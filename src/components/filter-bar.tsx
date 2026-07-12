@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { BookFormat } from "@prisma/client";
-import { ArrowDownAZ, ArrowUpAZ, Search } from "lucide-react";
+import { ArrowDownAZ, ArrowUpAZ, Layers, Search, X } from "lucide-react";
 import { FORMAT_LABELS } from "@/lib/display";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,10 +17,13 @@ import {
 
 export interface FilterValues {
   shelf: string;
+  shelfId: string;
   q: string;
   tag: string;
   format: string;
   minRating: string;
+  series: string;
+  group: string;
   sort: string;
   dir: string;
 }
@@ -31,6 +34,12 @@ const SORT_OPTIONS = [
   { value: "author", label: "Author" },
   { value: "rating", label: "Rating" },
   { value: "dateFinished", label: "Date finished" },
+];
+
+const GROUP_OPTIONS = [
+  { value: "none", label: "No grouping" },
+  { value: "author", label: "Group by author" },
+  { value: "series", label: "Group by series" },
 ];
 
 const RATING_OPTIONS = [
@@ -62,11 +71,14 @@ export function FilterBar({
     const next = { ...values, q: search, ...overrides };
     const params = new URLSearchParams();
     if (next.shelf && next.shelf !== "all") params.set("shelf", next.shelf);
+    if (next.shelfId) params.set("shelfId", next.shelfId);
     if (next.q) params.set("q", next.q);
     if (next.tag && next.tag !== "all") params.set("tag", next.tag);
     if (next.format && next.format !== "all") params.set("format", next.format);
     if (next.minRating && next.minRating !== "all")
       params.set("minRating", next.minRating);
+    if (next.series) params.set("series", next.series);
+    if (next.group && next.group !== "none") params.set("group", next.group);
     if (next.sort && next.sort !== "createdAt") params.set("sort", next.sort);
     if (next.dir && next.dir !== "desc") params.set("dir", next.dir);
     const qs = params.toString();
@@ -144,7 +156,35 @@ export function FilterBar({
         </SelectContent>
       </Select>
 
+      {values.series && (
+        <button
+          type="button"
+          onClick={() => navigate({ series: "" })}
+          className="inline-flex items-center gap-1 rounded-full border border-primary bg-primary/10 px-3 py-1 text-sm"
+          title="Clear series filter"
+        >
+          Series: {values.series}
+          <X className="size-3.5" />
+        </button>
+      )}
+
       <div className="ml-auto flex items-center gap-1">
+        <Select
+          value={values.group || "none"}
+          onValueChange={(v) => navigate({ group: v })}
+        >
+          <SelectTrigger className="w-44">
+            <Layers className="size-4 text-muted-foreground" />
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {GROUP_OPTIONS.map((o) => (
+              <SelectItem key={o.value} value={o.value}>
+                {o.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
         <Select value={values.sort} onValueChange={(v) => navigate({ sort: v })}>
           <SelectTrigger className="w-36">
             <SelectValue />

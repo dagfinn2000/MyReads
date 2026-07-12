@@ -24,9 +24,16 @@ surface area.
 - **Personal reading data** — status (Want to Read / Currently Reading /
   Read / Did Not Finish), 1–5 star ratings **with half stars**, free-text
   review/notes, start & finish dates, and re-read tracking.
-- **Library views** — status shelves, text search across title/author,
-  filters by tag, format, and minimum rating, sorting by title, author,
-  rating, date added, or date finished. All view state lives in the URL.
+- **Series** — assign books a series name and number (floats allowed, so a
+  novella can be #1.5). Book pages link the series and show its other
+  entries in reading order; the library can group by series.
+- **Custom shelves** — freeform, user-created shelves ("Sanderson",
+  "Fantasy") independent of reading status. A book can sit on any number of
+  shelves; deleting a shelf never touches its books.
+- **Library views** — status shelves, custom-shelf chips, text search across
+  title/author/series, filters by tag, format, and minimum rating, grouping
+  by author or series, sorting by title, author, rating, date added, or date
+  finished. All view state lives in the URL.
 - **Stats dashboard** — books read per year, average rating, total pages
   read, genre and format breakdowns.
 - **Auth** — username/password accounts via Auth.js (Credentials provider),
