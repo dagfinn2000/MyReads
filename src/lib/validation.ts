@@ -74,6 +74,21 @@ export const bookSchema = z.object({
         .map((t) => t.trim().toLowerCase())
         .filter(Boolean),
     ),
+  seriesName: z
+    .string()
+    .trim()
+    .max(200)
+    .transform((s) => s || null)
+    .nullable()
+    .optional(),
+  /** Position in a series; float so novellas can slot in at 1.5. */
+  seriesNumber: z.coerce
+    .number()
+    .min(0)
+    .max(10000)
+    .nullable()
+    .optional()
+    .catch(null),
   format: z.nativeEnum(BookFormat),
   owned: z.coerce.boolean(),
   openLibraryId: z
@@ -115,6 +130,12 @@ export const readingSchema = z.object({
     .optional(),
   timesRead: z.coerce.number().int().min(0).max(1000).catch(0),
 });
+
+export const shelfNameSchema = z
+  .string()
+  .trim()
+  .min(1, "Shelf name is required")
+  .max(50, "Shelf name must be at most 50 characters");
 
 export type BookInput = z.infer<typeof bookSchema>;
 export type ReadingInput = z.infer<typeof readingSchema>;

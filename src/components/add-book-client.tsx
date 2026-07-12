@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
  * Add-book flow: either search-and-import (pick a result → review the
  * prefilled form → save) or straight manual entry.
  */
-export function AddBookClient() {
+export function AddBookClient({ seriesNames = [] }: { seriesNames?: string[] }) {
   const [prefill, setPrefill] = useState<BookFormValues | null>(null);
 
   if (prefill) {
@@ -32,6 +32,7 @@ export function AddBookClient() {
           initial={prefill}
           submitLabel="Add to library"
           showStatus
+          seriesNames={seriesNames}
         />
       </div>
     );
@@ -47,7 +48,12 @@ export function AddBookClient() {
         <ImportSearch onPick={setPrefill} />
       </TabsContent>
       <TabsContent value="manual" className="pt-4">
-        <BookForm action={createBook} submitLabel="Add to library" showStatus />
+        <BookForm
+          action={createBook}
+          submitLabel="Add to library"
+          showStatus
+          seriesNames={seriesNames}
+        />
       </TabsContent>
     </Tabs>
   );

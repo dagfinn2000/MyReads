@@ -48,6 +48,12 @@ export function BookCard({ book }: { book: Book }) {
         <p className="line-clamp-1 text-xs text-muted-foreground">
           {book.authors.join(", ")}
         </p>
+        {book.seriesName && (
+          <p className="line-clamp-1 text-xs italic text-muted-foreground/80">
+            {book.seriesName}
+            {book.seriesNumber != null ? ` #${book.seriesNumber}` : ""}
+          </p>
+        )}
         <div className="mt-auto flex items-center justify-between pt-1">
           {book.rating ? <Stars value={book.rating} /> : <span />}
           <Badge className={`${STATUS_BADGE_CLASS[book.status]} text-[10px]`}>

@@ -21,6 +21,17 @@ export default async function EditBookPage({
   });
   if (!book) notFound();
 
+  // Existing series names, for the form's autocomplete suggestions.
+  const seriesRows = await prisma.book.findMany({
+    where: { userId: session.user.id, seriesName: { not: null } },
+    select: { seriesName: true },
+    distinct: ["seriesName"],
+    orderBy: { seriesName: "asc" },
+  });
+  const seriesNames = seriesRows
+    .map((r) => r.seriesName)
+    .filter((s): s is string => !!s);
+
   // Bind the id server-side so the client form can't target another row.
   const action = updateBook.bind(null, book.id);
 
@@ -32,6 +43,7 @@ export default async function EditBookPage({
       <BookForm
         action={action}
         submitLabel="Save changes"
+        seriesNames={seriesNames}
         initial={{
           title: book.title,
           authors: book.authors.join(", "),
@@ -41,6 +53,8 @@ export default async function EditBookPage({
           pageCount: book.pageCount?.toString() ?? "",
           publishedDate: book.publishedDate ?? "",
           tags: book.tags.join(", "),
+          seriesName: book.seriesName ?? "",
+          seriesNumber: book.seriesNumber?.toString() ?? "",
           format: book.format,
           owned: book.owned,
         }}

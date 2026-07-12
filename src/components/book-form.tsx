@@ -27,6 +27,8 @@ export interface BookFormValues {
   pageCount?: string;
   publishedDate?: string;
   tags?: string; // comma-separated
+  seriesName?: string;
+  seriesNumber?: string;
   format?: BookFormat;
   owned?: boolean;
   status?: ReadingStatus;
@@ -44,11 +46,14 @@ export function BookForm({
   initial = {},
   submitLabel,
   showStatus = false,
+  seriesNames = [],
 }: {
   action: (prev: ActionState, formData: FormData) => Promise<ActionState>;
   initial?: BookFormValues;
   submitLabel: string;
   showStatus?: boolean;
+  /** Existing series names, offered as autocomplete suggestions. */
+  seriesNames?: string[];
 }) {
   const [state, formAction, pending] = useActionState(action, {});
   const [coverPreview, setCoverPreview] = useState(initial.coverUrl ?? "");
@@ -132,6 +137,37 @@ export function BookForm({
             placeholder="fantasy, sci-fi, …"
             defaultValue={initial.tags ?? ""}
           />
+        </div>
+        <div className="grid grid-cols-[1fr_7rem] gap-4">
+          <div className="grid gap-2">
+            <Label htmlFor="seriesName">Series</Label>
+            <Input
+              id="seriesName"
+              name="seriesName"
+              placeholder="e.g. Mistborn Era 1"
+              defaultValue={initial.seriesName ?? ""}
+              list="series-suggestions"
+            />
+            {seriesNames.length > 0 && (
+              <datalist id="series-suggestions">
+                {seriesNames.map((s) => (
+                  <option key={s} value={s} />
+                ))}
+              </datalist>
+            )}
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="seriesNumber">No. in series</Label>
+            <Input
+              id="seriesNumber"
+              name="seriesNumber"
+              type="number"
+              step="0.1"
+              min={0}
+              placeholder="1"
+              defaultValue={initial.seriesNumber ?? ""}
+            />
+          </div>
         </div>
         <div className="grid gap-2">
           <Label htmlFor="description">Description</Label>

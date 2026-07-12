@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Pencil, Repeat } from "lucide-react";
+import { Library, Pencil, Repeat } from "lucide-react";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { formatDate, FORMAT_LABELS, STATUS_BADGE_CLASS, STATUS_LABELS } from "@/lib/display";
 import { BookCover } from "@/components/book-card";
+import { BookShelvesCard } from "@/components/book-shelves-card";
 import { DeleteBookButton } from "@/components/delete-book-button";
 import { ReadingCard } from "@/components/reading-card";
 import { Badge } from "@/components/ui/badge";
@@ -20,11 +21,37 @@ export default async function BookDetailPage({
   const session = await auth();
   if (!session?.user?.id) return null;
   const { id } = await params;
+  const userId = session.user.id;
 
   const book = await prisma.book.findFirst({
-    where: { id, userId: session.user.id },
+    where: { id, userId },
+    include: { shelves: { select: { id: true } } },
   });
   if (!book) notFound();
+
+  // Sidebar data: every shelf (for the assignment card) and, if this book is
+  // part of a series, its siblings ordered by series number.
+  const [allShelves, seriesBooks] = await Promise.all([
+    prisma.shelf.findMany({
+      where: { userId },
+      select: { id: true, name: true },
+      orderBy: { name: "asc" },
+    }),
+    book.seriesName
+      ? prisma.book.findMany({
+          where: {
+            userId,
+            seriesName: { equals: book.seriesName, mode: "insensitive" },
+            id: { not: book.id },
+          },
+          orderBy: { seriesNumber: "asc" },
+        })
+      : Promise.resolve([]),
+  ]);
+
+  const seriesHref = book.seriesName
+    ? `/books?series=${encodeURIComponent(book.seriesName)}&group=series`
+    : null;
 
   return (
     <div className="grid gap-6 md:grid-cols-[240px_1fr]">
@@ -48,6 +75,16 @@ export default async function BookDetailPage({
             <p className="mt-1 text-lg text-muted-foreground">
               {book.authors.join(", ")}
             </p>
+          )}
+          {book.seriesName && seriesHref && (
+            <Link
+              href={seriesHref}
+              className="mt-1 inline-flex items-center gap-1.5 text-sm italic text-muted-foreground hover:text-foreground hover:underline"
+            >
+              <Library className="size-3.5" />
+              {book.seriesName}
+              {book.seriesNumber != null ? ` #${book.seriesNumber}` : ""}
+            </Link>
           )}
         </div>
 
@@ -104,6 +141,39 @@ export default async function BookDetailPage({
             {book.description}
           </p>
         )}
+
+        {seriesBooks.length > 0 && seriesHref && (
+          <section className="grid gap-2">
+            <h2 className="text-sm font-medium text-muted-foreground">
+              More in{" "}
+              <Link href={seriesHref} className="italic hover:underline">
+                {book.seriesName}
+              </Link>
+            </h2>
+            <div className="flex flex-wrap gap-3">
+              {seriesBooks.map((b) => (
+                <Link
+                  key={b.id}
+                  href={`/books/${b.id}`}
+                  className="group w-20"
+                  title={`${b.title}${b.seriesNumber != null ? ` (#${b.seriesNumber})` : ""}`}
+                >
+                  <BookCover book={b} className="aspect-[2/3] w-20" />
+                  <p className="mt-1 line-clamp-2 text-xs leading-tight text-muted-foreground group-hover:text-foreground">
+                    {b.seriesNumber != null ? `#${b.seriesNumber} · ` : ""}
+                    {b.title}
+                  </p>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
+
+        <BookShelvesCard
+          bookId={book.id}
+          shelves={allShelves}
+          memberIds={book.shelves.map((s) => s.id)}
+        />
 
         <ReadingCard book={book} />
       </div>

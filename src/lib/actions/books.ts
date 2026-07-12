@@ -21,10 +21,14 @@ async function requireUserId(): Promise<string> {
   return session.user.id;
 }
 
-/** Lowercased title+authors blob that makes case-insensitive search a single
- *  `contains` query (Prisma can't substring-search a String[] column). */
-function buildSearchText(title: string, authors: string[]): string {
-  return [title, ...authors].join(" ").toLowerCase();
+/** Lowercased title+authors+series blob that makes case-insensitive search a
+ *  single `contains` query (Prisma can't substring-search a String[] column). */
+function buildSearchText(
+  title: string,
+  authors: string[],
+  seriesName?: string | null,
+): string {
+  return [title, ...authors, seriesName ?? ""].join(" ").trim().toLowerCase();
 }
 
 const statusField = z.nativeEnum(ReadingStatus).catch(ReadingStatus.WANT_TO_READ);
@@ -67,11 +71,13 @@ export async function createBook(
       pageCount: data.pageCount ?? null,
       publishedDate: data.publishedDate ?? null,
       tags: data.tags,
+      seriesName: data.seriesName ?? null,
+      seriesNumber: data.seriesNumber ?? null,
       format: data.format,
       owned: data.owned,
       openLibraryId: data.openLibraryId ?? null,
       status,
-      searchText: buildSearchText(data.title, data.authors),
+      searchText: buildSearchText(data.title, data.authors, data.seriesName),
     },
   });
 
@@ -117,9 +123,11 @@ export async function updateBook(
       pageCount: data.pageCount ?? null,
       publishedDate: data.publishedDate ?? null,
       tags: data.tags,
+      seriesName: data.seriesName ?? null,
+      seriesNumber: data.seriesNumber ?? null,
       format: data.format,
       owned: data.owned,
-      searchText: buildSearchText(data.title, data.authors),
+      searchText: buildSearchText(data.title, data.authors, data.seriesName),
     },
   });
 
