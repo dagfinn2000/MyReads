@@ -36,6 +36,21 @@ model User {
   passwordHash String // bcrypt
   createdAt    DateTime @default(now())
   books        Book[]
+  shelves      Shelf[]
+}
+
+/// A user-defined shelf ("Sanderson", "Fantasy") — freeform grouping
+/// independent of reading status. Books can sit on many shelves at once;
+/// deleting a shelf only removes the grouping, never the books.
+model Shelf {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  createdAt DateTime @default(now())
+  books     Book[]
+
+  @@unique([userId, name])
 }
 
 model Book {
@@ -56,6 +71,11 @@ model Book {
   tags          String[]   @default([])
   format        BookFormat @default(PHYSICAL)
   owned         Boolean    @default(true)
+  /// Freeform series name (e.g. "Mistborn Era 1"); groups books together.
+  seriesName    String?
+  /// Position in the series. Float so novellas can slot in at 1.5.
+  seriesNumber  Float?
+  shelves       Shelf[]
   /// Open Library work ID (e.g. "OL45883W") when imported via search.
   openLibraryId String?
 
