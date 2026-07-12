@@ -5,8 +5,8 @@
 # container exits and `restart: unless-stopped` retries.
 set -e
 
-echo "[bibliotek] applying database migrations…"
+echo "[myreads] applying database migrations…"
 prisma migrate deploy --schema /app/prisma/schema.prisma
 
-echo "[bibliotek] starting server on :${PORT:-3000}"
+echo "[myreads] starting server on :${PORT:-3000}"
 exec node server.js

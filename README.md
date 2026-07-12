@@ -1,4 +1,4 @@
-# Bibliotek
+# MyReads
 
 A self-hosted, single-purpose personal book library. Think *GoodReads, but
 just for you*: catalog the books you own, track what you're reading, rate and
@@ -41,8 +41,8 @@ import.
 Requirements: Docker with the compose plugin.
 
 ```bash
-git clone https://github.com/dagfinn2000/bibliotek.git
-cd bibliotek
+git clone https://github.com/dagfinn2000/myreads.git
+cd myreads
 cp .env.example .env
 # edit .env: set POSTGRES_PASSWORD and AUTH_SECRET (openssl rand -base64 32)
 docker compose up -d
@@ -63,7 +63,7 @@ Summary:
 
 | Variable | Required | Purpose |
 | --- | --- | --- |
-| `POSTGRES_USER` / `POSTGRES_DB` | no (default `bibliotek`) | Postgres credentials for the compose `db` service |
+| `POSTGRES_USER` / `POSTGRES_DB` | no (default `myreads`) | Postgres credentials for the compose `db` service |
 | `POSTGRES_PASSWORD` | **yes** | Postgres password; compose refuses to start without it |
 | `AUTH_SECRET` | **yes** | Signs session JWTs — generate with `openssl rand -base64 32` |
 | `AUTH_TRUST_HOST` | yes (keep `true`) | Required by Auth.js on self-hosted deployments |

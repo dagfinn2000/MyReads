@@ -7,7 +7,7 @@ import type { BookDetails, BookMetadata } from "./types";
  *
  * Open Library asks API consumers to send an identifying User-Agent.
  */
-const UA = "bibliotek/1.0 (self-hosted personal library)";
+const UA = "myreads/1.0 (self-hosted personal library)";
 
 const SEARCH_FIELDS = [
   "key",

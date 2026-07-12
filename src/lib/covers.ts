@@ -32,7 +32,7 @@ export async function cacheCoverImage(
   try {
     const res = await fetch(remoteUrl, {
       signal: AbortSignal.timeout(15_000),
-      headers: { "User-Agent": "bibliotek/1.0 (self-hosted personal library)" },
+      headers: { "User-Agent": "myreads/1.0 (self-hosted personal library)" },
     });
     if (!res.ok) return null;
 

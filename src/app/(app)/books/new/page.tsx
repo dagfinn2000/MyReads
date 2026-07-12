@@ -1,6 +1,6 @@
 import { AddBookClient } from "@/components/add-book-client";
 
-export const metadata = { title: "Add book · Bibliotek" };
+export const metadata = { title: "Add book · MyReads" };
 
 export default function NewBookPage() {
   return (

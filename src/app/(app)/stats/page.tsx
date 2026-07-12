@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/card";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Stats · Bibliotek" };
+export const metadata = { title: "Stats · MyReads" };
 
 /** Simple horizontal CSS bar — no chart library needed at this scale. */
 function Bar({ label, value, max }: { label: string; value: number; max: number }) {

@@ -1,4 +1,4 @@
-// Bibliotek data model.
+// MyReads data model.
 //
 // Design note: reading data (status, rating, review, dates) lives directly on
 // Book rather than in a separate "reading entry" model. Every book row already

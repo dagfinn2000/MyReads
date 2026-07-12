@@ -1,5 +1,5 @@
 # ---------------------------------------------------------------------------
-# Bibliotek — multi-stage build
+# MyReads — multi-stage build
 #   deps    → npm ci with the lockfile
 #   builder → prisma generate + next build (standalone output)
 #   runner  → minimal Alpine image: standalone server + prisma CLI for

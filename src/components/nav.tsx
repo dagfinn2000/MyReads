@@ -16,7 +16,7 @@ export async function Nav() {
           className="mr-4 flex items-center gap-2 text-lg font-semibold tracking-tight"
         >
           <BookOpen className="size-5" />
-          Bibliotek
+          MyReads
         </Link>
         <Button asChild variant="ghost" size="sm">
           <Link href="/books">

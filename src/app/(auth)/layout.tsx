@@ -8,7 +8,7 @@ export default function AuthLayout({
     <main className="flex min-h-screen flex-col items-center justify-center gap-6 p-4">
       <div className="flex items-center gap-2 text-2xl font-semibold tracking-tight">
         <BookOpen className="size-7" />
-        Bibliotek
+        MyReads
       </div>
       {children}
     </main>

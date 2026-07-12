@@ -5,7 +5,7 @@ import { updateBook } from "@/lib/actions/books";
 import { BookForm } from "@/components/book-form";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Edit book · Bibliotek" };
+export const metadata = { title: "Edit book · MyReads" };
 
 export default async function EditBookPage({
   params,
