@@ -4,8 +4,8 @@ import { BookFormat, ReadingStatus } from "@prisma/client";
 import { LibraryBig, Plus } from "lucide-react";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { BookCard } from "@/components/book-card";
 import { FilterBar, type FilterValues } from "@/components/filter-bar";
+import { LibraryView, type LibraryGroup } from "@/components/library-view";
 import { ShelfChips } from "@/components/shelf-chips";
 import { ShelfTabs } from "@/components/shelf-tabs";
 import { Button } from "@/components/ui/button";
@@ -33,14 +33,9 @@ function sortBooks(books: Book[], sort: string, dir: string): Book[] {
   return [...books].sort((a, b) => mul * fn(a, b));
 }
 
-interface BookGroup {
-  title: string;
-  books: Book[];
-}
-
 /** Sections for the group-by views. Series sections order their books by
  *  series number; a trailing section collects books outside any series. */
-function groupBooks(books: Book[], group: string): BookGroup[] | null {
+function groupBooks(books: Book[], group: string): LibraryGroup[] | null {
   if (group === "author") {
     const map = new Map<string, Book[]>();
     for (const b of books) {
@@ -74,16 +69,6 @@ function groupBooks(books: Book[], group: string): BookGroup[] | null {
   }
 
   return null;
-}
-
-function BookGrid({ books }: { books: Book[] }) {
-  return (
-    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-      {books.map((book) => (
-        <BookCard key={book.id} book={book} />
-      ))}
-    </div>
-  );
 }
 
 export default async function BooksPage({
@@ -208,22 +193,12 @@ export default async function BooksPage({
             </Button>
           )}
         </div>
-      ) : groups ? (
-        <div className="grid gap-6">
-          {groups.map((g) => (
-            <section key={g.title} className="grid gap-3">
-              <h2 className="border-b pb-1 text-lg font-medium">
-                {g.title}
-                <span className="ml-2 text-sm font-normal text-muted-foreground tabular-nums">
-                  {g.books.length}
-                </span>
-              </h2>
-              <BookGrid books={g.books} />
-            </section>
-          ))}
-        </div>
       ) : (
-        <BookGrid books={sorted} />
+        <LibraryView
+          books={sorted}
+          groups={groups}
+          shelves={shelves.map((s) => ({ id: s.id, name: s.name }))}
+        />
       )}
     </div>
   );
