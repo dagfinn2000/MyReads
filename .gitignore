@@ -1,0 +1,23 @@
+# dependencies
+node_modules/
+
+# next.js
+.next/
+out/
+next-env.d.ts
+
+# production
+build/
+
+# env — real secrets live here; .env.example is the committed template
+.env
+.env.local
+.env*.local
+
+# local data (cached cover images, dev database dumps)
+data/
+
+# misc
+*.tsbuildinfo
+npm-debug.log*
+.DS_Store
