@@ -2,6 +2,7 @@ import Link from "next/link";
 import { BookOpen, ChartColumn, LibraryBig, LogOut, Plus } from "lucide-react";
 import { auth, signOut } from "@/auth";
 import { Button } from "@/components/ui/button";
+import { ThemePicker } from "@/components/theme-picker";
 
 /** Top navigation for authenticated pages. Server component — reads the
  *  session directly and signs out via a server action. */
@@ -37,6 +38,7 @@ export async function Nav() {
           </Link>
         </Button>
         <div className="ml-auto flex items-center gap-3">
+          <ThemePicker />
           <span className="text-sm text-muted-foreground">
             {session?.user?.name}
           </span>

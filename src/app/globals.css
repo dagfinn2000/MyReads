@@ -116,6 +116,306 @@
     --sidebar-ring: oklch(0.556 0 0);
 }
 
+/* ── Preset themes ─────────────────────────────────────────────────────────
+   Palettes ported from dagfinn2000/dashify. Each block overrides the core
+   shadcn tokens; dark palettes are combined with the `dark` class on <html>
+   (applied by the theme picker) so Tailwind `dark:` variants activate too.
+   These blocks come after `.dark` on purpose: same specificity, later wins. */
+
+[data-theme="dracula"] {
+    --background: #282a36;
+    --foreground: #f8f8f2;
+    --card: #343746;
+    --card-foreground: #f8f8f2;
+    --popover: #343746;
+    --popover-foreground: #f8f8f2;
+    --primary: #bd93f9;
+    --primary-foreground: #282a36;
+    --secondary: #424458;
+    --secondary-foreground: #f8f8f2;
+    --muted: #424458;
+    --muted-foreground: #a9adc8;
+    --accent: #424458;
+    --accent-foreground: #f8f8f2;
+    --destructive: #ff5555;
+    --border: #44475a;
+    --input: #44475a;
+    --ring: #bd93f9;
+}
+
+[data-theme="catppuccin-mocha"] {
+    --background: #1e1e2e;
+    --foreground: #cdd6f4;
+    --card: #313244;
+    --card-foreground: #cdd6f4;
+    --popover: #313244;
+    --popover-foreground: #cdd6f4;
+    --primary: #cba6f7;
+    --primary-foreground: #1e1e2e;
+    --secondary: #45475a;
+    --secondary-foreground: #cdd6f4;
+    --muted: #45475a;
+    --muted-foreground: #a6adc8;
+    --accent: #45475a;
+    --accent-foreground: #cdd6f4;
+    --destructive: #f38ba8;
+    --border: #45475a;
+    --input: #45475a;
+    --ring: #cba6f7;
+}
+
+[data-theme="gruvbox"] {
+    --background: #282828;
+    --foreground: #ebdbb2;
+    --card: #3c3836;
+    --card-foreground: #ebdbb2;
+    --popover: #3c3836;
+    --popover-foreground: #ebdbb2;
+    --primary: #fabd2f;
+    --primary-foreground: #282828;
+    --secondary: #504945;
+    --secondary-foreground: #ebdbb2;
+    --muted: #504945;
+    --muted-foreground: #bdae93;
+    --accent: #504945;
+    --accent-foreground: #ebdbb2;
+    --destructive: #fb4934;
+    --border: #504945;
+    --input: #504945;
+    --ring: #fabd2f;
+}
+
+[data-theme="everforest"] {
+    --background: #2d353b;
+    --foreground: #d3c6aa;
+    --card: #343f44;
+    --card-foreground: #d3c6aa;
+    --popover: #343f44;
+    --popover-foreground: #d3c6aa;
+    --primary: #83c092;
+    --primary-foreground: #2d353b;
+    --secondary: #3d484d;
+    --secondary-foreground: #d3c6aa;
+    --muted: #3d484d;
+    --muted-foreground: #9da9a0;
+    --accent: #3d484d;
+    --accent-foreground: #d3c6aa;
+    --destructive: #e67e80;
+    --border: #475258;
+    --input: #475258;
+    --ring: #83c092;
+}
+
+[data-theme="kanagawa"] {
+    --background: #1f1f28;
+    --foreground: #dcd7ba;
+    --card: #2a2a37;
+    --card-foreground: #dcd7ba;
+    --popover: #2a2a37;
+    --popover-foreground: #dcd7ba;
+    --primary: #e6c384;
+    --primary-foreground: #1f1f28;
+    --secondary: #363646;
+    --secondary-foreground: #dcd7ba;
+    --muted: #363646;
+    --muted-foreground: #c8c093;
+    --accent: #363646;
+    --accent-foreground: #dcd7ba;
+    --destructive: #c34043;
+    --border: #54546d;
+    --input: #54546d;
+    --ring: #e6c384;
+}
+
+[data-theme="rose-pine"] {
+    --background: #191724;
+    --foreground: #e0def4;
+    --card: #1f1d2e;
+    --card-foreground: #e0def4;
+    --popover: #1f1d2e;
+    --popover-foreground: #e0def4;
+    --primary: #ebbcba;
+    --primary-foreground: #191724;
+    --secondary: #26233a;
+    --secondary-foreground: #e0def4;
+    --muted: #26233a;
+    --muted-foreground: #908caa;
+    --accent: #26233a;
+    --accent-foreground: #e0def4;
+    --destructive: #eb6f92;
+    --border: #26233a;
+    --input: #26233a;
+    --ring: #ebbcba;
+}
+
+[data-theme="zenburn"] {
+    --background: #3f3f3f;
+    --foreground: #dcdccc;
+    --card: #4a4a4a;
+    --card-foreground: #dcdccc;
+    --popover: #4a4a4a;
+    --popover-foreground: #dcdccc;
+    --primary: #dfaf8f;
+    --primary-foreground: #3f3f3f;
+    --secondary: #565650;
+    --secondary-foreground: #dcdccc;
+    --muted: #565650;
+    --muted-foreground: #c0c0a8;
+    --accent: #565650;
+    --accent-foreground: #dcdccc;
+    --destructive: #cc9393;
+    --border: #5f5f5f;
+    --input: #5f5f5f;
+    --ring: #dfaf8f;
+}
+
+[data-theme="everforest-light"] {
+    --background: #fdf6e3;
+    --foreground: #5c6a72;
+    --card: #f4f0d9;
+    --card-foreground: #5c6a72;
+    --popover: #f4f0d9;
+    --popover-foreground: #5c6a72;
+    --primary: #35a77c;
+    --primary-foreground: #ffffff;
+    --secondary: #efebd4;
+    --secondary-foreground: #5c6a72;
+    --muted: #efebd4;
+    --muted-foreground: #829181;
+    --accent: #efebd4;
+    --accent-foreground: #5c6a72;
+    --destructive: #f85552;
+    --border: #e0dcc7;
+    --input: #e0dcc7;
+    --ring: #35a77c;
+}
+
+[data-theme="gruvbox-light"] {
+    --background: #f2e5bc;
+    --foreground: #3c3836;
+    --card: #fbf1c7;
+    --card-foreground: #3c3836;
+    --popover: #fbf1c7;
+    --popover-foreground: #3c3836;
+    --primary: #af3a03;
+    --primary-foreground: #ffffff;
+    --secondary: #ebdbb2;
+    --secondary-foreground: #3c3836;
+    --muted: #ebdbb2;
+    --muted-foreground: #665c54;
+    --accent: #ebdbb2;
+    --accent-foreground: #3c3836;
+    --destructive: #9d0006;
+    --border: #d5c4a1;
+    --input: #d5c4a1;
+    --ring: #af3a03;
+}
+
+[data-theme="kanagawa-lotus"] {
+    --background: #e5ddb0;
+    --foreground: #545464;
+    --card: #f2ecbc;
+    --card-foreground: #545464;
+    --popover: #f2ecbc;
+    --popover-foreground: #545464;
+    --primary: #624c83;
+    --primary-foreground: #ffffff;
+    --secondary: #dcd5ac;
+    --secondary-foreground: #545464;
+    --muted: #dcd5ac;
+    --muted-foreground: #716e61;
+    --accent: #dcd5ac;
+    --accent-foreground: #545464;
+    --destructive: #c84053;
+    --border: #d5cea3;
+    --input: #d5cea3;
+    --ring: #624c83;
+}
+
+[data-theme="selenized-light"] {
+    --background: #ece3cc;
+    --foreground: #3a4d53;
+    --card: #fbf3db;
+    --card-foreground: #3a4d53;
+    --popover: #fbf3db;
+    --popover-foreground: #3a4d53;
+    --primary: #c25d1e;
+    --primary-foreground: #ffffff;
+    --secondary: #e0d6ba;
+    --secondary-foreground: #3a4d53;
+    --muted: #e0d6ba;
+    --muted-foreground: #53676d;
+    --accent: #e0d6ba;
+    --accent-foreground: #3a4d53;
+    --destructive: #d2212d;
+    --border: #d5cdb6;
+    --input: #d5cdb6;
+    --ring: #c25d1e;
+}
+
+[data-theme="solarized-light"] {
+    --background: #fdf6e3;
+    --foreground: #657b83;
+    --card: #eee8d5;
+    --card-foreground: #657b83;
+    --popover: #eee8d5;
+    --popover-foreground: #657b83;
+    --primary: #b58900;
+    --primary-foreground: #ffffff;
+    --secondary: #e7e1cd;
+    --secondary-foreground: #657b83;
+    --muted: #e7e1cd;
+    --muted-foreground: #839496;
+    --accent: #e7e1cd;
+    --accent-foreground: #657b83;
+    --destructive: #dc322f;
+    --border: #d3cbb8;
+    --input: #d3cbb8;
+    --ring: #b58900;
+}
+
+[data-theme="catppuccin-latte"] {
+    --background: #eff1f5;
+    --foreground: #4c4f69;
+    --card: #ffffff;
+    --card-foreground: #4c4f69;
+    --popover: #ffffff;
+    --popover-foreground: #4c4f69;
+    --primary: #8839ef;
+    --primary-foreground: #ffffff;
+    --secondary: #e6e9ef;
+    --secondary-foreground: #4c4f69;
+    --muted: #e6e9ef;
+    --muted-foreground: #6c6f85;
+    --accent: #e6e9ef;
+    --accent-foreground: #4c4f69;
+    --destructive: #d20f39;
+    --border: #ccd0da;
+    --input: #ccd0da;
+    --ring: #8839ef;
+}
+
+[data-theme="rose-pine-dawn"] {
+    --background: #faf4ed;
+    --foreground: #575279;
+    --card: #fffaf3;
+    --card-foreground: #575279;
+    --popover: #fffaf3;
+    --popover-foreground: #575279;
+    --primary: #907aa9;
+    --primary-foreground: #ffffff;
+    --secondary: #f2e9e1;
+    --secondary-foreground: #575279;
+    --muted: #f2e9e1;
+    --muted-foreground: #797593;
+    --accent: #f2e9e1;
+    --accent-foreground: #575279;
+    --destructive: #b4637a;
+    --border: #dfdad9;
+    --input: #dfdad9;
+    --ring: #907aa9;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
