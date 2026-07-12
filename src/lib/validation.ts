@@ -84,6 +84,13 @@ export const bookSchema = z.object({
     .optional(),
 });
 
+/** "" → null, unparseable → null, otherwise a valid Date. */
+function parseDateOrNull(s: string): Date | null {
+  if (!s) return null;
+  const d = new Date(s);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
 /** Personal reading data, editable from the book detail page. */
 export const readingSchema = z.object({
   status: z.nativeEnum(ReadingStatus),
@@ -98,12 +105,12 @@ export const readingSchema = z.object({
     .optional(),
   dateStarted: z
     .string()
-    .transform((s) => (s ? new Date(s) : null))
+    .transform(parseDateOrNull)
     .nullable()
     .optional(),
   dateFinished: z
     .string()
-    .transform((s) => (s ? new Date(s) : null))
+    .transform(parseDateOrNull)
     .nullable()
     .optional(),
   timesRead: z.coerce.number().int().min(0).max(1000).catch(0),
