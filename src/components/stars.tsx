@@ -2,10 +2,17 @@ import { Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 function StarRow({ filled, sizeClass }: { filled?: boolean; sizeClass: string }) {
+  // w-max + shrink-0 keep the row at its natural width inside the clipping
+  // container — without them the filled row's stars shrink to fit the
+  // clipped width instead of being cut off, drifting out of alignment with
+  // the outline row underneath.
   return (
-    <div className="flex">
+    <div className="flex w-max">
       {[0, 1, 2, 3, 4].map((i) => (
-        <Star key={i} className={cn(sizeClass, filled && "fill-current")} />
+        <Star
+          key={i}
+          className={cn(sizeClass, "shrink-0", filled && "fill-current")}
+        />
       ))}
     </div>
   );
