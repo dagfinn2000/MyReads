@@ -1,0 +1,4 @@
+* text=auto
+# The entrypoint runs inside an Alpine container — it must stay LF even when
+# the repo is checked out on Windows.
+*.sh text eol=lf

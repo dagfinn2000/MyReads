@@ -1,0 +1,46 @@
+name: bibliotek
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-bibliotek}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-bibliotek}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-bibliotek} -d ${POSTGRES_DB:-bibliotek}",
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+
+  app:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-3000}:3000"
+    environment:
+      # Assembled here from the POSTGRES_* values so there is exactly one
+      # place to configure credentials. (The DATABASE_URL in .env is only
+      # for running the app / prisma CLI outside Docker.)
+      DATABASE_URL: postgresql://${POSTGRES_USER:-bibliotek}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-bibliotek}
+      AUTH_SECRET: ${AUTH_SECRET:?Set AUTH_SECRET in .env}
+      AUTH_TRUST_HOST: "true"
+      GOOGLE_BOOKS_API_KEY: ${GOOGLE_BOOKS_API_KEY:-}
+      COVERS_DIR: /app/data/covers
+      DISABLE_REGISTRATION: ${DISABLE_REGISTRATION:-false}
+    volumes:
+      - covers:/app/data/covers
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata: # Postgres data — your entire library lives here
+  covers: # locally cached cover images
