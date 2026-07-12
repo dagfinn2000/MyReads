@@ -21,6 +21,15 @@ surface area.
   set. Every fetched field is reviewable/editable before saving, responses are
   cached in Postgres for a week, and cover images are downloaded into a local
   cache so the app never depends on third-party image hosting.
+- **ISBN barcode scanning** — point a camera at the barcode on a physical
+  book and it's looked up and prefilled automatically (a single match skips
+  straight to the review form). Uses the browser's native `BarcodeDetector`
+  (Chrome/Edge, incl. Chrome on Android). Note: browsers only allow camera
+  access over **HTTPS or localhost** — behind a reverse proxy with TLS it
+  just works; on a plain `http://LAN-IP` address it can't.
+- **Bulk edit** — flip the library into select mode, tick any number of
+  books (or "Select all" within the current filter), and set status, add
+  tags, or shelve them in one action.
 - **Personal reading data** — status (Want to Read / Currently Reading /
   Read / Did Not Finish), 1–5 star ratings **with half stars**, free-text
   review/notes, start & finish dates, and re-read tracking.
