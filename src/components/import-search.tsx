@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { BookOpen, Loader2 } from "lucide-react";
 import type { BookMetadata } from "@/lib/metadata/types";
 import type { BookFormValues } from "@/components/book-form";
+import { BarcodeScanner } from "@/components/barcode-scanner";
 import { Input } from "@/components/ui/input";
 
 /**
@@ -23,6 +24,15 @@ export function ImportSearch({
   const [pickingId, setPickingId] = useState<string | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const abortRef = useRef<AbortController | null>(null);
+  // Set when the query came from the barcode scanner: an ISBN search that
+  // returns exactly one result skips the picking step entirely.
+  const autoPickRef = useRef(false);
+
+  /** Barcode scanner handoff — the ISBN just becomes the search query. */
+  const handleScan = useCallback((isbn: string) => {
+    autoPickRef.current = true;
+    setQuery(isbn);
+  }, []);
 
   // Debounced search: waits 400ms after the last keystroke, cancels any
   // in-flight request so stale responses can't overwrite newer ones.
@@ -44,8 +54,15 @@ export function ImportSearch({
           { signal: controller.signal },
         );
         const data = await res.json();
-        setResults(data.results ?? []);
+        const list: BookMetadata[] = data.results ?? [];
+        setResults(list);
         setSearching(false);
+        if (autoPickRef.current) {
+          autoPickRef.current = false;
+          if (list.length === 1) {
+            void pick(list[0], list[0].openLibraryId ?? `${list[0].title}-0`);
+          }
+        }
       } catch {
         if (!controller.signal.aborted) setSearching(false);
       }
@@ -95,12 +112,15 @@ export function ImportSearch({
 
   return (
     <div className="grid gap-4">
-      <Input
-        placeholder="Search by title, author, or ISBN…"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        autoFocus
-      />
+      <div className="flex gap-2">
+        <Input
+          placeholder="Search by title, author, or ISBN…"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          autoFocus
+        />
+        <BarcodeScanner onDetected={handleScan} />
+      </div>
 
       {searching && (
         <p className="flex items-center gap-2 text-sm text-muted-foreground">
