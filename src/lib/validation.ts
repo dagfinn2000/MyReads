@@ -1,0 +1,113 @@
+import { z } from "zod";
+import { BookFormat, ReadingStatus } from "@prisma/client";
+
+export const registerSchema = z.object({
+  username: z
+    .string()
+    .trim()
+    .min(3, "Username must be at least 3 characters")
+    .max(32, "Username must be at most 32 characters")
+    .regex(
+      /^[a-zA-Z0-9._-]+$/,
+      "Username may only contain letters, numbers, and . _ -",
+    ),
+  password: z
+    .string()
+    .min(8, "Password must be at least 8 characters")
+    // bcrypt only uses the first 72 bytes; reject rather than silently truncate
+    .max(72, "Password must be at most 72 characters"),
+});
+
+/** Shared shape for creating and editing books. Forms submit strings; this
+ *  schema does the coercion so server actions can pass FormData through. */
+export const bookSchema = z.object({
+  title: z.string().trim().min(1, "Title is required").max(500),
+  /** Comma-separated in the form; stored as an array. */
+  authors: z
+    .string()
+    .transform((s) =>
+      s
+        .split(",")
+        .map((a) => a.trim())
+        .filter(Boolean),
+    ),
+  isbn: z
+    .string()
+    .trim()
+    .max(20)
+    .transform((s) => s.replace(/[\s-]/g, "") || null)
+    .nullable()
+    .optional(),
+  description: z
+    .string()
+    .trim()
+    .max(10000)
+    .transform((s) => s || null)
+    .nullable()
+    .optional(),
+  coverUrl: z
+    .string()
+    .trim()
+    .transform((s) => s || null)
+    .nullable()
+    .optional(),
+  pageCount: z.coerce
+    .number()
+    .int()
+    .min(1)
+    .max(100000)
+    .nullable()
+    .optional()
+    .catch(null),
+  publishedDate: z
+    .string()
+    .trim()
+    .max(20)
+    .transform((s) => s || null)
+    .nullable()
+    .optional(),
+  tags: z
+    .string()
+    .transform((s) =>
+      s
+        .split(",")
+        .map((t) => t.trim().toLowerCase())
+        .filter(Boolean),
+    ),
+  format: z.nativeEnum(BookFormat),
+  owned: z.coerce.boolean(),
+  openLibraryId: z
+    .string()
+    .trim()
+    .transform((s) => s || null)
+    .nullable()
+    .optional(),
+});
+
+/** Personal reading data, editable from the book detail page. */
+export const readingSchema = z.object({
+  status: z.nativeEnum(ReadingStatus),
+  /** 1–10 half-star units; empty string/0 clears the rating. */
+  rating: z.coerce.number().int().min(0).max(10).nullable().optional().catch(null),
+  review: z
+    .string()
+    .trim()
+    .max(20000)
+    .transform((s) => s || null)
+    .nullable()
+    .optional(),
+  dateStarted: z
+    .string()
+    .transform((s) => (s ? new Date(s) : null))
+    .nullable()
+    .optional(),
+  dateFinished: z
+    .string()
+    .transform((s) => (s ? new Date(s) : null))
+    .nullable()
+    .optional(),
+  timesRead: z.coerce.number().int().min(0).max(1000).catch(0),
+});
+
+export type BookInput = z.infer<typeof bookSchema>;
+export type ReadingInput = z.infer<typeof readingSchema>;
