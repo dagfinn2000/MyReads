@@ -1,0 +1,94 @@
+// Bibliotek data model.
+//
+// Design note: reading data (status, rating, review, dates) lives directly on
+// Book rather than in a separate "reading entry" model. Every book row already
+// belongs to exactly one user in this single-purpose app, so a join table
+// would only add indirection.
+
+generator client {
+  provider = "prisma-client-js"
+  // "native" covers local dev (Windows/macOS/Linux glibc); the musl target is
+  // what the Alpine-based Docker image needs at runtime.
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ReadingStatus {
+  WANT_TO_READ
+  READING
+  READ
+  DNF // did not finish
+}
+
+enum BookFormat {
+  PHYSICAL
+  EBOOK
+  AUDIOBOOK
+}
+
+model User {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  passwordHash String // bcrypt
+  createdAt    DateTime @default(now())
+  books        Book[]
+}
+
+model Book {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // --- bibliographic data ---
+  title         String
+  authors       String[]   @default([])
+  isbn          String?
+  description   String?
+  /// Either a local cached path ("/api/covers/<id>.jpg") or a remote URL.
+  coverUrl      String?
+  pageCount     Int?
+  /// Kept as a string because metadata APIs return partial dates ("1999", "2003-07").
+  publishedDate String?
+  tags          String[]   @default([])
+  format        BookFormat @default(PHYSICAL)
+  owned         Boolean    @default(true)
+  /// Open Library work ID (e.g. "OL45883W") when imported via search.
+  openLibraryId String?
+
+  // --- personal reading data ---
+  status       ReadingStatus @default(WANT_TO_READ)
+  /// 1–10 in half-star units: 7 = 3.5 stars. Null = unrated.
+  rating       Int?
+  review       String?
+  dateStarted  DateTime?
+  dateFinished DateTime?
+  timesRead    Int           @default(0)
+
+  /// Denormalized lowercase "title + authors" so search can be a single
+  /// case-insensitive `contains` (Prisma can't substring-search String[]).
+  searchText String @default("")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, status])
+  @@index([userId, createdAt])
+}
+
+/// Caches raw Open Library / Google Books responses so repeated lookups of the
+/// same query don't hit the external APIs. Rows are upserted per (source,
+/// query) and considered stale after `expiresAt`.
+model MetadataCache {
+  id        String   @id @default(cuid())
+  source    String // "ol-search" | "ol-work" | "gb-volume"
+  query     String // normalized (lowercased, trimmed) lookup key
+  payload   Json
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+
+  @@unique([source, query])
+}
