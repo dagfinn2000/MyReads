@@ -80,7 +80,9 @@ fine for this).
 
 ```bash
 cp .env.example .env       # set POSTGRES_PASSWORD, AUTH_SECRET
-docker compose up -d db    # just the database
+# start just the database, with 5432 published on localhost (dev override —
+# the base compose file deliberately keeps Postgres unexposed)
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d db
 npm install
 npx prisma migrate deploy  # apply migrations (DATABASE_URL points at localhost)
 npm run dev                # http://localhost:3000

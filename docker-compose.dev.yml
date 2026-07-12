@@ -1,0 +1,9 @@
+# Dev override: publishes Postgres on localhost:5432 so `npm run dev` and the
+# Prisma CLI on the host can reach it. Deliberately not part of the base
+# compose file — production deployments should keep the database unexposed.
+#
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d db
+services:
+  db:
+    ports:
+      - "127.0.0.1:5432:5432"
