@@ -111,11 +111,30 @@ model Book {
   /// case-insensitive `contains` (Prisma can't substring-search String[]).
   searchText String @default("")
 
+  quotes Quote[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([userId, status])
   @@index([userId, createdAt])
+}
+
+/// A favourite quote or highlight from a book, with an optional page
+/// reference and a personal note on why it stuck. Ownership is derived
+/// through the book (books are per-user).
+model Quote {
+  id     String @id @default(cuid())
+  bookId String
+  book   Book   @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  text String
+  page Int?
+  note String?
+
+  createdAt DateTime @default(now())
+
+  @@index([bookId])
 }
 
 /// Caches raw Open Library / Google Books responses so repeated lookups of the

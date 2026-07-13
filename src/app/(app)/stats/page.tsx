@@ -278,8 +278,10 @@ export default async function StatsPage() {
           </CardHeader>
           <CardContent className="grid gap-3">
             <p className="text-sm text-muted-foreground">
-              Download your library (books, shelves, goals) as JSON, or restore
-              a backup. Restoring merges: books you already have are skipped.
+              Download your library (books, quotes, shelves, goals — cover
+              images included) as a zip, or restore a backup (zip, or JSON
+              from older versions). Restoring merges: books you already have
+              are skipped.
             </p>
             <div className="flex flex-wrap items-start gap-2">
               <Button asChild variant="outline" size="sm">
