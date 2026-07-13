@@ -7,8 +7,9 @@ import type { ImportSummary } from "@/lib/import";
 import { Button } from "@/components/ui/button";
 
 /**
- * "Restore backup" button on the stats page: picks a MyReads export JSON,
- * posts it to /api/import, and reports what was merged in.
+ * "Restore backup" button on the stats page: picks a MyReads export (zip
+ * with covers, or a legacy JSON), posts it to /api/import, and reports what
+ * was merged in.
  */
 export function RestoreBackup() {
   const router = useRouter();
@@ -20,11 +21,9 @@ export function RestoreBackup() {
     setBusy(true);
     setMessage(null);
     try {
-      const text = await file.text();
       const res = await fetch("/api/import", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: text,
+        body: file,
       });
       const data = (await res.json()) as ImportSummary & { error?: string };
       if (!res.ok || data.error) {
@@ -35,6 +34,8 @@ export function RestoreBackup() {
         `${data.booksCreated} book${data.booksCreated === 1 ? "" : "s"} restored`,
         data.booksSkipped > 0 ? `${data.booksSkipped} already present` : null,
         data.booksInvalid > 0 ? `${data.booksInvalid} invalid` : null,
+        data.coversRestored > 0 ? `${data.coversRestored} covers restored` : null,
+        data.quotesRestored > 0 ? `${data.quotesRestored} quotes restored` : null,
         data.shelvesCreated > 0 ? `${data.shelvesCreated} shelves created` : null,
         data.goalsRestored > 0 ? `${data.goalsRestored} goals restored` : null,
       ].filter(Boolean);
@@ -68,7 +69,7 @@ export function RestoreBackup() {
         <input
           ref={fileRef}
           type="file"
-          accept="application/json,.json"
+          accept="application/zip,.zip,application/json,.json"
           className="hidden"
           onChange={(e) => {
             const f = e.target.files?.[0];

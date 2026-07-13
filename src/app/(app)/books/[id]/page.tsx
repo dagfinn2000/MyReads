@@ -7,6 +7,7 @@ import { formatDate, FORMAT_LABELS, STATUS_BADGE_CLASS, STATUS_LABELS } from "@/
 import { BookCover } from "@/components/book-card";
 import { BookShelvesCard } from "@/components/book-shelves-card";
 import { DeleteBookButton } from "@/components/delete-book-button";
+import { QuotesCard } from "@/components/quotes-card";
 import { ReadingCard } from "@/components/reading-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -25,7 +26,12 @@ export default async function BookDetailPage({
 
   const book = await prisma.book.findFirst({
     where: { id, userId },
-    include: { shelves: { select: { id: true } } },
+    include: {
+      shelves: { select: { id: true } },
+      quotes: {
+        orderBy: [{ page: { sort: "asc", nulls: "last" } }, { createdAt: "asc" }],
+      },
+    },
   });
   if (!book) notFound();
 
@@ -176,6 +182,8 @@ export default async function BookDetailPage({
         />
 
         <ReadingCard book={book} />
+
+        <QuotesCard bookId={book.id} quotes={book.quotes} />
       </div>
     </div>
   );

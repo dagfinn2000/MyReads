@@ -1,12 +1,20 @@
+import fs from "node:fs/promises";
+import path from "node:path";
+import JSZip from "jszip";
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { coversDir } from "@/lib/covers";
 
 /**
- * GET /api/export — downloads the signed-in user's entire library as JSON:
- * every book (with its shelf names), every shelf, and reading goals. A
- * one-click offsite backup for a self-hosted instance; cover image files are
- * not included (coverUrl paths reference the covers volume).
+ * GET /api/export — downloads the signed-in user's entire library as a zip:
+ * `library.json` (every book with its shelf names and quotes, every shelf,
+ * reading goals) plus `covers/<file>` for each locally cached cover image,
+ * so a restore into a fresh instance brings the covers back too.
+ *
+ * The JSON inside is still the version-1 export format (quotes are an
+ * additive field), so unzipping and feeding `library.json` to an older
+ * instance keeps working.
  */
 export async function GET() {
   const session = await auth();
@@ -19,7 +27,13 @@ export async function GET() {
     prisma.book.findMany({
       where: { userId },
       orderBy: { createdAt: "asc" },
-      include: { shelves: { select: { name: true } } },
+      include: {
+        shelves: { select: { name: true } },
+        quotes: {
+          select: { text: true, page: true, note: true, createdAt: true },
+          orderBy: { createdAt: "asc" },
+        },
+      },
     }),
     prisma.shelf.findMany({
       where: { userId },
@@ -47,11 +61,35 @@ export async function GET() {
     })),
   };
 
+  const zip = new JSZip();
+  zip.file("library.json", JSON.stringify(payload, null, 2));
+
+  // Bundle every locally cached cover. A missing file is not an error — the
+  // book row simply exports without its image, exactly as before.
+  const dir = coversDir();
+  for (const book of books) {
+    if (!book.coverUrl?.startsWith("/api/covers/")) continue;
+    const filename = path.basename(book.coverUrl);
+    try {
+      const buf = await fs.readFile(path.join(dir, filename));
+      // Covers are already-compressed images; deflating again wastes CPU.
+      zip.file(`covers/${filename}`, buf, { compression: "STORE" });
+    } catch {
+      // cover cache miss — skip
+    }
+  }
+
+  const body = await zip.generateAsync({
+    type: "uint8array",
+    compression: "DEFLATE",
+  });
+
   const date = new Date().toISOString().slice(0, 10);
-  return new NextResponse(JSON.stringify(payload, null, 2), {
+  // Fresh copy pins the TS type to Uint8Array<ArrayBuffer> (BodyInit).
+  return new NextResponse(new Uint8Array(body), {
     headers: {
-      "Content-Type": "application/json",
-      "Content-Disposition": `attachment; filename="myreads-export-${date}.json"`,
+      "Content-Type": "application/zip",
+      "Content-Disposition": `attachment; filename="myreads-export-${date}.zip"`,
       "Cache-Control": "no-store",
     },
   });

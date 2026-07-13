@@ -16,14 +16,33 @@ function param(v: string | string[] | undefined): string {
   return typeof v === "string" ? v : "";
 }
 
+/** Shelf order within one author: series entries stay together (a series
+ *  sorts as a block by its name, standalones slot in by title), ordered by
+ *  series number inside the block — Mistborn #1 right before Mistborn #2. */
+function seriesShelfOrder(a: Book, b: Book): number {
+  return (
+    (a.seriesName ?? a.title).localeCompare(b.seriesName ?? b.title) ||
+    (a.seriesNumber ?? Infinity) - (b.seriesNumber ?? Infinity) ||
+    a.title.localeCompare(b.title)
+  );
+}
+
 /** In-memory sort — a personal library is small enough that sorting after
  *  the filtered fetch is simpler than fighting Prisma over array columns
  *  (author sort) and nulls-last semantics. */
 function sortBooks(books: Book[], sort: string, dir: string): Book[] {
   const mul = dir === "asc" ? 1 : -1;
+  // Author sort: `dir` flips the author order only; within an author, books
+  // keep shelf order (series grouped, in series order) in both directions.
+  if (sort === "author") {
+    return [...books].sort(
+      (a, b) =>
+        mul * (a.authors[0] ?? "").localeCompare(b.authors[0] ?? "") ||
+        seriesShelfOrder(a, b),
+    );
+  }
   const cmp: Record<string, (a: Book, b: Book) => number> = {
     title: (a, b) => a.title.localeCompare(b.title),
-    author: (a, b) => (a.authors[0] ?? "").localeCompare(b.authors[0] ?? ""),
     rating: (a, b) => (a.rating ?? 0) - (b.rating ?? 0),
     dateFinished: (a, b) =>
       (a.dateFinished?.getTime() ?? 0) - (b.dateFinished?.getTime() ?? 0),

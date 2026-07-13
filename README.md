@@ -42,6 +42,9 @@ surface area.
   Read / Did Not Finish), 1–5 star ratings **with half stars**, free-text
   review/notes, start & finish dates, re-read tracking, and reading
   progress ("page 218 of 618") with a progress bar on the library card.
+- **Quotes & highlights** — keep passages from a book, each with an optional
+  page reference and a personal note, added/edited/deleted right on the book
+  page. Quotes are listed in page order and included in backups.
 - **Series** — assign books a series name and number (floats allowed, so a
   novella can be #1.5). Book pages link the series and show its other
   entries in reading order; the library can group by series.
@@ -51,7 +54,9 @@ surface area.
 - **Library views** — status shelves, custom-shelf chips, text search across
   title/author/series, filters by tag, format, and minimum rating, grouping
   by author or series, sorting by title, author, rating, date added, or date
-  finished. All view state lives in the URL. A "Pick for me" button opens a
+  finished. Sorting by author keeps each series together as a block in
+  series order — Mistborn #1 sits next to #2 instead of being alphabetized
+  apart. All view state lives in the URL. A "Pick for me" button opens a
   random book from Want to Read (respecting the active filters) when you
   can't decide.
 - **Tag management** — rename a tag across the whole library (renaming onto
@@ -63,9 +68,11 @@ surface area.
   page and watch the progress bar fill; hit the target and you earn a gold
   medal. Past years' goals (and medals) stay on display.
 - **Backup & restore** — one click downloads your entire library (books,
-  shelves, reading goals) as a JSON file, and the stats page can restore
-  such a backup into any instance. Restores merge: books you already have
-  are skipped, so it's safe to run on a live library.
+  quotes, shelves, reading goals, **and cover images**) as a zip, and the
+  stats page can restore such a backup into any instance — covers included,
+  so a restore onto a fresh server looks exactly like the original. Restores
+  merge: books you already have are skipped, so it's safe to run on a live
+  library. Plain-JSON backups from older versions restore fine too.
 - **Installable (PWA)** — a web app manifest makes MyReads installable on a
   phone home screen, which pairs nicely with barcode scanning.
 - **Auth** — username/password accounts via Auth.js (Credentials provider),

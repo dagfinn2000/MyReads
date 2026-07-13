@@ -51,7 +51,7 @@ export async function Nav() {
             asChild
             variant="ghost"
             size="sm"
-            title="Download library backup (JSON)"
+            title="Download library backup (zip incl. covers)"
           >
             {/* Plain <a>: this is a file download, not a client navigation. */}
             <a href="/api/export">

@@ -6,14 +6,16 @@ import { prisma } from "@/lib/prisma";
 import { coversDir } from "@/lib/covers";
 
 /**
- * Restore of a MyReads JSON export (the file /api/export produces).
+ * Restore of a MyReads export — either the `library.json` from a zip backup
+ * (with `getCoverFile` supplying the bundled cover images) or a legacy plain
+ * JSON export.
  *
  * Semantics: merge into the current user's library. Books already present —
  * same ISBN, or same title + first author (case-insensitive) — are skipped,
  * so restoring on top of a live library is safe and restoring into a fresh
- * instance brings everything back. Cover image files are not part of the
- * export; local cover paths are kept only when the file still exists (same
- * instance), otherwise cleared.
+ * instance brings everything back. A book's local cover path is kept when
+ * the file already exists (same instance) or can be restored from the
+ * backup, otherwise cleared.
  */
 
 const dateField = z
@@ -25,6 +27,14 @@ const dateField = z
     const d = new Date(s);
     return Number.isNaN(d.getTime()) ? null : d;
   });
+
+/** Quotes are additive (version-1 exports without them parse to []). */
+const importedQuoteSchema = z.object({
+  text: z.string().trim().min(1).max(5000),
+  page: z.number().int().min(0).max(100000).nullable().optional().catch(null),
+  note: z.string().trim().max(2000).nullable().optional(),
+  createdAt: dateField,
+});
 
 const importedBookSchema = z.object({
   title: z.string().trim().min(1).max(500),
@@ -48,6 +58,7 @@ const importedBookSchema = z.object({
   timesRead: z.number().int().min(0).max(1000).catch(0),
   currentPage: z.number().int().min(0).max(100000).nullable().optional().catch(null),
   shelves: z.array(z.string().trim().min(1).max(50)).catch([]),
+  quotes: z.array(importedQuoteSchema).catch([]),
   createdAt: dateField,
 });
 
@@ -67,23 +78,58 @@ export interface ImportSummary {
   booksInvalid: number;
   shelvesCreated: number;
   goalsRestored: number;
+  coversRestored: number;
+  quotesRestored: number;
 }
 
-/** A local cover path from the export is only useful if the file survived. */
-async function resolveCoverUrl(coverUrl: string | null | undefined): Promise<string | null> {
-  if (!coverUrl) return null;
-  if (!coverUrl.startsWith("/api/covers/")) return coverUrl; // remote URL — keep
+/** Reads a cover image bundled with the backup (zip imports supply this). */
+export type CoverFileReader = (filename: string) => Promise<Uint8Array | null>;
+
+/** Only names the cover cache itself produces get written back — and only
+ *  extensions /api/covers actually serves. Keeps a hand-crafted backup from
+ *  planting arbitrary files in the cache directory. */
+const SAFE_COVER_FILENAME = /^[A-Za-z0-9][A-Za-z0-9._-]*\.(jpg|png|gif|webp)$/;
+
+/**
+ * A local cover path from the export is kept if the file already exists on
+ * this instance, or can be written back from the backup; otherwise cleared.
+ * Returns the resolved URL and whether a file was restored from the backup.
+ */
+async function resolveCoverUrl(
+  coverUrl: string | null | undefined,
+  getCoverFile: CoverFileReader | undefined,
+): Promise<{ url: string | null; restored: boolean }> {
+  if (!coverUrl) return { url: null, restored: false };
+  if (!coverUrl.startsWith("/api/covers/")) return { url: coverUrl, restored: false }; // remote URL — keep
+
+  const filename = path.basename(coverUrl);
+  const target = path.join(coversDir(), filename);
   try {
-    await fs.access(path.join(coversDir(), path.basename(coverUrl)));
-    return coverUrl;
+    await fs.access(target);
+    return { url: coverUrl, restored: false }; // same instance — file survived
   } catch {
-    return null;
+    // fall through to the backup
   }
+
+  if (getCoverFile && SAFE_COVER_FILENAME.test(filename)) {
+    try {
+      const data = await getCoverFile(filename);
+      if (data) {
+        await fs.mkdir(coversDir(), { recursive: true });
+        await fs.writeFile(target, data);
+        return { url: coverUrl, restored: true };
+      }
+    } catch {
+      // unreadable zip entry / disk error — treat as missing
+    }
+  }
+  return { url: null, restored: false };
 }
 
 export async function importLibrary(
   userId: string,
   payload: unknown,
+  getCoverFile?: CoverFileReader,
 ): Promise<ImportSummary | { error: string }> {
   const parsed = exportPayloadSchema.safeParse(payload);
   if (!parsed.success) {
@@ -137,6 +183,8 @@ export async function importLibrary(
   let booksCreated = 0;
   let booksSkipped = 0;
   let booksInvalid = 0;
+  let coversRestored = 0;
+  let quotesRestored = 0;
 
   for (const raw of data.books) {
     const parsedBook = importedBookSchema.safeParse(raw);
@@ -152,6 +200,9 @@ export async function importLibrary(
       continue;
     }
 
+    const cover = await resolveCoverUrl(b.coverUrl, getCoverFile);
+    if (cover.restored) coversRestored++;
+
     await prisma.book.create({
       data: {
         userId,
@@ -159,7 +210,7 @@ export async function importLibrary(
         authors: b.authors,
         isbn,
         description: b.description ?? null,
-        coverUrl: await resolveCoverUrl(b.coverUrl),
+        coverUrl: cover.url,
         pageCount: b.pageCount ?? null,
         publishedDate: b.publishedDate ?? null,
         tags: [...new Set(b.tags)],
@@ -187,11 +238,20 @@ export async function importLibrary(
             .filter((id): id is string => !!id)
             .map((id) => ({ id })),
         },
+        quotes: {
+          create: b.quotes.map((q) => ({
+            text: q.text,
+            page: q.page ?? null,
+            note: q.note ?? null,
+            ...(q.createdAt && { createdAt: q.createdAt }),
+          })),
+        },
       },
     });
     if (isbn) existingIsbns.add(isbn);
     existingTitleAuthor.add(key);
     booksCreated++;
+    quotesRestored += b.quotes.length;
   }
 
   return {
@@ -200,5 +260,7 @@ export async function importLibrary(
     booksInvalid,
     shelvesCreated,
     goalsRestored: data.readingGoals.length,
+    coversRestored,
+    quotesRestored,
   };
 }

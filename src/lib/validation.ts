@@ -140,6 +140,31 @@ export const readingSchema = z.object({
     .catch(null),
 });
 
+/** A quote/highlight from the book detail page. Forms submit strings. */
+export const quoteSchema = z.object({
+  text: z
+    .string()
+    .trim()
+    .min(1, "Quote text is required")
+    .max(5000, "Quote must be at most 5000 characters"),
+  /** Page reference; empty string/0 means "no page". */
+  page: z.coerce
+    .number()
+    .int()
+    .min(0)
+    .max(100000)
+    .nullable()
+    .optional()
+    .catch(null),
+  note: z
+    .string()
+    .trim()
+    .max(2000)
+    .transform((s) => s || null)
+    .nullable()
+    .optional(),
+});
+
 export const shelfNameSchema = z
   .string()
   .trim()
