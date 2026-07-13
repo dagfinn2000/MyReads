@@ -64,7 +64,9 @@ export function BookForm({
     <form action={formAction} className="grid gap-6 md:grid-cols-[200px_1fr]">
       {/* Cover preview + URL + picker */}
       <div className="grid content-start gap-2">
-        <div className="aspect-[2/3] w-full overflow-hidden rounded-md border bg-muted">
+        {/* Capped below md so the stacked mobile layout doesn't blow the
+            preview up to full width (and ~1.5x screen height). */}
+        <div className="mx-auto aspect-[2/3] w-full max-w-52 overflow-hidden rounded-md border bg-muted md:mx-0 md:max-w-none">
           {coverUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img

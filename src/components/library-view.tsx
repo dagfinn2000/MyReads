@@ -95,7 +95,7 @@ export function LibraryView({
   }
 
   const renderGrid = (list: Book[]) => (
-    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-5">
       {list.map((book) => {
         const isSelected = selected.has(book.id);
         return (
@@ -180,11 +180,13 @@ export function LibraryView({
 
       {selectMode && (
         <div className="fixed bottom-4 left-1/2 z-50 flex w-[min(64rem,calc(100vw-2rem))] -translate-x-1/2 flex-wrap items-center gap-2 rounded-xl border bg-card p-3 shadow-lg">
-          <span className="text-sm font-medium tabular-nums">
+          {/* Mobile rows: count / status+shelf / tags / apply. From sm up
+              everything sits on one wrapping row with fixed widths. */}
+          <span className="w-full text-sm font-medium tabular-nums sm:w-auto">
             {selected.size} selected
           </span>
           <Select value={status} onValueChange={setStatus}>
-            <SelectTrigger className="w-44">
+            <SelectTrigger className="min-w-0 flex-1 basis-[calc(50%-0.5rem)] sm:w-44 sm:flex-initial sm:basis-auto">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -198,7 +200,7 @@ export function LibraryView({
           </Select>
           {shelves.length > 0 && (
             <Select value={shelfId} onValueChange={setShelfId}>
-              <SelectTrigger className="w-44">
+              <SelectTrigger className="min-w-0 flex-1 basis-[calc(50%-0.5rem)] sm:w-44 sm:flex-initial sm:basis-auto">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -215,12 +217,13 @@ export function LibraryView({
             value={tags}
             onChange={(e) => setTags(e.target.value)}
             placeholder="Add tags, comma separated"
-            className="w-52"
+            className="min-w-0 flex-1 basis-full sm:w-52 sm:flex-initial sm:basis-auto"
           />
           <Button
             size="sm"
             onClick={apply}
             disabled={pending || selected.size === 0}
+            className="flex-1 sm:flex-initial"
           >
             {pending ? "Applying…" : "Apply"}
           </Button>

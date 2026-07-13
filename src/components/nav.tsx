@@ -18,33 +18,35 @@ export async function Nav() {
 
   return (
     <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur">
-      <div className="mx-auto flex h-14 max-w-6xl items-center gap-1 px-4">
+      {/* Below sm the nav buttons collapse to icons so everything fits a
+          phone screen without horizontal overflow. */}
+      <div className="mx-auto flex h-14 max-w-6xl items-center gap-0.5 px-3 sm:gap-1 sm:px-4">
         <Link
           href="/books"
-          className="mr-4 flex items-center gap-2 text-lg font-semibold tracking-tight"
+          className="mr-2 flex items-center gap-2 text-lg font-semibold tracking-tight sm:mr-4"
         >
           <BookOpen className="size-5" />
-          MyReads
+          <span className="hidden min-[400px]:inline">MyReads</span>
         </Link>
-        <Button asChild variant="ghost" size="sm">
+        <Button asChild variant="ghost" size="sm" title="Library">
           <Link href="/books">
             <LibraryBig data-slot="icon" />
-            Library
+            <span className="hidden sm:inline">Library</span>
           </Link>
         </Button>
-        <Button asChild variant="ghost" size="sm">
+        <Button asChild variant="ghost" size="sm" title="Add book">
           <Link href="/books/new">
             <Plus data-slot="icon" />
-            Add book
+            <span className="hidden sm:inline">Add book</span>
           </Link>
         </Button>
-        <Button asChild variant="ghost" size="sm">
+        <Button asChild variant="ghost" size="sm" title="Stats">
           <Link href="/stats">
             <ChartColumn data-slot="icon" />
-            Stats
+            <span className="hidden sm:inline">Stats</span>
           </Link>
         </Button>
-        <div className="ml-auto flex items-center gap-3">
+        <div className="ml-auto flex items-center gap-1 sm:gap-3">
           <Button
             asChild
             variant="ghost"
@@ -58,7 +60,7 @@ export async function Nav() {
             </a>
           </Button>
           <ThemePicker />
-          <span className="text-sm text-muted-foreground">
+          <span className="hidden text-sm text-muted-foreground md:inline">
             {session?.user?.name}
           </span>
           <form

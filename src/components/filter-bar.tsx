@@ -98,19 +98,21 @@ export function FilterBar({
   }, [search]);
 
   return (
+    // On phones the controls stack into tidy full-width rows (search, then
+    // filters, then grouping/sort); from sm up they keep their fixed widths.
     <div className="flex flex-wrap items-center gap-2">
-      <div className="relative">
+      <div className="relative w-full sm:w-auto">
         <Search className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
         <Input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search title or author…"
-          className="w-56 pl-8"
+          className="w-full pl-8 sm:w-56"
         />
       </div>
 
       <Select value={values.tag || "all"} onValueChange={(v) => navigate({ tag: v })}>
-        <SelectTrigger className="w-36">
+        <SelectTrigger className="min-w-0 flex-1 sm:w-36 sm:flex-initial">
           <SelectValue placeholder="Tag" />
         </SelectTrigger>
         <SelectContent>
@@ -127,7 +129,7 @@ export function FilterBar({
         value={values.format || "all"}
         onValueChange={(v) => navigate({ format: v })}
       >
-        <SelectTrigger className="w-32">
+        <SelectTrigger className="min-w-0 flex-1 sm:w-32 sm:flex-initial">
           <SelectValue placeholder="Format" />
         </SelectTrigger>
         <SelectContent>
@@ -144,7 +146,7 @@ export function FilterBar({
         value={values.minRating || "all"}
         onValueChange={(v) => navigate({ minRating: v })}
       >
-        <SelectTrigger className="w-32">
+        <SelectTrigger className="min-w-0 flex-1 sm:w-32 sm:flex-initial">
           <SelectValue placeholder="Rating" />
         </SelectTrigger>
         <SelectContent>
@@ -168,12 +170,12 @@ export function FilterBar({
         </button>
       )}
 
-      <div className="ml-auto flex items-center gap-1">
+      <div className="flex w-full items-center gap-1 sm:ml-auto sm:w-auto">
         <Select
           value={values.group || "none"}
           onValueChange={(v) => navigate({ group: v })}
         >
-          <SelectTrigger className="w-44">
+          <SelectTrigger className="min-w-0 flex-1 sm:w-44 sm:flex-initial">
             <Layers className="size-4 text-muted-foreground" />
             <SelectValue />
           </SelectTrigger>
@@ -186,7 +188,7 @@ export function FilterBar({
           </SelectContent>
         </Select>
         <Select value={values.sort} onValueChange={(v) => navigate({ sort: v })}>
-          <SelectTrigger className="w-36">
+          <SelectTrigger className="min-w-0 flex-1 sm:w-36 sm:flex-initial">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -200,6 +202,7 @@ export function FilterBar({
         <Button
           variant="outline"
           size="icon"
+          className="shrink-0"
           title={values.dir === "asc" ? "Ascending" : "Descending"}
           onClick={() => navigate({ dir: values.dir === "asc" ? "desc" : "asc" })}
         >

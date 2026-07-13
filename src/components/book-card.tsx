@@ -54,7 +54,9 @@ export function BookCard({ book }: { book: Book }) {
             {book.seriesNumber != null ? ` #${book.seriesNumber}` : ""}
           </p>
         )}
-        <div className="mt-auto flex items-center justify-between pt-1">
+        {/* flex-wrap: on narrow cards the badge drops below the stars
+            instead of overflowing the card. */}
+        <div className="mt-auto flex flex-wrap items-center justify-between gap-1 pt-1">
           {book.rating ? <Stars value={book.rating} /> : <span />}
           <Badge className={`${STATUS_BADGE_CLASS[book.status]} text-[10px]`}>
             {STATUS_LABELS[book.status]}
