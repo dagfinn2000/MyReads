@@ -1,8 +1,12 @@
 import { ReadingStatus } from "@prisma/client";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { setReadingGoal } from "@/lib/actions/goals";
 import { FORMAT_LABELS } from "@/lib/display";
+import { GoldMedal } from "@/components/gold-medal";
 import { Stars } from "@/components/stars";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Card,
   CardContent,
@@ -80,6 +84,17 @@ export default async function StatsPage() {
   const years = [...perYear.entries()].sort((a, b) => a[0] - b[0]);
   const maxYear = Math.max(...perYear.values(), 0);
 
+  // Reading goals: progress is derived from the per-year finished counts.
+  const goals = await prisma.readingGoal.findMany({
+    where: { userId: session.user.id },
+    orderBy: { year: "desc" },
+  });
+  const currentYear = new Date().getFullYear();
+  const currentGoal = goals.find((g) => g.year === currentYear) ?? null;
+  const finishedThisYear = perYear.get(currentYear) ?? 0;
+  const goalMet = currentGoal !== null && finishedThisYear >= currentGoal.target;
+  const pastGoals = goals.filter((g) => g.year !== currentYear);
+
   // Genre/tag breakdown, top 10.
   const tagCounts = new Map<string, number>();
   for (const b of books) {
@@ -118,6 +133,93 @@ export default async function StatsPage() {
           )}
         </StatCard>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Reading goal {currentYear}</CardTitle>
+        </CardHeader>
+        <CardContent className="grid gap-4">
+          {currentGoal ? (
+            <div className="flex flex-wrap items-center gap-6">
+              {goalMet && <GoldMedal className="h-20 w-[60px] shrink-0" />}
+              <div className="min-w-56 flex-1">
+                <p className="text-2xl font-semibold tabular-nums">
+                  {finishedThisYear}{" "}
+                  <span className="text-base font-normal text-muted-foreground">
+                    of {currentGoal.target} books
+                  </span>
+                </p>
+                <div className="mt-2 h-3 rounded-full bg-muted">
+                  <div
+                    className={`h-full rounded-full ${goalMet ? "bg-amber-500" : "bg-primary/80"}`}
+                    style={{
+                      width: `${Math.min((finishedThisYear / currentGoal.target) * 100, 100)}%`,
+                    }}
+                  />
+                </div>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  {goalMet
+                    ? "Goal achieved — you've earned the gold medal! 🎉"
+                    : `${currentGoal.target - finishedThisYear} more to go.`}
+                </p>
+              </div>
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              Set a goal for the year — finish that many books and earn a gold
+              medal.
+            </p>
+          )}
+
+          <form action={setReadingGoal} className="flex flex-wrap items-end gap-2">
+            <input type="hidden" name="year" value={currentYear} />
+            <div className="grid gap-1">
+              <label
+                htmlFor="goal-target"
+                className="text-xs text-muted-foreground"
+              >
+                Books to read in {currentYear}
+              </label>
+              <Input
+                id="goal-target"
+                name="target"
+                type="number"
+                min={0}
+                max={10000}
+                defaultValue={currentGoal?.target}
+                placeholder="24"
+                className="w-28"
+              />
+            </div>
+            <Button type="submit" variant="outline" size="sm">
+              {currentGoal ? "Update goal" : "Set goal"}
+            </Button>
+            {currentGoal && (
+              <span className="pb-2 text-xs text-muted-foreground">
+                Set to 0 to remove the goal.
+              </span>
+            )}
+          </form>
+
+          {pastGoals.length > 0 && (
+            <div className="grid gap-1.5 border-t pt-3">
+              {pastGoals.map((g) => {
+                const finished = perYear.get(g.year) ?? 0;
+                const met = finished >= g.target;
+                return (
+                  <div key={g.year} className="flex items-center gap-3 text-sm">
+                    <span className="w-12 text-muted-foreground">{g.year}</span>
+                    <span className="tabular-nums">
+                      {finished} of {g.target}
+                    </span>
+                    {met && <GoldMedal className="h-6 w-[18px]" />}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>

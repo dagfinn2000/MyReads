@@ -31,12 +31,28 @@ enum BookFormat {
 }
 
 model User {
-  id           String   @id @default(cuid())
-  username     String   @unique
+  id           String        @id @default(cuid())
+  username     String        @unique
   passwordHash String // bcrypt
-  createdAt    DateTime @default(now())
+  createdAt    DateTime      @default(now())
   books        Book[]
   shelves      Shelf[]
+  readingGoals ReadingGoal[]
+}
+
+/// A yearly reading goal ("24 books in 2026"). Progress is derived from
+/// books with status READ finished in that year; hitting the target earns
+/// a gold medal on the stats page.
+model ReadingGoal {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  year      Int
+  target    Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, year])
 }
 
 /// A user-defined shelf ("Sanderson", "Fantasy") — freeform grouping

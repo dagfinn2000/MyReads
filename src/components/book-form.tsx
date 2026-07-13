@@ -5,6 +5,7 @@ import { BookFormat, ReadingStatus } from "@prisma/client";
 import { BookOpen } from "lucide-react";
 import type { ActionState } from "@/lib/actions/books";
 import { FORMAT_LABELS, STATUS_LABELS } from "@/lib/display";
+import { CoverPicker } from "@/components/cover-picker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -56,17 +57,18 @@ export function BookForm({
   seriesNames?: string[];
 }) {
   const [state, formAction, pending] = useActionState(action, {});
-  const [coverPreview, setCoverPreview] = useState(initial.coverUrl ?? "");
+  // Controlled so the cover picker and upload can set it programmatically.
+  const [coverUrl, setCoverUrl] = useState(initial.coverUrl ?? "");
 
   return (
     <form action={formAction} className="grid gap-6 md:grid-cols-[200px_1fr]">
-      {/* Cover preview + URL */}
+      {/* Cover preview + URL + picker */}
       <div className="grid content-start gap-2">
         <div className="aspect-[2/3] w-full overflow-hidden rounded-md border bg-muted">
-          {coverPreview ? (
+          {coverUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
-              src={coverPreview}
+              src={coverUrl}
               alt="Cover preview"
               className="h-full w-full object-cover"
             />
@@ -81,12 +83,13 @@ export function BookForm({
           id="coverUrl"
           name="coverUrl"
           placeholder="https://…"
-          defaultValue={initial.coverUrl ?? ""}
-          onChange={(e) => setCoverPreview(e.target.value)}
+          value={coverUrl}
+          onChange={(e) => setCoverUrl(e.target.value)}
         />
         <p className="text-xs text-muted-foreground">
           Remote images are downloaded and cached locally on save.
         </p>
+        <CoverPicker selected={coverUrl} onSelect={setCoverUrl} />
       </div>
 
       {/* Bibliographic fields */}

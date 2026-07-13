@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Geist } from "next/font/google";
 import { cn } from "@/lib/utils";
@@ -9,6 +9,12 @@ const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 export const metadata: Metadata = {
   title: "MyReads",
   description: "Self-hosted personal book library",
+  // Installed-PWA polish on iOS (the manifest covers Android/desktop).
+  appleWebApp: { capable: true, title: "MyReads", statusBarStyle: "default" },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#1e293b",
 };
 
 export default function RootLayout({

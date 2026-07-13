@@ -18,9 +18,17 @@ surface area.
 - **Search & import** — search-as-you-type against the
   [Open Library API](https://openlibrary.org/developers/api) (free, no key).
   Optionally enriched by the Google Books API when `GOOGLE_BOOKS_API_KEY` is
-  set. Every fetched field is reviewable/editable before saving, responses are
-  cached in Postgres for a week, and cover images are downloaded into a local
-  cache so the app never depends on third-party image hosting.
+  set, with the [National Library of Norway](https://api.nb.no/) as a final
+  fallback for titles the others don't know (it has essentially every book
+  ever published in Norway). Every fetched field is reviewable/editable
+  before saving, responses are cached in Postgres for a week, and cover
+  images are downloaded into a local cache so the app never depends on
+  third-party image hosting.
+- **Cover picker & custom covers** — the book form can search all three
+  sources for candidate covers (exact ISBN matches first, so the edition you
+  own wins — scan a Norwegian barcode, get the Norwegian cover) and lets you
+  pick one visually. You can also paste any image URL or upload your own
+  photo of the book.
 - **ISBN barcode scanning** — point a camera at the barcode on a physical
   book and it's looked up and prefilled automatically (a single match skips
   straight to the review form). Uses the browser's native `BarcodeDetector`
@@ -45,6 +53,13 @@ surface area.
   finished. All view state lives in the URL.
 - **Stats dashboard** — books read per year, average rating, total pages
   read, genre and format breakdowns.
+- **Reading goals** — set a yearly goal ("24 books in 2026") on the stats
+  page and watch the progress bar fill; hit the target and you earn a gold
+  medal. Past years' goals (and medals) stay on display.
+- **Backup export** — one click in the nav downloads your entire library
+  (books, shelves, reading goals) as a JSON file.
+- **Installable (PWA)** — a web app manifest makes MyReads installable on a
+  phone home screen, which pairs nicely with barcode scanning.
 - **Auth** — username/password accounts via Auth.js (Credentials provider),
   bcrypt-hashed passwords, JWT sessions. Registration can be disabled once
   your account exists.
@@ -130,7 +145,7 @@ src/
 ├─ components/         UI (shadcn/ui in components/ui, app components beside)
 ├─ lib/
 │  ├─ actions/books.ts server actions: create/update/delete + reading data
-│  ├─ metadata/        Open Library + Google Books clients, DB cache layer
+│  ├─ metadata/        Open Library + Google Books + nb.no clients, DB cache
 │  ├─ covers.ts        cover image download/cache
 │  └─ validation.ts    zod schemas shared by actions and API routes
 ├─ auth.config.ts      edge-safe Auth.js config (used by middleware)

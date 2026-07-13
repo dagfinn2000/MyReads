@@ -1,5 +1,12 @@
 import Link from "next/link";
-import { BookOpen, ChartColumn, LibraryBig, LogOut, Plus } from "lucide-react";
+import {
+  BookOpen,
+  ChartColumn,
+  HardDriveDownload,
+  LibraryBig,
+  LogOut,
+  Plus,
+} from "lucide-react";
 import { auth, signOut } from "@/auth";
 import { Button } from "@/components/ui/button";
 import { ThemePicker } from "@/components/theme-picker";
@@ -38,6 +45,18 @@ export async function Nav() {
           </Link>
         </Button>
         <div className="ml-auto flex items-center gap-3">
+          <Button
+            asChild
+            variant="ghost"
+            size="sm"
+            title="Download library backup (JSON)"
+          >
+            {/* Plain <a>: this is a file download, not a client navigation. */}
+            <a href="/api/export">
+              <HardDriveDownload data-slot="icon" />
+              <span className="sr-only">Download library backup</span>
+            </a>
+          </Button>
           <ThemePicker />
           <span className="text-sm text-muted-foreground">
             {session?.user?.name}

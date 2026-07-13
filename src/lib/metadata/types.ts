@@ -9,7 +9,13 @@ export interface BookMetadata {
   publishedDate: string | null;
   tags: string[];
   openLibraryId: string | null;
-  source: "openlibrary" | "googlebooks";
+  source: "openlibrary" | "googlebooks" | "nb";
+}
+
+/** A candidate cover image offered by the cover picker. */
+export interface CoverCandidate {
+  url: string;
+  source: BookMetadata["source"];
 }
 
 /** Extra fields fetched lazily when the user picks a search result. */
