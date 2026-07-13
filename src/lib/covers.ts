@@ -1,3 +1,4 @@
+import crypto from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
 
@@ -20,10 +21,14 @@ const EXT_BY_MIME: Record<string, string> = {
 };
 
 /**
- * Downloads `remoteUrl` into the cover cache under the book's id and returns
- * the app-relative URL it will be served from, or null if anything failed
- * (bad status, not an image, timeout). Failure is non-fatal by design — the
- * caller keeps the remote URL as-is.
+ * Downloads `remoteUrl` into the cover cache and returns the app-relative
+ * URL it will be served from, or null if anything failed (bad status, not an
+ * image, timeout). Failure is non-fatal by design — the caller keeps the
+ * remote URL as-is.
+ *
+ * The filename embeds a content hash so a changed cover gets a *new* URL —
+ * required for correctness, because /api/covers serves with
+ * `Cache-Control: immutable` and browsers never refetch a cached URL.
  */
 export async function cacheCoverImage(
   remoteUrl: string,
@@ -46,7 +51,8 @@ export async function cacheCoverImage(
 
     const dir = coversDir();
     await fs.mkdir(dir, { recursive: true });
-    const filename = `${bookId}.${ext}`;
+    const hash = crypto.createHash("sha1").update(buf).digest("hex").slice(0, 8);
+    const filename = `${bookId}-${hash}.${ext}`;
     await fs.writeFile(path.join(dir, filename), buf);
     return `/api/covers/${filename}`;
   } catch {

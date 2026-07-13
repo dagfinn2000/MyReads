@@ -26,8 +26,8 @@ export async function GET(
     return new NextResponse(new Uint8Array(buf), {
       headers: {
         "Content-Type": mime,
-        // Filenames are content-addressed by book id and rewritten on change,
-        // so aggressive caching is safe.
+        // Filenames embed a content hash (or a random upload id), so a
+        // changed cover always gets a new URL and immutable caching is safe.
         "Cache-Control": "public, max-age=31536000, immutable",
       },
     });
