@@ -74,7 +74,12 @@ surface area.
   merge: books you already have are skipped, so it's safe to run on a live
   library. Plain-JSON backups from older versions restore fine too.
 - **Installable (PWA)** — a web app manifest makes MyReads installable on a
-  phone home screen, which pairs nicely with barcode scanning.
+  phone home screen, which pairs nicely with barcode scanning. Same browser
+  rule as the scanner: manifests only apply over **HTTPS or localhost**.
+  Add the shortcut from a plain `http://LAN-IP` address and Android ignores
+  the manifest entirely — you get a bare bookmark with a letter tile instead
+  of the app icon. Behind a TLS reverse proxy it installs with the proper
+  icon and name.
 - **Auth** — username/password accounts via Auth.js (Credentials provider),
   bcrypt-hashed passwords, JWT sessions. Registration can be disabled once
   your account exists.
