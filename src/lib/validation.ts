@@ -129,6 +129,15 @@ export const readingSchema = z.object({
     .nullable()
     .optional(),
   timesRead: z.coerce.number().int().min(0).max(1000).catch(0),
+  /** Reading progress; empty string/0 clears it. */
+  currentPage: z.coerce
+    .number()
+    .int()
+    .min(0)
+    .max(100000)
+    .nullable()
+    .optional()
+    .catch(null),
 });
 
 export const shelfNameSchema = z

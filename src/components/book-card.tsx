@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Book } from "@prisma/client";
+import { ReadingStatus } from "@prisma/client";
 import { BookOpen } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Stars } from "@/components/stars";
@@ -35,12 +36,28 @@ export function BookCover({
 
 /** Grid tile for the library view. */
 export function BookCard({ book }: { book: Book }) {
+  const progress =
+    book.status === ReadingStatus.READING && book.currentPage != null && book.pageCount
+      ? Math.min(book.currentPage / book.pageCount, 1)
+      : null;
+
   return (
     <Link
       href={`/books/${book.id}`}
       className="group flex flex-col gap-2 rounded-lg border bg-card p-3 transition-colors hover:border-ring/60"
     >
       <BookCover book={book} className="aspect-[2/3] w-full" />
+      {progress !== null && (
+        <div
+          className="-mt-1 h-1.5 rounded-full bg-muted"
+          title={`Page ${book.currentPage} of ${book.pageCount}`}
+        >
+          <div
+            className="h-full rounded-full bg-primary/80"
+            style={{ width: `${progress * 100}%` }}
+          />
+        </div>
+      )}
       <div className="flex flex-1 flex-col gap-1">
         <p className="line-clamp-2 text-sm font-medium leading-snug group-hover:underline">
           {book.title}

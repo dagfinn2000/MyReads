@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import type { Book } from "@prisma/client";
 import { ReadingStatus } from "@prisma/client";
-import { Check, SquareCheckBig, X } from "lucide-react";
+import { Check, Dices, SquareCheckBig, X } from "lucide-react";
 import { bulkUpdateBooks } from "@/lib/actions/bulk";
 import { STATUS_LABELS } from "@/lib/display";
 import { cn } from "@/lib/utils";
@@ -66,6 +66,16 @@ export function LibraryView({
     setShelfId("keep");
     setTags("");
     setMessage(null);
+  }
+
+  /** Random pick from Want to Read within the current filters (any filtered
+   *  book when the current view has no unread ones). */
+  function pickForMe() {
+    const pool = books.filter((b) => b.status === ReadingStatus.WANT_TO_READ);
+    const candidates = pool.length > 0 ? pool : books;
+    if (candidates.length === 0) return;
+    const pick = candidates[Math.floor(Math.random() * candidates.length)];
+    router.push(`/books/${pick.id}`);
   }
 
   function apply() {
@@ -139,10 +149,22 @@ export function LibraryView({
           {books.length} book{books.length === 1 ? "" : "s"}
         </p>
         {!selectMode ? (
-          <Button variant="outline" size="sm" onClick={() => setSelectMode(true)}>
-            <SquareCheckBig data-slot="icon" />
-            Select
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={pickForMe}
+              disabled={books.length === 0}
+              title="Open a random book from Want to Read (respects your filters)"
+            >
+              <Dices data-slot="icon" />
+              Pick for me
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => setSelectMode(true)}>
+              <SquareCheckBig data-slot="icon" />
+              Select
+            </Button>
+          </div>
         ) : (
           <div className="flex gap-2">
             <Button

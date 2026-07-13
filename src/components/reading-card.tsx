@@ -94,7 +94,38 @@ export function ReadingCard({ book }: { book: Book }) {
                 defaultValue={book.timesRead}
               />
             </div>
+            <div className="grid gap-2">
+              <Label htmlFor="currentPage">
+                Current page{book.pageCount ? ` (of ${book.pageCount})` : ""}
+              </Label>
+              <Input
+                id="currentPage"
+                name="currentPage"
+                type="number"
+                min={0}
+                max={100000}
+                className="w-28"
+                defaultValue={book.currentPage ?? ""}
+                placeholder="—"
+              />
+            </div>
           </div>
+
+          {book.currentPage != null && book.pageCount ? (
+            <div className="grid max-w-sm gap-1">
+              <div className="h-2 rounded-full bg-muted">
+                <div
+                  className="h-full rounded-full bg-primary/80"
+                  style={{
+                    width: `${Math.min((book.currentPage / book.pageCount) * 100, 100)}%`,
+                  }}
+                />
+              </div>
+              <p className="text-xs text-muted-foreground tabular-nums">
+                {Math.min(Math.round((book.currentPage / book.pageCount) * 100), 100)}% read
+              </p>
+            </div>
+          ) : null}
 
           <div className="grid gap-2">
             <Label htmlFor="review">Review / notes</Label>

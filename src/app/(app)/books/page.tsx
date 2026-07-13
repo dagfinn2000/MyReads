@@ -135,6 +135,10 @@ export default async function BooksPage({
     counts.all += row._count._all;
   }
   const allTags = [...new Set(tagRows.flatMap((r) => r.tags))].sort();
+  const tagCounts: Record<string, number> = {};
+  for (const row of tagRows) {
+    for (const t of row.tags) tagCounts[t] = (tagCounts[t] ?? 0) + 1;
+  }
 
   // Current params as plain strings, for shelf/status links.
   const flatParams: Record<string, string> = {};
@@ -172,7 +176,7 @@ export default async function BooksPage({
         activeShelfId={values.shelfId}
         searchParams={flatParams}
       />
-      <FilterBar values={values} allTags={allTags} />
+      <FilterBar values={values} allTags={allTags} tagCounts={tagCounts} />
 
       {sorted.length === 0 ? (
         <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed py-16 text-center">

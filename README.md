@@ -40,7 +40,8 @@ surface area.
   tags, or shelve them in one action.
 - **Personal reading data** — status (Want to Read / Currently Reading /
   Read / Did Not Finish), 1–5 star ratings **with half stars**, free-text
-  review/notes, start & finish dates, and re-read tracking.
+  review/notes, start & finish dates, re-read tracking, and reading
+  progress ("page 218 of 618") with a progress bar on the library card.
 - **Series** — assign books a series name and number (floats allowed, so a
   novella can be #1.5). Book pages link the series and show its other
   entries in reading order; the library can group by series.
@@ -50,14 +51,21 @@ surface area.
 - **Library views** — status shelves, custom-shelf chips, text search across
   title/author/series, filters by tag, format, and minimum rating, grouping
   by author or series, sorting by title, author, rating, date added, or date
-  finished. All view state lives in the URL.
+  finished. All view state lives in the URL. A "Pick for me" button opens a
+  random book from Want to Read (respecting the active filters) when you
+  can't decide.
+- **Tag management** — rename a tag across the whole library (renaming onto
+  an existing tag merges them) or remove one everywhere, from a small dialog
+  next to the tag filter.
 - **Stats dashboard** — books read per year, average rating, total pages
   read, genre and format breakdowns.
 - **Reading goals** — set a yearly goal ("24 books in 2026") on the stats
   page and watch the progress bar fill; hit the target and you earn a gold
   medal. Past years' goals (and medals) stay on display.
-- **Backup export** — one click in the nav downloads your entire library
-  (books, shelves, reading goals) as a JSON file.
+- **Backup & restore** — one click downloads your entire library (books,
+  shelves, reading goals) as a JSON file, and the stats page can restore
+  such a backup into any instance. Restores merge: books you already have
+  are skipped, so it's safe to run on a live library.
 - **Installable (PWA)** — a web app manifest makes MyReads installable on a
   phone home screen, which pairs nicely with barcode scanning.
 - **Auth** — username/password accounts via Auth.js (Credentials provider),

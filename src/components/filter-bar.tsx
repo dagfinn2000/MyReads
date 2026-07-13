@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { BookFormat } from "@prisma/client";
 import { ArrowDownAZ, ArrowUpAZ, Layers, Search, X } from "lucide-react";
 import { FORMAT_LABELS } from "@/lib/display";
+import { ManageTagsDialog } from "@/components/manage-tags-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -59,9 +60,12 @@ const RATING_OPTIONS = [
 export function FilterBar({
   values,
   allTags,
+  tagCounts,
 }: {
   values: FilterValues;
   allTags: string[];
+  /** Books per tag, for the manage-tags dialog. */
+  tagCounts: Record<string, number>;
 }) {
   const router = useRouter();
   const [search, setSearch] = useState(values.q);
@@ -124,6 +128,7 @@ export function FilterBar({
           ))}
         </SelectContent>
       </Select>
+      <ManageTagsDialog tagCounts={tagCounts} />
 
       <Select
         value={values.format || "all"}

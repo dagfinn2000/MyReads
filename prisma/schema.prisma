@@ -103,6 +103,9 @@ model Book {
   dateStarted  DateTime?
   dateFinished DateTime?
   timesRead    Int           @default(0)
+  /// Where you are in the book right now. Kept for READING and DNF
+  /// ("stopped at p. 218"); cleared when the book is finished or reshelved.
+  currentPage  Int?
 
   /// Denormalized lowercase "title + authors" so search can be a single
   /// case-insensitive `contains` (Prisma can't substring-search String[]).

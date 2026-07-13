@@ -1,9 +1,11 @@
 import { ReadingStatus } from "@prisma/client";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { HardDriveDownload } from "lucide-react";
 import { setReadingGoal } from "@/lib/actions/goals";
 import { FORMAT_LABELS } from "@/lib/display";
 import { GoldMedal } from "@/components/gold-medal";
+import { RestoreBackup } from "@/components/restore-backup";
 import { Stars } from "@/components/stars";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -267,6 +269,27 @@ export default async function StatsPage() {
             {formatCounts.size === 0 && (
               <p className="text-sm text-muted-foreground">No books yet.</p>
             )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Backup</CardTitle>
+          </CardHeader>
+          <CardContent className="grid gap-3">
+            <p className="text-sm text-muted-foreground">
+              Download your library (books, shelves, goals) as JSON, or restore
+              a backup. Restoring merges: books you already have are skipped.
+            </p>
+            <div className="flex flex-wrap items-start gap-2">
+              <Button asChild variant="outline" size="sm">
+                <a href="/api/export">
+                  <HardDriveDownload data-slot="icon" />
+                  Download backup
+                </a>
+              </Button>
+              <RestoreBackup />
+            </div>
           </CardContent>
         </Card>
       </div>

@@ -169,6 +169,12 @@ export async function updateReading(
     if (timesRead === 0) timesRead = 1;
   }
 
+  // Progress only makes sense mid-book: keep it for READING and DNF
+  // ("stopped at p. 218"), clear it when finished or back on the shelf.
+  const keepsProgress =
+    data.status === ReadingStatus.READING || data.status === ReadingStatus.DNF;
+  const currentPage = keepsProgress ? data.currentPage || null : null;
+
   await prisma.book.update({
     where: { id: bookId },
     data: {
@@ -178,6 +184,7 @@ export async function updateReading(
       dateStarted: data.dateStarted ?? null,
       dateFinished,
       timesRead,
+      currentPage,
     },
   });
 
