@@ -106,7 +106,7 @@ import.
 **Book page** — bibliographic details, the rest of the series in reading
 order, shelves, and your own reading data below:
 
-![Book detail page](docs/book-detail.png)
+![Book detail page](docs/book-page.png)
 
 **Grouped by series** — each series becomes its own shelf heading, in
 reading order (novellas slot in at #2.5):
