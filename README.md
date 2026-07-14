@@ -111,7 +111,7 @@ order, shelves, and your own reading data below:
 **Grouped by series** — each series becomes its own shelf heading, in
 reading order (novellas slot in at #2.5):
 
-![Library grouped by series](docs/library-series.png)
+![Library grouped by series](docs/series-grouping.png)
 
 **Search & import** — type a title, author, or ISBN (or scan the barcode)
 and pick a result to prefill the form:
