@@ -103,6 +103,11 @@ import.
 
 ## Screenshots
 
+**Book page** — bibliographic details, the rest of the series in reading
+order, shelves, and your own reading data below:
+
+![Book detail page](docs/book-detail.png)
+
 **Grouped by series** — each series becomes its own shelf heading, in
 reading order (novellas slot in at #2.5):
 
@@ -113,11 +118,26 @@ and pick a result to prefill the form:
 
 ![Add book via search and import](docs/add-book.png)
 
+**Cover picker** — candidate covers from all three sources, exact ISBN
+matches first; the Norwegian editions come courtesy of the National
+Library:
+
+![Cover picker on the edit form](docs/cover-picker.png)
+
 **Stats & reading goals** — with backup & restore a click away:
 
 ![Stats dashboard with reading goal](docs/stats.png)
 
-| Sixteen themes | Backup & restore |
+**Year in review** — any year's wrap-up: the best-of shelf, highlights,
+monthly rhythm, ratings, and top genres:
+
+![Year in review page](docs/year-in-review.png)
+
+**Dark mode** — one of sixteen themes:
+
+![Library in a dark theme](docs/library-dark.png)
+
+| Theme picker | Backup & restore |
 | --- | --- |
 | ![Theme picker](docs/themes.png) | ![Backup card](docs/backup.png) |
 
