@@ -15,18 +15,22 @@ import { Input } from "@/components/ui/input";
  */
 export function ImportSearch({
   onPick,
+  initialQuery,
 }: {
   onPick: (values: BookFormValues) => void;
+  /** Seeds the search box (e.g. an ISBN from the check page) and auto-picks
+   *  a single match, exactly like a barcode scan. */
+  initialQuery?: string;
 }) {
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(initialQuery ?? "");
   const [results, setResults] = useState<BookMetadata[]>([]);
   const [searching, setSearching] = useState(false);
   const [pickingId, setPickingId] = useState<string | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const abortRef = useRef<AbortController | null>(null);
-  // Set when the query came from the barcode scanner: an ISBN search that
-  // returns exactly one result skips the picking step entirely.
-  const autoPickRef = useRef(false);
+  // Set when the query came from the barcode scanner (or an initialQuery):
+  // an ISBN search that returns exactly one result skips the picking step.
+  const autoPickRef = useRef(Boolean(initialQuery));
 
   /** Barcode scanner handoff — the ISBN just becomes the search query. */
   const handleScan = useCallback((isbn: string) => {

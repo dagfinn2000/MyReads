@@ -8,12 +8,12 @@ import { coversDir } from "@/lib/covers";
 
 /**
  * GET /api/export — downloads the signed-in user's entire library as a zip:
- * `library.json` (every book with its shelf names and quotes, every shelf,
- * reading goals) plus `covers/<file>` for each locally cached cover image,
- * so a restore into a fresh instance brings the covers back too.
+ * `library.json` (every book with its shelf names, quotes, and read history,
+ * every shelf, reading goals) plus `covers/<file>` for each locally cached
+ * cover image, so a restore into a fresh instance brings the covers back too.
  *
- * The JSON inside is still the version-1 export format (quotes are an
- * additive field), so unzipping and feeding `library.json` to an older
+ * The JSON inside is still the version-1 export format (quotes and reads are
+ * additive fields), so unzipping and feeding `library.json` to an older
  * instance keeps working.
  */
 export async function GET() {
@@ -31,6 +31,15 @@ export async function GET() {
         shelves: { select: { name: true } },
         quotes: {
           select: { text: true, page: true, note: true, createdAt: true },
+          orderBy: { createdAt: "asc" },
+        },
+        reads: {
+          select: {
+            dateStarted: true,
+            dateFinished: true,
+            rating: true,
+            createdAt: true,
+          },
           orderBy: { createdAt: "asc" },
         },
       },

@@ -35,13 +35,25 @@ surface area.
   (Chrome/Edge, incl. Chrome on Android). Note: browsers only allow camera
   access over **HTTPS or localhost** — behind a reverse proxy with TLS it
   just works; on a plain `http://LAN-IP` address it can't.
+- **"Do I own this?" bookstore mode** — scan a barcode (or type an ISBN) on
+  the Check page and instantly see whether the book is already in your
+  library: the exact edition (matched by ISBN in both its 10- and 13-digit
+  forms), the same title as a different edition, or not there at all — with
+  a one-tap handoff to the add flow, ISBN prefilled. Installed as a PWA, the
+  home-screen icon's long-press menu jumps straight to it. The add flow also
+  warns when you're about to import a book you already have.
 - **Bulk edit** — flip the library into select mode, tick any number of
   books (or "Select all" within the current filter), and set status, add
   tags, or shelve them in one action.
 - **Personal reading data** — status (Want to Read / Currently Reading /
   Read / Did Not Finish), 1–5 star ratings **with half stars**, free-text
-  review/notes, start & finish dates, re-read tracking, and reading
-  progress ("page 218 of 618") with a progress bar on the library card.
+  review/notes, start & finish dates, and reading progress ("page 218 of
+  618") with a progress bar on the library card.
+- **Read history & re-reads** — every pass through a book is kept: "Read it
+  again" archives the current dates and rating and restarts the book, and
+  reads from before the app can be recorded (dates optional, with what you
+  rated it that time). Re-reads count in the per-year stats and toward
+  reading goals; "times read" is derived from the history.
 - **Quotes & highlights** — keep passages from a book, each with an optional
   page reference and a personal note, added/edited/deleted right on the book
   page. Quotes are listed in page order and included in backups.
@@ -64,11 +76,16 @@ surface area.
   next to the tag filter.
 - **Stats dashboard** — books read per year, average rating, total pages
   read, genre and format breakdowns.
+- **Year in review** — click any year on the stats page for its wrap-up:
+  books and pages read, re-reads, best-of shelf, longest/shortest/fastest
+  read, first and last finish, monthly rhythm, rating distribution, and top
+  genres for that year.
 - **Reading goals** — set a yearly goal ("24 books in 2026") on the stats
   page and watch the progress bar fill; hit the target and you earn a gold
   medal. Past years' goals (and medals) stay on display.
 - **Backup & restore** — one click downloads your entire library (books,
-  quotes, shelves, reading goals, **and cover images**) as a zip, and the
+  quotes, read history, shelves, reading goals, **and cover images**) as a
+  zip, and the
   stats page can restore such a backup into any instance — covers included,
   so a restore onto a fresh server looks exactly like the original. Restores
   merge: books you already have are skipped, so it's safe to run on a live
@@ -177,7 +194,8 @@ Design decisions worth knowing about:
 
 - **Reading data lives on the Book row.** Books are per-user in this app, so
   a separate "reading entry" join model would add indirection for nothing.
-  `timesRead` covers re-reads.
+  The Book row always holds the *latest* read; earlier passes are archived
+  in the `Read` table, and `timesRead` is derived from the two.
 - **Ratings are integers 1–10** (half-star units); `7` renders as 3.5 stars.
 - **Metadata caching is a read-through table** (`MetadataCache`) keyed by
   `(source, normalized query)` with a one-week TTL and stale-if-error

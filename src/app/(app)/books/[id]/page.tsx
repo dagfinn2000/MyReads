@@ -8,6 +8,7 @@ import { BookCover } from "@/components/book-card";
 import { BookShelvesCard } from "@/components/book-shelves-card";
 import { DeleteBookButton } from "@/components/delete-book-button";
 import { QuotesCard } from "@/components/quotes-card";
+import { ReadHistoryCard } from "@/components/read-history-card";
 import { ReadingCard } from "@/components/reading-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -30,6 +31,13 @@ export default async function BookDetailPage({
       shelves: { select: { id: true } },
       quotes: {
         orderBy: [{ page: { sort: "asc", nulls: "last" } }, { createdAt: "asc" }],
+      },
+      // Oldest pass first; undated reads are presumed oldest.
+      reads: {
+        orderBy: [
+          { dateFinished: { sort: "asc", nulls: "first" } },
+          { createdAt: "asc" },
+        ],
       },
     },
   });
@@ -182,6 +190,8 @@ export default async function BookDetailPage({
         />
 
         <ReadingCard book={book} />
+
+        <ReadHistoryCard book={book} reads={book.reads} />
 
         <QuotesCard bookId={book.id} quotes={book.quotes} />
       </div>

@@ -128,7 +128,6 @@ export const readingSchema = z.object({
     .transform(parseDateOrNull)
     .nullable()
     .optional(),
-  timesRead: z.coerce.number().int().min(0).max(1000).catch(0),
   /** Reading progress; empty string/0 clears it. */
   currentPage: z.coerce
     .number()
@@ -138,6 +137,24 @@ export const readingSchema = z.object({
     .nullable()
     .optional()
     .catch(null),
+});
+
+/** A past read of a book (the read-history card). Everything is optional:
+ *  "I know I read this in 2019" and a fully undated "read it before" are
+ *  both valid entries. */
+export const pastReadSchema = z.object({
+  dateStarted: z
+    .string()
+    .transform(parseDateOrNull)
+    .nullable()
+    .optional(),
+  dateFinished: z
+    .string()
+    .transform(parseDateOrNull)
+    .nullable()
+    .optional(),
+  /** 1–10 half-star units; empty string/0 means "unrated that time". */
+  rating: z.coerce.number().int().min(0).max(10).nullable().optional().catch(null),
 });
 
 /** A quote/highlight from the book detail page. Forms submit strings. */

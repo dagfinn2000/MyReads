@@ -5,9 +5,15 @@ import { AddBookClient } from "@/components/add-book-client";
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Add book · MyReads" };
 
-export default async function NewBookPage() {
+export default async function NewBookPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ isbn?: string }>;
+}) {
   const session = await auth();
   if (!session?.user?.id) return null;
+  // Handoff from the "do I own this?" page: ?isbn= seeds the import search.
+  const { isbn } = await searchParams;
 
   // Existing series names, for the form's autocomplete suggestions.
   const seriesRows = await prisma.book.findMany({
@@ -23,7 +29,7 @@ export default async function NewBookPage() {
   return (
     <div className="mx-auto grid max-w-3xl gap-4">
       <h1 className="text-2xl font-semibold tracking-tight">Add book</h1>
-      <AddBookClient seriesNames={seriesNames} />
+      <AddBookClient seriesNames={seriesNames} initialIsbn={isbn} />
     </div>
   );
 }

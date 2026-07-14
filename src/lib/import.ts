@@ -36,6 +36,14 @@ const importedQuoteSchema = z.object({
   createdAt: dateField,
 });
 
+/** Past reads are additive too (exports without them parse to []). */
+const importedReadSchema = z.object({
+  dateStarted: dateField,
+  dateFinished: dateField,
+  rating: z.number().int().min(1).max(10).nullable().optional().catch(null),
+  createdAt: dateField,
+});
+
 const importedBookSchema = z.object({
   title: z.string().trim().min(1).max(500),
   authors: z.array(z.string().trim().max(200)).catch([]),
@@ -59,6 +67,7 @@ const importedBookSchema = z.object({
   currentPage: z.number().int().min(0).max(100000).nullable().optional().catch(null),
   shelves: z.array(z.string().trim().min(1).max(50)).catch([]),
   quotes: z.array(importedQuoteSchema).catch([]),
+  reads: z.array(importedReadSchema).catch([]),
   createdAt: dateField,
 });
 
@@ -80,6 +89,7 @@ export interface ImportSummary {
   goalsRestored: number;
   coversRestored: number;
   quotesRestored: number;
+  readsRestored: number;
 }
 
 /** Reads a cover image bundled with the backup (zip imports supply this). */
@@ -185,6 +195,7 @@ export async function importLibrary(
   let booksInvalid = 0;
   let coversRestored = 0;
   let quotesRestored = 0;
+  let readsRestored = 0;
 
   for (const raw of data.books) {
     const parsedBook = importedBookSchema.safeParse(raw);
@@ -202,6 +213,25 @@ export async function importLibrary(
 
     const cover = await resolveCoverUrl(b.coverUrl, getCoverFile);
     if (cover.restored) coversRestored++;
+
+    // Read history. Older exports have no `reads` — materialize the history
+    // that timesRead implies as undated past reads (the finished pass itself
+    // lives on the Book row), exactly like the migration backfill. Either
+    // way timesRead ends up consistent with the restored rows.
+    const isRead = b.status === ReadingStatus.READ;
+    const pastReads: { dateStarted: Date | null; dateFinished: Date | null; rating: number | null; createdAt: Date | null }[] =
+      b.reads.length > 0
+        ? b.reads.map((r) => ({
+            dateStarted: r.dateStarted,
+            dateFinished: r.dateFinished,
+            rating: r.rating ?? null,
+            createdAt: r.createdAt,
+          }))
+        : Array.from(
+            { length: Math.max(b.timesRead - (isRead ? 1 : 0), 0) },
+            () => ({ dateStarted: null, dateFinished: null, rating: null, createdAt: null }),
+          );
+    const timesRead = pastReads.length + (isRead ? 1 : 0);
 
     await prisma.book.create({
       data: {
@@ -224,7 +254,7 @@ export async function importLibrary(
         review: b.review ?? null,
         dateStarted: b.dateStarted,
         dateFinished: b.dateFinished,
-        timesRead: b.timesRead,
+        timesRead,
         currentPage: b.currentPage ?? null,
         searchText: [b.title, ...b.authors, b.seriesName ?? ""]
           .join(" ")
@@ -246,12 +276,21 @@ export async function importLibrary(
             ...(q.createdAt && { createdAt: q.createdAt }),
           })),
         },
+        reads: {
+          create: pastReads.map((r) => ({
+            dateStarted: r.dateStarted,
+            dateFinished: r.dateFinished,
+            rating: r.rating,
+            ...(r.createdAt && { createdAt: r.createdAt }),
+          })),
+        },
       },
     });
     if (isbn) existingIsbns.add(isbn);
     existingTitleAuthor.add(key);
     booksCreated++;
     quotesRestored += b.quotes.length;
+    readsRestored += pastReads.length;
   }
 
   return {
@@ -262,5 +301,6 @@ export async function importLibrary(
     goalsRestored: data.readingGoals.length,
     coversRestored,
     quotesRestored,
+    readsRestored,
   };
 }

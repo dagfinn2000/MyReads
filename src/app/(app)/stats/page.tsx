@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { ReadingStatus } from "@prisma/client";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
@@ -6,6 +7,7 @@ import { setReadingGoal } from "@/lib/actions/goals";
 import { FORMAT_LABELS } from "@/lib/display";
 import { GoldMedal } from "@/components/gold-medal";
 import { RestoreBackup } from "@/components/restore-backup";
+import { Bar, StatCard } from "@/components/stat-blocks";
 import { Stars } from "@/components/stars";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,34 +20,6 @@ import {
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Stats · MyReads" };
-
-/** Simple horizontal CSS bar — no chart library needed at this scale. */
-function Bar({ label, value, max }: { label: string; value: number; max: number }) {
-  const pct = max > 0 ? Math.max((value / max) * 100, 2) : 0;
-  return (
-    <div className="grid grid-cols-[7rem_1fr_2.5rem] items-center gap-2 text-sm">
-      <span className="truncate text-muted-foreground">{label}</span>
-      <div className="h-5 rounded bg-muted">
-        <div
-          className="h-full rounded bg-primary/80"
-          style={{ width: `${pct}%` }}
-        />
-      </div>
-      <span className="text-right tabular-nums">{value}</span>
-    </div>
-  );
-}
-
-function StatCard({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <Card>
-      <CardContent className="pt-0">
-        <p className="text-sm text-muted-foreground">{label}</p>
-        <div className="mt-1 text-2xl font-semibold tabular-nums">{children}</div>
-      </CardContent>
-    </Card>
-  );
-}
 
 export default async function StatsPage() {
   const session = await auth();
@@ -63,11 +37,20 @@ export default async function StatsPage() {
     },
   });
 
+  // Archived passes from the read-history table: re-reads and pre-app reads.
+  const pastReads = await prisma.read.findMany({
+    where: { book: { userId: session.user.id } },
+    select: { dateFinished: true, book: { select: { pageCount: true } } },
+  });
+
   const read = books.filter((b) => b.status === ReadingStatus.READ);
   const reading = books.filter((b) => b.status === ReadingStatus.READING);
 
-  // Pages read: sum over finished books that have a page count.
-  const pagesRead = read.reduce((sum, b) => sum + (b.pageCount ?? 0), 0);
+  // Pages read: every finished pass counts — the current one on each READ
+  // book plus every archived past read.
+  const pagesRead =
+    read.reduce((sum, b) => sum + (b.pageCount ?? 0), 0) +
+    pastReads.reduce((sum, r) => sum + (r.book.pageCount ?? 0), 0);
 
   // Average rating across every rated book (any status), in stars.
   const rated = books.filter((b) => b.rating != null);
@@ -76,11 +59,17 @@ export default async function StatsPage() {
       ? rated.reduce((sum, b) => sum + b.rating!, 0) / rated.length / 2
       : null;
 
-  // Books finished per year.
+  // Finishes per year: current passes and dated past reads both count, so a
+  // 2026 re-read of an old favourite shows up in 2026 (and toward its goal).
   const perYear = new Map<number, number>();
   for (const b of read) {
     if (!b.dateFinished) continue;
     const y = b.dateFinished.getFullYear();
+    perYear.set(y, (perYear.get(y) ?? 0) + 1);
+  }
+  for (const r of pastReads) {
+    if (!r.dateFinished) continue;
+    const y = r.dateFinished.getFullYear();
     perYear.set(y, (perYear.get(y) ?? 0) + 1);
   }
   const years = [...perYear.entries()].sort((a, b) => a[0] - b[0]);
@@ -234,9 +223,21 @@ export default async function StatsPage() {
                 Finish a book (with a finished date) and it shows up here.
               </p>
             ) : (
-              years.map(([year, count]) => (
-                <Bar key={year} label={String(year)} value={count} max={maxYear} />
-              ))
+              <>
+                {years.map(([year, count]) => (
+                  <Link
+                    key={year}
+                    href={`/stats/year/${year}`}
+                    className="-mx-1.5 rounded px-1.5 py-0.5 transition-colors hover:bg-accent/50"
+                    title={`${year} in review`}
+                  >
+                    <Bar label={String(year)} value={count} max={maxYear} />
+                  </Link>
+                ))}
+                <p className="pt-1 text-xs text-muted-foreground">
+                  Click a year for its full wrap-up.
+                </p>
+              </>
             )}
           </CardContent>
         </Card>

@@ -112,12 +112,35 @@ model Book {
   searchText String @default("")
 
   quotes Quote[]
+  reads  Read[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([userId, status])
   @@index([userId, createdAt])
+}
+
+/// A *past* completed pass through a book. The Book row itself always holds
+/// the latest read (status, dates, rating), so re-reading archives the
+/// previous pass here. `timesRead` on Book is kept in sync as
+/// `reads.count + (status == READ ? 1 : 0)` — see lib/actions/reads.ts.
+model Read {
+  id     String @id @default(cuid())
+  bookId String
+  book   Book   @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  /// Both dates optional: "I know I read this in 2019" is a valid entry,
+  /// and so is a fully undated "read it before" placeholder.
+  dateStarted  DateTime?
+  dateFinished DateTime?
+  /// What you rated it *that* time, 1–10 half-star units. Null = unrated;
+  /// the Book row's rating stays your current overall rating.
+  rating Int?
+
+  createdAt DateTime @default(now())
+
+  @@index([bookId, dateFinished])
 }
 
 /// A favourite quote or highlight from a book, with an optional page

@@ -84,17 +84,6 @@ export function ReadingCard({ book }: { book: Book }) {
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="timesRead">Times read</Label>
-              <Input
-                id="timesRead"
-                name="timesRead"
-                type="number"
-                min={0}
-                className="w-24"
-                defaultValue={book.timesRead}
-              />
-            </div>
-            <div className="grid gap-2">
               <Label htmlFor="currentPage">
                 Current page{book.pageCount ? ` (of ${book.pageCount})` : ""}
               </Label>

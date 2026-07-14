@@ -160,14 +160,17 @@ export async function updateReading(
   }
   const data = parsed.data;
 
-  // Conveniences: marking a book Read fills in "finished today" and bumps
-  // timesRead to 1 if those were never set — saves two clicks per book.
+  // Convenience: marking a book Read fills in "finished today" if the date
+  // was never set — saves a click per book.
   let dateFinished = data.dateFinished ?? null;
-  let timesRead = data.timesRead;
-  if (data.status === ReadingStatus.READ) {
-    if (!dateFinished) dateFinished = new Date();
-    if (timesRead === 0) timesRead = 1;
+  if (data.status === ReadingStatus.READ && !dateFinished) {
+    dateFinished = new Date();
   }
+
+  // timesRead is derived, not submitted: archived passes in the Read table
+  // plus the current one when it's finished.
+  const pastReads = await prisma.read.count({ where: { bookId } });
+  const timesRead = pastReads + (data.status === ReadingStatus.READ ? 1 : 0);
 
   // Progress only makes sense mid-book: keep it for READING and DNF
   // ("stopped at p. 218"), clear it when finished or back on the shelf.
