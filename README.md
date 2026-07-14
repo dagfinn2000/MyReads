@@ -5,6 +5,8 @@ just for you*: catalog the books you own, track what you're reading, rate and
 review everything — with no friends, feeds, follows, or any other social
 surface area.
 
+![The library — status shelves, custom shelves, search, filters, and covers](docs/library.png)
+
 ## Features
 
 - **Book catalog** — add books manually or via search-and-import, with title,
@@ -98,6 +100,26 @@ surface area.
 
 Deliberately out of scope: anything social, recommendation engines, CSV
 import.
+
+## Screenshots
+
+**Grouped by series** — each series becomes its own shelf heading, in
+reading order (novellas slot in at #2.5):
+
+![Library grouped by series](docs/library-series.png)
+
+**Search & import** — type a title, author, or ISBN (or scan the barcode)
+and pick a result to prefill the form:
+
+![Add book via search and import](docs/add-book.png)
+
+**Stats & reading goals** — with backup & restore a click away:
+
+![Stats dashboard with reading goal](docs/stats.png)
+
+| Sixteen themes | Backup & restore |
+| --- | --- |
+| ![Theme picker](docs/themes.png) | ![Backup card](docs/backup.png) |
 
 ## Quick start (Docker)
 
