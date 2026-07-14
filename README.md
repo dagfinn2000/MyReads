@@ -5,11 +5,6 @@ just for you*: catalog the books you own, track what you're reading, rate and
 review everything — with no friends, feeds, follows, or any other social
 surface area.
 
-> **Status:** fully functional. Screenshots coming soon.
->
-> ![Library view placeholder](docs/screenshot-library.png)
-> ![Stats placeholder](docs/screenshot-stats.png)
-
 ## Features
 
 - **Book catalog** — add books manually or via search-and-import, with title,
