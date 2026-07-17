@@ -4,32 +4,13 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { ReadingStatus } from "@prisma/client";
 import { z } from "zod";
-import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { bookSchema, readingSchema } from "@/lib/validation";
 import { cacheCoverImage, deleteCachedCover } from "@/lib/covers";
-
-export interface ActionState {
-  error?: string;
-  success?: boolean;
-}
-
-/** All actions require a session; returns the user id or throws. */
-async function requireUserId(): Promise<string> {
-  const session = await auth();
-  if (!session?.user?.id) throw new Error("Not authenticated");
-  return session.user.id;
-}
-
-/** Lowercased title+authors+series blob that makes case-insensitive search a
- *  single `contains` query (Prisma can't substring-search a String[] column). */
-function buildSearchText(
-  title: string,
-  authors: string[],
-  seriesName?: string | null,
-): string {
-  return [title, ...authors, seriesName ?? ""].join(" ").trim().toLowerCase();
-}
+import { requireUserId } from "@/lib/actions/helpers";
+import type { ActionState } from "@/lib/actions/helpers";
+import { currentPassEntries } from "@/lib/progress";
+import { buildSearchText } from "@/lib/utils";
 
 const statusField = z.nativeEnum(ReadingStatus).catch(ReadingStatus.WANT_TO_READ);
 
@@ -150,7 +131,12 @@ export async function updateReading(
 
   const existing = await prisma.book.findFirst({
     where: { id: bookId, userId },
-    select: { id: true },
+    select: {
+      status: true,
+      currentPage: true,
+      pageCount: true,
+      _count: { select: { reads: true } },
+    },
   });
   if (!existing) return { error: "Book not found" };
 
@@ -169,8 +155,8 @@ export async function updateReading(
 
   // timesRead is derived, not submitted: archived passes in the Read table
   // plus the current one when it's finished.
-  const pastReads = await prisma.read.count({ where: { bookId } });
-  const timesRead = pastReads + (data.status === ReadingStatus.READ ? 1 : 0);
+  const timesRead =
+    existing._count.reads + (data.status === ReadingStatus.READ ? 1 : 0);
 
   // Progress only makes sense mid-book: keep it for READING and DNF
   // ("stopped at p. 218"), clear it when finished or back on the shelf.
@@ -191,10 +177,75 @@ export async function updateReading(
     },
   });
 
+  await logProgress(bookId, existing, {
+    status: data.status,
+    currentPage,
+    dateStarted: data.dateStarted ?? null,
+    dateFinished,
+  });
+
   revalidatePath("/books");
   revalidatePath(`/books/${bookId}`);
   revalidatePath("/stats");
   return { success: true };
+}
+
+/**
+ * The automatic reading log: every change to `currentPage` becomes a dated
+ * ProgressEntry, and finishing a tracked book closes the log at the last
+ * page. Consumers (sparkline, pace, heatmap) count pages as the delta
+ * between *consecutive* entries, so the first entry of a reading pass is
+ * preceded by a page-0 anchor at the pass start — "page 74" logged into a
+ * fresh book credits 74 pages, while a lone entry with no predecessor (like
+ * the anchors the upgrade migration seeds from mid-read books) credits none.
+ * Re-read passes get their anchor from readAgain (see lib/actions/reads.ts).
+ */
+async function logProgress(
+  bookId: string,
+  prev: { status: ReadingStatus; currentPage: number | null; pageCount: number | null },
+  next: {
+    status: ReadingStatus;
+    currentPage: number | null;
+    dateStarted: Date | null;
+    dateFinished: Date | null;
+  },
+): Promise<void> {
+  const now = new Date();
+
+  // The latest entry of the current pass. A personal log is small, so
+  // fetching it whole and slicing beats encoding the pass rule in SQL.
+  const all = await prisma.progressEntry.findMany({
+    where: { bookId },
+    orderBy: [{ date: "asc" }, { page: "asc" }],
+    select: { page: true, date: true },
+  });
+  const pass = currentPassEntries(all, next.dateStarted);
+  const last = pass[pass.length - 1] ?? null;
+
+  if (next.currentPage != null && next.currentPage !== prev.currentPage) {
+    const entries: { bookId: string; page: number; date: Date }[] = [];
+    if (!last) {
+      entries.push({ bookId, page: 0, date: next.dateStarted ?? now });
+    }
+    entries.push({ bookId, page: next.currentPage, date: now });
+    await prisma.progressEntry.createMany({ data: entries });
+    return;
+  }
+
+  // Finishing a tracked book: close the log at the final page. An untracked
+  // pass (no entries) logs nothing — marking a book Read weeks after the
+  // fact shouldn't credit every page of it to one day.
+  if (
+    next.status === ReadingStatus.READ &&
+    prev.status !== ReadingStatus.READ &&
+    prev.pageCount != null &&
+    last != null &&
+    last.page < prev.pageCount
+  ) {
+    await prisma.progressEntry.create({
+      data: { bookId, page: prev.pageCount, date: next.dateFinished ?? now },
+    });
+  }
 }
 
 /** Delete a book and its cached cover image. */

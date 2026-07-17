@@ -51,6 +51,18 @@ surface area.
   reads from before the app can be recorded (dates optional, with what you
   rated it that time). Re-reads count in the per-year stats and toward
   reading goals; "times read" is derived from the history.
+- **Reading log, pace & forecast** — every change to "current page" is kept
+  as a dated log entry, at no extra effort: the book page draws the current
+  read as a progress-over-time sparkline with your pages-per-day pace and,
+  while you're mid-book, a finish forecast ("on pace to finish 3 Aug").
+  Finished books show the shape of the read instead. A collapsible log lists
+  every entry with delete buttons, and entries ride along in backups. Books
+  mid-read when you upgrade are seeded with their current position so pace
+  works from your first update.
+- **Reading-days heatmap** — a GitHub-style calendar of the last 12 months
+  on the stats page, tinted by pages read per day (counted as the increase
+  between consecutive log entries of each book), with reading-day and
+  streak counts above it.
 - **Quotes & highlights** — keep passages from a book, each with an optional
   page reference and a personal note, added/edited/deleted right on the book
   page. Quotes are listed in page order and included in backups.
@@ -81,7 +93,8 @@ surface area.
   page and watch the progress bar fill; hit the target and you earn a gold
   medal. Past years' goals (and medals) stay on display.
 - **Backup & restore** — one click downloads your entire library (books,
-  quotes, read history, shelves, reading goals, **and cover images**) as a
+  quotes, read history, the reading log, shelves, reading goals, **and
+  cover images**) as a
   zip, and the
   stats page can restore such a backup into any instance — covers included,
   so a restore onto a fresh server looks exactly like the original. Restores

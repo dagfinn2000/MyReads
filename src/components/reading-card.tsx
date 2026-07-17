@@ -1,10 +1,12 @@
 "use client";
 
 import { useActionState } from "react";
-import type { Book } from "@prisma/client";
+import type { Book, ProgressEntry } from "@prisma/client";
 import { ReadingStatus } from "@prisma/client";
 import { updateReading } from "@/lib/actions/books";
 import { STATUS_LABELS, toDateInputValue } from "@/lib/display";
+import { currentPassEntries } from "@/lib/progress";
+import { ProgressChart, ProgressLog } from "@/components/progress-log";
 import { StarRatingInput } from "@/components/star-rating-input";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,12 +28,23 @@ import {
 
 /**
  * The "my reading of this book" panel on the detail page: status, star
- * rating, dates, re-read count, and the personal review. Saves through the
+ * rating, dates, progress (with the sparkline and pace drawn from the
+ * automatic reading log), and the personal review. Saves through the
  * updateReading server action.
  */
-export function ReadingCard({ book }: { book: Book }) {
+export function ReadingCard({
+  book,
+  progress,
+}: {
+  book: Book;
+  progress: ProgressEntry[];
+}) {
   const action = updateReading.bind(null, book.id);
   const [state, formAction, pending] = useActionState(action, {});
+
+  // The sparkline shows the current pass; entries from earlier passes still
+  // feed the stats heatmap and stay in the log below.
+  const passEntries = currentPassEntries(progress, book.dateStarted);
 
   return (
     <Card>
@@ -116,6 +129,12 @@ export function ReadingCard({ book }: { book: Book }) {
             </div>
           ) : null}
 
+          <ProgressChart
+            entries={passEntries}
+            pageCount={book.pageCount}
+            status={book.status}
+          />
+
           <div className="grid gap-2">
             <Label htmlFor="review">Review / notes</Label>
             <Textarea
@@ -137,6 +156,12 @@ export function ReadingCard({ book }: { book: Book }) {
             )}
           </div>
         </form>
+
+        {progress.length > 0 && (
+          <div className="mt-4 border-t pt-3">
+            <ProgressLog entries={progress} />
+          </div>
+        )}
       </CardContent>
     </Card>
   );

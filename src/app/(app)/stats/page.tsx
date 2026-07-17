@@ -5,7 +5,9 @@ import { prisma } from "@/lib/prisma";
 import { HardDriveDownload } from "lucide-react";
 import { setReadingGoal } from "@/lib/actions/goals";
 import { FORMAT_LABELS } from "@/lib/display";
+import { dailyPageTotals } from "@/lib/progress";
 import { GoldMedal } from "@/components/gold-medal";
+import { ReadingHeatmap } from "@/components/reading-heatmap";
 import { RestoreBackup } from "@/components/restore-backup";
 import { Bar, StatCard } from "@/components/stat-blocks";
 import { Stars } from "@/components/stars";
@@ -25,23 +27,34 @@ export default async function StatsPage() {
   const session = await auth();
   if (!session?.user?.id) return null;
 
-  const books = await prisma.book.findMany({
-    where: { userId: session.user.id },
-    select: {
-      status: true,
-      rating: true,
-      pageCount: true,
-      dateFinished: true,
-      tags: true,
-      format: true,
-    },
-  });
-
-  // Archived passes from the read-history table: re-reads and pre-app reads.
-  const pastReads = await prisma.read.findMany({
-    where: { book: { userId: session.user.id } },
-    select: { dateFinished: true, book: { select: { pageCount: true } } },
-  });
+  const userId = session.user.id;
+  const [books, pastReads, goals, progressEntries] = await Promise.all([
+    prisma.book.findMany({
+      where: { userId },
+      select: {
+        status: true,
+        rating: true,
+        pageCount: true,
+        dateFinished: true,
+        tags: true,
+        format: true,
+      },
+    }),
+    // Archived passes from the read-history table: re-reads and pre-app reads.
+    prisma.read.findMany({
+      where: { book: { userId } },
+      select: { dateFinished: true, book: { select: { pageCount: true } } },
+    }),
+    prisma.readingGoal.findMany({
+      where: { userId },
+      orderBy: { year: "desc" },
+    }),
+    // The automatic reading log, for the reading-days heatmap.
+    prisma.progressEntry.findMany({
+      where: { book: { userId } },
+      select: { bookId: true, page: true, date: true },
+    }),
+  ]);
 
   const read = books.filter((b) => b.status === ReadingStatus.READ);
   const reading = books.filter((b) => b.status === ReadingStatus.READING);
@@ -76,10 +89,6 @@ export default async function StatsPage() {
   const maxYear = Math.max(...perYear.values(), 0);
 
   // Reading goals: progress is derived from the per-year finished counts.
-  const goals = await prisma.readingGoal.findMany({
-    where: { userId: session.user.id },
-    orderBy: { year: "desc" },
-  });
   const currentYear = new Date().getFullYear();
   const currentGoal = goals.find((g) => g.year === currentYear) ?? null;
   const finishedThisYear = perYear.get(currentYear) ?? 0;
@@ -103,6 +112,9 @@ export default async function StatsPage() {
     formatCounts.set(label, (formatCounts.get(label) ?? 0) + 1);
   }
   const maxFormat = Math.max(...formatCounts.values(), 0);
+
+  // Pages per day from the reading log, for the heatmap.
+  const pageTotals = dailyPageTotals(progressEntries);
 
   return (
     <div className="grid gap-6">
@@ -209,6 +221,15 @@ export default async function StatsPage() {
               })}
             </div>
           )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Reading days</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ReadingHeatmap totals={pageTotals} />
         </CardContent>
       </Card>
 

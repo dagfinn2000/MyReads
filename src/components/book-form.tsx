@@ -3,7 +3,7 @@
 import { useActionState, useState } from "react";
 import { BookFormat, ReadingStatus } from "@prisma/client";
 import { BookOpen } from "lucide-react";
-import type { ActionState } from "@/lib/actions/books";
+import type { ActionState } from "@/lib/actions/helpers";
 import { FORMAT_LABELS, STATUS_LABELS } from "@/lib/display";
 import { CoverPicker } from "@/components/cover-picker";
 import { Button } from "@/components/ui/button";

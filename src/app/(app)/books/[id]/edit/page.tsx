@@ -16,18 +16,19 @@ export default async function EditBookPage({
   if (!session?.user?.id) return null;
   const { id } = await params;
 
-  const book = await prisma.book.findFirst({
-    where: { id, userId: session.user.id },
-  });
+  const [book, seriesRows] = await Promise.all([
+    prisma.book.findFirst({
+      where: { id, userId: session.user.id },
+    }),
+    // Existing series names, for the form's autocomplete suggestions.
+    prisma.book.findMany({
+      where: { userId: session.user.id, seriesName: { not: null } },
+      select: { seriesName: true },
+      distinct: ["seriesName"],
+      orderBy: { seriesName: "asc" },
+    }),
+  ]);
   if (!book) notFound();
-
-  // Existing series names, for the form's autocomplete suggestions.
-  const seriesRows = await prisma.book.findMany({
-    where: { userId: session.user.id, seriesName: { not: null } },
-    select: { seriesName: true },
-    distinct: ["seriesName"],
-    orderBy: { seriesName: "asc" },
-  });
   const seriesNames = seriesRows
     .map((r) => r.seriesName)
     .filter((s): s is string => !!s);
