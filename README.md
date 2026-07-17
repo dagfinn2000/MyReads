@@ -65,7 +65,10 @@ surface area.
   streak counts above it.
 - **Quotes & highlights** — keep passages from a book, each with an optional
   page reference and a personal note, added/edited/deleted right on the book
-  page. Quotes are listed in page order and included in backups.
+  page. Quotes are listed in page order and included in backups. A dedicated
+  Quotes page collects every passage in the library (newest first) with
+  search across quote text, notes, and books, and the stats page shows a
+  random quote on every visit.
 - **Series** — assign books a series name and number (floats allowed, so a
   novella can be #1.5). Book pages link the series and show its other
   entries in reading order; the library can group by series.
@@ -73,7 +76,8 @@ surface area.
   "Fantasy") independent of reading status. A book can sit on any number of
   shelves; deleting a shelf never touches its books.
 - **Library views** — status shelves, custom-shelf chips, text search across
-  title/author/series, filters by tag, format, and minimum rating, grouping
+  title/author/series, filters by tag, format, owned vs. wishlist, and
+  minimum rating, grouping
   by author or series, sorting by title, author, rating, date added, or date
   finished. Sorting by author keeps each series together as a block in
   series order — Mistborn #1 sits next to #2 instead of being alphabetized
@@ -88,7 +92,9 @@ surface area.
 - **Year in review** — click any year on the stats page for its wrap-up:
   books and pages read, re-reads, best-of shelf, longest/shortest/fastest
   read, first and last finish, monthly rhythm, rating distribution, and top
-  genres for that year.
+  genres for that year. Years with reading-log data also get their rhythm
+  from the log itself: pages per month, days spent reading, the biggest
+  reading day, and the longest streak.
 - **Reading goals** — set a yearly goal ("24 books in 2026") on the stats
   page and watch the progress bar fill; hit the target and you earn a gold
   medal. Past years' goals (and medals) stay on display.
