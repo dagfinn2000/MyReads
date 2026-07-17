@@ -100,6 +100,10 @@ surface area.
   so a restore onto a fresh server looks exactly like the original. Restores
   merge: books you already have are skipped, so it's safe to run on a live
   library. Plain-JSON backups from older versions restore fine too.
+- **Sixteen themes that follow you** — the picked theme is saved on your
+  account and server-rendered on first paint, so signing in from a new
+  browser or device brings your look along (localStorage still covers the
+  signed-out pages).
 - **Installable (PWA)** — a web app manifest makes MyReads installable on a
   phone home screen, which pairs nicely with barcode scanning. Same browser
   rule as the scanner: manifests only apply over **HTTPS or localhost**.

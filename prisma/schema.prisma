@@ -34,6 +34,10 @@ model User {
   id           String        @id @default(cuid())
   username     String        @unique
   passwordHash String // bcrypt
+  /// Chosen UI theme (id from lib/themes.ts), so the look follows the
+  /// account across browsers. Null = never picked one on this account;
+  /// the client falls back to localStorage, then the default.
+  theme        String?
   createdAt    DateTime      @default(now())
   books        Book[]
   shelves      Shelf[]
