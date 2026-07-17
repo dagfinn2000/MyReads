@@ -6,6 +6,7 @@ import {
   LibraryBig,
   LogOut,
   Plus,
+  Quote,
   ScanSearch,
 } from "lucide-react";
 import { auth, signOut } from "@/auth";
@@ -45,6 +46,12 @@ export async function Nav() {
           <Link href="/books/check">
             <ScanSearch data-slot="icon" />
             <span className="hidden sm:inline">Check</span>
+          </Link>
+        </Button>
+        <Button asChild variant="ghost" size="sm" title="Quotes">
+          <Link href="/quotes">
+            <Quote data-slot="icon" />
+            <span className="hidden sm:inline">Quotes</span>
           </Link>
         </Button>
         <Button asChild variant="ghost" size="sm" title="Stats">
