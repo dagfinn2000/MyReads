@@ -22,6 +22,8 @@ export interface FilterValues {
   q: string;
   tag: string;
   format: string;
+  /** "all" | "owned" | "wishlist" (owned flag unset). */
+  owned: string;
   minRating: string;
   series: string;
   group: string;
@@ -41,6 +43,12 @@ const GROUP_OPTIONS = [
   { value: "none", label: "No grouping" },
   { value: "author", label: "Group by author" },
   { value: "series", label: "Group by series" },
+];
+
+const OWNED_OPTIONS = [
+  { value: "all", label: "Owned & wishlist" },
+  { value: "owned", label: "Owned" },
+  { value: "wishlist", label: "Wishlist" },
 ];
 
 const RATING_OPTIONS = [
@@ -79,6 +87,7 @@ export function FilterBar({
     if (next.q) params.set("q", next.q);
     if (next.tag && next.tag !== "all") params.set("tag", next.tag);
     if (next.format && next.format !== "all") params.set("format", next.format);
+    if (next.owned && next.owned !== "all") params.set("owned", next.owned);
     if (next.minRating && next.minRating !== "all")
       params.set("minRating", next.minRating);
     if (next.series) params.set("series", next.series);
@@ -142,6 +151,22 @@ export function FilterBar({
           {Object.values(BookFormat).map((f) => (
             <SelectItem key={f} value={f}>
               {FORMAT_LABELS[f]}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+
+      <Select
+        value={values.owned || "all"}
+        onValueChange={(v) => navigate({ owned: v })}
+      >
+        <SelectTrigger className="min-w-0 flex-1 sm:w-40 sm:flex-initial">
+          <SelectValue placeholder="Owned" />
+        </SelectTrigger>
+        <SelectContent>
+          {OWNED_OPTIONS.map((o) => (
+            <SelectItem key={o.value} value={o.value}>
+              {o.label}
             </SelectItem>
           ))}
         </SelectContent>
