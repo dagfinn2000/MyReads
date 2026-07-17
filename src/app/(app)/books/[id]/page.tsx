@@ -39,6 +39,11 @@ export default async function BookDetailPage({
           { createdAt: "asc" },
         ],
       },
+      // The automatic reading log, oldest first (page breaks same-instant
+      // ties — a pass's page-0 anchor sorts before its first real entry).
+      progress: {
+        orderBy: [{ date: "asc" }, { page: "asc" }],
+      },
     },
   });
   if (!book) notFound();
@@ -189,7 +194,7 @@ export default async function BookDetailPage({
           memberIds={book.shelves.map((s) => s.id)}
         />
 
-        <ReadingCard book={book} />
+        <ReadingCard book={book} progress={book.progress} />
 
         <ReadHistoryCard book={book} reads={book.reads} />
 

@@ -4,6 +4,7 @@ import { BookFormat, ReadingStatus } from "@prisma/client";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { coversDir } from "@/lib/covers";
+import { buildSearchText } from "@/lib/utils";
 
 /**
  * Restore of a MyReads export — either the `library.json` from a zip backup
@@ -44,6 +45,13 @@ const importedReadSchema = z.object({
   createdAt: dateField,
 });
 
+/** Reading-log entries are additive too; an entry without a usable date is
+ *  meaningless (every consumer is time-based) and gets dropped. */
+const importedProgressSchema = z.object({
+  page: z.number().int().min(0).max(100000),
+  date: dateField,
+});
+
 const importedBookSchema = z.object({
   title: z.string().trim().min(1).max(500),
   authors: z.array(z.string().trim().max(200)).catch([]),
@@ -68,6 +76,7 @@ const importedBookSchema = z.object({
   shelves: z.array(z.string().trim().min(1).max(50)).catch([]),
   quotes: z.array(importedQuoteSchema).catch([]),
   reads: z.array(importedReadSchema).catch([]),
+  progress: z.array(importedProgressSchema).catch([]),
   createdAt: dateField,
 });
 
@@ -90,6 +99,7 @@ export interface ImportSummary {
   coversRestored: number;
   quotesRestored: number;
   readsRestored: number;
+  progressRestored: number;
 }
 
 /** Reads a cover image bundled with the backup (zip imports supply this). */
@@ -196,6 +206,7 @@ export async function importLibrary(
   let coversRestored = 0;
   let quotesRestored = 0;
   let readsRestored = 0;
+  let progressRestored = 0;
 
   for (const raw of data.books) {
     const parsedBook = importedBookSchema.safeParse(raw);
@@ -256,10 +267,7 @@ export async function importLibrary(
         dateFinished: b.dateFinished,
         timesRead,
         currentPage: b.currentPage ?? null,
-        searchText: [b.title, ...b.authors, b.seriesName ?? ""]
-          .join(" ")
-          .trim()
-          .toLowerCase(),
+        searchText: buildSearchText(b.title, b.authors, b.seriesName),
         // Preserve "date added" ordering from the original library.
         ...(b.createdAt && { createdAt: b.createdAt }),
         shelves: {
@@ -284,6 +292,11 @@ export async function importLibrary(
             ...(r.createdAt && { createdAt: r.createdAt }),
           })),
         },
+        progress: {
+          create: b.progress
+            .filter((e) => e.date != null)
+            .map((e) => ({ page: e.page, date: e.date! })),
+        },
       },
     });
     if (isbn) existingIsbns.add(isbn);
@@ -291,6 +304,7 @@ export async function importLibrary(
     booksCreated++;
     quotesRestored += b.quotes.length;
     readsRestored += pastReads.length;
+    progressRestored += b.progress.filter((e) => e.date != null).length;
   }
 
   return {
@@ -302,5 +316,6 @@ export async function importLibrary(
     coversRestored,
     quotesRestored,
     readsRestored,
+    progressRestored,
   };
 }

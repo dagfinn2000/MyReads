@@ -34,6 +34,10 @@ model User {
   id           String        @id @default(cuid())
   username     String        @unique
   passwordHash String // bcrypt
+  /// Chosen UI theme (id from lib/themes.ts), so the look follows the
+  /// account across browsers. Null = never picked one on this account;
+  /// the client falls back to localStorage, then the default.
+  theme        String?
   createdAt    DateTime      @default(now())
   books        Book[]
   shelves      Shelf[]
@@ -111,8 +115,9 @@ model Book {
   /// case-insensitive `contains` (Prisma can't substring-search String[]).
   searchText String @default("")
 
-  quotes Quote[]
-  reads  Read[]
+  quotes   Quote[]
+  reads    Read[]
+  progress ProgressEntry[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -141,6 +146,27 @@ model Read {
   createdAt DateTime @default(now())
 
   @@index([bookId, dateFinished])
+}
+
+/// A point-in-time reading position: "on this date I was at page N".
+/// Logged automatically whenever `currentPage` changes, so the reading log
+/// costs no extra effort. Powers the progress sparkline, pace/forecast, and
+/// the reading-days heatmap. Pages-read-per-day is always the *delta between
+/// consecutive entries* of a book — a lone first entry contributes nothing,
+/// which is what makes anchors work: the upgrade migration seeds mid-read
+/// books with their current position, and each new reading pass starts with
+/// a page-0 anchor at the pass start (see logProgress in lib/actions/books.ts
+/// and readAgain in lib/actions/reads.ts; the latest page-0 entry is the
+/// pass boundary — see currentPassEntries in lib/progress.ts).
+model ProgressEntry {
+  id     String @id @default(cuid())
+  bookId String
+  book   Book   @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  page Int
+  date DateTime @default(now())
+
+  @@index([bookId, date])
 }
 
 /// A favourite quote or highlight from a book, with an optional page

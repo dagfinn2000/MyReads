@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Check, Palette } from "lucide-react";
+import { saveTheme } from "@/lib/actions/theme";
 import { THEMES, THEME_STORAGE_KEY } from "@/lib/themes";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -13,18 +14,20 @@ import {
 
 /**
  * Dashify-style theme picker: a grid of palette swatches in a dropdown.
- * Selection is applied to <html> (data-theme attribute + dark class) and
- * persisted in localStorage; the inline script in the root layout re-applies
- * it before first paint on subsequent visits. Purely client-side — nothing
- * is stored on the server.
+ * Selection is applied to <html> (data-theme attribute + dark class),
+ * persisted in localStorage for this browser, and saved on the account so
+ * signing in elsewhere brings the theme along (the root layout server-
+ * renders the saved theme; the inline init script covers signed-out pages
+ * from localStorage).
  */
 export function ThemePicker() {
-  // null until mounted — the server doesn't know the stored theme, so
-  // rendering a selection before mount would mismatch hydration.
+  // null until mounted — the applied theme lives on <html>, which the
+  // server render of this component can't see, so showing a selection
+  // before mount would mismatch hydration.
   const [current, setCurrent] = useState<string | null>(null);
 
   useEffect(() => {
-    setCurrent(localStorage.getItem(THEME_STORAGE_KEY) ?? "light");
+    setCurrent(document.documentElement.getAttribute("data-theme") ?? "light");
   }, []);
 
   function apply(id: string) {
@@ -38,6 +41,9 @@ export function ThemePicker() {
     } catch {
       // private-mode storage failure just means the choice won't persist
     }
+    // Fire-and-forget account sync; a no-op when signed out (login page)
+    // and nothing the picker needs to wait for.
+    saveTheme(id).catch(() => {});
     setCurrent(id);
   }
 

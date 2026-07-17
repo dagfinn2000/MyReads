@@ -47,11 +47,16 @@ export const DARK_THEME_IDS = THEMES.filter((t) => t.mode === "dark").map(
 
 /**
  * Inline script injected before hydration so the stored theme applies on
- * first paint (no flash of the default theme). Kept tiny and try/catch'd —
- * localStorage can throw in some privacy modes.
+ * first paint (no flash of the default theme). When the server already put
+ * the signed-in user's saved theme on <html>, that wins — the script only
+ * mirrors it into localStorage (so signed-out pages keep the look);
+ * otherwise it applies the localStorage fallback. Kept tiny and
+ * try/catch'd — localStorage can throw in some privacy modes.
  */
-export const THEME_INIT_SCRIPT = `(function(){try{var t=localStorage.getItem(${JSON.stringify(
+export const THEME_INIT_SCRIPT = `(function(){try{var d=document.documentElement;var s=d.getAttribute("data-theme");if(s){localStorage.setItem(${JSON.stringify(
   THEME_STORAGE_KEY,
-)});if(!t)return;document.documentElement.setAttribute("data-theme",t);if(${JSON.stringify(
+)},s);return;}var t=localStorage.getItem(${JSON.stringify(
+  THEME_STORAGE_KEY,
+)});if(!t)return;d.setAttribute("data-theme",t);if(${JSON.stringify(
   DARK_THEME_IDS,
-)}.indexOf(t)>-1)document.documentElement.classList.add("dark");}catch(e){}})();`;
+)}.indexOf(t)>-1)d.classList.add("dark");}catch(e){}})();`;

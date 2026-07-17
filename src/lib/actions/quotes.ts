@@ -1,16 +1,10 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { quoteSchema } from "@/lib/validation";
-import type { ActionState } from "@/lib/actions/books";
-
-async function requireUserId(): Promise<string> {
-  const session = await auth();
-  if (!session?.user?.id) throw new Error("Not authenticated");
-  return session.user.id;
-}
+import { requireUserId } from "@/lib/actions/helpers";
+import type { ActionState } from "@/lib/actions/helpers";
 
 /** Add a quote/highlight to a book (the form carries the bookId). */
 export async function addQuote(

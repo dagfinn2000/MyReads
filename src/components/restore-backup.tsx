@@ -37,6 +37,9 @@ export function RestoreBackup() {
         data.coversRestored > 0 ? `${data.coversRestored} covers restored` : null,
         data.quotesRestored > 0 ? `${data.quotesRestored} quotes restored` : null,
         data.readsRestored > 0 ? `${data.readsRestored} past reads restored` : null,
+        data.progressRestored > 0
+          ? `${data.progressRestored} progress entries restored`
+          : null,
         data.shelvesCreated > 0 ? `${data.shelvesCreated} shelves created` : null,
         data.goalsRestored > 0 ? `${data.goalsRestored} goals restored` : null,
       ].filter(Boolean);

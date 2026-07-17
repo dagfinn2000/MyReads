@@ -38,8 +38,3 @@ export function toDateInputValue(d: Date | null | undefined): string {
   if (!d) return "";
   return d.toISOString().slice(0, 10);
 }
-
-/** Half-star units (1–10) → display string ("3.5"). */
-export function ratingToStars(rating: number): string {
-  return (rating / 2).toString();
-}

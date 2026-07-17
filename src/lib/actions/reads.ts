@@ -2,28 +2,23 @@
 
 import { revalidatePath } from "next/cache";
 import { ReadingStatus } from "@prisma/client";
-import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { pastReadSchema } from "@/lib/validation";
-import type { ActionState } from "@/lib/actions/books";
-
-async function requireUserId(): Promise<string> {
-  const session = await auth();
-  if (!session?.user?.id) throw new Error("Not authenticated");
-  return session.user.id;
-}
+import { requireUserId } from "@/lib/actions/helpers";
+import type { ActionState } from "@/lib/actions/helpers";
 
 /** Keep Book.timesRead = archived passes + the current one when finished. */
 async function syncTimesRead(bookId: string): Promise<void> {
-  const [pastReads, book] = await Promise.all([
-    prisma.read.count({ where: { bookId } }),
-    prisma.book.findUnique({ where: { id: bookId }, select: { status: true } }),
-  ]);
+  const book = await prisma.book.findUnique({
+    where: { id: bookId },
+    select: { status: true, _count: { select: { reads: true } } },
+  });
   if (!book) return;
   await prisma.book.update({
     where: { id: bookId },
     data: {
-      timesRead: pastReads + (book.status === ReadingStatus.READ ? 1 : 0),
+      timesRead:
+        book._count.reads + (book.status === ReadingStatus.READ ? 1 : 0),
     },
   });
 }
@@ -46,6 +41,7 @@ export async function readAgain(bookId: string): Promise<void> {
   const book = await prisma.book.findFirst({ where: { id: bookId, userId } });
   if (!book || book.status !== ReadingStatus.READ) return;
 
+  const now = new Date();
   await prisma.read.create({
     data: {
       bookId,
@@ -58,11 +54,18 @@ export async function readAgain(bookId: string): Promise<void> {
     where: { id: bookId },
     data: {
       status: ReadingStatus.READING,
-      dateStarted: new Date(),
+      dateStarted: now,
       dateFinished: null,
       currentPage: null,
       // timesRead is unchanged: the pass moved from "current" to "archived".
     },
+  });
+  // Open the new pass in the reading log with a page-0 anchor at the exact
+  // re-read moment. The anchor marks the pass boundary — the date form field
+  // only keeps day precision, so without it a re-read started on a day with
+  // already-logged entries would blend into the previous pass.
+  await prisma.progressEntry.create({
+    data: { bookId, page: 0, date: now },
   });
 
   revalidateBook(bookId);

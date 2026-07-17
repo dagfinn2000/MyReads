@@ -1,19 +1,13 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { requireUserId } from "@/lib/actions/helpers";
 
 export interface TagActionResult {
   error?: string;
   /** Number of books whose tags changed. */
   count?: number;
-}
-
-async function requireUserId(): Promise<string> {
-  const session = await auth();
-  if (!session?.user?.id) throw new Error("Not authenticated");
-  return session.user.id;
 }
 
 function normalizeTag(s: string): string {
