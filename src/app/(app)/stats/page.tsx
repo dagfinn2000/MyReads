@@ -28,7 +28,7 @@ export default async function StatsPage() {
   if (!session?.user?.id) return null;
 
   const userId = session.user.id;
-  const [books, pastReads, goals, progressEntries] = await Promise.all([
+  const [books, pastReads, goals, progressEntries, quoteCount] = await Promise.all([
     prisma.book.findMany({
       where: { userId },
       select: {
@@ -54,7 +54,19 @@ export default async function StatsPage() {
       where: { book: { userId } },
       select: { bookId: true, page: true, date: true },
     }),
+    prisma.quote.count({ where: { book: { userId } } }),
   ]);
+
+  // A random quote for the serendipity card — new one on every visit.
+  const randomQuote =
+    quoteCount > 0
+      ? await prisma.quote.findFirst({
+          where: { book: { userId } },
+          skip: Math.floor(Math.random() * quoteCount),
+          orderBy: { createdAt: "asc" },
+          include: { book: { select: { id: true, title: true } } },
+        })
+      : null;
 
   const read = books.filter((b) => b.status === ReadingStatus.READ);
   const reading = books.filter((b) => b.status === ReadingStatus.READING);
@@ -293,6 +305,33 @@ export default async function StatsPage() {
             )}
           </CardContent>
         </Card>
+
+        {randomQuote && (
+          <Card>
+            <CardHeader>
+              <CardTitle>From your quotes</CardTitle>
+            </CardHeader>
+            <CardContent className="grid gap-3">
+              <blockquote className="whitespace-pre-line border-l-2 border-primary/50 pl-3 text-sm leading-relaxed">
+                {randomQuote.text}
+              </blockquote>
+              <p className="text-sm text-muted-foreground">
+                —{" "}
+                <Link
+                  href={`/books/${randomQuote.book.id}`}
+                  className="font-medium hover:underline"
+                >
+                  {randomQuote.book.title}
+                </Link>
+                {randomQuote.page != null && `, p. ${randomQuote.page}`}
+                {" · "}
+                <Link href="/quotes" className="hover:underline">
+                  browse all {quoteCount}
+                </Link>
+              </p>
+            </CardContent>
+          </Card>
+        )}
 
         <Card>
           <CardHeader>

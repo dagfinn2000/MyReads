@@ -5,6 +5,7 @@ import { ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { formatDate } from "@/lib/display";
+import { dailyPageTotals, readingStreaks } from "@/lib/progress";
 import { BookCover } from "@/components/book-card";
 import { GoldMedal } from "@/components/gold-medal";
 import { Bar, StatCard } from "@/components/stat-blocks";
@@ -84,7 +85,7 @@ export default async function YearInReviewPage({
 
   // Fetch everything and slice by year in JS, with getFullYear() — the same
   // bucketing the stats page uses, so the numbers always agree.
-  const [readBooks, allReads, goal] = await Promise.all([
+  const [readBooks, allReads, goal, progressEntries] = await Promise.all([
     prisma.book.findMany({
       where: { userId, status: ReadingStatus.READ, dateFinished: { not: null } },
       select: { ...bookSelect, rating: true, dateStarted: true, dateFinished: true },
@@ -101,6 +102,12 @@ export default async function YearInReviewPage({
     }),
     prisma.readingGoal.findUnique({
       where: { userId_year: { userId, year } },
+    }),
+    // The full reading log — deltas need each entry's predecessor, so the
+    // year slice happens after totals are computed.
+    prisma.progressEntry.findMany({
+      where: { book: { userId } },
+      select: { bookId: true, page: true, date: true },
     }),
   ]);
 
@@ -251,6 +258,30 @@ export default async function YearInReviewPage({
   const topTags = [...tagCounts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8);
   const maxTag = topTags[0]?.[1] ?? 0;
 
+  // Reading-log rhythm for this year: pages per day/month, biggest day, and
+  // the longest streak. Day keys are "YYYY-MM-DD", so slicing by prefix
+  // matches the same local-time bucketing the heatmap uses.
+  const yearDays = [...dailyPageTotals(progressEntries)].filter(([key]) =>
+    key.startsWith(`${year}-`),
+  );
+  const readingDays = yearDays.length;
+  const pagesLogged = yearDays.reduce((sum, [, pages]) => sum + pages, 0);
+  const pagesPerMonth = Array.from({ length: 12 }, () => 0);
+  for (const [key, pages] of yearDays) {
+    pagesPerMonth[Number(key.slice(5, 7)) - 1] += pages;
+  }
+  const maxPagesMonth = Math.max(...pagesPerMonth);
+  const biggestDay = yearDays.reduce<[string, number] | null>(
+    (best, day) => (best === null || day[1] > best[1] ? day : best),
+    null,
+  );
+  const { longest: longestStreak } = readingStreaks(
+    new Set(yearDays.map(([key]) => key)),
+  );
+  const biggestDayDate = biggestDay
+    ? formatDate(new Date(`${biggestDay[0]}T00:00:00`))
+    : null;
+
   const goalMet = goal !== null && finishes.length >= goal.target;
 
   return (
@@ -347,16 +378,57 @@ export default async function YearInReviewPage({
       </Card>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>By month</CardTitle>
-          </CardHeader>
-          <CardContent className="grid gap-2">
-            {perMonth.map((count, i) => (
-              <Bar key={MONTHS[i]} label={MONTHS[i]} value={count} max={maxMonth} />
-            ))}
-          </CardContent>
-        </Card>
+        <div className="grid content-start gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>By month</CardTitle>
+            </CardHeader>
+            <CardContent className="grid gap-2">
+              {perMonth.map((count, i) => (
+                <Bar key={MONTHS[i]} label={MONTHS[i]} value={count} max={maxMonth} />
+              ))}
+            </CardContent>
+          </Card>
+
+          {readingDays > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Reading days</CardTitle>
+              </CardHeader>
+              <CardContent className="grid gap-4">
+                <div className="grid gap-2 text-sm">
+                  <Highlight label="Days reading">
+                    <span className="tabular-nums">{readingDays}</span> ·{" "}
+                    {pagesLogged.toLocaleString("en")} pages logged
+                  </Highlight>
+                  {biggestDay && (
+                    <Highlight label="Biggest day">
+                      <span className="tabular-nums">{biggestDay[1]}</span> pages
+                      · {biggestDayDate}
+                    </Highlight>
+                  )}
+                  {longestStreak > 1 && (
+                    <Highlight label="Longest streak">
+                      <span className="tabular-nums">{longestStreak}</span> days
+                      in a row
+                    </Highlight>
+                  )}
+                </div>
+                <div className="grid gap-2">
+                  <p className="text-xs text-muted-foreground">Pages per month</p>
+                  {pagesPerMonth.map((pages, i) => (
+                    <Bar
+                      key={MONTHS[i]}
+                      label={MONTHS[i]}
+                      value={pages}
+                      max={maxPagesMonth}
+                    />
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
 
         <div className="grid content-start gap-6">
           {ratingRows.length > 0 && (

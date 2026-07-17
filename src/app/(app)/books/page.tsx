@@ -106,6 +106,7 @@ export default async function BooksPage({
     q: param(sp.q),
     tag: param(sp.tag),
     format: param(sp.format),
+    owned: param(sp.owned) || "all",
     minRating: param(sp.minRating),
     series: param(sp.series),
     group: param(sp.group) || "none",
@@ -121,6 +122,8 @@ export default async function BooksPage({
     userId,
     ...(shelf && { status: shelf }),
     ...(format && { format }),
+    ...(values.owned === "owned" && { owned: true }),
+    ...(values.owned === "wishlist" && { owned: false }),
     ...(minRating >= 1 && { rating: { gte: minRating } }),
     ...(values.tag && values.tag !== "all" && { tags: { has: values.tag } }),
     ...(values.shelfId && { shelves: { some: { id: values.shelfId } } }),
@@ -169,6 +172,7 @@ export default async function BooksPage({
     !!values.q ||
     !!values.tag ||
     !!values.format ||
+    values.owned !== "all" ||
     !!values.minRating ||
     !!values.shelfId ||
     !!values.series;
