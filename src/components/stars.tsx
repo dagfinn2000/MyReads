@@ -28,12 +28,16 @@ export function Stars({
   value,
   size = "sm",
   className,
+  starClassName,
 }: {
   value: number;
   size?: "sm" | "lg";
   className?: string;
+  /** Overrides the size preset — lets the rating input use responsive
+   *  star sizes (bigger touch targets on phones) without a new preset. */
+  starClassName?: string;
 }) {
-  const sizeClass = size === "lg" ? "size-6" : "size-4";
+  const sizeClass = starClassName ?? (size === "lg" ? "size-6" : "size-4");
   return (
     <div
       className={cn("relative inline-flex text-muted-foreground/30", className)}
