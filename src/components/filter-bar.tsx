@@ -3,7 +3,15 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { BookFormat } from "@prisma/client";
-import { ArrowDownAZ, ArrowUpAZ, Layers, Search, X } from "lucide-react";
+import {
+  ArrowDownAZ,
+  ArrowDownWideNarrow,
+  ArrowUpAZ,
+  ArrowUpNarrowWide,
+  Layers,
+  Search,
+  X,
+} from "lucide-react";
 import { saveLibraryView } from "@/lib/actions/library-view";
 import { FORMAT_LABELS } from "@/lib/display";
 import { ManageTagsDialog } from "@/components/manage-tags-dialog";
@@ -45,6 +53,24 @@ const GROUP_OPTIONS = [
   { value: "author", label: "Group by author" },
   { value: "series", label: "Group by series" },
 ];
+
+/** Direction-toggle tooltip: names the current order and what a click does,
+ *  phrased for the active sort — letters for the text sorts, low/high for
+ *  rating, old/new for the date sorts. */
+function dirTooltip(sort: string, asc: boolean): string {
+  if (sort === "title" || sort === "author") {
+    return asc ? "Sorted A–Z — click for Z–A" : "Sorted Z–A — click for A–Z";
+  }
+  if (sort === "rating") {
+    return asc
+      ? "Sorted lowest rated first — click for highest first"
+      : "Sorted highest rated first — click for lowest first";
+  }
+  // createdAt / dateFinished
+  return asc
+    ? "Sorted oldest first — click for newest first"
+    : "Sorted newest first — click for oldest first";
+}
 
 const OWNED_OPTIONS = [
   { value: "all", label: "Owned & wishlist" },
@@ -247,17 +273,20 @@ export function FilterBar({
           variant="outline"
           size="icon"
           className="shrink-0"
-          // The icon shows the current direction; the tooltip names the
-          // action — a bare state label here reads as "click for ascending"
-          // and makes the toggle feel reversed.
-          title={
-            values.dir === "asc"
-              ? "Sorted A–Z — click for Z–A"
-              : "Sorted Z–A — click for A–Z"
-          }
+          // The icon shows the current direction; the tooltip names both the
+          // state and the action (a bare state label reads as "click for
+          // ascending" and makes the toggle feel reversed). Wording and icon
+          // follow the active sort — "A–Z" only makes sense for text sorts.
+          title={dirTooltip(values.sort, values.dir === "asc")}
           onClick={() => navigate({ dir: values.dir === "asc" ? "desc" : "asc" })}
         >
-          {values.dir === "asc" ? <ArrowUpAZ /> : <ArrowDownAZ />}
+          {values.sort === "title" || values.sort === "author" ? (
+            values.dir === "asc" ? <ArrowUpAZ /> : <ArrowDownAZ />
+          ) : values.dir === "asc" ? (
+            <ArrowUpNarrowWide />
+          ) : (
+            <ArrowDownWideNarrow />
+          )}
         </Button>
       </div>
     </div>
