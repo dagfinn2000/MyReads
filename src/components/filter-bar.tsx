@@ -247,7 +247,14 @@ export function FilterBar({
           variant="outline"
           size="icon"
           className="shrink-0"
-          title={values.dir === "asc" ? "Ascending" : "Descending"}
+          // The icon shows the current direction; the tooltip names the
+          // action — a bare state label here reads as "click for ascending"
+          // and makes the toggle feel reversed.
+          title={
+            values.dir === "asc"
+              ? "Sorted A–Z — click for Z–A"
+              : "Sorted Z–A — click for A–Z"
+          }
           onClick={() => navigate({ dir: values.dir === "asc" ? "desc" : "asc" })}
         >
           {values.dir === "asc" ? <ArrowUpAZ /> : <ArrowDownAZ />}
