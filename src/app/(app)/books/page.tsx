@@ -17,6 +17,33 @@ function param(v: string | string[] | undefined): string {
   return typeof v === "string" ? v : "";
 }
 
+/** Surname particles that travel with the last name: "Le Guin" sorts under
+ *  L, "van der Berg" under V. (Anglo-American shelving convention — Dutch
+ *  libraries would file "van" under the bare surname instead.) */
+const SURNAME_PARTICLES = new Set([
+  "da", "de", "del", "della", "den", "der", "di", "du", "la", "le",
+  "mac", "mc", "st", "st.", "ten", "ter", "van", "von",
+]);
+
+/** Name suffixes that never lead a sort key. */
+const NAME_SUFFIXES = new Set(["jr", "jr.", "sr", "sr.", "ii", "iii", "iv"]);
+
+/**
+ * "Ursula K. Le Guin" → "le guin ursula k." — authors sort the way a
+ * bookshelf files them: by surname (particles included), then given names,
+ * suffixes last. Single-word names (Homer) are their own key.
+ */
+function authorSortKey(name: string): string {
+  const words = name.trim().toLowerCase().split(/\s+/);
+  const suffixes: string[] = [];
+  while (words.length > 1 && NAME_SUFFIXES.has(words[words.length - 1])) {
+    suffixes.unshift(words.pop()!);
+  }
+  let start = words.length - 1;
+  while (start > 0 && SURNAME_PARTICLES.has(words[start - 1])) start--;
+  return [...words.slice(start), ...words.slice(0, start), ...suffixes].join(" ");
+}
+
 /** Shelf order within one author: series entries stay together (a series
  *  sorts as a block by its name, standalones slot in by title), ordered by
  *  series number inside the block — Mistborn #1 right before Mistborn #2. */
@@ -38,8 +65,10 @@ function sortBooks(books: Book[], sort: string, dir: string): Book[] {
   if (sort === "author") {
     return [...books].sort(
       (a, b) =>
-        mul * (a.authors[0] ?? "").localeCompare(b.authors[0] ?? "") ||
-        seriesShelfOrder(a, b),
+        mul *
+          authorSortKey(a.authors[0] ?? "").localeCompare(
+            authorSortKey(b.authors[0] ?? ""),
+          ) || seriesShelfOrder(a, b),
     );
   }
   const cmp: Record<string, (a: Book, b: Book) => number> = {
@@ -62,8 +91,9 @@ function groupBooks(books: Book[], group: string): LibraryGroup[] | null {
       const key = b.authors[0] ?? "Unknown author";
       map.set(key, [...(map.get(key) ?? []), b]);
     }
+    // Same surname-first order as the author sort, so the two views agree.
     return [...map.entries()]
-      .sort((a, b) => a[0].localeCompare(b[0]))
+      .sort((a, b) => authorSortKey(a[0]).localeCompare(authorSortKey(b[0])))
       .map(([title, groupBooks]) => ({ title, books: groupBooks }));
   }
 

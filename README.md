@@ -79,7 +79,9 @@ surface area.
   title/author/series, filters by tag, format, owned vs. wishlist, and
   minimum rating, grouping
   by author or series, sorting by title, author, rating, date added, or date
-  finished. Sorting by author keeps each series together as a block in
+  finished. Authors sort by surname the way a bookshelf files them — Le
+  Guin under L, van Gulik under V — in both the author sort and the author
+  grouping. Sorting by author keeps each series together as a block in
   series order — Mistborn #1 sits next to #2 instead of being alphabetized
   apart. All view state lives in the URL, and the sort, direction, and
   grouping you pick are also remembered on your account — coming back to
