@@ -4,6 +4,7 @@ import { BookFormat, ReadingStatus } from "@prisma/client";
 import { LibraryBig, Plus } from "lucide-react";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { DEFAULT_LIBRARY_VIEW, parseLibraryView } from "@/lib/library-view";
 import { FilterBar, type FilterValues } from "@/components/filter-bar";
 import { LibraryView, type LibraryGroup } from "@/components/library-view";
 import { ShelfChips } from "@/components/shelf-chips";
@@ -100,6 +101,23 @@ export default async function BooksPage({
   const userId = session.user.id;
 
   const sp = await searchParams;
+
+  // Explicit view params in the URL win (the filter bar always writes them);
+  // a param-less visit — the nav link, a bookmark — falls back to the view
+  // saved on the account, so the chosen sort survives clicking away.
+  const hasViewParams =
+    sp.sort !== undefined || sp.dir !== undefined || sp.group !== undefined;
+  const savedView = hasViewParams
+    ? DEFAULT_LIBRARY_VIEW
+    : parseLibraryView(
+        (
+          await prisma.user.findUnique({
+            where: { id: userId },
+            select: { libraryView: true },
+          })
+        )?.libraryView,
+      );
+
   const values: FilterValues = {
     shelf: param(sp.shelf) || "all",
     shelfId: param(sp.shelfId),
@@ -109,9 +127,9 @@ export default async function BooksPage({
     owned: param(sp.owned) || "all",
     minRating: param(sp.minRating),
     series: param(sp.series),
-    group: param(sp.group) || "none",
-    sort: param(sp.sort) || "createdAt",
-    dir: param(sp.dir) || "desc",
+    group: param(sp.group) || savedView.group,
+    sort: param(sp.sort) || savedView.sort,
+    dir: param(sp.dir) || savedView.dir,
   };
 
   const shelf = Object.values(ReadingStatus).find((s) => s === values.shelf);

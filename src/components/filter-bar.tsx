@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { BookFormat } from "@prisma/client";
 import { ArrowDownAZ, ArrowUpAZ, Layers, Search, X } from "lucide-react";
+import { saveLibraryView } from "@/lib/actions/library-view";
 import { FORMAT_LABELS } from "@/lib/display";
 import { ManageTagsDialog } from "@/components/manage-tags-dialog";
 import { Button } from "@/components/ui/button";
@@ -91,11 +92,24 @@ export function FilterBar({
     if (next.minRating && next.minRating !== "all")
       params.set("minRating", next.minRating);
     if (next.series) params.set("series", next.series);
-    if (next.group && next.group !== "none") params.set("group", next.group);
-    if (next.sort && next.sort !== "createdAt") params.set("sort", next.sort);
-    if (next.dir && next.dir !== "desc") params.set("dir", next.dir);
+    // View params are always explicit in the URL, so the page never has to
+    // guess between "reset to default" and "no preference stated" — the
+    // account-saved view only fills in on param-less visits (the nav link).
+    params.set("group", next.group || "none");
+    params.set("sort", next.sort || "createdAt");
+    params.set("dir", next.dir || "desc");
     const qs = params.toString();
     router.replace(`/books${qs ? `?${qs}` : ""}`);
+
+    // A change to the view is a lasting preference — remember it on the
+    // account (fire-and-forget; the URL is already correct either way).
+    if ("sort" in overrides || "dir" in overrides || "group" in overrides) {
+      saveLibraryView({
+        sort: next.sort || "createdAt",
+        dir: next.dir || "desc",
+        group: next.group || "none",
+      }).catch(() => {});
+    }
   }
 
   // Debounced text search. Skips the initial render so mounting doesn't

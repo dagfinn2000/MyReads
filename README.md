@@ -81,9 +81,11 @@ surface area.
   by author or series, sorting by title, author, rating, date added, or date
   finished. Sorting by author keeps each series together as a block in
   series order — Mistborn #1 sits next to #2 instead of being alphabetized
-  apart. All view state lives in the URL. A "Pick for me" button opens a
-  random book from Want to Read (respecting the active filters) when you
-  can't decide.
+  apart. All view state lives in the URL, and the sort, direction, and
+  grouping you pick are also remembered on your account — coming back to
+  the library later (or from another device) restores your view. A "Pick
+  for me" button opens a random book from Want to Read (respecting the
+  active filters) when you can't decide.
 - **Tag management** — rename a tag across the whole library (renaming onto
   an existing tag merges them) or remove one everywhere, from a small dialog
   next to the tag filter.

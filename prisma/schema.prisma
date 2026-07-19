@@ -38,6 +38,10 @@ model User {
   /// account across browsers. Null = never picked one on this account;
   /// the client falls back to localStorage, then the default.
   theme        String?
+  /// Preferred library view ({ sort, dir, group } — see lib/library-view.ts),
+  /// applied when /books is opened without explicit view params so the
+  /// chosen sort survives navigating away and back. Null = defaults.
+  libraryView  Json?
   createdAt    DateTime      @default(now())
   books        Book[]
   shelves      Shelf[]
