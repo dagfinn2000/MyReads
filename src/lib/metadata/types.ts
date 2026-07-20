@@ -18,6 +18,14 @@ export interface CoverCandidate {
   source: BookMetadata["source"];
 }
 
+/** Human-readable source names — shown on search results and cover
+ *  candidates so mixed-source lists say where each row came from. */
+export const SOURCE_LABELS: Record<BookMetadata["source"], string> = {
+  openlibrary: "Open Library",
+  googlebooks: "Google Books",
+  nb: "nb.no",
+};
+
 /** Extra fields fetched lazily when the user picks a search result. */
 export interface BookDetails {
   description: string | null;

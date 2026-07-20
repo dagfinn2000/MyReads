@@ -1,3 +1,4 @@
+import { isbnVariants, normalizeIsbn } from "@/lib/isbn";
 import { searchOpenLibrary, getOpenLibraryDetails } from "./openlibrary";
 import {
   searchGoogleBooks,
@@ -9,18 +10,40 @@ import type { BookDetails, BookMetadata, CoverCandidate } from "./types";
 
 export type { BookDetails, BookMetadata, CoverCandidate };
 
+/** Same-edition key: the ISBN-13 form when one exists, so an ISBN-10 from
+ *  one source matches its ISBN-13 twin from another. */
+function editionKey(isbn: string): string {
+  return isbnVariants(isbn).find((v) => v.length === 13) ?? normalizeIsbn(isbn);
+}
+
 /**
- * Searches for book metadata. Open Library is the primary source; Google
- * Books (if configured) fills in when Open Library returns nothing, and the
- * National Library of Norway is the final fallback — typically the only one
- * that knows Norwegian editions.
+ * Searches every metadata source in parallel and returns all their results:
+ * Open Library first, then Google Books (when configured), then the
+ * National Library of Norway. No single catalog knows every edition — nb.no
+ * is often the only one with the Norwegian printing — so the sources are
+ * shown side by side rather than as fallbacks for each other. Rows that
+ * resolve to the same edition (same ISBN, in either form) appear once, from
+ * the highest-priority source; that also keeps a barcode scan resolving to
+ * exactly one row, which is what lets the scan flow auto-pick it.
  */
 export async function searchBooks(query: string): Promise<BookMetadata[]> {
-  const fromOl = await searchOpenLibrary(query);
-  if (fromOl.length > 0) return fromOl;
-  const fromGb = await searchGoogleBooks(query);
-  if (fromGb.length > 0) return fromGb;
-  return searchNb(query);
+  const [fromOl, fromGb, fromNb] = await Promise.all([
+    searchOpenLibrary(query).catch(() => []),
+    searchGoogleBooks(query).catch(() => []),
+    searchNb(query).catch(() => []),
+  ]);
+
+  const seen = new Set<string>();
+  const results: BookMetadata[] = [];
+  for (const r of [...fromOl, ...fromGb, ...fromNb]) {
+    if (r.isbn) {
+      const key = editionKey(r.isbn);
+      if (seen.has(key)) continue;
+      seen.add(key);
+    }
+    results.push(r);
+  }
+  return results;
 }
 
 /**
@@ -105,9 +128,15 @@ export async function getCoverCandidates(params: {
   if (nbByIsbn) candidates.push({ url: nbByIsbn, source: "nb" });
   if (gbDetails?.coverUrl)
     candidates.push({ url: gbDetails.coverUrl, source: "googlebooks" });
-  for (const list of [olSearch, gbSearch, nbSearch]) {
-    for (const r of list) {
-      if (r.coverUrl) candidates.push({ url: r.coverUrl, source: r.source });
+  // Search hits are interleaved round-robin so every source keeps a fair
+  // share of the capped grid — appended list-by-list, Open Library and
+  // Google would fill all twelve slots before a single nb.no cover showed.
+  const searchLists = [olSearch, gbSearch, nbSearch];
+  const longest = Math.max(...searchLists.map((l) => l.length));
+  for (let i = 0; i < longest; i++) {
+    for (const list of searchLists) {
+      const r = list[i];
+      if (r?.coverUrl) candidates.push({ url: r.coverUrl, source: r.source });
     }
   }
 

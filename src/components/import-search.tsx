@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { BookOpen, Loader2 } from "lucide-react";
-import type { BookMetadata } from "@/lib/metadata/types";
+import { SOURCE_LABELS, type BookMetadata } from "@/lib/metadata/types";
 import type { BookFormValues } from "@/components/book-form";
 import { BarcodeScanner } from "@/components/barcode-scanner";
 import { Input } from "@/components/ui/input";
@@ -171,6 +171,9 @@ export function ImportSearch({
                     {r.authors.join(", ")}
                     {r.publishedDate ? ` · ${r.publishedDate}` : ""}
                     {r.pageCount ? ` · ${r.pageCount} pages` : ""}
+                    {/* Results now mix all sources — say which catalog each
+                        row came from so the right edition is easy to spot. */}
+                    {` · ${SOURCE_LABELS[r.source]}`}
                   </p>
                 </div>
                 {pickingId === key && (

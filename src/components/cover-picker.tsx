@@ -2,15 +2,9 @@
 
 import { useRef, useState } from "react";
 import { ImageDown, Loader2, Upload } from "lucide-react";
-import type { CoverCandidate } from "@/lib/metadata/types";
+import { SOURCE_LABELS, type CoverCandidate } from "@/lib/metadata/types";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-
-const SOURCE_LABELS: Record<CoverCandidate["source"], string> = {
-  openlibrary: "Open Library",
-  googlebooks: "Google Books",
-  nb: "nb.no",
-};
 
 /**
  * Cover picker: searches every metadata source for candidate covers of the
