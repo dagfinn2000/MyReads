@@ -2,13 +2,12 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import type { Book } from "@prisma/client";
 import { ReadingStatus } from "@prisma/client";
 import { Check, Dices, SquareCheckBig, X } from "lucide-react";
 import { bulkUpdateBooks } from "@/lib/actions/bulk";
 import { STATUS_LABELS } from "@/lib/display";
 import { cn } from "@/lib/utils";
-import { BookCard } from "@/components/book-card";
+import { BookCard, type BookCardBook } from "@/components/book-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -21,7 +20,7 @@ import {
 
 export interface LibraryGroup {
   title: string;
-  books: Book[];
+  books: BookCardBook[];
 }
 
 /**
@@ -35,7 +34,7 @@ export function LibraryView({
   groups,
   shelves,
 }: {
-  books: Book[];
+  books: BookCardBook[];
   /** Pre-grouped sections (author/series view) or null for the flat grid. */
   groups: LibraryGroup[] | null;
   shelves: { id: string; name: string }[];
@@ -104,7 +103,7 @@ export function LibraryView({
     });
   }
 
-  const renderGrid = (list: Book[]) => (
+  const renderGrid = (list: BookCardBook[]) => (
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-5">
       {list.map((book) => {
         const isSelected = selected.has(book.id);

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { Book, Prisma } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 import { BookFormat, ReadingStatus } from "@prisma/client";
 import { LibraryBig, Plus } from "lucide-react";
 import { auth } from "@/auth";
@@ -16,6 +16,27 @@ export const dynamic = "force-dynamic";
 function param(v: string | string[] | undefined): string {
   return typeof v === "string" ? v : "";
 }
+
+/** What the library page fetches per book: the card fields plus the two
+ *  sort keys the cards don't render. Everything else on Book — description,
+ *  review, searchText, … — would be serialized into the client payload for
+ *  every book on every visit, for nothing. */
+const librarySelect = {
+  id: true,
+  title: true,
+  authors: true,
+  coverUrl: true,
+  status: true,
+  rating: true,
+  currentPage: true,
+  pageCount: true,
+  seriesName: true,
+  seriesNumber: true,
+  dateFinished: true,
+  createdAt: true,
+} satisfies Prisma.BookSelect;
+
+type LibraryBook = Prisma.BookGetPayload<{ select: typeof librarySelect }>;
 
 /** Surname particles that travel with the last name: "Le Guin" sorts under
  *  L, "van der Berg" under V. (Anglo-American shelving convention — Dutch
@@ -47,7 +68,7 @@ function authorSortKey(name: string): string {
 /** Shelf order within one author: series entries stay together (a series
  *  sorts as a block by its name, standalones slot in by title), ordered by
  *  series number inside the block — Mistborn #1 right before Mistborn #2. */
-function seriesShelfOrder(a: Book, b: Book): number {
+function seriesShelfOrder(a: LibraryBook, b: LibraryBook): number {
   return (
     (a.seriesName ?? a.title).localeCompare(b.seriesName ?? b.title) ||
     (a.seriesNumber ?? Infinity) - (b.seriesNumber ?? Infinity) ||
@@ -58,7 +79,7 @@ function seriesShelfOrder(a: Book, b: Book): number {
 /** In-memory sort — a personal library is small enough that sorting after
  *  the filtered fetch is simpler than fighting Prisma over array columns
  *  (author sort) and nulls-last semantics. */
-function sortBooks(books: Book[], sort: string, dir: string): Book[] {
+function sortBooks(books: LibraryBook[], sort: string, dir: string): LibraryBook[] {
   const mul = dir === "asc" ? 1 : -1;
   // Author sort: `dir` flips the author order only; within an author, books
   // keep shelf order (series grouped, in series order) in both directions.
@@ -71,7 +92,7 @@ function sortBooks(books: Book[], sort: string, dir: string): Book[] {
           ) || seriesShelfOrder(a, b),
     );
   }
-  const cmp: Record<string, (a: Book, b: Book) => number> = {
+  const cmp: Record<string, (a: LibraryBook, b: LibraryBook) => number> = {
     title: (a, b) => a.title.localeCompare(b.title),
     rating: (a, b) => (a.rating ?? 0) - (b.rating ?? 0),
     dateFinished: (a, b) =>
@@ -84,9 +105,9 @@ function sortBooks(books: Book[], sort: string, dir: string): Book[] {
 
 /** Sections for the group-by views. Series sections order their books by
  *  series number; a trailing section collects books outside any series. */
-function groupBooks(books: Book[], group: string): LibraryGroup[] | null {
+function groupBooks(books: LibraryBook[], group: string): LibraryGroup[] | null {
   if (group === "author") {
-    const map = new Map<string, Book[]>();
+    const map = new Map<string, LibraryBook[]>();
     for (const b of books) {
       const key = b.authors[0] ?? "Unknown author";
       map.set(key, [...(map.get(key) ?? []), b]);
@@ -98,8 +119,8 @@ function groupBooks(books: Book[], group: string): LibraryGroup[] | null {
   }
 
   if (group === "series") {
-    const map = new Map<string, Book[]>();
-    const noSeries: Book[] = [];
+    const map = new Map<string, LibraryBook[]>();
+    const noSeries: LibraryBook[] = [];
     for (const b of books) {
       if (b.seriesName) map.set(b.seriesName, [...(map.get(b.seriesName) ?? []), b]);
       else noSeries.push(b);
@@ -182,7 +203,7 @@ export default async function BooksPage({
   };
 
   const [books, statusCounts, tagRows, shelves] = await Promise.all([
-    prisma.book.findMany({ where }),
+    prisma.book.findMany({ where, select: librarySelect }),
     prisma.book.groupBy({
       by: ["status"],
       where: { userId },

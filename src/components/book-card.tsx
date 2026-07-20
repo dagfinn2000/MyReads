@@ -34,8 +34,25 @@ export function BookCover({
   );
 }
 
+/** The slice of a Book the library grid actually renders. The books page
+ *  fetches exactly this (plus its sort keys) instead of full rows, so large
+ *  text fields (description, review, searchText) never reach the client. */
+export type BookCardBook = Pick<
+  Book,
+  | "id"
+  | "title"
+  | "authors"
+  | "coverUrl"
+  | "status"
+  | "rating"
+  | "currentPage"
+  | "pageCount"
+  | "seriesName"
+  | "seriesNumber"
+>;
+
 /** Grid tile for the library view. */
-export function BookCard({ book }: { book: Book }) {
+export function BookCard({ book }: { book: BookCardBook }) {
   const progress =
     book.status === ReadingStatus.READING && book.currentPage != null && book.pageCount
       ? Math.min(book.currentPage / book.pageCount, 1)
