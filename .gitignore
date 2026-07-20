@@ -21,3 +21,6 @@ data/
 *.tsbuildinfo
 npm-debug.log*
 .DS_Store
+
+# session working documents, not part of the public repo
+docs/optimization-report.md
