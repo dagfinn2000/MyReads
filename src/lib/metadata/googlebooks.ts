@@ -76,7 +76,9 @@ export async function searchGoogleBooks(
   limit = 10,
 ): Promise<BookMetadata[]> {
   if (!googleBooksEnabled()) return [];
-  const data = await cachedLookup<GbResponse>("gb-search", query, () =>
+  // The limit is part of the key: the import search (10) and the cover
+  // picker (6) must not overwrite each other's cached result lists.
+  const data = await cachedLookup<GbResponse>("gb-search", `${query}|${limit}`, () =>
     gbQuery(query, limit),
   );
   return (data?.items ?? [])

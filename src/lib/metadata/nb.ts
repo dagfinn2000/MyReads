@@ -79,7 +79,9 @@ export async function searchNb(
   query: string,
   limit = 10,
 ): Promise<BookMetadata[]> {
-  const data = await cachedLookup<NbResponse>("nb-search", query, () =>
+  // The limit is part of the key: the import search (10) and the cover
+  // picker (6) must not overwrite each other's cached result lists.
+  const data = await cachedLookup<NbResponse>("nb-search", `${query}|${limit}`, () =>
     nbQuery(query, limit),
   );
   return (data?._embedded?.items ?? [])

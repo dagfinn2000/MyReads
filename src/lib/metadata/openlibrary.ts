@@ -49,7 +49,9 @@ export async function searchOpenLibrary(
 ): Promise<BookMetadata[]> {
   const data = await cachedLookup<OlSearchResponse>(
     "ol-search",
-    query,
+    // The limit is part of the key: the import search (10) and the cover
+    // picker (6) must not overwrite each other's cached result lists.
+    `${query}|${limit}`,
     async () => {
       const url = new URL("https://openlibrary.org/search.json");
       url.searchParams.set("q", query);
