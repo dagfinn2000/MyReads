@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import type { Prisma } from "@prisma/client";
 import { ReadingStatus } from "@prisma/client";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
@@ -164,24 +165,29 @@ export async function updateReading(
     data.status === ReadingStatus.READING || data.status === ReadingStatus.DNF;
   const currentPage = keepsProgress ? data.currentPage || null : null;
 
-  await prisma.book.update({
-    where: { id: bookId },
-    data: {
+  // The book update and its automatic reading-log entries land together —
+  // a page-0 anchor without the page change it anchors (or vice versa)
+  // would corrupt the pass bookkeeping.
+  await prisma.$transaction(async (tx) => {
+    await tx.book.update({
+      where: { id: bookId },
+      data: {
+        status: data.status,
+        rating: data.rating || null, // 0 = cleared
+        review: data.review ?? null,
+        dateStarted: data.dateStarted ?? null,
+        dateFinished,
+        timesRead,
+        currentPage,
+      },
+    });
+
+    await logProgress(tx, bookId, existing, {
       status: data.status,
-      rating: data.rating || null, // 0 = cleared
-      review: data.review ?? null,
+      currentPage,
       dateStarted: data.dateStarted ?? null,
       dateFinished,
-      timesRead,
-      currentPage,
-    },
-  });
-
-  await logProgress(bookId, existing, {
-    status: data.status,
-    currentPage,
-    dateStarted: data.dateStarted ?? null,
-    dateFinished,
+    });
   });
 
   revalidatePath("/books");
@@ -201,6 +207,7 @@ export async function updateReading(
  * Re-read passes get their anchor from readAgain (see lib/actions/reads.ts).
  */
 async function logProgress(
+  db: Prisma.TransactionClient,
   bookId: string,
   prev: { status: ReadingStatus; currentPage: number | null; pageCount: number | null },
   next: {
@@ -214,7 +221,7 @@ async function logProgress(
 
   // The latest entry of the current pass. A personal log is small, so
   // fetching it whole and slicing beats encoding the pass rule in SQL.
-  const all = await prisma.progressEntry.findMany({
+  const all = await db.progressEntry.findMany({
     where: { bookId },
     orderBy: [{ date: "asc" }, { page: "asc" }],
     select: { page: true, date: true },
@@ -228,7 +235,7 @@ async function logProgress(
       entries.push({ bookId, page: 0, date: next.dateStarted ?? now });
     }
     entries.push({ bookId, page: next.currentPage, date: now });
-    await prisma.progressEntry.createMany({ data: entries });
+    await db.progressEntry.createMany({ data: entries });
     return;
   }
 
@@ -242,7 +249,7 @@ async function logProgress(
     last != null &&
     last.page < prev.pageCount
   ) {
-    await prisma.progressEntry.create({
+    await db.progressEntry.create({
       data: { bookId, page: prev.pageCount, date: next.dateFinished ?? now },
     });
   }

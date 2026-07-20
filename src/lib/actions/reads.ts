@@ -1,20 +1,26 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import type { Prisma } from "@prisma/client";
 import { ReadingStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { pastReadSchema } from "@/lib/validation";
 import { requireUserId } from "@/lib/actions/helpers";
 import type { ActionState } from "@/lib/actions/helpers";
 
-/** Keep Book.timesRead = archived passes + the current one when finished. */
-async function syncTimesRead(bookId: string): Promise<void> {
-  const book = await prisma.book.findUnique({
+/** Keep Book.timesRead = archived passes + the current one when finished.
+ *  Runs on the caller's transaction client so the recount sees (and commits
+ *  with) the write that made it necessary. */
+async function syncTimesRead(
+  db: Prisma.TransactionClient,
+  bookId: string,
+): Promise<void> {
+  const book = await db.book.findUnique({
     where: { id: bookId },
     select: { status: true, _count: { select: { reads: true } } },
   });
   if (!book) return;
-  await prisma.book.update({
+  await db.book.update({
     where: { id: bookId },
     data: {
       timesRead:
@@ -38,35 +44,41 @@ function revalidateBook(bookId: string) {
 export async function readAgain(bookId: string): Promise<void> {
   const userId = await requireUserId();
 
-  const book = await prisma.book.findFirst({ where: { id: bookId, userId } });
+  const book = await prisma.book.findFirst({
+    where: { id: bookId, userId },
+    select: { status: true, dateStarted: true, dateFinished: true, rating: true },
+  });
   if (!book || book.status !== ReadingStatus.READ) return;
 
   const now = new Date();
-  await prisma.read.create({
-    data: {
-      bookId,
-      dateStarted: book.dateStarted,
-      dateFinished: book.dateFinished,
-      rating: book.rating,
-    },
-  });
-  await prisma.book.update({
-    where: { id: bookId },
-    data: {
-      status: ReadingStatus.READING,
-      dateStarted: now,
-      dateFinished: null,
-      currentPage: null,
-      // timesRead is unchanged: the pass moved from "current" to "archived".
-    },
-  });
-  // Open the new pass in the reading log with a page-0 anchor at the exact
-  // re-read moment. The anchor marks the pass boundary — the date form field
-  // only keeps day precision, so without it a re-read started on a day with
-  // already-logged entries would blend into the previous pass.
-  await prisma.progressEntry.create({
-    data: { bookId, page: 0, date: now },
-  });
+  // One atomic unit — failing between these writes would strand the book
+  // half-archived. The progress entry is the new pass's page-0 anchor at the
+  // exact re-read moment: the date form field only keeps day precision, so
+  // without it a re-read started on a day with already-logged entries would
+  // blend into the previous pass. timesRead is unchanged throughout: the
+  // pass moved from "current" to "archived".
+  await prisma.$transaction([
+    prisma.read.create({
+      data: {
+        bookId,
+        dateStarted: book.dateStarted,
+        dateFinished: book.dateFinished,
+        rating: book.rating,
+      },
+    }),
+    prisma.book.update({
+      where: { id: bookId },
+      data: {
+        status: ReadingStatus.READING,
+        dateStarted: now,
+        dateFinished: null,
+        currentPage: null,
+      },
+    }),
+    prisma.progressEntry.create({
+      data: { bookId, page: 0, date: now },
+    }),
+  ]);
 
   revalidateBook(bookId);
 }
@@ -92,15 +104,17 @@ export async function addPastRead(
   }
   const data = parsed.data;
 
-  await prisma.read.create({
-    data: {
-      bookId,
-      dateStarted: data.dateStarted ?? null,
-      dateFinished: data.dateFinished ?? null,
-      rating: data.rating || null, // 0 = unrated
-    },
+  await prisma.$transaction(async (tx) => {
+    await tx.read.create({
+      data: {
+        bookId,
+        dateStarted: data.dateStarted ?? null,
+        dateFinished: data.dateFinished ?? null,
+        rating: data.rating || null, // 0 = unrated
+      },
+    });
+    await syncTimesRead(tx, bookId);
   });
-  await syncTimesRead(bookId);
 
   revalidateBook(bookId);
   return { success: true };
@@ -149,8 +163,10 @@ export async function deletePastRead(readId: string): Promise<void> {
   });
   if (!existing) return;
 
-  await prisma.read.delete({ where: { id: readId } });
-  await syncTimesRead(existing.bookId);
+  await prisma.$transaction(async (tx) => {
+    await tx.read.delete({ where: { id: readId } });
+    await syncTimesRead(tx, existing.bookId);
+  });
 
   revalidateBook(existing.bookId);
 }
