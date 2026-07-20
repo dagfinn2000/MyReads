@@ -79,18 +79,26 @@ export async function GET() {
   zip.file("library.json", JSON.stringify(payload, null, 2));
 
   // Bundle every locally cached cover. A missing file is not an error — the
-  // book row simply exports without its image, exactly as before.
+  // book row simply exports without its image, exactly as before. Files are
+  // read concurrently but added to the zip in book order, so the archive
+  // layout stays deterministic.
   const dir = coversDir();
-  for (const book of books) {
-    if (!book.coverUrl?.startsWith("/api/covers/")) continue;
-    const filename = path.basename(book.coverUrl);
-    try {
-      const buf = await fs.readFile(path.join(dir, filename));
-      // Covers are already-compressed images; deflating again wastes CPU.
-      zip.file(`covers/${filename}`, buf, { compression: "STORE" });
-    } catch {
-      // cover cache miss — skip
-    }
+  const coverFiles = await Promise.all(
+    books
+      .filter((b) => b.coverUrl?.startsWith("/api/covers/"))
+      .map(async (book) => {
+        const filename = path.basename(book.coverUrl!);
+        try {
+          return { filename, buf: await fs.readFile(path.join(dir, filename)) };
+        } catch {
+          return null; // cover cache miss — skip
+        }
+      }),
+  );
+  for (const file of coverFiles) {
+    if (!file) continue;
+    // Covers are already-compressed images; deflating again wastes CPU.
+    zip.file(`covers/${file.filename}`, file.buf, { compression: "STORE" });
   }
 
   const body = await zip.generateAsync({

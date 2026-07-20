@@ -78,6 +78,7 @@ export async function updateBook(
 
   const existing = await prisma.book.findFirst({
     where: { id: bookId, userId },
+    select: { coverUrl: true },
   });
   if (!existing) return { error: "Book not found" };
 

@@ -25,6 +25,17 @@ export default async function BookDetailPage({
   const { id } = await params;
   const userId = session.user.id;
 
+  // Kicked off before the book fetch so the two round-trips overlap. The
+  // no-op catch keeps a 404'd render (which never awaits this) from turning
+  // a failed shelf query into an unhandled rejection; the Promise.all below
+  // still sees the original promise and surfaces the error normally.
+  const shelvesPromise = prisma.shelf.findMany({
+    where: { userId },
+    select: { id: true, name: true },
+    orderBy: { name: "asc" },
+  });
+  shelvesPromise.catch(() => {});
+
   const book = await prisma.book.findFirst({
     where: { id, userId },
     include: {
@@ -51,11 +62,7 @@ export default async function BookDetailPage({
   // Sidebar data: every shelf (for the assignment card) and, if this book is
   // part of a series, its siblings ordered by series number.
   const [allShelves, seriesBooks] = await Promise.all([
-    prisma.shelf.findMany({
-      where: { userId },
-      select: { id: true, name: true },
-      orderBy: { name: "asc" },
-    }),
+    shelvesPromise,
     book.seriesName
       ? prisma.book.findMany({
           where: {
@@ -63,6 +70,8 @@ export default async function BookDetailPage({
             seriesName: { equals: book.seriesName, mode: "insensitive" },
             id: { not: book.id },
           },
+          // Just what the cover strip renders — not the full rows.
+          select: { id: true, title: true, coverUrl: true, seriesNumber: true },
           orderBy: { seriesNumber: "asc" },
         })
       : Promise.resolve([]),

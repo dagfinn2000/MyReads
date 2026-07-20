@@ -28,7 +28,8 @@ export default async function StatsPage() {
   if (!session?.user?.id) return null;
 
   const userId = session.user.id;
-  const [books, pastReads, goals, progressEntries, quoteCount] = await Promise.all([
+  const [books, pastReads, goals, progressEntries, quoteCount, randomQuotes] =
+    await Promise.all([
     prisma.book.findMany({
       where: { userId },
       select: {
@@ -55,18 +56,21 @@ export default async function StatsPage() {
       select: { bookId: true, page: true, date: true },
     }),
     prisma.quote.count({ where: { book: { userId } } }),
+    // A random quote for the serendipity card — new one on every visit.
+    // ORDER BY random() picks uniformly in one query, where the previous
+    // count-then-skip needed the count first (a second round-trip).
+    prisma.$queryRaw<
+      { id: string; text: string; page: number | null; bookId: string; bookTitle: string }[]
+    >`
+      SELECT q."id", q."text", q."page", b."id" AS "bookId", b."title" AS "bookTitle"
+      FROM "Quote" q
+      JOIN "Book" b ON b."id" = q."bookId"
+      WHERE b."userId" = ${userId}
+      ORDER BY random()
+      LIMIT 1`,
   ]);
 
-  // A random quote for the serendipity card — new one on every visit.
-  const randomQuote =
-    quoteCount > 0
-      ? await prisma.quote.findFirst({
-          where: { book: { userId } },
-          skip: Math.floor(Math.random() * quoteCount),
-          orderBy: { createdAt: "asc" },
-          include: { book: { select: { id: true, title: true } } },
-        })
-      : null;
+  const randomQuote = randomQuotes[0] ?? null;
 
   const read = books.filter((b) => b.status === ReadingStatus.READ);
   const reading = books.filter((b) => b.status === ReadingStatus.READING);
@@ -318,10 +322,10 @@ export default async function StatsPage() {
               <p className="text-sm text-muted-foreground">
                 —{" "}
                 <Link
-                  href={`/books/${randomQuote.book.id}`}
+                  href={`/books/${randomQuote.bookId}`}
                   className="font-medium hover:underline"
                 >
-                  {randomQuote.book.title}
+                  {randomQuote.bookTitle}
                 </Link>
                 {randomQuote.page != null && `, p. ${randomQuote.page}`}
                 {" · "}

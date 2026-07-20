@@ -158,18 +158,8 @@ export default async function BooksPage({
   // saved on the account, so the chosen sort survives clicking away.
   const hasViewParams =
     sp.sort !== undefined || sp.dir !== undefined || sp.group !== undefined;
-  const savedView = hasViewParams
-    ? DEFAULT_LIBRARY_VIEW
-    : parseLibraryView(
-        (
-          await prisma.user.findUnique({
-            where: { id: userId },
-            select: { libraryView: true },
-          })
-        )?.libraryView,
-      );
 
-  const values: FilterValues = {
+  const filters = {
     shelf: param(sp.shelf) || "all",
     shelfId: param(sp.shelfId),
     q: param(sp.q),
@@ -178,44 +168,66 @@ export default async function BooksPage({
     owned: param(sp.owned) || "all",
     minRating: param(sp.minRating),
     series: param(sp.series),
-    group: param(sp.group) || savedView.group,
-    sort: param(sp.sort) || savedView.sort,
-    dir: param(sp.dir) || savedView.dir,
   };
 
-  const shelf = Object.values(ReadingStatus).find((s) => s === values.shelf);
-  const format = Object.values(BookFormat).find((f) => f === values.format);
-  const minRating = parseInt(values.minRating, 10);
+  const shelf = Object.values(ReadingStatus).find((s) => s === filters.shelf);
+  const format = Object.values(BookFormat).find((f) => f === filters.format);
+  const minRating = parseInt(filters.minRating, 10);
 
   const where: Prisma.BookWhereInput = {
     userId,
     ...(shelf && { status: shelf }),
     ...(format && { format }),
-    ...(values.owned === "owned" && { owned: true }),
-    ...(values.owned === "wishlist" && { owned: false }),
+    ...(filters.owned === "owned" && { owned: true }),
+    ...(filters.owned === "wishlist" && { owned: false }),
     ...(minRating >= 1 && { rating: { gte: minRating } }),
-    ...(values.tag && values.tag !== "all" && { tags: { has: values.tag } }),
-    ...(values.shelfId && { shelves: { some: { id: values.shelfId } } }),
-    ...(values.series && {
-      seriesName: { equals: values.series, mode: "insensitive" as const },
+    ...(filters.tag && filters.tag !== "all" && { tags: { has: filters.tag } }),
+    ...(filters.shelfId && { shelves: { some: { id: filters.shelfId } } }),
+    ...(filters.series && {
+      seriesName: { equals: filters.series, mode: "insensitive" as const },
     }),
-    ...(values.q && { searchText: { contains: values.q.toLowerCase() } }),
+    ...(filters.q && { searchText: { contains: filters.q.toLowerCase() } }),
   };
 
-  const [books, statusCounts, tagRows, shelves] = await Promise.all([
+  const [books, statusCounts, tagRows, shelves, viewUser] = await Promise.all([
     prisma.book.findMany({ where, select: librarySelect }),
     prisma.book.groupBy({
       by: ["status"],
       where: { userId },
       _count: { _all: true },
     }),
-    prisma.book.findMany({ where: { userId }, select: { tags: true } }),
+    // Tag names + occurrence counts across the whole library, aggregated in
+    // SQL instead of shipping every book's tags array out of the database.
+    prisma.$queryRaw<{ tag: string; count: number }[]>`
+      SELECT t AS tag, COUNT(*)::int AS count
+      FROM "Book", LATERAL unnest("tags") AS t
+      WHERE "userId" = ${userId}
+      GROUP BY t`,
     prisma.shelf.findMany({
       where: { userId },
       include: { _count: { select: { books: true } } },
       orderBy: { name: "asc" },
     }),
+    // The saved view only affects sort/group below, never the where clause,
+    // so its lookup can ride in the same round of queries.
+    hasViewParams
+      ? null
+      : prisma.user.findUnique({
+          where: { id: userId },
+          select: { libraryView: true },
+        }),
   ]);
+
+  const savedView = hasViewParams
+    ? DEFAULT_LIBRARY_VIEW
+    : parseLibraryView(viewUser?.libraryView);
+
+  const values: FilterValues = {
+    ...filters,
+    group: param(sp.group) || savedView.group,
+    sort: param(sp.sort) || savedView.sort,
+    dir: param(sp.dir) || savedView.dir,
+  };
 
   const sorted = sortBooks(books, values.sort, values.dir);
   const groups = groupBooks(sorted, values.group);
@@ -225,11 +237,11 @@ export default async function BooksPage({
     counts[row.status] = row._count._all;
     counts.all += row._count._all;
   }
-  const allTags = [...new Set(tagRows.flatMap((r) => r.tags))].sort();
+  // Sorted in JS (not ORDER BY) so tag ordering stays exactly what the
+  // previous [...new Set(...)].sort() produced, independent of DB collation.
+  const allTags = tagRows.map((r) => r.tag).sort();
   const tagCounts: Record<string, number> = {};
-  for (const row of tagRows) {
-    for (const t of row.tags) tagCounts[t] = (tagCounts[t] ?? 0) + 1;
-  }
+  for (const row of tagRows) tagCounts[row.tag] = row.count;
 
   // Current params as plain strings, for shelf/status links.
   const flatParams: Record<string, string> = {};
