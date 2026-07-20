@@ -88,11 +88,6 @@ export async function updateBook(
   const data = parsed.data;
   const newCover = data.coverUrl ?? null;
 
-  // If the cover changed away from a cached file, clean the old file up.
-  if (existing.coverUrl !== newCover) {
-    await deleteCachedCover(existing.coverUrl);
-  }
-
   await prisma.book.update({
     where: { id: bookId },
     data: {
@@ -112,7 +107,11 @@ export async function updateBook(
     },
   });
 
+  // Only after the update lands: clean up the replaced cached file (doing
+  // it earlier would leave the row pointing at a deleted image if the
+  // update failed) and pull a new remote cover into the cache.
   if (existing.coverUrl !== newCover) {
+    await deleteCachedCover(existing.coverUrl);
     await localizeCover(bookId, newCover);
   }
 
