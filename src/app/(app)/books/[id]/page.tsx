@@ -75,7 +75,7 @@ export default async function BookDetailPage({
   return (
     <div className="grid gap-6 md:grid-cols-[240px_1fr]">
       <div className="grid content-start gap-3">
-        <BookCover book={book} className="aspect-[2/3] w-full max-w-60" />
+        <BookCover book={book} className="aspect-[2/3] w-full max-w-60" loading="eager" />
         <div className="flex gap-2">
           <Button asChild variant="outline" size="sm">
             <Link href={`/books/${book.id}/edit`}>

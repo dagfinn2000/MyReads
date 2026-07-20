@@ -155,6 +155,8 @@ export function ImportSearch({
                     <img
                       src={r.coverUrl.replace("-L.jpg", "-S.jpg")}
                       alt=""
+                      loading="lazy"
+                      decoding="async"
                       className="h-full w-full object-cover"
                     />
                   ) : (

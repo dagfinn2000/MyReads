@@ -6,13 +6,18 @@ import { Badge } from "@/components/ui/badge";
 import { Stars } from "@/components/stars";
 import { STATUS_BADGE_CLASS, STATUS_LABELS } from "@/lib/display";
 
-/** Cover image with a graceful placeholder when there's no cover. */
+/** Cover image with a graceful placeholder when there's no cover.
+ *  Lazy by default — grids request hundreds of covers at once, and the
+ *  below-the-fold ones shouldn't compete with the visible page. The detail
+ *  page passes `loading="eager"` for its above-the-fold hero cover. */
 export function BookCover({
   book,
   className,
+  loading = "lazy",
 }: {
   book: Pick<Book, "title" | "coverUrl">;
   className?: string;
+  loading?: "eager" | "lazy";
 }) {
   return (
     <div
@@ -23,6 +28,8 @@ export function BookCover({
         <img
           src={book.coverUrl}
           alt={`Cover of ${book.title}`}
+          loading={loading}
+          decoding="async"
           className="h-full w-full object-cover"
         />
       ) : (
