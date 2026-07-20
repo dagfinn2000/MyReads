@@ -138,7 +138,10 @@ export function ImportSearch({
         </p>
       )}
 
-      <ul className="grid gap-2">
+      {/* grid-cols-1 (minmax(0,1fr)) caps the track at the container width;
+          a bare `grid` sizes its implicit column by content, so one long
+          nowrap title would stretch every card past the page edge. */}
+      <ul className="grid grid-cols-1 gap-2">
         {results.map((r, i) => {
           const key = r.openLibraryId ?? `${r.title}-${i}`;
           return (

@@ -67,11 +67,16 @@ export default async function QuotesPage({
           </p>
         </div>
       ) : (
-        <ul className="grid gap-3">
+        // grid-cols-1 (minmax(0,1fr)) caps the track at the container width;
+        // a bare `grid` would let a long nowrap book title stretch every
+        // quote card past the page edge instead of truncating.
+        <ul className="grid grid-cols-1 gap-3">
           {quotes.map((quote) => (
             <li key={quote.id}>
               <Card>
-                <CardContent className="grid gap-3 pt-0">
+                {/* grid-cols-1 here too: the card's inner track must also
+                    clamp, or the truncate on the book line never engages. */}
+                <CardContent className="grid grid-cols-1 gap-3 pt-0">
                   <blockquote className="whitespace-pre-line border-l-2 border-primary/50 pl-3 text-sm leading-relaxed">
                     {quote.text}
                   </blockquote>
