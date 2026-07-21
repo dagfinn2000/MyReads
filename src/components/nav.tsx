@@ -8,6 +8,7 @@ import {
   Plus,
   Quote,
   ScanSearch,
+  UserRound,
 } from "lucide-react";
 import { auth, signOut } from "@/auth";
 import { Button } from "@/components/ui/button";
@@ -74,9 +75,14 @@ export async function Nav() {
             </a>
           </Button>
           <ThemePicker />
-          <span className="hidden text-sm text-muted-foreground md:inline">
-            {session?.user?.name}
-          </span>
+          <Button asChild variant="ghost" size="sm" title="Account">
+            <Link href="/account">
+              <UserRound data-slot="icon" />
+              <span className="hidden text-muted-foreground md:inline">
+                {session?.user?.name}
+              </span>
+            </Link>
+          </Button>
           <form
             action={async () => {
               "use server";

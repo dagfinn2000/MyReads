@@ -33,7 +33,11 @@ export default function LoginPage() {
     });
 
     if (res?.error) {
-      setError("Invalid username or password");
+      setError(
+        res.code === "rate-limited"
+          ? "Too many failed attempts — wait a few minutes and try again."
+          : "Invalid username or password",
+      );
       setBusy(false);
     } else {
       router.push("/books");

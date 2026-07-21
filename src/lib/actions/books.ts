@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { after } from "next/server";
 import type { Prisma } from "@prisma/client";
 import { ReadingStatus } from "@prisma/client";
 import { z } from "zod";
@@ -19,13 +20,29 @@ const statusField = z.nativeEnum(ReadingStatus).catch(ReadingStatus.WANT_TO_READ
  * If the book was saved with a remote cover URL, pull it into the local
  * cache and point the row at the cached copy. Best-effort: on failure the
  * remote URL stays and the UI still works.
+ *
+ * Runs via `after()` — the download can take seconds on a slow image host,
+ * and the save response shouldn't wait for it. The page renders the remote
+ * URL until the cached copy lands; every book page after that gets the
+ * local file.
+ *
+ * One delayed retry: Open Library covers redirect to archive.org, which
+ * extracts them from zip archives on demand — a cold request can take 10s+
+ * or fail outright while the very next one is instant. Now that no user is
+ * waiting, retrying is free and rescues most of those covers.
  */
-async function localizeCover(bookId: string, coverUrl: string | null) {
+function localizeCoverAfterResponse(bookId: string, coverUrl: string | null) {
   if (!coverUrl || !/^https?:\/\//.test(coverUrl)) return;
-  const localUrl = await cacheCoverImage(coverUrl, bookId);
-  if (localUrl) {
-    await prisma.book.update({ where: { id: bookId }, data: { coverUrl: localUrl } });
-  }
+  after(async () => {
+    let localUrl = await cacheCoverImage(coverUrl, bookId);
+    if (!localUrl) {
+      await new Promise((r) => setTimeout(r, 10_000));
+      localUrl = await cacheCoverImage(coverUrl, bookId);
+    }
+    if (localUrl) {
+      await prisma.book.update({ where: { id: bookId }, data: { coverUrl: localUrl } });
+    }
+  });
 }
 
 /** Create a book from the add form (manual or import-prefilled). */
@@ -63,7 +80,7 @@ export async function createBook(
     },
   });
 
-  await localizeCover(book.id, book.coverUrl);
+  localizeCoverAfterResponse(book.id, book.coverUrl);
 
   revalidatePath("/books");
   redirect(`/books/${book.id}`);
@@ -114,7 +131,7 @@ export async function updateBook(
   // update failed) and pull a new remote cover into the cache.
   if (existing.coverUrl !== newCover) {
     await deleteCachedCover(existing.coverUrl);
-    await localizeCover(bookId, newCover);
+    localizeCoverAfterResponse(bookId, newCover);
   }
 
   revalidatePath("/books");

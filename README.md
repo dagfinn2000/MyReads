@@ -123,7 +123,13 @@ surface area.
   icon and name.
 - **Auth** — username/password accounts via Auth.js (Credentials provider),
   bcrypt-hashed passwords, JWT sessions. Registration can be disabled once
-  your account exists.
+  your account exists, and both login and registration are rate-limited
+  (in-memory, per username and per IP) so an internet-facing instance can't
+  be password-guessed or flooded with junk accounts.
+- **Account page** — change your password (current password required) or
+  delete the account entirely: everything cascades — books, history, quotes,
+  shelves, goals, cached covers — after a password-confirmed two-step, with
+  a backup download one click away.
 
 Deliberately out of scope: anything social, recommendation engines, CSV
 import.
@@ -221,7 +227,13 @@ npm run dev                # http://localhost:3000
 ```
 
 Useful scripts: `npm run build` (prisma generate + production build),
-`npm run db:studio` (browse the DB), `npm run db:migrate` (apply migrations).
+`npm test` (unit tests — Vitest, no DB needed), `npm run db:studio`
+(browse the DB), `npm run db:migrate` (apply migrations).
+
+The unit tests cover the logic most prone to silent breakage: ISBN 10↔13
+conversion, reading-pass boundaries and pages-per-day math, streaks, the
+surname/series shelf-filing rules, saved-view parsing, and the auth rate
+limiter.
 
 ## Tech stack
 
@@ -232,6 +244,7 @@ Useful scripts: `npm run build` (prisma generate + production build),
   JWT sessions, bcryptjs hashing
 - **[Tailwind CSS v4](https://tailwindcss.com/)** + **[shadcn/ui](https://ui.shadcn.com/)**
 - **[Zod](https://zod.dev/)** for validation
+- **[Vitest](https://vitest.dev/)** for unit tests (`npm test`)
 
 ## Architecture notes
 
@@ -241,16 +254,18 @@ src/
 │  ├─ (auth)/          login & register (no nav shell)
 │  ├─ (app)/           authenticated pages: books (library), books/new,
 │  │                   books/[id], books/[id]/edit, books/check, quotes,
-│  │                   stats, stats/year/[year]
+│  │                   stats, stats/year/[year], account
 │  └─ api/             auth (Auth.js), register, metadata (search/details/
 │                      covers), library/check, cover upload & serving,
 │                      backup export/import
 ├─ components/         UI (shadcn/ui in components/ui, app components beside)
 ├─ lib/
 │  ├─ actions/         server actions: books & reading data, reads, quotes,
-│  │                   shelves, tags, goals (all with ownership checks)
+│  │                   shelves, tags, goals, account (all with ownership
+│  │                   checks)
 │  ├─ metadata/        Open Library + Google Books + nb.no clients, DB cache
 │  ├─ covers.ts        cover image download/cache
+│  ├─ rate-limit.ts    in-memory throttle for login/registration attempts
 │  └─ validation.ts    zod schemas shared by actions and API routes
 ├─ auth.config.ts      edge-safe Auth.js config (used by proxy)
 ├─ auth.ts             full Auth.js config (Credentials + Prisma + bcrypt)

@@ -1,6 +1,13 @@
 import { z } from "zod";
 import { BookFormat, ReadingStatus } from "@prisma/client";
 
+/** Shared by registration and the change-password form. */
+export const passwordSchema = z
+  .string()
+  .min(8, "Password must be at least 8 characters")
+  // bcrypt only uses the first 72 bytes; reject rather than silently truncate
+  .max(72, "Password must be at most 72 characters");
+
 export const registerSchema = z.object({
   username: z
     .string()
@@ -11,11 +18,14 @@ export const registerSchema = z.object({
       /^[a-zA-Z0-9._-]+$/,
       "Username may only contain letters, numbers, and . _ -",
     ),
-  password: z
-    .string()
-    .min(8, "Password must be at least 8 characters")
-    // bcrypt only uses the first 72 bytes; reject rather than silently truncate
-    .max(72, "Password must be at most 72 characters"),
+  password: passwordSchema,
+});
+
+/** Account page: change password. The current password re-proves identity —
+ *  a stolen session cookie alone must not be enough to take the account. */
+export const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1, "Current password is required"),
+  newPassword: passwordSchema,
 });
 
 /** Shared shape for creating and editing books. Forms submit strings; this
@@ -68,12 +78,17 @@ export const bookSchema = z.object({
     .optional(),
   tags: z
     .string()
-    .transform((s) =>
-      s
-        .split(",")
-        .map((t) => t.trim().toLowerCase())
-        .filter(Boolean),
-    ),
+    .transform((s) => [
+      // Deduped: metadata subjects often differ only in case ("Fiction",
+      // "fiction"), which collide after lowercasing — and duplicate tags
+      // break React keys wherever tags render.
+      ...new Set(
+        s
+          .split(",")
+          .map((t) => t.trim().toLowerCase())
+          .filter(Boolean),
+      ),
+    ]),
   seriesName: z
     .string()
     .trim()
