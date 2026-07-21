@@ -174,13 +174,18 @@ monthly rhythm, ratings, and top genres:
 | --- | --- |
 | ![Theme picker](docs/themes.png) | ![Backup card](docs/backup.png) |
 
+**Account** — change your password or delete the account (a backup one click
+away); both are password-confirmed:
+
+![Account page](docs/account.png)
+
 ## Quick start (Docker)
 
 Requirements: Docker with the compose plugin.
 
 ```bash
-git clone https://github.com/dagfinn2000/myreads.git
-cd myreads
+git clone https://github.com/dagfinn2000/MyReads.git
+cd MyReads
 cp .env.example .env
 # edit .env: set POSTGRES_PASSWORD and AUTH_SECRET (openssl rand -base64 32)
 docker compose up -d
@@ -282,10 +287,13 @@ Design decisions worth knowing about:
 - **Metadata caching is a read-through table** (`MetadataCache`) keyed by
   `(source, normalized query)` with a one-week TTL and stale-if-error
   fallback, so a flaky Open Library never breaks previously working lookups.
-- **Cover images are cached locally.** On save, a remote cover URL is
-  downloaded to `COVERS_DIR` and the book is repointed to
-  `/api/covers/<id>.<ext>`; deletion cleans the file up. Failures are
-  non-fatal (the remote URL simply stays).
+- **Cover images are cached locally.** After a save the remote cover URL is
+  downloaded to `COVERS_DIR` in the background (via `after()`, so it never
+  blocks the save) and the book is repointed to `/api/covers/<id>-<hash>.<ext>`
+  — the content hash gives a changed cover a fresh, immutably-cacheable URL. A
+  single delayed retry rescues hosts that are slow on a cold request (Open
+  Library covers redirect to archive.org, which can lag the first time).
+  Deletion cleans the file up; failures are non-fatal (the remote URL stays).
 - **Mutations are server actions** with per-user ownership checks;
   list/detail pages are server components querying Prisma directly. The
   handful of client-fetched API routes back interactive UI only — metadata
