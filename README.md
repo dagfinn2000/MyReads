@@ -239,19 +239,22 @@ Useful scripts: `npm run build` (prisma generate + production build),
 src/
 ├─ app/
 │  ├─ (auth)/          login & register (no nav shell)
-│  ├─ (app)/           authenticated pages: books, books/new, books/[id],
-│  │                   books/[id]/edit, stats
-│  └─ api/             auth (Auth.js), register, metadata search/details,
-│                      cached cover serving
+│  ├─ (app)/           authenticated pages: books (library), books/new,
+│  │                   books/[id], books/[id]/edit, books/check, quotes,
+│  │                   stats, stats/year/[year]
+│  └─ api/             auth (Auth.js), register, metadata (search/details/
+│                      covers), library/check, cover upload & serving,
+│                      backup export/import
 ├─ components/         UI (shadcn/ui in components/ui, app components beside)
 ├─ lib/
-│  ├─ actions/books.ts server actions: create/update/delete + reading data
+│  ├─ actions/         server actions: books & reading data, reads, quotes,
+│  │                   shelves, tags, goals (all with ownership checks)
 │  ├─ metadata/        Open Library + Google Books + nb.no clients, DB cache
 │  ├─ covers.ts        cover image download/cache
 │  └─ validation.ts    zod schemas shared by actions and API routes
-├─ auth.config.ts      edge-safe Auth.js config (used by middleware)
+├─ auth.config.ts      edge-safe Auth.js config (used by proxy)
 ├─ auth.ts             full Auth.js config (Credentials + Prisma + bcrypt)
-└─ middleware.ts       route protection
+└─ proxy.ts            route protection (Next 16; formerly middleware.ts)
 ```
 
 Design decisions worth knowing about:
@@ -269,9 +272,10 @@ Design decisions worth knowing about:
   `/api/covers/<id>.<ext>`; deletion cleans the file up. Failures are
   non-fatal (the remote URL simply stays).
 - **Mutations are server actions** with per-user ownership checks;
-  list/detail pages are server components querying Prisma directly. The only
-  client-fetch API routes are the metadata endpoints (interactive search) and
-  cover serving.
+  list/detail pages are server components querying Prisma directly. The
+  handful of client-fetched API routes back interactive UI only — metadata
+  search/details/covers, the library ownership check, cover upload, and
+  backup import — plus the route that serves cached covers.
 - **Migrations run on container start** (`prisma migrate deploy` in the
   entrypoint) — first boot creates the schema, upgrades apply pending
   migrations, and an already-migrated DB is a no-op.
