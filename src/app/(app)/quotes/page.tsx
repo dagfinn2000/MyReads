@@ -77,11 +77,11 @@ export default async function QuotesPage({
                 {/* grid-cols-1 here too: the card's inner track must also
                     clamp, or the truncate on the book line never engages. */}
                 <CardContent className="grid grid-cols-1 gap-3 pt-0">
-                  <blockquote className="whitespace-pre-line border-l-2 border-primary/50 pl-3 text-sm leading-relaxed">
+                  <blockquote className="whitespace-pre-line break-words border-l-2 border-primary/50 pl-3 text-sm leading-relaxed">
                     {quote.text}
                   </blockquote>
                   {quote.note && (
-                    <p className="text-sm italic text-muted-foreground">
+                    <p className="break-words text-sm italic text-muted-foreground">
                       {quote.note}
                     </p>
                   )}

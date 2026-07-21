@@ -33,16 +33,18 @@ export function QuotesCard({
       <CardHeader>
         <CardTitle>Quotes &amp; highlights</CardTitle>
       </CardHeader>
-      <CardContent className="grid gap-4">
+      {/* grid-cols-1 clamps the tracks so a long unbroken token (a pasted
+          URL, say) wraps via break-words instead of stretching the card. */}
+      <CardContent className="grid grid-cols-1 gap-4">
         {quotes.length > 0 && (
-          <ul className="grid gap-3">
+          <ul className="grid grid-cols-1 gap-3">
             {quotes.map((quote) => (
-              <li key={quote.id} className="grid gap-1">
+              <li key={quote.id} className="grid grid-cols-1 gap-1">
                 {editingId === quote.id ? (
                   <QuoteForm quote={quote} onDone={() => setEditingId(null)} />
                 ) : (
                   <>
-                    <blockquote className="whitespace-pre-line border-l-2 border-primary/40 pl-3 text-sm leading-relaxed">
+                    <blockquote className="whitespace-pre-line break-words border-l-2 border-primary/40 pl-3 text-sm leading-relaxed">
                       {quote.text}
                     </blockquote>
                     <div className="flex min-h-7 flex-wrap items-center gap-x-2 pl-3">
@@ -52,7 +54,7 @@ export function QuotesCard({
                         </span>
                       )}
                       {quote.note && (
-                        <span className="text-xs italic text-muted-foreground">
+                        <span className="min-w-0 break-words text-xs italic text-muted-foreground">
                           {quote.note}
                         </span>
                       )}

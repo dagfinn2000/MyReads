@@ -249,7 +249,7 @@ export default async function StatsPage() {
         </CardContent>
       </Card>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader>
             <CardTitle>Books read per year</CardTitle>
@@ -315,8 +315,8 @@ export default async function StatsPage() {
             <CardHeader>
               <CardTitle>From your quotes</CardTitle>
             </CardHeader>
-            <CardContent className="grid gap-3">
-              <blockquote className="whitespace-pre-line border-l-2 border-primary/50 pl-3 text-sm leading-relaxed">
+            <CardContent className="grid grid-cols-1 gap-3">
+              <blockquote className="whitespace-pre-line break-words border-l-2 border-primary/50 pl-3 text-sm leading-relaxed">
                 {randomQuote.text}
               </blockquote>
               <p className="text-sm text-muted-foreground">

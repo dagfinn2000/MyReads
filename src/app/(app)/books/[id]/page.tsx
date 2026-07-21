@@ -82,7 +82,10 @@ export default async function BookDetailPage({
     : null;
 
   return (
-    <div className="grid gap-6 md:grid-cols-[240px_1fr]">
+    // Both column definitions clamp their track minimums to 0 — with the
+    // default (auto) minimum, one unbreakable token in the description (Open
+    // Library URLs, say) would stretch the whole page past the viewport.
+    <div className="grid grid-cols-1 gap-6 md:grid-cols-[240px_minmax(0,1fr)]">
       <div className="grid content-start gap-3">
         <BookCover book={book} className="aspect-[2/3] w-full max-w-60" loading="eager" />
         <div className="flex gap-2">
@@ -96,7 +99,7 @@ export default async function BookDetailPage({
         </div>
       </div>
 
-      <div className="grid content-start gap-4">
+      <div className="grid grid-cols-1 content-start gap-4">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight">{book.title}</h1>
           {book.authors.length > 0 && (
@@ -165,7 +168,9 @@ export default async function BookDetailPage({
         </dl>
 
         {book.description && (
-          <p className="max-w-prose whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+          // break-words: imported descriptions can contain long raw URLs,
+          // which would otherwise refuse to wrap and overflow on phones.
+          <p className="max-w-prose whitespace-pre-line break-words text-sm leading-relaxed text-muted-foreground">
             {book.description}
           </p>
         )}
