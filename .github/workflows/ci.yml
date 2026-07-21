@@ -1,0 +1,43 @@
+name: CI
+
+# Runs the project's checks on every push and pull request. This is
+# tooling only — it executes in GitHub's cloud and never ships with the app.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22" # README's documented minimum (Node 22+)
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # tsc and the build both need the generated Prisma client, which no
+      # postinstall hook produces — so generate it explicitly first.
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: Type-check
+        run: npx tsc --noEmit
+
+      - name: Unit tests
+        run: npm test
+
+      # A production build catches breakage the unit tests can't. The pages
+      # are all force-dynamic, so this needs no database — the dummy values
+      # below only satisfy env look-ups at build time, never a connection.
+      - name: Build
+        run: npm run build
+        env:
+          DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
+          AUTH_SECRET: ci-dummy-secret-not-used-at-build
+          AUTH_TRUST_HOST: "true"
