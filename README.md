@@ -225,7 +225,7 @@ Useful scripts: `npm run build` (prisma generate + production build),
 
 ## Tech stack
 
-- **[Next.js 15](https://nextjs.org/)** (App Router, TypeScript) — UI and API
+- **[Next.js 16](https://nextjs.org/)** (App Router, TypeScript) — UI and API
   routes in one codebase, standalone output for a small Docker image
 - **[PostgreSQL](https://www.postgresql.org/)** + **[Prisma](https://www.prisma.io/)**
 - **[Auth.js v5](https://authjs.dev/)** (NextAuth) — Credentials provider,
