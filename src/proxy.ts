@@ -2,8 +2,10 @@ import NextAuth from "next-auth";
 import { authConfig } from "@/auth.config";
 
 /**
- * Route protection. Uses only the edge-safe config — the `authorized`
- * callback in auth.config.ts decides who gets through.
+ * Route protection (Next 16 `proxy` convention — the old middleware.ts,
+ * renamed). Runs on the Node runtime, but keeps using only the lean config —
+ * the `authorized` callback in auth.config.ts decides who gets through
+ * without a database round-trip.
  */
 export default NextAuth(authConfig).auth;
 
