@@ -34,7 +34,16 @@ ENV NODE_ENV=production \
     PORT=3000 \
     COVERS_DIR=/app/data/covers
 
-# Prisma CLI (with its engines) so the entrypoint can `prisma migrate deploy`
+# Prisma CLI (with its engines) so the entrypoint can `prisma migrate deploy`.
+#
+# Copying node_modules/prisma from the deps stage instead was tried, to avoid
+# fetching the CLI twice, and reverted after testing the built image: the CLI
+# is not self-contained. node_modules/.bin/prisma is a symlink that COPY
+# dereferences, stranding it from the .wasm files it loads relative to its own
+# path; and @prisma/config pulls transitive dependencies that live outside
+# both `prisma` and `@prisma`. Copying the full closure would break silently
+# on any Prisma release that adds a dependency, and only a container run would
+# reveal it. Not worth ~50 MB.
 RUN npm install -g --no-audit --no-fund prisma@6
 
 RUN addgroup -S nodejs -g 1001 && adduser -S nextjs -u 1001 -G nodejs
