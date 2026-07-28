@@ -45,6 +45,10 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 # icons 404 in production and Android silently ignores the manifest.
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
+# Housekeeping scripts run by the entrypoint (metadata cache prune) and by
+# hand (orphaned cover prune). They resolve @prisma/client out of the
+# standalone bundle's node_modules.
+COPY --from=builder --chown=nextjs:nodejs /app/scripts ./scripts
 COPY --chown=nextjs:nodejs docker-entrypoint.sh ./
 RUN chmod +x docker-entrypoint.sh && \
     mkdir -p /app/data/covers && chown -R nextjs:nodejs /app/data

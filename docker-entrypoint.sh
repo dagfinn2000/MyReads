@@ -8,5 +8,10 @@ set -e
 echo "[myreads] applying database migrations…"
 prisma migrate deploy --schema /app/prisma/schema.prisma
 
+# Housekeeping: drop expired third-party metadata lookups. Cheap, and the
+# only thing that ever removes them. Never fatal — the script swallows its
+# own errors so a hiccup here can't stop the app from starting.
+node scripts/prune-metadata-cache.mjs || true
+
 echo "[myreads] starting server on :${PORT:-3000}"
 exec node server.js

@@ -12,7 +12,9 @@
     "lint": "eslint .",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate deploy",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "db:prune": "node scripts/prune-metadata-cache.mjs",
+    "covers:prune": "node scripts/prune-covers.mjs"
   },
   "dependencies": {
     "@prisma/client": "^6.5.0",

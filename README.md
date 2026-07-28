@@ -232,8 +232,21 @@ npm run dev                # http://localhost:3000
 ```
 
 Useful scripts: `npm run build` (prisma generate + production build),
-`npm test` (unit tests — Vitest, no DB needed), `npm run db:studio`
-(browse the DB), `npm run db:migrate` (apply migrations).
+`npm test` (unit tests — Vitest, no DB needed), `npm run lint`,
+`npm run db:studio` (browse the DB), `npm run db:migrate` (apply migrations).
+
+### Housekeeping
+
+Two things accumulate on a long-lived instance and are not your data:
+
+- **Expired metadata cache rows.** Pruned automatically on every container
+  start; `npm run db:prune` runs it by hand.
+- **Orphaned cover files** — images written by an upload whose form was never
+  submitted. `npm run covers:prune` reports what it would remove;
+  `npm run covers:prune -- --yes` actually removes it. Files younger than 24
+  hours are always kept, so an upload sitting in an open form is safe. This
+  one is deliberately manual: it deletes files the app cannot prove are
+  needed, which is not something to do unattended on every restart.
 
 The unit tests cover the logic most prone to silent breakage: ISBN 10↔13
 conversion, reading-pass boundaries and pages-per-day math, streaks, the

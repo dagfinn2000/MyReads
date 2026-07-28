@@ -51,6 +51,44 @@ describe("RateLimiter", () => {
   });
 });
 
+describe("metadataLimiter", () => {
+  beforeEach(() => vi.useFakeTimers());
+  afterEach(() => vi.useRealTimers());
+
+  // Guards a third party's budget rather than ours, so unlike the auth
+  // limiters it counts every call, not just failures. Exercised with fake
+  // timers: proving it by making ~90 real requests would mean doing the exact
+  // thing to Open Library that this limit exists to prevent.
+  it("allows a realistic burst of searching, then blocks", () => {
+    const limiter = new RateLimiter(90, 60_000);
+    const key = "metadata:user-1";
+
+    // 30 searches (three catalogue calls each) fit inside one minute.
+    for (let i = 0; i < 90; i++) {
+      expect(limiter.blocked(key), `call ${i + 1}`).toBe(false);
+      limiter.hit(key);
+    }
+    expect(limiter.blocked(key)).toBe(true);
+  });
+
+  it("frees up once the window rolls over", () => {
+    const limiter = new RateLimiter(90, 60_000);
+    const key = "metadata:user-1";
+    for (let i = 0; i < 90; i++) limiter.hit(key);
+    expect(limiter.blocked(key)).toBe(true);
+
+    vi.advanceTimersByTime(60_001);
+    expect(limiter.blocked(key)).toBe(false);
+  });
+
+  it("keys per user, so one busy account cannot spend another's", () => {
+    const limiter = new RateLimiter(90, 60_000);
+    for (let i = 0; i < 90; i++) limiter.hit("metadata:user-1");
+    expect(limiter.blocked("metadata:user-1")).toBe(true);
+    expect(limiter.blocked("metadata:user-2")).toBe(false);
+  });
+});
+
 describe("clientIp", () => {
   const withHops = (hops: string | undefined, fn: () => void) => {
     const prev = process.env.TRUSTED_PROXY_HOPS;
