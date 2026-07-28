@@ -6,6 +6,15 @@ import { authConfig } from "@/auth.config";
  * renamed). Runs on the Node runtime, but keeps using only the lean config —
  * the `authorized` callback in auth.config.ts decides who gets through
  * without a database round-trip.
+ *
+ * Note for session revocation: a token revoked via `tokenVersion` (see
+ * auth.ts) still passes this layer — measured: with the lean config a revoked
+ * cookie reaches the page handler. It is stopped one layer in, where every
+ * page calls `auth()` — which does run the DB-backed `jwt` callback — and
+ * redirects to /login; API routes do their own `auth()` check and return 401.
+ * Keeping the DB out of the proxy is deliberate: it runs on every matched
+ * request, and the check it would duplicate already happens where the data
+ * is actually read.
  */
 export default NextAuth(authConfig).auth;
 

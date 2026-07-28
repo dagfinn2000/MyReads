@@ -66,12 +66,44 @@ export class RateLimiter {
   }
 }
 
-/** First address in x-forwarded-for (set by the reverse proxy), or a shared
- *  fallback key — better to throttle direct-connection clients as one pool
- *  than not at all. */
+/**
+ * The client address, read from x-forwarded-for.
+ *
+ * Counted from the *right*, not the left. X-Forwarded-For is a client-supplied
+ * header that each proxy appends to — nginx's standard
+ * `proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for` produces
+ * "<whatever the client sent>, <real client IP>". Taking the leftmost entry
+ * therefore hands the rate limiter a value the attacker chose, and rotating it
+ * defeats the per-IP budget entirely. The rightmost entries are the ones your
+ * own infrastructure appended and can be trusted.
+ *
+ * TRUSTED_PROXY_HOPS is how many proxies sit between the app and the internet
+ * (default 1 — the usual single reverse proxy). With two hops, the real client
+ * is the second address from the right, and so on. Set it to match your
+ * deployment; too high hands trust back to the client, too low keys on your
+ * own proxy's address and throttles everyone as one pool.
+ *
+ * No header at all (direct LAN access, no proxy) falls back to a shared key —
+ * better to throttle direct-connection clients as one pool than not at all.
+ */
 export function clientIp(headers: Headers): string {
   const forwarded = headers.get("x-forwarded-for");
-  return forwarded?.split(",")[0]?.trim() || "unknown";
+  if (!forwarded) return "unknown";
+
+  const chain = forwarded
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  if (chain.length === 0) return "unknown";
+
+  const hops = Number.parseInt(process.env.TRUSTED_PROXY_HOPS ?? "1", 10);
+  const trusted = Number.isFinite(hops) && hops >= 1 ? hops : 1;
+
+  // Clamp: a chain shorter than the configured hop count means the header
+  // didn't come through the expected path, so use the leftmost entry we have
+  // rather than reading off the end of the array.
+  const index = Math.max(chain.length - trusted, 0);
+  return chain[index] || "unknown";
 }
 
 // Module-level singletons, hung on globalThis so dev hot-reload doesn't

@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
@@ -15,8 +15,12 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-export default function LoginPage() {
+/** Changing your password invalidates every session, including this browser's
+ *  — say so, otherwise being bounced here looks like a bug. */
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const justChangedPassword = searchParams.get("changed") === "1";
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -52,6 +56,12 @@ export default function LoginPage() {
         <CardDescription>Your personal book library</CardDescription>
       </CardHeader>
       <CardContent>
+        {justChangedPassword && (
+          <p className="mb-4 rounded-md border bg-muted/50 p-3 text-sm text-muted-foreground">
+            Password changed. Sign in again — this also signed you out
+            anywhere else you were logged in.
+          </p>
+        )}
         <form onSubmit={handleSubmit} className="grid gap-4">
           <div className="grid gap-2">
             <Label htmlFor="username">Username</Label>
@@ -80,5 +90,15 @@ export default function LoginPage() {
         </form>
       </CardContent>
     </Card>
+  );
+}
+
+export default function LoginPage() {
+  // useSearchParams needs a Suspense boundary to keep this page
+  // prerenderable; the fallback is the same card without the notice.
+  return (
+    <Suspense fallback={<Card className="w-full max-w-sm" />}>
+      <LoginForm />
+    </Suspense>
   );
 }

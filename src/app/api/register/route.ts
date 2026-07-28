@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { clientIp, registerLimiter } from "@/lib/rate-limit";
 import { registerSchema } from "@/lib/validation";
@@ -52,7 +53,21 @@ export async function POST(req: Request) {
   }
 
   const passwordHash = await bcrypt.hash(parsed.data.password, 12);
-  await prisma.user.create({ data: { username, passwordHash } });
+  try {
+    await prisma.user.create({ data: { username, passwordHash } });
+  } catch (err) {
+    // The check above is not atomic: two concurrent signups for the same name
+    // both pass it, and the unique index rejects the loser. That's the
+    // constraint doing its job — report it as the same conflict rather than
+    // letting it surface as an unhandled 500.
+    if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
+      return NextResponse.json(
+        { error: "That username is already taken" },
+        { status: 409 },
+      );
+    }
+    throw err;
+  }
 
   return NextResponse.json({ ok: true }, { status: 201 });
 }

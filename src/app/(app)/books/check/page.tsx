@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { CheckBookClient } from "@/components/check-book-client";
 
@@ -11,7 +12,7 @@ export const metadata = { title: "Do I own this? · MyReads" };
  */
 export default async function CheckBookPage() {
   const session = await auth();
-  if (!session?.user?.id) return null;
+  if (!session?.user?.id) redirect("/login"); // revoked session (see auth.ts)
 
   return (
     <div className="mx-auto grid max-w-xl gap-4">

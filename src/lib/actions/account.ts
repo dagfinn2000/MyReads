@@ -43,7 +43,16 @@ async function verifyPassword(
   return { ok: true };
 }
 
-/** Change the account password (current password required). */
+/**
+ * Change the account password (current password required).
+ *
+ * Bumps `tokenVersion` in the same write, which invalidates every JWT issued
+ * against the old password — the point of changing it after a suspected
+ * compromise is that the other party loses access, and with JWT sessions
+ * there is no session row to delete. That necessarily includes the session
+ * doing the changing, so this signs out and sends you back to /login to sign
+ * in with the new password.
+ */
 export async function changePassword(
   _prev: ActionState,
   formData: FormData,
@@ -62,8 +71,13 @@ export async function changePassword(
   if ("error" in verified) return verified;
 
   const passwordHash = await bcrypt.hash(parsed.data.newPassword, 12);
-  await prisma.user.update({ where: { id: user.id }, data: { passwordHash } });
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { passwordHash, tokenVersion: { increment: 1 } },
+  });
 
+  // Throws Next's redirect — never returns.
+  await signOut({ redirectTo: "/login?changed=1" });
   return { success: true };
 }
 

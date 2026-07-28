@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { updateBook } from "@/lib/actions/books";
@@ -13,7 +13,7 @@ export default async function EditBookPage({
   params: Promise<{ id: string }>;
 }) {
   const session = await auth();
-  if (!session?.user?.id) return null;
+  if (!session?.user?.id) redirect("/login"); // revoked session (see auth.ts)
   const { id } = await params;
 
   const [book, seriesRows] = await Promise.all([

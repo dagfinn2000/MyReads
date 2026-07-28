@@ -34,6 +34,13 @@ model User {
   id           String        @id @default(cuid())
   username     String        @unique
   passwordHash String // bcrypt
+  /// Bumped whenever every existing session should stop working — currently
+  /// a password change. Sessions are JWTs with no server-side row to delete,
+  /// so the token carries the value it was minted with and `auth.ts` rejects
+  /// it once the two disagree. Tokens minted before this column existed have
+  /// no value at all and are treated as 0, so upgrading doesn't sign anyone
+  /// out; the first password change invalidates them like any other.
+  tokenVersion Int           @default(0)
   /// Chosen UI theme (id from lib/themes.ts), so the look follows the
   /// account across browsers. Null = never picked one on this account;
   /// the client falls back to localStorage, then the default.
