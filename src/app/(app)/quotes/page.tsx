@@ -28,30 +28,42 @@ export default async function QuotesPage({
   const sp = await searchParams;
   const q = typeof sp.q === "string" ? sp.q : "";
 
-  const quotes = await prisma.quote.findMany({
-    where: {
-      book: { userId },
-      ...(q && {
-        OR: [
-          { text: { contains: q, mode: "insensitive" as const } },
-          { note: { contains: q, mode: "insensitive" as const } },
-          { book: { is: { searchText: { contains: q.toLowerCase() } } } },
-        ],
-      }),
-    },
-    include: {
-      book: { select: { id: true, title: true, authors: true, coverUrl: true } },
-    },
-    orderBy: { createdAt: "desc" },
-  });
+  // Newest first, capped. A quote collection grows without bound and the page
+  // renders every match; the cap keeps one enormous render from being the
+  // only way to view it, and the count below says when something is hidden.
+  const QUOTE_LIMIT = 200;
+
+  const where = {
+    book: { userId },
+    ...(q && {
+      OR: [
+        { text: { contains: q, mode: "insensitive" as const } },
+        { note: { contains: q, mode: "insensitive" as const } },
+        { book: { is: { searchText: { contains: q.toLowerCase() } } } },
+      ],
+    }),
+  };
+
+  const [quotes, totalQuotes] = await Promise.all([
+    prisma.quote.findMany({
+      where,
+      include: {
+        book: { select: { id: true, title: true, authors: true, coverUrl: true } },
+      },
+      orderBy: { createdAt: "desc" },
+      take: QUOTE_LIMIT,
+    }),
+    prisma.quote.count({ where }),
+  ]);
 
   return (
     <div className="grid gap-4">
       <div className="flex flex-wrap items-center gap-3">
         <h1 className="text-2xl font-semibold tracking-tight">Quotes</h1>
         <span className="text-sm text-muted-foreground tabular-nums">
-          {quotes.length}
+          {totalQuotes}
           {q ? ` matching` : ""}
+          {totalQuotes > quotes.length ? ` · showing ${quotes.length}` : ""}
         </span>
         <div className="w-full sm:ml-auto sm:w-auto">
           <QuotesSearch initial={q} />

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { ReadingStatus } from "@prisma/client";
 import { Check, Dices, SquareCheckBig, X } from "lucide-react";
 import { bulkUpdateBooks } from "@/lib/actions/bulk";
+import { pickRandomBook } from "@/lib/actions/pick";
 import { STATUS_LABELS } from "@/lib/display";
 import { cn } from "@/lib/utils";
 import { BookCard, type BookCardBook } from "@/components/book-card";
@@ -21,22 +22,37 @@ import {
 export interface LibraryGroup {
   title: string;
   books: BookCardBook[];
+  /** The section's real size, which may exceed what's rendered. */
+  total: number;
 }
+
+/** How many more cards each "Show more" asks the server for. */
+const PAGE_STEP = 200;
 
 /**
  * The library grid with bulk-edit support. Normally the cards are plain
  * links; toggling select mode overlays each card with a checkbox hitbox and
  * shows a floating action bar (set status / add to shelf / add tags) that
  * applies to every selected book in one server action.
+ *
+ * Renders only the slice the server sent. "Show more" and "Pick for me" both
+ * go back to the server rather than working from a full in-memory library.
  */
 export function LibraryView({
   books,
   groups,
+  totalCount,
+  searchParams,
   shelves,
 }: {
+  /** Only the books being rendered — the server sorts everything and slices. */
   books: BookCardBook[];
   /** Pre-grouped sections (author/series view) or null for the flat grid. */
   groups: LibraryGroup[] | null;
+  /** How many books match the current filters, rendered or not. */
+  totalCount: number;
+  /** Current URL params, so "Show more" can raise the limit in place. */
+  searchParams: Record<string, string>;
   shelves: { id: string; name: string }[];
 }) {
   const router = useRouter();
@@ -68,13 +84,16 @@ export function LibraryView({
   }
 
   /** Random pick from Want to Read within the current filters (any filtered
-   *  book when the current view has no unread ones). */
+   *  book when the current view has no unread ones).
+   *
+   *  Runs on the server: the page no longer ships the whole library, so
+   *  picking from `books` would silently narrow the shuffle to the loaded
+   *  slice instead of everything matching the filters. */
   function pickForMe() {
-    const pool = books.filter((b) => b.status === ReadingStatus.WANT_TO_READ);
-    const candidates = pool.length > 0 ? pool : books;
-    if (candidates.length === 0) return;
-    const pick = candidates[Math.floor(Math.random() * candidates.length)];
-    router.push(`/books/${pick.id}`);
+    startTransition(async () => {
+      const pick = await pickRandomBook(searchParams);
+      if (pick) router.push(`/books/${pick.id}`);
+    });
   }
 
   function apply() {
@@ -101,6 +120,17 @@ export function LibraryView({
         router.refresh();
       }
     });
+  }
+
+  const hiddenCount = totalCount - books.length;
+
+  /** Raise ?limit= and let the server send the next slice. View state lives
+   *  in the URL throughout this app, so "Show more" is shareable and survives
+   *  a reload like every other part of the view. */
+  function showMore() {
+    const next = new URLSearchParams(searchParams);
+    next.set("limit", String(books.length + PAGE_STEP));
+    router.push(`/books?${next}`, { scroll: false });
   }
 
   const renderGrid = (list: BookCardBook[]) => (
@@ -145,7 +175,8 @@ export function LibraryView({
     <div className="grid gap-4">
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground tabular-nums">
-          {books.length} book{books.length === 1 ? "" : "s"}
+          {totalCount} book{totalCount === 1 ? "" : "s"}
+          {hiddenCount > 0 ? ` · showing ${books.length}` : ""}
         </p>
         {!selectMode ? (
           <div className="flex gap-2">
@@ -170,6 +201,7 @@ export function LibraryView({
               variant="outline"
               size="sm"
               onClick={() => setSelected(new Set(books.map((b) => b.id)))}
+              title="Selects the books currently shown"
             >
               Select all
             </Button>
@@ -188,7 +220,10 @@ export function LibraryView({
               <h2 className="border-b pb-1 text-lg font-medium">
                 {g.title}
                 <span className="ml-2 text-sm font-normal text-muted-foreground tabular-nums">
-                  {g.books.length}
+                  {/* The group's real size, even when only part of it is
+                      rendered — the heading describes the shelf, not the
+                      slice. */}
+                  {g.total}
                 </span>
               </h2>
               {renderGrid(g.books)}
@@ -197,6 +232,14 @@ export function LibraryView({
         </div>
       ) : (
         renderGrid(books)
+      )}
+
+      {hiddenCount > 0 && (
+        <div className="flex justify-center">
+          <Button variant="outline" onClick={showMore}>
+            Show more ({hiddenCount} not shown)
+          </Button>
+        </div>
       )}
 
       {selectMode && (

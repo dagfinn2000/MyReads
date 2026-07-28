@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { HardDriveDownload } from "lucide-react";
 import { setReadingGoal } from "@/lib/actions/goals";
 import { FORMAT_LABELS } from "@/lib/display";
-import { dailyPageTotals } from "@/lib/progress";
+import { dailyPageTotalsForUser } from "@/lib/progress-query";
 import { GoldMedal } from "@/components/gold-medal";
 import { ReadingHeatmap } from "@/components/reading-heatmap";
 import { RestoreBackup } from "@/components/restore-backup";
@@ -29,7 +29,7 @@ export default async function StatsPage() {
   if (!session?.user?.id) redirect("/login"); // revoked session (see auth.ts)
 
   const userId = session.user.id;
-  const [books, pastReads, goals, progressEntries, quoteCount, randomQuotes] =
+  const [books, pastReads, goals, pageTotals, quoteCount, randomQuotes] =
     await Promise.all([
     prisma.book.findMany({
       where: { userId },
@@ -51,11 +51,10 @@ export default async function StatsPage() {
       where: { userId },
       orderBy: { year: "desc" },
     }),
-    // The automatic reading log, for the reading-days heatmap.
-    prisma.progressEntry.findMany({
-      where: { book: { userId } },
-      select: { bookId: true, page: true, date: true },
-    }),
+    // Pages-per-day for the heatmap, aggregated in SQL — one row per reading
+    // day rather than every log entry ever written. See lib/progress-query.ts
+    // for why this is not simply a date-bounded findMany.
+    dailyPageTotalsForUser(userId),
     prisma.quote.count({ where: { book: { userId } } }),
     // A random quote for the serendipity card — new one on every visit.
     // ORDER BY random() picks uniformly in one query, where the previous
@@ -129,9 +128,6 @@ export default async function StatsPage() {
     formatCounts.set(label, (formatCounts.get(label) ?? 0) + 1);
   }
   const maxFormat = Math.max(...formatCounts.values(), 0);
-
-  // Pages per day from the reading log, for the heatmap.
-  const pageTotals = dailyPageTotals(progressEntries);
 
   return (
     <div className="grid gap-6">

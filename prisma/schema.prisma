@@ -135,6 +135,16 @@ model Book {
 
   @@index([userId, status])
   @@index([userId, createdAt])
+  /// Year pages and per-year stats filter and sort on finish date.
+  @@index([userId, dateFinished])
+  /// "Do I own this?" matches by ISBN in both 10- and 13-digit forms.
+  @@index([userId, isbn])
+  /// Tag filter uses array containment, which a btree cannot serve.
+  @@index([tags], type: Gin)
+  /// Library search is a substring match (LIKE '%…%'); the series lookup is
+  /// ILIKE. Both need trigrams — see the 20260728020000 migration.
+  @@index([searchText(ops: raw("gin_trgm_ops"))], type: Gin, map: "Book_searchText_trgm_idx")
+  @@index([seriesName(ops: raw("gin_trgm_ops"))], type: Gin, map: "Book_seriesName_trgm_idx")
 }
 
 /// A *past* completed pass through a book. The Book row itself always holds
@@ -195,6 +205,8 @@ model Quote {
   createdAt DateTime @default(now())
 
   @@index([bookId])
+  /// Quotes are always read newest-first within a book.
+  @@index([bookId, createdAt])
 }
 
 /// Caches raw Open Library / Google Books responses so repeated lookups of the

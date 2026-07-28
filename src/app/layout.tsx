@@ -1,8 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Geist } from "next/font/google";
-import { auth } from "@/auth";
-import { prisma } from "@/lib/prisma";
+import { getCurrentUser } from "@/lib/current-user";
 import { cn } from "@/lib/utils";
 import { DARK_THEME_IDS, THEME_INIT_SCRIPT } from "@/lib/themes";
 
@@ -25,15 +24,10 @@ export default async function RootLayout({
   // The signed-in user's saved theme, server-rendered onto <html> so a
   // fresh browser paints the right palette immediately. Signed-out pages
   // fall back to localStorage via the init script below.
-  let theme: string | null = null;
-  const session = await auth();
-  if (session?.user?.id) {
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: { theme: true },
-    });
-    theme = user?.theme ?? null;
-  }
+  //
+  // Request-scoped cache: the page rendering inside this layout resolves the
+  // same user, and both now share one session decode and one row read.
+  const theme = (await getCurrentUser())?.theme ?? null;
   const dark = theme !== null && DARK_THEME_IDS.includes(theme);
 
   return (
