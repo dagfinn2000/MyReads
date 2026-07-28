@@ -3,9 +3,13 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { importLibrary, type CoverFileReader } from "@/lib/import";
 
-// Generous: a library backup with a thousand bundled cover images still
-// lands well under this.
-const MAX_BYTES = 500 * 1024 * 1024;
+// A library backup with a thousand bundled cover images lands comfortably
+// under this. Lowered from 500 MB deliberately: the zip has to be held in
+// memory to be read at all (JSZip needs the whole buffer), so this ceiling
+// is really "how much RAM a restore may claim", and 500 MB is more than most
+// self-hosted boxes can spare. Raising it means giving the container more
+// memory to match.
+const MAX_BYTES = 200 * 1024 * 1024;
 
 /** Zip local-file-header magic: "PK\x03\x04". */
 function isZip(bytes: Uint8Array): boolean {
@@ -30,14 +34,17 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  // Declared size first, so an oversized upload is refused before its body is
+  // read into memory rather than after.
   const length = parseInt(req.headers.get("content-length") ?? "0", 10);
   if (length > MAX_BYTES) {
-    return NextResponse.json({ error: "File too large (max 500 MB)" }, { status: 413 });
+    return NextResponse.json({ error: "File too large (max 200 MB)" }, { status: 413 });
   }
 
   const bytes = new Uint8Array(await req.arrayBuffer());
+  // Second check catches a body that lied about (or omitted) its length.
   if (bytes.length > MAX_BYTES) {
-    return NextResponse.json({ error: "File too large (max 500 MB)" }, { status: 413 });
+    return NextResponse.json({ error: "File too large (max 200 MB)" }, { status: 413 });
   }
 
   let payload: unknown;

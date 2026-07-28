@@ -122,6 +122,9 @@ export async function updateBook(
       seriesNumber: data.seriesNumber ?? null,
       format: data.format,
       owned: data.owned,
+      // Submitted by the form and validated by bookSchema, but previously
+      // dropped here — the only field of the schema the update ignored.
+      openLibraryId: data.openLibraryId ?? null,
       searchText: buildSearchText(data.title, data.authors, data.seriesName),
     },
   });

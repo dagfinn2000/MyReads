@@ -232,13 +232,38 @@ npm run dev                # http://localhost:3000
 ```
 
 Useful scripts: `npm run build` (prisma generate + production build),
-`npm test` (unit tests — Vitest, no DB needed), `npm run db:studio`
-(browse the DB), `npm run db:migrate` (apply migrations).
+`npm test` (unit tests — Vitest, no DB needed), `npm run lint`,
+`npm run db:studio` (browse the DB), `npm run db:migrate` (apply migrations).
 
-The unit tests cover the logic most prone to silent breakage: ISBN 10↔13
-conversion, reading-pass boundaries and pages-per-day math, streaks, the
-surname/series shelf-filing rules, saved-view parsing, and the auth rate
-limiter.
+### Housekeeping
+
+Two things accumulate on a long-lived instance and are not your data:
+
+- **Expired metadata cache rows.** Pruned automatically on every container
+  start; `npm run db:prune` runs it by hand.
+- **Orphaned cover files** — images written by an upload whose form was never
+  submitted. `npm run covers:prune` reports what it would remove;
+  `npm run covers:prune -- --yes` actually removes it. Files younger than 24
+  hours are always kept, so an upload sitting in an open form is safe. This
+  one is deliberately manual: it deletes files the app cannot prove are
+  needed, which is not something to do unattended on every restart.
+
+There are two test suites:
+
+- **`npm test`** — fast unit tests over the pure logic most prone to silent
+  breakage: ISBN 10↔13 conversion, reading-pass boundaries and pages-per-day
+  math, streaks, the surname/series shelf-filing rules, saved-view parsing,
+  the auth rate limiter, the SSRF address guard, and image sniffing. No
+  database needed.
+- **`npm run test:db:docker`** — database-backed tests against a throwaway
+  `postgres:16-alpine` container: the export→restore round trip, restore's
+  merge and duplicate rules, `timesRead` bookkeeping across re-reads, bulk
+  edit atomicity, and the per-user ownership checks. Use `npm run test:db`
+  instead if you already have a `DATABASE_URL` pointing at a scratch database.
+
+The database suite exists because those are the paths where a stand-in for
+Postgres would reproduce a bug faithfully rather than catch it — and because
+restore is the only feature whose failure loses data you can't get back.
 
 ## Tech stack
 

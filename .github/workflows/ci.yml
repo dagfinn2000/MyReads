@@ -10,6 +10,25 @@ on:
 jobs:
   check:
     runs-on: ubuntu-latest
+
+    # The database-backed tests talk to a real Postgres. A service container
+    # is faster than starting one from the test harness and uses the same
+    # image the app ships against.
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: myreads
+          POSTGRES_PASSWORD: ci
+          POSTGRES_DB: myreads_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U myreads -d myreads_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+
     steps:
       - uses: actions/checkout@v4
 
@@ -34,6 +53,16 @@ jobs:
 
       - name: Unit tests
         run: npm test
+
+      # Restore, the export round trip, and the ownership checks — the paths
+      # where a fake database would reproduce the bug rather than catch it.
+      # DATABASE_URL is set, so the harness uses the service container above
+      # instead of starting its own.
+      - name: Database tests
+        run: npx prisma migrate deploy && npm run test:db
+        env:
+          DATABASE_URL: postgresql://myreads:ci@localhost:5432/myreads_test
+          COVERS_DIR: /tmp/ci-covers
 
       # A production build catches breakage the unit tests can't. The pages
       # are all force-dynamic, so this needs no database — the dummy values

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/auth";
+import { guardMetadataRequest } from "@/lib/api-guard";
 import { getCoverCandidates } from "@/lib/metadata";
 
 /**
@@ -8,10 +8,8 @@ import { getCoverCandidates } from "@/lib/metadata";
  * from Open Library, Google Books, and the National Library of Norway.
  */
 export async function GET(req: Request) {
-  const session = await auth();
-  if (!session?.user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const guard = await guardMetadataRequest();
+  if (!guard.ok) return guard.response;
 
   const params = new URL(req.url).searchParams;
   const isbn = params.get("isbn")?.replace(/[\s-]/g, "") || null;

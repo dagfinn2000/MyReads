@@ -101,14 +101,31 @@ export async function GET() {
     zip.file(`covers/${file.filename}`, file.buf, { compression: "STORE" });
   }
 
-  const body = await zip.generateAsync({
+  // Streamed rather than assembled in memory: generateAsync would hold the
+  // entire archive — every cover image plus the JSON — as one buffer before
+  // the first byte reaches the client, which on a large library is the
+  // difference between a download and an out-of-memory kill on a small VPS.
+  const zipStream = zip.generateInternalStream({
     type: "uint8array",
     compression: "DEFLATE",
   });
 
+  const body = new ReadableStream<Uint8Array>({
+    start(controller) {
+      zipStream
+        .on("data", (chunk: Uint8Array) => controller.enqueue(chunk))
+        .on("error", (err: Error) => controller.error(err))
+        .on("end", () => controller.close());
+      zipStream.resume();
+    },
+    cancel() {
+      // Client went away mid-download — stop generating.
+      zipStream.pause();
+    },
+  });
+
   const date = new Date().toISOString().slice(0, 10);
-  // Fresh copy pins the TS type to Uint8Array<ArrayBuffer> (BodyInit).
-  return new NextResponse(new Uint8Array(body), {
+  return new NextResponse(body, {
     headers: {
       "Content-Type": "application/zip",
       "Content-Disposition": `attachment; filename="myreads-export-${date}.zip"`,

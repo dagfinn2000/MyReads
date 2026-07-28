@@ -9,10 +9,14 @@
     "start": "next start",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:db": "vitest run --config vitest.config.db.ts",
+    "test:db:docker": "scripts/with-test-db.sh npm run test:db",
     "lint": "eslint .",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate deploy",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "db:prune": "node scripts/prune-metadata-cache.mjs",
+    "covers:prune": "node scripts/prune-covers.mjs"
   },
   "dependencies": {
     "@prisma/client": "^6.5.0",

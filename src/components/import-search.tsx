@@ -38,11 +38,17 @@ export function ImportSearch({
     setQuery(isbn);
   }, []);
 
-  // Debounced search: waits 400ms after the last keystroke, cancels any
-  // in-flight request so stale responses can't overwrite newer ones.
+  // Debounced search: waits for a pause in typing, then cancels any in-flight
+  // request so stale responses can't overwrite newer ones.
+  //
+  // 700ms and a 3-character floor, up from 400ms and 2. Every search fans out
+  // to three external catalogues, and each distinct prefix is a fresh cache
+  // miss — at the old settings, typing "brandon sanderson" at a normal pace
+  // sent tens of requests to free services to answer one question. An ISBN
+  // scan is unaffected: it sets the whole query at once.
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
-    if (query.trim().length < 2) {
+    if (query.trim().length < 3) {
       setResults([]);
       setSearching(false);
       return;
@@ -70,9 +76,13 @@ export function ImportSearch({
       } catch {
         if (!controller.signal.aborted) setSearching(false);
       }
-    }, 400);
+    }, 700);
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
+      // Also abort a request already in flight: without this, navigating away
+      // mid-search left the fetch running and its setState firing into an
+      // unmounted component.
+      abortRef.current?.abort();
     };
   }, [query]);
 
@@ -132,7 +142,7 @@ export function ImportSearch({
         </p>
       )}
 
-      {!searching && query.trim().length >= 2 && results.length === 0 && (
+      {!searching && query.trim().length >= 3 && results.length === 0 && (
         <p className="text-sm text-muted-foreground">
           No results. You can still add the book manually.
         </p>

@@ -111,6 +111,7 @@ export function clientIp(headers: Headers): string {
 const globalForRateLimit = globalThis as unknown as {
   loginLimiter?: RateLimiter;
   registerLimiter?: RateLimiter;
+  metadataLimiter?: RateLimiter;
 };
 
 /** Failed sign-in attempts: 10 per username (and 10 per IP) per 15 minutes.
@@ -122,3 +123,15 @@ export const loginLimiter = (globalForRateLimit.loginLimiter ??=
  *  fumbling the password rules, useless for flooding junk accounts. */
 export const registerLimiter = (globalForRateLimit.registerLimiter ??=
   new RateLimiter(10, 60 * 60_000));
+
+/**
+ * Outbound metadata lookups: 90 per signed-in user per minute.
+ *
+ * Unlike the auth limiters this counts *every* call, not just failures — the
+ * budget being protected is Open Library's and nb.no's, not ours. Each search
+ * fans out to three catalogues, so 90/min is roughly 30 searches a minute:
+ * far more than a human types, and a hard stop on a stuck retry loop or a
+ * script pointed at the endpoint.
+ */
+export const metadataLimiter = (globalForRateLimit.metadataLimiter ??=
+  new RateLimiter(90, 60_000));

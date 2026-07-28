@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import type { Prisma } from "@prisma/client";
-import { BookFormat, ReadingStatus } from "@prisma/client";
 import { LibraryBig, Plus } from "lucide-react";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { groupBooks, sortBooks } from "@/lib/library-sort";
+import { buildBookWhere, parseFilters } from "@/lib/library-filters";
 import { DEFAULT_LIBRARY_VIEW, parseLibraryView } from "@/lib/library-view";
 import { FilterBar, type FilterValues } from "@/components/filter-bar";
 import { LibraryView } from "@/components/library-view";
@@ -15,8 +15,31 @@ import { Button } from "@/components/ui/button";
 
 export const dynamic = "force-dynamic";
 
+/** Cards rendered per page load, and the ceiling "Show more" can reach.
+ *  The cap keeps a crafted ?limit= from asking the server to serialize an
+ *  entire library in one response. */
+const DEFAULT_PAGE_SIZE = 200;
+const MAX_PAGE_SIZE = 2000;
+
 function param(v: string | string[] | undefined): string {
   return typeof v === "string" ? v : "";
+}
+
+/** Fill grouped sections in order until the budget runs out. Sections keep
+ *  their real size in the heading, so a partially shown group still says how
+ *  many books it holds. */
+function sliceGroups(
+  groups: { title: string; books: LibraryBook[] }[],
+  limit: number,
+): { title: string; books: LibraryBook[]; total: number }[] {
+  let budget = limit;
+  const out: { title: string; books: LibraryBook[]; total: number }[] = [];
+  for (const g of groups) {
+    if (budget <= 0) break;
+    out.push({ title: g.title, books: g.books.slice(0, budget), total: g.books.length });
+    budget -= g.books.length;
+  }
+  return out;
 }
 
 /** What the library page fetches per book: the card fields plus the two
@@ -38,6 +61,8 @@ const librarySelect = {
   createdAt: true,
 } satisfies Prisma.BookSelect;
 
+type LibraryBook = Prisma.BookGetPayload<{ select: typeof librarySelect }>;
+
 export default async function BooksPage({
   searchParams,
 }: {
@@ -55,35 +80,18 @@ export default async function BooksPage({
   const hasViewParams =
     sp.sort !== undefined || sp.dir !== undefined || sp.group !== undefined;
 
-  const filters = {
-    shelf: param(sp.shelf) || "all",
-    shelfId: param(sp.shelfId),
-    q: param(sp.q),
-    tag: param(sp.tag),
-    format: param(sp.format),
-    owned: param(sp.owned) || "all",
-    minRating: param(sp.minRating),
-    series: param(sp.series),
-  };
+  const filters = parseFilters(sp);
+  const where = buildBookWhere(userId, filters);
 
-  const shelf = Object.values(ReadingStatus).find((s) => s === filters.shelf);
-  const format = Object.values(BookFormat).find((f) => f === filters.format);
-  const minRating = parseInt(filters.minRating, 10);
-
-  const where: Prisma.BookWhereInput = {
-    userId,
-    ...(shelf && { status: shelf }),
-    ...(format && { format }),
-    ...(filters.owned === "owned" && { owned: true }),
-    ...(filters.owned === "wishlist" && { owned: false }),
-    ...(minRating >= 1 && { rating: { gte: minRating } }),
-    ...(filters.tag && filters.tag !== "all" && { tags: { has: filters.tag } }),
-    ...(filters.shelfId && { shelves: { some: { id: filters.shelfId } } }),
-    ...(filters.series && {
-      seriesName: { equals: filters.series, mode: "insensitive" as const },
-    }),
-    ...(filters.q && { searchText: { contains: filters.q.toLowerCase() } }),
-  };
+  // How many cards to render. Sorting and grouping stay in JS — the
+  // surname-filing and series-block rules have no SQL equivalent — so the
+  // whole filtered set is still fetched and ordered here, but only this many
+  // books are serialized into the client payload. "Show more" raises it via
+  // the URL, like every other bit of view state in this app.
+  const limit = Math.min(
+    Math.max(parseInt(param(sp.limit), 10) || DEFAULT_PAGE_SIZE, DEFAULT_PAGE_SIZE),
+    MAX_PAGE_SIZE,
+  );
 
   const [books, statusCounts, tagRows, shelves, viewUser] = await Promise.all([
     prisma.book.findMany({ where, select: librarySelect }),
@@ -125,8 +133,15 @@ export default async function BooksPage({
     dir: param(sp.dir) || savedView.dir,
   };
 
+  // Sort and group the whole filtered set — the shelf-filing rules need every
+  // book to place any of them — then hand the client only the slice it
+  // renders. Passing all of them was the page's real cost: a 20k-book library
+  // serialized ~6.7 MB of props to draw two hundred cards.
   const sorted = sortBooks(books, values.sort, values.dir);
   const groups = groupBooks(sorted, values.group);
+
+  const visibleBooks = sorted.slice(0, limit);
+  const visibleGroups = groups ? sliceGroups(groups, limit) : null;
 
   const counts: Record<string, number> = { all: 0 };
   for (const row of statusCounts) {
@@ -199,8 +214,10 @@ export default async function BooksPage({
         </div>
       ) : (
         <LibraryView
-          books={sorted}
-          groups={groups}
+          books={visibleBooks}
+          groups={visibleGroups}
+          totalCount={sorted.length}
+          searchParams={flatParams}
           shelves={shelves.map((s) => ({ id: s.id, name: s.name }))}
         />
       )}
