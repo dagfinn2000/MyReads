@@ -6,7 +6,7 @@ const minimalForm = {
   authors: "",
   tags: "",
   format: "PHYSICAL",
-  owned: "true",
+  ownership: "OWNED",
 };
 
 describe("bookSchema tags", () => {

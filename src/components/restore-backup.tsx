@@ -40,6 +40,7 @@ export function RestoreBackup() {
         data.progressRestored > 0
           ? `${data.progressRestored} progress entries restored`
           : null,
+        data.loansRestored > 0 ? `${data.loansRestored} loans restored` : null,
         data.shelvesCreated > 0 ? `${data.shelvesCreated} shelves created` : null,
         data.goalsRestored > 0 ? `${data.goalsRestored} goals restored` : null,
       ].filter(Boolean);

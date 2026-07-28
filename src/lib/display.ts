@@ -1,4 +1,4 @@
-import { BookFormat, ReadingStatus } from "@prisma/client";
+import { BookFormat, BookOwnership, ReadingStatus } from "@prisma/client";
 
 export const STATUS_LABELS: Record<ReadingStatus, string> = {
   WANT_TO_READ: "Want to Read",
@@ -11,6 +11,22 @@ export const FORMAT_LABELS: Record<BookFormat, string> = {
   PHYSICAL: "Physical",
   EBOOK: "Ebook",
   AUDIOBOOK: "Audiobook",
+};
+
+export const OWNERSHIP_LABELS: Record<BookOwnership, string> = {
+  OWNED: "Owned",
+  WISHLIST: "Wishlist",
+  BORROWED: "Borrowed",
+  GIVEN_AWAY: "No longer have it",
+};
+
+/** Shorter form for the badge on a book page, where "Owned" is the boring
+ *  default and only the other three are worth calling out. */
+export const OWNERSHIP_BADGE_LABELS: Record<BookOwnership, string> = {
+  OWNED: "Owned",
+  WISHLIST: "Wishlist",
+  BORROWED: "Borrowed",
+  GIVEN_AWAY: "Given away",
 };
 
 /** Badge tint per reading status (light + dark variants). */

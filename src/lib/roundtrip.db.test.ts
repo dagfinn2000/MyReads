@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import JSZip from "jszip";
-import { PrismaClient, ReadingStatus } from "@prisma/client";
+import { BookOwnership, PrismaClient, ReadingStatus } from "@prisma/client";
 
 /**
  * Export a library, restore it into an empty account, and check that what
@@ -71,7 +71,7 @@ describe("export -> import round trip", () => {
         publishedDate: "2006",
         tags: ["fantasy", "epic"],
         format: "PHYSICAL",
-        owned: true,
+        ownership: BookOwnership.OWNED,
         seriesName: "Mistborn",
         seriesNumber: 1,
         status: ReadingStatus.READ,
@@ -94,6 +94,16 @@ describe("export -> import round trip", () => {
             { page: 250, date: new Date("2026-01-10T09:00:00.000Z") },
           ],
         },
+        loans: {
+          create: [
+            {
+              borrower: "Kari",
+              lentAt: new Date("2026-02-01T00:00:00.000Z"),
+              returnedAt: new Date("2026-02-20T00:00:00.000Z"),
+            },
+            { borrower: "Ola", lentAt: new Date("2026-03-01T00:00:00.000Z") },
+          ],
+        },
       },
     });
 
@@ -110,12 +120,13 @@ describe("export -> import round trip", () => {
       quotesRestored: 1,
       readsRestored: 1,
       progressRestored: 2,
+      loansRestored: 2,
       goalsRestored: 1,
     });
 
     const restored = await prisma.book.findFirstOrThrow({
       where: { userId: targetUserId },
-      include: { shelves: true, quotes: true, reads: true, progress: true },
+      include: { shelves: true, quotes: true, reads: true, progress: true, loans: true },
     });
 
     // Bibliographic data
@@ -128,6 +139,7 @@ describe("export -> import round trip", () => {
     expect([...restored.tags].sort()).toEqual(["epic", "fantasy"]);
     expect(restored.seriesName).toBe("Mistborn");
     expect(restored.seriesNumber).toBe(1);
+    expect(restored.ownership).toBe(BookOwnership.OWNED);
 
     // Personal reading data
     expect(restored.status).toBe(ReadingStatus.READ);
@@ -144,10 +156,32 @@ describe("export -> import round trip", () => {
     expect(restored.reads[0].rating).toBe(8);
     expect(restored.progress.map((p) => p.page).sort((a, b) => a - b)).toEqual([0, 250]);
 
+    // Lending survives, including which loan is still open.
+    expect(restored.loans).toHaveLength(2);
+    const stillOut = restored.loans.filter((l) => l.returnedAt === null);
+    expect(stillOut.map((l) => l.borrower)).toEqual(["Ola"]);
+
     const goal = await prisma.readingGoal.findFirstOrThrow({
       where: { userId: targetUserId, year: 2026 },
     });
     expect(goal.target).toBe(24);
+  });
+
+  it("still writes the legacy `owned` boolean for older instances", async () => {
+    // The export format promises an older build can read this file, and
+    // `owned` is the only ownership vocabulary such a build has.
+    await prisma.book.create({
+      data: {
+        userId: sourceUserId,
+        title: "Borrowed one",
+        searchText: "borrowed one",
+        ownership: BookOwnership.BORROWED,
+      },
+    });
+
+    const payload = await exportLibrary();
+    expect(payload.books[0].ownership).toBe("BORROWED");
+    expect(payload.books[0].owned).toBe(false);
   });
 
   it("does not leak the internal columns into the backup", async () => {

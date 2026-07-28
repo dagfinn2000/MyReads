@@ -59,9 +59,17 @@ const librarySelect = {
   seriesNumber: true,
   dateFinished: true,
   createdAt: true,
+  // Just enough to know whether the copy is out — one row at most, rather
+  // than the loan history the card would never render.
+  loans: { where: { returnedAt: null }, select: { id: true }, take: 1 },
 } satisfies Prisma.BookSelect;
 
-type LibraryBook = Prisma.BookGetPayload<{ select: typeof librarySelect }>;
+/** What the card actually receives: the selected columns with the open-loan
+ *  probe collapsed into a boolean. */
+type LibraryBook = Omit<
+  Prisma.BookGetPayload<{ select: typeof librarySelect }>,
+  "loans"
+> & { lentOut: boolean };
 
 export default async function BooksPage({
   searchParams,
@@ -137,7 +145,14 @@ export default async function BooksPage({
   // book to place any of them — then hand the client only the slice it
   // renders. Passing all of them was the page's real cost: a 20k-book library
   // serialized ~6.7 MB of props to draw two hundred cards.
-  const sorted = sortBooks(books, values.sort, values.dir);
+  // Flatten the open-loan probe into a boolean before sorting, so the client
+  // payload carries a flag rather than a relation.
+  const withLoanFlag = books.map(({ loans, ...b }) => ({
+    ...b,
+    lentOut: loans.length > 0,
+  }));
+
+  const sorted = sortBooks(withLoanFlag, values.sort, values.dir);
   const groups = groupBooks(sorted, values.group);
 
   const visibleBooks = sorted.slice(0, limit);

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { Book } from "@prisma/client";
 import { ReadingStatus } from "@prisma/client";
-import { BookOpen } from "lucide-react";
+import { BookOpen, HandHeart } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Stars } from "@/components/stars";
 import { STATUS_BADGE_CLASS, STATUS_LABELS } from "@/lib/display";
@@ -56,7 +56,11 @@ export type BookCardBook = Pick<
   | "pageCount"
   | "seriesName"
   | "seriesNumber"
->;
+> & {
+  /** True when an unreturned loan exists. Passed as a flag rather than the
+   *  loan rows so the grid payload stays the card's fields only. */
+  lentOut?: boolean;
+};
 
 /** Grid tile for the library view. */
 export function BookCard({ book }: { book: BookCardBook }) {
@@ -99,9 +103,21 @@ export function BookCard({ book }: { book: BookCardBook }) {
             instead of overflowing the card. */}
         <div className="mt-auto flex flex-wrap items-center justify-between gap-1 pt-1">
           {book.rating ? <Stars value={book.rating} /> : <span />}
-          <Badge className={`${STATUS_BADGE_CLASS[book.status]} text-[10px]`}>
-            {STATUS_LABELS[book.status]}
-          </Badge>
+          <span className="flex flex-wrap items-center gap-1">
+            {book.lentOut && (
+              <Badge
+                variant="outline"
+                className="border-amber-400 text-[10px] text-amber-700 dark:text-amber-300"
+                title="Lent out"
+              >
+                <HandHeart className="size-3" />
+                Lent
+              </Badge>
+            )}
+            <Badge className={`${STATUS_BADGE_CLASS[book.status]} text-[10px]`}>
+              {STATUS_LABELS[book.status]}
+            </Badge>
+          </span>
         </div>
       </div>
     </Link>

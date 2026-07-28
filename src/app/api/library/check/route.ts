@@ -14,7 +14,7 @@ const bookSelect = {
   rating: true,
   timesRead: true,
   format: true,
-  owned: true,
+  ownership: true,
 } as const;
 
 export interface LibraryCheckResult {
@@ -29,7 +29,7 @@ export interface LibraryCheckResult {
     rating: number | null;
     timesRead: number;
     format: string;
-    owned: boolean;
+    ownership: string;
   };
   /** What the ISBN resolved to in the metadata sources (scan flow only). */
   lookedUp?: { title: string; authors: string[] } | null;

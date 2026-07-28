@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { BookFormat, ReadingStatus } from "@prisma/client";
+import { BookFormat, BookOwnership, ReadingStatus } from "@prisma/client";
 
 /** Shared by registration and the change-password form. */
 export const passwordSchema = z
@@ -117,7 +117,9 @@ export const bookSchema = z.object({
     .optional()
     .catch(null),
   format: z.nativeEnum(BookFormat),
-  owned: z.coerce.boolean(),
+  /** Defaults to OWNED so a form that omits the field (or sends something
+   *  unexpected) still saves as an ordinary book on your shelf. */
+  ownership: z.nativeEnum(BookOwnership).catch(BookOwnership.OWNED),
   openLibraryId: z
     .string()
     .trim()
@@ -204,6 +206,28 @@ export const quoteSchema = z.object({
     .string()
     .trim()
     .max(2000)
+    .transform((s) => s || null)
+    .nullable()
+    .optional(),
+});
+
+/** Lending a copy out. Only the borrower is required — "I lent it to Kari"
+ *  is a complete thought, and the date defaults to today. */
+export const loanSchema = z.object({
+  borrower: z
+    .string()
+    .trim()
+    .min(1, "Who has it?")
+    .max(100, "Name must be at most 100 characters"),
+  lentAt: z
+    .string()
+    .transform(parseDateOrNull)
+    .nullable()
+    .optional(),
+  note: z
+    .string()
+    .trim()
+    .max(500)
     .transform((s) => s || null)
     .nullable()
     .optional(),

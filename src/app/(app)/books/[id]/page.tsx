@@ -3,11 +3,18 @@ import { notFound, redirect } from "next/navigation";
 import { Library, Pencil, Repeat } from "lucide-react";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { formatDate, FORMAT_LABELS, STATUS_BADGE_CLASS, STATUS_LABELS } from "@/lib/display";
+import {
+  formatDate,
+  FORMAT_LABELS,
+  OWNERSHIP_BADGE_LABELS,
+  STATUS_BADGE_CLASS,
+  STATUS_LABELS,
+} from "@/lib/display";
 import { BookCover } from "@/components/book-card";
 import { BookShelvesCard } from "@/components/book-shelves-card";
 import { DeleteBookButton } from "@/components/delete-book-button";
 import { QuotesCard } from "@/components/quotes-card";
+import { LendingCard } from "@/components/lending-card";
 import { ReadHistoryCard } from "@/components/read-history-card";
 import { ReadingCard } from "@/components/reading-card";
 import { Badge } from "@/components/ui/badge";
@@ -55,6 +62,8 @@ export default async function BookDetailPage({
       progress: {
         orderBy: [{ date: "asc" }, { page: "asc" }],
       },
+      // Newest first: the open loan (if any) leads, history follows.
+      loans: { orderBy: { lentAt: "desc" } },
     },
   });
   if (!book) notFound();
@@ -124,7 +133,9 @@ export default async function BookDetailPage({
             {STATUS_LABELS[book.status]}
           </Badge>
           <Badge variant="secondary">{FORMAT_LABELS[book.format]}</Badge>
-          {book.owned && <Badge variant="outline">Owned</Badge>}
+          <Badge variant="outline">
+            {OWNERSHIP_BADGE_LABELS[book.ownership]}
+          </Badge>
           {book.timesRead > 1 && (
             <Badge variant="outline">
               <Repeat data-slot="icon" className="size-3" />
@@ -211,6 +222,8 @@ export default async function BookDetailPage({
         <ReadingCard book={book} progress={book.progress} />
 
         <ReadHistoryCard book={book} reads={book.reads} />
+
+        <LendingCard bookId={book.id} loans={book.loans} />
 
         <QuotesCard bookId={book.id} quotes={book.quotes} />
       </div>

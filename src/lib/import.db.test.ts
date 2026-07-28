@@ -27,7 +27,7 @@ function book(over: Record<string, unknown> = {}) {
     pageCount: 541,
     tags: ["fantasy"],
     format: "PHYSICAL",
-    owned: true,
+    ownership: "OWNED",
     status: "READ",
     rating: 9,
     timesRead: 1,
@@ -388,5 +388,91 @@ describe("importLibrary", () => {
     expect(saved.currentPage).toBe(120);
     expect(saved.timesRead).toBe(0);
     expect(saved.reads).toHaveLength(0);
+  });
+});
+
+describe("ownership and lending", () => {
+  it("reads the legacy `owned` boolean from an older backup", async () => {
+    // Exports predating the ownership states carry only this boolean, where
+    // true meant "on my shelf" and false meant "on the wishlist".
+    await importLibrary(
+      userId,
+      payload([
+        { ...book({ isbn: "1000000000001" }), ownership: undefined, owned: true },
+        { ...book({ title: "Wanted", isbn: "1000000000002" }), ownership: undefined, owned: false },
+      ]),
+    );
+
+    const rows = await prisma.book.findMany({ where: { userId }, orderBy: { title: "asc" } });
+    expect(rows.map((b) => [b.title, b.ownership])).toEqual([
+      ["The Final Empire", "OWNED"],
+      ["Wanted", "WISHLIST"],
+    ]);
+  });
+
+  it("prefers `ownership` when a backup carries both", async () => {
+    // Current exports write both for backwards compatibility; the richer
+    // field wins, so a borrowed book does not degrade to a wishlist entry.
+    await importLibrary(
+      userId,
+      payload([{ ...book(), owned: false, ownership: "BORROWED" }]),
+    );
+
+    const saved = await prisma.book.findFirstOrThrow({ where: { userId } });
+    expect(saved.ownership).toBe("BORROWED");
+  });
+
+  it("defaults to OWNED when a backup says nothing about ownership", async () => {
+    await importLibrary(userId, payload([{ ...book(), ownership: undefined }]));
+    const saved = await prisma.book.findFirstOrThrow({ where: { userId } });
+    expect(saved.ownership).toBe("OWNED");
+  });
+
+  it("restores lending records, open and returned", async () => {
+    const res = await importLibrary(
+      userId,
+      payload([
+        book({
+          loans: [
+            { borrower: "Kari", lentAt: "2026-01-05T00:00:00.000Z", returnedAt: "2026-02-01T00:00:00.000Z" },
+            { borrower: "Ola", lentAt: "2026-03-01T00:00:00.000Z", returnedAt: null, note: "book club" },
+          ],
+        }),
+      ]),
+    );
+    expect(res).toMatchObject({ loansRestored: 2 });
+
+    const saved = await prisma.book.findFirstOrThrow({
+      where: { userId },
+      include: { loans: { orderBy: { lentAt: "asc" } } },
+    });
+    expect(saved.loans).toHaveLength(2);
+    expect(saved.loans[0].returnedAt).not.toBeNull();
+    // The still-open loan is what makes the book "lent out".
+    expect(saved.loans[1].borrower).toBe("Ola");
+    expect(saved.loans[1].returnedAt).toBeNull();
+    expect(saved.loans[1].note).toBe("book club");
+  });
+
+  it("gives an undated loan a date rather than dropping it", async () => {
+    await importLibrary(
+      userId,
+      payload([book({ loans: [{ borrower: "Someone" }] })]),
+    );
+    const saved = await prisma.book.findFirstOrThrow({
+      where: { userId },
+      include: { loans: true },
+    });
+    expect(saved.loans).toHaveLength(1);
+    expect(saved.loans[0].lentAt).toBeInstanceOf(Date);
+  });
+
+  it("drops a loan with no borrower instead of failing the book", async () => {
+    const res = await importLibrary(
+      userId,
+      payload([book({ loans: [{ borrower: "" }] })]),
+    );
+    // The book still lands; only the unusable loan is discarded.
+    expect(res).toMatchObject({ booksCreated: 1, loansRestored: 0 });
   });
 });

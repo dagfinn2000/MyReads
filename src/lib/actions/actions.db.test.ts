@@ -29,6 +29,7 @@ vi.mock("next/cache", () => ({ revalidatePath: () => {} }));
 const { readAgain, addPastRead, deletePastRead } = await import("@/lib/actions/reads");
 const { bulkUpdateBooks } = await import("@/lib/actions/bulk");
 const { renameTag, deleteTag } = await import("@/lib/actions/tags");
+const { lendBook, returnLoan, deleteLoan } = await import("@/lib/actions/loans");
 
 let userId: string;
 let otherUserId: string;
@@ -253,5 +254,103 @@ describe("tag management", () => {
 
     const after = await prisma.book.findFirstOrThrow({ where: { id: theirs.id } });
     expect(after.tags).toEqual(["scifi"]);
+  });
+});
+
+describe("lending", () => {
+  it("lends a book out and reports who has it", async () => {
+    const bk = await makeBook();
+    const res = await lendBook(bk.id, {}, form({ borrower: "Kari", note: "back by June" }));
+    expect(res).toEqual({ success: true });
+
+    const loans = await prisma.loan.findMany({ where: { bookId: bk.id } });
+    expect(loans).toHaveLength(1);
+    expect(loans[0].borrower).toBe("Kari");
+    expect(loans[0].returnedAt).toBeNull();
+    expect(loans[0].note).toBe("back by June");
+  });
+
+  it("refuses a second loan while the book is still out", async () => {
+    // Two open loans would make "who has it?" unanswerable.
+    const bk = await makeBook();
+    await lendBook(bk.id, {}, form({ borrower: "Kari" }));
+    const res = await lendBook(bk.id, {}, form({ borrower: "Ola" }));
+
+    expect(res.error).toContain("Kari");
+    expect(await prisma.loan.count({ where: { bookId: bk.id } })).toBe(1);
+  });
+
+  it("allows lending again once the previous loan came back", async () => {
+    const bk = await makeBook();
+    await lendBook(bk.id, {}, form({ borrower: "Kari" }));
+    const first = await prisma.loan.findFirstOrThrow({ where: { bookId: bk.id } });
+
+    await returnLoan(first.id);
+    const res = await lendBook(bk.id, {}, form({ borrower: "Ola" }));
+
+    expect(res).toEqual({ success: true });
+    const loans = await prisma.loan.findMany({ where: { bookId: bk.id }, orderBy: { lentAt: "asc" } });
+    expect(loans).toHaveLength(2);
+    // The returned one stays as history rather than being overwritten.
+    expect(loans[0].returnedAt).not.toBeNull();
+    expect(loans[1].returnedAt).toBeNull();
+  });
+
+  it("requires a borrower", async () => {
+    const bk = await makeBook();
+    const res = await lendBook(bk.id, {}, form({ borrower: "   " }));
+    expect(res.error).toBeTruthy();
+    expect(await prisma.loan.count({ where: { bookId: bk.id } })).toBe(0);
+  });
+
+  it("refuses to lend another account's book", async () => {
+    const theirs = await makeBook({}, otherUserId);
+    const res = await lendBook(theirs.id, {}, form({ borrower: "Kari" }));
+
+    expect(res.error).toBeTruthy();
+    expect(await prisma.loan.count({ where: { bookId: theirs.id } })).toBe(0);
+  });
+
+  it("refuses to return or delete another account's loan", async () => {
+    const theirs = await makeBook({}, otherUserId);
+    const loan = await prisma.loan.create({
+      data: { bookId: theirs.id, borrower: "Someone" },
+    });
+
+    await returnLoan(loan.id);
+    expect((await prisma.loan.findFirstOrThrow({ where: { id: loan.id } })).returnedAt).toBeNull();
+
+    await deleteLoan(loan.id);
+    expect(await prisma.loan.count({ where: { id: loan.id } })).toBe(1);
+  });
+
+  it("returning an already-returned loan does not move the date", async () => {
+    const bk = await makeBook();
+    await lendBook(bk.id, {}, form({ borrower: "Kari" }));
+    const loan = await prisma.loan.findFirstOrThrow({ where: { bookId: bk.id } });
+
+    await returnLoan(loan.id);
+    const firstReturn = (await prisma.loan.findFirstOrThrow({ where: { id: loan.id } })).returnedAt;
+    await returnLoan(loan.id);
+    const secondReturn = (await prisma.loan.findFirstOrThrow({ where: { id: loan.id } })).returnedAt;
+
+    expect(secondReturn?.toISOString()).toBe(firstReturn?.toISOString());
+  });
+
+  it("deleting a loan removes it from the history", async () => {
+    const bk = await makeBook();
+    await lendBook(bk.id, {}, form({ borrower: "Kari" }));
+    const loan = await prisma.loan.findFirstOrThrow({ where: { bookId: bk.id } });
+
+    await deleteLoan(loan.id);
+    expect(await prisma.loan.count({ where: { bookId: bk.id } })).toBe(0);
+  });
+
+  it("loans disappear with the book", async () => {
+    const bk = await makeBook();
+    await lendBook(bk.id, {}, form({ borrower: "Kari" }));
+    await prisma.book.delete({ where: { id: bk.id } });
+
+    expect(await prisma.loan.count({ where: { bookId: bk.id } })).toBe(0);
   });
 });

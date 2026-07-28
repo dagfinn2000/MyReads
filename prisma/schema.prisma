@@ -30,6 +30,20 @@ enum BookFormat {
   AUDIOBOOK
 }
 
+/// Where a book physically stands in relation to you. This replaced a single
+/// `owned` boolean, which had to mean both "on my shelf" and — when false —
+/// "on the wishlist". That left nowhere to record the two states a real
+/// shelf produces: a book borrowed from someone else, and one you read and
+/// no longer have. Both used to be forced into the wishlist.
+enum BookOwnership {
+  OWNED
+  WISHLIST
+  /// Someone else's copy, currently with you.
+  BORROWED
+  /// Read it, but it's gone — sold, donated, or lost.
+  GIVEN_AWAY
+}
+
 model User {
   id           String        @id @default(cuid())
   username     String        @unique
@@ -101,7 +115,7 @@ model Book {
   publishedDate String?
   tags          String[]   @default([])
   format        BookFormat @default(PHYSICAL)
-  owned         Boolean    @default(true)
+  ownership     BookOwnership @default(OWNED)
   /// Freeform series name (e.g. "Mistborn Era 1"); groups books together.
   seriesName    String?
   /// Position in the series. Float so novellas can slot in at 1.5.
@@ -129,6 +143,7 @@ model Book {
   quotes   Quote[]
   reads    Read[]
   progress ProgressEntry[]
+  loans    Loan[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -188,6 +203,31 @@ model ProgressEntry {
   date DateTime @default(now())
 
   @@index([bookId, date])
+}
+
+/// A copy of this book lent to someone. An open loan (`returnedAt` null) is
+/// what makes a book "lent out"; returning one keeps the row as history, so
+/// the book page can show who has borrowed it over the years.
+///
+/// Deliberately about *your* copy going out, not about books you borrowed —
+/// that's `ownership = BORROWED` on the book itself.
+model Loan {
+  id     String @id @default(cuid())
+  bookId String
+  book   Book   @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  /// Freeform: a name, "the book club", whatever identifies where it went.
+  borrower   String
+  lentAt     DateTime  @default(now())
+  /// Null while the book is still out.
+  returnedAt DateTime?
+  note       String?
+
+  createdAt DateTime @default(now())
+
+  /// Finding open loans, and listing a book's history newest-first.
+  @@index([bookId, returnedAt])
+  @@index([bookId, lentAt])
 }
 
 /// A favourite quote or highlight from a book, with an optional page
