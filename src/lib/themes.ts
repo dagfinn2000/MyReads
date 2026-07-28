@@ -4,10 +4,12 @@
  * metadata the UI needs (names, light/dark mode, swatch colors).
  *
  * Most palettes are ported from dagfinn2000/dashify so both apps share a
- * look. Synthwave, Abyss, Blossom and Cyanotype are additions that
- * deliberately sit outside that family — the ported set is entirely muted
- * editor colourschemes, with every light a warm cream and every dark a
- * low-saturation grey or violet.
+ * look. The rest are additions that deliberately sit outside that family —
+ * the ported set is entirely muted editor colourschemes, with every light a
+ * warm cream and every dark a low-saturation grey or violet. Each addition
+ * claims a hue or character the set didn't have: neon, deep water, true
+ * black, brown, forest green, and tinted papers in pink, blue, green, violet
+ * and peach.
  * Dark-mode themes additionally get the `dark` class on <html> so Tailwind
  * `dark:` variants (status badges etc.) follow along.
  */
@@ -36,6 +38,9 @@ export const THEMES: ThemeDef[] = [
   { id: "zenburn", name: "Zenburn", mode: "dark", swatch: ["#3f3f3f", "#dfaf8f"] },
   { id: "synthwave", name: "Synthwave", mode: "dark", swatch: ["#171122", "#ff5ed0"] },
   { id: "abyss", name: "Abyss", mode: "dark", swatch: ["#05202b", "#2ad4c4"] },
+  { id: "obsidian", name: "Obsidian", mode: "dark", swatch: ["#000000", "#4c8dff"] },
+  { id: "sepia", name: "Sepia", mode: "dark", swatch: ["#241a15", "#d9a066"] },
+  { id: "evergreen", name: "Evergreen", mode: "dark", swatch: ["#0d1f16", "#7ee787"] },
 
   // Light palettes
   { id: "everforest-light", name: "Everforest Light", mode: "light", swatch: ["#fdf6e3", "#35a77c"] },
@@ -47,6 +52,9 @@ export const THEMES: ThemeDef[] = [
   { id: "rose-pine-dawn", name: "Rosé Pine Dawn", mode: "light", swatch: ["#faf4ed", "#907aa9"] },
   { id: "blossom", name: "Blossom", mode: "light", swatch: ["#fff5f7", "#c2185b"] },
   { id: "cyanotype", name: "Cyanotype", mode: "light", swatch: ["#eef4fb", "#1b4f9c"] },
+  { id: "sage", name: "Sage", mode: "light", swatch: ["#f0f5f0", "#2f6b46"] },
+  { id: "lilac", name: "Lilac", mode: "light", swatch: ["#f5f2fc", "#6d40c4"] },
+  { id: "apricot", name: "Apricot", mode: "light", swatch: ["#fff2e8", "#b8502d"] },
 ];
 
 export const DARK_THEME_IDS = THEMES.filter((t) => t.mode === "dark").map(

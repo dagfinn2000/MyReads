@@ -317,6 +317,77 @@
     --ring: #2ad4c4;
 }
 
+/* True black, for OLED screens where #000 costs no light at all. Also the
+   only blue-accented dark in the set — every other one runs purple, gold,
+   green, pink or turquoise. */
+[data-theme="obsidian"] {
+    --background: #000000;
+    --foreground: #e8eaed;
+    --card: #0d0f12;
+    --card-foreground: #e8eaed;
+    --popover: #0d0f12;
+    --popover-foreground: #e8eaed;
+    --primary: #4c8dff;
+    --primary-foreground: #041020;
+    --secondary: #1a1d23;
+    --secondary-foreground: #e8eaed;
+    --muted: #1a1d23;
+    --muted-foreground: #9aa3ad;
+    --accent: #1a1d23;
+    --accent-foreground: #e8eaed;
+    --destructive: #ff6b6b;
+    --border: #23272e;
+    --input: #23272e;
+    --ring: #4c8dff;
+}
+
+/* Old paper and leather. The warm darks here (Gruvbox, Zenburn) are really
+   warm greys; this one is actually brown, which for a shelf of books felt
+   like an obvious gap. */
+[data-theme="sepia"] {
+    --background: #241a15;
+    --foreground: #efe0d0;
+    --card: #32251e;
+    --card-foreground: #efe0d0;
+    --popover: #32251e;
+    --popover-foreground: #efe0d0;
+    --primary: #d9a066;
+    --primary-foreground: #241a15;
+    --secondary: #42332a;
+    --secondary-foreground: #efe0d0;
+    --muted: #42332a;
+    --muted-foreground: #c3ab95;
+    --accent: #42332a;
+    --accent-foreground: #efe0d0;
+    --destructive: #e78f70;
+    --border: #4d3b30;
+    --input: #4d3b30;
+    --ring: #d9a066;
+}
+
+/* Properly green, where Everforest is a grey that leans green and Abyss is
+   blue-teal. Dark canopy with a bright leaf accent. */
+[data-theme="evergreen"] {
+    --background: #0d1f16;
+    --foreground: #dcecdf;
+    --card: #142c20;
+    --card-foreground: #dcecdf;
+    --popover: #142c20;
+    --popover-foreground: #dcecdf;
+    --primary: #7ee787;
+    --primary-foreground: #0d1f16;
+    --secondary: #1d3d2c;
+    --secondary-foreground: #dcecdf;
+    --muted: #1d3d2c;
+    --muted-foreground: #9cbfa8;
+    --accent: #1d3d2c;
+    --accent-foreground: #dcecdf;
+    --destructive: #ff8c8c;
+    --border: #244a35;
+    --input: #244a35;
+    --ring: #7ee787;
+}
+
 [data-theme="everforest-light"] {
     --background: #fdf6e3;
     --foreground: #5c6a72;
@@ -508,6 +579,75 @@
     --border: #cbdaea;
     --input: #cbdaea;
     --ring: #1b4f9c;
+}
+
+/* Green-tinted paper. Everforest Light pairs a green accent with a cream
+   ground; this tints the ground itself, which reads quite differently. */
+[data-theme="sage"] {
+    --background: #f0f5f0;
+    --foreground: #1f3326;
+    --card: #f9fcf9;
+    --card-foreground: #1f3326;
+    --popover: #f9fcf9;
+    --popover-foreground: #1f3326;
+    --primary: #2f6b46;
+    --primary-foreground: #ffffff;
+    --secondary: #dfe9e0;
+    --secondary-foreground: #1f3326;
+    --muted: #dfe9e0;
+    --muted-foreground: #506b58;
+    --accent: #dfe9e0;
+    --accent-foreground: #1f3326;
+    --destructive: #b3261e;
+    --border: #d0ded2;
+    --input: #d0ded2;
+    --ring: #2f6b46;
+}
+
+/* Violet-tinted paper. The purple-accented lights (Latte, Rosé Pine Dawn,
+   Kanagawa Lotus) all sit on cream or grey; none tints the page itself. */
+[data-theme="lilac"] {
+    --background: #f5f2fc;
+    --foreground: #2b2440;
+    --card: #fbf9ff;
+    --card-foreground: #2b2440;
+    --popover: #fbf9ff;
+    --popover-foreground: #2b2440;
+    --primary: #6d40c4;
+    --primary-foreground: #ffffff;
+    --secondary: #e7e0f7;
+    --secondary-foreground: #2b2440;
+    --muted: #e7e0f7;
+    --muted-foreground: #5e5378;
+    --accent: #e7e0f7;
+    --accent-foreground: #2b2440;
+    --destructive: #b3261e;
+    --border: #ded5f0;
+    --input: #ded5f0;
+    --ring: #6d40c4;
+}
+
+/* Peach paper with burnt terracotta. Warmer and pinker than the yellow
+   creams — the sunlit end of the light themes. */
+[data-theme="apricot"] {
+    --background: #fff2e8;
+    --foreground: #45291b;
+    --card: #fffaf5;
+    --card-foreground: #45291b;
+    --popover: #fffaf5;
+    --popover-foreground: #45291b;
+    --primary: #b8502d;
+    --primary-foreground: #ffffff;
+    --secondary: #fbe2d1;
+    --secondary-foreground: #45291b;
+    --muted: #fbe2d1;
+    --muted-foreground: #855b48;
+    --accent: #fbe2d1;
+    --accent-foreground: #45291b;
+    --destructive: #a32318;
+    --border: #f3d6c3;
+    --input: #f3d6c3;
+    --ring: #b8502d;
 }
 
 @layer base {
