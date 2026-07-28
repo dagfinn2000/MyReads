@@ -144,7 +144,8 @@ export function BarcodeScanner({
         {error ? (
           <p className="text-sm text-muted-foreground">{ERROR_MESSAGES[error]}</p>
         ) : (
-          // eslint-disable-next-line jsx-a11y/media-has-caption
+          // No captions: this is a live camera feed for barcode scanning,
+          // not media with an audio track.
           <video
             ref={videoRef}
             className="aspect-video w-full rounded-md bg-black object-cover"

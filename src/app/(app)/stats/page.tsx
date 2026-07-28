@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { ReadingStatus } from "@prisma/client";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
@@ -25,7 +26,7 @@ export const metadata = { title: "Stats · MyReads" };
 
 export default async function StatsPage() {
   const session = await auth();
-  if (!session?.user?.id) return null;
+  if (!session?.user?.id) redirect("/login"); // revoked session (see auth.ts)
 
   const userId = session.user.id;
   const [books, pastReads, goals, progressEntries, quoteCount, randomQuotes] =

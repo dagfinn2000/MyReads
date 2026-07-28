@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { HardDriveDownload } from "lucide-react";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
@@ -17,7 +18,7 @@ export const metadata = { title: "Account · MyReads" };
 
 export default async function AccountPage() {
   const session = await auth();
-  if (!session?.user?.id) return null; // middleware already guards this
+  if (!session?.user?.id) redirect("/login"); // revoked session (see auth.ts)
   const userId = session.user.id;
 
   const [user, bookCount] = await Promise.all([

@@ -68,8 +68,52 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         loginLimiter.clear(userKey);
         loginLimiter.clear(ipKey);
-        return { id: user.id, name: user.username };
+        return {
+          id: user.id,
+          name: user.username,
+          tokenVersion: user.tokenVersion,
+        };
       },
     }),
   ],
+  callbacks: {
+    ...authConfig.callbacks,
+    /**
+     * Session revocation. JWT sessions have no server-side row to delete, so
+     * a stolen cookie would otherwise stay valid for its full lifetime even
+     * after the owner changed their password. The token carries the
+     * `tokenVersion` it was minted with; here — on the Node runtime, where
+     * Prisma is available — it's checked against the database on every
+     * session read, and a mismatch destroys the session.
+     *
+     * Returning null invalidates the token. The edge-safe config in
+     * auth.config.ts deliberately keeps its DB-free callback for the proxy,
+     * so a revoked token still passes the middleware and is rejected here
+     * instead: every page and server action resolves its session through
+     * this config, so a revoked session can neither read nor write.
+     *
+     * Tokens minted before the column existed carry no version and are read
+     * as 0, matching the column default — upgrading an existing instance
+     * doesn't sign anyone out.
+     */
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id;
+        token.tokenVersion = user.tokenVersion ?? 0;
+        return token;
+      }
+
+      if (typeof token.id !== "string") return null;
+
+      const current = await prisma.user.findUnique({
+        where: { id: token.id },
+        select: { tokenVersion: true },
+      });
+      // Deleted account: the row is gone, so the cookie must stop working.
+      if (!current) return null;
+      if (current.tokenVersion !== (token.tokenVersion ?? 0)) return null;
+
+      return token;
+    },
+  },
 });

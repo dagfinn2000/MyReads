@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { ReadingStatus } from "@prisma/client";
 import { ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
 import { auth } from "@/auth";
@@ -67,7 +67,7 @@ export default async function YearInReviewPage({
   params: Promise<{ year: string }>;
 }) {
   const session = await auth();
-  if (!session?.user?.id) return null;
+  if (!session?.user?.id) redirect("/login"); // revoked session (see auth.ts)
   const userId = session.user.id;
 
   const { year: rawYear } = await params;

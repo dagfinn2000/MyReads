@@ -4,13 +4,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { auth } from "@/auth";
 import { coversDir } from "@/lib/covers";
-
-const EXT_BY_MIME: Record<string, string> = {
-  "image/jpeg": "jpg",
-  "image/png": "png",
-  "image/gif": "gif",
-  "image/webp": "webp",
-};
+import { sniffImageKind } from "@/lib/image-type";
 
 const MAX_BYTES = 10 * 1024 * 1024;
 
@@ -32,18 +26,24 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "No file provided" }, { status: 400 });
   }
 
-  const ext = EXT_BY_MIME[file.type];
+  if (file.size > MAX_BYTES) {
+    return NextResponse.json({ error: "Image too large (max 10 MB)" }, { status: 400 });
+  }
+
+  const buf = Buffer.from(await file.arrayBuffer());
+
+  // The extension comes from the bytes, not from the client-declared MIME
+  // type: `file.type` is caller-controlled, so trusting it means arbitrary
+  // content can be written under an image extension and later served with an
+  // image Content-Type.
+  const ext = sniffImageKind(buf);
   if (!ext) {
     return NextResponse.json(
       { error: "Unsupported image type (use JPEG, PNG, GIF, or WebP)" },
       { status: 400 },
     );
   }
-  if (file.size > MAX_BYTES) {
-    return NextResponse.json({ error: "Image too large (max 10 MB)" }, { status: 400 });
-  }
 
-  const buf = Buffer.from(await file.arrayBuffer());
   const dir = coversDir();
   await fs.mkdir(dir, { recursive: true });
   // "upload-" prefix keeps these visually distinct from book-id covers; the

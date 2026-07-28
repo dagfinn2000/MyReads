@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { AddBookClient } from "@/components/add-book-client";
@@ -11,7 +12,7 @@ export default async function NewBookPage({
   searchParams: Promise<{ isbn?: string }>;
 }) {
   const session = await auth();
-  if (!session?.user?.id) return null;
+  if (!session?.user?.id) redirect("/login"); // revoked session (see auth.ts)
   // Handoff from the "do I own this?" page: ?isbn= seeds the import search.
   const { isbn } = await searchParams;
 

@@ -55,9 +55,21 @@ export const bookSchema = z.object({
     .transform((s) => s || null)
     .nullable()
     .optional(),
+  /**
+   * Either a local cache path ("/api/covers/…") or a remote image URL the
+   * user pasted. Bounded like every other free-text field — this was the one
+   * that had no `.max()`, while the import schema capped the same field at
+   * 2000 — and restricted to http(s) so a `javascript:` or `data:` value
+   * can't be stored and later rendered into an attribute.
+   */
   coverUrl: z
     .string()
     .trim()
+    .max(2000, "Cover URL must be at most 2000 characters")
+    .refine(
+      (s) => s === "" || s.startsWith("/") || /^https?:\/\//i.test(s),
+      "Cover URL must be an http(s) URL",
+    )
     .transform((s) => s || null)
     .nullable()
     .optional(),

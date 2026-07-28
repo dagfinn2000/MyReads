@@ -8,4 +8,18 @@ declare module "next-auth" {
       id: string;
     } & DefaultSession["user"];
   }
+
+  // What `authorize` returns and the `jwt` callback receives at sign-in.
+  interface User {
+    tokenVersion?: number;
+  }
+}
+
+declare module "next-auth/jwt" {
+  interface JWT {
+    id?: string;
+    /** Snapshot of User.tokenVersion when this token was minted. Absent on
+     *  tokens issued before the column existed — treated as 0. */
+    tokenVersion?: number;
+  }
 }

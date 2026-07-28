@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import type { Prisma } from "@prisma/client";
 import { BookFormat, ReadingStatus } from "@prisma/client";
 import { LibraryBig, Plus } from "lucide-react";
@@ -37,15 +38,13 @@ const librarySelect = {
   createdAt: true,
 } satisfies Prisma.BookSelect;
 
-type LibraryBook = Prisma.BookGetPayload<{ select: typeof librarySelect }>;
-
 export default async function BooksPage({
   searchParams,
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const session = await auth();
-  if (!session?.user?.id) return null; // middleware already guards this
+  if (!session?.user?.id) redirect("/login"); // revoked session (see auth.ts)
   const userId = session.user.id;
 
   const sp = await searchParams;
