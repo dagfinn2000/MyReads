@@ -87,16 +87,33 @@ export function AddBookClient({
   );
 }
 
+/** Identifies the book a check result belongs to, so a stale answer is never
+ *  shown against a newly picked book. */
+function checkKey(prefill: BookFormValues | null): string {
+  if (!prefill) return "";
+  const author = prefill.authors?.split(",")[0]?.trim() ?? "";
+  return `${prefill.isbn ?? ""}|${prefill.title ?? ""}|${author}`;
+}
+
 /** Once a result is picked, quietly ask the library whether it's already
  *  there (exact ISBN, or same title + author as another edition). Best
  *  effort: a failed check just means no warning. */
 function useDuplicateCheck(
   prefill: BookFormValues | null,
 ): LibraryCheckResult | null {
-  const [result, setResult] = useState<LibraryCheckResult | null>(null);
+  // The answer is stored with the book it was fetched for. Clearing it when
+  // the pick changes is then a render-time comparison rather than a setState
+  // at the top of the effect — which was an extra render pass, and left a
+  // frame in which the previous book's "you already own this" warning showed
+  // against the newly picked one.
+  const [answer, setAnswer] = useState<{
+    key: string;
+    result: LibraryCheckResult;
+  } | null>(null);
+
+  const key = checkKey(prefill);
 
   useEffect(() => {
-    setResult(null);
     if (!prefill?.isbn && !prefill?.title) return;
     const params = new URLSearchParams();
     if (prefill.isbn) params.set("isbn", prefill.isbn);
@@ -108,7 +125,7 @@ function useDuplicateCheck(
     fetch(`/api/library/check?${params}`)
       .then((res) => (res.ok ? res.json() : null))
       .then((data: LibraryCheckResult | null) => {
-        if (!cancelled && data) setResult(data);
+        if (!cancelled && data) setAnswer({ key: checkKey(prefill), result: data });
       })
       .catch(() => {});
     return () => {
@@ -116,5 +133,5 @@ function useDuplicateCheck(
     };
   }, [prefill]);
 
-  return result;
+  return answer?.key === key ? answer.result : null;
 }

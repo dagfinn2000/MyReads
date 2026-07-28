@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import { Check, Palette } from "lucide-react";
 import { saveTheme } from "@/lib/actions/theme";
 import { THEMES, THEME_STORAGE_KEY } from "@/lib/themes";
@@ -20,15 +20,37 @@ import {
  * renders the saved theme; the inline init script covers signed-out pages
  * from localStorage).
  */
-export function ThemePicker() {
-  // null until mounted — the applied theme lives on <html>, which the
-  // server render of this component can't see, so showing a selection
-  // before mount would mismatch hydration.
-  const [current, setCurrent] = useState<string | null>(null);
+/**
+ * The applied theme is the `data-theme` attribute on <html> — written by the
+ * root layout on the server, by the pre-paint init script, and by this
+ * picker. That makes it external state React doesn't own, so it's read as
+ * one rather than mirrored into component state: a MutationObserver reports
+ * changes, and the picker stays correct no matter which of the three wrote
+ * the value.
+ */
+function subscribeToTheme(onChange: () => void): () => void {
+  const observer = new MutationObserver(onChange);
+  observer.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ["data-theme"],
+  });
+  return () => observer.disconnect();
+}
 
-  useEffect(() => {
-    setCurrent(document.documentElement.getAttribute("data-theme") ?? "light");
-  }, []);
+const readTheme = () =>
+  document.documentElement.getAttribute("data-theme") ?? "light";
+
+// null on the server: the attribute lives on an element this component's
+// server render can't see, and claiming a selection there would mismatch
+// hydration.
+const readThemeOnServer = () => null;
+
+export function ThemePicker() {
+  const current = useSyncExternalStore(
+    subscribeToTheme,
+    readTheme,
+    readThemeOnServer,
+  );
 
   function apply(id: string) {
     const theme = THEMES.find((t) => t.id === id);
@@ -44,7 +66,8 @@ export function ThemePicker() {
     // Fire-and-forget account sync; a no-op when signed out (login page)
     // and nothing the picker needs to wait for.
     saveTheme(id).catch(() => {});
-    setCurrent(id);
+    // No setState: the attribute write above is the state change, and the
+    // observer re-renders from it.
   }
 
   return (

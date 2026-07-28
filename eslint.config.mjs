@@ -34,15 +34,11 @@ const config = [
         },
       ],
 
-      // Downgraded from error, deliberately. Five pre-existing components
-      // (theme-picker, shelf-chips, add-book-client, barcode-scanner,
-      // import-search) read from the DOM or react to a server-action result
-      // inside an effect. They work; the modern replacements
-      // (useSyncExternalStore, action-state driven rendering) are real
-      // rewrites of live features and belong in their own change, not in
-      // the commit that merely turns linting on. Left as warnings so the
-      // work stays visible instead of being silenced.
-      "react-hooks/set-state-in-effect": "warn",
+      // Left at its default (error). The five components that tripped it —
+      // theme-picker, shelf-chips, add-book-client, barcode-scanner,
+      // import-search — have been reworked to read external state properly,
+      // close dialogs from the action that succeeded, and derive rather than
+      // mirror. Nothing is suppressed here any more.
     },
   },
 ];

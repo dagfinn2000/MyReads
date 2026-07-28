@@ -20,20 +20,27 @@ export const authConfig = {
   callbacks: {
     /**
      * Gatekeeper used by the middleware. Everything except the login and
-     * registration pages requires a session; hitting an auth page while
-     * already signed in bounces to the library.
+     * registration pages requires a session.
+     *
+     * The auth pages are always allowed through, and deliberately so. This
+     * callback only sees the decoded JWT — it cannot tell a live session from
+     * one revoked by a password change or a deleted account, because Auth.js
+     * does not run the DB-backed `jwt` callback here. Bouncing "logged in"
+     * visitors from /login to /books therefore sent revoked sessions into a
+     * loop: the page resolves the real session, finds nothing and sends the
+     * client to /login, which this callback sent straight back to /books.
+     *
+     * Sending an already-signed-in visitor to the library is still done — by
+     * the login page itself, which resolves the session properly and can tell
+     * the difference.
      */
     authorized({ auth, request: { nextUrl } }) {
-      const isLoggedIn = !!auth?.user;
       const isAuthPage =
         nextUrl.pathname.startsWith("/login") ||
         nextUrl.pathname.startsWith("/register");
 
-      if (isAuthPage) {
-        if (isLoggedIn) return Response.redirect(new URL("/books", nextUrl));
-        return true;
-      }
-      return isLoggedIn;
+      if (isAuthPage) return true;
+      return !!auth?.user;
     },
     /** Persist the user id into the JWT at sign-in. */
     jwt({ token, user }) {
