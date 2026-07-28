@@ -1,10 +1,10 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { BookFormat, ReadingStatus } from "@prisma/client";
+import { BookFormat, BookOwnership, ReadingStatus } from "@prisma/client";
 import { BookOpen } from "lucide-react";
 import type { ActionState } from "@/lib/actions/helpers";
-import { FORMAT_LABELS, STATUS_LABELS } from "@/lib/display";
+import { FORMAT_LABELS, OWNERSHIP_LABELS, STATUS_LABELS } from "@/lib/display";
 import { CoverPicker } from "@/components/cover-picker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,7 +31,7 @@ export interface BookFormValues {
   seriesName?: string;
   seriesNumber?: string;
   format?: BookFormat;
-  owned?: boolean;
+  ownership?: BookOwnership;
   status?: ReadingStatus;
   openLibraryId?: string;
 }
@@ -219,16 +219,21 @@ export function BookForm({
               </Select>
             </div>
           )}
-          <label className="flex h-8 cursor-pointer items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              name="owned"
-              value="true"
-              defaultChecked={initial.owned ?? true}
-              className="size-4 accent-primary"
-            />
-            I own this book
-          </label>
+          <div className="grid gap-2">
+            <Label htmlFor="ownership">Ownership</Label>
+            <Select name="ownership" defaultValue={initial.ownership ?? "OWNED"}>
+              <SelectTrigger id="ownership">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.values(BookOwnership).map((o) => (
+                  <SelectItem key={o} value={o}>
+                    {OWNERSHIP_LABELS[o]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         {initial.openLibraryId && (

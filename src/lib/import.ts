@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { BookFormat, ReadingStatus } from "@prisma/client";
+import { BookFormat, BookOwnership, ReadingStatus } from "@prisma/client";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { coversDir } from "@/lib/covers";
@@ -45,6 +45,15 @@ const importedReadSchema = z.object({
   createdAt: dateField,
 });
 
+/** Lending records are additive too (exports without them parse to []). */
+const importedLoanSchema = z.object({
+  borrower: z.string().trim().min(1).max(100),
+  lentAt: dateField,
+  returnedAt: dateField,
+  note: z.string().trim().max(500).nullable().optional(),
+  createdAt: dateField,
+});
+
 /** Reading-log entries are additive too; an entry without a usable date is
  *  meaningless (every consumer is time-based) and gets dropped. */
 const importedProgressSchema = z.object({
@@ -62,7 +71,10 @@ const importedBookSchema = z.object({
   publishedDate: z.string().trim().max(20).nullable().optional(),
   tags: z.array(z.string().trim().toLowerCase().max(50)).catch([]),
   format: z.nativeEnum(BookFormat).catch(BookFormat.PHYSICAL),
-  owned: z.boolean().catch(true),
+  /** Legacy field, still written by exports for older instances to read. */
+  owned: z.boolean().nullable().optional().catch(null),
+  /** Present in exports from this version onward. */
+  ownership: z.nativeEnum(BookOwnership).nullable().optional().catch(null),
   seriesName: z.string().trim().max(200).nullable().optional(),
   seriesNumber: z.number().min(0).max(10000).nullable().optional().catch(null),
   openLibraryId: z.string().trim().max(50).nullable().optional(),
@@ -77,6 +89,7 @@ const importedBookSchema = z.object({
   quotes: z.array(importedQuoteSchema).catch([]),
   reads: z.array(importedReadSchema).catch([]),
   progress: z.array(importedProgressSchema).catch([]),
+  loans: z.array(importedLoanSchema).catch([]),
   createdAt: dateField,
 });
 
@@ -100,6 +113,7 @@ export interface ImportSummary {
   quotesRestored: number;
   readsRestored: number;
   progressRestored: number;
+  loansRestored: number;
   /** Set when the restore stopped early. Everything counted above did land —
    *  a restore is resumable by re-running it, since books already present are
    *  skipped — but the caller must not present the run as complete. */
@@ -155,6 +169,24 @@ async function mapWithConcurrency<T, R>(
   await Promise.all(runners); // always settles: runners swallow their own error
   if (failure !== null) throw failure;
   return results;
+}
+
+/**
+ * Ownership from a backup, whichever era it came from.
+ *
+ * Exports written before the ownership states existed carry only
+ * `owned: boolean`, and that boolean meant exactly two things: true = on my
+ * shelf, false = on the wishlist. Reading it that way keeps an old backup
+ * restoring to what it said, and never invents BORROWED or GIVEN_AWAY for a
+ * library that had no way to express them.
+ */
+function resolveOwnership(b: {
+  ownership?: BookOwnership | null;
+  owned?: boolean | null;
+}): BookOwnership {
+  if (b.ownership) return b.ownership;
+  if (b.owned === false) return BookOwnership.WISHLIST;
+  return BookOwnership.OWNED;
 }
 
 /** Reads a cover image bundled with the backup (zip imports supply this). */
@@ -295,6 +327,7 @@ export async function importLibrary(
   let quotesRestored = 0;
   let readsRestored = 0;
   let progressRestored = 0;
+  let loansRestored = 0;
   let incomplete: ImportSummary["incomplete"];
 
   // Pass 2 — write, with bounded concurrency. Each book is one nested create,
@@ -333,7 +366,7 @@ export async function importLibrary(
         publishedDate: b.publishedDate ?? null,
         tags: [...new Set(b.tags)],
         format: b.format,
-        owned: b.owned,
+        ownership: resolveOwnership(b),
         seriesName: b.seriesName ?? null,
         seriesNumber: b.seriesNumber ?? null,
         openLibraryId: b.openLibraryId ?? null,
@@ -374,6 +407,18 @@ export async function importLibrary(
             .filter((e) => e.date != null)
             .map((e) => ({ page: e.page, date: e.date! })),
         },
+        loans: {
+          // An undated loan cannot be reasoned about (how long has it been
+          // out?), so lentAt falls back to the record's creation date and
+          // finally to now rather than dropping the borrower entirely.
+          create: b.loans.map((l) => ({
+            borrower: l.borrower,
+            lentAt: l.lentAt ?? l.createdAt ?? new Date(),
+            returnedAt: l.returnedAt,
+            note: l.note ?? null,
+            ...(l.createdAt && { createdAt: l.createdAt }),
+          })),
+        },
       },
     });
 
@@ -384,6 +429,7 @@ export async function importLibrary(
     quotesRestored += b.quotes.length;
     readsRestored += pastReads.length;
     progressRestored += b.progress.filter((e) => e.date != null).length;
+    loansRestored += b.loans.length;
   };
 
   try {
@@ -410,6 +456,7 @@ export async function importLibrary(
     quotesRestored,
     readsRestored,
     progressRestored,
+    loansRestored,
     ...(incomplete && { incomplete }),
   };
 }

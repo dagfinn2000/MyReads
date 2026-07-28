@@ -8,14 +8,16 @@ import { coversDir } from "@/lib/covers";
 
 /**
  * GET /api/export — downloads the signed-in user's entire library as a zip:
- * `library.json` (every book with its shelf names, quotes, read history, and
- * reading log, every shelf, reading goals) plus `covers/<file>` for each
+ * `library.json` (every book with its shelf names, quotes, read history,
+ * reading log and lending records, every shelf, reading goals) plus
+ * `covers/<file>` for each
  * locally cached cover image, so a restore into a fresh instance brings the
  * covers back too.
  *
- * The JSON inside is still the version-1 export format (quotes, reads, and
- * progress are additive fields), so unzipping and feeding `library.json` to
- * an older instance keeps working.
+ * The JSON inside is still the version-1 export format — quotes, reads,
+ * progress and loans are additive fields, and `owned` is still written
+ * alongside the newer `ownership` — so unzipping and feeding `library.json`
+ * to an older instance keeps working.
  */
 export async function GET() {
   const session = await auth();
@@ -47,6 +49,16 @@ export async function GET() {
           select: { page: true, date: true },
           orderBy: [{ date: "asc" }, { page: "asc" }],
         },
+        loans: {
+          select: {
+            borrower: true,
+            lentAt: true,
+            returnedAt: true,
+            note: true,
+            createdAt: true,
+          },
+          orderBy: { lentAt: "asc" },
+        },
       },
     }),
     prisma.shelf.findMany({
@@ -71,6 +83,13 @@ export async function GET() {
     readingGoals,
     books: books.map(({ userId: _userId, searchText: _searchText, ...book }) => ({
       ...book,
+      // `owned` no longer exists on the row, but the export format promises
+      // that an older instance can still read this file. Emitting the boolean
+      // alongside the richer field keeps that promise: an old build sees the
+      // shelf/wishlist split it understands, a current one prefers
+      // `ownership`. A borrowed or given-away book reads as "not owned"
+      // there, which is the closest true statement that vocabulary has.
+      owned: book.ownership === "OWNED",
       shelves: book.shelves.map((s) => s.name),
     })),
   };

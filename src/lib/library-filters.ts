@@ -1,5 +1,5 @@
 import type { Prisma } from "@prisma/client";
-import { BookFormat, ReadingStatus } from "@prisma/client";
+import { BookFormat, BookOwnership, ReadingStatus } from "@prisma/client";
 
 /** The library view's filter state, as it appears in the URL. */
 export interface LibraryFilters {
@@ -16,6 +16,15 @@ export interface LibraryFilters {
 function param(v: string | string[] | undefined): string {
   return typeof v === "string" ? v : "";
 }
+
+/** Filter value -> ownership state. "lent" is not an ownership state at all
+ *  (a lent book is still owned), so it is handled separately below. */
+const OWNERSHIP_FILTERS: Record<string, BookOwnership | undefined> = {
+  owned: BookOwnership.OWNED,
+  wishlist: BookOwnership.WISHLIST,
+  borrowed: BookOwnership.BORROWED,
+  given_away: BookOwnership.GIVEN_AWAY,
+};
 
 /** Reads the filter state out of a searchParams object. */
 export function parseFilters(
@@ -44,14 +53,17 @@ export function buildBookWhere(
 ): Prisma.BookWhereInput {
   const shelf = Object.values(ReadingStatus).find((s) => s === filters.shelf);
   const format = Object.values(BookFormat).find((f) => f === filters.format);
+  // The URL keeps the `owned` param name so existing bookmarks and shared
+  // links still work; its values just grew beyond owned/wishlist.
+  const ownership = OWNERSHIP_FILTERS[filters.owned];
   const minRating = parseInt(filters.minRating, 10);
 
   return {
     userId,
     ...(shelf && { status: shelf }),
     ...(format && { format }),
-    ...(filters.owned === "owned" && { owned: true }),
-    ...(filters.owned === "wishlist" && { owned: false }),
+    ...(ownership && { ownership }),
+    ...(filters.owned === "lent" && { loans: { some: { returnedAt: null } } }),
     ...(minRating >= 1 && { rating: { gte: minRating } }),
     ...(filters.tag && filters.tag !== "all" && { tags: { has: filters.tag } }),
     ...(filters.shelfId && { shelves: { some: { id: filters.shelfId } } }),

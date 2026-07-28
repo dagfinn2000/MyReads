@@ -57,7 +57,7 @@ export default async function EditBookPage({
           seriesName: book.seriesName ?? "",
           seriesNumber: book.seriesNumber?.toString() ?? "",
           format: book.format,
-          owned: book.owned,
+          ownership: book.ownership,
         }}
       />
     </div>

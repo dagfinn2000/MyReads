@@ -73,7 +73,7 @@ export async function createBook(
       seriesName: data.seriesName ?? null,
       seriesNumber: data.seriesNumber ?? null,
       format: data.format,
-      owned: data.owned,
+      ownership: data.ownership,
       openLibraryId: data.openLibraryId ?? null,
       status,
       searchText: buildSearchText(data.title, data.authors, data.seriesName),
@@ -121,7 +121,7 @@ export async function updateBook(
       seriesName: data.seriesName ?? null,
       seriesNumber: data.seriesNumber ?? null,
       format: data.format,
-      owned: data.owned,
+      ownership: data.ownership,
       // Submitted by the form and validated by bookSchema, but previously
       // dropped here — the only field of the schema the update ignored.
       openLibraryId: data.openLibraryId ?? null,

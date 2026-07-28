@@ -11,7 +11,8 @@ surface area.
 
 - **Book catalog** — add books manually or via search-and-import, with title,
   author(s), ISBN, cover, description, page count, publish date, genre/tags,
-  format (physical / ebook / audiobook), and an owned flag. Full edit/delete.
+  format (physical / ebook / audiobook), and ownership (owned / wishlist /
+  borrowed / no longer have it). Full edit/delete.
 - **Search & import** — search-as-you-type against the
   [Open Library API](https://openlibrary.org/developers/api) (free, no key).
   Optionally enriched by the Google Books API when `GOOGLE_BOOKS_API_KEY` is
@@ -39,6 +40,11 @@ surface area.
   a one-tap handoff to the add flow, ISBN prefilled. Installed as a PWA, the
   home-screen icon's long-press menu jumps straight to it. The add flow also
   warns when you're about to import a book you already have.
+- **Lending** — record who borrowed your copy and when. A book that's out is
+  badged in the library and filterable as "Lent out", and the book page shows
+  who has it, for how long, and everyone who has borrowed it before. Marking
+  it returned keeps the record as history. Lending is separate from
+  ownership — a lent book is still yours.
 - **Bulk edit** — flip the library into select mode, tick any number of
   books (or "Select all" within the current filter), and set status, add
   tags, or shelve them in one action.
@@ -76,7 +82,8 @@ surface area.
   "Fantasy") independent of reading status. A book can sit on any number of
   shelves; deleting a shelf never touches its books.
 - **Library views** — status shelves, custom-shelf chips, text search across
-  title/author/series, filters by tag, format, owned vs. wishlist, and
+  title/author/series, filters by tag, format, ownership (including "lent
+  out"), and
   minimum rating, grouping
   by author or series, sorting by title, author, rating, date added, or date
   finished. Authors sort by surname the way a bookshelf files them — Le

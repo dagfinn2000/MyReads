@@ -31,7 +31,8 @@ export interface FilterValues {
   q: string;
   tag: string;
   format: string;
-  /** "all" | "owned" | "wishlist" (owned flag unset). */
+  /** Ownership filter: "all" | "owned" | "wishlist" | "borrowed" |
+   *  "given_away" | "lent". Keeps the `owned` name so old links still work. */
   owned: string;
   minRating: string;
   series: string;
@@ -75,6 +76,9 @@ function dirTooltip(sort: string, asc: boolean): string {
 const OWNED_OPTIONS = [
   { value: "all", label: "Owned & wishlist" },
   { value: "owned", label: "Owned" },
+  { value: "borrowed", label: "Borrowed" },
+  { value: "given_away", label: "No longer have" },
+  { value: "lent", label: "Lent out" },
   { value: "wishlist", label: "Wishlist" },
 ];
 
