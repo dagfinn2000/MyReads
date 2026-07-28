@@ -117,7 +117,7 @@ surface area.
   so a restore onto a fresh server looks exactly like the original. Restores
   merge: books you already have are skipped, so it's safe to run on a live
   library. Plain-JSON backups from older versions restore fine too.
-- **Sixteen themes that follow you** — the picked theme is saved on your
+- **Twenty themes that follow you** — the picked theme is saved on your
   account and server-rendered on first paint, so signing in from a new
   browser or device brings your look along (localStorage still covers the
   signed-out pages).
@@ -173,7 +173,7 @@ monthly rhythm, ratings, and top genres:
 
 ![Year in review page](docs/year-in-review.png)
 
-**Dark mode** — one of sixteen themes:
+**Dark mode** — one of twenty themes:
 
 ![Library in a dark theme](docs/library-dark.png)
 

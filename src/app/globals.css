@@ -269,6 +269,54 @@
     --ring: #dfaf8f;
 }
 
+/* Neon on near-black. Nothing else here is saturated — the whole set is
+   muted editor palettes — so this one leans the other way entirely. The ring
+   is cyan rather than the usual copy of --primary, which is what puts both
+   signature colours on screen at once (magenta buttons, cyan focus). */
+[data-theme="synthwave"] {
+    --background: #171122;
+    --foreground: #f2e9ff;
+    --card: #221936;
+    --card-foreground: #f2e9ff;
+    --popover: #221936;
+    --popover-foreground: #f2e9ff;
+    --primary: #ff5ed0;
+    --primary-foreground: #171122;
+    --secondary: #33254d;
+    --secondary-foreground: #f2e9ff;
+    --muted: #33254d;
+    --muted-foreground: #bfa9e0;
+    --accent: #33254d;
+    --accent-foreground: #f2e9ff;
+    --destructive: #ff4d6d;
+    --border: #3d2c5c;
+    --input: #3d2c5c;
+    --ring: #22e0e0;
+}
+
+/* Cold and saturated, where the other darks are grey, brown or violet.
+   Deep-water blue-green with a turquoise accent. */
+[data-theme="abyss"] {
+    --background: #05202b;
+    --foreground: #d9f0f6;
+    --card: #0a2f3d;
+    --card-foreground: #d9f0f6;
+    --popover: #0a2f3d;
+    --popover-foreground: #d9f0f6;
+    --primary: #2ad4c4;
+    --primary-foreground: #05202b;
+    --secondary: #113f50;
+    --secondary-foreground: #d9f0f6;
+    --muted: #113f50;
+    --muted-foreground: #8fbecb;
+    --accent: #113f50;
+    --accent-foreground: #d9f0f6;
+    --destructive: #ff7a7a;
+    --border: #174d61;
+    --input: #174d61;
+    --ring: #2ad4c4;
+}
+
 [data-theme="everforest-light"] {
     --background: #fdf6e3;
     --foreground: #5c6a72;
@@ -414,6 +462,52 @@
     --border: #dfdad9;
     --input: #dfdad9;
     --ring: #907aa9;
+}
+
+/* Pink paper. Every other light here is cream, beige or neutral grey; this
+   is the only tinted-warm-pink background in the set. */
+[data-theme="blossom"] {
+    --background: #fff5f7;
+    --foreground: #43212c;
+    --card: #fffafb;
+    --card-foreground: #43212c;
+    --popover: #fffafb;
+    --popover-foreground: #43212c;
+    --primary: #c2185b;
+    --primary-foreground: #ffffff;
+    --secondary: #fbe4ea;
+    --secondary-foreground: #43212c;
+    --muted: #fbe4ea;
+    --muted-foreground: #855667;
+    --accent: #fbe4ea;
+    --accent-foreground: #43212c;
+    --destructive: #b3261e;
+    --border: #f2d3dc;
+    --input: #f2d3dc;
+    --ring: #c2185b;
+}
+
+/* Blueprint paper: cool blue-tinted light with deep navy ink — the cold
+   counterpart to the warm creams, and the only blue-backed light theme. */
+[data-theme="cyanotype"] {
+    --background: #eef4fb;
+    --foreground: #16304d;
+    --card: #f8fbff;
+    --card-foreground: #16304d;
+    --popover: #f8fbff;
+    --popover-foreground: #16304d;
+    --primary: #1b4f9c;
+    --primary-foreground: #ffffff;
+    --secondary: #dbe7f5;
+    --secondary-foreground: #16304d;
+    --muted: #dbe7f5;
+    --muted-foreground: #4b6a8c;
+    --accent: #dbe7f5;
+    --accent-foreground: #16304d;
+    --destructive: #b3261e;
+    --border: #cbdaea;
+    --input: #cbdaea;
+    --ring: #1b4f9c;
 }
 
 @layer base {
