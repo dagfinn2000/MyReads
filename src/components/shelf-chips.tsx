@@ -1,9 +1,10 @@
 "use client";
 
-import { useActionState, useEffect, useState, useTransition } from "react";
+import { useActionState, useState, useTransition } from "react";
 import Link from "next/link";
 import { Plus, X } from "lucide-react";
 import { createShelf, deleteShelf } from "@/lib/actions/shelves";
+import type { ActionState } from "@/lib/actions/helpers";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -41,15 +42,22 @@ export function ShelfChips({
   activeShelfId: string;
   searchParams: Record<string, string>;
 }) {
-  const [createState, createAction, creating] = useActionState(createShelf, {});
   const [dialogOpen, setDialogOpen] = useState(false);
   const [, startTransition] = useTransition();
 
-  // Each successful create returns a fresh state object, so this closes the
-  // dialog exactly once per creation.
-  useEffect(() => {
-    if (createState.success) setDialogOpen(false);
-  }, [createState]);
+  // Closing the dialog is part of submitting, not a reaction to state
+  // changing afterwards: the action runs, and on success the dialog closes
+  // in the same flow. Reacting to `createState` in an effect meant an extra
+  // render pass, and depended on each success producing a new object
+  // identity to avoid re-closing a dialog the user had reopened.
+  const [createState, createAction, creating] = useActionState(
+    async (prev: ActionState, formData: FormData): Promise<ActionState> => {
+      const result = await createShelf(prev, formData);
+      if (result.success) setDialogOpen(false);
+      return result;
+    },
+    {},
+  );
 
   const active = shelves.find((s) => s.id === activeShelfId);
 

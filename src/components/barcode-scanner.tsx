@@ -117,7 +117,6 @@ export function BarcodeScanner({
       }, 350);
     }
 
-    setError(null);
     void start();
     return () => {
       cancelled = true;
@@ -127,7 +126,17 @@ export function BarcodeScanner({
   }, [open, onDetected]);
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    // Clearing a previous failure belongs to the act of reopening, not to a
+    // pass through the effect: retrying after denying camera permission
+    // should start from a clean slate, and doing it here keeps the effect to
+    // starting and stopping the camera.
+    <Dialog
+      open={open}
+      onOpenChange={(next) => {
+        if (next) setError(null);
+        setOpen(next);
+      }}
+    >
       <DialogTrigger asChild>
         <Button type="button" variant="outline" title="Scan a book barcode">
           <ScanBarcode data-slot="icon" />

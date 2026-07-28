@@ -7,6 +7,15 @@ import type { BookFormValues } from "@/components/book-form";
 import { BarcodeScanner } from "@/components/barcode-scanner";
 import { Input } from "@/components/ui/input";
 
+/** Shortest query worth sending: one or two letters match most of a
+ *  catalogue, and every search fans out to three of them. Mirrored by the
+ *  route (app/api/metadata/search). */
+const MIN_QUERY_LENGTH = 3;
+
+/** Pause in typing before searching. Raised from 400ms for the same reason —
+ *  each distinct prefix is a fresh cache miss against free services. */
+const DEBOUNCE_MS = 700;
+
 /**
  * Search-as-you-type against /api/metadata/search (Open Library, with
  * optional Google Books fallback server-side). Picking a result fetches the
@@ -23,8 +32,13 @@ export function ImportSearch({
   initialQuery?: string;
 }) {
   const [query, setQuery] = useState(initialQuery ?? "");
-  const [results, setResults] = useState<BookMetadata[]>([]);
-  const [searching, setSearching] = useState(false);
+  // Results are stored with the query they answer. Everything the UI needs —
+  // which results to show, and whether a search is outstanding — is then
+  // derived from that one fact, instead of three states nudged into
+  // agreement by setState calls at the top of the effect.
+  const [answer, setAnswer] = useState<{ query: string; list: BookMetadata[] } | null>(
+    null,
+  );
   const [pickingId, setPickingId] = useState<string | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -32,62 +46,24 @@ export function ImportSearch({
   // an ISBN search that returns exactly one result skips the picking step.
   const autoPickRef = useRef(Boolean(initialQuery));
 
+  const trimmed = query.trim();
+  const longEnough = trimmed.length >= MIN_QUERY_LENGTH;
+  const answered = answer?.query === trimmed;
+  // A typed character invalidates the previous answer by itself: the results
+  // stop matching the query, which is exactly what "searching" means.
+  const results = answered ? answer.list : [];
+  const searching = longEnough && !answered;
+
   /** Barcode scanner handoff — the ISBN just becomes the search query. */
   const handleScan = useCallback((isbn: string) => {
     autoPickRef.current = true;
     setQuery(isbn);
   }, []);
 
-  // Debounced search: waits for a pause in typing, then cancels any in-flight
-  // request so stale responses can't overwrite newer ones.
-  //
-  // 700ms and a 3-character floor, up from 400ms and 2. Every search fans out
-  // to three external catalogues, and each distinct prefix is a fresh cache
-  // miss — at the old settings, typing "brandon sanderson" at a normal pace
-  // sent tens of requests to free services to answer one question. An ISBN
-  // scan is unaffected: it sets the whole query at once.
-  useEffect(() => {
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    if (query.trim().length < 3) {
-      setResults([]);
-      setSearching(false);
-      return;
-    }
-    setSearching(true);
-    debounceRef.current = setTimeout(async () => {
-      abortRef.current?.abort();
-      const controller = new AbortController();
-      abortRef.current = controller;
-      try {
-        const res = await fetch(
-          `/api/metadata/search?q=${encodeURIComponent(query.trim())}`,
-          { signal: controller.signal },
-        );
-        const data = await res.json();
-        const list: BookMetadata[] = data.results ?? [];
-        setResults(list);
-        setSearching(false);
-        if (autoPickRef.current) {
-          autoPickRef.current = false;
-          if (list.length === 1) {
-            void pick(list[0], list[0].openLibraryId ?? `${list[0].title}-0`);
-          }
-        }
-      } catch {
-        if (!controller.signal.aborted) setSearching(false);
-      }
-    }, 700);
-    return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-      // Also abort a request already in flight: without this, navigating away
-      // mid-search left the fetch running and its setState firing into an
-      // unmounted component.
-      abortRef.current?.abort();
-    };
-  }, [query]);
-
-  /** Fetch description/subjects for the chosen result, then prefill. */
-  async function pick(result: BookMetadata, key: string) {
+  /** Fetch description/subjects for the chosen result, then prefill.
+   *  Stable across renders (onPick is a setState from the parent), so the
+   *  search effect can depend on it honestly instead of omitting it. */
+  const pick = useCallback(async (result: BookMetadata, key: string) => {
     setPickingId(key);
     let details = {
       description: result.description,
@@ -122,7 +98,50 @@ export function ImportSearch({
       openLibraryId: result.openLibraryId ?? "",
     });
     setPickingId(null);
-  }
+  }, [onPick]);
+
+  // Debounced search: waits for a pause in typing, then cancels any in-flight
+  // request so stale responses can't overwrite newer ones. An ISBN scan is
+  // unaffected by the debounce — it sets the whole query at once.
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (trimmed.length < MIN_QUERY_LENGTH) return;
+
+    debounceRef.current = setTimeout(async () => {
+      abortRef.current?.abort();
+      const controller = new AbortController();
+      abortRef.current = controller;
+      try {
+        const res = await fetch(
+          `/api/metadata/search?q=${encodeURIComponent(trimmed)}`,
+          { signal: controller.signal },
+        );
+        const data = await res.json();
+        const list: BookMetadata[] = data.results ?? [];
+        setAnswer({ query: trimmed, list });
+        if (autoPickRef.current) {
+          autoPickRef.current = false;
+          if (list.length === 1) {
+            void pick(list[0], list[0].openLibraryId ?? `${list[0].title}-0`);
+          }
+        }
+      } catch {
+        // A failed lookup answers the query with nothing, which stops the
+        // spinner and shows "no results". An abort is a newer query taking
+        // over and must not answer this one.
+        if (!controller.signal.aborted) setAnswer({ query: trimmed, list: [] });
+      }
+    }, DEBOUNCE_MS);
+
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      // Also abort a request already in flight: without this, navigating away
+      // mid-search left the fetch running and its setState firing into an
+      // unmounted component.
+      abortRef.current?.abort();
+    };
+  }, [trimmed, pick]);
+
 
   return (
     <div className="grid gap-4">
@@ -142,7 +161,7 @@ export function ImportSearch({
         </p>
       )}
 
-      {!searching && query.trim().length >= 3 && results.length === 0 && (
+      {!searching && longEnough && results.length === 0 && (
         <p className="text-sm text-muted-foreground">
           No results. You can still add the book manually.
         </p>
