@@ -49,40 +49,51 @@ export async function bulkUpdateBooks(
   if (owned.length === 0) return { error: "No matching books" };
   const ownedIds = owned.map((b) => b.id);
 
-  if (status) {
-    await prisma.book.updateMany({
-      where: { id: { in: ownedIds } },
-      data: { status },
-    });
-  }
-
-  if (addTags?.length) {
-    // Per-row updates so existing tags are merged without duplicates —
-    // updateMany's `push` would blindly append. Personal-library scale.
-    const updates = owned
-      .map((b) => ({ b, merged: [...new Set([...b.tags, ...addTags])] }))
-      .filter(({ b, merged }) => merged.length !== b.tags.length)
-      .map(({ b, merged }) =>
-        prisma.book.update({ where: { id: b.id }, data: { tags: merged } }),
-      );
-    if (updates.length) await prisma.$transaction(updates);
-  }
-
+  // The shelf is resolved before the transaction so an unknown shelf id is
+  // rejected without having written anything.
+  let shelf: { id: string; books: { id: string }[] } | null = null;
   if (addShelfId) {
-    const shelf = await prisma.shelf.findFirst({
+    shelf = await prisma.shelf.findFirst({
       where: { id: addShelfId, userId },
       select: { id: true, books: { select: { id: true } } },
     });
     if (!shelf) return { error: "Shelf not found" };
-    const already = new Set(shelf.books.map((b) => b.id));
-    const toConnect = ownedIds.filter((id) => !already.has(id));
-    if (toConnect.length) {
-      await prisma.shelf.update({
-        where: { id: shelf.id },
-        data: { books: { connect: toConnect.map((id) => ({ id })) } },
+  }
+
+  // One unit of work. Applying a status, then tags, then a shelf as three
+  // independent writes meant a failure partway through left some of the
+  // selection changed and some not — while still reporting the whole batch
+  // as updated. "Apply to 20 books" should either happen or not.
+  await prisma.$transaction(async (tx) => {
+    if (status) {
+      await tx.book.updateMany({
+        where: { id: { in: ownedIds } },
+        data: { status },
       });
     }
-  }
+
+    if (addTags?.length) {
+      // Per-row updates so existing tags are merged without duplicates —
+      // updateMany's `push` would blindly append. Personal-library scale.
+      const changed = owned
+        .map((b) => ({ b, merged: [...new Set([...b.tags, ...addTags])] }))
+        .filter(({ b, merged }) => merged.length !== b.tags.length);
+      for (const { b, merged } of changed) {
+        await tx.book.update({ where: { id: b.id }, data: { tags: merged } });
+      }
+    }
+
+    if (shelf) {
+      const already = new Set(shelf.books.map((b) => b.id));
+      const toConnect = ownedIds.filter((id) => !already.has(id));
+      if (toConnect.length) {
+        await tx.shelf.update({
+          where: { id: shelf.id },
+          data: { books: { connect: toConnect.map((id) => ({ id })) } },
+        });
+      }
+    }
+  });
 
   revalidatePath("/books");
   return { count: ownedIds.length };

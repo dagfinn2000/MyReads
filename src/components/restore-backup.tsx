@@ -43,7 +43,15 @@ export function RestoreBackup() {
         data.shelvesCreated > 0 ? `${data.shelvesCreated} shelves created` : null,
         data.goalsRestored > 0 ? `${data.goalsRestored} goals restored` : null,
       ].filter(Boolean);
-      setMessage(`${parts.join(", ")}.`);
+      // A restore that stopped early must not read as a clean success — say
+      // what landed and that re-running finishes the job (already-restored
+      // books are skipped as duplicates).
+      setMessage(
+        data.incomplete
+          ? `${parts.join(", ")} — then stopped early (${data.incomplete.reason}). ` +
+            `Run the restore again to continue where it left off.`
+          : `${parts.join(", ")}.`,
+      );
       router.refresh();
     } catch {
       setMessage("Restore failed — is this a MyReads export file?");

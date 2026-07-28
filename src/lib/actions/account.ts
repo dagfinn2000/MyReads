@@ -101,15 +101,21 @@ export async function deleteAccount(
   const verified = await verifyPassword(user, password);
   if ("error" in verified) return verified;
 
+  // Collect the cover paths *before* the delete (the rows are about to go),
+  // but unlink the files only once the database delete has actually landed.
+  // The other order loses your images to a failed delete, leaving a library
+  // that still lists every book with a broken cover — the same trap
+  // updateBook already avoids when it replaces a cover.
   const books = await prisma.book.findMany({
     where: { userId: user.id },
     select: { coverUrl: true },
   });
+
+  await prisma.user.delete({ where: { id: user.id } });
+
   for (const b of books) {
     await deleteCachedCover(b.coverUrl); // tolerates already-missing files
   }
-
-  await prisma.user.delete({ where: { id: user.id } });
 
   // Throws Next's redirect to /login — never returns.
   await signOut({ redirectTo: "/login" });

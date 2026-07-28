@@ -100,6 +100,37 @@ export interface ImportSummary {
   quotesRestored: number;
   readsRestored: number;
   progressRestored: number;
+  /** Set when the restore stopped early. Everything counted above did land —
+   *  a restore is resumable by re-running it, since books already present are
+   *  skipped — but the caller must not present the run as complete. */
+  incomplete?: { after: number; reason: string };
+}
+
+/** How many book creates are in flight at once. Each book is a single nested
+ *  write (book + its quotes, reads and progress), so per-book atomicity is
+ *  already guaranteed by the database; this only bounds how many of those
+ *  round-trips overlap. Sequential made a 1000-book restore 1000 waits long;
+ *  unbounded would open 1000 connections. */
+const IMPORT_CONCURRENCY = 10;
+
+/** Runs `worker` over `items`, at most `limit` at a time, preserving order in
+ *  the returned results and stopping at the first failure. */
+async function mapWithConcurrency<T, R>(
+  items: T[],
+  limit: number,
+  worker: (item: T, index: number) => Promise<R>,
+): Promise<R[]> {
+  const results = new Array<R>(items.length);
+  let next = 0;
+  const runners = Array.from({ length: Math.min(limit, items.length) }, async () => {
+    for (;;) {
+      const i = next++;
+      if (i >= items.length) return;
+      results[i] = await worker(items[i], i);
+    }
+  });
+  await Promise.all(runners);
+  return results;
 }
 
 /** Reads a cover image bundled with the backup (zip imports supply this). */
@@ -170,23 +201,31 @@ export async function importLibrary(
       for (const name of shelves) if (typeof name === "string") wantedShelves.add(name);
     }
   }
+  // Missing shelves in one statement, then read back to learn their ids —
+  // two round-trips instead of one per shelf.
+  const missingShelves = [...wantedShelves].filter((n) => !shelfIdByName.has(n));
   let shelvesCreated = 0;
-  for (const name of wantedShelves) {
-    if (!shelfIdByName.has(name)) {
-      const shelf = await prisma.shelf.create({ data: { userId, name } });
-      shelfIdByName.set(name, shelf.id);
-      shelvesCreated++;
-    }
+  if (missingShelves.length > 0) {
+    const created = await prisma.shelf.createMany({
+      data: missingShelves.map((name) => ({ userId, name })),
+      skipDuplicates: true,
+    });
+    shelvesCreated = created.count;
+    const refreshed = await prisma.shelf.findMany({
+      where: { userId, name: { in: missingShelves } },
+      select: { id: true, name: true },
+    });
+    for (const s of refreshed) shelfIdByName.set(s.name, s.id);
   }
 
-  // Reading goals: upsert per year.
-  for (const goal of data.readingGoals) {
-    await prisma.readingGoal.upsert({
+  // Reading goals: upsert per year, concurrently — they're independent.
+  await mapWithConcurrency(data.readingGoals, IMPORT_CONCURRENCY, (goal) =>
+    prisma.readingGoal.upsert({
       where: { userId_year: { userId, year: goal.year } },
       create: { userId, year: goal.year, target: goal.target },
       update: { target: goal.target },
-    });
-  }
+    }),
+  );
 
   // Existing books, for duplicate detection.
   const existing = await prisma.book.findMany({
@@ -200,14 +239,15 @@ export async function importLibrary(
     ),
   );
 
-  let booksCreated = 0;
   let booksSkipped = 0;
   let booksInvalid = 0;
-  let coversRestored = 0;
-  let quotesRestored = 0;
-  let readsRestored = 0;
-  let progressRestored = 0;
 
+  // Pass 1 — decide, sequentially. Duplicate detection folds each accepted
+  // book back into the lookup sets, so a payload containing the same book
+  // twice keeps skipping the second copy. That ordering dependency is why
+  // the decisions stay serial; only the slow database work below is
+  // parallelised.
+  const accepted: { b: z.infer<typeof importedBookSchema>; isbn: string | null }[] = [];
   for (const raw of data.books) {
     const parsedBook = importedBookSchema.safeParse(raw);
     if (!parsedBook.success) {
@@ -221,9 +261,22 @@ export async function importLibrary(
       booksSkipped++;
       continue;
     }
+    if (isbn) existingIsbns.add(isbn);
+    existingTitleAuthor.add(key);
+    accepted.push({ b, isbn });
+  }
 
+  let booksCreated = 0;
+  let coversRestored = 0;
+  let quotesRestored = 0;
+  let readsRestored = 0;
+  let progressRestored = 0;
+  let incomplete: ImportSummary["incomplete"];
+
+  // Pass 2 — write, with bounded concurrency. Each book is one nested create,
+  // so a book and its quotes/reads/progress can never land half-written.
+  const createOne = async ({ b, isbn }: (typeof accepted)[number]) => {
     const cover = await resolveCoverUrl(b.coverUrl, getCoverFile);
-    if (cover.restored) coversRestored++;
 
     // Read history. Older exports have no `reads` — materialize the history
     // that timesRead implies as undated past reads (the finished pass itself
@@ -299,12 +352,28 @@ export async function importLibrary(
         },
       },
     });
-    if (isbn) existingIsbns.add(isbn);
-    existingTitleAuthor.add(key);
+
+    // Counted only after the write lands, so the summary never claims a book
+    // the database rejected.
+    if (cover.restored) coversRestored++;
     booksCreated++;
     quotesRestored += b.quotes.length;
     readsRestored += pastReads.length;
     progressRestored += b.progress.filter((e) => e.date != null).length;
+  };
+
+  try {
+    await mapWithConcurrency(accepted, IMPORT_CONCURRENCY, createOne);
+  } catch (err) {
+    // A restore is not one transaction — wrapping thousands of nested writes
+    // in a single long-running transaction trades this failure mode for a
+    // worse one. Instead the books written so far stay written, and the run
+    // says so. Re-running the same backup finishes the job: everything
+    // already restored is detected as a duplicate and skipped.
+    incomplete = {
+      after: booksCreated,
+      reason: err instanceof Error ? err.message : "unknown error",
+    };
   }
 
   return {
@@ -317,5 +386,6 @@ export async function importLibrary(
     quotesRestored,
     readsRestored,
     progressRestored,
+    ...(incomplete && { incomplete }),
   };
 }
