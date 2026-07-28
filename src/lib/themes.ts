@@ -3,7 +3,11 @@
  * `[data-theme="…"]` CSS-variable blocks; this module only carries the
  * metadata the UI needs (names, light/dark mode, swatch colors).
  *
- * Palettes are ported from dagfinn2000/dashify so both apps share a look.
+ * Most palettes are ported from dagfinn2000/dashify so both apps share a
+ * look. Synthwave, Abyss, Blossom and Cyanotype are additions that
+ * deliberately sit outside that family — the ported set is entirely muted
+ * editor colourschemes, with every light a warm cream and every dark a
+ * low-saturation grey or violet.
  * Dark-mode themes additionally get the `dark` class on <html> so Tailwind
  * `dark:` variants (status badges etc.) follow along.
  */
@@ -30,6 +34,8 @@ export const THEMES: ThemeDef[] = [
   { id: "kanagawa", name: "Kanagawa", mode: "dark", swatch: ["#1f1f28", "#e6c384"] },
   { id: "rose-pine", name: "Rosé Pine", mode: "dark", swatch: ["#191724", "#ebbcba"] },
   { id: "zenburn", name: "Zenburn", mode: "dark", swatch: ["#3f3f3f", "#dfaf8f"] },
+  { id: "synthwave", name: "Synthwave", mode: "dark", swatch: ["#171122", "#ff5ed0"] },
+  { id: "abyss", name: "Abyss", mode: "dark", swatch: ["#05202b", "#2ad4c4"] },
 
   // Light palettes
   { id: "everforest-light", name: "Everforest Light", mode: "light", swatch: ["#fdf6e3", "#35a77c"] },
@@ -39,6 +45,8 @@ export const THEMES: ThemeDef[] = [
   { id: "solarized-light", name: "Solarized Light", mode: "light", swatch: ["#fdf6e3", "#b58900"] },
   { id: "catppuccin-latte", name: "Catppuccin Latte", mode: "light", swatch: ["#eff1f5", "#8839ef"] },
   { id: "rose-pine-dawn", name: "Rosé Pine Dawn", mode: "light", swatch: ["#faf4ed", "#907aa9"] },
+  { id: "blossom", name: "Blossom", mode: "light", swatch: ["#fff5f7", "#c2185b"] },
+  { id: "cyanotype", name: "Cyanotype", mode: "light", swatch: ["#eef4fb", "#1b4f9c"] },
 ];
 
 export const DARK_THEME_IDS = THEMES.filter((t) => t.mode === "dark").map(
