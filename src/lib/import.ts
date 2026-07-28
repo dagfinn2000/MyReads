@@ -113,8 +113,22 @@ export interface ImportSummary {
  *  unbounded would open 1000 connections. */
 const IMPORT_CONCURRENCY = 10;
 
-/** Runs `worker` over `items`, at most `limit` at a time, preserving order in
- *  the returned results and stopping at the first failure. */
+/**
+ * Runs `worker` over `items`, at most `limit` at a time, preserving order in
+ * the returned results and stopping at the first failure.
+ *
+ * "Stopping" has to be done deliberately. Letting the rejection propagate out
+ * of `Promise.all` returns while the other runners are still pulling items and
+ * writing — so the caller reads its progress counters mid-flight and reports a
+ * total lower than what actually reached the database, which is exactly the
+ * number a user is told to trust when re-running an interrupted restore. A
+ * second runner failing afterwards would also surface as an unhandled
+ * rejection, since nothing is awaiting it any more.
+ *
+ * So: the first error is captured, remaining runners stop claiming new work,
+ * everything already in flight is allowed to settle, and only then is the
+ * error rethrown.
+ */
 async function mapWithConcurrency<T, R>(
   items: T[],
   limit: number,
@@ -122,14 +136,24 @@ async function mapWithConcurrency<T, R>(
 ): Promise<R[]> {
   const results = new Array<R>(items.length);
   let next = 0;
+  let failure: unknown = null;
+
   const runners = Array.from({ length: Math.min(limit, items.length) }, async () => {
     for (;;) {
+      if (failure !== null) return;
       const i = next++;
       if (i >= items.length) return;
-      results[i] = await worker(items[i], i);
+      try {
+        results[i] = await worker(items[i], i);
+      } catch (err) {
+        failure ??= err;
+        return;
+      }
     }
   });
-  await Promise.all(runners);
+
+  await Promise.all(runners); // always settles: runners swallow their own error
+  if (failure !== null) throw failure;
   return results;
 }
 

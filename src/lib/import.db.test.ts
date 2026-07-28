@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { PrismaClient, ReadingStatus } from "@prisma/client";
 import { importLibrary } from "@/lib/import";
 
@@ -194,7 +194,11 @@ describe("importLibrary", () => {
   });
 
   it("writes a cover bundled with the backup and points the book at it", async () => {
-    const name = "restored-abcdef12.png";
+    // Unique per run: a fixed name would be left behind in COVERS_DIR, and
+    // resolveCoverUrl treats an already-present file as "nothing to restore",
+    // so the assertion below would pass once and fail on every re-run against
+    // the same directory.
+    const name = `restored-${Date.now().toString(16)}${Math.floor(Math.random() * 1e6).toString(16)}.png`;
     const png = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 1, 2, 3]);
     const res = await importLibrary(
       userId,
@@ -267,6 +271,107 @@ describe("importLibrary", () => {
     );
 
     expect(second).toMatchObject({ booksCreated: 0, booksSkipped: 1 });
+  });
+
+  describe("when a restore fails partway through", () => {
+    /** Fails the Nth book create, delegating the rest to the real client. */
+    async function failOnNthCreate(n: number) {
+      const { prisma: lib } = await import("@/lib/prisma");
+      const real = lib.book.create.bind(lib.book);
+      let calls = 0;
+      return vi
+        .spyOn(lib.book, "create")
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .mockImplementation((async (args: any) => {
+          if (++calls === n) throw new Error("connection lost");
+          return real(args);
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        }) as any);
+    }
+
+    afterEach(() => vi.restoreAllMocks());
+
+    it("reports the restore as incomplete instead of claiming success", async () => {
+      await failOnNthCreate(3);
+
+      const res = await importLibrary(
+        userId,
+        payload([
+          book({ title: "One", isbn: "1111111111111" }),
+          book({ title: "Two", isbn: "2222222222222" }),
+          book({ title: "Three", isbn: "3333333333333" }),
+          book({ title: "Four", isbn: "4444444444444" }),
+        ]),
+      );
+
+      expect(res).not.toHaveProperty("error");
+      const summary = res as Extract<typeof res, { booksCreated: number }>;
+
+      // The whole point: the caller must be able to tell this apart from a
+      // clean run, rather than seeing a smaller number and assuming that was
+      // simply all there was.
+      expect(summary.incomplete).toBeDefined();
+      expect(summary.incomplete?.reason).toContain("connection lost");
+      expect(summary.booksCreated).toBeLessThan(4);
+    });
+
+    it("reports a count that matches what actually reached the database", async () => {
+      // The number the user is told to trust when deciding whether to re-run.
+      // It is read after the failure, so every sibling write must have
+      // settled by then — otherwise it silently undercounts.
+      await failOnNthCreate(3);
+
+      const res = await importLibrary(
+        userId,
+        payload(
+          Array.from({ length: 8 }, (_, i) =>
+            book({ title: `Book ${i}`, isbn: `${i}${i}${i}${i}${i}${i}${i}${i}${i}${i}${i}${i}${i}` }),
+          ),
+        ),
+      );
+      const summary = res as Extract<typeof res, { booksCreated: number }>;
+
+      const actuallyStored = await prisma.book.count({ where: { userId } });
+      expect(summary.booksCreated).toBe(actuallyStored);
+    });
+
+    it("is resumable: re-running finishes the job and skips what landed", async () => {
+      const file = payload([
+        book({ title: "One", isbn: "1111111111111" }),
+        book({ title: "Two", isbn: "2222222222222" }),
+        book({ title: "Three", isbn: "3333333333333" }),
+        book({ title: "Four", isbn: "4444444444444" }),
+      ]);
+
+      const spy = await failOnNthCreate(3);
+      const first = (await importLibrary(userId, file)) as Extract<
+        Awaited<ReturnType<typeof importLibrary>>,
+        { booksCreated: number }
+      >;
+      expect(first.incomplete).toBeDefined();
+      spy.mockRestore();
+
+      // Same file again, nothing failing this time.
+      const second = (await importLibrary(userId, file)) as Extract<
+        Awaited<ReturnType<typeof importLibrary>>,
+        { booksCreated: number }
+      >;
+      expect(second.incomplete).toBeUndefined();
+      expect(second.booksSkipped).toBe(first.booksCreated);
+
+      // Every book present exactly once — the advice to re-run must not
+      // produce duplicates.
+      expect(await prisma.book.count({ where: { userId } })).toBe(4);
+      const titles = (await prisma.book.findMany({ where: { userId } })).map((b) => b.title);
+      expect([...titles].sort()).toEqual(["Four", "One", "Three", "Two"]);
+    });
+
+    it("leaves a clean run with no incomplete marker", async () => {
+      const res = await importLibrary(userId, payload([book()]));
+      const summary = res as Extract<typeof res, { booksCreated: number }>;
+      expect(summary.incomplete).toBeUndefined();
+      expect(summary.booksCreated).toBe(1);
+    });
   });
 
   it("restores a status other than READ without inventing history", async () => {
