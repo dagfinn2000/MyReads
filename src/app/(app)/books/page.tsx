@@ -37,8 +37,6 @@ const librarySelect = {
   createdAt: true,
 } satisfies Prisma.BookSelect;
 
-type LibraryBook = Prisma.BookGetPayload<{ select: typeof librarySelect }>;
-
 export default async function BooksPage({
   searchParams,
 }: {
