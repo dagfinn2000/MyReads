@@ -156,10 +156,12 @@ automatically.
 - **Update.** Run `git pull`, then `docker compose up -d --build`. Database
   changes are applied automatically when the app starts.
 
-## Settings
+## Server settings
 
 These are the settings in `.env` you are most likely to change. The rest are
-explained in [.env.example](.env.example).
+explained in [.env.example](.env.example). Personal choices are made in the
+app instead: date formats, time zone and the rest under Preferences on the
+Account page, and the theme with the palette button in the top bar.
 
 | Setting | Needed? | What it does |
 | --- | --- | --- |
