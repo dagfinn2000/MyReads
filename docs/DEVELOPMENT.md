@@ -1,0 +1,126 @@
+# Developing MyReads
+
+How to run MyReads from source, run the tests, and find your way around the
+code. To just use the app, follow the install steps in the
+[README](../README.md) instead.
+
+## Run it locally
+
+You need Node 22+ and a Postgres database. The compose `db` service works
+fine for the database.
+
+```bash
+cp .env.example .env       # set POSTGRES_PASSWORD and AUTH_SECRET
+# Start only the database, reachable on localhost:5432. The dev override
+# file publishes the port; the main compose file keeps Postgres private.
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d db
+npm install
+npx prisma migrate deploy  # create the tables (uses DATABASE_URL from .env)
+npm run dev                # http://localhost:3000
+```
+
+Outside Docker the app reads `DATABASE_URL` from `.env`. Make sure its
+password matches `POSTGRES_PASSWORD`. Every setting is described in
+[.env.example](../.env.example).
+
+## Scripts
+
+| Command | What it does |
+| --- | --- |
+| `npm run dev` | Start the dev server |
+| `npm run build` | Generate the Prisma client and make a production build |
+| `npm run lint` | Run ESLint |
+| `npm test` | Unit tests (no database needed) |
+| `npm run test:db:docker` | Database tests against a throwaway Postgres container |
+| `npm run test:db` | Database tests against the database in `DATABASE_URL` |
+| `npm run db:migrate` | Apply database migrations |
+| `npm run db:studio` | Browse the database in Prisma Studio |
+| `npm run db:prune` | Delete expired search-cache rows (also runs on every container start) |
+| `npm run covers:prune` | Report cover files no book uses; add `-- --yes` to delete them |
+
+## Tests
+
+- **`npm test`** covers the pure logic that is easiest to break without
+  noticing: ISBN-10/13 conversion, reading pace and streaks, sorting authors
+  by surname and series in order, saved library views, lending, the rate
+  limiter, the guard that stops cover downloads from reaching private
+  addresses, and image type detection.
+- **`npm run test:db:docker`** starts a `postgres:16-alpine` container, runs
+  the database tests, and removes it. They cover backup and restore (the
+  round trip, merging, and duplicates), re-read counts, the book form and the
+  reading log it writes, library search, bulk edit, and the checks that stop
+  one user from touching another user's books.
+
+These run against a real database because a stand-in would copy Postgres's
+behaviour wrongly in exactly the places that matter, and because restore is
+the one feature whose failure loses data you can't get back.
+
+CI ([.github/workflows/ci.yml](../.github/workflows/ci.yml)) runs lint, the
+type check, both test suites and a production build on every pull request.
+
+## Tech stack
+
+- [Next.js 16](https://nextjs.org/) (App Router, TypeScript), built as a
+  standalone server for a small Docker image
+- [PostgreSQL](https://www.postgresql.org/) with [Prisma](https://www.prisma.io/)
+- [Auth.js v5](https://authjs.dev/): username and password, JWT sessions,
+  passwords hashed with bcrypt
+- [Tailwind CSS v4](https://tailwindcss.com/) and [shadcn/ui](https://ui.shadcn.com/)
+- [Zod](https://zod.dev/) for validation and [Vitest](https://vitest.dev/) for tests
+
+## Project layout
+
+```
+src/
+├─ app/
+│  ├─ (auth)/          login and register pages
+│  ├─ (app)/           pages behind login: books (the library), books/new,
+│  │                   books/[id], books/[id]/edit, books/check, quotes,
+│  │                   stats, stats/year/[year], account
+│  └─ api/             Auth.js, register, metadata search/details/covers,
+│                      library check, cover upload and serving,
+│                      backup export and import
+├─ components/         UI components (shadcn/ui primitives in components/ui)
+├─ lib/
+│  ├─ actions/         server actions for every change, each checking that
+│  │                   the data belongs to the signed-in user
+│  ├─ metadata/        Open Library, Google Books and nb.no clients, plus
+│  │                   the database cache
+│  ├─ covers.ts        downloading and caching cover images
+│  ├─ net-guard.ts     blocks cover downloads from private addresses
+│  ├─ rate-limit.ts    in-memory limits for sign-in, registration,
+│  │                   catalogue lookups and cover uploads
+│  └─ validation.ts    Zod schemas shared by actions and API routes
+├─ auth.config.ts      Auth.js config that is safe to run in proxy.ts
+├─ auth.ts             full Auth.js config (credentials, Prisma, bcrypt)
+└─ proxy.ts            sends signed-out visitors to the login page
+                       (Next 16's new name for middleware.ts)
+```
+
+## Design decisions
+
+- **Reading data lives on the Book row.** Each book belongs to one user, so
+  a separate "reading entry" table would add nothing. The Book row holds the
+  latest read; earlier reads are archived in the `Read` table, and
+  `timesRead` is worked out from both.
+- **Ratings are stored as whole numbers from 1 to 10**, in half stars. `7`
+  shows as 3.5 stars.
+- **Catalogue lookups are cached** in the `MetadataCache` table for a week,
+  keyed by source and query. If a source is down, the last good answer is
+  used, so a flaky Open Library doesn't break lookups that worked before.
+- **Cover images are stored locally.** After a save, the cover is downloaded
+  to `COVERS_DIR` in the background (with `after()`, so saving never waits
+  for it) and the book is pointed at `/api/covers/<id>-<hash>.<ext>`. The
+  hash in the name means a changed cover gets a new URL, so browsers can
+  cache covers forever. A slow host gets one retry. If the download fails,
+  the book keeps the remote URL. A cover file is deleted only when no book
+  uses it any more.
+- **Changes go through server actions** that check ownership, and pages
+  are server components that query Prisma directly. API routes are used
+  only where the browser has to call the server itself: sign-in and
+  registration, metadata search, the "Do I own this?" check, cover upload
+  and serving, and backup download and restore.
+- **Migrations run when the container starts** (`prisma migrate deploy` in
+  [docker-entrypoint.sh](../docker-entrypoint.sh)). The first start creates
+  the tables, later starts apply anything new, and an up-to-date database is
+  left alone.
