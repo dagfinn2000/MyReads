@@ -5,6 +5,7 @@ import { ReadingStatus } from "@prisma/client";
 import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { settleReadingState } from "@/lib/reading-state";
 
 const bulkSchema = z.object({
   bookIds: z.array(z.string()).min(1).max(500),
@@ -44,7 +45,15 @@ export async function bulkUpdateBooks(
 
   const owned = await prisma.book.findMany({
     where: { id: { in: bookIds }, userId },
-    select: { id: true, tags: true },
+    select: {
+      id: true,
+      tags: true,
+      status: true,
+      dateStarted: true,
+      dateFinished: true,
+      currentPage: true,
+      _count: { select: { reads: true } },
+    },
   });
   if (owned.length === 0) return { error: "No matching books" };
   const ownedIds = owned.map((b) => b.id);
@@ -66,10 +75,25 @@ export async function bulkUpdateBooks(
   // as updated. "Apply to 20 books" should either happen or not.
   await prisma.$transaction(async (tx) => {
     if (status) {
-      await tx.book.updateMany({
-        where: { id: { in: ownedIds } },
-        data: { status },
-      });
+      // Per book, through the same rules as the reading card: moving a book
+      // to Read dates it and counts the read, moving it off Read uncounts
+      // it. A bare updateMany of the status left both behind, so bulk-read
+      // books were missing from the yearly stats and goal. Books already
+      // in the target status are left alone.
+      for (const b of owned) {
+        if (b.status === status) continue;
+        const next = settleReadingState(
+          b.status,
+          {
+            status,
+            dateStarted: b.dateStarted,
+            dateFinished: b.dateFinished,
+            currentPage: b.currentPage,
+          },
+          b._count.reads,
+        );
+        await tx.book.update({ where: { id: b.id }, data: next });
+      }
     }
 
     if (addTags?.length) {

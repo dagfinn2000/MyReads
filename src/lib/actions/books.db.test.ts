@@ -152,6 +152,32 @@ describe("createBook", () => {
     expect(book.searchText).toBe("the left hand of darkness ursula k. le guin hainish cycle");
   });
 
+  it("dates and counts a book added straight onto Read", async () => {
+    // It used to land with no finish date and timesRead 0: in "Books read"
+    // but missing from the year it was read and from the goal.
+    await redirectOf(createBook({}, form({ ...bookFields, status: "READ" })));
+
+    const book = await prisma.book.findFirstOrThrow({ where: { userId } });
+    expect(book.dateFinished?.toDateString()).toBe(new Date().toDateString());
+    expect(book.timesRead).toBe(1);
+  });
+
+  it("starts a book added as Currently Reading today", async () => {
+    await redirectOf(createBook({}, form({ ...bookFields, status: "READING" })));
+
+    const book = await prisma.book.findFirstOrThrow({ where: { userId } });
+    expect(book.dateStarted?.toDateString()).toBe(new Date().toDateString());
+    expect(book.dateFinished).toBeNull();
+    expect(book.timesRead).toBe(0);
+  });
+
+  it("saves a blank series number as none, not #0", async () => {
+    await redirectOf(createBook({}, form({ ...bookFields, seriesName: "Jane Eyre", seriesNumber: "" })));
+
+    const book = await prisma.book.findFirstOrThrow({ where: { userId } });
+    expect(book.seriesNumber).toBeNull();
+  });
+
   it("returns the validation error and saves nothing", async () => {
     const result = await createBook({}, form({ ...bookFields, title: "  " }));
     expect(result.error).toBe("Title is required");
@@ -291,6 +317,41 @@ describe("updateReading and the reading log", () => {
 
     await updateReading(bk.id, {}, form({ status: "WANT_TO_READ", currentPage: "218" }));
     expect((await prisma.book.findUniqueOrThrow({ where: { id: bk.id } })).currentPage).toBeNull();
+  });
+
+  it("refuses a page past the end of the book, and logs nothing", async () => {
+    const bk = await makeBook({ status: ReadingStatus.READING, pageCount: 220 });
+    const result = await updateReading(bk.id, {}, form({ status: "READING", currentPage: "9999" }));
+
+    expect(result.error).toBe("Page 9999 is past the end of the book (220 pages)");
+    expect((await prisma.book.findUniqueOrThrow({ where: { id: bk.id } })).currentPage).toBeNull();
+    expect(await progressOf(bk.id)).toHaveLength(0);
+
+    // The last page itself is fine.
+    expect((await updateReading(bk.id, {}, form({ status: "READING", currentPage: "220" }))).success).toBe(true);
+  });
+
+  it("refuses a finish date before the start date", async () => {
+    const bk = await makeBook({ status: ReadingStatus.READING });
+    const result = await updateReading(
+      bk.id,
+      {},
+      form({ status: "READ", dateStarted: "2026-10-05", dateFinished: "2026-10-01" }),
+    );
+
+    expect(result.error).toBe("Finish date is before the start date");
+    expect((await prisma.book.findUniqueOrThrow({ where: { id: bk.id } })).status).toBe(
+      ReadingStatus.READING,
+    );
+  });
+
+  it("starting a book from Want to Read fills in today as the start date", async () => {
+    const bk = await makeBook({ status: ReadingStatus.WANT_TO_READ });
+    await updateReading(bk.id, {}, form({ status: "READING", dateStarted: "", currentPage: "40" }));
+
+    const after = await prisma.book.findUniqueOrThrow({ where: { id: bk.id } });
+    expect(after.dateStarted?.toDateString()).toBe(new Date().toDateString());
+    expect((await progressOf(bk.id)).map((e) => e.page)).toEqual([0, 40]);
   });
 
   it("refuses another account's book", async () => {

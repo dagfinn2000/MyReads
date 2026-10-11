@@ -4,6 +4,7 @@ import { spendMetadataBudget } from "@/lib/api-guard";
 import { prisma } from "@/lib/prisma";
 import { searchBooks } from "@/lib/metadata";
 import { isbnVariants, normalizeIsbn } from "@/lib/isbn";
+import { escapeLike, foldForSearch } from "@/lib/utils";
 
 /** What the check UI needs to show a hit — no reading data beyond the badge bits. */
 const bookSelect = {
@@ -97,13 +98,15 @@ export async function GET(req: Request) {
     // Both conditions substring-match searchText (title + authors + series).
     // Requiring the author's surname too keeps short titles from matching
     // half the library.
-    const surname = author.split(/\s+/).filter(Boolean).pop()?.toLowerCase();
+    // Folded like searchText, so an edition titled "Brontë" still matches
+    // a catalogue that spells it "Bronte".
+    const surname = author.split(/\s+/).filter(Boolean).pop();
     const book = await prisma.book.findFirst({
       where: {
         userId,
         AND: [
-          { searchText: { contains: title.toLowerCase() } },
-          ...(surname ? [{ searchText: { contains: surname } }] : []),
+          { searchText: { contains: escapeLike(foldForSearch(title)) } },
+          ...(surname ? [{ searchText: { contains: escapeLike(foldForSearch(surname)) } }] : []),
         ],
       },
       select: bookSelect,

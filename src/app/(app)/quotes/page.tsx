@@ -4,6 +4,7 @@ import { Quote } from "lucide-react";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { formatDate } from "@/lib/display";
+import { escapeLike, searchTerms } from "@/lib/utils";
 import { BookCover } from "@/components/book-card";
 import { QuotesSearch } from "@/components/quotes-search";
 import { Card, CardContent } from "@/components/ui/card";
@@ -26,7 +27,8 @@ export default async function QuotesPage({
   const userId = session.user.id;
 
   const sp = await searchParams;
-  const q = typeof sp.q === "string" ? sp.q : "";
+  const q = typeof sp.q === "string" ? sp.q.replace(/\0/g, "").trim() : "";
+  const terms = searchTerms(q);
 
   // Newest first, capped. A quote collection grows without bound and the page
   // renders every match; the cap keeps one enormous render from being the
@@ -37,9 +39,11 @@ export default async function QuotesPage({
     book: { userId },
     ...(q && {
       OR: [
-        { text: { contains: q, mode: "insensitive" as const } },
-        { note: { contains: q, mode: "insensitive" as const } },
-        { book: { is: { searchText: { contains: q.toLowerCase() } } } },
+        // The quote itself is matched as a phrase; the book by its words,
+        // accent-insensitively, like the library search.
+        { text: { contains: escapeLike(q), mode: "insensitive" as const } },
+        { note: { contains: escapeLike(q), mode: "insensitive" as const } },
+        { book: { is: { AND: terms.map((t) => ({ searchText: { contains: t } })) } } },
       ],
     }),
   };
