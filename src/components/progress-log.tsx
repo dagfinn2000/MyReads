@@ -6,6 +6,7 @@ import { ReadingStatus } from "@prisma/client";
 import { Trash2, X } from "lucide-react";
 import { deleteProgressEntry } from "@/lib/actions/progress";
 import { formatDate } from "@/lib/display";
+import { usePreferences } from "@/components/preferences-provider";
 import { Button } from "@/components/ui/button";
 
 const DAY_MS = 86_400_000;
@@ -31,6 +32,7 @@ export function ProgressChart({
   pageCount: number | null;
   status: ReadingStatus;
 }) {
+  const prefs = usePreferences();
   if (entries.length < 2) return null;
   const first = entries[0];
   const last = entries[entries.length - 1];
@@ -63,7 +65,7 @@ export function ProgressChart({
       // A forecast a year+ out says "pace", not "date".
       if (daysLeft <= 366) {
         const finish = new Date(last.date.getTime() + daysLeft * DAY_MS);
-        paceText += ` · on pace to finish ${formatDate(finish)}`;
+        paceText += ` · on pace to finish ${formatDate(finish, prefs)}`;
       }
     }
   } else if (pace && status === ReadingStatus.READ) {
@@ -105,6 +107,7 @@ export function ProgressChart({
  * the book's current page stays whatever the reading card says.
  */
 export function ProgressLog({ entries }: { entries: ProgressEntry[] }) {
+  const prefs = usePreferences();
   if (entries.length === 0) return null;
   const newestFirst = [...entries].reverse();
 
@@ -120,7 +123,7 @@ export function ProgressLog({ entries }: { entries: ProgressEntry[] }) {
             <span className="w-20 tabular-nums">
               {e.page === 0 ? "Started" : `Page ${e.page}`}
             </span>
-            <span className="text-muted-foreground">{formatDate(e.date)}</span>
+            <span className="text-muted-foreground">{formatDate(e.date, prefs)}</span>
             <span className="ml-auto">
               <DeleteEntryButton entryId={e.id} />
             </span>

@@ -6,6 +6,7 @@ import { HandHeart, Trash2, Undo2 } from "lucide-react";
 import { deleteLoan, lendBook, returnLoan } from "@/lib/actions/loans";
 import type { ActionState } from "@/lib/actions/helpers";
 import { formatDate, toDateInputValue } from "@/lib/display";
+import { usePreferences } from "@/components/preferences-provider";
 import { outFor } from "@/lib/loans";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,6 +29,7 @@ export function LendingCard({
   loans: Loan[];
 }) {
   const [showForm, setShowForm] = useState(false);
+  const prefs = usePreferences();
   const [, startTransition] = useTransition();
 
   const [state, formAction, pending] = useActionState(
@@ -59,7 +61,7 @@ export function LendingCard({
             <div className="min-w-0">
               <p className="font-medium">Lent to {open.borrower}</p>
               <p className="text-muted-foreground">
-                Since {formatDate(open.lentAt)} ·{" "}
+                Since {formatDate(open.lentAt, prefs)} ·{" "}
                 {outFor(new Date(open.lentAt), new Date())}
               </p>
               {open.note && (
@@ -102,7 +104,7 @@ export function LendingCard({
                   id="lentAt"
                   name="lentAt"
                   type="date"
-                  defaultValue={toDateInputValue(new Date())}
+                  defaultValue={toDateInputValue(new Date(), prefs.timeZone)}
                 />
               </div>
             </div>
@@ -149,7 +151,7 @@ export function LendingCard({
                     <span className="font-medium">{loan.borrower}</span>
                     <span className="text-muted-foreground">
                       {" · "}
-                      {formatDate(loan.lentAt)} – {formatDate(loan.returnedAt)}
+                      {formatDate(loan.lentAt, prefs)} – {formatDate(loan.returnedAt, prefs)}
                     </span>
                   </span>
                   <Button

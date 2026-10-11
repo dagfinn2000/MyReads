@@ -44,7 +44,7 @@ export function LoginForm() {
       );
       setBusy(false);
     } else {
-      router.push("/books");
+      router.push("/");
       router.refresh();
     }
   }

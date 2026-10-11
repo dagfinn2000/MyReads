@@ -11,13 +11,17 @@ import {
   UserRound,
 } from "lucide-react";
 import { auth, signOut } from "@/auth";
+import { getPreferences } from "@/lib/current-user";
 import { Button } from "@/components/ui/button";
 import { ThemePicker } from "@/components/theme-picker";
 
 /** Top navigation for authenticated pages. Server component — reads the
- *  session directly and signs out via a server action. */
+ *  session directly and signs out via a server action. The Check and
+ *  Quotes links can be hidden in Preferences; the logo goes to the start
+ *  page chosen there. */
 export async function Nav() {
-  const session = await auth();
+  const [session, prefs] = await Promise.all([auth(), getPreferences()]);
+  const hidden = new Set(prefs.hiddenNav);
 
   return (
     <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur">
@@ -25,7 +29,7 @@ export async function Nav() {
           phone screen without horizontal overflow. */}
       <div className="mx-auto flex h-14 max-w-6xl items-center gap-0.5 px-3 sm:gap-1 sm:px-4">
         <Link
-          href="/books"
+          href="/"
           className="mr-2 flex items-center gap-2 text-lg font-semibold tracking-tight sm:mr-4"
         >
           <BookOpen className="size-5" />
@@ -43,18 +47,22 @@ export async function Nav() {
             <span className="hidden sm:inline">Add book</span>
           </Link>
         </Button>
-        <Button asChild variant="ghost" size="sm" title="Do I own this?">
-          <Link href="/books/check">
-            <ScanSearch data-slot="icon" />
-            <span className="hidden sm:inline">Check</span>
-          </Link>
-        </Button>
-        <Button asChild variant="ghost" size="sm" title="Quotes">
-          <Link href="/quotes">
-            <Quote data-slot="icon" />
-            <span className="hidden sm:inline">Quotes</span>
-          </Link>
-        </Button>
+        {!hidden.has("check") && (
+          <Button asChild variant="ghost" size="sm" title="Do I own this?">
+            <Link href="/books/check">
+              <ScanSearch data-slot="icon" />
+              <span className="hidden sm:inline">Check</span>
+            </Link>
+          </Button>
+        )}
+        {!hidden.has("quotes") && (
+          <Button asChild variant="ghost" size="sm" title="Quotes">
+            <Link href="/quotes">
+              <Quote data-slot="icon" />
+              <span className="hidden sm:inline">Quotes</span>
+            </Link>
+          </Button>
+        )}
         <Button asChild variant="ghost" size="sm" title="Stats">
           <Link href="/stats">
             <ChartColumn data-slot="icon" />

@@ -226,4 +226,89 @@ describe("export -> import round trip", () => {
     expect(second).toMatchObject({ booksCreated: 0, booksSkipped: 1 });
     expect(await prisma.book.count({ where: { userId: targetUserId } })).toBe(1);
   });
+
+  it("carries settings, saved views and goal options across", async () => {
+    const view = await prisma.savedView.create({
+      data: {
+        userId: sourceUserId,
+        name: "Next up",
+        query: "shelf=WANT_TO_READ&group=none&sort=createdAt&dir=desc",
+      },
+    });
+    await prisma.savedView.create({
+      data: {
+        userId: sourceUserId,
+        name: "Fantasy",
+        query: "tag=fantasy&group=none&sort=title&dir=asc",
+      },
+    });
+    await prisma.user.update({
+      where: { id: sourceUserId },
+      data: {
+        theme: "auto:sage:obsidian",
+        libraryView: { layout: "list", sort: "title", dir: "asc" },
+        preferences: {
+          dateFormat: "iso",
+          ratingStyle: "ten",
+          timeZone: "America/New_York",
+          defaultViewId: view.id,
+        },
+      },
+    });
+    await prisma.readingGoal.create({
+      data: {
+        userId: sourceUserId,
+        year: 2026,
+        target: 9000,
+        unit: "PAGES",
+        countRereads: false,
+      },
+    });
+    // The new account has already been visited once, which saved its zone.
+    await prisma.user.update({
+      where: { id: targetUserId },
+      data: { preferences: { timeZone: "Europe/Oslo" } },
+    });
+
+    const payload = await exportLibrary();
+    // An older MyReads reads every readingGoals entry as a book count.
+    expect(payload.readingGoals).toEqual([]);
+    expect(payload.pageGoals).toEqual([{ year: 2026, target: 9000, countRereads: false }]);
+
+    const summary = await importLibrary(targetUserId, payload);
+    expect(summary).toMatchObject({
+      goalsRestored: 1,
+      savedViewsRestored: 2,
+      settingsRestored: true,
+    });
+
+    const target = await prisma.user.findUniqueOrThrow({
+      where: { id: targetUserId },
+      include: { savedViews: true },
+    });
+    expect(target.theme).toBe("auto:sage:obsidian");
+    expect(target.libraryView).toMatchObject({ layout: "list", sort: "title", dir: "asc" });
+    const nextUp = target.savedViews.find((v) => v.name === "Next up");
+    expect(target.savedViews.map((v) => v.name).sort()).toEqual(["Fantasy", "Next up"]);
+    expect(target.preferences).toEqual({
+      // What the account already had stays; the rest comes from the backup.
+      timeZone: "Europe/Oslo",
+      dateFormat: "iso",
+      ratingStyle: "ten",
+      // The default view points at the restored copy, not the old id.
+      defaultViewId: nextUp?.id,
+    });
+
+    const goal = await prisma.readingGoal.findFirstOrThrow({ where: { userId: targetUserId } });
+    expect(goal).toMatchObject({ target: 9000, unit: "PAGES", countRereads: false });
+  });
+
+  it("leaves a theme the account already chose alone", async () => {
+    await prisma.user.update({ where: { id: sourceUserId }, data: { theme: "dracula" } });
+    await prisma.user.update({ where: { id: targetUserId }, data: { theme: "sage" } });
+
+    await importLibrary(targetUserId, await exportLibrary());
+    const target = await prisma.user.findUniqueOrThrow({ where: { id: targetUserId } });
+    expect(target.theme).toBe("sage");
+  });
 });

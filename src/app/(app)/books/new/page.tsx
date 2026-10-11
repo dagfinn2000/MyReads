@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { getPreferences } from "@/lib/current-user";
 import { AddBookClient } from "@/components/add-book-client";
 
 export const dynamic = "force-dynamic";
@@ -26,11 +27,21 @@ export default async function NewBookPage({
   const seriesNames = seriesRows
     .map((r) => r.seriesName)
     .filter((s): s is string => !!s);
+  const prefs = await getPreferences();
 
   return (
     <div className="mx-auto grid max-w-3xl gap-4">
       <h1 className="text-2xl font-semibold tracking-tight">Add book</h1>
-      <AddBookClient seriesNames={seriesNames} initialIsbn={isbn} />
+      <AddBookClient
+        seriesNames={seriesNames}
+        initialIsbn={isbn}
+        defaults={{
+          format: prefs.newBookFormat,
+          status: prefs.newBookStatus,
+          ownership: prefs.newBookOwnership,
+        }}
+        importTags={prefs.importTags}
+      />
     </div>
   );
 }

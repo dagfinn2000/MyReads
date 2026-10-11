@@ -1,12 +1,20 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { BookFormat, BookOwnership, ReadingStatus } from "@prisma/client";
+import { BookFormat, BookOwnership, GoalUnit, Prisma, ReadingStatus } from "@prisma/client";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { coverFilePath, coversDir } from "@/lib/covers";
 import { sniffImageKind } from "@/lib/image-type";
 import { buildSearchText } from "@/lib/utils";
 import { isAllowedCoverUrl } from "@/lib/validation";
+import { cleanLibraryViewPatch } from "@/lib/library-view";
+import { cleanPreferencesPatch } from "@/lib/preferences";
+import {
+  MAX_SAVED_VIEWS,
+  SAVED_VIEW_NAME_MAX,
+  canonicalViewQueryFromString,
+} from "@/lib/saved-views";
+import { parseThemeSetting, serializeThemeSetting } from "@/lib/themes";
 
 /**
  * Restore of a MyReads export — either the `library.json` from a zip backup
@@ -19,6 +27,11 @@ import { isAllowedCoverUrl } from "@/lib/validation";
  * instance brings everything back. A book's local cover path is kept when
  * the file already exists (same instance) or can be restored from the
  * backup, otherwise cleared.
+ *
+ * Account settings (theme, library view, Preferences) are filled in only
+ * where this account hasn't set them: a restore onto a fresh account brings
+ * the old setup back, and one onto a live account never undoes choices
+ * made since. Saved views merge by name like shelves.
  */
 
 const dateField = z
@@ -96,12 +109,40 @@ const importedBookSchema = z.object({
   createdAt: dateField,
 });
 
+const goalSchema = z.object({
+  year: z.number().int().min(1900).max(2200),
+  target: z.number().int().min(1).max(1_000_000),
+  // Additive: goals from older exports count re-reads.
+  countRereads: z.boolean().catch(true),
+});
+
 const exportPayloadSchema = z.object({
   format: z.literal("myreads-export"),
   version: z.literal(1),
   shelves: z.array(z.object({ name: z.string().trim().min(1).max(50) })).catch([]),
-  readingGoals: z
-    .array(z.object({ year: z.number().int().min(1900).max(2200), target: z.number().int().min(1).max(10000) }))
+  /** Goals counted in books. */
+  readingGoals: z.array(goalSchema).catch([]),
+  /** Goals counted in pages. Additive, and kept apart so an older MyReads
+   *  doesn't read them as book counts. */
+  pageGoals: z.array(goalSchema).catch([]),
+  /** Additive, like everything after `books` was in version 1. */
+  settings: z
+    .object({
+      theme: z.string().max(100).nullable().catch(null),
+      libraryView: z.unknown(),
+      preferences: z.unknown(),
+      defaultViewName: z.string().max(SAVED_VIEW_NAME_MAX).nullable().catch(null),
+    })
+    .nullable()
+    .optional()
+    .catch(null),
+  savedViews: z
+    .array(
+      z.object({
+        name: z.string().trim().min(1).max(SAVED_VIEW_NAME_MAX),
+        query: z.string().max(4000),
+      }),
+    )
     .catch([]),
   books: z.array(z.unknown()),
 });
@@ -112,6 +153,10 @@ export interface ImportSummary {
   booksInvalid: number;
   shelvesCreated: number;
   goalsRestored: number;
+  savedViewsRestored: number;
+  /** True when the backup's theme, library view or preferences were applied
+   *  (only ever to an account that had none). */
+  settingsRestored: boolean;
   coversRestored: number;
   quotesRestored: number;
   readsRestored: number;
@@ -279,13 +324,36 @@ export async function importLibrary(
   }
 
   // Reading goals: upsert per year, concurrently — they're independent.
-  await mapWithConcurrency(data.readingGoals, IMPORT_CONCURRENCY, (goal) =>
+  const goals = [
+    ...data.readingGoals.map((g) => ({ ...g, unit: GoalUnit.BOOKS })),
+    ...data.pageGoals.map((g) => ({ ...g, unit: GoalUnit.PAGES })),
+  ];
+  await mapWithConcurrency(goals, IMPORT_CONCURRENCY, (goal) =>
     prisma.readingGoal.upsert({
       where: { userId_year: { userId, year: goal.year } },
-      create: { userId, year: goal.year, target: goal.target },
-      update: { target: goal.target },
+      create: {
+        userId,
+        year: goal.year,
+        target: goal.target,
+        unit: goal.unit,
+        countRereads: goal.countRereads,
+      },
+      update: { target: goal.target, unit: goal.unit, countRereads: goal.countRereads },
     }),
   );
+
+  // Saved views: add the ones whose names are new here, up to the cap.
+  // Queries are rebuilt the same way saving one does, so a hand-edited
+  // backup can't store parameters the library doesn't know.
+  const existingViewCount = await prisma.savedView.count({ where: { userId } });
+  const viewsCreated = await prisma.savedView.createMany({
+    data: data.savedViews
+      .slice(0, Math.max(0, MAX_SAVED_VIEWS - existingViewCount))
+      .map((v) => ({ userId, name: v.name, query: canonicalViewQueryFromString(v.query) })),
+    skipDuplicates: true,
+  });
+
+  const settingsRestored = data.settings ? await restoreSettings(userId, data.settings) : false;
 
   // Existing books, for duplicate detection.
   const existing = await prisma.book.findMany({
@@ -455,7 +523,9 @@ export async function importLibrary(
     booksSkipped,
     booksInvalid,
     shelvesCreated,
-    goalsRestored: data.readingGoals.length,
+    goalsRestored: goals.length,
+    savedViewsRestored: viewsCreated.count,
+    settingsRestored,
     coversRestored,
     quotesRestored,
     readsRestored,
@@ -463,4 +533,66 @@ export async function importLibrary(
     loansRestored,
     ...(incomplete && { incomplete }),
   };
+}
+
+/**
+ * Applies a backup's account settings wherever this account hasn't chosen
+ * its own: the theme if none is saved, and each library-view and
+ * Preferences field the account has never set. Field by field rather than
+ * all or nothing, because a fresh account already has a little saved — its
+ * time zone is filled in on the very first page load. Each value goes
+ * through the same cleaning a save does, so nothing unknown is stored; the
+ * default saved view is matched by name, since view ids are new on every
+ * instance.
+ */
+async function restoreSettings(
+  userId: string,
+  settings: {
+    theme: string | null;
+    libraryView?: unknown;
+    preferences?: unknown;
+    defaultViewName: string | null;
+  },
+): Promise<boolean> {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { theme: true, libraryView: true, preferences: true },
+  });
+  if (!user) return false;
+
+  const asObject = (v: unknown): Record<string, unknown> =>
+    v && typeof v === "object" && !Array.isArray(v) ? (v as Record<string, unknown>) : {};
+  /** The backup's fields that the stored object doesn't have yet. */
+  const missing = (stored: Record<string, unknown>, backup: Record<string, unknown>) =>
+    Object.fromEntries(Object.entries(backup).filter(([k]) => !(k in stored)));
+
+  const data: Prisma.UserUpdateInput = {};
+
+  const theme = parseThemeSetting(settings.theme);
+  if (user.theme === null && theme) data.theme = serializeThemeSetting(theme);
+
+  const storedView = asObject(user.libraryView);
+  const viewAdds = missing(storedView, cleanLibraryViewPatch(settings.libraryView));
+  if (Object.keys(viewAdds).length > 0) {
+    data.libraryView = { ...storedView, ...viewAdds } as Prisma.InputJsonObject;
+  }
+
+  const storedPrefs = asObject(user.preferences);
+  // The backup's own defaultViewId points at a view on the old instance.
+  const { defaultViewId: _oldId, ...backupPrefs } = cleanPreferencesPatch(settings.preferences);
+  const prefAdds: Record<string, unknown> = missing(storedPrefs, backupPrefs);
+  if (settings.defaultViewName && !("defaultViewId" in storedPrefs)) {
+    const view = await prisma.savedView.findUnique({
+      where: { userId_name: { userId, name: settings.defaultViewName } },
+      select: { id: true },
+    });
+    if (view) prefAdds.defaultViewId = view.id;
+  }
+  if (Object.keys(prefAdds).length > 0) {
+    data.preferences = { ...storedPrefs, ...prefAdds } as Prisma.InputJsonObject;
+  }
+
+  if (Object.keys(data).length === 0) return false;
+  await prisma.user.update({ where: { id: userId }, data });
+  return true;
 }

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { guardMetadataRequest } from "@/lib/api-guard";
+import { getPreferences } from "@/lib/current-user";
 import { getCoverCandidates } from "@/lib/metadata";
 
 /**
@@ -20,6 +21,7 @@ export async function GET(req: Request) {
     return NextResponse.json({ covers: [] });
   }
 
-  const covers = await getCoverCandidates({ isbn, title, author });
+  const { catalogues } = await getPreferences();
+  const covers = await getCoverCandidates({ isbn, title, author }, catalogues);
   return NextResponse.json({ covers });
 }

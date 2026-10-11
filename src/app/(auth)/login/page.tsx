@@ -17,7 +17,7 @@ export const dynamic = "force-dynamic";
  */
 export default async function LoginPage() {
   const session = await auth();
-  if (session?.user?.id) redirect("/books");
+  if (session?.user?.id) redirect("/");
 
   // useSearchParams needs a Suspense boundary to keep this page
   // prerenderable; the fallback is the same card without the notice.

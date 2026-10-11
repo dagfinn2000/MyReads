@@ -63,23 +63,57 @@ model User {
   /// applied when /books is opened without explicit view params so the
   /// chosen sort survives navigating away and back. Null = defaults.
   libraryView  Json?
+  /// Everything set in the Preferences card on the Account page (see
+  /// lib/preferences.ts): defaults for new books, date and number formats,
+  /// time zone, sorting rules, catalogues, rating style and so on. One JSON
+  /// column rather than a column per setting, so adding a setting needs no
+  /// migration — parsePreferences fills in a default for anything missing.
+  /// Null = never changed anything.
+  preferences  Json?
   createdAt    DateTime      @default(now())
   books        Book[]
   shelves      Shelf[]
   readingGoals ReadingGoal[]
+  savedViews   SavedView[]
 }
 
-/// A yearly reading goal ("24 books in 2026"). Progress is derived from
-/// books with status READ finished in that year; hitting the target earns
-/// a gold medal on the stats page.
-model ReadingGoal {
+/// A library view saved under a name ("Unread fantasy"): the filters, sort
+/// and grouping exactly as they appear in the /books address. Shown as chips
+/// above the library; Preferences can make one the view the library opens on.
+model SavedView {
   id        String   @id @default(cuid())
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  year      Int
-  target    Int
+  name      String
+  /// The /books query string, rebuilt from the parsed filters so only known
+  /// parameters are ever stored (see lib/saved-views.ts).
+  query     String
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+
+  @@unique([userId, name])
+}
+
+enum GoalUnit {
+  BOOKS
+  PAGES
+}
+
+/// A yearly reading goal ("24 books in 2026", or "8,000 pages"). Progress is
+/// derived from the books finished in that year (see lib/goals.ts); hitting
+/// the target earns a gold medal on the stats page.
+model ReadingGoal {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  year         Int
+  target       Int
+  /// What `target` counts: finished books, or the pages of finished books.
+  unit         GoalUnit @default(BOOKS)
+  /// Whether finishing a book again counts. False = only books finished for
+  /// the first time that year.
+  countRereads Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   @@unique([userId, year])
 }

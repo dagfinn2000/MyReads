@@ -44,7 +44,7 @@ export function QuotesCard({
                   <QuoteForm quote={quote} onDone={() => setEditingId(null)} />
                 ) : (
                   <>
-                    <blockquote className="whitespace-pre-line break-words border-l-2 border-primary/40 pl-3 text-sm leading-relaxed">
+                    <blockquote className="long-text whitespace-pre-line break-words border-l-2 border-primary/40 pl-3 text-sm leading-relaxed">
                       {quote.text}
                     </blockquote>
                     <div className="flex min-h-7 flex-wrap items-center gap-x-2 pl-3">
@@ -54,7 +54,7 @@ export function QuotesCard({
                         </span>
                       )}
                       {quote.note && (
-                        <span className="min-w-0 break-words text-xs italic text-muted-foreground">
+                        <span className="long-text min-w-0 break-words text-xs italic text-muted-foreground">
                           {quote.note}
                         </span>
                       )}

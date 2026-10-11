@@ -15,6 +15,11 @@ vi.mock("@/lib/prisma", () => ({
   prisma: { book: { findFirst: (...args: unknown[]) => findFirst(...args) } },
 }));
 
+vi.mock("@/lib/current-user", async () => {
+  const { DEFAULT_PREFERENCES } = await import("@/lib/preferences");
+  return { getPreferences: async () => DEFAULT_PREFERENCES };
+});
+
 const searchBooks = vi.fn();
 vi.mock("@/lib/metadata", () => ({
   searchBooks: (...args: unknown[]) => searchBooks(...args),

@@ -1,9 +1,9 @@
-import type { Metadata, Viewport } from "next";
+import type { Metadata } from "next";
 import "./globals.css";
 import { Geist } from "next/font/google";
 import { getCurrentUser } from "@/lib/current-user";
 import { cn } from "@/lib/utils";
-import { DARK_THEME_IDS, THEME_INIT_SCRIPT } from "@/lib/themes";
+import { DARK_THEME_IDS, THEME_INIT_SCRIPT, parseThemeSetting } from "@/lib/themes";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -14,21 +14,28 @@ export const metadata: Metadata = {
   appleWebApp: { capable: true, title: "MyReads", statusBarStyle: "default" },
 };
 
-export const viewport: Viewport = {
-  themeColor: "#1e293b",
-};
-
 export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   // The signed-in user's saved theme, server-rendered onto <html> so a
   // fresh browser paints the right palette immediately. Signed-out pages
-  // fall back to localStorage via the init script below.
+  // fall back to localStorage via the init script below. In automatic mode
+  // only the browser knows whether the system is light or dark, so the
+  // server sends the pair and the init script picks before first paint.
   //
   // Request-scoped cache: the page rendering inside this layout resolves the
   // same user, and both now share one session decode and one row read.
-  const theme = (await getCurrentUser())?.theme ?? null;
-  const dark = theme !== null && DARK_THEME_IDS.includes(theme);
+  const user = await getCurrentUser();
+  const setting = parseThemeSetting(user?.theme);
+  const prefs = user?.preferences;
+
+  const themeAttrs =
+    setting?.kind === "fixed"
+      ? { "data-theme": setting.id }
+      : setting?.kind === "auto"
+        ? { "data-theme-auto": `${setting.light}:${setting.dark}` }
+        : {};
+  const dark = setting?.kind === "fixed" && DARK_THEME_IDS.includes(setting.id);
 
   return (
     // suppressHydrationWarning: the theme init script mutates data-theme and
@@ -36,12 +43,16 @@ export default async function RootLayout({
     <html
       lang="en"
       className={cn("font-sans", geist.variable, dark && "dark")}
-      {...(theme !== null && { "data-theme": theme })}
+      {...themeAttrs}
+      // Text size and the long-text font (Preferences); see globals.css.
+      data-text-size={prefs?.textSize}
+      data-long-font={prefs?.longTextFont}
       suppressHydrationWarning
     >
       <body className="min-h-screen bg-background text-foreground antialiased">
         {/* Applies the stored theme before first paint to avoid a flash of
-            the default theme. Must stay ahead of {children}. */}
+            the default theme, and sets the browser's title bar colour to
+            match. Must stay ahead of {children}. */}
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         {children}
       </body>

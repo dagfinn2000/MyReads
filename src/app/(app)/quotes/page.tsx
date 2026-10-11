@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { Quote } from "lucide-react";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { getPreferences } from "@/lib/current-user";
 import { formatDate } from "@/lib/display";
 import { escapeLike, searchTerms } from "@/lib/utils";
 import { BookCover } from "@/components/book-card";
@@ -27,6 +28,7 @@ export default async function QuotesPage({
   const userId = session.user.id;
 
   const sp = await searchParams;
+  const prefs = await getPreferences();
   const q = typeof sp.q === "string" ? sp.q.replace(/\0/g, "").trim() : "";
   const terms = searchTerms(q);
 
@@ -94,11 +96,11 @@ export default async function QuotesPage({
                 {/* grid-cols-1 here too: the card's inner track must also
                     clamp, or the truncate on the book line never engages. */}
                 <CardContent className="grid grid-cols-1 gap-3 pt-0">
-                  <blockquote className="whitespace-pre-line break-words border-l-2 border-primary/50 pl-3 text-sm leading-relaxed">
+                  <blockquote className="long-text whitespace-pre-line break-words border-l-2 border-primary/50 pl-3 text-sm leading-relaxed">
                     {quote.text}
                   </blockquote>
                   {quote.note && (
-                    <p className="break-words text-sm italic text-muted-foreground">
+                    <p className="long-text break-words text-sm italic text-muted-foreground">
                       {quote.note}
                     </p>
                   )}
@@ -117,7 +119,7 @@ export default async function QuotesPage({
                       <span className="block truncate text-xs text-muted-foreground">
                         {quote.book.authors.join(", ")}
                         {quote.page != null && ` · p. ${quote.page}`}
-                        {quote.createdAt && ` · added ${formatDate(quote.createdAt)}`}
+                        {quote.createdAt && ` · added ${formatDate(quote.createdAt, prefs)}`}
                       </span>
                     </span>
                   </Link>

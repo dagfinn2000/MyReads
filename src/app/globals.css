@@ -661,3 +661,19 @@
     @apply font-sans;
     }
 }
+/* ── Reading preferences ───────────────────────────────────────────────────
+   Set on <html> by the root layout from the account's Preferences.
+   Text size scales the root font size, which every rem-based size in the
+   app follows. The serif choice applies to long passages only — book
+   descriptions, reviews, quotes and notes — marked with `long-text`. It uses
+   fonts the device already has, so choosing it downloads nothing. */
+html[data-text-size="large"] {
+  font-size: 112.5%;
+}
+html[data-text-size="larger"] {
+  font-size: 125%;
+}
+html[data-long-font="serif"] .long-text {
+  font-family: ui-serif, "Iowan Old Style", "Palatino Linotype", Palatino, Georgia,
+    Cambria, "Times New Roman", serif;
+}

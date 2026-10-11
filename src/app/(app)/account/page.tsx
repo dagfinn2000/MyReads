@@ -2,9 +2,13 @@ import { redirect } from "next/navigation";
 import { HardDriveDownload } from "lucide-react";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { formatDate } from "@/lib/display";
+import { getCurrentUser, getPreferences } from "@/lib/current-user";
+import { formatDate, formatNumber } from "@/lib/display";
+import { googleBooksEnabled } from "@/lib/metadata/googlebooks";
+import { DEFAULT_PREFERENCES, serverTimeZone } from "@/lib/preferences";
 import { ChangePasswordForm } from "@/components/change-password-form";
 import { DeleteAccount } from "@/components/delete-account";
+import { PreferencesForm } from "@/components/preferences-form";
 import { RestoreBackup } from "@/components/restore-backup";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,14 +26,24 @@ export default async function AccountPage() {
   if (!session?.user?.id) redirect("/login"); // revoked session (see auth.ts)
   const userId = session.user.id;
 
-  const [user, bookCount] = await Promise.all([
+  const [user, bookCount, current, prefs, savedViews] = await Promise.all([
     prisma.user.findUnique({
       where: { id: userId },
       select: { username: true, createdAt: true },
     }),
     prisma.book.count({ where: { userId } }),
+    getCurrentUser(),
+    getPreferences(),
+    prisma.savedView.findMany({
+      where: { userId },
+      select: { id: true, name: true },
+      orderBy: { name: "asc" },
+    }),
   ]);
   if (!user) return null;
+  // As stored, so the form can tell "never set" from a chosen zone.
+  const stored = current?.preferences ?? DEFAULT_PREFERENCES;
+  const timeZones = [...new Set(["UTC", ...Intl.supportedValuesOf("timeZone")])];
 
   return (
     <div className="grid gap-6">
@@ -41,10 +55,28 @@ export default async function AccountPage() {
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">
-            Member since {formatDate(user.createdAt)} ·{" "}
-            {bookCount.toLocaleString("en")} book{bookCount === 1 ? "" : "s"} in
+            Member since {formatDate(user.createdAt, prefs)} ·{" "}
+            {formatNumber(bookCount, prefs)} book{bookCount === 1 ? "" : "s"} in
             the library
           </p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Preferences</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {/* Keyed on the zone: the first visit fills it in from the
+              browser, and the form should show the zone it picked. */}
+          <PreferencesForm
+            key={stored.timeZone}
+            initial={stored}
+            serverTimeZone={serverTimeZone()}
+            timeZones={timeZones}
+            googleAvailable={googleBooksEnabled()}
+            savedViews={savedViews}
+          />
         </CardContent>
       </Card>
 

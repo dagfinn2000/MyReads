@@ -43,6 +43,8 @@ export function RestoreBackup() {
         data.loansRestored > 0 ? `${data.loansRestored} loans restored` : null,
         data.shelvesCreated > 0 ? `${data.shelvesCreated} shelves created` : null,
         data.goalsRestored > 0 ? `${data.goalsRestored} goals restored` : null,
+        data.savedViewsRestored > 0 ? `${data.savedViewsRestored} saved views restored` : null,
+        data.settingsRestored ? "settings restored" : null,
       ].filter(Boolean);
       // A restore that stopped early must not read as a clean success — say
       // what landed and that re-running finishes the job (already-restored

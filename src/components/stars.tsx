@@ -1,5 +1,8 @@
+"use client";
+
 import { Star } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { usePreferences } from "@/components/preferences-provider";
 
 function StarRow({ filled, sizeClass }: { filled?: boolean; sizeClass: string }) {
   // w-max + shrink-0 keep the row at its natural width inside the clipping
@@ -19,12 +22,48 @@ function StarRow({ filled, sizeClass }: { filled?: boolean; sizeClass: string })
 }
 
 /**
+ * A rating shown the way the reader chose in Preferences: stars, "7/10", or
+ * nothing at all when ratings are switched off. `value` is the stored 1–10.
+ */
+export function Stars(props: {
+  value: number;
+  size?: "sm" | "lg";
+  className?: string;
+  starClassName?: string;
+}) {
+  const { ratingStyle } = usePreferences();
+  if (ratingStyle === "off") return null;
+  if (ratingStyle === "ten") {
+    return (
+      <span
+        className={cn(
+          "inline-flex items-center gap-1 tabular-nums",
+          props.size === "lg" ? "text-base" : "text-xs",
+          props.className,
+        )}
+        role="img"
+        aria-label={`${props.value} out of 10`}
+      >
+        <Star
+          className={cn(
+            props.size === "lg" ? "size-5" : "size-3.5",
+            "fill-current text-amber-500",
+          )}
+        />
+        {props.value}/10
+      </span>
+    );
+  }
+  return <StarGraphic {...props} />;
+}
+
+/**
  * Read-only star display with half-star precision.
  * `value` is in half-star units (0–10); rendered by clipping a filled star
  * row to `value * 10%` width over a muted outline row — the stars are laid
  * out gap-free so the percentage maps exactly onto half stars.
  */
-export function Stars({
+export function StarGraphic({
   value,
   size = "sm",
   className,

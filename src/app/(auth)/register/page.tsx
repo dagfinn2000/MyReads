@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
  *  belongs here and not in the middleware. */
 export default async function RegisterPage() {
   const session = await auth();
-  if (session?.user?.id) redirect("/books");
+  if (session?.user?.id) redirect("/");
 
   return <RegisterForm />;
 }

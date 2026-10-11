@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { spendMetadataBudget } from "@/lib/api-guard";
+import { getPreferences } from "@/lib/current-user";
 import { prisma } from "@/lib/prisma";
 import { searchBooks } from "@/lib/metadata";
 import { isbnVariants, looksLikeIsbn, normalizeIsbn } from "@/lib/isbn";
@@ -89,8 +90,10 @@ export async function GET(req: Request) {
     // it spends from the same per-user budget as /api/metadata/*.
     const limited = spendMetadataBudget(userId);
     if (limited) return limited;
+    // The reader's catalogues, in their order (Preferences).
+    const { catalogues } = await getPreferences();
     try {
-      const results = await searchBooks(normalizeIsbn(isbnParam));
+      const results = await searchBooks(normalizeIsbn(isbnParam), catalogues);
       const hit = results[0];
       if (hit) {
         title = hit.title;

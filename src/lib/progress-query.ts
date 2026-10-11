@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { serverTimeZone } from "@/lib/preferences";
 
 /**
  * Pages read per calendar day, computed in the database.
@@ -15,12 +16,12 @@ import { prisma } from "@/lib/prisma";
  *    a pass-start anchor and the first real entry of that pass tie-break the
  *    same way.
  *
- *  - Days are bucketed in the *application's* timezone, not the database's.
+ *  - Days are bucketed in the *reader's* timezone, not the database's.
  *    `date` is `timestamp without time zone` holding a UTC instant, while
- *    `dayKey()` formats in Node's local zone. On a server anywhere east or
- *    west of UTC the naive `date_trunc` would file late-night reading under
- *    the wrong day and quietly change both the heatmap and the all-time
- *    longest streak. The zone is passed in so the two agree.
+ *    `dayKey()` formats in the zone it is given. The naive `date_trunc`
+ *    would file late-night reading under the wrong day and quietly change
+ *    both the heatmap and the all-time longest streak. The zone is passed in
+ *    so the two agree.
  *
  * No date filter: the heatmap shows twelve months, but `readingStreaks`
  * derives the longest-ever run from these same keys. Bounding the query to a
@@ -29,8 +30,9 @@ import { prisma } from "@/lib/prisma";
  */
 export async function dailyPageTotalsForUser(
   userId: string,
+  /** The reader's zone (Preferences); default the server's. */
+  timeZone: string = serverTimeZone(),
 ): Promise<Map<string, number>> {
-  const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
 
   const rows = await prisma.$queryRaw<{ day: string; pages: number }[]>`
     SELECT

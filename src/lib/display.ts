@@ -1,4 +1,6 @@
 import { BookFormat, BookOwnership, ReadingStatus } from "@prisma/client";
+import { calendarDay } from "@/lib/dates";
+import type { DateFormat, NumberFormat } from "@/lib/preferences";
 
 export const STATUS_LABELS: Record<ReadingStatus, string> = {
   WANT_TO_READ: "Want to Read",
@@ -39,18 +41,70 @@ export const STATUS_BADGE_CLASS: Record<ReadingStatus, string> = {
   DNF: "bg-rose-100 text-rose-900 dark:bg-rose-950 dark:text-rose-200 border-transparent",
 };
 
-/** "12 May 2024" or empty string. */
-export function formatDate(d: Date | null | undefined): string {
-  if (!d) return "";
-  return d.toLocaleDateString("en-GB", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
+/** What a date or number formatter needs from Preferences. Optional
+ *  throughout: leaving it out gives the original "12 May 2024" and "1,234",
+ *  with moments read in the server's zone. */
+export interface FormatPrefs {
+  dateFormat?: DateFormat;
+  numberFormat?: NumberFormat;
+  timeZone?: string;
 }
 
-/** Date → value usable by <input type="date">. */
-export function toDateInputValue(d: Date | null | undefined): string {
+const MONTHS_SHORT = [
+  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+];
+
+/** A "YYYY-MM-DD" key in the chosen date style. */
+export function formatDayKey(key: string, format: DateFormat = "d-mmm-y"): string {
+  const [y, m, d] = key.split("-");
+  const day = String(Number(d));
+  const month = MONTHS_SHORT[Number(m) - 1];
+  switch (format) {
+    case "mmm-d-y":
+      return `${month} ${day}, ${y}`;
+    case "dd.mm.y":
+      return `${d}.${m}.${y}`;
+    case "dd/mm/y":
+      return `${d}/${m}/${y}`;
+    case "mm/dd/y":
+      return `${m}/${d}/${y}`;
+    case "iso":
+      return key;
+    default:
+      return `${day} ${month} ${y}`;
+  }
+}
+
+/** "12 May 2024" (or the chosen style), or empty string. See calendarDay
+ *  for which day a stored date counts as. */
+export function formatDate(d: Date | null | undefined, prefs?: FormatPrefs): string {
   if (!d) return "";
-  return d.toISOString().slice(0, 10);
+  return formatDayKey(calendarDay(d, prefs?.timeZone), prefs?.dateFormat);
+}
+
+const NUMBER_LOCALES: Record<NumberFormat, string> = {
+  comma: "en-US", // 1,234
+  space: "nb-NO", // 1 234
+  period: "de-DE", // 1.234
+};
+
+const numberFormatters = new Map<NumberFormat, Intl.NumberFormat>();
+
+/** "1,234" (or the chosen grouping). Whole numbers only — counts and pages. */
+export function formatNumber(n: number, prefs?: FormatPrefs): string {
+  const format = prefs?.numberFormat ?? "comma";
+  let f = numberFormatters.get(format);
+  if (!f) {
+    f = new Intl.NumberFormat(NUMBER_LOCALES[format], { maximumFractionDigits: 0 });
+    numberFormatters.set(format, f);
+  }
+  return f.format(n);
+}
+
+/** Date → value usable by <input type="date">: the same calendar day
+ *  formatDate shows. */
+export function toDateInputValue(d: Date | null | undefined, timeZone?: string): string {
+  if (!d) return "";
+  return calendarDay(d, timeZone);
 }
