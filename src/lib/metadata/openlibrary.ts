@@ -67,7 +67,10 @@ export async function searchOpenLibrary(
     },
   );
 
-  return (data?.docs ?? [])
+  // null means the request failed and nothing was cached: an outage, which
+  // searchBooks needs to tell apart from "no matches".
+  if (data === null) throw new Error("Open Library unavailable");
+  return (data.docs ?? [])
     .filter((d) => d.title)
     .map((d) => ({
       title: d.title!,

@@ -3,7 +3,7 @@ import { auth } from "@/auth";
 import { spendMetadataBudget } from "@/lib/api-guard";
 import { prisma } from "@/lib/prisma";
 import { searchBooks } from "@/lib/metadata";
-import { isbnVariants, normalizeIsbn } from "@/lib/isbn";
+import { isbnVariants, looksLikeIsbn, normalizeIsbn } from "@/lib/isbn";
 import { escapeLike, foldForSearch } from "@/lib/utils";
 
 /** What the check UI needs to show a hit — no reading data beyond the badge bits. */
@@ -35,6 +35,8 @@ export interface LibraryCheckResult {
   };
   /** What the ISBN resolved to in the metadata sources (scan flow only). */
   lookedUp?: { title: string; authors: string[] } | null;
+  /** The catalogues couldn't be asked, so only the exact edition was checked. */
+  lookupFailed?: boolean;
 }
 
 /**
@@ -62,6 +64,11 @@ export async function GET(req: Request) {
   if (!isbnParam && !titleParam) {
     return NextResponse.json({ error: "isbn or title required" }, { status: 400 });
   }
+  // The scan flow has only the ISBN to go on; junk there would be answered
+  // "not in your library", which reads as a real answer.
+  if (!titleParam && !looksLikeIsbn(isbnParam)) {
+    return NextResponse.json({ error: "That doesn't look like an ISBN" }, { status: 400 });
+  }
 
   if (isbnParam) {
     const book = await prisma.book.findFirst({
@@ -76,6 +83,7 @@ export async function GET(req: Request) {
   let title = titleParam;
   let author = authorParam;
   let lookedUp: LibraryCheckResult["lookedUp"] = null;
+  let lookupFailed = false;
   if (!title && isbnParam) {
     // This is the one branch that calls out to the external catalogues, so
     // it spends from the same per-user budget as /api/metadata/*.
@@ -90,7 +98,9 @@ export async function GET(req: Request) {
         lookedUp = { title: hit.title, authors: hit.authors };
       }
     } catch {
-      // metadata sources down — the ISBN check above already ran
+      // Metadata sources down. The ISBN check above already ran; say that
+      // the title check couldn't.
+      lookupFailed = true;
     }
   }
 
@@ -120,5 +130,9 @@ export async function GET(req: Request) {
     }
   }
 
-  return NextResponse.json({ match: null, lookedUp } satisfies LibraryCheckResult);
+  return NextResponse.json({
+    match: null,
+    lookedUp,
+    ...(lookupFailed && { lookupFailed }),
+  } satisfies LibraryCheckResult);
 }

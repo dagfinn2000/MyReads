@@ -32,8 +32,8 @@ const PAGE_STEP = 200;
 /**
  * The library grid with bulk-edit support. Normally the cards are plain
  * links; toggling select mode overlays each card with a checkbox hitbox and
- * shows a floating action bar (set status / add to shelf / add tags) that
- * applies to every selected book in one server action.
+ * shows a floating action bar (set status / add to or remove from a shelf /
+ * add tags) that applies to every selected book in one server action.
  *
  * Renders only the slice the server sent. "Show more" and "Pick for me" both
  * go back to the server rather than working from a full in-memory library.
@@ -101,6 +101,8 @@ export function LibraryView({
       .split(",")
       .map((t) => t.trim().toLowerCase())
       .filter(Boolean);
+    // The shelf select's values are "add:<id>" and "remove:<id>".
+    const [shelfAction, shelfTarget] = shelfId.split(":");
     if (status === "keep" && shelfId === "keep" && addTags.length === 0) {
       setMessage("Pick a status, shelf, or tags first.");
       return;
@@ -109,7 +111,8 @@ export function LibraryView({
       const res = await bulkUpdateBooks({
         bookIds: [...selected],
         status: status === "keep" ? undefined : (status as ReadingStatus),
-        addShelfId: shelfId === "keep" ? undefined : shelfId,
+        addShelfId: shelfAction === "add" ? shelfTarget : undefined,
+        removeShelfId: shelfAction === "remove" ? shelfTarget : undefined,
         addTags: addTags.length ? addTags : undefined,
       });
       if (res.error) {
@@ -270,8 +273,13 @@ export function LibraryView({
               <SelectContent>
                 <SelectItem value="keep">Shelf: don&apos;t change</SelectItem>
                 {shelves.map((s) => (
-                  <SelectItem key={s.id} value={s.id}>
+                  <SelectItem key={s.id} value={`add:${s.id}`}>
                     Add to “{s.name}”
+                  </SelectItem>
+                ))}
+                {shelves.map((s) => (
+                  <SelectItem key={`remove-${s.id}`} value={`remove:${s.id}`}>
+                    Remove from “{s.name}”
                   </SelectItem>
                 ))}
               </SelectContent>

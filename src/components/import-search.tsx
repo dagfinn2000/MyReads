@@ -36,9 +36,13 @@ export function ImportSearch({
   // which results to show, and whether a search is outstanding — is then
   // derived from that one fact, instead of three states nudged into
   // agreement by setState calls at the top of the effect.
-  const [answer, setAnswer] = useState<{ query: string; list: BookMetadata[] } | null>(
-    null,
-  );
+  // `failed`: the catalogues couldn't be reached, which is not the same
+  // answer as "they have nothing by that name".
+  const [answer, setAnswer] = useState<{
+    query: string;
+    list: BookMetadata[];
+    failed?: boolean;
+  } | null>(null);
   const [pickingId, setPickingId] = useState<string | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -52,6 +56,7 @@ export function ImportSearch({
   // A typed character invalidates the previous answer by itself: the results
   // stop matching the query, which is exactly what "searching" means.
   const results = answered ? answer.list : [];
+  const failed = answered && answer.failed === true;
   const searching = longEnough && !answered;
 
   /** Barcode scanner handoff — the ISBN just becomes the search query. */
@@ -118,7 +123,9 @@ export function ImportSearch({
         );
         const data = await res.json();
         const list: BookMetadata[] = data.results ?? [];
-        setAnswer({ query: trimmed, list });
+        // 502: no catalogue answered. Other errors (a spent lookup budget)
+        // also mean "couldn't search", not "nothing found".
+        setAnswer({ query: trimmed, list, failed: !res.ok });
         if (autoPickRef.current) {
           autoPickRef.current = false;
           if (list.length === 1) {
@@ -127,9 +134,9 @@ export function ImportSearch({
         }
       } catch {
         // A failed lookup answers the query with nothing, which stops the
-        // spinner and shows "no results". An abort is a newer query taking
-        // over and must not answer this one.
-        if (!controller.signal.aborted) setAnswer({ query: trimmed, list: [] });
+        // spinner and says the search failed. An abort is a newer query
+        // taking over and must not answer this one.
+        if (!controller.signal.aborted) setAnswer({ query: trimmed, list: [], failed: true });
       }
     }, DEBOUNCE_MS);
 
@@ -163,7 +170,9 @@ export function ImportSearch({
 
       {!searching && longEnough && results.length === 0 && (
         <p className="text-sm text-muted-foreground">
-          No results. You can still add the book manually.
+          {failed
+            ? "Couldn't reach the book catalogues. Try again in a moment, or add the book manually."
+            : "No results. You can still add the book manually."}
         </p>
       )}
 

@@ -30,6 +30,7 @@ const { readAgain, addPastRead, deletePastRead } = await import("@/lib/actions/r
 const { bulkUpdateBooks } = await import("@/lib/actions/bulk");
 const { renameTag, deleteTag } = await import("@/lib/actions/tags");
 const { lendBook, returnLoan, deleteLoan } = await import("@/lib/actions/loans");
+const { createShelf } = await import("@/lib/actions/shelves");
 
 let userId: string;
 let otherUserId: string;
@@ -239,6 +240,30 @@ describe("bulkUpdateBooks", () => {
     );
   });
 
+  it("takes books off a shelf, leaving the others on it", async () => {
+    const [a, b, c] = await Promise.all([makeBook(), makeBook(), makeBook()]);
+    const shelf = await prisma.shelf.create({
+      data: { userId, name: "Shelf", books: { connect: [{ id: a.id }, { id: b.id }, { id: c.id }] } },
+    });
+
+    const res = await bulkUpdateBooks({ bookIds: [a.id, b.id], removeShelfId: shelf.id });
+    expect(res.count).toBe(2);
+
+    const after = await prisma.shelf.findUniqueOrThrow({
+      where: { id: shelf.id },
+      select: { books: { select: { id: true } } },
+    });
+    expect(after.books.map((x) => x.id)).toEqual([c.id]);
+  });
+
+  it("won't take books off another account's shelf", async () => {
+    const bk = await makeBook();
+    const theirShelf = await prisma.shelf.create({ data: { userId: otherUserId, name: "Theirs" } });
+    expect(await bulkUpdateBooks({ bookIds: [bk.id], removeShelfId: theirShelf.id })).toEqual({
+      error: "Shelf not found",
+    });
+  });
+
   it("rejects a shelf belonging to another account without writing anything", async () => {
     const bk = await makeBook();
     const theirShelf = await prisma.shelf.create({
@@ -291,6 +316,21 @@ describe("tag management", () => {
 
     const after = await prisma.book.findFirstOrThrow({ where: { id: theirs.id } });
     expect(after.tags).toEqual(["scifi"]);
+  });
+});
+
+describe("shelves", () => {
+  it("refuses a second shelf whose name differs only by case or spaces", async () => {
+    expect(await createShelf({}, form({ name: "Favourites" }))).toEqual({ success: true });
+    expect(await createShelf({}, form({ name: "favourites " }))).toEqual({
+      error: 'You already have a shelf called "Favourites"',
+    });
+    expect(await prisma.shelf.count({ where: { userId } })).toBe(1);
+  });
+
+  it("doesn't count another account's shelf as a duplicate", async () => {
+    await prisma.shelf.create({ data: { userId: otherUserId, name: "Favourites" } });
+    expect(await createShelf({}, form({ name: "Favourites" }))).toEqual({ success: true });
   });
 });
 

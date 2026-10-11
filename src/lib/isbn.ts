@@ -11,6 +11,13 @@ export function normalizeIsbn(raw: string): string {
   return raw.replace(/[\s-]/g, "").toUpperCase();
 }
 
+/** True when `raw` has the shape of an ISBN-10 or ISBN-13 (spaces and
+ *  hyphens allowed). The check digit isn't verified: a book with a
+ *  misprinted ISBN is still a book someone might own. */
+export function looksLikeIsbn(raw: string): boolean {
+  return /^(\d{9}[\dX]|\d{13})$/.test(normalizeIsbn(raw));
+}
+
 /** Check digit for a 13-digit ISBN, given its first 12 digits. */
 function isbn13CheckDigit(digits12: string): string {
   let sum = 0;

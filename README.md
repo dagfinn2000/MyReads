@@ -82,9 +82,9 @@ surface area.
   "Fantasy") independent of reading status. A book can sit on any number of
   shelves; deleting a shelf never touches its books.
 - **Library views** — status shelves, custom-shelf chips, text search across
-  title/author/series, filters by tag, format, ownership (including "lent
-  out"), and
-  minimum rating, grouping
+  title/author/series (every word must match, in any order, and accents
+  don't matter: "bronte" finds Brontë), filters by tag, format, ownership
+  (including "lent out"), and minimum rating, grouping
   by author or series, sorting by title, author, rating, date added, or date
   finished. Authors sort by surname the way a bookshelf files them — Le
   Guin under L, van Gulik under V — in both the author sort and the author
@@ -111,12 +111,11 @@ surface area.
   medal. Past years' goals (and medals) stay on display.
 - **Backup & restore** — one click downloads your entire library (books,
   quotes, read history, the reading log, shelves, reading goals, **and
-  cover images**) as a
-  zip, and the
-  stats page can restore such a backup into any instance — covers included,
-  so a restore onto a fresh server looks exactly like the original. Restores
-  merge: books you already have are skipped, so it's safe to run on a live
-  library. Plain-JSON backups from older versions restore fine too.
+  cover images**) as a zip, and the account page can restore such a backup
+  into any instance — covers included, so a restore onto a fresh server
+  looks exactly like the original. Restores merge: books you already have
+  are skipped, so it's safe to run on a live library. Plain-JSON backups
+  from older versions restore fine too.
 - **Twenty-six themes that follow you** — the picked theme is saved on your
   account and server-rendered on first paint, so signing in from a new
   browser or device brings your look along (localStorage still covers the
@@ -164,7 +163,7 @@ Library:
 
 ![Cover picker on the edit form](docs/cover-picker.png)
 
-**Stats & reading goals** — with backup & restore a click away:
+**Stats & reading goals**:
 
 ![Stats dashboard with reading goal](docs/stats.png)
 
@@ -181,8 +180,8 @@ monthly rhythm, ratings, and top genres:
 | --- | --- |
 | ![Theme picker](docs/themes.png) | ![Backup card](docs/backup.png) |
 
-**Account** — change your password or delete the account (a backup one click
-away); both are password-confirmed:
+**Account** — change your password, download or restore a backup, or delete
+the account; the password change and the deletion are password-confirmed:
 
 ![Account page](docs/account.png)
 

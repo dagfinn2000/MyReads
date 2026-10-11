@@ -185,9 +185,9 @@ export function BookForm({
         </div>
         <div className="flex flex-wrap items-end gap-4">
           <div className="grid gap-2">
-            <Label>Format</Label>
+            <Label htmlFor="format">Format</Label>
             <Select name="format" defaultValue={initial.format ?? BookFormat.PHYSICAL}>
-              <SelectTrigger className="w-36">
+              <SelectTrigger id="format" className="w-36">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -201,12 +201,12 @@ export function BookForm({
           </div>
           {showStatus && (
             <div className="grid gap-2">
-              <Label>Shelf</Label>
+              <Label htmlFor="status">Shelf</Label>
               <Select
                 name="status"
                 defaultValue={initial.status ?? ReadingStatus.WANT_TO_READ}
               >
-                <SelectTrigger className="w-44">
+                <SelectTrigger id="status" className="w-44">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>

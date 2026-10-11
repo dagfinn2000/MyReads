@@ -11,6 +11,7 @@ const bulkSchema = z.object({
   bookIds: z.array(z.string()).min(1).max(500),
   status: z.nativeEnum(ReadingStatus).optional(),
   addShelfId: z.string().optional(),
+  removeShelfId: z.string().optional(),
   addTags: z
     .array(z.string().trim().toLowerCase().max(50))
     .max(20)
@@ -24,9 +25,9 @@ export interface BulkResult {
 
 /**
  * Apply changes to many books at once: set reading status, append tags,
- * and/or put them on a shelf. Every id is filtered through an ownership
- * check first, so ids smuggled into the request for other users' rows are
- * silently dropped rather than acted on.
+ * and/or put them on or take them off a shelf. Every id is filtered through
+ * an ownership check first, so ids smuggled into the request for other
+ * users' rows are silently dropped rather than acted on.
  */
 export async function bulkUpdateBooks(
   input: z.infer<typeof bulkSchema>,
@@ -37,9 +38,9 @@ export async function bulkUpdateBooks(
 
   const parsed = bulkSchema.safeParse(input);
   if (!parsed.success) return { error: "Invalid input" };
-  const { bookIds, status, addShelfId, addTags } = parsed.data;
+  const { bookIds, status, addShelfId, removeShelfId, addTags } = parsed.data;
 
-  if (!status && !addShelfId && !addTags?.length) {
+  if (!status && !addShelfId && !removeShelfId && !addTags?.length) {
     return { error: "Nothing to apply" };
   }
 
@@ -67,6 +68,14 @@ export async function bulkUpdateBooks(
       select: { id: true, books: { select: { id: true } } },
     });
     if (!shelf) return { error: "Shelf not found" };
+  }
+  let removeFrom: { id: string } | null = null;
+  if (removeShelfId) {
+    removeFrom = await prisma.shelf.findFirst({
+      where: { id: removeShelfId, userId },
+      select: { id: true },
+    });
+    if (!removeFrom) return { error: "Shelf not found" };
   }
 
   // One unit of work. Applying a status, then tags, then a shelf as three
@@ -116,6 +125,14 @@ export async function bulkUpdateBooks(
           data: { books: { connect: toConnect.map((id) => ({ id })) } },
         });
       }
+    }
+
+    if (removeFrom) {
+      // Disconnecting a book that isn't on the shelf is a no-op.
+      await tx.shelf.update({
+        where: { id: removeFrom.id },
+        data: { books: { disconnect: ownedIds.map((id) => ({ id })) } },
+      });
     }
   });
 

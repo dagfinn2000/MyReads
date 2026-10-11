@@ -16,7 +16,7 @@ export default function NotFound() {
         <div className="grid gap-1">
           <h1 className="text-2xl font-semibold tracking-tight">Not found</h1>
           <p className="max-w-prose text-sm text-muted-foreground">
-            That page doesn&apos;t exist — or the book was deleted.
+            That page doesn&apos;t exist, or what it showed has been deleted.
           </p>
         </div>
         <Button asChild>

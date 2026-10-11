@@ -36,11 +36,12 @@ export function CheckBookClient() {
       const res = await fetch(
         `/api/library/check?isbn=${encodeURIComponent(value)}`,
       );
-      if (res.status === 429) {
-        setError("Too many lookups — wait a minute and try again.");
+      if (!res.ok) {
+        // The route explains a bad ISBN or a spent lookup budget itself.
+        const data = (await res.json().catch(() => null)) as { error?: string } | null;
+        setError(data?.error ?? "Check failed — are you online?");
         return;
       }
-      if (!res.ok) throw new Error();
       setResult((await res.json()) as LibraryCheckResult);
     } catch {
       setError("Check failed — are you online?");
@@ -136,6 +137,12 @@ function Verdict({ result, isbn }: { result: LibraryCheckResult; isbn: string })
         <CircleHelp className="size-5 text-muted-foreground" />
         Not in your library.
       </p>
+      {result.lookupFailed && (
+        <p className="text-sm text-muted-foreground">
+          Couldn&apos;t reach the book catalogues, so only this exact edition was checked,
+          not other editions of the same title.
+        </p>
+      )}
       {result.lookedUp && (
         <p className="text-sm text-muted-foreground">
           Looked up: <span className="font-medium">{result.lookedUp.title}</span>

@@ -62,3 +62,19 @@ describe("GET /api/library/check", () => {
     expect(await res.json()).toMatchObject({ match: "isbn" });
   });
 });
+
+describe("GET /api/library/check input and outages", () => {
+  it("refuses something that isn't an ISBN in the scan flow", async () => {
+    const res = await check("isbn=not-an-isbn");
+    expect(res.status).toBe(400);
+    expect(await res.json()).toEqual({ error: "That doesn't look like an ISBN" });
+    expect(searchBooks).not.toHaveBeenCalled();
+  });
+
+  it("says so when the catalogues couldn't be asked", async () => {
+    searchBooks.mockRejectedValueOnce(new Error("Couldn't reach the book catalogues"));
+    const res = await check("isbn=9780765311788");
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ match: null, lookedUp: null, lookupFailed: true });
+  });
+});
