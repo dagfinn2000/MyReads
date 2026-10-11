@@ -51,7 +51,7 @@ export function RegisterForm() {
 
     // Account created — sign straight in.
     await signIn("credentials", { username, password, redirect: false });
-    router.push("/books");
+    router.push("/");
     router.refresh();
   }
 

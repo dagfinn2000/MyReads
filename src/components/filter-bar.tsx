@@ -14,7 +14,12 @@ import {
 } from "lucide-react";
 import { saveLibraryView } from "@/lib/actions/library-view";
 import { FORMAT_LABELS } from "@/lib/display";
+import type { LibraryDisplay } from "@/lib/library-view";
+import type { RatingStyle } from "@/lib/preferences";
+import { canonicalViewQuery } from "@/lib/saved-views";
+import { LibraryViewMenu } from "@/components/library-view-menu";
 import { ManageTagsDialog } from "@/components/manage-tags-dialog";
+import { SaveViewDialog } from "@/components/save-view-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -82,14 +87,34 @@ const OWNED_OPTIONS = [
   { value: "wishlist", label: "Wishlist" },
 ];
 
-const RATING_OPTIONS = [
-  { value: "all", label: "Any rating" },
-  { value: "4", label: "≥ 2 stars" },
-  { value: "6", label: "≥ 3 stars" },
-  { value: "8", label: "≥ 4 stars" },
-  { value: "9", label: "≥ 4.5 stars" },
-  { value: "10", label: "5 stars" },
-];
+/** Minimum-rating choices, worded in the reader's rating style. Values are
+ *  the stored 1–10. */
+const RATING_OPTIONS: Record<Exclude<RatingStyle, "off">, { value: string; label: string }[]> = {
+  half: [
+    { value: "all", label: "Any rating" },
+    { value: "4", label: "≥ 2 stars" },
+    { value: "6", label: "≥ 3 stars" },
+    { value: "8", label: "≥ 4 stars" },
+    { value: "9", label: "≥ 4.5 stars" },
+    { value: "10", label: "5 stars" },
+  ],
+  whole: [
+    { value: "all", label: "Any rating" },
+    { value: "4", label: "≥ 2 stars" },
+    { value: "6", label: "≥ 3 stars" },
+    { value: "8", label: "≥ 4 stars" },
+    { value: "10", label: "5 stars" },
+  ],
+  ten: [
+    { value: "all", label: "Any rating" },
+    { value: "5", label: "≥ 5/10" },
+    { value: "6", label: "≥ 6/10" },
+    { value: "7", label: "≥ 7/10" },
+    { value: "8", label: "≥ 8/10" },
+    { value: "9", label: "≥ 9/10" },
+    { value: "10", label: "10/10" },
+  ],
+};
 
 /**
  * Search/filter/sort controls. All state lives in the URL: every change
@@ -100,11 +125,16 @@ export function FilterBar({
   values,
   allTags,
   tagCounts,
+  display,
+  ratingStyle,
 }: {
   values: FilterValues;
   allTags: string[];
   /** Books per tag, for the manage-tags dialog. */
   tagCounts: Record<string, number>;
+  /** Card size, layout and card details, for the View menu. */
+  display: LibraryDisplay;
+  ratingStyle: RatingStyle;
 }) {
   const router = useRouter();
   const [search, setSearch] = useState(values.q);
@@ -155,10 +185,13 @@ export function FilterBar({
   }, [search]);
 
   return (
-    // On phones the controls stack into tidy full-width rows (search, then
-    // filters, then grouping/sort); from sm up they keep their fixed widths.
+    // On phones the controls stack into tidy full-width rows (search with
+    // the view buttons, then filters, then grouping/sort); from sm up they
+    // keep their fixed widths and the view buttons go last.
     <div className="flex flex-wrap items-center gap-2">
-      <div className="relative w-full sm:w-auto">
+      {/* Leaves exactly the room the two view buttons take: 2 × 2.25rem,
+          plus the gaps. */}
+      <div className="relative w-[calc(100%-5.25rem)] sm:w-auto">
         <Search className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
         <Input
           value={search}
@@ -166,6 +199,10 @@ export function FilterBar({
           placeholder="Search title or author…"
           className="w-full pl-8 sm:w-56"
         />
+      </div>
+      <div className="flex shrink-0 items-center gap-1 sm:order-last">
+        <LibraryViewMenu display={display} ratings={ratingStyle !== "off"} />
+        <SaveViewDialog query={canonicalViewQuery({ ...values, q: search })} />
       </div>
 
       {/* Each filter is at least half the row on phones, so they wrap two
@@ -218,21 +255,31 @@ export function FilterBar({
         </SelectContent>
       </Select>
 
-      <Select
-        value={values.minRating || "all"}
-        onValueChange={(v) => navigate({ minRating: v })}
-      >
-        <SelectTrigger className="min-w-[calc(50%_-_0.25rem)] flex-1 sm:w-32 sm:min-w-0 sm:flex-initial">
-          <SelectValue placeholder="Rating" />
-        </SelectTrigger>
-        <SelectContent>
-          {RATING_OPTIONS.map((o) => (
-            <SelectItem key={o.value} value={o.value}>
-              {o.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      {ratingStyle !== "off" && (
+        <Select
+          value={values.minRating || "all"}
+          onValueChange={(v) => navigate({ minRating: v })}
+        >
+          <SelectTrigger className="min-w-[calc(50%_-_0.25rem)] flex-1 sm:w-32 sm:min-w-0 sm:flex-initial">
+            <SelectValue placeholder="Rating" />
+          </SelectTrigger>
+          <SelectContent>
+            {/* A filter set under another style (≥ 4.5 stars, say) still
+                shows, so the active filter is never invisible. */}
+            {(RATING_OPTIONS[ratingStyle].some((o) => o.value === (values.minRating || "all"))
+              ? RATING_OPTIONS[ratingStyle]
+              : [
+                  ...RATING_OPTIONS[ratingStyle],
+                  { value: values.minRating, label: `≥ ${values.minRating}/10` },
+                ]
+            ).map((o) => (
+              <SelectItem key={o.value} value={o.value}>
+                {o.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      )}
 
       {values.series && (
         <button
@@ -268,7 +315,9 @@ export function FilterBar({
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {SORT_OPTIONS.map((o) => (
+            {SORT_OPTIONS.filter(
+              (o) => o.value !== "rating" || ratingStyle !== "off" || values.sort === "rating",
+            ).map((o) => (
               <SelectItem key={o.value} value={o.value}>
                 {o.label}
               </SelectItem>

@@ -5,6 +5,7 @@ import type { Book, ProgressEntry } from "@prisma/client";
 import { ReadingStatus } from "@prisma/client";
 import { updateReading } from "@/lib/actions/books";
 import { STATUS_LABELS, toDateInputValue } from "@/lib/display";
+import { usePreferences } from "@/components/preferences-provider";
 import { currentPassEntries } from "@/lib/progress";
 import { ProgressChart, ProgressLog } from "@/components/progress-log";
 import { StarRatingInput } from "@/components/star-rating-input";
@@ -41,6 +42,7 @@ export function ReadingCard({
 }) {
   const action = updateReading.bind(null, book.id);
   const [state, formAction, pending] = useActionState(action, {});
+  const prefs = usePreferences();
 
   // Remount the form whenever the server-side reading data changes. React
   // resets uncontrolled fields after a successful action, and the Radix
@@ -100,7 +102,7 @@ export function ReadingCard({
                 name="dateStarted"
                 type="date"
                 className="w-40"
-                defaultValue={toDateInputValue(book.dateStarted)}
+                defaultValue={toDateInputValue(book.dateStarted, prefs.timeZone)}
               />
             </div>
             <div className="grid gap-2">
@@ -110,7 +112,7 @@ export function ReadingCard({
                 name="dateFinished"
                 type="date"
                 className="w-40"
-                defaultValue={toDateInputValue(book.dateFinished)}
+                defaultValue={toDateInputValue(book.dateFinished, prefs.timeZone)}
               />
             </div>
             <div className="grid gap-2">
@@ -158,6 +160,7 @@ export function ReadingCard({
               id="review"
               name="review"
               rows={5}
+              className="long-text"
               placeholder="What did you think?"
               defaultValue={book.review ?? ""}
             />

@@ -61,18 +61,125 @@ export const DARK_THEME_IDS = THEMES.filter((t) => t.mode === "dark").map(
   (t) => t.id,
 );
 
+/** Each theme's page background, for the browser's title bar colour
+ *  (the installed app's top bar on a phone). */
+export const THEME_BACKGROUNDS: Record<string, string> = Object.fromEntries(
+  THEMES.map((t) => [t.id, t.swatch[0]]),
+);
+
+/**
+ * A stored theme choice. Either one fixed theme ("dracula"), or "auto" with
+ * one light and one dark theme that follow the system's light/dark mode —
+ * written "auto:<light id>:<dark id>" in User.theme and localStorage, so the
+ * existing column and storage key hold both kinds.
+ */
+export type ThemeSetting =
+  | { kind: "fixed"; id: string }
+  | { kind: "auto"; light: string; dark: string };
+
+export const DEFAULT_AUTO_THEMES = { light: "light", dark: "dark" } as const;
+
+/** Stored string → a setting whose ids all exist, or null. An auto pair has
+ *  to be one light and one dark theme, or the switch would do nothing. */
+export function parseThemeSetting(raw: string | null | undefined): ThemeSetting | null {
+  if (!raw) return null;
+  const mode = (id: string) => THEMES.find((t) => t.id === id)?.mode;
+  if (raw.startsWith("auto:")) {
+    const [light, dark] = raw.slice(5).split(":");
+    if (mode(light) !== "light" || mode(dark) !== "dark") return null;
+    return { kind: "auto", light, dark };
+  }
+  return mode(raw) ? { kind: "fixed", id: raw } : null;
+}
+
+export function serializeThemeSetting(setting: ThemeSetting): string {
+  return setting.kind === "auto" ? `auto:${setting.light}:${setting.dark}` : setting.id;
+}
+
+/**
+ * Puts a stored theme setting on <html>: the `data-theme` palette, the
+ * `dark` class Tailwind's `dark:` variants key on, the browser title bar
+ * colour, and — for automatic mode — `data-theme-auto`, which remembers the
+ * pair so a later system switch can pick the other one.
+ *
+ * Used both by the theme picker and, as source text, by the pre-paint script
+ * below. That second use is why it takes everything as arguments and touches
+ * nothing outside its own body: the script is this function's code, run
+ * before any module has loaded.
+ */
+export function applyThemeSetting(
+  setting: string,
+  darkIds: string[],
+  backgrounds: Record<string, string>,
+): void {
+  const root = document.documentElement;
+  let id = setting;
+  if (setting.indexOf("auto:") === 0) {
+    const pair = setting.slice(5).split(":");
+    root.setAttribute("data-theme-auto", pair[0] + ":" + pair[1]);
+    id = window.matchMedia("(prefers-color-scheme: dark)").matches ? pair[1] : pair[0];
+  } else {
+    root.removeAttribute("data-theme-auto");
+  }
+  root.setAttribute("data-theme", id);
+  root.classList.toggle("dark", darkIds.indexOf(id) > -1);
+
+  // The title bar colour. This tag is only ever written here: if the server
+  // rendered one too, React would manage it and the two would fight.
+  const color = backgrounds[id];
+  if (!color) return;
+  let meta = document.querySelector('meta[name="theme-color"]');
+  if (!meta) {
+    meta = document.createElement("meta");
+    meta.setAttribute("name", "theme-color");
+    document.head.appendChild(meta);
+  }
+  meta.setAttribute("content", color);
+}
+
+/**
+ * Body of the pre-paint script. The server puts the signed-in user's saved
+ * setting on <html> (`data-theme`, or `data-theme-auto` for automatic mode);
+ * that wins and is mirrored into localStorage so signed-out pages keep the
+ * look. Without one, the localStorage copy applies. Also listens for the
+ * system switching between light and dark, which only matters while
+ * automatic mode is on. Same self-contained rule as applyThemeSetting.
+ */
+function themeInit(
+  storageKey: string,
+  darkIds: string[],
+  backgrounds: Record<string, string>,
+  apply: typeof applyThemeSetting,
+): void {
+  try {
+    const root = document.documentElement;
+    const auto = root.getAttribute("data-theme-auto");
+    let setting = auto ? "auto:" + auto : root.getAttribute("data-theme");
+    try {
+      // localStorage can throw in some privacy modes.
+      if (setting) localStorage.setItem(storageKey, setting);
+      else setting = localStorage.getItem(storageKey);
+    } catch {}
+    // Nothing stored anywhere means the default theme, applied all the
+    // same so the title bar gets its colour.
+    apply(setting || "light", darkIds, backgrounds);
+    window
+      .matchMedia("(prefers-color-scheme: dark)")
+      .addEventListener("change", function () {
+        const pair = root.getAttribute("data-theme-auto");
+        if (pair) apply("auto:" + pair, darkIds, backgrounds);
+      });
+  } catch {}
+}
+
 /**
  * Inline script injected before hydration so the stored theme applies on
- * first paint (no flash of the default theme). When the server already put
- * the signed-in user's saved theme on <html>, that wins — the script only
- * mirrors it into localStorage (so signed-out pages keep the look);
- * otherwise it applies the localStorage fallback. Kept tiny and
- * try/catch'd — localStorage can throw in some privacy modes.
+ * first paint (no flash of the default theme). Built from the two functions
+ * above, so the picker and the first paint can never disagree about what a
+ * setting means.
  */
-export const THEME_INIT_SCRIPT = `(function(){try{var d=document.documentElement;var s=d.getAttribute("data-theme");if(s){localStorage.setItem(${JSON.stringify(
+export const THEME_INIT_SCRIPT = `(${themeInit.toString()})(${JSON.stringify(
   THEME_STORAGE_KEY,
-)},s);return;}var t=localStorage.getItem(${JSON.stringify(
-  THEME_STORAGE_KEY,
-)});if(!t)return;d.setAttribute("data-theme",t);if(${JSON.stringify(
-  DARK_THEME_IDS,
-)}.indexOf(t)>-1)d.classList.add("dark");}catch(e){}})();`;
+)},${JSON.stringify(DARK_THEME_IDS)},${JSON.stringify(
+  THEME_BACKGROUNDS,
+)},${applyThemeSetting.toString()});`;

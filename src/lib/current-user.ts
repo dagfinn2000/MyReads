@@ -1,6 +1,12 @@
 import { cache } from "react";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import {
+  DEFAULT_PREFERENCES,
+  parsePreferences,
+  serverTimeZone,
+  type Preferences,
+} from "@/lib/preferences";
 
 /**
  * The signed-in user's id plus the bits the shell needs, fetched once per
@@ -13,19 +19,35 @@ import { prisma } from "@/lib/prisma";
  * read.
  *
  * That also absorbs the cost of session revocation: the `jwt` callback reads
- * the user row to check `tokenVersion`, and folding the theme into the same
- * request-scoped lookup keeps a page render at one user query rather than
- * three.
+ * the user row to check `tokenVersion`, and folding the theme and
+ * preferences into the same request-scoped lookup keeps a page render at one
+ * user query rather than three.
  */
 export const getCurrentUser = cache(
-  async (): Promise<{ id: string; theme: string | null } | null> => {
+  async (): Promise<{
+    id: string;
+    theme: string | null;
+    /** As stored: `timeZone` is "" until the reader's zone is known. */
+    preferences: Preferences;
+  } | null> => {
     const session = await auth();
     if (!session?.user?.id) return null;
 
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
-      select: { id: true, theme: true },
+      select: { id: true, theme: true, preferences: true },
     });
-    return user ?? null;
+    if (!user) return null;
+    return { ...user, preferences: parsePreferences(user.preferences) };
   },
 );
+
+/**
+ * The signed-in user's preferences, ready to use: defaults when signed out,
+ * and `timeZone` always set — to the server's zone until the reader's own
+ * is known — so date code never has to handle "no zone".
+ */
+export const getPreferences = cache(async (): Promise<Preferences> => {
+  const prefs = (await getCurrentUser())?.preferences ?? DEFAULT_PREFERENCES;
+  return { ...prefs, timeZone: prefs.timeZone || serverTimeZone() };
+});

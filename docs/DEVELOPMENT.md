@@ -41,15 +41,18 @@ password matches `POSTGRES_PASSWORD`. Every setting is described in
 ## Tests
 
 - **`npm test`** covers the pure logic that is easiest to break without
-  noticing: ISBN-10/13 conversion, reading pace and streaks, sorting authors
-  by surname and series in order, saved library views, lending, the rate
-  limiter, the guard that stops cover downloads from reaching private
-  addresses, and image type detection.
+  noticing: ISBN-10/13 conversion, reading pace and streaks, which day a date
+  falls on in each time zone, sorting authors by surname and series in
+  order, the sorting rules and alphabets, saved library views, reading
+  goals, reading preferences and themes, lending, the rate limiter, the
+  guard that stops cover downloads from reaching private addresses, and
+  image type detection.
 - **`npm run test:db:docker`** starts a `postgres:16-alpine` container, runs
   the database tests, and removes it. They cover backup and restore (the
-  round trip, merging, and duplicates), re-read counts, the book form and the
-  reading log it writes, library search, bulk edit, and the checks that stop
-  one user from touching another user's books.
+  round trip, merging, duplicates, and settings), re-read counts, the book
+  form and the reading log it writes, library search, bulk edit, saving
+  preferences and saved views, and the checks that stop one user from
+  touching another user's books.
 
 These run against a real database because a stand-in would copy Postgres's
 behaviour wrongly in exactly the places that matter, and because restore is
@@ -87,7 +90,9 @@ src/
 │  ├─ metadata/        Open Library, Google Books and nb.no clients, plus
 │  │                   the database cache
 │  ├─ covers.ts        downloading and caching cover images
+│  ├─ dates.ts         which calendar day a date falls on, by time zone
 │  ├─ net-guard.ts     blocks cover downloads from private addresses
+│  ├─ preferences.ts   the Preferences settings and their defaults
 │  ├─ rate-limit.ts    in-memory limits for sign-in, registration,
 │  │                   catalogue lookups and cover uploads
 │  └─ validation.ts    Zod schemas shared by actions and API routes
@@ -104,7 +109,21 @@ src/
   latest read; earlier reads are archived in the `Read` table, and
   `timesRead` is worked out from both.
 - **Ratings are stored as whole numbers from 1 to 10**, in half stars. `7`
-  shows as 3.5 stars.
+  shows as 3.5 stars, or as 7/10 for someone who rates out of 10. Changing
+  the rating style only changes how ratings look and are entered, never the
+  stored numbers.
+- **Settings are one JSON value per account.** Preferences live in
+  `User.preferences` and the library's look in `User.libraryView`. Each is
+  read through a parse function (`parsePreferences`, `parseLibraryView`)
+  that fills in a default for anything missing or wrong. Adding a setting
+  means adding it there; older rows just get the default. Saves merge the
+  changed keys in SQL, so two quick changes can't undo each other.
+- **Typed dates and moments are read differently.** A date typed into a date
+  field is stored as midnight UTC and means that day everywhere. Anything
+  else, like "finished today" or a reading-log entry, is a moment, and
+  counts on the day it was in the reader's time zone. `calendarDay` in
+  [dates.ts](../src/lib/dates.ts) applies the rule. The time zone is taken
+  from the browser on the first visit and can be changed in Preferences.
 - **Catalogue lookups are cached** in the `MetadataCache` table for a week,
   keyed by source and query. If a source is down, the last good answer is
   used, so a flaky Open Library doesn't break lookups that worked before.

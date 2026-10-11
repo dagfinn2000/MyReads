@@ -91,4 +91,14 @@ describe("dailyPageTotalsForUser", () => {
     expect(fromSql.has("2026-03-06")).toBe(false); // tz-c, no predecessor
     expect(fromSql.has("2026-03-04")).toBe(false); // tz-b went backwards
   });
+
+  it("agrees with the in-memory version in the reader's own zone", async () => {
+    for (const zone of ["UTC", "America/New_York", "Asia/Tokyo", "Europe/Oslo"]) {
+      const fromSql = await dailyPageTotalsForUser(USER, zone);
+      const fromJs = dailyPageTotals(entries, zone);
+      expect(Object.fromEntries([...fromSql].sort()), zone).toEqual(
+        Object.fromEntries([...fromJs].sort()),
+      );
+    }
+  });
 });

@@ -75,4 +75,34 @@ describe("searchBooks", () => {
     nb.mockResolvedValue([book("Hobbiten", "9788205530102"), book("The Hobbit (dup)", "0261103342")]);
     expect((await searchBooks("hobbit")).map((r) => r.title)).toEqual(["The Hobbit", "Hobbiten"]);
   });
+
+  it("asks only the chosen catalogues, in the chosen order", async () => {
+    ol.mockResolvedValue([book("Open Library row")]);
+    nb.mockResolvedValue([book("nb.no row")]);
+    expect((await searchBooks("x", ["nb", "openlibrary"])).map((r) => r.title)).toEqual([
+      "nb.no row",
+      "Open Library row",
+    ]);
+
+    ol.mockClear();
+    expect((await searchBooks("x", ["nb"])).map((r) => r.title)).toEqual(["nb.no row"]);
+    expect(ol).not.toHaveBeenCalled();
+  });
+
+  it("lets the first chosen catalogue win a duplicate edition", async () => {
+    ol.mockResolvedValue([book("From Open Library", "9780261103344")]);
+    nb.mockResolvedValue([book("From nb.no", "0261103342")]);
+    expect((await searchBooks("x", ["nb", "openlibrary"])).map((r) => r.title)).toEqual([
+      "From nb.no",
+    ]);
+  });
+
+  it("falls back to the keyless catalogues when only Google is chosen but not set up", async () => {
+    ol.mockResolvedValue([book("Open Library row")]);
+    nb.mockResolvedValue([]);
+    expect((await searchBooks("x", ["google"])).map((r) => r.title)).toEqual([
+      "Open Library row",
+    ]);
+    expect(gb).not.toHaveBeenCalled();
+  });
 });

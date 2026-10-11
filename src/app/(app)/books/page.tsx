@@ -4,11 +4,14 @@ import type { Prisma } from "@prisma/client";
 import { LibraryBig, Plus } from "lucide-react";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { groupBooks, sortBooks } from "@/lib/library-sort";
+import { getPreferences } from "@/lib/current-user";
+import { groupBooks, sortBooks, type SortOptions } from "@/lib/library-sort";
 import { buildBookWhere, parseFilters } from "@/lib/library-filters";
-import { DEFAULT_LIBRARY_VIEW, parseLibraryView } from "@/lib/library-view";
+import { parseLibraryView } from "@/lib/library-view";
+import { canonicalViewQuery } from "@/lib/saved-views";
 import { FilterBar, type FilterValues } from "@/components/filter-bar";
 import { LibraryView } from "@/components/library-view";
+import { SavedViewChips } from "@/components/saved-view-chips";
 import { ShelfChips } from "@/components/shelf-chips";
 import { ShelfTabs } from "@/components/shelf-tabs";
 import { Button } from "@/components/ui/button";
@@ -81,6 +84,21 @@ export default async function BooksPage({
   const userId = session.user.id;
 
   const sp = await searchParams;
+  const prefs = await getPreferences();
+
+  // Saved views are needed up front: a bare visit to /books (the nav link,
+  // the installed app) opens on the default saved view when there is one.
+  // Every link the page itself makes carries explicit params, so this only
+  // ever fires on the way in.
+  const savedViews = await prisma.savedView.findMany({
+    where: { userId },
+    select: { id: true, name: true, query: true },
+    orderBy: { name: "asc" },
+  });
+  if (Object.keys(sp).length === 0 && prefs.defaultViewId) {
+    const start = savedViews.find((v) => v.id === prefs.defaultViewId);
+    if (start) redirect(`/books?${start.query}`);
+  }
 
   // Explicit view params in the URL win (the filter bar always writes them);
   // a param-less visit — the nav link, a bookmark — falls back to the view
@@ -120,19 +138,19 @@ export default async function BooksPage({
       include: { _count: { select: { books: true } } },
       orderBy: { name: "asc" },
     }),
-    // The saved view only affects sort/group below, never the where clause,
-    // so its lookup can ride in the same round of queries.
-    hasViewParams
-      ? null
-      : prisma.user.findUnique({
-          where: { id: userId },
-          select: { libraryView: true },
-        }),
+    // The saved view only affects sort/group and how cards are drawn,
+    // never the where clause, so its lookup can ride in the same round of
+    // queries.
+    prisma.user.findUnique({
+      where: { id: userId },
+      select: { libraryView: true },
+    }),
   ]);
 
-  const savedView = hasViewParams
-    ? DEFAULT_LIBRARY_VIEW
-    : parseLibraryView(viewUser?.libraryView);
+  const accountView = parseLibraryView(viewUser?.libraryView);
+  // Sort and grouping from the account only fill in a param-less visit; the
+  // display settings (card size, layout, card details) always apply.
+  const savedView = hasViewParams ? parseLibraryView(null) : accountView;
 
   const values: FilterValues = {
     ...filters,
@@ -152,8 +170,13 @@ export default async function BooksPage({
     lentOut: loans.length > 0,
   }));
 
-  const sorted = sortBooks(withLoanFlag, values.sort, values.dir);
-  const groups = groupBooks(sorted, values.group);
+  const sortOptions: SortOptions = {
+    ignoreArticles: prefs.ignoreArticles,
+    authorOrder: prefs.authorOrder,
+    alphabet: prefs.sortAlphabet,
+  };
+  const sorted = sortBooks(withLoanFlag, values.sort, values.dir, sortOptions);
+  const groups = groupBooks(sorted, values.group, sortOptions);
 
   const visibleBooks = sorted.slice(0, limit);
   const visibleGroups = groups ? sliceGroups(groups, limit) : null;
@@ -174,6 +197,12 @@ export default async function BooksPage({
   for (const [k, v] of Object.entries(sp)) {
     if (typeof v === "string" && v) flatParams[k] = v;
   }
+  // Links built from these (status tabs, shelf chips, "Show more") always
+  // name the view they keep. None of them is then a bare /books, which would
+  // open the default saved view instead of the shelf that was clicked.
+  flatParams.group ||= values.group;
+  flatParams.sort ||= values.sort;
+  flatParams.dir ||= values.dir;
 
   const hasFilters =
     !!values.q ||
@@ -206,7 +235,22 @@ export default async function BooksPage({
         activeShelfId={values.shelfId}
         searchParams={flatParams}
       />
-      <FilterBar values={values} allTags={allTags} tagCounts={tagCounts} />
+      <SavedViewChips
+        views={savedViews}
+        currentQuery={canonicalViewQuery({ ...flatParams, ...values })}
+        clearHref={`/books?${new URLSearchParams({
+          group: values.group,
+          sort: values.sort,
+          dir: values.dir,
+        })}`}
+      />
+      <FilterBar
+        values={values}
+        allTags={allTags}
+        tagCounts={tagCounts}
+        display={accountView}
+        ratingStyle={prefs.ratingStyle}
+      />
 
       {sorted.length === 0 ? (
         <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed py-16 text-center">
@@ -234,6 +278,7 @@ export default async function BooksPage({
           totalCount={sorted.length}
           searchParams={flatParams}
           shelves={shelves.map((s) => ({ id: s.id, name: s.name }))}
+          display={accountView}
         />
       )}
     </div>

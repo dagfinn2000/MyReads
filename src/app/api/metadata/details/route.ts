@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { guardMetadataRequest } from "@/lib/api-guard";
+import { getPreferences } from "@/lib/current-user";
 import { getBookDetails } from "@/lib/metadata";
 
 /**
@@ -12,12 +13,15 @@ export async function GET(req: Request) {
   if (!guard.ok) return guard.response;
 
   const params = new URL(req.url).searchParams;
-  const details = await getBookDetails({
-    openLibraryId: params.get("olid"),
-    isbn: params.get("isbn"),
-    title: params.get("title"),
-    author: params.get("author"),
-  });
+  const details = await getBookDetails(
+    {
+      openLibraryId: params.get("olid"),
+      isbn: params.get("isbn"),
+      title: params.get("title"),
+      author: params.get("author"),
+    },
+    (await getPreferences()).catalogues,
+  );
 
   return NextResponse.json({ details });
 }

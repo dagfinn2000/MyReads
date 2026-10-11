@@ -5,17 +5,20 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { coverFilePath } from "@/lib/covers";
+import { parsePreferences } from "@/lib/preferences";
 
 /**
  * GET /api/export — downloads the signed-in user's entire library as a zip:
  * `library.json` (every book with its shelf names, quotes, read history,
- * reading log and lending records, every shelf, reading goals) plus
+ * reading log and lending records, every shelf, reading goals, saved views,
+ * and the account's theme, library view and preferences) plus
  * `covers/<file>` for each
  * locally cached cover image, so a restore into a fresh instance brings the
  * covers back too.
  *
  * The JSON inside is still the version-1 export format — quotes, reads,
- * progress and loans are additive fields, and `owned` is still written
+ * progress, loans, settings, saved views and pages goals are additive
+ * fields (as is a goal's `countRereads`), and `owned` is still written
  * alongside the newer `ownership` — so unzipping and feeding `library.json`
  * to an older instance keeps working.
  */
@@ -26,7 +29,7 @@ export async function GET() {
   }
   const userId = session.user.id;
 
-  const [books, shelves, readingGoals] = await Promise.all([
+  const [books, shelves, readingGoals, user, savedViews] = await Promise.all([
     prisma.book.findMany({
       where: { userId },
       orderBy: { createdAt: "asc" },
@@ -69,7 +72,16 @@ export async function GET() {
     prisma.readingGoal.findMany({
       where: { userId },
       orderBy: { year: "asc" },
-      select: { year: true, target: true },
+      select: { year: true, target: true, unit: true, countRereads: true },
+    }),
+    prisma.user.findUnique({
+      where: { id: userId },
+      select: { theme: true, libraryView: true, preferences: true },
+    }),
+    prisma.savedView.findMany({
+      where: { userId },
+      orderBy: { name: "asc" },
+      select: { id: true, name: true, query: true },
     }),
   ]);
 
@@ -80,7 +92,26 @@ export async function GET() {
     username: session.user.name ?? null,
     counts: { books: books.length, shelves: shelves.length },
     shelves,
-    readingGoals,
+    // Pages goals get a list of their own: an older MyReads reads every
+    // entry of readingGoals as a number of books.
+    readingGoals: readingGoals
+      .filter((g) => g.unit === "BOOKS")
+      .map(({ unit: _unit, ...goal }) => goal),
+    pageGoals: readingGoals
+      .filter((g) => g.unit === "PAGES")
+      .map(({ unit: _unit, ...goal }) => goal),
+    // The account's own settings: theme, library view and Preferences. A
+    // restore fills these in only where the account has none yet. The
+    // default saved view is kept by name, since ids don't survive a move.
+    settings: {
+      theme: user?.theme ?? null,
+      libraryView: user?.libraryView ?? null,
+      preferences: user?.preferences ?? null,
+      defaultViewName:
+        savedViews.find((v) => v.id === parsePreferences(user?.preferences).defaultViewId)
+          ?.name ?? null,
+    },
+    savedViews: savedViews.map(({ name, query }) => ({ name, query })),
     books: books.map(({ userId: _userId, searchText: _searchText, ...book }) => ({
       ...book,
       // `owned` no longer exists on the row, but the export format promises

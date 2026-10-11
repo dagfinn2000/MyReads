@@ -1,17 +1,7 @@
 import type { ProgressEntry } from "@prisma/client";
+import { dayKey, shiftDayKey } from "@/lib/dates";
 
-/** Local-time day key ("2026-07-17") — sortable and comparable. */
-export function dayKey(d: Date): string {
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${d.getFullYear()}-${m}-${day}`;
-}
-
-/** The day after a key's day, DST-safe (local Date arithmetic, not +24h). */
-function nextDayKey(key: string): string {
-  const [y, m, d] = key.split("-").map(Number);
-  return dayKey(new Date(y, m - 1, d + 1));
-}
+export { dayKey };
 
 type LogPoint = Pick<ProgressEntry, "bookId" | "page" | "date">;
 
@@ -43,7 +33,11 @@ export function currentPassEntries<T extends Pick<ProgressEntry, "page" | "date"
  * pass-start anchors inert — and decreases (corrections, re-read resets)
  * credit nothing but move the baseline.
  */
-export function dailyPageTotals(entries: LogPoint[]): Map<string, number> {
+export function dailyPageTotals(
+  entries: LogPoint[],
+  /** The reader's zone; default the server's. */
+  timeZone?: string,
+): Map<string, number> {
   const byBook = new Map<string, LogPoint[]>();
   for (const e of entries) {
     const log = byBook.get(e.bookId);
@@ -57,7 +51,7 @@ export function dailyPageTotals(entries: LogPoint[]): Map<string, number> {
     for (let i = 1; i < log.length; i++) {
       const delta = log[i].page - log[i - 1].page;
       if (delta <= 0) continue;
-      const key = dayKey(log[i].date);
+      const key = dayKey(log[i].date, timeZone);
       totals.set(key, (totals.get(key) ?? 0) + delta);
     }
   }
@@ -72,22 +66,24 @@ export function dailyPageTotals(entries: LogPoint[]): Map<string, number> {
 export function readingStreaks(
   days: ReadonlySet<string>,
   today: Date = new Date(),
+  /** The reader's zone, which decides what "today" is; default the server's. */
+  timeZone?: string,
 ): { current: number; longest: number } {
   let longest = 0;
   let run = 0;
   let prev: string | null = null;
   for (const key of [...days].sort()) {
-    run = prev !== null && key === nextDayKey(prev) ? run + 1 : 1;
+    run = prev !== null && key === shiftDayKey(prev, 1) ? run + 1 : 1;
     if (run > longest) longest = run;
     prev = key;
   }
 
-  const cursor = new Date(today);
-  if (!days.has(dayKey(cursor))) cursor.setDate(cursor.getDate() - 1);
+  let cursor = dayKey(today, timeZone);
+  if (!days.has(cursor)) cursor = shiftDayKey(cursor, -1);
   let current = 0;
-  while (days.has(dayKey(cursor))) {
+  while (days.has(cursor)) {
     current++;
-    cursor.setDate(cursor.getDate() - 1);
+    cursor = shiftDayKey(cursor, -1);
   }
   return { current, longest };
 }

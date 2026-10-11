@@ -1,8 +1,10 @@
 /**
  * The library's view preference — which sort/direction/grouping the user
- * last chose. Saved on the User row (User.libraryView) whenever it changes
- * in the filter bar, and applied by the books page when the URL carries no
- * explicit view params, so clicking away and back doesn't reset the view.
+ * last chose, plus how the books are drawn (card size, grid or list, and
+ * which details each card shows). Saved on the User row (User.libraryView)
+ * whenever it changes in the filter bar. Sort and grouping are applied by
+ * the books page when the URL carries no explicit view params, so clicking
+ * away and back doesn't reset the view; the display settings always apply.
  *
  * The value lists here are the source of truth shared by the filter bar's
  * dropdowns, the save action's validation, and the books page's fallback —
@@ -21,23 +23,45 @@ export const LIBRARY_GROUPS = ["none", "author", "series"] as const;
 
 export const LIBRARY_DIRS = ["asc", "desc"] as const;
 
+/** How big the covers are, which sets how many fit across. */
+export const CARD_SIZES = ["small", "medium", "large"] as const;
+
+/** Cover grid, or one compact row per book. */
+export const LIBRARY_LAYOUTS = ["grid", "list"] as const;
+
 // A type alias (not an interface) so it satisfies Prisma's Json input type —
 // aliases get an implicit index signature for assignability, interfaces don't.
 export type LibraryView = {
   sort: (typeof LIBRARY_SORTS)[number];
   dir: (typeof LIBRARY_DIRS)[number];
   group: (typeof LIBRARY_GROUPS)[number];
+  cardSize: (typeof CARD_SIZES)[number];
+  layout: (typeof LIBRARY_LAYOUTS)[number];
+  showRating: boolean;
+  showStatus: boolean;
+  showSeries: boolean;
 };
+
+/** The drawing half of a view — what the View menu changes. */
+export type LibraryDisplay = Pick<
+  LibraryView,
+  "cardSize" | "layout" | "showRating" | "showStatus" | "showSeries"
+>;
 
 export const DEFAULT_LIBRARY_VIEW: LibraryView = {
   sort: "createdAt",
   dir: "desc",
   group: "none",
+  cardSize: "medium",
+  layout: "grid",
+  showRating: true,
+  showStatus: true,
+  showSeries: true,
 };
 
 /** Stored JSON (or anything else) → a safe view, unknown fields defaulted. */
 export function parseLibraryView(raw: unknown): LibraryView {
-  const obj = (raw ?? {}) as Record<string, unknown>;
+  const obj = (raw && typeof raw === "object" ? raw : {}) as Record<string, unknown>;
   const pick = <T extends readonly string[]>(
     allowed: T,
     value: unknown,
@@ -46,9 +70,29 @@ export function parseLibraryView(raw: unknown): LibraryView {
     typeof value === "string" && (allowed as readonly string[]).includes(value)
       ? (value as T[number])
       : fallback;
+  const bool = (value: unknown, fallback: boolean) =>
+    typeof value === "boolean" ? value : fallback;
+  const d = DEFAULT_LIBRARY_VIEW;
   return {
-    sort: pick(LIBRARY_SORTS, obj.sort, DEFAULT_LIBRARY_VIEW.sort),
-    dir: pick(LIBRARY_DIRS, obj.dir, DEFAULT_LIBRARY_VIEW.dir),
-    group: pick(LIBRARY_GROUPS, obj.group, DEFAULT_LIBRARY_VIEW.group),
+    sort: pick(LIBRARY_SORTS, obj.sort, d.sort),
+    dir: pick(LIBRARY_DIRS, obj.dir, d.dir),
+    group: pick(LIBRARY_GROUPS, obj.group, d.group),
+    cardSize: pick(CARD_SIZES, obj.cardSize, d.cardSize),
+    layout: pick(LIBRARY_LAYOUTS, obj.layout, d.layout),
+    showRating: bool(obj.showRating, d.showRating),
+    showStatus: bool(obj.showStatus, d.showStatus),
+    showSeries: bool(obj.showSeries, d.showSeries),
   };
+}
+
+/** The known fields of `patch`, each made valid — what a save may write. */
+export function cleanLibraryViewPatch(patch: unknown): Partial<LibraryView> {
+  if (!patch || typeof patch !== "object") return {};
+  const keys = Object.keys(patch).filter(
+    (k) => k in DEFAULT_LIBRARY_VIEW,
+  ) as (keyof LibraryView)[];
+  const parsed = parseLibraryView({ ...DEFAULT_LIBRARY_VIEW, ...patch });
+  const out: Partial<LibraryView> = {};
+  for (const k of keys) (out as Record<string, unknown>)[k] = parsed[k];
+  return out;
 }

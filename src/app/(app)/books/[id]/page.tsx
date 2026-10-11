@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { Library, Pencil, Repeat } from "lucide-react";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { getPreferences } from "@/lib/current-user";
 import {
   formatDate,
   FORMAT_LABELS,
@@ -31,6 +32,7 @@ export default async function BookDetailPage({
   if (!session?.user?.id) redirect("/login"); // revoked session (see auth.ts)
   const { id } = await params;
   const userId = session.user.id;
+  const prefs = await getPreferences();
 
   // Kicked off before the book fetch so the two round-trips overlap. The
   // no-op catch keeps a 404'd render (which never awaits this) from turning
@@ -173,7 +175,7 @@ export default async function BookDetailPage({
           {book.dateFinished && (
             <div>
               <dt className="text-muted-foreground">Finished</dt>
-              <dd>{formatDate(book.dateFinished)}</dd>
+              <dd>{formatDate(book.dateFinished, prefs)}</dd>
             </div>
           )}
         </dl>
@@ -181,7 +183,7 @@ export default async function BookDetailPage({
         {book.description && (
           // break-words: imported descriptions can contain long raw URLs,
           // which would otherwise refuse to wrap and overflow on phones.
-          <p className="max-w-prose whitespace-pre-line break-words text-sm leading-relaxed text-muted-foreground">
+          <p className="long-text max-w-prose whitespace-pre-line break-words text-sm leading-relaxed text-muted-foreground">
             {book.description}
           </p>
         )}

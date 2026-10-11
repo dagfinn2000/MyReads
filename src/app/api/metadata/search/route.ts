@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { guardMetadataRequest } from "@/lib/api-guard";
+import { getPreferences } from "@/lib/current-user";
 import { CataloguesUnreachableError, searchBooks } from "@/lib/metadata";
 
 /**
@@ -21,7 +22,8 @@ export async function GET(req: Request) {
   }
 
   try {
-    const results = await searchBooks(q);
+    // The reader's catalogues, in their order (Preferences).
+    const results = await searchBooks(q, (await getPreferences()).catalogues);
     return NextResponse.json({ results });
   } catch (e) {
     if (!(e instanceof CataloguesUnreachableError)) throw e;

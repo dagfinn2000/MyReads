@@ -1,10 +1,13 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { ReadingStatus } from "@prisma/client";
+import { GoalUnit, ReadingStatus } from "@prisma/client";
 import { ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { formatDate } from "@/lib/display";
+import { getPreferences } from "@/lib/current-user";
+import { calendarDay } from "@/lib/dates";
+import { formatDate, formatNumber } from "@/lib/display";
+import { goalProgress, markRereads } from "@/lib/goals";
 import { dailyPageTotals, readingStreaks } from "@/lib/progress";
 import { BookCover } from "@/components/book-card";
 import { GoldMedal } from "@/components/gold-medal";
@@ -75,6 +78,10 @@ export default async function YearInReviewPage({
   const { year: rawYear } = await params;
   const year = parseYear(rawYear);
   if (year === null) notFound();
+  const prefs = await getPreferences();
+  const ratings = prefs.ratingStyle !== "off";
+  /** "2026-05-12" for a finish date, in the reader's zone (see calendarDay). */
+  const dayOf = (d: Date) => calendarDay(d, prefs.timeZone);
 
   const bookSelect = {
     id: true,
@@ -85,7 +92,7 @@ export default async function YearInReviewPage({
     tags: true,
   } as const;
 
-  // Fetch everything and slice by year in JS, with getFullYear() — the same
+  // Fetch everything and slice by year in JS, with calendarDay() — the same
   // bucketing the stats page uses, so the numbers always agree.
   const [readBooks, allReads, goal, progressEntries] = await Promise.all([
     prisma.book.findMany({
@@ -113,46 +120,40 @@ export default async function YearInReviewPage({
     }),
   ]);
 
-  // Everything known about earlier passes, for re-read detection: dated
-  // finishes per book, plus books with undated reads (presumed earlier).
-  const datedFinishes = new Map<string, Date[]>();
-  const addFinish = (bookId: string, d: Date | null) => {
-    if (!d) return;
-    const list = datedFinishes.get(bookId) ?? [];
-    list.push(d);
-    datedFinishes.set(bookId, list);
-  };
-  for (const b of readBooks) addFinish(b.id, b.dateFinished);
-  for (const r of allReads) addFinish(r.bookId, r.dateFinished);
-  const hasUndatedRead = new Set(
-    allReads.filter((r) => !r.dateFinished).map((r) => r.bookId),
+  // Every dated finish, tagged as a re-read when the book had been finished
+  // before (or has an undated read, presumed earlier) — see markRereads.
+  const marked = markRereads(
+    [
+      ...readBooks.map((b) => ({
+        bookId: b.id,
+        dateFinished: b.dateFinished!,
+        book: b,
+        dateStarted: b.dateStarted,
+        rating: b.rating,
+      })),
+      ...allReads
+        .filter((r) => r.dateFinished)
+        .map((r) => ({
+          bookId: r.bookId,
+          dateFinished: r.dateFinished!,
+          book: r.book,
+          dateStarted: r.dateStarted,
+          // A pass without its own rating falls back to the book's rating.
+          rating: r.rating ?? r.book.rating,
+        })),
+    ],
+    new Set(allReads.filter((r) => !r.dateFinished).map((r) => r.bookId)),
   );
-  const isReread = (bookId: string, finished: Date) =>
-    hasUndatedRead.has(bookId) ||
-    (datedFinishes.get(bookId) ?? []).some((d) => d < finished);
 
-  const finishes: Finish[] = [];
-  for (const b of readBooks) {
-    if (b.dateFinished!.getFullYear() !== year) continue;
-    finishes.push({
-      book: b,
-      dateStarted: b.dateStarted,
-      dateFinished: b.dateFinished!,
-      rating: b.rating,
-      isReread: isReread(b.id, b.dateFinished!),
-    });
-  }
-  for (const r of allReads) {
-    if (r.dateFinished?.getFullYear() !== year) continue;
-    finishes.push({
-      book: r.book,
-      dateStarted: r.dateStarted,
-      dateFinished: r.dateFinished,
-      // A pass without its own rating falls back to the book's rating.
-      rating: r.rating ?? r.book.rating,
-      isReread: isReread(r.bookId, r.dateFinished),
-    });
-  }
+  const finishes: Finish[] = marked
+    .filter((f) => dayOf(f.dateFinished).startsWith(`${year}-`))
+    .map((f) => ({
+      book: f.book,
+      dateStarted: f.dateStarted,
+      dateFinished: f.dateFinished,
+      rating: f.rating,
+      isReread: f.isReread,
+    }));
   finishes.sort((a, b) => a.dateFinished.getTime() - b.dateFinished.getTime());
 
   const header = (
@@ -241,7 +242,7 @@ export default async function YearInReviewPage({
 
   // Distributions.
   const perMonth = Array.from({ length: 12 }, () => 0);
-  for (const f of finishes) perMonth[f.dateFinished.getMonth()]++;
+  for (const f of finishes) perMonth[Number(dayOf(f.dateFinished).slice(5, 7)) - 1]++;
   const maxMonth = Math.max(...perMonth);
 
   const ratingCounts = new Map<number, number>();
@@ -263,7 +264,7 @@ export default async function YearInReviewPage({
   // Reading-log rhythm for this year: pages per day/month, biggest day, and
   // the longest streak. Day keys are "YYYY-MM-DD", so slicing by prefix
   // matches the same local-time bucketing the heatmap uses.
-  const yearDays = [...dailyPageTotals(progressEntries)].filter(([key]) =>
+  const yearDays = [...dailyPageTotals(progressEntries, prefs.timeZone)].filter(([key]) =>
     key.startsWith(`${year}-`),
   );
   const readingDays = yearDays.length;
@@ -279,31 +280,43 @@ export default async function YearInReviewPage({
   );
   const { longest: longestStreak } = readingStreaks(
     new Set(yearDays.map(([key]) => key)),
+    new Date(),
+    prefs.timeZone,
   );
   const biggestDayDate = biggestDay
-    ? formatDate(new Date(`${biggestDay[0]}T00:00:00`))
+    ? formatDate(new Date(`${biggestDay[0]}T00:00:00Z`), prefs)
     : null;
 
-  const goalMet = goal !== null && finishes.length >= goal.target;
+  const goalDone = goal
+    ? goalProgress(
+        finishes.map((f) => ({ isReread: f.isReread, pageCount: f.book.pageCount })),
+        goal,
+      )
+    : 0;
+  const goalMet = goal !== null && goalDone >= goal.target;
 
   return (
     <div className="grid gap-6">
       {header}
 
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <StatCard label="Books finished">{finishes.length}</StatCard>
-        <StatCard label="Pages read">{pagesRead.toLocaleString("en")}</StatCard>
-        <StatCard label="Re-reads">{rereads}</StatCard>
-        <StatCard label="Average rating">
-          {avgRating != null ? (
-            <span className="flex items-center gap-2">
-              {avgRating.toFixed(1)}
-              <Stars value={Math.round(avgRating * 2)} />
-            </span>
-          ) : (
-            "–"
-          )}
-        </StatCard>
+      <div className={`grid grid-cols-2 gap-4 ${ratings ? "lg:grid-cols-4" : "lg:grid-cols-3"}`}>
+        <StatCard label="Books finished">{formatNumber(finishes.length, prefs)}</StatCard>
+        <StatCard label="Pages read">{formatNumber(pagesRead, prefs)}</StatCard>
+        <StatCard label="Re-reads">{formatNumber(rereads, prefs)}</StatCard>
+        {ratings && (
+          <StatCard label="Average rating">
+            {avgRating == null ? (
+              "–"
+            ) : prefs.ratingStyle === "ten" ? (
+              `${(avgRating * 2).toFixed(1)}/10`
+            ) : (
+              <span className="flex items-center gap-2">
+                {avgRating.toFixed(1)}
+                <Stars value={Math.round(avgRating * 2)} />
+              </span>
+            )}
+          </StatCard>
+        )}
       </div>
 
       {goal && (
@@ -312,16 +325,17 @@ export default async function YearInReviewPage({
             {goalMet && <GoldMedal className="h-14 w-[42px] shrink-0" />}
             <p className="text-sm">
               <span className="font-semibold tabular-nums">
-                {finishes.length} of {goal.target}
+                {formatNumber(goalDone, prefs)} of {formatNumber(goal.target, prefs)}
               </span>{" "}
-              books toward the {year} goal —{" "}
+              {goal.unit === GoalUnit.PAGES ? "pages" : "books"} toward the {year} goal
+              {!goal.countRereads && " (first reads only)"} —{" "}
               {goalMet ? "achieved! 🎉" : "not reached."}
             </p>
           </CardContent>
         </Card>
       )}
 
-      {topRated.length > 0 && (
+      {ratings && topRated.length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle>Best of {year}</CardTitle>
@@ -369,11 +383,11 @@ export default async function YearInReviewPage({
             </Highlight>
           )}
           <Highlight label="First finish">
-            <BookLink finish={first} /> · {formatDate(first.dateFinished)}
+            <BookLink finish={first} /> · {formatDate(first.dateFinished, prefs)}
           </Highlight>
           {last.book.id !== first.book.id && (
             <Highlight label="Last finish">
-              <BookLink finish={last} /> · {formatDate(last.dateFinished)}
+              <BookLink finish={last} /> · {formatDate(last.dateFinished, prefs)}
             </Highlight>
           )}
         </CardContent>
@@ -401,7 +415,7 @@ export default async function YearInReviewPage({
                 <div className="grid gap-2 text-sm">
                   <Highlight label="Days reading">
                     <span className="tabular-nums">{readingDays}</span> ·{" "}
-                    {pagesLogged.toLocaleString("en")} pages logged
+                    {formatNumber(pagesLogged, prefs)} pages logged
                   </Highlight>
                   {biggestDay && (
                     <Highlight label="Biggest day">
@@ -433,7 +447,7 @@ export default async function YearInReviewPage({
         </div>
 
         <div className="grid content-start gap-6">
-          {ratingRows.length > 0 && (
+          {ratings && ratingRows.length > 0 && (
             <Card>
               <CardHeader>
                 <CardTitle>Ratings</CardTitle>
@@ -442,7 +456,7 @@ export default async function YearInReviewPage({
                 {ratingRows.map(([value, count]) => (
                   <Bar
                     key={value}
-                    label={`${value / 2} ★`}
+                    label={prefs.ratingStyle === "ten" ? `${value}/10` : `${value / 2} ★`}
                     value={count}
                     max={maxRatingCount}
                   />

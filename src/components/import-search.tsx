@@ -25,11 +25,15 @@ const DEBOUNCE_MS = 700;
 export function ImportSearch({
   onPick,
   initialQuery,
+  importTags = true,
 }: {
   onPick: (values: BookFormValues) => void;
   /** Seeds the search box (e.g. an ISBN from the check page) and auto-picks
    *  a single match, exactly like a barcode scan. */
   initialQuery?: string;
+  /** Copy the catalogue's subjects into tags (Preferences). Off leaves the
+   *  tags field empty for the reader's own. */
+  importTags?: boolean;
 }) {
   const [query, setQuery] = useState(initialQuery ?? "");
   // Results are stored with the query they answer. Everything the UI needs —
@@ -99,11 +103,11 @@ export function ImportSearch({
       coverUrl: result.coverUrl ?? details.coverUrl ?? "",
       pageCount: (result.pageCount ?? details.pageCount)?.toString() ?? "",
       publishedDate: result.publishedDate ?? "",
-      tags: [...new Set([...result.tags, ...details.tags])].join(", "),
+      tags: importTags ? [...new Set([...result.tags, ...details.tags])].join(", ") : "",
       openLibraryId: result.openLibraryId ?? "",
     });
     setPickingId(null);
-  }, [onPick]);
+  }, [onPick, importTags]);
 
   // Debounced search: waits for a pause in typing, then cancels any in-flight
   // request so stale responses can't overwrite newer ones. An ISBN scan is

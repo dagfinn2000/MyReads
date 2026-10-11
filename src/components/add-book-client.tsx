@@ -19,9 +19,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 export function AddBookClient({
   seriesNames = [],
   initialIsbn,
+  defaults = {},
+  importTags = true,
 }: {
   seriesNames?: string[];
   initialIsbn?: string;
+  /** Format, status and ownership a new book starts with (Preferences). */
+  defaults?: Pick<BookFormValues, "format" | "status" | "ownership">;
+  /** Whether a catalogue's subjects are copied into the tags field. */
+  importTags?: boolean;
 }) {
   const [prefill, setPrefill] = useState<BookFormValues | null>(null);
   const dupe = useDuplicateCheck(prefill);
@@ -57,7 +63,7 @@ export function AddBookClient({
         </p>
         <BookForm
           action={createBook}
-          initial={prefill}
+          initial={{ ...defaults, ...prefill }}
           submitLabel="Add to library"
           showStatus
           seriesNames={seriesNames}
@@ -73,11 +79,16 @@ export function AddBookClient({
         <TabsTrigger value="manual">Manual entry</TabsTrigger>
       </TabsList>
       <TabsContent value="search" className="pt-4">
-        <ImportSearch onPick={setPrefill} initialQuery={initialIsbn} />
+        <ImportSearch
+          onPick={setPrefill}
+          initialQuery={initialIsbn}
+          importTags={importTags}
+        />
       </TabsContent>
       <TabsContent value="manual" className="pt-4">
         <BookForm
           action={createBook}
+          initial={defaults}
           submitLabel="Add to library"
           showStatus
           seriesNames={seriesNames}

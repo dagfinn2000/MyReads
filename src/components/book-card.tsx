@@ -5,6 +5,8 @@ import { BookOpen, HandHeart } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Stars } from "@/components/stars";
 import { STATUS_BADGE_CLASS, STATUS_LABELS } from "@/lib/display";
+import type { LibraryDisplay } from "@/lib/library-view";
+import { cn } from "@/lib/utils";
 
 /** Cover image with a graceful placeholder when there's no cover.
  *  Lazy by default — grids request hundreds of covers at once, and the
@@ -62,17 +64,107 @@ export type BookCardBook = Pick<
   lentOut?: boolean;
 };
 
+/** Which details a card or row shows (the library's View menu). */
+export type CardDetails = Pick<LibraryDisplay, "showRating" | "showStatus" | "showSeries">;
+
+const ALL_DETAILS: CardDetails = { showRating: true, showStatus: true, showSeries: true };
+
+/** Reading progress as 0–1 while a book is being read, else null. */
+function readingProgress(book: BookCardBook): number | null {
+  return book.status === ReadingStatus.READING && book.currentPage != null && book.pageCount
+    ? Math.min(book.currentPage / book.pageCount, 1)
+    : null;
+}
+
+function LentBadge() {
+  return (
+    <Badge
+      variant="outline"
+      className="border-amber-400 text-[10px] text-amber-700 dark:text-amber-300"
+      title="Lent out"
+    >
+      <HandHeart className="size-3" />
+      Lent
+    </Badge>
+  );
+}
+
+function seriesLabel(book: BookCardBook): string {
+  return `${book.seriesName}${book.seriesNumber != null ? ` #${book.seriesNumber}` : ""}`;
+}
+
+/**
+ * One line per book for the library's list layout: a small cover, title,
+ * author and series, then rating and badges on the right. For long
+ * libraries, where scanning titles beats scanning covers.
+ */
+export function BookRow({
+  book,
+  details = ALL_DETAILS,
+}: {
+  book: BookCardBook;
+  details?: CardDetails;
+}) {
+  const progress = readingProgress(book);
+  return (
+    <Link
+      href={`/books/${book.id}`}
+      className="group flex items-center gap-3 rounded-lg border bg-card p-2 transition-colors hover:border-ring/60"
+    >
+      <BookCover book={book} className="aspect-[2/3] w-10 shrink-0" />
+      <div className="grid min-w-0 flex-1 gap-0.5">
+        <p className="truncate text-sm font-medium group-hover:underline">{book.title}</p>
+        <p className="truncate text-xs text-muted-foreground">
+          {book.authors.join(", ")}
+          {details.showSeries && book.seriesName && (
+            <span className="italic text-muted-foreground/80"> · {seriesLabel(book)}</span>
+          )}
+        </p>
+        {progress !== null && (
+          <div
+            className="mt-0.5 h-1 max-w-40 rounded-full bg-muted"
+            title={`Page ${book.currentPage} of ${book.pageCount}`}
+          >
+            <div
+              className="h-full rounded-full bg-primary/80"
+              style={{ width: `${progress * 100}%` }}
+            />
+          </div>
+        )}
+      </div>
+      <div className="flex shrink-0 flex-wrap items-center justify-end gap-1.5">
+        {details.showRating && book.rating ? <Stars value={book.rating} /> : null}
+        {book.lentOut && <LentBadge />}
+        {details.showStatus && (
+          <Badge className={`${STATUS_BADGE_CLASS[book.status]} hidden text-[10px] sm:inline-flex`}>
+            {STATUS_LABELS[book.status]}
+          </Badge>
+        )}
+      </div>
+    </Link>
+  );
+}
+
 /** Grid tile for the library view. */
-export function BookCard({ book }: { book: BookCardBook }) {
-  const progress =
-    book.status === ReadingStatus.READING && book.currentPage != null && book.pageCount
-      ? Math.min(book.currentPage / book.pageCount, 1)
-      : null;
+export function BookCard({
+  book,
+  details = ALL_DETAILS,
+  compact = false,
+}: {
+  book: BookCardBook;
+  details?: CardDetails;
+  /** Small covers: tighter padding, no author line. */
+  compact?: boolean;
+}) {
+  const progress = readingProgress(book);
 
   return (
     <Link
       href={`/books/${book.id}`}
-      className="group flex flex-col gap-2 rounded-lg border bg-card p-3 transition-colors hover:border-ring/60"
+      className={cn(
+        "group flex flex-col rounded-lg border bg-card transition-colors hover:border-ring/60",
+        compact ? "gap-1.5 p-2" : "gap-2 p-3",
+      )}
     >
       <BookCover book={book} className="aspect-[2/3] w-full" />
       {progress !== null && (
@@ -87,36 +179,35 @@ export function BookCard({ book }: { book: BookCardBook }) {
         </div>
       )}
       <div className="flex flex-1 flex-col gap-1">
-        <p className="line-clamp-2 text-sm font-medium leading-snug group-hover:underline">
+        <p
+          className={cn(
+            "line-clamp-2 font-medium leading-snug group-hover:underline",
+            compact ? "text-xs" : "text-sm",
+          )}
+        >
           {book.title}
         </p>
-        <p className="line-clamp-1 text-xs text-muted-foreground">
-          {book.authors.join(", ")}
-        </p>
-        {book.seriesName && (
+        {!compact && (
+          <p className="line-clamp-1 text-xs text-muted-foreground">
+            {book.authors.join(", ")}
+          </p>
+        )}
+        {details.showSeries && book.seriesName && (
           <p className="line-clamp-1 text-xs italic text-muted-foreground/80">
-            {book.seriesName}
-            {book.seriesNumber != null ? ` #${book.seriesNumber}` : ""}
+            {seriesLabel(book)}
           </p>
         )}
         {/* flex-wrap: on narrow cards the badge drops below the stars
             instead of overflowing the card. */}
         <div className="mt-auto flex flex-wrap items-center justify-between gap-1 pt-1">
-          {book.rating ? <Stars value={book.rating} /> : <span />}
+          {details.showRating && book.rating ? <Stars value={book.rating} /> : <span />}
           <span className="flex flex-wrap items-center gap-1">
-            {book.lentOut && (
-              <Badge
-                variant="outline"
-                className="border-amber-400 text-[10px] text-amber-700 dark:text-amber-300"
-                title="Lent out"
-              >
-                <HandHeart className="size-3" />
-                Lent
+            {book.lentOut && <LentBadge />}
+            {details.showStatus && (
+              <Badge className={`${STATUS_BADGE_CLASS[book.status]} text-[10px]`}>
+                {STATUS_LABELS[book.status]}
               </Badge>
             )}
-            <Badge className={`${STATUS_BADGE_CLASS[book.status]} text-[10px]`}>
-              {STATUS_LABELS[book.status]}
-            </Badge>
           </span>
         </div>
       </div>

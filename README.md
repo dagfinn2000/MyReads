@@ -13,8 +13,9 @@ reading, and what you thought of them, on your own server.
 - Search by title, author or ISBN and import the details from
   [Open Library](https://openlibrary.org/), with
   [Google Books](https://developers.google.com/books) (optional) and the
-  [National Library of Norway](https://api.nb.no/) as extra sources. You can
-  check and edit everything before saving, or type a book in by hand.
+  [National Library of Norway](https://api.nb.no/) as extra sources. You
+  choose which of them to search and in what order. You can check and edit
+  everything before saving, or type a book in by hand.
 - Scan the barcode on a book with your phone's camera.
 - Choose a cover from the search results, paste an image link, or upload a
   photo. Covers are stored on your server.
@@ -23,8 +24,9 @@ reading, and what you thought of them, on your own server.
 
 **Tracking your reading**
 
-- Status (Want to Read, Currently Reading, Read, Did Not Finish), half-star
-  ratings, notes, and start and finish dates.
+- Status (Want to Read, Currently Reading, Read, Did Not Finish), ratings,
+  notes, and start and finish dates. Rate in half stars, whole stars or out
+  of 10, or switch ratings off.
 - Update your current page as you go. The book page shows your pace and when
   you're likely to finish.
 - Re-reads are kept as history and count in your stats.
@@ -39,6 +41,9 @@ reading, and what you thought of them, on your own server.
 - Search, filter, sort and group the library. Authors sort by surname, the
   way a bookshelf is filed. "Pick for me" opens a random book from Want to
   Read.
+- Show the library as covers in three sizes or as a list, and choose what
+  each book shows. Save the searches and filters you use often as views, and
+  open the library on one of them if you like.
 - Edit many books at once: set their status, add tags, or put them on a
   shelf or take them off it.
 
@@ -46,13 +51,19 @@ reading, and what you thought of them, on your own server.
 
 - Books read per year, pages read, ratings, genres and formats, and a
   calendar of the days you read.
-- A "year in review" page for every year, and yearly reading goals.
+- A "year in review" page for every year, and yearly reading goals in books
+  or pages, with or without re-reads.
 
 **Everything else**
 
-- Download a backup (a zip with everything, covers included) and restore it
-  on any MyReads server.
-- 26 colour themes. Your choice follows you to every device you sign in on.
+- Download a backup (a zip with everything, covers and settings included)
+  and restore it on any MyReads server.
+- 26 colour themes, or a light and a dark one that switch with your device.
+  Your choice follows you to every device you sign in on.
+- Preferences on the Account page: date and number formats, your time zone
+  and the first day of the week, how titles and authors sort, what new books
+  start as, text size, a serif font for reviews and quotes, which page opens
+  first, and which links and stats cards you see.
 - Install it on your phone's home screen like an app.
 
 Deliberately out of scope: anything social, recommendation engines, and CSV

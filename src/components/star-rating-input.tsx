@@ -2,7 +2,9 @@
 
 import { useRef, useState } from "react";
 import { X } from "lucide-react";
-import { Stars } from "@/components/stars";
+import { cn } from "@/lib/utils";
+import { usePreferences } from "@/components/preferences-provider";
+import { StarGraphic } from "@/components/stars";
 import { Button } from "@/components/ui/button";
 
 /**
@@ -18,6 +20,10 @@ import { Button } from "@/components/ui/button";
  * The chosen value (half-star units, 0 = unrated) is submitted through a
  * hidden input so the surrounding form can stay a plain <form action={…}>.
  * Stars render larger below the sm breakpoint — a roomier first touch.
+ *
+ * Follows the rating style in Preferences: whole stars only (steps of 2),
+ * a row of 1–10 buttons, or — with ratings switched off — just the hidden
+ * input, so saving the form keeps whatever rating the book already had.
  */
 export function StarRatingInput({
   name,
@@ -25,6 +31,24 @@ export function StarRatingInput({
 }: {
   name: string;
   defaultValue?: number;
+}) {
+  const { ratingStyle } = usePreferences();
+  if (ratingStyle === "off") return <input type="hidden" name={name} value={defaultValue} />;
+  if (ratingStyle === "ten") return <TenPointInput name={name} defaultValue={defaultValue} />;
+  return (
+    <StarInput name={name} defaultValue={defaultValue} whole={ratingStyle === "whole"} />
+  );
+}
+
+function StarInput({
+  name,
+  defaultValue,
+  whole,
+}: {
+  name: string;
+  defaultValue: number;
+  /** Whole stars only: every value is even. */
+  whole: boolean;
 }) {
   const [value, setValue] = useState(defaultValue);
   const [hover, setHover] = useState<number | null>(null);
@@ -37,11 +61,15 @@ export function StarRatingInput({
 
   const preview = hover ?? value;
 
-  /** Pointer x → half-star value 1–10 (clamped; can't scrub to 0). */
+  const steps = whole ? 5 : 10;
+  const unit = 10 / steps; // half-star units per hitbox
+
+  /** Pointer x → value 1–10 (clamped; can't scrub to 0), whole stars
+   *  rounding up to the next even value. */
   function valueAt(clientX: number): number {
     const rect = rowRef.current!.getBoundingClientRect();
     const fraction = (clientX - rect.left) / rect.width;
-    return Math.min(10, Math.max(1, Math.ceil(fraction * 10)));
+    return Math.min(10, Math.max(unit, Math.ceil(fraction * steps) * unit));
   }
 
   function onPointerDown(e: React.PointerEvent) {
@@ -91,29 +119,70 @@ export function StarRatingInput({
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerCancel}
       >
-        <Stars value={preview} starClassName="size-8 sm:size-6" />
-        {/* ten half-star hitboxes (keyboard access + hover preview) */}
+        <StarGraphic value={preview} starClassName="size-8 sm:size-6" />
+        {/* one hitbox per step — half stars, or whole ones (keyboard
+            access + hover preview) */}
         <div className="absolute inset-0 flex">
-          {Array.from({ length: 10 }, (_, i) => (
-            <button
-              key={i}
-              type="button"
-              className="h-full w-[10%]"
-              aria-label={`${(i + 1) / 2} stars`}
-              onMouseEnter={() => setHover(i + 1)}
-              onFocus={() => setHover(i + 1)}
-              onBlur={() => setHover(null)}
-              onClick={() => {
-                if (suppressClick.current) return;
-                setValue(i + 1);
-              }}
-            />
-          ))}
+          {Array.from({ length: steps }, (_, i) => {
+            const v = (i + 1) * unit;
+            return (
+              <button
+                key={i}
+                type="button"
+                className={whole ? "h-full w-[20%]" : "h-full w-[10%]"}
+                aria-label={`${v / 2} stars`}
+                onMouseEnter={() => setHover(v)}
+                onFocus={() => setHover(v)}
+                onBlur={() => setHover(null)}
+                onClick={() => {
+                  if (suppressClick.current) return;
+                  setValue(v);
+                }}
+              />
+            );
+          })}
         </div>
       </div>
       <span className="w-8 text-sm text-muted-foreground tabular-nums">
         {preview > 0 ? preview / 2 : "–"}
       </span>
+      {value > 0 && (
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-sm"
+          title="Clear rating"
+          onClick={() => setValue(0)}
+        >
+          <X data-slot="icon" />
+        </Button>
+      )}
+    </div>
+  );
+}
+
+/** "Out of 10": ten numbered buttons, the chosen one highlighted. */
+function TenPointInput({ name, defaultValue }: { name: string; defaultValue: number }) {
+  const [value, setValue] = useState(defaultValue);
+  return (
+    <div className="flex flex-wrap items-center gap-1">
+      <input type="hidden" name={name} value={value} />
+      {Array.from({ length: 10 }, (_, i) => i + 1).map((v) => (
+        <button
+          key={v}
+          type="button"
+          aria-pressed={value === v}
+          aria-label={`${v} out of 10`}
+          onClick={() => setValue(v)}
+          className={cn(
+            "size-8 rounded-md border text-sm tabular-nums transition-colors hover:border-ring/60 sm:size-7",
+            value === v && "border-primary bg-primary text-primary-foreground",
+            value > v && "bg-muted",
+          )}
+        >
+          {v}
+        </button>
+      ))}
       {value > 0 && (
         <Button
           type="button"

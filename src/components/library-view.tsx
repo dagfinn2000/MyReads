@@ -8,7 +8,8 @@ import { bulkUpdateBooks } from "@/lib/actions/bulk";
 import { pickRandomBook } from "@/lib/actions/pick";
 import { STATUS_LABELS } from "@/lib/display";
 import { cn } from "@/lib/utils";
-import { BookCard, type BookCardBook } from "@/components/book-card";
+import type { LibraryDisplay } from "@/lib/library-view";
+import { BookCard, BookRow, type BookCardBook } from "@/components/book-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -29,6 +30,13 @@ export interface LibraryGroup {
 /** How many more cards each "Show more" asks the server for. */
 const PAGE_STEP = 200;
 
+/** Columns per breakpoint for each cover size (the View menu). */
+const GRID_CLASS: Record<LibraryDisplay["cardSize"], string> = {
+  small: "grid grid-cols-3 gap-2 sm:grid-cols-4 sm:gap-3 md:grid-cols-6 lg:grid-cols-8",
+  medium: "grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-5",
+  large: "grid grid-cols-1 gap-4 min-[420px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4",
+};
+
 /**
  * The library grid with bulk-edit support. Normally the cards are plain
  * links; toggling select mode overlays each card with a checkbox hitbox and
@@ -44,6 +52,7 @@ export function LibraryView({
   totalCount,
   searchParams,
   shelves,
+  display,
 }: {
   /** Only the books being rendered — the server sorts everything and slices. */
   books: BookCardBook[];
@@ -54,6 +63,8 @@ export function LibraryView({
   /** Current URL params, so "Show more" can raise the limit in place. */
   searchParams: Record<string, string>;
   shelves: { id: string; name: string }[];
+  /** Cover size, grid or list, and which details cards show. */
+  display: LibraryDisplay;
 }) {
   const router = useRouter();
   const [selectMode, setSelectMode] = useState(false);
@@ -136,9 +147,10 @@ export function LibraryView({
     router.push(`/books?${next}`, { scroll: false });
   }
 
-  const renderGrid = (list: BookCardBook[]) => (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-5">
-      {list.map((book) => {
+  const list = display.layout === "list";
+  const renderGrid = (items: BookCardBook[]) => (
+    <div className={list ? "grid gap-2" : GRID_CLASS[display.cardSize]}>
+      {items.map((book) => {
         const isSelected = selected.has(book.id);
         return (
           <div
@@ -148,7 +160,15 @@ export function LibraryView({
               selectMode && isSelected && "ring-2 ring-primary",
             )}
           >
-            <BookCard book={book} />
+            {list ? (
+              <BookRow book={book} details={display} />
+            ) : (
+              <BookCard
+                book={book}
+                details={display}
+                compact={display.cardSize === "small"}
+              />
+            )}
             {selectMode && (
               <button
                 type="button"

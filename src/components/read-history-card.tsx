@@ -10,7 +10,8 @@ import {
   readAgain,
   updatePastRead,
 } from "@/lib/actions/reads";
-import { formatDate, toDateInputValue } from "@/lib/display";
+import { formatDate, toDateInputValue, type FormatPrefs } from "@/lib/display";
+import { usePreferences } from "@/components/preferences-provider";
 import { Stars } from "@/components/stars";
 import { StarRatingInput } from "@/components/star-rating-input";
 import { Button } from "@/components/ui/button";
@@ -24,9 +25,12 @@ import {
 } from "@/components/ui/card";
 
 /** "12 May 2024 – 3 Jun 2024", partial-date variants, or "Undated read". */
-function readLabel(read: Pick<Read, "dateStarted" | "dateFinished">): string {
-  const start = formatDate(read.dateStarted);
-  const finish = formatDate(read.dateFinished);
+function readLabel(
+  read: Pick<Read, "dateStarted" | "dateFinished">,
+  prefs: FormatPrefs,
+): string {
+  const start = formatDate(read.dateStarted, prefs);
+  const finish = formatDate(read.dateFinished, prefs);
   if (start && finish) return `${start} – ${finish}`;
   if (finish) return `Finished ${finish}`;
   if (start) return `Started ${start}`;
@@ -51,6 +55,7 @@ export function ReadHistoryCard({
   reads: Read[];
 }) {
   const [editingId, setEditingId] = useState<string | null>(null);
+  const prefs = usePreferences();
   const finished = book.status === ReadingStatus.READ;
 
   return (
@@ -72,7 +77,7 @@ export function ReadHistoryCard({
                 ) : (
                   <div className="flex min-h-7 flex-wrap items-center gap-x-3 gap-y-1 text-sm">
                     <span className="text-muted-foreground">
-                      {readLabel(read)}
+                      {readLabel(read, prefs)}
                     </span>
                     {read.rating != null && <Stars value={read.rating} />}
                     <span className="ml-auto flex items-center gap-1">
@@ -94,7 +99,7 @@ export function ReadHistoryCard({
             {finished && (
               <li className="flex min-h-7 flex-wrap items-center gap-x-3 gap-y-1 text-sm">
                 <span>
-                  {readLabel(book)}
+                  {readLabel(book, prefs)}
                   <span className="ml-2 text-xs text-muted-foreground">
                     latest — edit in the reading card
                   </span>
@@ -129,6 +134,7 @@ function PastReadForm({
 }) {
   const action = read ? updatePastRead.bind(null, read.id) : addPastRead;
   const [state, formAction, pending] = useActionState(action, {});
+  const { timeZone } = usePreferences();
 
   // Editing: close the form once the save lands. (The add form instead
   // relies on React resetting an uncontrolled form after its action.)
@@ -146,7 +152,7 @@ function PastReadForm({
             name="dateStarted"
             type="date"
             className="w-40"
-            defaultValue={toDateInputValue(read?.dateStarted)}
+            defaultValue={toDateInputValue(read?.dateStarted, timeZone)}
           />
         </div>
         <div className="grid gap-1">
@@ -155,7 +161,7 @@ function PastReadForm({
             name="dateFinished"
             type="date"
             className="w-40"
-            defaultValue={toDateInputValue(read?.dateFinished)}
+            defaultValue={toDateInputValue(read?.dateFinished, timeZone)}
           />
         </div>
         <div className="grid gap-1">

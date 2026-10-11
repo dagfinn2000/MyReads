@@ -152,4 +152,14 @@ describe("readingStreaks", () => {
       longest: 0,
     });
   });
+
+  it("decides what today is in the reader's zone", () => {
+    // 23:30 UTC on 3 January: still the 3rd in New York, where the streak
+    // is alive (today isn't over), but already the 4th in Oslo, where the
+    // 3rd went unread.
+    const now = new Date("2026-01-03T23:30:00Z");
+    const days = keys("2026-01-01", "2026-01-02");
+    expect(readingStreaks(days, now, "America/New_York").current).toBe(2);
+    expect(readingStreaks(days, now, "Europe/Oslo").current).toBe(0);
+  });
 });

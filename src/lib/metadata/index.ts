@@ -7,6 +7,7 @@ import {
 } from "./googlebooks";
 import { searchNb, getNbCoverByIsbn } from "./nb";
 import type { BookDetails, BookMetadata, CoverCandidate } from "./types";
+import type { Catalogue } from "@/lib/preferences";
 
 export type { BookDetails, BookMetadata, CoverCandidate };
 
@@ -19,6 +20,18 @@ export class CataloguesUnreachableError extends Error {
   }
 }
 
+/** Every catalogue, in the default priority order. Callers pass the
+ *  reader's own list (Preferences) to switch some off or reorder them. */
+const ALL_CATALOGUES: readonly Catalogue[] = ["openlibrary", "google", "nb"];
+
+/** The catalogues worth asking: the chosen ones, minus Google Books when
+ *  this server has no key for it. A list that leaves nothing (Google only,
+ *  on a server without a key) falls back to the keyless two. */
+function askable(sources: readonly Catalogue[]): Catalogue[] {
+  const asked = sources.filter((s) => s !== "google" || googleBooksEnabled());
+  return asked.length > 0 ? asked : ["openlibrary", "nb"];
+}
+
 /** Same-edition key: the ISBN-13 form when one exists, so an ISBN-10 from
  *  one source matches its ISBN-13 twin from another. */
 function editionKey(isbn: string): string {
@@ -26,33 +39,35 @@ function editionKey(isbn: string): string {
 }
 
 /**
- * Searches every metadata source in parallel and returns all their results:
- * Open Library first, then Google Books (when configured), then the
- * National Library of Norway. No single catalog knows every edition — nb.no
- * is often the only one with the Norwegian printing — so the sources are
- * shown side by side rather than as fallbacks for each other. Rows that
- * resolve to the same edition (same ISBN, in either form) appear once, from
- * the highest-priority source; that also keeps a barcode scan resolving to
- * exactly one row, which is what lets the scan flow auto-pick it.
+ * Searches the metadata sources in parallel and returns all their results,
+ * in priority order: by default Open Library first, then Google Books (when
+ * configured), then the National Library of Norway; `sources` is the
+ * reader's own choice and order from Preferences. No single catalog knows
+ * every edition — nb.no is often the only one with the Norwegian printing —
+ * so the sources are shown side by side rather than as fallbacks for each
+ * other. Rows that resolve to the same edition (same ISBN, in either form)
+ * appear once, from the highest-priority source; that also keeps a barcode
+ * scan resolving to exactly one row, which is what lets the scan flow
+ * auto-pick it.
  *
  * One source failing is normal and its rows are simply missing. If every
- * source failed, this throws CataloguesUnreachableError.
+ * source asked failed, this throws CataloguesUnreachableError.
  */
-export async function searchBooks(query: string): Promise<BookMetadata[]> {
-  const [ol, gb, nb] = await Promise.allSettled([
-    searchOpenLibrary(query),
-    searchGoogleBooks(query),
-    searchNb(query),
-  ]);
-  const asked = googleBooksEnabled() ? [ol, gb, nb] : [ol, nb];
-  if (asked.every((s) => s.status === "rejected")) throw new CataloguesUnreachableError();
-  const rows = (s: PromiseSettledResult<BookMetadata[]>) =>
-    s.status === "fulfilled" ? s.value : [];
-  const [fromOl, fromGb, fromNb] = [rows(ol), rows(gb), rows(nb)];
+export async function searchBooks(
+  query: string,
+  sources: readonly Catalogue[] = ALL_CATALOGUES,
+): Promise<BookMetadata[]> {
+  const search: Record<Catalogue, () => Promise<BookMetadata[]>> = {
+    openlibrary: () => searchOpenLibrary(query),
+    google: () => searchGoogleBooks(query),
+    nb: () => searchNb(query),
+  };
+  const settled = await Promise.allSettled(askable(sources).map((s) => search[s]()));
+  if (settled.every((s) => s.status === "rejected")) throw new CataloguesUnreachableError();
 
   const seen = new Set<string>();
   const results: BookMetadata[] = [];
-  for (const r of [...fromOl, ...fromGb, ...fromNb]) {
+  for (const r of settled.flatMap((s) => (s.status === "fulfilled" ? s.value : []))) {
     if (r.isbn) {
       const key = editionKey(r.isbn);
       if (seen.has(key)) continue;
@@ -70,17 +85,21 @@ export async function searchBooks(query: string): Promise<BookMetadata[]> {
  * better than Open Library's, so when both exist Google wins for those
  * fields while tags are combined.
  */
-export async function getBookDetails(params: {
-  openLibraryId?: string | null;
-  isbn?: string | null;
-  title?: string | null;
-  author?: string | null;
-}): Promise<BookDetails> {
+export async function getBookDetails(
+  params: {
+    openLibraryId?: string | null;
+    isbn?: string | null;
+    title?: string | null;
+    author?: string | null;
+  },
+  sources: readonly Catalogue[] = ALL_CATALOGUES,
+): Promise<BookDetails> {
+  const asked = askable(sources);
   const [ol, gb] = await Promise.all([
-    params.openLibraryId
+    params.openLibraryId && asked.includes("openlibrary")
       ? getOpenLibraryDetails(params.openLibraryId)
       : Promise.resolve(null),
-    googleBooksEnabled()
+    asked.includes("google")
       ? getGoogleBooksDetails(params)
       : Promise.resolve(null),
   ]);
@@ -115,40 +134,54 @@ async function olIsbnCover(isbn: string): Promise<string | null> {
  * ISBN lookups are exact (the right edition); title searches cast a wider
  * net. All sources are queried in parallel and failures are simply dropped.
  */
-export async function getCoverCandidates(params: {
-  isbn?: string | null;
-  title?: string | null;
-  author?: string | null;
-}): Promise<CoverCandidate[]> {
+export async function getCoverCandidates(
+  params: {
+    isbn?: string | null;
+    title?: string | null;
+    author?: string | null;
+  },
+  sources: readonly Catalogue[] = ALL_CATALOGUES,
+): Promise<CoverCandidate[]> {
   const { isbn, title, author } = params;
   const titleQuery = title
     ? `${title}${author ? ` ${author}` : ""}`.trim()
     : null;
+  const asked = askable(sources);
 
-  const [olByIsbn, nbByIsbn, gbDetails, olSearch, gbSearch, nbSearch] =
-    await Promise.all([
-      isbn ? olIsbnCover(isbn) : Promise.resolve(null),
-      isbn ? getNbCoverByIsbn(isbn).catch(() => null) : Promise.resolve(null),
-      googleBooksEnabled() && (isbn || title)
-        ? getGoogleBooksDetails(params).catch(() => null)
-        : Promise.resolve(null),
-      titleQuery ? searchOpenLibrary(titleQuery, 6).catch(() => []) : [],
-      titleQuery && googleBooksEnabled()
-        ? searchGoogleBooks(titleQuery, 6).catch(() => [])
-        : [],
-      titleQuery ? searchNb(titleQuery, 6).catch(() => []) : [],
-    ]);
+  /** The exact-edition cover and the title-search hits from one source. */
+  const fromSource: Record<
+    Catalogue,
+    () => Promise<[CoverCandidate | null, BookMetadata[]]>
+  > = {
+    openlibrary: () =>
+      Promise.all([
+        isbn ? olIsbnCover(isbn) : Promise.resolve(null),
+        titleQuery ? searchOpenLibrary(titleQuery, 6).catch(() => []) : [],
+      ]).then(([url, hits]) => [url ? { url, source: "openlibrary" } : null, hits]),
+    google: () =>
+      Promise.all([
+        isbn || title ? getGoogleBooksDetails(params).catch(() => null) : null,
+        titleQuery ? searchGoogleBooks(titleQuery, 6).catch(() => []) : [],
+      ]).then(([details, hits]) => [
+        details?.coverUrl ? { url: details.coverUrl, source: "googlebooks" } : null,
+        hits,
+      ]),
+    nb: () =>
+      Promise.all([
+        isbn ? getNbCoverByIsbn(isbn).catch(() => null) : Promise.resolve(null),
+        titleQuery ? searchNb(titleQuery, 6).catch(() => []) : [],
+      ]).then(([url, hits]) => [url ? { url, source: "nb" } : null, hits]),
+  };
+  const perSource = await Promise.all(asked.map((s) => fromSource[s]()));
 
   const candidates: CoverCandidate[] = [];
-  // Exact-edition (ISBN) hits first — most likely to be the copy you own.
-  if (olByIsbn) candidates.push({ url: olByIsbn, source: "openlibrary" });
-  if (nbByIsbn) candidates.push({ url: nbByIsbn, source: "nb" });
-  if (gbDetails?.coverUrl)
-    candidates.push({ url: gbDetails.coverUrl, source: "googlebooks" });
+  // Exact-edition (ISBN) hits first — most likely to be the copy you own —
+  // in the reader's catalogue order.
+  for (const [exact] of perSource) if (exact) candidates.push(exact);
   // Search hits are interleaved round-robin so every source keeps a fair
   // share of the capped grid — appended list-by-list, Open Library and
   // Google would fill all twelve slots before a single nb.no cover showed.
-  const searchLists = [olSearch, gbSearch, nbSearch];
+  const searchLists = perSource.map(([, hits]) => hits);
   const longest = Math.max(...searchLists.map((l) => l.length));
   for (let i = 0; i < longest; i++) {
     for (const list of searchLists) {

@@ -1,5 +1,8 @@
-import { formatDate } from "@/lib/display";
-import { dayKey, readingStreaks } from "@/lib/progress";
+import { dayKey, keyToUtcDate, shiftDayKey } from "@/lib/dates";
+import { formatDate, formatNumber } from "@/lib/display";
+import { heatmapLegend, heatmapLevel, heatmapThresholds } from "@/lib/heatmap";
+import type { Preferences } from "@/lib/preferences";
+import { readingStreaks } from "@/lib/progress";
 
 /** Cell tint per intensity level (0 = no reading that day). */
 const LEVEL_CLASS = [
@@ -10,26 +13,37 @@ const LEVEL_CLASS = [
   "bg-primary",
 ];
 
-/** Fixed pages/day thresholds — comparable across the whole year. */
-function level(pages: number): number {
-  if (pages <= 0) return 0;
-  if (pages < 20) return 1;
-  if (pages < 50) return 2;
-  if (pages < 100) return 3;
-  return 4;
+function shortMonth(d: Date): string {
+  return d.toLocaleDateString("en-GB", { month: "short", timeZone: "UTC" });
 }
 
-function shortMonth(d: Date): string {
-  return d.toLocaleDateString("en-GB", { month: "short" });
-}
+/** Day-of-week labels down the side, every other row. */
+const DAY_LABELS = {
+  monday: ["Mon", "", "Wed", "", "Fri", "", ""],
+  sunday: ["", "Mon", "", "Wed", "", "Fri", ""],
+};
 
 /**
  * GitHub-style calendar of the last 12 months: one cell per day, tinted by
  * pages read that day (see dailyPageTotals for how entries become pages).
  * Server component — plain divs with title tooltips, no interactivity.
+ *
+ * Days are counted in the reader's time zone, weeks start on their chosen
+ * day, and the shades follow their chosen scale (all from Preferences). The
+ * calendar itself is laid out on midnight-UTC dates built from day keys, so
+ * the server's own zone can't shift a cell.
  */
-export function ReadingHeatmap({ totals }: { totals: Map<string, number> }) {
-  const today = new Date();
+export function ReadingHeatmap({
+  totals,
+  prefs,
+}: {
+  totals: Map<string, number>;
+  prefs: Pick<
+    Preferences,
+    "weekStart" | "timeZone" | "heatmapScale" | "dateFormat" | "numberFormat"
+  >;
+}) {
+  const now = new Date();
 
   if (totals.size === 0) {
     return (
@@ -40,19 +54,22 @@ export function ReadingHeatmap({ totals }: { totals: Map<string, number> }) {
     );
   }
 
-  // Window: the Monday on/before (today − 364 days) through today.
-  const start = new Date(today);
-  start.setHours(0, 0, 0, 0);
-  start.setDate(start.getDate() - 364);
-  while (start.getDay() !== 1) start.setDate(start.getDate() - 1);
+  // Window: the first day of the week on/before (today − 364 days) through
+  // today.
+  const todayKey = dayKey(now, prefs.timeZone);
+  const firstWeekday = prefs.weekStart === "sunday" ? 0 : 1;
+  let startKey = shiftDayKey(todayKey, -364);
+  while (keyToUtcDate(startKey).getUTCDay() !== firstWeekday) {
+    startKey = shiftDayKey(startKey, -1);
+  }
 
   const weeks: { date: Date; key: string }[][] = [];
-  const cursor = new Date(start);
-  while (cursor <= today) {
+  let cursor = startKey;
+  while (cursor <= todayKey) {
     const week: { date: Date; key: string }[] = [];
-    for (let i = 0; i < 7 && cursor <= today; i++) {
-      week.push({ date: new Date(cursor), key: dayKey(cursor) });
-      cursor.setDate(cursor.getDate() + 1);
+    for (let i = 0; i < 7 && cursor <= todayKey; i++) {
+      week.push({ date: keyToUtcDate(cursor), key: cursor });
+      cursor = shiftDayKey(cursor, 1);
     }
     weeks.push(week);
   }
@@ -61,7 +78,7 @@ export function ReadingHeatmap({ totals }: { totals: Map<string, number> }) {
   // column is only labelled when its month lasts a few columns, so the
   // window edge doesn't produce two overlapping labels.
   const labels: (string | null)[] = weeks.map((week, i) =>
-    i > 0 && week[0].date.getMonth() !== weeks[i - 1][0].date.getMonth()
+    i > 0 && week[0].date.getUTCMonth() !== weeks[i - 1][0].date.getUTCMonth()
       ? shortMonth(week[0].date)
       : null,
   );
@@ -69,12 +86,17 @@ export function ReadingHeatmap({ totals }: { totals: Map<string, number> }) {
 
   // Summary line: days and pages inside the window, streaks over the full log.
   const windowDays = weeks.flat();
-  const daysRead = windowDays.filter((d) => (totals.get(d.key) ?? 0) > 0).length;
-  const pagesInWindow = windowDays.reduce(
-    (sum, d) => sum + (totals.get(d.key) ?? 0),
-    0,
+  const windowTotals = windowDays.map((d) => totals.get(d.key) ?? 0);
+  const daysRead = windowTotals.filter((p) => p > 0).length;
+  const pagesInWindow = windowTotals.reduce((sum, p) => sum + p, 0);
+  const { current, longest } = readingStreaks(
+    new Set(totals.keys()),
+    now,
+    prefs.timeZone,
   );
-  const { current, longest } = readingStreaks(new Set(totals.keys()), today);
+
+  const thresholds = heatmapThresholds(prefs.heatmapScale, windowTotals);
+  const legend = heatmapLegend(thresholds);
 
   return (
     <div className="grid gap-3">
@@ -83,7 +105,7 @@ export function ReadingHeatmap({ totals }: { totals: Map<string, number> }) {
           {daysRead}
         </span>{" "}
         reading {daysRead === 1 ? "day" : "days"} (
-        {pagesInWindow.toLocaleString("en")} pages) in the last year
+        {formatNumber(pagesInWindow, prefs)} pages) in the last year
         {current > 1 && (
           <>
             {" "}
@@ -99,7 +121,7 @@ export function ReadingHeatmap({ totals }: { totals: Map<string, number> }) {
       <div className="overflow-x-auto pb-1">
         <div className="flex w-max gap-[3px]">
           <div className="mr-1 flex flex-col gap-[3px] pt-[17px] text-[10px] leading-3 text-muted-foreground">
-            {["Mon", "", "Wed", "", "Fri", "", ""].map((d, i) => (
+            {DAY_LABELS[prefs.weekStart].map((d, i) => (
               <span key={i} className="h-3">
                 {d}
               </span>
@@ -119,11 +141,11 @@ export function ReadingHeatmap({ totals }: { totals: Map<string, number> }) {
                 return (
                   <div
                     key={day.key}
-                    className={`size-3 rounded-[3px] ${LEVEL_CLASS[level(pages)]}`}
+                    className={`size-3 rounded-[3px] ${LEVEL_CLASS[heatmapLevel(pages, thresholds)]}`}
                     title={
                       pages > 0
-                        ? `${pages} pages · ${formatDate(day.date)}`
-                        : formatDate(day.date)
+                        ? `${pages} pages · ${formatDate(day.date, prefs)}`
+                        : formatDate(day.date, prefs)
                     }
                   />
                 );
@@ -135,8 +157,8 @@ export function ReadingHeatmap({ totals }: { totals: Map<string, number> }) {
 
       <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
         <span className="mr-1">Less</span>
-        {LEVEL_CLASS.map((cls) => (
-          <span key={cls} className={`size-3 rounded-[3px] ${cls}`} />
+        {LEVEL_CLASS.map((cls, i) => (
+          <span key={cls} className={`size-3 rounded-[3px] ${cls}`} title={legend[i]} />
         ))}
         <span className="ml-1">More</span>
       </div>

@@ -3,6 +3,7 @@ import {
   authorSortKey,
   groupBooks,
   sortBooks,
+  titleSortKey,
   type SortableBook,
 } from "@/lib/library-sort";
 
@@ -185,5 +186,54 @@ describe("groupBooks", () => {
       "series",
     );
     expect(groups?.[0].books.map((b) => b.title)).toEqual(["One", "Companion"]);
+  });
+});
+
+describe("sorting rules", () => {
+  const titles = (books: SortableBook[]) => books.map((b) => b.title);
+
+  it("files titles past a leading article when asked", () => {
+    const books = [
+      book({ title: "The Hobbit" }),
+      book({ title: "Dune" }),
+      book({ title: "A Wizard of Earthsea" }),
+    ];
+    expect(titles(sortBooks(books, "title", "asc"))).toEqual([
+      "A Wizard of Earthsea",
+      "Dune",
+      "The Hobbit",
+    ]);
+    expect(titles(sortBooks(books, "title", "asc", { ignoreArticles: true }))).toEqual([
+      "Dune",
+      "The Hobbit",
+      "A Wizard of Earthsea",
+    ]);
+  });
+
+  it("skips the alphabet's own articles too, but never a whole title", () => {
+    expect(titleSortKey("Den siste viking", { ignoreArticles: true, alphabet: "nb" })).toBe(
+      "siste viking",
+    );
+    expect(titleSortKey("Den siste viking", { ignoreArticles: true })).toBe("Den siste viking");
+    expect(titleSortKey("It", { ignoreArticles: true })).toBe("It");
+  });
+
+  it("sorts authors as written when asked", () => {
+    expect(authorSortKey("Ursula K. Le Guin", { authorOrder: "as-written" })).toBe(
+      "ursula k. le guin",
+    );
+  });
+
+  it("puts Æ, Ø and Å after Z in the Norwegian alphabet", () => {
+    const books = [
+      book({ title: "Åsgårdsreien" }),
+      book({ title: "Zorro" }),
+      book({ title: "Ærlig talt" }),
+    ];
+    expect(titles(sortBooks(books, "title", "asc", { alphabet: "nb" }))).toEqual([
+      "Zorro",
+      "Ærlig talt",
+      "Åsgårdsreien",
+    ]);
   });
 });
