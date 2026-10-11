@@ -112,6 +112,7 @@ const globalForRateLimit = globalThis as unknown as {
   loginLimiter?: RateLimiter;
   registerLimiter?: RateLimiter;
   metadataLimiter?: RateLimiter;
+  uploadLimiter?: RateLimiter;
 };
 
 /** Failed sign-in attempts: 10 per username (and 10 per IP) per 15 minutes.
@@ -135,3 +136,12 @@ export const registerLimiter = (globalForRateLimit.registerLimiter ??=
  */
 export const metadataLimiter = (globalForRateLimit.metadataLimiter ??=
   new RateLimiter(90, 60_000));
+
+/**
+ * Cover uploads: 60 per signed-in user per hour. Counts every upload, like
+ * the metadata budget. One a minute is more than anyone photographing their
+ * shelf needs, and it caps how fast one account can fill the disk (each
+ * upload may be up to 10 MB).
+ */
+export const uploadLimiter = (globalForRateLimit.uploadLimiter ??=
+  new RateLimiter(60, 60 * 60_000));

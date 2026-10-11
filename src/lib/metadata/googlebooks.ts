@@ -81,7 +81,9 @@ export async function searchGoogleBooks(
   const data = await cachedLookup<GbResponse>("gb-search", `${query}|${limit}`, () =>
     gbQuery(query, limit),
   );
-  return (data?.items ?? [])
+  // null: failed and nothing cached (see searchOpenLibrary).
+  if (data === null) throw new Error("Google Books unavailable");
+  return (data.items ?? [])
     .map(toMetadata)
     .filter((m): m is BookMetadata => m !== null);
 }

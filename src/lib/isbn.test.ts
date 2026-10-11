@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isbnVariants, normalizeIsbn } from "@/lib/isbn";
+import { isbnVariants, looksLikeIsbn, normalizeIsbn } from "@/lib/isbn";
 
 describe("normalizeIsbn", () => {
   it("strips hyphens and spaces", () => {
@@ -47,5 +47,19 @@ describe("isbnVariants", () => {
   it("returns non-ISBN input as itself, normalized", () => {
     expect(isbnVariants("not an isbn")).toEqual(["NOTANISBN"]);
     expect(isbnVariants("12345")).toEqual(["12345"]);
+  });
+});
+
+describe("looksLikeIsbn", () => {
+  it("accepts ISBN-10 and ISBN-13 shapes, with or without hyphens", () => {
+    for (const isbn of ["9780306406157", "978-0-306-40615-7", "0306406152", "080442957x"]) {
+      expect(looksLikeIsbn(isbn), isbn).toBe(true);
+    }
+  });
+
+  it("refuses anything else", () => {
+    for (const junk of ["not-an-isbn", "12345", "97803064061570", "", "X306406152"]) {
+      expect(looksLikeIsbn(junk), junk).toBe(false);
+    }
   });
 });

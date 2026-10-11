@@ -1,5 +1,6 @@
 import type { Prisma } from "@prisma/client";
 import { BookFormat, BookOwnership, ReadingStatus } from "@prisma/client";
+import { searchTerms } from "@/lib/utils";
 
 /** The library view's filter state, as it appears in the URL. */
 export interface LibraryFilters {
@@ -13,8 +14,10 @@ export interface LibraryFilters {
   series: string;
 }
 
+/** A URL parameter as a string. Null bytes are dropped: Postgres refuses
+ *  them in text, so `?tag=%00` used to crash the page. */
 function param(v: string | string[] | undefined): string {
-  return typeof v === "string" ? v : "";
+  return typeof v === "string" ? v.replace(/\0/g, "") : "";
 }
 
 /** Filter value -> ownership state. "lent" is not an ownership state at all
@@ -33,7 +36,7 @@ export function parseFilters(
   return {
     shelf: param(sp.shelf) || "all",
     shelfId: param(sp.shelfId),
-    q: param(sp.q),
+    q: param(sp.q).trim(),
     tag: param(sp.tag),
     format: param(sp.format),
     owned: param(sp.owned) || "all",
@@ -57,6 +60,7 @@ export function buildBookWhere(
   // links still work; its values just grew beyond owned/wishlist.
   const ownership = OWNERSHIP_FILTERS[filters.owned];
   const minRating = parseInt(filters.minRating, 10);
+  const terms = searchTerms(filters.q);
 
   return {
     userId,
@@ -70,6 +74,9 @@ export function buildBookWhere(
     ...(filters.series && {
       seriesName: { equals: filters.series, mode: "insensitive" as const },
     }),
-    ...(filters.q && { searchText: { contains: filters.q.toLowerCase() } }),
+    // Every word has to appear somewhere in title, authors or series.
+    ...(terms.length > 0 && {
+      AND: terms.map((t) => ({ searchText: { contains: t } })),
+    }),
   };
 }

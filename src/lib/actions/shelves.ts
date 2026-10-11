@@ -23,10 +23,13 @@ export async function createShelf(
   }
   const name = parsed.data;
 
-  const existing = await prisma.shelf.findUnique({
-    where: { userId_name: { userId, name } },
+  // Case-insensitive: "Favourites" and "favourites" side by side is never
+  // what anyone meant.
+  const existing = await prisma.shelf.findFirst({
+    where: { userId, name: { equals: name, mode: "insensitive" } },
+    select: { name: true },
   });
-  if (existing) return { error: "You already have a shelf with that name" };
+  if (existing) return { error: `You already have a shelf called "${existing.name}"` };
 
   const bookId = formData.get("bookId");
   await prisma.shelf.create({

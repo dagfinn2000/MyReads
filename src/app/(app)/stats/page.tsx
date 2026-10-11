@@ -3,13 +3,11 @@ import { redirect } from "next/navigation";
 import { ReadingStatus } from "@prisma/client";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { HardDriveDownload } from "lucide-react";
 import { setReadingGoal } from "@/lib/actions/goals";
 import { FORMAT_LABELS } from "@/lib/display";
 import { dailyPageTotalsForUser } from "@/lib/progress-query";
 import { GoldMedal } from "@/components/gold-medal";
 import { ReadingHeatmap } from "@/components/reading-heatmap";
-import { RestoreBackup } from "@/components/restore-backup";
 import { Bar, StatCard } from "@/components/stat-blocks";
 import { Stars } from "@/components/stars";
 import { Button } from "@/components/ui/button";
@@ -333,29 +331,6 @@ export default async function StatsPage() {
             </CardContent>
           </Card>
         )}
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Backup</CardTitle>
-          </CardHeader>
-          <CardContent className="grid gap-3">
-            <p className="text-sm text-muted-foreground">
-              Download your library (books, quotes, shelves, goals — cover
-              images included) as a zip, or restore a backup (zip, or JSON
-              from older versions). Restoring merges: books you already have
-              are skipped.
-            </p>
-            <div className="flex flex-wrap items-start gap-2">
-              <Button asChild variant="outline" size="sm">
-                <a href="/api/export">
-                  <HardDriveDownload data-slot="icon" />
-                  Download backup
-                </a>
-              </Button>
-              <RestoreBackup />
-            </div>
-          </CardContent>
-        </Card>
       </div>
     </div>
   );

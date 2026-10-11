@@ -37,7 +37,9 @@ export async function generateMetadata({
   params: Promise<{ year: string }>;
 }) {
   const { year } = await params;
-  return { title: `${year} in books · MyReads` };
+  // Same check as the page, so /stats/year/abc isn't titled "abc in books".
+  const parsed = parseYear(year);
+  return { title: parsed === null ? "Not found · MyReads" : `${parsed} in books · MyReads` };
 }
 
 /** One finished pass through a book, in the review year. */

@@ -1,6 +1,16 @@
 import { z } from "zod";
 import { BookFormat, BookOwnership, ReadingStatus } from "@prisma/client";
 
+/**
+ * What a stored cover URL may be: a local path ("/api/covers/…") or an
+ * http(s) URL. Not `javascript:` or `data:`, and not a protocol-relative
+ * `//host/x` or `/\host/x`, which start with "/" but point off-site.
+ * Shared by the book form and the backup import.
+ */
+export function isAllowedCoverUrl(s: string): boolean {
+  return s === "" || /^\/(?![/\\])/.test(s) || /^https?:\/\//i.test(s);
+}
+
 /** Shared by registration and the change-password form. */
 export const passwordSchema = z
   .string()
@@ -66,10 +76,7 @@ export const bookSchema = z.object({
     .string()
     .trim()
     .max(2000, "Cover URL must be at most 2000 characters")
-    .refine(
-      (s) => s === "" || s.startsWith("/") || /^https?:\/\//i.test(s),
-      "Cover URL must be an http(s) URL",
-    )
+    .refine(isAllowedCoverUrl, "Cover URL must be an http(s) URL")
     .transform((s) => s || null)
     .nullable()
     .optional(),
@@ -108,14 +115,13 @@ export const bookSchema = z.object({
     .transform((s) => s || null)
     .nullable()
     .optional(),
-  /** Position in a series; float so novellas can slot in at 1.5. */
-  seriesNumber: z.coerce
-    .number()
-    .min(0)
-    .max(10000)
-    .nullable()
-    .optional()
-    .catch(null),
+  /** Position in a series; float so novellas can slot in at 1.5. A blank
+   *  field is no number, not #0: `z.coerce` alone turns "" into 0, and 0 is
+   *  a real position (prequels are often numbered 0). */
+  seriesNumber: z.preprocess(
+    (v) => (typeof v === "string" && v.trim() === "" ? null : v),
+    z.coerce.number().min(0).max(10000).nullable().optional().catch(null),
+  ),
   format: z.nativeEnum(BookFormat),
   /** Defaults to OWNED so a form that omits the field (or sends something
    *  unexpected) still saves as an ordinary book on your shelf. */
@@ -133,6 +139,32 @@ function parseDateOrNull(s: string): Date | null {
   if (!s) return null;
   const d = new Date(s);
   return Number.isNaN(d.getTime()) ? null : d;
+}
+
+/**
+ * Started/finished dates must make sense together: no finishing before you
+ * started (it shows up as a negative "fastest read"), and nothing in the
+ * future. "Future" allows a day's slack, because the form sends a calendar
+ * date read as midnight UTC, which is already tomorrow east of UTC.
+ */
+function checkReadDates(
+  d: { dateStarted?: Date | null; dateFinished?: Date | null },
+  ctx: z.RefinementCtx,
+) {
+  const latest = Date.now() + 86_400_000;
+  if (d.dateStarted && d.dateStarted.getTime() > latest) {
+    ctx.addIssue({ code: "custom", path: ["dateStarted"], message: "Start date is in the future" });
+  }
+  if (d.dateFinished && d.dateFinished.getTime() > latest) {
+    ctx.addIssue({ code: "custom", path: ["dateFinished"], message: "Finish date is in the future" });
+  }
+  if (d.dateStarted && d.dateFinished && d.dateFinished < d.dateStarted) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["dateFinished"],
+      message: "Finish date is before the start date",
+    });
+  }
 }
 
 /** Personal reading data, editable from the book detail page. */
@@ -166,7 +198,7 @@ export const readingSchema = z.object({
     .nullable()
     .optional()
     .catch(null),
-});
+}).superRefine(checkReadDates);
 
 /** A past read of a book (the read-history card). Everything is optional:
  *  "I know I read this in 2019" and a fully undated "read it before" are
@@ -184,7 +216,7 @@ export const pastReadSchema = z.object({
     .optional(),
   /** 1–10 half-star units; empty string/0 means "unrated that time". */
   rating: z.coerce.number().int().min(0).max(10).nullable().optional().catch(null),
-});
+}).superRefine(checkReadDates);
 
 /** A quote/highlight from the book detail page. Forms submit strings. */
 export const quoteSchema = z.object({

@@ -84,7 +84,9 @@ export async function searchNb(
   const data = await cachedLookup<NbResponse>("nb-search", `${query}|${limit}`, () =>
     nbQuery(query, limit),
   );
-  return (data?._embedded?.items ?? [])
+  // null: failed and nothing cached (see searchOpenLibrary).
+  if (data === null) throw new Error("nb.no unavailable");
+  return (data._embedded?.items ?? [])
     .map(toMetadata)
     .filter((m): m is BookMetadata => m !== null);
 }

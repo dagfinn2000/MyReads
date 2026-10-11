@@ -44,22 +44,69 @@ function isBlockedIpv4(ip: string): boolean {
   return false;
 }
 
-/** Blocked IPv6 ranges: loopback, unspecified, link-local, unique-local,
- *  multicast, and anything embedding a blocked IPv4 address. */
+/**
+ * Expands an IPv6 address into its eight 16-bit groups, or null if it can't
+ * be read. Works on the numbers rather than the text because the same
+ * address has many spellings: `new URL()` rewrites `[::ffff:127.0.0.1]` to
+ * `[::ffff:7f00:1]`, so a check that only recognised the dotted form would
+ * wave the hex form straight through.
+ */
+function ipv6Groups(ip: string): number[] | null {
+  let addr = ip.toLowerCase().split("%")[0]; // strip zone id
+
+  // A trailing dotted quad (::ffff:10.0.0.1) is the last two groups.
+  const dotted = addr.match(/^(.*:)(\d+)\.(\d+)\.(\d+)\.(\d+)$/);
+  if (dotted) {
+    const [a, b, c, d] = dotted.slice(2).map(Number);
+    if ([a, b, c, d].some((n) => n > 255)) return null;
+    addr = `${dotted[1]}${((a << 8) | b).toString(16)}:${((c << 8) | d).toString(16)}`;
+  }
+
+  const halves = addr.split("::");
+  if (halves.length > 2) return null;
+  const head = halves[0] ? halves[0].split(":") : [];
+  const tail = halves.length === 2 && halves[1] ? halves[1].split(":") : [];
+  const missing = 8 - head.length - tail.length;
+  if (halves.length === 2 ? missing < 1 : missing !== 0) return null;
+
+  const groups = [...head, ...Array<string>(missing).fill("0"), ...tail].map((g) =>
+    /^[0-9a-f]{1,4}$/.test(g) ? Number.parseInt(g, 16) : NaN,
+  );
+  return groups.some(Number.isNaN) ? null : groups;
+}
+
+/** The IPv4 address carried in two IPv6 groups, as a dotted quad. */
+function embeddedIpv4(hi: number, lo: number): string {
+  return `${hi >> 8}.${hi & 0xff}.${lo >> 8}.${lo & 0xff}`;
+}
+
+/** Blocked IPv6 ranges: loopback, unspecified, link-local, site-local,
+ *  unique-local, multicast, Teredo, and anything embedding a blocked IPv4
+ *  address. */
 function isBlockedIpv6(ip: string): boolean {
-  const addr = ip.toLowerCase().split("%")[0]; // strip zone id
+  const g = ipv6Groups(ip);
+  if (!g) return true; // unparseable — refuse rather than guess
+  const zero = (from: number, to: number) => g.slice(from, to).every((x) => x === 0);
 
-  if (addr === "::" || addr === "::1") return true;
+  // Forms that carry an IPv4 address delegate to the v4 rules — otherwise
+  // each would be a way to reach 127.0.0.1 or 169.254.169.254 in disguise.
+  // ::/96 also covers :: (0.0.0.0) and ::1 (0.0.0.1), both blocked there.
+  if (zero(0, 5) && g[5] === 0xffff) return isBlockedIpv4(embeddedIpv4(g[6], g[7])); // ::ffff:0:0/96 mapped
+  if (zero(0, 6)) return isBlockedIpv4(embeddedIpv4(g[6], g[7])); // ::/96 compatible
+  if (zero(0, 4) && g[4] === 0xffff && g[5] === 0) {
+    return isBlockedIpv4(embeddedIpv4(g[6], g[7])); // ::ffff:0:0:0/96 translated
+  }
+  if (g[0] === 0x64 && g[1] === 0xff9b && zero(2, 6)) {
+    return isBlockedIpv4(embeddedIpv4(g[6], g[7])); // 64:ff9b::/96 NAT64
+  }
+  if (g[0] === 0x64 && g[1] === 0xff9b && g[2] === 1) return true; // 64:ff9b:1::/48 local NAT64
+  if (g[0] === 0x2002) return isBlockedIpv4(embeddedIpv4(g[1], g[2])); // 2002::/16 6to4
+  if (g[0] === 0x2001 && g[1] === 0) return true; // 2001::/32 Teredo
 
-  // IPv4-mapped (::ffff:10.0.0.1) and IPv4-compatible forms delegate to the
-  // v4 rules — otherwise they'd be an trivial bypass.
-  const mapped = addr.match(/^::(?:ffff:)?(\d+\.\d+\.\d+\.\d+)$/);
-  if (mapped) return isBlockedIpv4(mapped[1]);
-
-  if (addr.startsWith("fe8") || addr.startsWith("fe9")) return true; // fe80::/10
-  if (addr.startsWith("fea") || addr.startsWith("feb")) return true;
-  if (addr.startsWith("fc") || addr.startsWith("fd")) return true; // fc00::/7 ULA
-  if (addr.startsWith("ff")) return true; // ff00::/8 multicast
+  if ((g[0] & 0xffc0) === 0xfe80) return true; // fe80::/10 link-local
+  if ((g[0] & 0xffc0) === 0xfec0) return true; // fec0::/10 site-local
+  if ((g[0] & 0xfe00) === 0xfc00) return true; // fc00::/7 ULA
+  if ((g[0] & 0xff00) === 0xff00) return true; // ff00::/8 multicast
 
   return false;
 }

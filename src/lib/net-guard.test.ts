@@ -53,8 +53,36 @@ describe("isBlockedAddress", () => {
     expect(isBlockedAddress("::ffff:192.168.0.1")).toBe(true);
   });
 
-  it("allows public IPv6", () => {
-    expect(isBlockedAddress("2606:4700:4700::1111")).toBe(false);
+  it("blocks the hex spellings of IPv4-mapped and -compatible addresses", () => {
+    // What new URL() turns [::ffff:127.0.0.1] and friends into.
+    for (const ip of [
+      "::ffff:7f00:1",
+      "::ffff:a9fe:a9fe",
+      "::ffff:c0a8:1",
+      "::7f00:1",
+      "::ffff:0:7f00:1",
+      "0:0:0:0:0:ffff:7f00:1",
+    ]) {
+      expect(isBlockedAddress(ip), ip).toBe(true);
+    }
+  });
+
+  it("blocks NAT64 and 6to4 addresses that wrap a private IPv4", () => {
+    for (const ip of ["64:ff9b::7f00:1", "64:ff9b::a9fe:a9fe", "64:ff9b::10.0.0.1", "2002:7f00:1::", "2002:c0a8:101::1"]) {
+      expect(isBlockedAddress(ip), ip).toBe(true);
+    }
+  });
+
+  it("blocks Teredo, local-use NAT64 and site-local outright", () => {
+    for (const ip of ["2001:0:4136:e378::1", "64:ff9b:1::a00:1", "fec0::1"]) {
+      expect(isBlockedAddress(ip), ip).toBe(true);
+    }
+  });
+
+  it("allows public IPv6, including NAT64 and 6to4 of a public IPv4", () => {
+    for (const ip of ["2606:4700:4700::1111", "2a00:1450:400f:80d::200e", "64:ff9b::808:808", "2002:808:808::1", "::ffff:8.8.8.8"]) {
+      expect(isBlockedAddress(ip), ip).toBe(false);
+    }
   });
 
   it("refuses anything that is not an IP", () => {
@@ -80,6 +108,30 @@ describe("checkUrlAllowed", () => {
     expect((await checkUrlAllowed("http://[::1]/cover.jpg")).ok).toBe(false);
     expect((await checkUrlAllowed("http://169.254.169.254/latest/meta-data")).ok).toBe(false);
     expect(lookup).not.toHaveBeenCalled();
+  });
+
+  it("rejects IPv6 literals that wrap a private IPv4 address", async () => {
+    // The URL parser rewrites these to hex before the guard sees them, so
+    // this goes through checkUrlAllowed rather than isBlockedAddress.
+    const lookup = vi.spyOn(dns, "lookup");
+    for (const url of [
+      "http://[::ffff:127.0.0.1]/",
+      "http://[::ffff:169.254.169.254]/latest/meta-data",
+      "http://[::127.0.0.1]/",
+      "http://[64:ff9b::7f00:1]/",
+      "http://[2002:7f00:1::]/",
+    ]) {
+      expect((await checkUrlAllowed(url)).ok, url).toBe(false);
+    }
+    expect(lookup).not.toHaveBeenCalled();
+  });
+
+  it("rejects a host that resolves to a hex-mapped private address", async () => {
+    vi.spyOn(dns, "lookup").mockResolvedValue([
+      { address: "::ffff:a00:5", family: 6 },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ] as any);
+    expect((await checkUrlAllowed("https://sneaky.example.com/a.jpg")).ok).toBe(false);
   });
 
   it("allows a host resolving to a public address", async () => {

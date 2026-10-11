@@ -65,7 +65,17 @@ export function RegisterForm() {
         <form onSubmit={handleSubmit} className="grid gap-4">
           <div className="grid gap-2">
             <Label htmlFor="username">Username</Label>
-            <Input id="username" name="username" autoComplete="username" required autoFocus />
+            <Input
+              id="username"
+              name="username"
+              autoComplete="username"
+              required
+              autoFocus
+              // Same limits as registerSchema, so a short name is caught
+              // before the round trip.
+              minLength={3}
+              maxLength={32}
+            />
           </div>
           <div className="grid gap-2">
             <Label htmlFor="password">Password</Label>

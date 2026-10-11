@@ -12,6 +12,7 @@ import { cacheCoverImage, deleteCachedCover } from "@/lib/covers";
 import { requireUserId } from "@/lib/actions/helpers";
 import type { ActionState } from "@/lib/actions/helpers";
 import { currentPassEntries } from "@/lib/progress";
+import { settleReadingState } from "@/lib/reading-state";
 import { buildSearchText } from "@/lib/utils";
 
 const statusField = z.nativeEnum(ReadingStatus).catch(ReadingStatus.WANT_TO_READ);
@@ -40,7 +41,14 @@ function localizeCoverAfterResponse(bookId: string, coverUrl: string | null) {
       localUrl = await cacheCoverImage(coverUrl, bookId);
     }
     if (localUrl) {
-      await prisma.book.update({ where: { id: bookId }, data: { coverUrl: localUrl } });
+      // Only if the book still has the cover this download was for. A save
+      // in the meantime may have picked another one, and this older
+      // download finishing late must not overwrite it.
+      const { count } = await prisma.book.updateMany({
+        where: { id: bookId, coverUrl },
+        data: { coverUrl: localUrl },
+      });
+      if (count === 0) await deleteCachedCover(localUrl);
     }
   });
 }
@@ -56,7 +64,18 @@ export async function createBook(
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
   }
-  const status = statusField.parse(formData.get("status"));
+  // Adding a book straight onto Read or Currently Reading gets the same
+  // dates and read count as moving it there from the reading card.
+  const reading = settleReadingState(
+    null,
+    {
+      status: statusField.parse(formData.get("status")),
+      dateStarted: null,
+      dateFinished: null,
+      currentPage: null,
+    },
+    0,
+  );
 
   const data = parsed.data;
   const book = await prisma.book.create({
@@ -75,7 +94,10 @@ export async function createBook(
       format: data.format,
       ownership: data.ownership,
       openLibraryId: data.openLibraryId ?? null,
-      status,
+      status: reading.status,
+      dateStarted: reading.dateStarted,
+      dateFinished: reading.dateFinished,
+      timesRead: reading.timesRead,
       searchText: buildSearchText(data.title, data.authors, data.seriesName),
     },
   });
@@ -167,23 +189,25 @@ export async function updateReading(
   }
   const data = parsed.data;
 
-  // Convenience: marking a book Read fills in "finished today" if the date
-  // was never set — saves a click per book.
-  let dateFinished = data.dateFinished ?? null;
-  if (data.status === ReadingStatus.READ && !dateFinished) {
-    dateFinished = new Date();
+  // Fills in "finished today" / "started today" when the dates were left
+  // empty, derives timesRead, and drops the page once the book is finished
+  // or reshelved. Shared with createBook and bulk edit.
+  const { dateStarted, dateFinished, timesRead, currentPage } = settleReadingState(
+    existing.status,
+    {
+      status: data.status,
+      dateStarted: data.dateStarted ?? null,
+      dateFinished: data.dateFinished ?? null,
+      currentPage: data.currentPage ?? null,
+    },
+    existing._count.reads,
+  );
+
+  // A page past the end is a typo, and the reading log would keep it: every
+  // page between the last entry and it would be credited to today.
+  if (currentPage != null && existing.pageCount != null && currentPage > existing.pageCount) {
+    return { error: `Page ${currentPage} is past the end of the book (${existing.pageCount} pages)` };
   }
-
-  // timesRead is derived, not submitted: archived passes in the Read table
-  // plus the current one when it's finished.
-  const timesRead =
-    existing._count.reads + (data.status === ReadingStatus.READ ? 1 : 0);
-
-  // Progress only makes sense mid-book: keep it for READING and DNF
-  // ("stopped at p. 218"), clear it when finished or back on the shelf.
-  const keepsProgress =
-    data.status === ReadingStatus.READING || data.status === ReadingStatus.DNF;
-  const currentPage = keepsProgress ? data.currentPage || null : null;
 
   // The book update and its automatic reading-log entries land together —
   // a page-0 anchor without the page change it anchors (or vice versa)
@@ -195,7 +219,7 @@ export async function updateReading(
         status: data.status,
         rating: data.rating || null, // 0 = cleared
         review: data.review ?? null,
-        dateStarted: data.dateStarted ?? null,
+        dateStarted,
         dateFinished,
         timesRead,
         currentPage,
@@ -205,7 +229,7 @@ export async function updateReading(
     await logProgress(tx, bookId, existing, {
       status: data.status,
       currentPage,
-      dateStarted: data.dateStarted ?? null,
+      dateStarted,
       dateFinished,
     });
   });

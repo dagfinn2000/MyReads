@@ -10,6 +10,15 @@ import type { BookDetails, BookMetadata, CoverCandidate } from "./types";
 
 export type { BookDetails, BookMetadata, CoverCandidate };
 
+/** Thrown by searchBooks when not one catalogue answered, so callers can say
+ *  "couldn't reach the catalogues" instead of "no results". */
+export class CataloguesUnreachableError extends Error {
+  constructor() {
+    super("Couldn't reach the book catalogues");
+    this.name = "CataloguesUnreachableError";
+  }
+}
+
 /** Same-edition key: the ISBN-13 form when one exists, so an ISBN-10 from
  *  one source matches its ISBN-13 twin from another. */
 function editionKey(isbn: string): string {
@@ -25,13 +34,21 @@ function editionKey(isbn: string): string {
  * resolve to the same edition (same ISBN, in either form) appear once, from
  * the highest-priority source; that also keeps a barcode scan resolving to
  * exactly one row, which is what lets the scan flow auto-pick it.
+ *
+ * One source failing is normal and its rows are simply missing. If every
+ * source failed, this throws CataloguesUnreachableError.
  */
 export async function searchBooks(query: string): Promise<BookMetadata[]> {
-  const [fromOl, fromGb, fromNb] = await Promise.all([
-    searchOpenLibrary(query).catch(() => []),
-    searchGoogleBooks(query).catch(() => []),
-    searchNb(query).catch(() => []),
+  const [ol, gb, nb] = await Promise.allSettled([
+    searchOpenLibrary(query),
+    searchGoogleBooks(query),
+    searchNb(query),
   ]);
+  const asked = googleBooksEnabled() ? [ol, gb, nb] : [ol, nb];
+  if (asked.every((s) => s.status === "rejected")) throw new CataloguesUnreachableError();
+  const rows = (s: PromiseSettledResult<BookMetadata[]>) =>
+    s.status === "fulfilled" ? s.value : [];
+  const [fromOl, fromGb, fromNb] = [rows(ol), rows(gb), rows(nb)];
 
   const seen = new Set<string>();
   const results: BookMetadata[] = [];

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { guardMetadataRequest } from "@/lib/api-guard";
-import { searchBooks } from "@/lib/metadata";
+import { CataloguesUnreachableError, searchBooks } from "@/lib/metadata";
 
 /**
  * GET /api/metadata/search?q=<query>
@@ -20,6 +20,11 @@ export async function GET(req: Request) {
     return NextResponse.json({ results: [] });
   }
 
-  const results = await searchBooks(q);
-  return NextResponse.json({ results });
+  try {
+    const results = await searchBooks(q);
+    return NextResponse.json({ results });
+  } catch (e) {
+    if (!(e instanceof CataloguesUnreachableError)) throw e;
+    return NextResponse.json({ results: [], error: e.message }, { status: 502 });
+  }
 }

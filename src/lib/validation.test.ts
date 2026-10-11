@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { bookSchema } from "@/lib/validation";
+import { bookSchema, isAllowedCoverUrl, pastReadSchema, readingSchema } from "@/lib/validation";
 
 const minimalForm = {
   title: "T",
@@ -26,5 +26,65 @@ describe("bookSchema tags", () => {
       tags: "Fiction, fiction, FICTION, fantasy",
     });
     expect(parsed.tags).toEqual(["fiction", "fantasy"]);
+  });
+});
+
+describe("isAllowedCoverUrl", () => {
+  it("accepts local cache paths, http(s) URLs and an empty value", () => {
+    for (const url of ["", "/api/covers/abc-1234.jpg", "https://covers.openlibrary.org/b/id/1-L.jpg", "HTTP://x.example/a.png"]) {
+      expect(isAllowedCoverUrl(url), url).toBe(true);
+    }
+  });
+
+  it("refuses other schemes and protocol-relative paths", () => {
+    // `//host` and `/\host` start with "/" but browsers fetch them off-site.
+    for (const url of ["javascript:alert(1)", "data:image/png;base64,AAAA", "//evil.example/x.jpg", "/\\evil.example/x.jpg", "ftp://x.example/a.jpg"]) {
+      expect(isAllowedCoverUrl(url), url).toBe(false);
+    }
+  });
+});
+
+describe("bookSchema seriesNumber", () => {
+  it("saves a blank field as no number, not #0", () => {
+    expect(bookSchema.parse({ ...minimalForm, seriesNumber: "" }).seriesNumber).toBeNull();
+    expect(bookSchema.parse({ ...minimalForm, seriesNumber: "  " }).seriesNumber).toBeNull();
+    expect(bookSchema.parse(minimalForm).seriesNumber).toBeUndefined();
+  });
+
+  it("keeps real numbers, including a deliberate 0 and halves", () => {
+    expect(bookSchema.parse({ ...minimalForm, seriesNumber: "0" }).seriesNumber).toBe(0);
+    expect(bookSchema.parse({ ...minimalForm, seriesNumber: "2.5" }).seriesNumber).toBe(2.5);
+  });
+});
+
+describe("reading dates", () => {
+  const dayAfterTomorrow = new Date(Date.now() + 2 * 86_400_000).toISOString().slice(0, 10);
+
+  it("refuses a finish date before the start date", () => {
+    const res = readingSchema.safeParse({
+      status: "READ",
+      dateStarted: "2026-10-05",
+      dateFinished: "2026-10-01",
+    });
+    expect(res.success).toBe(false);
+    expect(res.error?.issues[0]?.message).toBe("Finish date is before the start date");
+  });
+
+  it("refuses dates in the future", () => {
+    expect(readingSchema.safeParse({ status: "READ", dateFinished: dayAfterTomorrow }).success).toBe(false);
+    expect(readingSchema.safeParse({ status: "READING", dateStarted: dayAfterTomorrow }).success).toBe(false);
+  });
+
+  it("accepts the same day for both, and either date alone", () => {
+    expect(
+      readingSchema.safeParse({ status: "READ", dateStarted: "2026-10-01", dateFinished: "2026-10-01" }).success,
+    ).toBe(true);
+    expect(readingSchema.safeParse({ status: "READ", dateFinished: "2019-05-01" }).success).toBe(true);
+    expect(readingSchema.safeParse({ status: "READING", dateStarted: "", dateFinished: "" }).success).toBe(true);
+  });
+
+  it("applies the same rules to past reads", () => {
+    expect(pastReadSchema.safeParse({ dateStarted: "2020-02-01", dateFinished: "2020-01-01" }).success).toBe(false);
+    expect(pastReadSchema.safeParse({ dateFinished: "2019-05-01" }).success).toBe(true);
   });
 });

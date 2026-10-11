@@ -7,7 +7,7 @@ import type { ImportSummary } from "@/lib/import";
 import { Button } from "@/components/ui/button";
 
 /**
- * "Restore backup" button on the stats page: picks a MyReads export (zip
+ * "Restore backup" button on the account page: picks a MyReads export (zip
  * with covers, or a legacy JSON), posts it to /api/import, and reports what
  * was merged in.
  */

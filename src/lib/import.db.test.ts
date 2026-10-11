@@ -228,6 +228,38 @@ describe("importLibrary", () => {
     expect(saved.coverUrl).toBeNull();
   });
 
+  it("refuses a bundled cover whose bytes are not an image", async () => {
+    // Same check as /api/covers/upload: an HTML page renamed to .jpg in a
+    // hand-made backup must not land in the cache.
+    const name = `fake-${Date.now().toString(16)}${Math.floor(Math.random() * 1e6).toString(16)}.jpg`;
+    const html = new TextEncoder().encode("<html><script>alert(1)</script></html>");
+    const res = await importLibrary(
+      userId,
+      payload([book({ coverUrl: `/api/covers/${name}` })]),
+      async (f) => (f === name ? html : null),
+    );
+
+    expect(res).toMatchObject({ coversRestored: 0 });
+    const saved = await prisma.book.findFirstOrThrow({ where: { userId } });
+    expect(saved.coverUrl).toBeNull();
+  });
+
+  it("drops a cover URL the book form would refuse, but keeps the book", async () => {
+    await importLibrary(
+      userId,
+      payload([
+        book({ title: "A", isbn: null, coverUrl: "javascript:alert(1)" }),
+        book({ title: "B", isbn: null, coverUrl: "//evil.example/x.jpg" }),
+      ]),
+    );
+
+    const saved = await prisma.book.findMany({ where: { userId }, orderBy: { title: "asc" } });
+    expect(saved.map((b) => [b.title, b.coverUrl])).toEqual([
+      ["A", null],
+      ["B", null],
+    ]);
+  });
+
   it("preserves the original date added, so library ordering survives", async () => {
     const when = "2020-03-04T05:06:07.000Z";
     await importLibrary(userId, payload([book({ createdAt: when })]));

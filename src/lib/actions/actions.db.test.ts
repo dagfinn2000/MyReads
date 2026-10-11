@@ -30,6 +30,7 @@ const { readAgain, addPastRead, deletePastRead } = await import("@/lib/actions/r
 const { bulkUpdateBooks } = await import("@/lib/actions/bulk");
 const { renameTag, deleteTag } = await import("@/lib/actions/tags");
 const { lendBook, returnLoan, deleteLoan } = await import("@/lib/actions/loans");
+const { createShelf } = await import("@/lib/actions/shelves");
 
 let userId: string;
 let otherUserId: string;
@@ -179,6 +180,43 @@ describe("bulkUpdateBooks", () => {
     }
   });
 
+  it("dates and counts books moved to Read, as the reading card does", async () => {
+    // A bare status update left these undated with timesRead 0, so they
+    // were missing from the yearly stats and the goal.
+    const fresh = await makeBook({ status: ReadingStatus.READING });
+    const dated = await makeBook({
+      status: ReadingStatus.READING,
+      dateFinished: new Date("2026-02-03T00:00:00.000Z"),
+    });
+    const reread = await makeBook({ status: ReadingStatus.READING });
+    await prisma.read.create({ data: { bookId: reread.id } });
+
+    const res = await bulkUpdateBooks({
+      bookIds: [fresh.id, dated.id, reread.id],
+      status: ReadingStatus.READ,
+    });
+    expect(res.count).toBe(3);
+
+    const rows = await prisma.book.findMany({
+      where: { id: { in: [fresh.id, dated.id, reread.id] } },
+    });
+    const byId = new Map(rows.map((r) => [r.id, r]));
+    expect(byId.get(fresh.id)?.dateFinished?.toDateString()).toBe(new Date().toDateString());
+    expect(byId.get(fresh.id)?.timesRead).toBe(1);
+    expect(byId.get(dated.id)?.dateFinished?.toISOString()).toBe("2026-02-03T00:00:00.000Z");
+    expect(byId.get(reread.id)?.timesRead).toBe(2);
+  });
+
+  it("uncounts books moved off Read and clears their page", async () => {
+    const bk = await makeBook({ status: ReadingStatus.READ, timesRead: 1, currentPage: 50 });
+    await bulkUpdateBooks({ bookIds: [bk.id], status: ReadingStatus.WANT_TO_READ });
+
+    const after = await prisma.book.findUniqueOrThrow({ where: { id: bk.id } });
+    expect(after.status).toBe(ReadingStatus.WANT_TO_READ);
+    expect(after.timesRead).toBe(0);
+    expect(after.currentPage).toBeNull();
+  });
+
   it("merges tags instead of appending duplicates", async () => {
     const bk = await makeBook({ tags: ["fantasy", "epic"] });
     await bulkUpdateBooks({ bookIds: [bk.id], addTags: ["fantasy", "reread"] });
@@ -200,6 +238,30 @@ describe("bulkUpdateBooks", () => {
     expect((await prisma.book.findFirstOrThrow({ where: { id: theirs.id } })).status).toBe(
       ReadingStatus.WANT_TO_READ,
     );
+  });
+
+  it("takes books off a shelf, leaving the others on it", async () => {
+    const [a, b, c] = await Promise.all([makeBook(), makeBook(), makeBook()]);
+    const shelf = await prisma.shelf.create({
+      data: { userId, name: "Shelf", books: { connect: [{ id: a.id }, { id: b.id }, { id: c.id }] } },
+    });
+
+    const res = await bulkUpdateBooks({ bookIds: [a.id, b.id], removeShelfId: shelf.id });
+    expect(res.count).toBe(2);
+
+    const after = await prisma.shelf.findUniqueOrThrow({
+      where: { id: shelf.id },
+      select: { books: { select: { id: true } } },
+    });
+    expect(after.books.map((x) => x.id)).toEqual([c.id]);
+  });
+
+  it("won't take books off another account's shelf", async () => {
+    const bk = await makeBook();
+    const theirShelf = await prisma.shelf.create({ data: { userId: otherUserId, name: "Theirs" } });
+    expect(await bulkUpdateBooks({ bookIds: [bk.id], removeShelfId: theirShelf.id })).toEqual({
+      error: "Shelf not found",
+    });
   });
 
   it("rejects a shelf belonging to another account without writing anything", async () => {
@@ -254,6 +316,21 @@ describe("tag management", () => {
 
     const after = await prisma.book.findFirstOrThrow({ where: { id: theirs.id } });
     expect(after.tags).toEqual(["scifi"]);
+  });
+});
+
+describe("shelves", () => {
+  it("refuses a second shelf whose name differs only by case or spaces", async () => {
+    expect(await createShelf({}, form({ name: "Favourites" }))).toEqual({ success: true });
+    expect(await createShelf({}, form({ name: "favourites " }))).toEqual({
+      error: 'You already have a shelf called "Favourites"',
+    });
+    expect(await prisma.shelf.count({ where: { userId } })).toBe(1);
+  });
+
+  it("doesn't count another account's shelf as a duplicate", async () => {
+    await prisma.shelf.create({ data: { userId: otherUserId, name: "Favourites" } });
+    expect(await createShelf({}, form({ name: "Favourites" }))).toEqual({ success: true });
   });
 });
 

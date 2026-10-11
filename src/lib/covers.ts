@@ -2,6 +2,7 @@ import crypto from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { checkUrlAllowed } from "@/lib/net-guard";
+import { prisma } from "@/lib/prisma";
 
 /**
  * Local cover-image cache. When a book is saved with a remote cover URL the
@@ -11,7 +12,21 @@ import { checkUrlAllowed } from "@/lib/net-guard";
  * In Docker this directory is a named volume (COVERS_DIR=/app/data/covers).
  */
 export function coversDir(): string {
-  return process.env.COVERS_DIR || path.join(process.cwd(), "data", "covers");
+  return (
+    process.env.COVERS_DIR ||
+    path.join(/* turbopackIgnore: true */ process.cwd(), "data", "covers")
+  );
+}
+
+/**
+ * Where the cached cover `filename` lives on disk. Every read and write in
+ * the cache goes through here so the build's file tracer is told once, in
+ * one place, that these paths are only known at runtime. Without the hint
+ * it can't tell what they point at and copies project files into the
+ * standalone bundle (and so the Docker image) to be safe.
+ */
+export function coverFilePath(filename: string): string {
+  return path.join(/* turbopackIgnore: true */ coversDir(), filename);
 }
 
 const EXT_BY_MIME: Record<string, string> = {
@@ -127,19 +142,37 @@ export async function cacheCoverImage(
     await fs.mkdir(dir, { recursive: true });
     const hash = crypto.createHash("sha1").update(buf).digest("hex").slice(0, 8);
     const filename = `${bookId}-${hash}.${ext}`;
-    await fs.writeFile(path.join(dir, filename), buf);
+    await fs.writeFile(coverFilePath(filename), buf);
     return `/api/covers/${filename}`;
   } catch {
     return null;
   }
 }
 
-/** Removes a book's cached cover file, if `coverUrl` points into the cache. */
+/**
+ * Removes a cached cover file, if `coverUrl` points into the cache and no
+ * book uses it any more. Call it after the row that held `coverUrl` has been
+ * changed or deleted.
+ *
+ * coverUrl is only a string: the book form accepts any local path, and a
+ * restored backup keeps the path it had. So two books, even two accounts'
+ * books, can name the same file, and deleting it for one would break the
+ * other's cover (or let one account delete another's). When in doubt the
+ * file stays; `npm run covers:prune` clears what nothing points at.
+ */
 export async function deleteCachedCover(coverUrl: string | null | undefined) {
   if (!coverUrl?.startsWith("/api/covers/")) return;
   const filename = path.basename(coverUrl);
   try {
-    await fs.unlink(path.join(coversDir(), filename));
+    const stillUsed = await prisma.book.count({
+      where: { coverUrl: { contains: filename } },
+    });
+    if (stillUsed > 0) return;
+  } catch {
+    return; // can't tell — keep the file
+  }
+  try {
+    await fs.unlink(coverFilePath(filename));
   } catch {
     // already gone — fine
   }

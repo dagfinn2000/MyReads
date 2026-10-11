@@ -168,8 +168,10 @@ export function FilterBar({
         />
       </div>
 
+      {/* Each filter is at least half the row on phones, so they wrap two
+          to a line instead of squeezing "All tags" down to "All ta". */}
       <Select value={values.tag || "all"} onValueChange={(v) => navigate({ tag: v })}>
-        <SelectTrigger className="min-w-0 flex-1 sm:w-36 sm:flex-initial">
+        <SelectTrigger className="min-w-[calc(50%_-_0.25rem)] flex-1 sm:w-36 sm:min-w-0 sm:flex-initial">
           <SelectValue placeholder="Tag" />
         </SelectTrigger>
         <SelectContent>
@@ -187,7 +189,7 @@ export function FilterBar({
         value={values.format || "all"}
         onValueChange={(v) => navigate({ format: v })}
       >
-        <SelectTrigger className="min-w-0 flex-1 sm:w-32 sm:flex-initial">
+        <SelectTrigger className="min-w-[calc(50%_-_0.25rem)] flex-1 sm:w-32 sm:min-w-0 sm:flex-initial">
           <SelectValue placeholder="Format" />
         </SelectTrigger>
         <SelectContent>
@@ -204,7 +206,7 @@ export function FilterBar({
         value={values.owned || "all"}
         onValueChange={(v) => navigate({ owned: v })}
       >
-        <SelectTrigger className="min-w-0 flex-1 sm:w-40 sm:flex-initial">
+        <SelectTrigger className="min-w-[calc(50%_-_0.25rem)] flex-1 sm:w-40 sm:min-w-0 sm:flex-initial">
           <SelectValue placeholder="Owned" />
         </SelectTrigger>
         <SelectContent>
@@ -220,7 +222,7 @@ export function FilterBar({
         value={values.minRating || "all"}
         onValueChange={(v) => navigate({ minRating: v })}
       >
-        <SelectTrigger className="min-w-0 flex-1 sm:w-32 sm:flex-initial">
+        <SelectTrigger className="min-w-[calc(50%_-_0.25rem)] flex-1 sm:w-32 sm:min-w-0 sm:flex-initial">
           <SelectValue placeholder="Rating" />
         </SelectTrigger>
         <SelectContent>

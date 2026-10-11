@@ -72,9 +72,9 @@ export function ReadingCard({
         <form key={formKey} action={formAction} className="grid gap-4">
           <div className="flex flex-wrap items-end gap-4">
             <div className="grid gap-2">
-              <Label>Status</Label>
+              <Label htmlFor="status">Status</Label>
               <Select name="status" defaultValue={book.status}>
-                <SelectTrigger className="w-44">
+                <SelectTrigger id="status" className="w-44">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
