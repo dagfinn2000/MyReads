@@ -1,341 +1,182 @@
 # MyReads
 
-A self-hosted, single-purpose personal book library. Think *GoodReads, but
-just for you*: catalog the books you own, track what you're reading, rate and
-review everything — with no friends, feeds, follows, or any other social
-surface area.
+A book library you host yourself, for one reader. Think of it as Goodreads
+without the social side: keep track of the books you own, what you're
+reading, and what you thought of them, on your own server.
 
-![The library — status shelves, custom shelves, search, filters, and covers](docs/library.png)
+![The library page with status shelves, search, filters and covers](docs/library.png)
 
-## Features
+## What it does
 
-- **Book catalog** — add books manually or via search-and-import, with title,
-  author(s), ISBN, cover, description, page count, publish date, genre/tags,
-  format (physical / ebook / audiobook), and ownership (owned / wishlist /
-  borrowed / no longer have it). Full edit/delete.
-- **Search & import** — search-as-you-type against the
-  [Open Library API](https://openlibrary.org/developers/api) (free, no key).
-  Optionally enriched by the Google Books API when `GOOGLE_BOOKS_API_KEY` is
-  set, with the [National Library of Norway](https://api.nb.no/) as a final
-  fallback for titles the others don't know (it has essentially every book
-  ever published in Norway). Every fetched field is reviewable/editable
-  before saving, responses are cached in Postgres for a week, and cover
-  images are downloaded into a local cache so the app never depends on
-  third-party image hosting.
-- **Cover picker & custom covers** — the book form can search all three
-  sources for candidate covers (exact ISBN matches first, so the edition you
-  own wins — scan a Norwegian barcode, get the Norwegian cover) and lets you
-  pick one visually. You can also paste any image URL or upload your own
-  photo of the book.
-- **ISBN barcode scanning** — point a camera at the barcode on a physical
-  book and it's looked up and prefilled automatically (a single match skips
-  straight to the review form). Uses the browser's native `BarcodeDetector`
-  (Chrome/Edge, incl. Chrome on Android). Note: browsers only allow camera
-  access over **HTTPS or localhost** — behind a reverse proxy with TLS it
-  just works; on a plain `http://LAN-IP` address it can't.
-- **"Do I own this?" bookstore mode** — scan a barcode (or type an ISBN) on
-  the Check page and instantly see whether the book is already in your
-  library: the exact edition (matched by ISBN in both its 10- and 13-digit
-  forms), the same title as a different edition, or not there at all — with
-  a one-tap handoff to the add flow, ISBN prefilled. Installed as a PWA, the
-  home-screen icon's long-press menu jumps straight to it. The add flow also
-  warns when you're about to import a book you already have.
-- **Lending** — record who borrowed your copy and when. A book that's out is
-  badged in the library and filterable as "Lent out", and the book page shows
-  who has it, for how long, and everyone who has borrowed it before. Marking
-  it returned keeps the record as history. Lending is separate from
-  ownership — a lent book is still yours.
-- **Bulk edit** — flip the library into select mode, tick any number of
-  books (or "Select all" within the current filter), and set status, add
-  tags, or shelve them in one action.
-- **Personal reading data** — status (Want to Read / Currently Reading /
-  Read / Did Not Finish), 1–5 star ratings **with half stars**, free-text
-  review/notes, start & finish dates, and reading progress ("page 218 of
-  618") with a progress bar on the library card.
-- **Read history & re-reads** — every pass through a book is kept: "Read it
-  again" archives the current dates and rating and restarts the book, and
-  reads from before the app can be recorded (dates optional, with what you
-  rated it that time). Re-reads count in the per-year stats and toward
-  reading goals; "times read" is derived from the history.
-- **Reading log, pace & forecast** — every change to "current page" is kept
-  as a dated log entry, at no extra effort: the book page draws the current
-  read as a progress-over-time sparkline with your pages-per-day pace and,
-  while you're mid-book, a finish forecast ("on pace to finish 3 Aug").
-  Finished books show the shape of the read instead. A collapsible log lists
-  every entry with delete buttons, and entries ride along in backups. Books
-  mid-read when you upgrade are seeded with their current position so pace
-  works from your first update.
-- **Reading-days heatmap** — a GitHub-style calendar of the last 12 months
-  on the stats page, tinted by pages read per day (counted as the increase
-  between consecutive log entries of each book), with reading-day and
-  streak counts above it.
-- **Quotes & highlights** — keep passages from a book, each with an optional
-  page reference and a personal note, added/edited/deleted right on the book
-  page. Quotes are listed in page order and included in backups. A dedicated
-  Quotes page collects every passage in the library (newest first) with
-  search across quote text, notes, and books, and the stats page shows a
-  random quote on every visit.
-- **Series** — assign books a series name and number (floats allowed, so a
-  novella can be #1.5). Book pages link the series and show its other
-  entries in reading order; the library can group by series.
-- **Custom shelves** — freeform, user-created shelves ("Sanderson",
-  "Fantasy") independent of reading status. A book can sit on any number of
-  shelves; deleting a shelf never touches its books.
-- **Library views** — status shelves, custom-shelf chips, text search across
-  title/author/series (every word must match, in any order, and accents
-  don't matter: "bronte" finds Brontë), filters by tag, format, ownership
-  (including "lent out"), and minimum rating, grouping
-  by author or series, sorting by title, author, rating, date added, or date
-  finished. Authors sort by surname the way a bookshelf files them — Le
-  Guin under L, van Gulik under V — in both the author sort and the author
-  grouping. Sorting by author keeps each series together as a block in
-  series order — Mistborn #1 sits next to #2 instead of being alphabetized
-  apart. All view state lives in the URL, and the sort, direction, and
-  grouping you pick are also remembered on your account — coming back to
-  the library later (or from another device) restores your view. A "Pick
-  for me" button opens a random book from Want to Read (respecting the
-  active filters) when you can't decide.
-- **Tag management** — rename a tag across the whole library (renaming onto
-  an existing tag merges them) or remove one everywhere, from a small dialog
-  next to the tag filter.
-- **Stats dashboard** — books read per year, average rating, total pages
-  read, genre and format breakdowns.
-- **Year in review** — click any year on the stats page for its wrap-up:
-  books and pages read, re-reads, best-of shelf, longest/shortest/fastest
-  read, first and last finish, monthly rhythm, rating distribution, and top
-  genres for that year. Years with reading-log data also get their rhythm
-  from the log itself: pages per month, days spent reading, the biggest
-  reading day, and the longest streak.
-- **Reading goals** — set a yearly goal ("24 books in 2026") on the stats
-  page and watch the progress bar fill; hit the target and you earn a gold
-  medal. Past years' goals (and medals) stay on display.
-- **Backup & restore** — one click downloads your entire library (books,
-  quotes, read history, the reading log, shelves, reading goals, **and
-  cover images**) as a zip, and the account page can restore such a backup
-  into any instance — covers included, so a restore onto a fresh server
-  looks exactly like the original. Restores merge: books you already have
-  are skipped, so it's safe to run on a live library. Plain-JSON backups
-  from older versions restore fine too.
-- **Twenty-six themes that follow you** — the picked theme is saved on your
-  account and server-rendered on first paint, so signing in from a new
-  browser or device brings your look along (localStorage still covers the
-  signed-out pages).
-- **Installable (PWA)** — a web app manifest makes MyReads installable on a
-  phone home screen, which pairs nicely with barcode scanning. Same browser
-  rule as the scanner: manifests only apply over **HTTPS or localhost**.
-  Add the shortcut from a plain `http://LAN-IP` address and Android ignores
-  the manifest entirely — you get a bare bookmark with a letter tile instead
-  of the app icon. Behind a TLS reverse proxy it installs with the proper
-  icon and name.
-- **Auth** — username/password accounts via Auth.js (Credentials provider),
-  bcrypt-hashed passwords, JWT sessions. Registration can be disabled once
-  your account exists, and both login and registration are rate-limited
-  (in-memory, per username and per IP) so an internet-facing instance can't
-  be password-guessed or flooded with junk accounts.
-- **Account page** — change your password (current password required) or
-  delete the account entirely: everything cascades — books, history, quotes,
-  shelves, goals, cached covers — after a password-confirmed two-step, with
-  a backup download one click away.
+**Adding books**
 
-Deliberately out of scope: anything social, recommendation engines, CSV
+- Search by title, author or ISBN and import the details from
+  [Open Library](https://openlibrary.org/), with
+  [Google Books](https://developers.google.com/books) (optional) and the
+  [National Library of Norway](https://api.nb.no/) as extra sources. You can
+  check and edit everything before saving, or type a book in by hand.
+- Scan the barcode on a book with your phone's camera.
+- Choose a cover from the search results, paste an image link, or upload a
+  photo. Covers are stored on your server.
+- **Do I own this?** In a bookshop, scan a barcode on the Check page to see
+  whether the book is already in your library.
+
+**Tracking your reading**
+
+- Status (Want to Read, Currently Reading, Read, Did Not Finish), half-star
+  ratings, notes, and start and finish dates.
+- Update your current page as you go. The book page shows your pace and when
+  you're likely to finish.
+- Re-reads are kept as history and count in your stats.
+- Save favourite quotes with page numbers, and search all of them on the
+  Quotes page.
+
+**Organising your library**
+
+- Custom shelves, tags, series in reading order, format (physical, ebook,
+  audiobook) and ownership (owned, wishlist, borrowed, no longer have it).
+- Keep track of who borrowed your books and when.
+- Search, filter, sort and group the library. Authors sort by surname, the
+  way a bookshelf is filed. "Pick for me" opens a random book from Want to
+  Read.
+- Edit many books at once: set their status, add tags, or put them on a
+  shelf or take them off it.
+
+**Stats**
+
+- Books read per year, pages read, ratings, genres and formats, and a
+  calendar of the days you read.
+- A "year in review" page for every year, and yearly reading goals.
+
+**Everything else**
+
+- Download a backup (a zip with everything, covers included) and restore it
+  on any MyReads server.
+- 26 colour themes. Your choice follows you to every device you sign in on.
+- Install it on your phone's home screen like an app.
+
+Deliberately out of scope: anything social, recommendation engines, and CSV
 import.
 
 ## Screenshots
 
-**Book page** — bibliographic details, the rest of the series in reading
-order, shelves, and your own reading data below:
+<details>
+<summary>Show screenshots: book page, adding a book, cover picker, series, stats, year in review, themes</summary>
 
-![Book detail page](docs/book-page.png)
+**Book page**: details, the rest of the series, shelves, and your own
+reading data.
 
-**Grouped by series** — each series becomes its own shelf heading, in
-reading order (novellas slot in at #2.5):
+![Book page](docs/book-page.png)
+
+**Adding a book**: search by title, author or ISBN, or scan the barcode, then
+pick a result to fill in the form.
+
+![Search and import](docs/add-book.png)
+
+**Cover picker**: covers from all sources, with exact matches for your
+edition first.
+
+![Cover picker](docs/cover-picker.png)
+
+**Grouped by series**, in reading order:
 
 ![Library grouped by series](docs/series-grouping.png)
 
-**Search & import** — type a title, author, or ISBN (or scan the barcode)
-and pick a result to prefill the form:
+**Stats and reading goals**:
 
-![Add book via search and import](docs/add-book.png)
+![Stats page](docs/stats.png)
 
-**Cover picker** — candidate covers from all three sources, exact ISBN
-matches first; the Norwegian editions come courtesy of the National
-Library:
+**Year in review**:
 
-![Cover picker on the edit form](docs/cover-picker.png)
+![Year in review](docs/year-in-review.png)
 
-**Stats & reading goals**:
-
-![Stats dashboard with reading goal](docs/stats.png)
-
-**Year in review** — any year's wrap-up: the best-of shelf, highlights,
-monthly rhythm, ratings, and top genres:
-
-![Year in review page](docs/year-in-review.png)
-
-**Dark mode** — one of twenty-six themes:
+**Themes**: a dark theme, and the theme picker.
 
 ![Library in a dark theme](docs/library-dark.png)
 
-| Theme picker | Backup & restore |
-| --- | --- |
-| ![Theme picker](docs/themes.png) | ![Backup card](docs/backup.png) |
+![Theme picker](docs/themes.png)
 
-**Account** — change your password, download or restore a backup, or delete
-the account; the password change and the deletion are password-confirmed:
+</details>
 
-![Account page](docs/account.png)
+## Install
 
-## Quick start (Docker)
+You need [Docker](https://docs.docker.com/get-docker/) with Docker Compose.
 
-Requirements: Docker with the compose plugin.
+1. Get the code and make a settings file:
 
-```bash
-git clone https://github.com/dagfinn2000/MyReads.git
-cd MyReads
-cp .env.example .env
-# edit .env: set POSTGRES_PASSWORD and AUTH_SECRET (openssl rand -base64 32)
-docker compose up -d
-```
+   ```bash
+   git clone https://github.com/dagfinn2000/MyReads.git
+   cd MyReads
+   cp .env.example .env
+   ```
 
-That's it. The app container waits for Postgres to be healthy, applies
-database migrations automatically, and starts on
-[http://localhost:3000](http://localhost:3000). Register an account and start
-adding books.
+2. Open `.env` and change two values:
+   - `POSTGRES_PASSWORD`: any long random string.
+   - `AUTH_SECRET`: paste the output of `openssl rand -base64 32`.
 
-Data persists in two named volumes: `pgdata` (the database — your entire
-library) and `covers` (cached cover images).
+3. Start MyReads:
 
-## Environment variables
+   ```bash
+   docker compose up -d
+   ```
 
-All configuration is documented inline in [.env.example](.env.example).
-Summary:
+4. Open <http://localhost:3000>, register an account, and add your first
+   book.
 
-| Variable | Required | Purpose |
+The first start builds the app, so it takes a while. The database is set up
+automatically.
+
+## After installing
+
+- **Close registration.** Once you have your account, set
+  `DISABLE_REGISTRATION=true` in `.env` and run `docker compose up -d` again
+  so nobody else can sign up.
+- **Use HTTPS for the phone features.** Browsers only allow the barcode
+  camera and installing the app on HTTPS or `localhost`, so on a plain
+  `http://192.168.x.x` address they won't work. Put MyReads behind a reverse
+  proxy with HTTPS (for example Caddy, nginx or Traefik). Barcode scanning
+  works in Chrome and Edge, including Chrome on Android.
+- **Make backups.** On the Account page, **Download backup** saves
+  everything as a zip. **Restore backup** on the same page loads one into any
+  MyReads server. Books you already have are skipped, so restoring twice is
+  safe.
+- **Know where your data is.** The library lives in two Docker volumes:
+  `pgdata` (the database) and `covers` (cover images).
+- **Update.** Run `git pull`, then `docker compose up -d --build`. Database
+  changes are applied automatically when the app starts.
+
+## Settings
+
+These are the settings in `.env` you are most likely to change. The rest are
+explained in [.env.example](.env.example).
+
+| Setting | Needed? | What it does |
 | --- | --- | --- |
-| `POSTGRES_USER` / `POSTGRES_DB` | no (default `myreads`) | Postgres credentials for the compose `db` service |
-| `POSTGRES_PASSWORD` | **yes** | Postgres password; compose refuses to start without it |
-| `AUTH_SECRET` | **yes** | Signs session JWTs — generate with `openssl rand -base64 32` |
-| `AUTH_TRUST_HOST` | yes (keep `true`) | Required by Auth.js on self-hosted deployments |
-| `DATABASE_URL` | outside Docker only | Connection string for local dev / the Prisma CLI; inside Docker compose assembles it from the `POSTGRES_*` values |
-| `GOOGLE_BOOKS_API_KEY` | no | Enables Google Books as search fallback + metadata enrichment |
-| `COVERS_DIR` | no | Cover cache directory (Docker sets `/app/data/covers`; local dev defaults to `./data/covers`) |
-| `DISABLE_REGISTRATION` | no | `true` blocks new accounts after you've made yours |
-| `APP_PORT` | no | Host port for the app (default `3000`) |
+| `POSTGRES_PASSWORD` | **yes** | Password for the database. |
+| `AUTH_SECRET` | **yes** | Secret that signs logins. Make one with `openssl rand -base64 32`. |
+| `DISABLE_REGISTRATION` | no | `true` stops new accounts from being created. |
+| `GOOGLE_BOOKS_API_KEY` | no | Adds Google Books to search, which often has better descriptions and page counts. |
+| `APP_PORT` | no | Port MyReads runs on (default `3000`). |
 
-## Local development
+## Cleaning up cover images
 
-Requirements: Node 22+, a Postgres instance (the compose `db` service works
-fine for this).
+Cover images that no book uses any more, for example from an upload you
+never saved, stay on disk. To see how many there are, then delete them:
 
 ```bash
-cp .env.example .env       # set POSTGRES_PASSWORD, AUTH_SECRET
-# start just the database, with 5432 published on localhost (dev override —
-# the base compose file deliberately keeps Postgres unexposed)
-docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d db
-npm install
-npx prisma migrate deploy  # apply migrations (DATABASE_URL points at localhost)
-npm run dev                # http://localhost:3000
+docker compose exec app node scripts/prune-covers.mjs        # report only
+docker compose exec app node scripts/prune-covers.mjs --yes  # delete
 ```
 
-Useful scripts: `npm run build` (prisma generate + production build),
-`npm test` (unit tests — Vitest, no DB needed), `npm run lint`,
-`npm run db:studio` (browse the DB), `npm run db:migrate` (apply migrations).
+Files less than a day old are always kept. Old search results are cleaned up
+automatically every time the app starts.
 
-### Housekeeping
+## Development
 
-Two things accumulate on a long-lived instance and are not your data:
-
-- **Expired metadata cache rows.** Pruned automatically on every container
-  start; `npm run db:prune` runs it by hand.
-- **Orphaned cover files** — images written by an upload whose form was never
-  submitted. `npm run covers:prune` reports what it would remove;
-  `npm run covers:prune -- --yes` actually removes it. Files younger than 24
-  hours are always kept, so an upload sitting in an open form is safe. This
-  one is deliberately manual: it deletes files the app cannot prove are
-  needed, which is not something to do unattended on every restart.
-
-There are two test suites:
-
-- **`npm test`** — fast unit tests over the pure logic most prone to silent
-  breakage: ISBN 10↔13 conversion, reading-pass boundaries and pages-per-day
-  math, streaks, the surname/series shelf-filing rules, saved-view parsing,
-  the auth rate limiter, the SSRF address guard, and image sniffing. No
-  database needed.
-- **`npm run test:db:docker`** — database-backed tests against a throwaway
-  `postgres:16-alpine` container: the export→restore round trip, restore's
-  merge and duplicate rules, `timesRead` bookkeeping across re-reads, the
-  book form actions and the reading log they write, bulk edit atomicity, and
-  the per-user ownership checks. Use `npm run test:db` instead if you
-  already have a `DATABASE_URL` pointing at a scratch database.
-
-The database suite exists because those are the paths where a stand-in for
-Postgres would reproduce a bug faithfully rather than catch it — and because
-restore is the only feature whose failure loses data you can't get back.
-
-## Tech stack
-
-- **[Next.js 16](https://nextjs.org/)** (App Router, TypeScript) — UI and API
-  routes in one codebase, standalone output for a small Docker image
-- **[PostgreSQL](https://www.postgresql.org/)** + **[Prisma](https://www.prisma.io/)**
-- **[Auth.js v5](https://authjs.dev/)** (NextAuth) — Credentials provider,
-  JWT sessions, bcryptjs hashing
-- **[Tailwind CSS v4](https://tailwindcss.com/)** + **[shadcn/ui](https://ui.shadcn.com/)**
-- **[Zod](https://zod.dev/)** for validation
-- **[Vitest](https://vitest.dev/)** for unit tests (`npm test`)
-
-## Architecture notes
-
-```
-src/
-├─ app/
-│  ├─ (auth)/          login & register (no nav shell)
-│  ├─ (app)/           authenticated pages: books (library), books/new,
-│  │                   books/[id], books/[id]/edit, books/check, quotes,
-│  │                   stats, stats/year/[year], account
-│  └─ api/             auth (Auth.js), register, metadata (search/details/
-│                      covers), library/check, cover upload & serving,
-│                      backup export/import
-├─ components/         UI (shadcn/ui in components/ui, app components beside)
-├─ lib/
-│  ├─ actions/         server actions: books & reading data, reads, quotes,
-│  │                   shelves, tags, goals, account (all with ownership
-│  │                   checks)
-│  ├─ metadata/        Open Library + Google Books + nb.no clients, DB cache
-│  ├─ covers.ts        cover image download/cache
-│  ├─ rate-limit.ts    in-memory throttles for sign-in, registration,
-│  │                   catalogue lookups and cover uploads
-│  └─ validation.ts    zod schemas shared by actions and API routes
-├─ auth.config.ts      edge-safe Auth.js config (used by proxy)
-├─ auth.ts             full Auth.js config (Credentials + Prisma + bcrypt)
-└─ proxy.ts            route protection (Next 16; formerly middleware.ts)
-```
-
-Design decisions worth knowing about:
-
-- **Reading data lives on the Book row.** Books are per-user in this app, so
-  a separate "reading entry" join model would add indirection for nothing.
-  The Book row always holds the *latest* read; earlier passes are archived
-  in the `Read` table, and `timesRead` is derived from the two.
-- **Ratings are integers 1–10** (half-star units); `7` renders as 3.5 stars.
-- **Metadata caching is a read-through table** (`MetadataCache`) keyed by
-  `(source, normalized query)` with a one-week TTL and stale-if-error
-  fallback, so a flaky Open Library never breaks previously working lookups.
-- **Cover images are cached locally.** After a save the remote cover URL is
-  downloaded to `COVERS_DIR` in the background (via `after()`, so it never
-  blocks the save) and the book is repointed to `/api/covers/<id>-<hash>.<ext>`
-  — the content hash gives a changed cover a fresh, immutably-cacheable URL. A
-  single delayed retry rescues hosts that are slow on a cold request (Open
-  Library covers redirect to archive.org, which can lag the first time).
-  Deleting a book removes its file unless another book still uses it;
-  download failures are non-fatal (the remote URL stays).
-- **Mutations are server actions** with per-user ownership checks;
-  list/detail pages are server components querying Prisma directly. The
-  handful of client-fetched API routes back interactive UI only — metadata
-  search/details/covers, the library ownership check, cover upload, and
-  backup import — plus the route that serves cached covers.
-- **Migrations run on container start** (`prisma migrate deploy` in the
-  entrypoint) — first boot creates the schema, upgrades apply pending
-  migrations, and an already-migrated DB is a no-op.
+MyReads is a [Next.js](https://nextjs.org/) app with PostgreSQL and
+[Prisma](https://www.prisma.io/). To run it without Docker you need Node 22+
+and a Postgres database. See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) for
+setup, tests, the project layout and the main design decisions.
 
 ## License
 
