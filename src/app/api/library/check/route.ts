@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
+import { spendMetadataBudget } from "@/lib/api-guard";
 import { prisma } from "@/lib/prisma";
 import { searchBooks } from "@/lib/metadata";
 import { isbnVariants, normalizeIsbn } from "@/lib/isbn";
@@ -44,6 +45,7 @@ export interface LibraryCheckResult {
  *     catches "you own this, but as a different edition/translation".
  *     The scan flow has no title, so the ISBN is looked up in the metadata
  *     sources first; the add flow passes title/author straight through.
+ *     That lookup spends from the caller's metadata budget (lib/api-guard.ts).
  */
 export async function GET(req: Request) {
   const session = await auth();
@@ -74,6 +76,10 @@ export async function GET(req: Request) {
   let author = authorParam;
   let lookedUp: LibraryCheckResult["lookedUp"] = null;
   if (!title && isbnParam) {
+    // This is the one branch that calls out to the external catalogues, so
+    // it spends from the same per-user budget as /api/metadata/*.
+    const limited = spendMetadataBudget(userId);
+    if (limited) return limited;
     try {
       const results = await searchBooks(normalizeIsbn(isbnParam));
       const hit = results[0];

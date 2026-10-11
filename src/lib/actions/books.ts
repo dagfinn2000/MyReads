@@ -40,7 +40,14 @@ function localizeCoverAfterResponse(bookId: string, coverUrl: string | null) {
       localUrl = await cacheCoverImage(coverUrl, bookId);
     }
     if (localUrl) {
-      await prisma.book.update({ where: { id: bookId }, data: { coverUrl: localUrl } });
+      // Only if the book still has the cover this download was for. A save
+      // in the meantime may have picked another one, and this older
+      // download finishing late must not overwrite it.
+      const { count } = await prisma.book.updateMany({
+        where: { id: bookId, coverUrl },
+        data: { coverUrl: localUrl },
+      });
+      if (count === 0) await deleteCachedCover(localUrl);
     }
   });
 }

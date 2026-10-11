@@ -4,7 +4,7 @@ import JSZip from "jszip";
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { coversDir } from "@/lib/covers";
+import { coverFilePath } from "@/lib/covers";
 
 /**
  * GET /api/export — downloads the signed-in user's entire library as a zip:
@@ -101,14 +101,13 @@ export async function GET() {
   // book row simply exports without its image, exactly as before. Files are
   // read concurrently but added to the zip in book order, so the archive
   // layout stays deterministic.
-  const dir = coversDir();
   const coverFiles = await Promise.all(
     books
       .filter((b) => b.coverUrl?.startsWith("/api/covers/"))
       .map(async (book) => {
         const filename = path.basename(book.coverUrl!);
         try {
-          return { filename, buf: await fs.readFile(path.join(dir, filename)) };
+          return { filename, buf: await fs.readFile(coverFilePath(filename)) };
         } catch {
           return null; // cover cache miss — skip
         }

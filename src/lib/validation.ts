@@ -1,6 +1,16 @@
 import { z } from "zod";
 import { BookFormat, BookOwnership, ReadingStatus } from "@prisma/client";
 
+/**
+ * What a stored cover URL may be: a local path ("/api/covers/…") or an
+ * http(s) URL. Not `javascript:` or `data:`, and not a protocol-relative
+ * `//host/x` or `/\host/x`, which start with "/" but point off-site.
+ * Shared by the book form and the backup import.
+ */
+export function isAllowedCoverUrl(s: string): boolean {
+  return s === "" || /^\/(?![/\\])/.test(s) || /^https?:\/\//i.test(s);
+}
+
 /** Shared by registration and the change-password form. */
 export const passwordSchema = z
   .string()
@@ -66,10 +76,7 @@ export const bookSchema = z.object({
     .string()
     .trim()
     .max(2000, "Cover URL must be at most 2000 characters")
-    .refine(
-      (s) => s === "" || s.startsWith("/") || /^https?:\/\//i.test(s),
-      "Cover URL must be an http(s) URL",
-    )
+    .refine(isAllowedCoverUrl, "Cover URL must be an http(s) URL")
     .transform((s) => s || null)
     .nullable()
     .optional(),

@@ -36,6 +36,10 @@ export function CheckBookClient() {
       const res = await fetch(
         `/api/library/check?isbn=${encodeURIComponent(value)}`,
       );
+      if (res.status === 429) {
+        setError("Too many lookups — wait a minute and try again.");
+        return;
+      }
       if (!res.ok) throw new Error();
       setResult((await res.json()) as LibraryCheckResult);
     } catch {

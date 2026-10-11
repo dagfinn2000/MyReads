@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { coversDir } from "@/lib/covers";
+import { coverFilePath } from "@/lib/covers";
 import { MIME_BY_KIND, type ImageKind } from "@/lib/image-type";
 
 const KIND_BY_EXT: Record<string, ImageKind> = {
@@ -23,7 +23,7 @@ export async function GET(
   if (!kind) return new NextResponse("Not found", { status: 404 });
 
   try {
-    const buf = await fs.readFile(path.join(coversDir(), safe));
+    const buf = await fs.readFile(coverFilePath(safe));
     return new NextResponse(new Uint8Array(buf), {
       headers: {
         "Content-Type": MIME_BY_KIND[kind],

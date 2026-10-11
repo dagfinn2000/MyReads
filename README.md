@@ -264,9 +264,10 @@ There are two test suites:
   database needed.
 - **`npm run test:db:docker`** — database-backed tests against a throwaway
   `postgres:16-alpine` container: the export→restore round trip, restore's
-  merge and duplicate rules, `timesRead` bookkeeping across re-reads, bulk
-  edit atomicity, and the per-user ownership checks. Use `npm run test:db`
-  instead if you already have a `DATABASE_URL` pointing at a scratch database.
+  merge and duplicate rules, `timesRead` bookkeeping across re-reads, the
+  book form actions and the reading log they write, bulk edit atomicity, and
+  the per-user ownership checks. Use `npm run test:db` instead if you
+  already have a `DATABASE_URL` pointing at a scratch database.
 
 The database suite exists because those are the paths where a stand-in for
 Postgres would reproduce a bug faithfully rather than catch it — and because
@@ -302,7 +303,8 @@ src/
 │  │                   checks)
 │  ├─ metadata/        Open Library + Google Books + nb.no clients, DB cache
 │  ├─ covers.ts        cover image download/cache
-│  ├─ rate-limit.ts    in-memory throttle for login/registration attempts
+│  ├─ rate-limit.ts    in-memory throttles for sign-in, registration,
+│  │                   catalogue lookups and cover uploads
 │  └─ validation.ts    zod schemas shared by actions and API routes
 ├─ auth.config.ts      edge-safe Auth.js config (used by proxy)
 ├─ auth.ts             full Auth.js config (Credentials + Prisma + bcrypt)
@@ -325,7 +327,8 @@ Design decisions worth knowing about:
   — the content hash gives a changed cover a fresh, immutably-cacheable URL. A
   single delayed retry rescues hosts that are slow on a cold request (Open
   Library covers redirect to archive.org, which can lag the first time).
-  Deletion cleans the file up; failures are non-fatal (the remote URL stays).
+  Deleting a book removes its file unless another book still uses it;
+  download failures are non-fatal (the remote URL stays).
 - **Mutations are server actions** with per-user ownership checks;
   list/detail pages are server components querying Prisma directly. The
   handful of client-fetched API routes back interactive UI only — metadata

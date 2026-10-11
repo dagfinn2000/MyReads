@@ -24,17 +24,28 @@ export async function guardMetadataRequest(): Promise<
     };
   }
 
-  const key = `metadata:${session.user.id}`;
-  if (metadataLimiter.blocked(key)) {
-    return {
-      ok: false,
-      response: NextResponse.json(
-        { error: "Too many lookups — slow down a moment" },
-        { status: 429, headers: { "Retry-After": "60" } },
-      ),
-    };
-  }
-  metadataLimiter.hit(key);
+  const limited = spendMetadataBudget(session.user.id);
+  if (limited) return { ok: false, response: limited };
 
   return { ok: true, userId: session.user.id };
+}
+
+/**
+ * Spends one unit of `userId`'s outbound-lookup budget. Returns a 429 to send
+ * back when the budget is used up, or null when the lookup may go ahead.
+ *
+ * For routes that only sometimes call out (like /api/library/check, which
+ * looks an ISBN up only when it isn't already in the library), so they can
+ * spend the budget at the point they reach for a catalogue.
+ */
+export function spendMetadataBudget(userId: string): NextResponse | null {
+  const key = `metadata:${userId}`;
+  if (metadataLimiter.blocked(key)) {
+    return NextResponse.json(
+      { error: "Too many lookups — slow down a moment" },
+      { status: 429, headers: { "Retry-After": "60" } },
+    );
+  }
+  metadataLimiter.hit(key);
+  return null;
 }

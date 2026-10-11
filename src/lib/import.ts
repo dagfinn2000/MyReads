@@ -3,8 +3,10 @@ import path from "node:path";
 import { BookFormat, BookOwnership, ReadingStatus } from "@prisma/client";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import { coversDir } from "@/lib/covers";
+import { coverFilePath, coversDir } from "@/lib/covers";
+import { sniffImageKind } from "@/lib/image-type";
 import { buildSearchText } from "@/lib/utils";
+import { isAllowedCoverUrl } from "@/lib/validation";
 
 /**
  * Restore of a MyReads export — either the `library.json` from a zip backup
@@ -66,7 +68,8 @@ const importedBookSchema = z.object({
   authors: z.array(z.string().trim().max(200)).catch([]),
   isbn: z.string().trim().max(20).nullable().optional(),
   description: z.string().max(10000).nullable().optional(),
-  coverUrl: z.string().max(2000).nullable().optional(),
+  // Same rule as the book form; a bad value drops the cover, not the book.
+  coverUrl: z.string().max(2000).refine(isAllowedCoverUrl).nullable().optional().catch(null),
   pageCount: z.number().int().min(1).max(100000).nullable().optional().catch(null),
   publishedDate: z.string().trim().max(20).nullable().optional(),
   tags: z.array(z.string().trim().toLowerCase().max(50)).catch([]),
@@ -194,7 +197,8 @@ export type CoverFileReader = (filename: string) => Promise<Uint8Array | null>;
 
 /** Only names the cover cache itself produces get written back — and only
  *  extensions /api/covers actually serves. Keeps a hand-crafted backup from
- *  planting arbitrary files in the cache directory. */
+ *  planting arbitrary files in the cache directory; the bytes must also be
+ *  an image, the same check /api/covers/upload makes. */
 const SAFE_COVER_FILENAME = /^[A-Za-z0-9][A-Za-z0-9._-]*\.(jpg|png|gif|webp)$/;
 
 /**
@@ -210,7 +214,7 @@ async function resolveCoverUrl(
   if (!coverUrl.startsWith("/api/covers/")) return { url: coverUrl, restored: false }; // remote URL — keep
 
   const filename = path.basename(coverUrl);
-  const target = path.join(coversDir(), filename);
+  const target = coverFilePath(filename);
   try {
     await fs.access(target);
     return { url: coverUrl, restored: false }; // same instance — file survived
@@ -221,7 +225,7 @@ async function resolveCoverUrl(
   if (getCoverFile && SAFE_COVER_FILENAME.test(filename)) {
     try {
       const data = await getCoverFile(filename);
-      if (data) {
+      if (data && sniffImageKind(data)) {
         await fs.mkdir(coversDir(), { recursive: true });
         await fs.writeFile(target, data);
         return { url: coverUrl, restored: true };

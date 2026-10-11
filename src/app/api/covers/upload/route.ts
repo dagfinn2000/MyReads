@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import crypto from "node:crypto";
 import fs from "node:fs/promises";
-import path from "node:path";
 import { auth } from "@/auth";
-import { coversDir } from "@/lib/covers";
+import { coverFilePath, coversDir } from "@/lib/covers";
 import { sniffImageKind } from "@/lib/image-type";
+import { uploadLimiter } from "@/lib/rate-limit";
 
 const MAX_BYTES = 10 * 1024 * 1024;
 
@@ -16,9 +16,18 @@ const MAX_BYTES = 10 * 1024 * 1024;
  */
 export async function POST(req: Request) {
   const session = await auth();
-  if (!session?.user) {
+  if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  const key = `upload:${session.user.id}`;
+  if (uploadLimiter.blocked(key)) {
+    return NextResponse.json(
+      { error: "Too many uploads — try again later" },
+      { status: 429, headers: { "Retry-After": "3600" } },
+    );
+  }
+  uploadLimiter.hit(key);
 
   const form = await req.formData().catch(() => null);
   const file = form?.get("file");
@@ -44,12 +53,11 @@ export async function POST(req: Request) {
     );
   }
 
-  const dir = coversDir();
-  await fs.mkdir(dir, { recursive: true });
+  await fs.mkdir(coversDir(), { recursive: true });
   // "upload-" prefix keeps these visually distinct from book-id covers; the
   // random name means an abandoned form never collides with anything.
   const filename = `upload-${crypto.randomUUID()}.${ext}`;
-  await fs.writeFile(path.join(dir, filename), buf);
+  await fs.writeFile(coverFilePath(filename), buf);
 
   return NextResponse.json({ url: `/api/covers/${filename}` });
 }
