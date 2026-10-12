@@ -1,14 +1,15 @@
-import Link from "next/link";
 import type { Book } from "@prisma/client";
 import { ReadingStatus } from "@prisma/client";
 import { BookOpen, HandHeart } from "lucide-react";
+import { BookLink } from "@/components/book-link";
 import { Badge } from "@/components/ui/badge";
 import { Stars } from "@/components/stars";
 import { STATUS_BADGE_CLASS, STATUS_LABELS } from "@/lib/display";
+import { coverArt } from "@/lib/cover-art";
 import type { LibraryDisplay } from "@/lib/library-view";
 import { cn } from "@/lib/utils";
 
-/** Cover image with a graceful placeholder when there's no cover.
+/** Cover image, or a stand-in when the book has none.
  *  Lazy by default — grids request hundreds of covers at once, and the
  *  below-the-fold ones shouldn't compete with the visible page. The detail
  *  page passes `loading="eager"` for its above-the-fold hero cover. */
@@ -16,14 +17,19 @@ export function BookCover({
   book,
   className,
   loading = "lazy",
+  flightTarget,
 }: {
-  book: Pick<Book, "title" | "coverUrl">;
+  book: Pick<Book, "title" | "coverUrl"> & { authors?: string[] };
   className?: string;
   loading?: "eager" | "lazy";
+  /** The book's id, on the book page's own cover: where a cover clicked
+   *  elsewhere flies to (lib/cover-flight.ts). */
+  flightTarget?: string;
 }) {
   return (
     <div
-      className={`overflow-hidden rounded-md bg-muted ${className ?? ""}`}
+      className={cn("book-cover relative overflow-hidden rounded-md bg-muted", className)}
+      data-cover-for={flightTarget}
     >
       {book.coverUrl ? (
         // eslint-disable-next-line @next/next/no-img-element
@@ -35,11 +41,50 @@ export function BookCover({
           className="h-full w-full object-cover"
         />
       ) : (
-        <div className="flex h-full w-full items-center justify-center">
-          <BookOpen className="size-10 text-muted-foreground/40" />
-        </div>
+        <MissingCover title={book.title} author={book.authors?.[0]} />
       )}
     </div>
+  );
+}
+
+/**
+ * The stand-in for a book without a cover image. Both kinds are rendered and
+ * CSS shows one, following "Books without a cover" in Preferences
+ * (`data-covers` on <html>; see globals.css) — so this stays a plain
+ * component that server and client pages can share without passing the
+ * setting down.
+ *
+ * The drawn cover is a coloured board with the title and first author,
+ * coloured from the title (lib/cover-art.ts). The plain one is the old grey
+ * box with a book icon.
+ */
+function MissingCover({ title, author }: { title: string; author?: string }) {
+  const art = coverArt(title);
+  return (
+    <>
+      <div
+        className="drawn-cover"
+        data-layout={art.layout}
+        style={
+          {
+            "--cover-hue": art.hue,
+            "--cover-sat": `${art.saturation}%`,
+            "--cover-light": `${art.lightness}%`,
+            "--cover-title": `${art.titleSize}cqi`,
+          } as React.CSSProperties
+        }
+        aria-hidden="true"
+      >
+        <div className="drawn-cover-frame">
+          <span className="drawn-cover-title">{title}</span>
+          <span className="drawn-cover-rule" />
+          {author && <span className="drawn-cover-author">{author}</span>}
+        </div>
+      </div>
+      <div className="plain-cover h-full w-full items-center justify-center">
+        <BookOpen className="size-10 text-muted-foreground/40" />
+      </div>
+    </>
   );
 }
 
@@ -107,13 +152,15 @@ export function BookRow({
 }) {
   const progress = readingProgress(book);
   return (
-    <Link
-      href={`/books/${book.id}`}
-      className="group flex items-center gap-3 rounded-lg border bg-card p-2 transition-colors hover:border-ring/60"
+    <BookLink
+      bookId={book.id}
+      className="lift group flex items-center gap-3 rounded-lg border bg-card p-2 transition-colors hover:border-ring/60"
     >
       <BookCover book={book} className="aspect-[2/3] w-10 shrink-0" />
       <div className="grid min-w-0 flex-1 gap-0.5">
-        <p className="truncate text-sm font-medium group-hover:underline">{book.title}</p>
+        <p className="truncate font-heading text-sm font-medium group-hover:underline">
+          {book.title}
+        </p>
         <p className="truncate text-xs text-muted-foreground">
           {book.authors.join(", ")}
           {details.showSeries && book.seriesName && (
@@ -126,7 +173,7 @@ export function BookRow({
             title={`Page ${book.currentPage} of ${book.pageCount}`}
           >
             <div
-              className="h-full rounded-full bg-primary/80"
+              className="bar-grow h-full rounded-full bg-primary/80"
               style={{ width: `${progress * 100}%` }}
             />
           </div>
@@ -141,7 +188,7 @@ export function BookRow({
           </Badge>
         )}
       </div>
-    </Link>
+    </BookLink>
   );
 }
 
@@ -159,10 +206,10 @@ export function BookCard({
   const progress = readingProgress(book);
 
   return (
-    <Link
-      href={`/books/${book.id}`}
+    <BookLink
+      bookId={book.id}
       className={cn(
-        "group flex flex-col rounded-lg border bg-card transition-colors hover:border-ring/60",
+        "lift group flex flex-col rounded-lg border bg-card transition-colors hover:border-ring/60",
         compact ? "gap-1.5 p-2" : "gap-2 p-3",
       )}
     >
@@ -173,7 +220,7 @@ export function BookCard({
           title={`Page ${book.currentPage} of ${book.pageCount}`}
         >
           <div
-            className="h-full rounded-full bg-primary/80"
+            className="bar-grow h-full rounded-full bg-primary/80"
             style={{ width: `${progress * 100}%` }}
           />
         </div>
@@ -181,7 +228,7 @@ export function BookCard({
       <div className="flex flex-1 flex-col gap-1">
         <p
           className={cn(
-            "line-clamp-2 font-medium leading-snug group-hover:underline",
+            "line-clamp-2 font-heading font-medium leading-snug group-hover:underline",
             compact ? "text-xs" : "text-sm",
           )}
         >
@@ -211,6 +258,47 @@ export function BookCard({
           </span>
         </div>
       </div>
-    </Link>
+    </BookLink>
+  );
+}
+
+/** "Covers only": the cover and title with no frame, details or badges. */
+export function BookCoverTile({ book, compact = false }: { book: BookCardBook; compact?: boolean }) {
+  const progress = readingProgress(book);
+  return (
+    <BookLink bookId={book.id} className="lift-cover group flex flex-col gap-1.5">
+      <BookCover book={book} className="cover-shadow aspect-[2/3] w-full" />
+      {progress !== null && (
+        <div
+          className="h-1 rounded-full bg-muted"
+          title={`Page ${book.currentPage} of ${book.pageCount}`}
+        >
+          <div
+            className="bar-grow h-full rounded-full bg-primary/80"
+            style={{ width: `${progress * 100}%` }}
+          />
+        </div>
+      )}
+      <p
+        className={cn(
+          "line-clamp-2 font-heading leading-snug text-muted-foreground group-hover:text-foreground group-hover:underline",
+          compact ? "text-[11px]" : "text-xs",
+        )}
+      >
+        {book.title}
+      </p>
+    </BookLink>
+  );
+}
+
+/** "Bookshelf": just the cover, standing on the shelf its slot draws
+ *  (globals.css). The title shows on hover and to screen readers. */
+export function BookOnShelf({ book }: { book: BookCardBook }) {
+  const byline = book.authors.length ? ` by ${book.authors.join(", ")}` : "";
+  return (
+    <BookLink bookId={book.id} className="lift-cover block" title={`${book.title}${byline}`}>
+      <BookCover book={book} className="cover-shadow aspect-[2/3] w-full" />
+      <span className="sr-only">{book.title}</span>
+    </BookLink>
   );
 }

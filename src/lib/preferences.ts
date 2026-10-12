@@ -43,6 +43,42 @@ export const TEXT_SIZES = ["normal", "large", "larger"] as const;
 
 export const LONG_TEXT_FONTS = ["sans", "serif"] as const;
 
+/** The face for page titles, book titles and card titles: the app's own
+ *  sans (Geist), a book serif (Literata) or a rounded sans (Nunito). */
+export const HEADING_FONTS = ["sans", "serif", "rounded"] as const;
+
+/** Animations on or off. Off is also forced whenever the device asks for
+ *  reduced motion, whatever this says (see globals.css and lib/motion.ts). */
+export const MOTIONS = ["on", "off"] as const;
+
+/** What a book without a cover image shows: a drawn cover with its title,
+ *  or the plain grey box. */
+export const COVER_ARTS = ["drawn", "plain"] as const;
+
+/** Accent colours that can replace a theme's own: buttons, links, focus
+ *  rings and progress bars. "theme" keeps the theme's accent. Each has a
+ *  deeper shade for light themes and a lighter one for dark themes
+ *  (globals.css). */
+export const ACCENTS = [
+  "theme",
+  "rose",
+  "orange",
+  "amber",
+  "emerald",
+  "teal",
+  "sky",
+  "indigo",
+  "violet",
+  "fuchsia",
+] as const;
+
+/** How round corners are, through the --radius token every radius in the
+ *  app derives from. */
+export const CORNERS = ["square", "rounded", "round"] as const;
+
+/** A texture behind the pages: none, a faint paper grain, or a dot grid. */
+export const BACKGROUNDS = ["plain", "grain", "dots"] as const;
+
 /** Colour steps for the reading calendar (see lib/heatmap.ts). */
 export const HEATMAP_SCALES = ["standard", "gentle", "heavy", "auto"] as const;
 
@@ -70,6 +106,12 @@ export type Catalogue = (typeof CATALOGUES)[number];
 export type RatingStyle = (typeof RATING_STYLES)[number];
 export type TextSize = (typeof TEXT_SIZES)[number];
 export type LongTextFont = (typeof LONG_TEXT_FONTS)[number];
+export type HeadingFont = (typeof HEADING_FONTS)[number];
+export type Motion = (typeof MOTIONS)[number];
+export type CoverArtStyle = (typeof COVER_ARTS)[number];
+export type Accent = (typeof ACCENTS)[number];
+export type Corners = (typeof CORNERS)[number];
+export type Background = (typeof BACKGROUNDS)[number];
 export type HeatmapScale = (typeof HEATMAP_SCALES)[number];
 export type StartPage = (typeof START_PAGES)[number];
 export type HideableNav = (typeof HIDEABLE_NAV)[number];
@@ -106,6 +148,14 @@ export type Preferences = {
 
   textSize: TextSize;
   longTextFont: LongTextFont;
+  headingFont: HeadingFont;
+
+  // Appearance
+  motion: Motion;
+  coverArt: CoverArtStyle;
+  accent: Accent;
+  corners: Corners;
+  background: Background;
 
   heatmapScale: HeatmapScale;
   startPage: StartPage;
@@ -131,6 +181,12 @@ export const DEFAULT_PREFERENCES: Preferences = {
   ratingStyle: "half",
   textSize: "normal",
   longTextFont: "sans",
+  headingFont: "sans",
+  motion: "on",
+  coverArt: "drawn",
+  accent: "theme",
+  corners: "rounded",
+  background: "plain",
   heatmapScale: "standard",
   startPage: "library",
   hiddenNav: [],
@@ -209,6 +265,12 @@ export function parsePreferences(raw: unknown): Preferences {
     ratingStyle: pick(RATING_STYLES, obj.ratingStyle, d.ratingStyle),
     textSize: pick(TEXT_SIZES, obj.textSize, d.textSize),
     longTextFont: pick(LONG_TEXT_FONTS, obj.longTextFont, d.longTextFont),
+    headingFont: pick(HEADING_FONTS, obj.headingFont, d.headingFont),
+    motion: pick(MOTIONS, obj.motion, d.motion),
+    coverArt: pick(COVER_ARTS, obj.coverArt, d.coverArt),
+    accent: pick(ACCENTS, obj.accent, d.accent),
+    corners: pick(CORNERS, obj.corners, d.corners),
+    background: pick(BACKGROUNDS, obj.background, d.background),
     heatmapScale: pick(HEATMAP_SCALES, obj.heatmapScale, d.heatmapScale),
     startPage: pick(START_PAGES, obj.startPage, d.startPage),
     hiddenNav: pickList(HIDEABLE_NAV, obj.hiddenNav),

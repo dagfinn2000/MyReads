@@ -1,11 +1,17 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { Geist } from "next/font/google";
+import { Geist, Literata, Nunito } from "next/font/google";
 import { getCurrentUser } from "@/lib/current-user";
 import { cn } from "@/lib/utils";
 import { DARK_THEME_IDS, THEME_INIT_SCRIPT, parseThemeSetting } from "@/lib/themes";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
+// A book face for the titles on drawn covers and the serif heading choice,
+// and a rounded face for the other heading choice (Preferences). Not
+// preloaded: the browser only fetches a face once something on the page
+// uses it.
+const literata = Literata({ subsets: ["latin"], variable: "--font-literata", preload: false });
+const nunito = Nunito({ subsets: ["latin"], variable: "--font-nunito", preload: false });
 
 export const metadata: Metadata = {
   title: "MyReads",
@@ -42,11 +48,26 @@ export default async function RootLayout({
     // the dark class on <html> before React hydrates.
     <html
       lang="en"
-      className={cn("font-sans", geist.variable, dark && "dark")}
+      className={cn(
+        "font-sans",
+        geist.variable,
+        literata.variable,
+        nunito.variable,
+        dark && "dark",
+      )}
       {...themeAttrs}
-      // Text size and the long-text font (Preferences); see globals.css.
+      // Text size and fonts (Preferences); see globals.css.
       data-text-size={prefs?.textSize}
       data-long-font={prefs?.longTextFont}
+      data-heading-font={prefs?.headingFont}
+      // Appearance (Preferences); see globals.css.
+      data-motion={prefs?.motion}
+      data-covers={prefs?.coverArt}
+      data-accent={prefs?.accent}
+      data-corners={prefs?.corners}
+      data-background={prefs?.background}
+      // 3D covers, from the library's View menu.
+      data-cover-3d={user?.libraryView.cover3d ? "" : undefined}
       suppressHydrationWarning
     >
       <body className="min-h-screen bg-background text-foreground antialiased">

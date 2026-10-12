@@ -1,6 +1,7 @@
 import { cache } from "react";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { parseLibraryView, type LibraryView } from "@/lib/library-view";
 import {
   DEFAULT_PREFERENCES,
   parsePreferences,
@@ -29,16 +30,22 @@ export const getCurrentUser = cache(
     theme: string | null;
     /** As stored: `timeZone` is "" until the reader's zone is known. */
     preferences: Preferences;
+    /** For the 3D covers switch, which the root layout applies everywhere. */
+    libraryView: LibraryView;
   } | null> => {
     const session = await auth();
     if (!session?.user?.id) return null;
 
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
-      select: { id: true, theme: true, preferences: true },
+      select: { id: true, theme: true, preferences: true, libraryView: true },
     });
     if (!user) return null;
-    return { ...user, preferences: parsePreferences(user.preferences) };
+    return {
+      ...user,
+      preferences: parsePreferences(user.preferences),
+      libraryView: parseLibraryView(user.libraryView),
+    };
   },
 );
 

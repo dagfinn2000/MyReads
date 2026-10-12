@@ -14,16 +14,19 @@ import {
   formatNumber,
 } from "@/lib/display";
 import {
+  ACCENTS,
   CATALOGUES,
   DATE_FORMATS,
   HIDEABLE_NAV,
   HIDEABLE_STATS,
   NUMBER_FORMATS,
+  type Accent,
   type Catalogue,
   type HideableNav,
   type HideableStat,
   type Preferences,
 } from "@/lib/preferences";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -43,6 +46,68 @@ const NAV_LABELS: Record<HideableNav, string> = {
   check: "Check (“Do I own this?”)",
   quotes: "Quotes",
 };
+
+const ACCENT_LABELS: Record<Accent, string> = {
+  theme: "Theme default",
+  rose: "Rose",
+  orange: "Orange",
+  amber: "Amber",
+  emerald: "Emerald",
+  teal: "Teal",
+  sky: "Sky",
+  indigo: "Indigo",
+  violet: "Violet",
+  fuchsia: "Fuchsia",
+};
+
+/**
+ * Appearance settings that the root layout puts on <html> as data
+ * attributes, keyed by preference. The form sets the attribute straight
+ * away as well as saving, so a change shows at once instead of after the
+ * server round trip; the refreshed layout then writes the same value.
+ */
+const HTML_ATTRIBUTES: Partial<Record<keyof Preferences, string>> = {
+  headingFont: "data-heading-font",
+  motion: "data-motion",
+  coverArt: "data-covers",
+  accent: "data-accent",
+  corners: "data-corners",
+  background: "data-background",
+};
+
+/** The accent colour swatches, one round button each. */
+function AccentPicker({ value, onChange }: { value: Accent; onChange: (a: Accent) => void }) {
+  return (
+    <div className="grid gap-1.5 sm:grid-cols-[14rem_1fr] sm:items-center sm:gap-4">
+      <div>
+        <p className="text-sm font-medium">Accent colour</p>
+        <p className="text-xs text-muted-foreground">Buttons, links, progress bars and focus rings.</p>
+      </div>
+      <div role="radiogroup" aria-label="Accent colour" className="flex flex-wrap items-center gap-1.5">
+        {ACCENTS.map((a) => (
+          <button
+            key={a}
+            type="button"
+            role="radio"
+            aria-checked={value === a}
+            aria-label={ACCENT_LABELS[a]}
+            title={ACCENT_LABELS[a]}
+            onClick={() => onChange(a)}
+            className={cn(
+              "h-7 rounded-full border-2 border-background ring-1 ring-border transition-shadow",
+              a === "theme" ? "bg-muted px-2.5 text-xs" : "w-7",
+              value === a && "ring-2 ring-foreground",
+            )}
+            // The swatch shows the shade this mode would use (globals.css).
+            style={a === "theme" ? undefined : { background: `var(--accent-${a})` }}
+          >
+            {a === "theme" ? "Theme" : null}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 const STATS_LABELS: Record<HideableStat, string> = {
   goal: "Reading goal",
@@ -155,6 +220,10 @@ export function PreferencesForm({
 
   function update(patch: Partial<Preferences>) {
     setPrefs((p) => ({ ...p, ...patch }));
+    for (const [key, value] of Object.entries(patch)) {
+      const attribute = HTML_ATTRIBUTES[key as keyof Preferences];
+      if (attribute) document.documentElement.setAttribute(attribute, String(value));
+    }
     setStatus("saving");
     startTransition(async () => {
       try {
@@ -369,6 +438,53 @@ export function PreferencesForm({
         </p>
       </Section>
 
+      <Section title="Appearance">
+        <AccentPicker value={prefs.accent} onChange={(a) => update({ accent: a })} />
+        <Choice
+          label="Books without a cover"
+          value={prefs.coverArt}
+          options={[
+            { value: "drawn", label: "A drawn cover with the title" },
+            { value: "plain", label: "A plain grey box" },
+          ]}
+          onChange={(v) => update({ coverArt: v })}
+        />
+        <Choice
+          label="Corners"
+          value={prefs.corners}
+          options={[
+            { value: "square", label: "Square" },
+            { value: "rounded", label: "Rounded" },
+            { value: "round", label: "Round" },
+          ]}
+          onChange={(v) => update({ corners: v })}
+        />
+        <Choice
+          label="Background"
+          hint="Behind the pages, not the cards on them."
+          value={prefs.background}
+          options={[
+            { value: "plain", label: "Plain" },
+            { value: "grain", label: "Paper grain" },
+            { value: "dots", label: "Dots" },
+          ]}
+          onChange={(v) => update({ background: v })}
+        />
+      </Section>
+
+      <Section title="Motion">
+        <Choice
+          label="Animations"
+          hint="Always off when your device asks for reduced motion."
+          value={prefs.motion}
+          options={[
+            { value: "on", label: "On" },
+            { value: "off", label: "Off" },
+          ]}
+          onChange={(v) => update({ motion: v })}
+        />
+      </Section>
+
       <Section title="Text">
         <Choice
           label="Text size"
@@ -389,6 +505,17 @@ export function PreferencesForm({
             { value: "serif", label: "Book-style serif" },
           ]}
           onChange={(v) => update({ longTextFont: v })}
+        />
+        <Choice
+          label="Headings"
+          hint="Page titles, book titles and card titles."
+          value={prefs.headingFont}
+          options={[
+            { value: "sans", label: "Same as everything else" },
+            { value: "serif", label: "Book-style serif" },
+            { value: "rounded", label: "Rounded" },
+          ]}
+          onChange={(v) => update({ headingFont: v })}
         />
       </Section>
 

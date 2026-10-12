@@ -9,6 +9,7 @@ import { calendarDay } from "@/lib/dates";
 import { FORMAT_LABELS, formatNumber } from "@/lib/display";
 import { goalProgress, markRereads } from "@/lib/goals";
 import { dailyPageTotalsForUser } from "@/lib/progress-query";
+import { GoalReached } from "@/components/goal-reached";
 import { GoldMedal } from "@/components/gold-medal";
 import { ReadingHeatmap } from "@/components/reading-heatmap";
 import { Bar, StatCard } from "@/components/stat-blocks";
@@ -188,7 +189,11 @@ export default async function StatsPage() {
           <CardContent className="grid gap-4">
             {currentGoal ? (
               <div className="flex flex-wrap items-center gap-6">
-                {goalMet && <GoldMedal className="h-20 w-[60px] shrink-0" />}
+                {goalMet && (
+                  <GoalReached year={currentYear}>
+                    <GoldMedal animate className="h-20 w-[60px] shrink-0" />
+                  </GoalReached>
+                )}
                 <div className="min-w-56 flex-1">
                   <p className="text-2xl font-semibold tabular-nums">
                     {formatNumber(currentProgress, prefs)}{" "}
@@ -199,7 +204,7 @@ export default async function StatsPage() {
                   </p>
                   <div className="mt-2 h-3 rounded-full bg-muted">
                     <div
-                      className={`h-full rounded-full ${goalMet ? "bg-amber-500" : "bg-primary/80"}`}
+                      className={`bar-grow h-full rounded-full ${goalMet ? "bg-amber-500" : "bg-primary/80"}`}
                       style={{
                         width: `${Math.min((currentProgress / currentGoal.target) * 100, 100)}%`,
                       }}

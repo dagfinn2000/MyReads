@@ -8,7 +8,7 @@ export function Bar({ label, value, max }: { label: string; value: number; max: 
       <span className="truncate text-muted-foreground">{label}</span>
       <div className="h-5 rounded bg-muted">
         <div
-          className="h-full rounded bg-primary/80"
+          className="bar-grow h-full rounded bg-primary/80"
           style={{ width: `${pct}%` }}
         />
       </div>

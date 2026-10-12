@@ -41,9 +41,11 @@ reading, and what you thought of them, on your own server.
 - Search, filter, sort and group the library. Authors sort by surname, the
   way a bookshelf is filed. "Pick for me" opens a random book from Want to
   Read.
-- Show the library as covers in three sizes or as a list, and choose what
-  each book shows. Save the searches and filters you use often as views, and
-  open the library on one of them if you like.
+- Show the library as cards, bare covers or a bookshelf, in three sizes, or
+  as a list, and choose what each book shows. Covers can look like little
+  hardbacks, and books without a cover get one drawn with their title. Save
+  the searches and filters you use often as views, and open the library on
+  one of them if you like.
 - Edit many books at once: set their status, add tags, or put them on a
   shelf or take them off it.
 
@@ -58,12 +60,18 @@ reading, and what you thought of them, on your own server.
 
 - Download a backup (a zip with everything, covers and settings included)
   and restore it on any MyReads server.
-- 26 colour themes, or a light and a dark one that switch with your device.
-  Your choice follows you to every device you sign in on.
+- 26 colour themes, or a light and a dark one that switch with your device,
+  with an accent colour of your own on top if you like. Your choice follows
+  you to every device you sign in on.
 - Preferences on the Account page: date and number formats, your time zone
   and the first day of the week, how titles and authors sort, what new books
-  start as, text size, a serif font for reviews and quotes, which page opens
-  first, and which links and stats cards you see.
+  start as, text size, a serif font for reviews and quotes, the font for
+  headings, how round the corners are, a paper or dotted background, which
+  page opens first, and which links and stats cards you see.
+- A little motion: pages fade in, a book's cover flies to its page, bars
+  fill up, and finishing a book or reaching your goal sets off confetti.
+  Animations can be turned off, and stay off when your device asks for
+  reduced motion.
 - Install it on your phone's home screen like an app.
 
 Deliberately out of scope: anything social, recommendation engines, and CSV

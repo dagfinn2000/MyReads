@@ -322,7 +322,7 @@ export default async function YearInReviewPage({
       {goal && (
         <Card>
           <CardContent className="flex flex-wrap items-center gap-4 pt-0">
-            {goalMet && <GoldMedal className="h-14 w-[42px] shrink-0" />}
+            {goalMet && <GoldMedal animate className="h-14 w-[42px] shrink-0" />}
             <p className="text-sm">
               <span className="font-semibold tabular-nums">
                 {formatNumber(goalDone, prefs)} of {formatNumber(goal.target, prefs)}

@@ -9,7 +9,13 @@ import { pickRandomBook } from "@/lib/actions/pick";
 import { STATUS_LABELS } from "@/lib/display";
 import { cn } from "@/lib/utils";
 import type { LibraryDisplay } from "@/lib/library-view";
-import { BookCard, BookRow, type BookCardBook } from "@/components/book-card";
+import {
+  BookCard,
+  BookCoverTile,
+  BookOnShelf,
+  BookRow,
+  type BookCardBook,
+} from "@/components/book-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -30,11 +36,23 @@ export interface LibraryGroup {
 /** How many more cards each "Show more" asks the server for. */
 const PAGE_STEP = 200;
 
+/** Cards that fade in one after another when the library opens. The rest
+ *  appear together, so a big library (or "Show more") never waits. */
+const STAGGERED_CARDS = 24;
+
 /** Columns per breakpoint for each cover size (the View menu). */
-const GRID_CLASS: Record<LibraryDisplay["cardSize"], string> = {
-  small: "grid grid-cols-3 gap-2 sm:grid-cols-4 sm:gap-3 md:grid-cols-6 lg:grid-cols-8",
-  medium: "grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-5",
-  large: "grid grid-cols-1 gap-4 min-[420px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4",
+const GRID_COLUMNS: Record<LibraryDisplay["cardSize"], string> = {
+  small: "grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8",
+  medium: "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5",
+  large: "grid-cols-1 min-[420px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4",
+};
+
+/** Space between cards. A bookshelf has none across, so its ledges join
+ *  up; its slots pad the covers apart instead (globals.css). */
+const GRID_GAPS: Record<LibraryDisplay["cardSize"], string> = {
+  small: "gap-2 sm:gap-3",
+  medium: "gap-3 sm:gap-4",
+  large: "gap-4",
 };
 
 /**
@@ -148,20 +166,37 @@ export function LibraryView({
   }
 
   const list = display.layout === "list";
+  const style = list ? null : display.cardStyle;
   const renderGrid = (items: BookCardBook[]) => (
-    <div className={list ? "grid gap-2" : GRID_CLASS[display.cardSize]}>
-      {items.map((book) => {
+    // no-lift: cards stay put on hover while picking, so the selection ring
+    // keeps lining up with the card.
+    <div
+      className={cn(
+        "grid",
+        list && "gap-2",
+        !list && GRID_COLUMNS[display.cardSize],
+        style === "shelf" ? "bookshelf gap-y-6" : !list && GRID_GAPS[display.cardSize],
+        selectMode && "no-lift",
+      )}
+    >
+      {items.map((book, i) => {
         const isSelected = selected.has(book.id);
         return (
           <div
             key={book.id}
             className={cn(
-              "relative rounded-lg",
+              "card-in relative rounded-lg",
+              style === "shelf" && "shelf-slot",
               selectMode && isSelected && "ring-2 ring-primary",
             )}
+            style={{ "--i": i < STAGGERED_CARDS ? i : 0 } as React.CSSProperties}
           >
             {list ? (
               <BookRow book={book} details={display} />
+            ) : style === "shelf" ? (
+              <BookOnShelf book={book} />
+            ) : style === "covers" ? (
+              <BookCoverTile book={book} compact={display.cardSize === "small"} />
             ) : (
               <BookCard
                 book={book}
@@ -240,7 +275,7 @@ export function LibraryView({
         <div className="grid gap-6">
           {groups.map((g) => (
             <section key={g.title} className="grid gap-3">
-              <h2 className="border-b pb-1 text-lg font-medium">
+              <h2 className="border-b pb-1 font-heading text-lg font-medium">
                 {g.title}
                 <span className="ml-2 text-sm font-normal text-muted-foreground tabular-nums">
                   {/* The group's real size, even when only part of it is

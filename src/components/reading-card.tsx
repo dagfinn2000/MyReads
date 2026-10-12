@@ -1,9 +1,10 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import type { Book, ProgressEntry } from "@prisma/client";
 import { ReadingStatus } from "@prisma/client";
 import { updateReading } from "@/lib/actions/books";
+import { celebrate } from "@/lib/confetti";
 import { STATUS_LABELS, toDateInputValue } from "@/lib/display";
 import { usePreferences } from "@/components/preferences-provider";
 import { currentPassEntries } from "@/lib/progress";
@@ -43,6 +44,13 @@ export function ReadingCard({
   const action = updateReading.bind(null, book.id);
   const [state, formAction, pending] = useActionState(action, {});
   const prefs = usePreferences();
+  const saveButton = useRef<HTMLButtonElement>(null);
+
+  // Finishing a book gets a burst of confetti from the save button. Each
+  // save returns a new state object, so this runs once per save.
+  useEffect(() => {
+    if (state.finished) celebrate(saveButton.current);
+  }, [state]);
 
   // Remount the form whenever the server-side reading data changes. React
   // resets uncontrolled fields after a successful action, and the Radix
@@ -136,7 +144,7 @@ export function ReadingCard({
             <div className="grid max-w-sm gap-1">
               <div className="h-2 rounded-full bg-muted">
                 <div
-                  className="h-full rounded-full bg-primary/80"
+                  className="bar-grow h-full rounded-full bg-primary/80"
                   style={{
                     width: `${Math.min((book.currentPage / book.pageCount) * 100, 100)}%`,
                   }}
@@ -168,7 +176,7 @@ export function ReadingCard({
 
           {state.error && <p className="text-sm text-destructive">{state.error}</p>}
           <div className="flex items-center gap-3">
-            <Button type="submit" disabled={pending}>
+            <Button ref={saveButton} type="submit" disabled={pending}>
               {pending ? "Saving…" : "Save reading data"}
             </Button>
             {state.success && (

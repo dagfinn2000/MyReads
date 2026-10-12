@@ -5,7 +5,7 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-    --font-heading: var(--font-sans);
+    --font-heading: var(--heading-font, var(--font-sans));
     --font-sans: var(--font-sans);
     --color-sidebar-ring: var(--sidebar-ring);
     --color-sidebar-border: var(--sidebar-border);
@@ -657,8 +657,15 @@
   body {
     @apply bg-background text-foreground;
     }
+  h1 {
+    @apply font-heading;
+    }
   html {
     @apply font-sans;
+    /* The top bar is sticky, 3.5rem tall, and sits over the page; anything
+       scrolled into view (a #link, or the page Next.js scrolls to after a
+       navigation) should land below it, with the page's own 1.5rem gap. */
+    scroll-padding-top: 5rem;
     }
 }
 /* ── Reading preferences ───────────────────────────────────────────────────
@@ -676,4 +683,423 @@ html[data-text-size="larger"] {
 html[data-long-font="serif"] .long-text {
   font-family: ui-serif, "Iowan Old Style", "Palatino Linotype", Palatino, Georgia,
     Cambria, "Times New Roman", serif;
+}
+
+/* The heading face: page titles (every h1), book titles on cards and rows,
+   card and dialog titles, all through `font-heading`, which reads
+   --heading-font and falls back to the app's sans. Unlike the long-text
+   serif these faces come with the app (next/font in app/layout.tsx), so a
+   heading looks the same on every device. */
+html[data-heading-font="serif"] {
+  --heading-font: var(--font-literata), ui-serif, Georgia, serif;
+}
+html[data-heading-font="rounded"] {
+  --heading-font: var(--font-nunito), ui-rounded, ui-sans-serif, system-ui, sans-serif;
+}
+
+/* ── Accent colour ─────────────────────────────────────────────────────────
+   "Accent colour" in Preferences replaces the theme's accent (--primary,
+   which buttons, links, progress bars and checkboxes use, and --ring for
+   focus outlines) with one of these. Light themes get the deeper shade,
+   with white text on it; dark themes the lighter shade, with near-black
+   text. Every pairing passes 4.5:1. The --accent-<name>
+   values also colour the swatches in Preferences, so they follow the mode
+   too. html[data-accent]:not(…) outranks the [data-theme] blocks above. */
+:root {
+  --accent-rose: #be123c;
+  --accent-orange: #c2410c;
+  --accent-amber: #b45309;
+  --accent-emerald: #047857;
+  --accent-teal: #0f766e;
+  --accent-sky: #0369a1;
+  --accent-indigo: #4338ca;
+  --accent-violet: #6d28d9;
+  --accent-fuchsia: #a21caf;
+}
+.dark {
+  --accent-rose: #fb7185;
+  --accent-orange: #fb923c;
+  --accent-amber: #fbbf24;
+  --accent-emerald: #34d399;
+  --accent-teal: #2dd4bf;
+  --accent-sky: #38bdf8;
+  --accent-indigo: #818cf8;
+  --accent-violet: #a78bfa;
+  --accent-fuchsia: #e879f9;
+}
+html[data-accent="rose"] { --accent-color: var(--accent-rose); }
+html[data-accent="orange"] { --accent-color: var(--accent-orange); }
+html[data-accent="amber"] { --accent-color: var(--accent-amber); }
+html[data-accent="emerald"] { --accent-color: var(--accent-emerald); }
+html[data-accent="teal"] { --accent-color: var(--accent-teal); }
+html[data-accent="sky"] { --accent-color: var(--accent-sky); }
+html[data-accent="indigo"] { --accent-color: var(--accent-indigo); }
+html[data-accent="violet"] { --accent-color: var(--accent-violet); }
+html[data-accent="fuchsia"] { --accent-color: var(--accent-fuchsia); }
+html[data-accent]:not([data-accent="theme"]) {
+  --primary: var(--accent-color);
+  --primary-foreground: #ffffff;
+  --ring: var(--accent-color);
+}
+html.dark[data-accent]:not([data-accent="theme"]) {
+  --primary-foreground: #111111;
+}
+
+/* ── Corners and background ────────────────────────────────────────────────
+   "Corners" in Preferences moves --radius, which every rounded-* size
+   derives from (the @theme block above), so cards, buttons, inputs and
+   menus change together; pills and avatars stay fully round. "Background"
+   lays a texture over the page colour behind everything: a faint paper
+   grain (SVG noise, mid-grey, so it reads on light and dark themes alike)
+   or a dot grid in the theme's own text colour. Cards keep their solid
+   fill on top. */
+html[data-corners="square"] {
+  --radius: 0.15rem;
+}
+html[data-corners="round"] {
+  --radius: 1rem;
+}
+html[data-background="grain"] body {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.5 0 0 0 0 0.5 0 0 0 0 0.5 0.22 0 0 0 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+/* Light specks show more on a dark page, so dark themes get a fainter grain. */
+html.dark[data-background="grain"] body {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.5 0 0 0 0 0.5 0 0 0 0 0.5 0.12 0 0 0 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+html[data-background="dots"] body {
+  background-image: radial-gradient(
+    color-mix(in oklab, var(--foreground) 14%, transparent) 1px,
+    transparent 1.5px
+  );
+  background-size: 22px 22px;
+}
+
+/* ── Drawn covers ──────────────────────────────────────────────────────────
+   The stand-in for a book with no cover image (BookCover in
+   components/book-card.tsx): a coloured board with a spine shadow, a thin
+   inset frame, the title in a book face and the author in small capitals.
+   The colour comes from the title (lib/cover-art.ts) through --cover-hue,
+   --cover-sat and --cover-light. Sizes are in cqi (percent of the cover's
+   width), so the same cover reads at every size; covers too small for
+   text (list rows, quotes) show just the board.
+   "Books without a cover: Plain" in Preferences (data-covers="plain")
+   shows the grey box with a book icon instead. */
+.book-cover {
+  container-type: inline-size;
+}
+.plain-cover {
+  display: none;
+}
+html[data-covers="plain"] .plain-cover {
+  display: flex;
+}
+html[data-covers="plain"] .drawn-cover {
+  display: none;
+}
+.drawn-cover {
+  position: absolute;
+  inset: 0;
+  background: hsl(var(--cover-hue) var(--cover-sat) var(--cover-light));
+  color: hsl(var(--cover-hue) 45% 93%);
+}
+.drawn-cover::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 6%;
+  background: linear-gradient(90deg, rgb(0 0 0 / 0.3), rgb(255 255 255 / 0.1) 75%, transparent);
+}
+.drawn-cover-frame {
+  position: absolute;
+  inset: 7% 7% 7% 11%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5cqi;
+  padding: 12cqi 6cqi 7cqi;
+  overflow: hidden;
+  border: 1px solid hsl(var(--cover-hue) 45% 88% / 0.42);
+  text-align: center;
+}
+.drawn-cover-title {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 5;
+  overflow: hidden;
+  font-family: var(--font-literata), ui-serif, Georgia, serif;
+  font-size: var(--cover-title, 11.5cqi);
+  font-weight: 600;
+  line-height: 1.14;
+  overflow-wrap: break-word;
+  text-wrap: balance;
+}
+.drawn-cover-rule {
+  flex: none;
+  width: 16cqi;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.6;
+}
+.drawn-cover-author {
+  margin-top: auto;
+  font-size: 6.4cqi;
+  letter-spacing: 0.12em;
+  line-height: 1.3;
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+/* Three arrangements, picked per title so a shelf doesn't look stamped
+   out: title at the top (0), everything centred (1), or the title on a
+   band across the middle with no frame (2). */
+.drawn-cover[data-layout="1"] .drawn-cover-frame {
+  justify-content: center;
+}
+.drawn-cover[data-layout="1"] .drawn-cover-author {
+  margin-top: 2cqi;
+}
+.drawn-cover[data-layout="2"] .drawn-cover-frame {
+  inset: 0 0 0 6%;
+  justify-content: center;
+  padding-inline: 10cqi;
+  border: 0;
+}
+.drawn-cover[data-layout="2"] .drawn-cover-frame::before {
+  content: "";
+  position: absolute;
+  inset: 30% 0 36%;
+  border-block: 1px solid hsl(var(--cover-hue) 45% 88% / 0.35);
+  background: hsl(var(--cover-hue) 40% 90% / 0.13);
+}
+.drawn-cover[data-layout="2"] .drawn-cover-frame > * {
+  position: relative;
+}
+.drawn-cover[data-layout="2"] .drawn-cover-author {
+  margin-top: 3cqi;
+}
+@container (max-width: 4.5rem) {
+  .drawn-cover-frame {
+    display: none;
+  }
+}
+
+/* ── Page and library motion ───────────────────────────────────────────────
+   Pages fade up as they open ((app)/template.tsx), library cards rise into
+   place one after another (each card's --i is its position, capped in
+   library-view.tsx), and a card lifts a little under the pointer.
+   `backwards` fill only holds the start frame during the delay: once an
+   animation ends nothing is left applied, so a finished page wrapper never
+   becomes the containing block for the fixed bulk-edit bar. */
+@keyframes page-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+@keyframes card-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+.page-in {
+  animation: page-in 0.3s ease-out backwards;
+}
+.card-in {
+  animation: card-in 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+  animation-delay: calc(var(--i, 0) * 40ms);
+}
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-motion="off"]) .lift {
+    transition:
+      transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1),
+      box-shadow 0.2s,
+      border-color 0.15s;
+  }
+  html:not([data-motion="off"]) .lift:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 24px -14px rgb(0 0 0 / 0.45);
+  }
+  html:not([data-motion="off"]) .no-lift .lift:hover {
+    transform: none;
+    box-shadow: none;
+  }
+}
+
+/* Bars (reading progress, the goal, the stats charts) grow from the left
+   as the page opens, and the gold medal for a reached goal swings in and
+   catches the light once. The shine is clipped to the medal's disc. */
+@keyframes bar-grow {
+  from {
+    transform: scaleX(0);
+  }
+}
+@keyframes medal-in {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px) rotate(-12deg) scale(0.7);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(2px) rotate(4deg) scale(1.05);
+  }
+}
+@keyframes medal-shine {
+  from {
+    transform: translateX(-120%) skewX(-20deg);
+  }
+  to {
+    transform: translateX(260%) skewX(-20deg);
+  }
+}
+.bar-grow {
+  transform-origin: left;
+  animation: bar-grow 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+}
+.gold-medal-in {
+  animation: medal-in 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+}
+.gold-medal-shine {
+  position: absolute;
+  inset: 36% 10.4% 4.7%;
+  overflow: hidden;
+  border-radius: 50%;
+  pointer-events: none;
+}
+.gold-medal-shine::after {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  width: 40%;
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.75), transparent);
+  transform: translateX(-120%) skewX(-20deg);
+  animation: medal-shine 1.1s 0.6s ease-in-out both;
+}
+
+/* A clicked cover flying to its place on the book page
+   (lib/cover-flight.ts). A touch slower than the page cross-fade, with an
+   ease that settles, so the cover visibly lands. */
+::view-transition-group(book-cover) {
+  animation-duration: 0.45s;
+  animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* ── Card styles and 3D covers ───────────────────────────────────────────
+   "Covers only" and "Bookshelf" (the library's View menu) drop the card
+   frame, so the cover carries its own shadow and rises on its own under the
+   pointer. A bookshelf has no gap between columns: each slot draws its
+   stretch of ledge under its cover, so a row of slots reads as one shelf,
+   and the last slot's ledge runs on to the grid's edge, which clips it. */
+.cover-shadow {
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 0.14),
+    0 10px 18px -12px rgb(0 0 0 / 0.55);
+}
+.bookshelf {
+  overflow-x: clip;
+}
+.shelf-slot {
+  padding: 0 clamp(0.375rem, 1.5vw, 0.875rem) 0.75rem;
+}
+.shelf-slot::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 0.75rem;
+  pointer-events: none;
+  background: linear-gradient(
+    color-mix(in oklab, var(--foreground) 8%, var(--background)) 0 0.25rem,
+    color-mix(in oklab, var(--foreground) 20%, var(--background)) 0.25rem
+  );
+  box-shadow: 0 10px 12px -8px rgb(0 0 0 / 0.4);
+}
+.shelf-slot:last-child::after {
+  right: -100vw;
+}
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-motion="off"]) .lift-cover .book-cover {
+    transition: translate 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  html:not([data-motion="off"]) .lift-cover:hover .book-cover {
+    translate: 0 -4px;
+  }
+  html:not([data-motion="off"]) .no-lift .lift-cover:hover .book-cover {
+    translate: none;
+  }
+}
+
+/* 3D covers (the View menu's switch, data-cover-3d on <html>): every cover
+   in the app becomes a little hardback, with a squarer spine edge, a crease
+   and shine down the spine, a few page edges peeking out on the right and a
+   shadow underneath. The pages stay paper-coloured on any theme, a little
+   dimmer on dark ones. Offsets are small enough for the tiny covers in
+   lists. */
+html {
+  --cover-pages: #f3efe4;
+}
+html.dark {
+  --cover-pages: #d6d0c2;
+}
+html[data-cover-3d] .book-cover {
+  border-radius: 2px 5px 5px 2px;
+  box-shadow:
+    2px 0 0 -1px var(--cover-pages),
+    3px 0 0 -1px rgb(0 0 0 / 0.16),
+    4px 0 0 -2px var(--cover-pages),
+    5px 0 0 -2px rgb(0 0 0 / 0.16),
+    6px 8px 14px -6px rgb(0 0 0 / 0.55);
+}
+html[data-cover-3d] .book-cover::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    to right,
+    rgb(0 0 0 / 0.3) 0,
+    rgb(255 255 255 / 0.2) 2.5%,
+    rgb(0 0 0 / 0.14) 5%,
+    transparent 9%,
+    transparent 72%,
+    rgb(255 255 255 / 0.08)
+  );
+}
+
+/* Theme switch: the new theme grows out of the palette button as a circle
+   (revealTheme in components/theme-picker.tsx), so the default cross-fade
+   between the two snapshots is turned off while it runs. */
+html.theme-reveal::view-transition-old(root),
+html.theme-reveal::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+/* ── Motion ────────────────────────────────────────────────────────────────
+   Every animation and transition in the app, including the menu and dialog
+   zoom from shadcn, stops when the device asks for reduced motion or the
+   reader turns Animations off in Preferences (data-motion="off" on <html>).
+   Durations drop to almost nothing rather than to `none`, so an animation
+   that holds its end state still lands on it. Animations started from
+   script check the same two things through motionAllowed() in
+   lib/motion.ts. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0s !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0s !important;
+    scroll-behavior: auto !important;
+  }
+}
+html[data-motion="off"] *,
+html[data-motion="off"] *::before,
+html[data-motion="off"] *::after {
+  animation-duration: 0.01ms !important;
+  animation-delay: 0s !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  transition-delay: 0s !important;
+  scroll-behavior: auto !important;
 }
