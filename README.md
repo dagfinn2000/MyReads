@@ -16,7 +16,21 @@ reading, and what you thought of them, on your own server.
   [National Library of Norway](https://api.nb.no/) as extra sources. You
   choose which of them to search and in what order. You can check and edit
   everything before saving, or type a book in by hand.
-- Scan the barcode on a book with your phone's camera.
+- Scan the barcode on a book with your phone's camera. Switch on Keep
+  scanning to work through a whole shelf: each book is looked up and added
+  as you scan it, with Undo, and books you already have are pointed out.
+- "Add and add another" brings you straight back for the next book (with
+  the camera open again if you scanned). In Preferences you choose what
+  adding a book does: open it, add another, or go to the library.
+- A book added as Read can say when you finished it, or that you don't
+  remember, so years of old reading don't land in this year's stats. A book
+  added as Currently Reading can say when you started and what page you're
+  on.
+- Subjects from the catalogues can be copied in as tags: all of them, only
+  the tags you already use, or none. Renaming or removing a tag in Manage
+  tags can apply to future imports too.
+- "Look up details" on a book's edit page fills in what's missing, like a
+  page count, from the catalogues.
 - Choose a cover from the search results, paste an image link, or upload a
   photo. Covers are stored on your server.
 - **Do I own this?** In a bookshop, scan a barcode on the Check page to see

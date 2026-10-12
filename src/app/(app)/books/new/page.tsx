@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { getPreferences } from "@/lib/current-user";
 import { ownershipParam } from "@/lib/check-verdict";
+import { tagImportFor } from "@/lib/user-tags";
 import { AddBookClient } from "@/components/add-book-client";
 
 export const dynamic = "force-dynamic";
@@ -30,6 +31,9 @@ export default async function NewBookPage({
     .map((r) => r.seriesName)
     .filter((s): s is string => !!s);
   const prefs = await getPreferences();
+  // How catalogue subjects become tags: the import mode and tag rules, plus
+  // the library's own tags when only those are wanted.
+  const tagImport = await tagImportFor(session.user.id, prefs);
 
   return (
     <div className="mx-auto grid max-w-3xl gap-4">
@@ -42,7 +46,7 @@ export default async function NewBookPage({
           status: prefs.newBookStatus,
           ownership: ownershipParam(ownership) ?? prefs.newBookOwnership,
         }}
-        importTags={prefs.importTagsMode !== "off"}
+        tagImport={tagImport}
       />
     </div>
   );

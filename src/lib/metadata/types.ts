@@ -32,4 +32,7 @@ export interface BookDetails {
   pageCount: number | null;
   tags: string[];
   coverUrl: string | null;
+  /** The Open Library work, when one was found (also for a book that came
+   *  from another catalogue, through its ISBN). */
+  openLibraryId?: string | null;
 }

@@ -22,13 +22,24 @@ export function settleReadingState(
   /** Earlier passes archived in the Read table. */
   archivedReads: number,
   now: Date = new Date(),
+  opts: {
+    /** A Read book with no date given stays undated instead of being
+     *  finished today: the reader said they don't remember, or chose that
+     *  in Preferences (New books). */
+    undatedFinish?: boolean;
+  } = {},
 ): ReadingState & { timesRead: number } {
   const { status } = next;
 
   // Marking a book Read without saying when means "finished today". Without
-  // a date it can't count toward any year's stats or goal.
-  const dateFinished =
-    status === ReadingStatus.READ && !next.dateFinished ? now : next.dateFinished;
+  // a date it can't count toward any year's stats or goal, which is what an
+  // undated finish asks for. A book that was already Read and is saved
+  // without a date stays undated too, so a later save (a new rating, say)
+  // never stamps today on a book whose date nobody remembers.
+  let dateFinished = next.dateFinished;
+  if (status === ReadingStatus.READ && !next.dateFinished) {
+    dateFinished = opts.undatedFinish || prevStatus === ReadingStatus.READ ? null : now;
+  }
 
   // Starting a book without saying when means "started today", the same
   // convenience in the other direction. Only from Want to Read (or a new

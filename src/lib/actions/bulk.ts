@@ -144,6 +144,12 @@ export async function bulkUpdateBooks(input: BulkInput): Promise<BulkResult> {
   // independent writes meant a failure partway through left some of the
   // selection changed and some not — while still reporting the whole batch
   // as updated. "Apply to 20 books" should either happen or not.
+  // Books moved to Read with no finish date follow the "Books I add as Read
+  // were finished" preference (New books): today, or no date at all.
+  const undatedFinish = status
+    ? (await getPreferences()).addedAsReadFinished === "undated"
+    : false;
+
   const outcome = await prisma.$transaction(async (tx) => {
     if (status) {
       // Per book, through the same rules as the reading card: moving a book
@@ -162,6 +168,8 @@ export async function bulkUpdateBooks(input: BulkInput): Promise<BulkResult> {
             currentPage: b.currentPage,
           },
           b._count.reads,
+          new Date(),
+          { undatedFinish },
         );
         await tx.book.update({ where: { id: b.id }, data: next });
       }

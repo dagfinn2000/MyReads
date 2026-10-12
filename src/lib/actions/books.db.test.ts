@@ -189,6 +189,107 @@ describe("createBook", () => {
     expect(result.error).toBe("Cover URL must be an http(s) URL");
   });
 
+  it("keeps the finish date picked for a book added as Read, and its rating", async () => {
+    await redirectOf(
+      createBook({}, form({ ...bookFields, status: "READ", dateFinished: "2019-06-14", rating: "8" })),
+    );
+
+    const book = await prisma.book.findFirstOrThrow({ where: { userId } });
+    expect(book.dateFinished?.toISOString().slice(0, 10)).toBe("2019-06-14");
+    expect(book.rating).toBe(8);
+    expect(book.timesRead).toBe(1);
+  });
+
+  it("leaves a book added as Read undated when the reader doesn't remember", async () => {
+    // A date sent along with the box (it can't be, the field is disabled)
+    // still loses to it.
+    await redirectOf(
+      createBook(
+        {},
+        form({ ...bookFields, status: "READ", finishedUnknown: "on", dateFinished: "2019-06-14" }),
+      ),
+    );
+
+    const book = await prisma.book.findFirstOrThrow({ where: { userId } });
+    expect(book.dateFinished).toBeNull();
+    expect(book.timesRead).toBe(1);
+  });
+
+  it("follows the undated preference when no date is given", async () => {
+    await prisma.user.update({
+      where: { id: userId },
+      data: { preferences: { addedAsReadFinished: "undated" } },
+    });
+    await redirectOf(createBook({}, form({ ...bookFields, status: "READ" })));
+    expect((await prisma.book.findFirstOrThrow({ where: { userId } })).dateFinished).toBeNull();
+
+    // A date picked anyway is kept.
+    await redirectOf(createBook({}, form({ ...bookFields, status: "READ", dateFinished: "2020-01-02" })));
+    const dated = await prisma.book.findFirstOrThrow({ where: { userId, dateFinished: { not: null } } });
+    expect(dated.dateFinished?.toISOString().slice(0, 10)).toBe("2020-01-02");
+  });
+
+  it("starts the log of a book added mid-read at its page, with no page-0 anchor", async () => {
+    // Started 8 Oct on page 64 credits nothing to today: a lone first entry
+    // has no predecessor to count from.
+    await redirectOf(
+      createBook(
+        {},
+        form({ ...bookFields, pageCount: "208", status: "READING", dateStarted: "2026-10-08", currentPage: "64" }),
+      ),
+    );
+
+    const book = await prisma.book.findFirstOrThrow({ where: { userId } });
+    expect(book.dateStarted?.toISOString().slice(0, 10)).toBe("2026-10-08");
+    expect(book.currentPage).toBe(64);
+    const log = await progressOf(book.id);
+    expect(log.map((e) => e.page)).toEqual([64]);
+    expect(log[0].date.getTime()).toBeGreaterThanOrEqual(book.dateStarted!.getTime());
+
+    // The next page logged on the card counts from there.
+    await updateReading(book.id, {}, form({ status: "READING", dateStarted: "2026-10-08", currentPage: "80" }));
+    expect((await progressOf(book.id)).map((e) => e.page)).toEqual([64, 80]);
+  });
+
+  it("logs nothing for a book added as Currently Reading on page 0", async () => {
+    await redirectOf(createBook({}, form({ ...bookFields, status: "READING", currentPage: "" })));
+    const book = await prisma.book.findFirstOrThrow({ where: { userId } });
+    expect(await progressOf(book.id)).toHaveLength(0);
+  });
+
+  it("refuses a page past the end or a finish date in the future, and saves nothing", async () => {
+    const pastEnd = await createBook(
+      {},
+      form({ ...bookFields, pageCount: "208", status: "READING", currentPage: "900" }),
+    );
+    expect(pastEnd.error).toBe("Page 900 is past the end of the book (208 pages)");
+
+    const future = new Date(Date.now() + 3 * 86_400_000).toISOString().slice(0, 10);
+    const early = await createBook({}, form({ ...bookFields, status: "READ", dateFinished: future }));
+    expect(early.error).toBe("Finish date is in the future");
+
+    expect(await prisma.book.count({ where: { userId } })).toBe(0);
+  });
+
+  it("stays on the add page for Add and add another, saying what was added", async () => {
+    const res = await createBook({}, form({ ...bookFields, afterAdd: "another" }));
+
+    const book = await prisma.book.findFirstOrThrow({ where: { userId } });
+    expect(res).toEqual({ success: true, added: { id: book.id, title: book.title } });
+  });
+
+  it("goes to the library when asked, and follows the preference without a button", async () => {
+    expect(await redirectOf(createBook({}, form({ ...bookFields, afterAdd: "library" })))).toBe("/books");
+
+    await prisma.user.update({ where: { id: userId }, data: { preferences: { afterAdd: "library" } } });
+    expect(await redirectOf(createBook({}, form(bookFields)))).toBe("/books");
+
+    await prisma.user.update({ where: { id: userId }, data: { preferences: { afterAdd: "another" } } });
+    expect((await createBook({}, form(bookFields))).added).toBeDefined();
+    // Junk in the field reads as no button.
+    expect((await createBook({}, form({ ...bookFields, afterAdd: "then" }))).added).toBeDefined();
+  });
+
   it("swaps a remote cover for the cached copy once it downloads", async () => {
     cacheCoverImage.mockResolvedValue("/api/covers/cached-1.jpg");
     await redirectOf(
@@ -211,6 +312,14 @@ describe("updateBook", () => {
     const after = await prisma.book.findUniqueOrThrow({ where: { id: bk.id } });
     expect(after.title).toBe("Lathe of Heaven");
     expect(after.searchText).toBe("lathe of heaven le guin");
+  });
+
+  it("keeps the Open Library id the form sends", async () => {
+    const bk = await makeBook({ openLibraryId: "OL27482W" });
+    await redirectOf(updateBook(bk.id, {}, form({ ...bookFields, openLibraryId: "OL27482W" })));
+    expect((await prisma.book.findUniqueOrThrow({ where: { id: bk.id } })).openLibraryId).toBe(
+      "OL27482W",
+    );
   });
 
   it("refuses another account's book", async () => {
@@ -297,6 +406,26 @@ describe("updateReading and the reading log", () => {
     const after = await prisma.book.findUniqueOrThrow({ where: { id: bk.id } });
     expect(after.dateFinished?.toDateString()).toBe(new Date().toDateString());
     expect(await progressOf(bk.id)).toHaveLength(0);
+  });
+
+  it("keeps an undated Read book undated when it is saved again", async () => {
+    const bk = await makeBook({ status: ReadingStatus.READ, timesRead: 1 });
+    await updateReading(bk.id, {}, form({ status: "READ", rating: "8" }));
+
+    const after = await prisma.book.findUniqueOrThrow({ where: { id: bk.id } });
+    expect(after.dateFinished).toBeNull();
+    expect(after.rating).toBe(8);
+  });
+
+  it("finishing with Don't remember leaves no date and no closing log entry", async () => {
+    const bk = await makeBook({ status: ReadingStatus.READING });
+    await updateReading(bk.id, {}, form({ status: "READING", currentPage: "120" }));
+    await updateReading(bk.id, {}, form({ status: "READ", finishedUnknown: "on" }));
+
+    const after = await prisma.book.findUniqueOrThrow({ where: { id: bk.id } });
+    expect(after.dateFinished).toBeNull();
+    expect(after.timesRead).toBe(1);
+    expect((await progressOf(bk.id)).map((e) => e.page)).toEqual([0, 120]);
   });
 
   it("counts archived reads plus the current one in timesRead", async () => {

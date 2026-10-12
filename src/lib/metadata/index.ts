@@ -1,5 +1,9 @@
 import { isbnVariants, normalizeIsbn } from "@/lib/isbn";
-import { searchOpenLibrary, getOpenLibraryDetails } from "./openlibrary";
+import {
+  searchOpenLibrary,
+  getOpenLibraryDetails,
+  getOpenLibraryEdition,
+} from "./openlibrary";
 import {
   searchGoogleBooks,
   getGoogleBooksDetails,
@@ -84,6 +88,11 @@ export async function searchBooks(
  * Books enrichment pass. Google's descriptions and page counts are often
  * better than Open Library's, so when both exist Google wins for those
  * fields while tags are combined.
+ *
+ * With an ISBN, Open Library's record of that exact edition is fetched too:
+ * its page count beats the work's median, and its work id fills in an Open
+ * Library id (and so the work's description and subjects) for a book found
+ * in another catalogue. The id used comes back as `openLibraryId`.
  */
 export async function getBookDetails(
   params: {
@@ -95,22 +104,28 @@ export async function getBookDetails(
   sources: readonly Catalogue[] = ALL_CATALOGUES,
 ): Promise<BookDetails> {
   const asked = askable(sources);
-  const [ol, gb] = await Promise.all([
-    params.openLibraryId && asked.includes("openlibrary")
+  const useOl = asked.includes("openlibrary");
+  const [olGiven, edition, gb] = await Promise.all([
+    params.openLibraryId && useOl
       ? getOpenLibraryDetails(params.openLibraryId)
       : Promise.resolve(null),
+    params.isbn && useOl ? getOpenLibraryEdition(params.isbn) : Promise.resolve(null),
     asked.includes("google")
       ? getGoogleBooksDetails(params)
       : Promise.resolve(null),
   ]);
+  // No id given: the edition's work, fetched once the edition named it.
+  const workId = params.openLibraryId || edition?.workId || null;
+  const ol = olGiven ?? (useOl && workId ? await getOpenLibraryDetails(workId) : null);
 
   const tags = [...new Set([...(gb?.tags ?? []), ...(ol?.tags ?? [])])].slice(0, 6);
 
   return {
     description: gb?.description ?? ol?.description ?? null,
-    pageCount: gb?.pageCount ?? ol?.pageCount ?? null,
+    pageCount: gb?.pageCount ?? edition?.pageCount ?? ol?.pageCount ?? null,
     tags,
     coverUrl: gb?.coverUrl ?? ol?.coverUrl ?? null,
+    openLibraryId: workId,
   };
 }
 

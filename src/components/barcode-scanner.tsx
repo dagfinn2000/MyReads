@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { ScanBarcode } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { ShelfScanPanel, type ShelfScan } from "@/components/shelf-scan";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -50,19 +52,60 @@ const ERROR_MESSAGES: Record<string, string> = {
     "Couldn't access the camera. Check this site's camera permission in the browser.",
 };
 
+/** Where the "Keep scanning" switch is remembered, per device. */
+const KEEP_SCANNING_KEY = "myreads:keep-scanning";
+
+function readKeepScanning(): boolean {
+  try {
+    return typeof window !== "undefined" && localStorage.getItem(KEEP_SCANNING_KEY) === "on";
+  } catch {
+    return false; // storage blocked (private mode): just off
+  }
+}
+
+function writeKeepScanning(on: boolean) {
+  try {
+    localStorage.setItem(KEEP_SCANNING_KEY, on ? "on" : "off");
+  } catch {
+    // not remembered, which is fine
+  }
+}
+
 /**
  * "Scan" button + camera dialog. Watches the video feed for an EAN-13
  * barcode that looks like an ISBN and hands it to `onDetected` (the import
  * search then takes over). The camera is only held while the dialog is open.
+ *
+ * With `shelfScan`, the dialog also has a "Keep scanning" switch. While it
+ * is on, the camera stays open and every barcode goes to the shelf-scan
+ * session instead, which looks it up and adds it, with the list of results
+ * under the camera.
  */
 export function BarcodeScanner({
   onDetected,
+  defaultOpen = false,
+  shelfScan,
 }: {
   onDetected: (isbn: string) => void;
+  /** Open the camera straight away (adding another book after a scan). */
+  defaultOpen?: boolean;
+  shelfScan?: {
+    scan: ShelfScan;
+    /** "Add by hand" on a code no catalogue knows. */
+    onAddByHand: (isbn: string) => void;
+    /** Done: the reader is finished scanning. */
+    onDone: () => void;
+  };
 }) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(defaultOpen);
   const [error, setError] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const [keep, setKeep] = useState(() => Boolean(shelfScan) && readKeepScanning());
+  // Read by the detection loop, so flipping the switch never restarts the
+  // camera.
+  const keepRef = useRef(keep);
+  const [flash, setFlash] = useState(false);
+  const handleCode = shelfScan?.scan.handleCode;
 
   useEffect(() => {
     if (!open) return;
@@ -105,7 +148,13 @@ export function BarcodeScanner({
         try {
           const codes = await detector.detect(videoRef.current);
           const hit = codes.find((c) => isIsbn13(c.rawValue));
-          if (hit) {
+          if (hit && keepRef.current && handleCode) {
+            // A short ring round the picture says the code was taken.
+            if (handleCode(hit.rawValue)) {
+              setFlash(true);
+              setTimeout(() => setFlash(false), 600);
+            }
+          } else if (hit) {
             setOpen(false); // effect cleanup stops the camera
             onDetected(hit.rawValue);
           }
@@ -123,7 +172,7 @@ export function BarcodeScanner({
       if (timer) clearInterval(timer);
       stream?.getTracks().forEach((t) => t.stop());
     };
-  }, [open, onDetected]);
+  }, [open, onDetected, handleCode]);
 
   return (
     // Clearing a previous failure belongs to the act of reopening, not to a
@@ -143,13 +192,31 @@ export function BarcodeScanner({
           Scan
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Scan ISBN barcode</DialogTitle>
+          <DialogTitle>{keep ? "Scan a shelf" : "Scan ISBN barcode"}</DialogTitle>
           <DialogDescription>
-            Point the camera at the barcode on the back of the book.
+            {keep
+              ? "Adds each book with your New books settings."
+              : "Point the camera at the barcode on the back of the book."}
           </DialogDescription>
         </DialogHeader>
+        {shelfScan && !error && (
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              role="switch"
+              checked={keep}
+              onChange={(e) => {
+                keepRef.current = e.target.checked;
+                setKeep(e.target.checked);
+                writeKeepScanning(e.target.checked);
+              }}
+              className="size-4 accent-primary"
+            />
+            Keep scanning
+          </label>
+        )}
         {error ? (
           <p className="text-sm text-muted-foreground">{ERROR_MESSAGES[error]}</p>
         ) : (
@@ -157,9 +224,25 @@ export function BarcodeScanner({
           // not media with an audio track.
           <video
             ref={videoRef}
-            className="aspect-video w-full rounded-md bg-black object-cover"
+            className={cn(
+              "aspect-video w-full rounded-md bg-black object-cover ring-offset-2 ring-offset-background transition-shadow",
+              flash && "ring-2 ring-primary",
+            )}
             muted
             playsInline
+          />
+        )}
+        {shelfScan && !error && (keep || shelfScan.scan.snapshot.rows.length > 0) && (
+          <ShelfScanPanel
+            scan={shelfScan.scan}
+            onAddByHand={(isbn) => {
+              setOpen(false);
+              shelfScan.onAddByHand(isbn);
+            }}
+            onDone={() => {
+              setOpen(false);
+              shelfScan.onDone();
+            }}
           />
         )}
       </DialogContent>
