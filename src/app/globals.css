@@ -877,6 +877,56 @@ html[data-covers="plain"] .drawn-cover {
   }
 }
 
+/* Bars (reading progress, the goal, the stats charts) grow from the left
+   as the page opens, and the gold medal for a reached goal swings in and
+   catches the light once. The shine is clipped to the medal's disc. */
+@keyframes bar-grow {
+  from {
+    transform: scaleX(0);
+  }
+}
+@keyframes medal-in {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px) rotate(-12deg) scale(0.7);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(2px) rotate(4deg) scale(1.05);
+  }
+}
+@keyframes medal-shine {
+  from {
+    transform: translateX(-120%) skewX(-20deg);
+  }
+  to {
+    transform: translateX(260%) skewX(-20deg);
+  }
+}
+.bar-grow {
+  transform-origin: left;
+  animation: bar-grow 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+}
+.gold-medal-in {
+  animation: medal-in 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+}
+.gold-medal-shine {
+  position: absolute;
+  inset: 36% 10.4% 4.7%;
+  overflow: hidden;
+  border-radius: 50%;
+  pointer-events: none;
+}
+.gold-medal-shine::after {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  width: 40%;
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.75), transparent);
+  transform: translateX(-120%) skewX(-20deg);
+  animation: medal-shine 1.1s 0.6s ease-in-out both;
+}
+
 /* Theme switch: the new theme grows out of the palette button as a circle
    (revealTheme in components/theme-picker.tsx), so the default cross-fade
    between the two snapshots is turned off while it runs. */

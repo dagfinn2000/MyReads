@@ -2,10 +2,20 @@
 
 import { useRef, useState } from "react";
 import { X } from "lucide-react";
+import { motionAllowed } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 import { usePreferences } from "@/components/preferences-provider";
 import { StarGraphic } from "@/components/stars";
 import { Button } from "@/components/ui/button";
+
+/** A quick bounce when a rating is picked. Skipped when animations are off. */
+function pop(el: Element | null | undefined) {
+  if (!el || !motionAllowed()) return;
+  el.animate(
+    [{ transform: "scale(1)" }, { transform: "scale(1.15)" }, { transform: "scale(1)" }],
+    { duration: 320, easing: "cubic-bezier(0.3, 1.6, 0.5, 1)" },
+  );
+}
 
 /**
  * Interactive 1–5 star rating input with half-star steps.
@@ -96,6 +106,7 @@ function StarInput({
     setTimeout(() => (suppressClick.current = false), 0);
     setValue(valueAt(e.clientX));
     setHover(null);
+    pop(rowRef.current);
   }
 
   function onPointerCancel() {
@@ -137,6 +148,7 @@ function StarInput({
                 onClick={() => {
                   if (suppressClick.current) return;
                   setValue(v);
+                  pop(rowRef.current);
                 }}
               />
             );
@@ -173,7 +185,10 @@ function TenPointInput({ name, defaultValue }: { name: string; defaultValue: num
           type="button"
           aria-pressed={value === v}
           aria-label={`${v} out of 10`}
-          onClick={() => setValue(v)}
+          onClick={(e) => {
+            setValue(v);
+            pop(e.currentTarget);
+          }}
           className={cn(
             "size-8 rounded-md border text-sm tabular-nums transition-colors hover:border-ring/60 sm:size-7",
             value === v && "border-primary bg-primary text-primary-foreground",

@@ -164,7 +164,7 @@ export function BookRow({
             title={`Page ${book.currentPage} of ${book.pageCount}`}
           >
             <div
-              className="h-full rounded-full bg-primary/80"
+              className="bar-grow h-full rounded-full bg-primary/80"
               style={{ width: `${progress * 100}%` }}
             />
           </div>
@@ -211,7 +211,7 @@ export function BookCard({
           title={`Page ${book.currentPage} of ${book.pageCount}`}
         >
           <div
-            className="h-full rounded-full bg-primary/80"
+            className="bar-grow h-full rounded-full bg-primary/80"
             style={{ width: `${progress * 100}%` }}
           />
         </div>

@@ -4,6 +4,9 @@ import { auth } from "@/auth";
 export interface ActionState {
   error?: string;
   success?: boolean;
+  /** Set by updateReading when the save marked the book as read, so the
+   *  reading card can celebrate. */
+  finished?: boolean;
 }
 
 /** All actions require a session; returns the user id or throws. */

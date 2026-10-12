@@ -354,6 +354,15 @@ describe("updateReading and the reading log", () => {
     expect((await progressOf(bk.id)).map((e) => e.page)).toEqual([0, 40]);
   });
 
+  it("says when a save finished the book, and only then", async () => {
+    const bk = await makeBook({ status: ReadingStatus.READING });
+    expect((await updateReading(bk.id, {}, form({ status: "READ" }))).finished).toBe(true);
+    // Saving it again (a new rating, say) isn't finishing it again.
+    expect((await updateReading(bk.id, {}, form({ status: "READ", rating: "8" }))).finished).toBe(
+      false,
+    );
+  });
+
   it("refuses another account's book", async () => {
     const bk = await makeBook({ status: ReadingStatus.READING }, otherUserId);
     const result = await updateReading(bk.id, {}, form({ status: "READ" }));

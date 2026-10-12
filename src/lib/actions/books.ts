@@ -237,7 +237,10 @@ export async function updateReading(
   revalidatePath("/books");
   revalidatePath(`/books/${bookId}`);
   revalidatePath("/stats");
-  return { success: true };
+  return {
+    success: true,
+    finished: existing.status !== ReadingStatus.READ && data.status === ReadingStatus.READ,
+  };
 }
 
 /**
