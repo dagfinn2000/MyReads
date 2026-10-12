@@ -25,8 +25,9 @@ export async function Nav() {
 
   return (
     <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur">
-      {/* Below sm the nav buttons collapse to icons so everything fits a
-          phone screen without horizontal overflow. */}
+      {/* Below lg the nav buttons collapse to icons. With five labelled
+          links plus the right-hand group the bar needs about 900px, so
+          labels from sm (640px) overflowed tablets and narrow windows. */}
       <div className="mx-auto flex h-14 max-w-6xl items-center gap-0.5 px-3 sm:gap-1 sm:px-4">
         <Link
           href="/"
@@ -38,20 +39,20 @@ export async function Nav() {
         <Button asChild variant="ghost" size="sm" title="Library">
           <Link href="/books">
             <LibraryBig data-slot="icon" />
-            <span className="hidden sm:inline">Library</span>
+            <span className="hidden lg:inline">Library</span>
           </Link>
         </Button>
         <Button asChild variant="ghost" size="sm" title="Add book">
           <Link href="/books/new">
             <Plus data-slot="icon" />
-            <span className="hidden sm:inline">Add book</span>
+            <span className="hidden lg:inline">Add book</span>
           </Link>
         </Button>
         {!hidden.has("check") && (
           <Button asChild variant="ghost" size="sm" title="Do I own this?">
             <Link href="/books/check">
               <ScanSearch data-slot="icon" />
-              <span className="hidden sm:inline">Check</span>
+              <span className="hidden lg:inline">Check</span>
             </Link>
           </Button>
         )}
@@ -59,14 +60,14 @@ export async function Nav() {
           <Button asChild variant="ghost" size="sm" title="Quotes">
             <Link href="/quotes">
               <Quote data-slot="icon" />
-              <span className="hidden sm:inline">Quotes</span>
+              <span className="hidden lg:inline">Quotes</span>
             </Link>
           </Button>
         )}
         <Button asChild variant="ghost" size="sm" title="Stats">
           <Link href="/stats">
             <ChartColumn data-slot="icon" />
-            <span className="hidden sm:inline">Stats</span>
+            <span className="hidden lg:inline">Stats</span>
           </Link>
         </Button>
         <div className="ml-auto flex items-center gap-1 sm:gap-3">
@@ -86,7 +87,7 @@ export async function Nav() {
           <Button asChild variant="ghost" size="sm" title="Account">
             <Link href="/account">
               <UserRound data-slot="icon" />
-              <span className="hidden text-muted-foreground md:inline">
+              <span className="hidden text-muted-foreground xl:inline">
                 {session?.user?.name}
               </span>
             </Link>
