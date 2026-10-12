@@ -52,6 +52,7 @@ export default async function EditBookPage({
           description: book.description ?? "",
           coverUrl: book.coverUrl ?? "",
           pageCount: book.pageCount?.toString() ?? "",
+          lengthMinutes: book.lengthMinutes?.toString() ?? "",
           publishedDate: book.publishedDate ?? "",
           tags: book.tags.join(", "),
           seriesName: book.seriesName ?? "",

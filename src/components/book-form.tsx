@@ -5,6 +5,7 @@ import { BookFormat, BookOwnership, ReadingStatus } from "@prisma/client";
 import { BookOpen } from "lucide-react";
 import type { ActionState } from "@/lib/actions/helpers";
 import { FORMAT_LABELS, OWNERSHIP_LABELS, STATUS_LABELS } from "@/lib/display";
+import { AudiobookLengthField } from "@/components/audiobook-length-field";
 import { CoverPicker } from "@/components/cover-picker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,6 +27,7 @@ export interface BookFormValues {
   description?: string;
   coverUrl?: string;
   pageCount?: string;
+  lengthMinutes?: string; // audiobooks only
   publishedDate?: string;
   tags?: string; // comma-separated
   seriesName?: string;
@@ -59,6 +61,10 @@ export function BookForm({
   const [state, formAction, pending] = useActionState(action, {});
   // Controlled so the cover picker and upload can set it programmatically.
   const [coverUrl, setCoverUrl] = useState(initial.coverUrl ?? "");
+  // Tracked so the audiobook length shows only for audiobooks.
+  const [format, setFormat] = useState<BookFormat>(
+    initial.format ?? BookFormat.PHYSICAL,
+  );
 
   return (
     <form action={formAction} className="grid gap-6 md:grid-cols-[200px_1fr]">
@@ -186,7 +192,11 @@ export function BookForm({
         <div className="flex flex-wrap items-end gap-4">
           <div className="grid gap-2">
             <Label htmlFor="format">Format</Label>
-            <Select name="format" defaultValue={initial.format ?? BookFormat.PHYSICAL}>
+            <Select
+              name="format"
+              defaultValue={initial.format ?? BookFormat.PHYSICAL}
+              onValueChange={(v) => setFormat(v as BookFormat)}
+            >
               <SelectTrigger id="format" className="w-36">
                 <SelectValue />
               </SelectTrigger>
@@ -199,6 +209,10 @@ export function BookForm({
               </SelectContent>
             </Select>
           </div>
+          <AudiobookLengthField
+            initialMinutes={initial.lengthMinutes}
+            hidden={format !== BookFormat.AUDIOBOOK}
+          />
           {showStatus && (
             <div className="grid gap-2">
               <Label htmlFor="status">Shelf</Label>

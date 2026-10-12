@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { Library, Pencil, Repeat } from "lucide-react";
+import { BookFormat } from "@prisma/client";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { getPreferences } from "@/lib/current-user";
@@ -11,6 +12,7 @@ import {
   STATUS_BADGE_CLASS,
   STATUS_LABELS,
 } from "@/lib/display";
+import { formatLength } from "@/lib/progress-units";
 import { BookCover } from "@/components/book-card";
 import { BookLink } from "@/components/book-link";
 import { BookShelvesCard } from "@/components/book-shelves-card";
@@ -164,6 +166,12 @@ export default async function BookDetailPage({
             <div>
               <dt className="text-muted-foreground">Pages</dt>
               <dd>{book.pageCount}</dd>
+            </div>
+          )}
+          {book.format === BookFormat.AUDIOBOOK && book.lengthMinutes != null && (
+            <div>
+              <dt className="text-muted-foreground">Length</dt>
+              <dd>{formatLength(book.lengthMinutes)}</dd>
             </div>
           )}
           {book.publishedDate && (

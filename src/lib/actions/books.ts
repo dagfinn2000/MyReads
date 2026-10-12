@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { after } from "next/server";
 import type { Prisma } from "@prisma/client";
-import { ReadingStatus } from "@prisma/client";
+import { BookFormat, ReadingStatus } from "@prisma/client";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { bookSchema, readingSchema } from "@/lib/validation";
@@ -12,6 +12,7 @@ import { cacheCoverImage, deleteCachedCover } from "@/lib/covers";
 import { requireUserId } from "@/lib/actions/helpers";
 import type { ActionState } from "@/lib/actions/helpers";
 import { currentPassEntries } from "@/lib/progress";
+import { anchorMoment } from "@/lib/reading-log";
 import { settleReadingState } from "@/lib/reading-state";
 import { buildSearchText } from "@/lib/utils";
 
@@ -87,6 +88,8 @@ export async function createBook(
       description: data.description ?? null,
       coverUrl: data.coverUrl ?? null,
       pageCount: data.pageCount ?? null,
+      // Only an audiobook has a running time; any other format saves none.
+      lengthMinutes: data.format === BookFormat.AUDIOBOOK ? (data.lengthMinutes ?? null) : null,
       publishedDate: data.publishedDate ?? null,
       tags: data.tags,
       seriesName: data.seriesName ?? null,
@@ -138,6 +141,7 @@ export async function updateBook(
       description: data.description ?? null,
       coverUrl: newCover,
       pageCount: data.pageCount ?? null,
+      lengthMinutes: data.format === BookFormat.AUDIOBOOK ? (data.lengthMinutes ?? null) : null,
       publishedDate: data.publishedDate ?? null,
       tags: data.tags,
       seriesName: data.seriesName ?? null,
@@ -279,7 +283,7 @@ async function logProgress(
   if (next.currentPage != null && next.currentPage !== prev.currentPage) {
     const entries: { bookId: string; page: number; date: Date }[] = [];
     if (!last) {
-      entries.push({ bookId, page: 0, date: next.dateStarted ?? now });
+      entries.push({ bookId, page: 0, date: anchorMoment(next.dateStarted, now) });
     }
     entries.push({ bookId, page: next.currentPage, date: now });
     await db.progressEntry.createMany({ data: entries });
