@@ -69,7 +69,7 @@ export async function GET() {
     prisma.shelf.findMany({
       where: { userId },
       orderBy: { name: "asc" },
-      select: { name: true, createdAt: true },
+      select: { id: true, name: true, createdAt: true },
     }),
     prisma.readingGoal.findMany({
       where: { userId },
@@ -87,13 +87,21 @@ export async function GET() {
     }),
   ]);
 
+  const prefs = parsePreferences(user?.preferences);
+  // Preferences that list shelves or saved views by id go out by name too,
+  // since ids don't survive a move.
+  const shelfNames = new Map(shelves.map((s) => [s.id, s.name]));
+  const viewNames = new Map(savedViews.map((v) => [v.id, v.name]));
+  const namesOf = (ids: string[], names: Map<string, string>) =>
+    ids.flatMap((id) => names.get(id) ?? []);
+
   const payload = {
     format: "myreads-export",
     version: 1,
     exportedAt: new Date().toISOString(),
     username: session.user.name ?? null,
     counts: { books: books.length, shelves: shelves.length },
-    shelves,
+    shelves: shelves.map(({ id: _id, ...shelf }) => shelf),
     // Pages goals get a list of their own: an older MyReads reads every
     // entry of readingGoals as a number of books.
     readingGoals: readingGoals
@@ -104,14 +112,15 @@ export async function GET() {
       .map(({ unit: _unit, ...goal }) => goal),
     // The account's own settings: theme, library view and Preferences. A
     // restore fills these in only where the account has none yet. The
-    // default saved view is kept by name, since ids don't survive a move.
+    // default saved view, and the shelf and view orders, are kept by name.
     settings: {
       theme: user?.theme ?? null,
       libraryView: user?.libraryView ?? null,
       preferences: user?.preferences ?? null,
-      defaultViewName:
-        savedViews.find((v) => v.id === parsePreferences(user?.preferences).defaultViewId)
-          ?.name ?? null,
+      defaultViewName: viewNames.get(prefs.defaultViewId) ?? null,
+      shelfOrderNames: namesOf(prefs.shelfOrder, shelfNames),
+      hiddenShelfNames: namesOf(prefs.hiddenShelves, shelfNames),
+      savedViewOrderNames: namesOf(prefs.savedViewOrder, viewNames),
     },
     savedViews: savedViews.map(({ name, query }) => ({ name, query })),
     books: books.map(({ userId: _userId, searchText: _searchText, ...book }) => ({

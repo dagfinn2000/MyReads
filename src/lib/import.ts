@@ -120,6 +120,9 @@ const goalSchema = z.object({
   countRereads: z.boolean().catch(true),
 });
 
+/** Shelf or saved-view names in a preference, as exported. */
+const nameList = z.array(z.string().max(100)).max(500).optional().catch([]);
+
 const exportPayloadSchema = z.object({
   format: z.literal("myreads-export"),
   version: z.literal(1),
@@ -136,6 +139,10 @@ const exportPayloadSchema = z.object({
       libraryView: z.unknown(),
       preferences: z.unknown(),
       defaultViewName: z.string().max(SAVED_VIEW_NAME_MAX).nullable().catch(null),
+      // Shelf and saved-view preferences, by name (see restoreSettings).
+      shelfOrderNames: nameList,
+      hiddenShelfNames: nameList,
+      savedViewOrderNames: nameList,
     })
     .nullable()
     .optional()
@@ -565,6 +572,9 @@ async function restoreSettings(
     libraryView?: unknown;
     preferences?: unknown;
     defaultViewName: string | null;
+    shelfOrderNames?: string[];
+    hiddenShelfNames?: string[];
+    savedViewOrderNames?: string[];
   },
 ): Promise<boolean> {
   const user = await prisma.user.findUnique({
@@ -591,15 +601,36 @@ async function restoreSettings(
   }
 
   const storedPrefs = asObject(user.preferences);
-  // The backup's own defaultViewId points at a view on the old instance.
-  const { defaultViewId: _oldId, ...backupPrefs } = cleanPreferencesPatch(settings.preferences);
+  // The backup's own ids point at shelves and views on the old instance;
+  // they come back through the names exported beside them.
+  const {
+    defaultViewId: _oldViewId,
+    shelfOrder: _oldShelfOrder,
+    hiddenShelves: _oldHiddenShelves,
+    savedViewOrder: _oldViewOrder,
+    ...backupPrefs
+  } = cleanPreferencesPatch(settings.preferences);
   const prefAdds: Record<string, unknown> = missing(storedPrefs, backupPrefs);
+
+  const [shelves, views] = await Promise.all([
+    prisma.shelf.findMany({ where: { userId }, select: { id: true, name: true } }),
+    prisma.savedView.findMany({ where: { userId }, select: { id: true, name: true } }),
+  ]);
+  const shelfIds = new Map(shelves.map((s) => [s.name, s.id]));
+  const viewIds = new Map(views.map((v) => [v.name, v.id]));
+  const idsOf = (names: string[] | undefined, ids: Map<string, string>) =>
+    (names ?? []).flatMap((name) => ids.get(name) ?? []);
+  const byName: [string, string[]][] = [
+    ["shelfOrder", idsOf(settings.shelfOrderNames, shelfIds)],
+    ["hiddenShelves", idsOf(settings.hiddenShelfNames, shelfIds)],
+    ["savedViewOrder", idsOf(settings.savedViewOrderNames, viewIds)],
+  ];
+  for (const [key, ids] of byName) {
+    if (ids.length > 0 && !(key in storedPrefs)) prefAdds[key] = ids;
+  }
   if (settings.defaultViewName && !("defaultViewId" in storedPrefs)) {
-    const view = await prisma.savedView.findUnique({
-      where: { userId_name: { userId, name: settings.defaultViewName } },
-      select: { id: true },
-    });
-    if (view) prefAdds.defaultViewId = view.id;
+    const id = viewIds.get(settings.defaultViewName);
+    if (id) prefAdds.defaultViewId = id;
   }
   if (Object.keys(prefAdds).length > 0) {
     data.preferences = { ...storedPrefs, ...prefAdds } as Prisma.InputJsonObject;

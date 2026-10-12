@@ -40,7 +40,7 @@ export default async function NewBookPage({
           status: prefs.newBookStatus,
           ownership: prefs.newBookOwnership,
         }}
-        importTags={prefs.importTags}
+        importTags={prefs.importTagsMode !== "off"}
       />
     </div>
   );

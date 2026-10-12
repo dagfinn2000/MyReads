@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
   DEFAULT_LIBRARY_VIEW,
+  LIBRARY_GROUPS,
+  LIBRARY_SORTS,
+  NATURAL_DIRS,
   cleanLibraryViewPatch,
+  naturalDir,
   parseLibraryView,
 } from "@/lib/library-view";
 
@@ -91,5 +95,37 @@ describe("cleanLibraryViewPatch", () => {
     expect(cleanLibraryViewPatch({ evil: 1 })).toEqual({});
     expect(cleanLibraryViewPatch(null)).toEqual({});
     expect(cleanLibraryViewPatch("list")).toEqual({});
+  });
+});
+
+describe("the newer sorts, groupings and display options", () => {
+  it("accepts each sort and grouping", () => {
+    for (const sort of LIBRARY_SORTS) expect(parseLibraryView({ sort }).sort).toBe(sort);
+    for (const group of LIBRARY_GROUPS) expect(parseLibraryView({ group }).group).toBe(group);
+  });
+
+  it("gives every sort a natural direction", () => {
+    for (const sort of LIBRARY_SORTS) expect(NATURAL_DIRS[sort]).toMatch(/^(asc|desc)$/);
+    expect(naturalDir("title")).toBe("asc");
+    expect(naturalDir("author")).toBe("asc");
+    expect(naturalDir("rating")).toBe("desc");
+    expect(naturalDir("pageCount")).toBe("desc");
+    expect(naturalDir("bogus")).toBe("desc");
+  });
+
+  it("parses the list-row and ownership options", () => {
+    expect(parseLibraryView({})).toMatchObject({
+      showOwnership: false,
+      rowDate: "none",
+      showPageCount: false,
+    });
+    expect(
+      parseLibraryView({ showOwnership: true, rowDate: "finished", showPageCount: true }),
+    ).toMatchObject({ showOwnership: true, rowDate: "finished", showPageCount: true });
+    expect(parseLibraryView({ rowDate: "started", showPageCount: "yes" })).toMatchObject({
+      rowDate: "none",
+      showPageCount: false,
+    });
+    expect(cleanLibraryViewPatch({ rowDate: "added" })).toEqual({ rowDate: "added" });
   });
 });

@@ -308,6 +308,52 @@ describe("export -> import round trip", () => {
     expect(goal).toMatchObject({ target: 9000, unit: "PAGES", countRereads: false });
   });
 
+  it("keeps the shelf and saved-view order by name", async () => {
+    const [a, b, hidden] = await Promise.all(
+      ["Alpha", "Beta", "Hidden"].map((name) =>
+        prisma.shelf.create({ data: { userId: sourceUserId, name } }),
+      ),
+    );
+    const [v1, v2] = await Promise.all(
+      ["One", "Two"].map((name) =>
+        prisma.savedView.create({
+          data: { userId: sourceUserId, name, query: "group=none&sort=title&dir=asc" },
+        }),
+      ),
+    );
+    await prisma.user.update({
+      where: { id: sourceUserId },
+      data: {
+        preferences: {
+          shelfOrder: [b.id, a.id, "gone-shelf"],
+          hiddenShelves: [hidden.id],
+          savedViewOrder: [v2.id, v1.id],
+        },
+      },
+    });
+
+    const payload = await exportLibrary();
+    expect(payload.shelves.every((s: object) => !("id" in s))).toBe(true);
+    expect(payload.settings).toMatchObject({
+      shelfOrderNames: ["Beta", "Alpha"],
+      hiddenShelfNames: ["Hidden"],
+      savedViewOrderNames: ["Two", "One"],
+    });
+
+    await importLibrary(targetUserId, payload);
+    const target = await prisma.user.findUniqueOrThrow({
+      where: { id: targetUserId },
+      include: { shelves: true, savedViews: true },
+    });
+    const shelfId = (name: string) => target.shelves.find((s) => s.name === name)?.id;
+    const viewId = (name: string) => target.savedViews.find((v) => v.name === name)?.id;
+    expect(target.preferences).toMatchObject({
+      shelfOrder: [shelfId("Beta"), shelfId("Alpha")],
+      hiddenShelves: [shelfId("Hidden")],
+      savedViewOrder: [viewId("Two"), viewId("One")],
+    });
+  });
+
   it("leaves a theme the account already chose alone", async () => {
     await prisma.user.update({ where: { id: sourceUserId }, data: { theme: "dracula" } });
     await prisma.user.update({ where: { id: targetUserId }, data: { theme: "sage" } });

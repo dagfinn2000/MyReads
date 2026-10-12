@@ -45,6 +45,7 @@ const CATALOGUE_LABELS: Record<Catalogue, string> = {
 };
 
 const NAV_LABELS: Record<HideableNav, string> = {
+  reading: "Now reading",
   check: "Check (“Do I own this?”)",
   quotes: "Quotes",
 };
@@ -237,9 +238,18 @@ function Toggle({
   );
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function Section({
+  title,
+  id,
+  children,
+}: {
+  title: string;
+  /** For links straight to the section (/account#pick-for-me). */
+  id?: string;
+  children: React.ReactNode;
+}) {
   return (
-    <section className="grid gap-3 border-t pt-4 first:border-t-0 first:pt-0">
+    <section id={id} className="grid scroll-mt-20 gap-3 border-t pt-4 first:border-t-0 first:pt-0">
       <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
         {title}
       </h3>
@@ -352,8 +362,8 @@ export function PreferencesForm({
         />
         <Toggle
           label="Copy subjects from the catalogue as tags"
-          checked={prefs.importTags}
-          onChange={(c) => update({ importTags: c })}
+          checked={prefs.importTagsMode !== "off"}
+          onChange={(c) => update({ importTagsMode: c ? "all" : "off" })}
         />
       </Section>
 
@@ -575,6 +585,7 @@ export function PreferencesForm({
             { value: "library", label: "Library" },
             { value: "stats", label: "Stats" },
             { value: "add", label: "Add book" },
+            { value: "reading", label: "Now reading" },
           ]}
           onChange={(v) => update({ startPage: v })}
         />
