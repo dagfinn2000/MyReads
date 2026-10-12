@@ -166,6 +166,43 @@ describe("importLibrary", () => {
     expect(await prisma.shelf.count({ where: { userId, name: "Sanderson" } })).toBe(1);
   });
 
+  it("matches an existing shelf whatever the case, as the shelf form does", async () => {
+    const mine = await prisma.shelf.create({ data: { userId, name: "Favourites" } });
+    const res = await importLibrary(
+      userId,
+      payload([book({ shelves: ["favourites", "FAVOURITES"] })], {
+        shelves: [{ name: "favourites" }],
+      }),
+    );
+    expect(res).toMatchObject({ booksCreated: 1, shelvesCreated: 0 });
+
+    const saved = await prisma.book.findFirstOrThrow({
+      where: { userId },
+      include: { shelves: true },
+    });
+    expect(saved.shelves.map((s) => s.id)).toEqual([mine.id]);
+  });
+
+  it("takes shelf names the way the shelf form does, one at a time", async () => {
+    // Trimmed, and a name past 50 characters dropped on its own: it used to
+    // be created as it was, while the book lost every one of its shelves.
+    const res = await importLibrary(
+      userId,
+      payload([book({ shelves: ["  Padded  ", "x".repeat(5000), "Kept", 7] })], {
+        shelves: [{ name: "y".repeat(51) }, { name: " Listed " }, null],
+      }),
+    );
+    expect(res).toMatchObject({ booksCreated: 1, shelvesCreated: 3 });
+
+    const shelves = await prisma.shelf.findMany({ where: { userId }, orderBy: { name: "asc" } });
+    expect(shelves.map((s) => s.name)).toEqual(["Kept", "Listed", "Padded"]);
+    const saved = await prisma.book.findFirstOrThrow({
+      where: { userId },
+      include: { shelves: true },
+    });
+    expect(saved.shelves.map((s) => s.name).sort()).toEqual(["Kept", "Padded"]);
+  });
+
   it("materializes history from timesRead when the export predates `reads`", async () => {
     // Old exports carry only a count. Three reads = the current pass plus two
     // archived ones, so timesRead stays consistent with the rows created.

@@ -1,6 +1,7 @@
 import crypto from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
+import { readBodyCapped } from "@/lib/capped-read";
 import { checkUrlAllowed } from "@/lib/net-guard";
 import { prisma } from "@/lib/prisma";
 
@@ -43,36 +44,6 @@ const MAX_COVER_BYTES = 5 * 1024 * 1024;
 /** Redirect hops to follow. Open Library covers redirect to archive.org, so
  *  some redirection is required; an unbounded chain is not. */
 const MAX_REDIRECTS = 3;
-
-/**
- * Reads at most `limit` bytes from the response, aborting as soon as that is
- * exceeded. `res.arrayBuffer()` would buffer whatever the server chooses to
- * send — including a deliberately endless body.
- */
-async function readCapped(res: Response, limit: number): Promise<Buffer | null> {
-  if (!res.body) return null;
-
-  // Trust Content-Length when it's present and already too big: no point
-  // streaming megabytes to discover what the header said up front.
-  const declared = Number.parseInt(res.headers.get("content-length") ?? "", 10);
-  if (Number.isFinite(declared) && declared > limit) return null;
-
-  const chunks: Uint8Array[] = [];
-  let total = 0;
-  const reader = res.body.getReader();
-  try {
-    for (;;) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      total += value.length;
-      if (total > limit) return null;
-      chunks.push(value);
-    }
-  } finally {
-    await reader.cancel().catch(() => {});
-  }
-  return Buffer.concat(chunks, total);
-}
 
 /**
  * Fetches `url`, following redirects one hop at a time and re-checking every
@@ -133,7 +104,7 @@ export async function cacheCoverImage(
       return null;
     }
 
-    const buf = await readCapped(res, MAX_COVER_BYTES);
+    const buf = await readBodyCapped(res, MAX_COVER_BYTES);
     if (!buf) return null;
     // Open Library serves a tiny placeholder for missing covers; skip those.
     if (buf.length < 500) return null;
