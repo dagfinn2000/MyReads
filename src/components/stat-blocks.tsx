@@ -17,12 +17,22 @@ export function Bar({ label, value, max }: { label: string; value: number; max: 
   );
 }
 
-export function StatCard({ label, children }: { label: string; children: React.ReactNode }) {
+export function StatCard({
+  label,
+  note,
+  children,
+}: {
+  label: string;
+  /** A small line under the number: which rule is on, what it includes. */
+  note?: string;
+  children: React.ReactNode;
+}) {
   return (
     <Card>
       <CardContent className="pt-0">
         <p className="text-sm text-muted-foreground">{label}</p>
         <div className="mt-1 text-2xl font-semibold tabular-nums">{children}</div>
+        {note && <p className="mt-1 text-xs text-muted-foreground">{note}</p>}
       </CardContent>
     </Card>
   );

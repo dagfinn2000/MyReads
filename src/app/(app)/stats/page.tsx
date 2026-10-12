@@ -1,28 +1,36 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { GoalUnit, ReadingStatus } from "@prisma/client";
+import { ReadingStatus } from "@prisma/client";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { setReadingGoal } from "@/lib/actions/goals";
 import { getPreferences } from "@/lib/current-user";
-import { calendarDay } from "@/lib/dates";
+import { dayKey } from "@/lib/dates";
 import { FORMAT_LABELS, formatNumber } from "@/lib/display";
-import { goalProgress, markRereads } from "@/lib/goals";
+import { goalPace, goalProgress, splitGoals, yearClock } from "@/lib/goals";
 import { dailyPageTotalsForUser } from "@/lib/progress-query";
-import { GoalReached } from "@/components/goal-reached";
-import { GoldMedal } from "@/components/gold-medal";
+import {
+  booksReadAllTime,
+  buildPasses,
+  countWindow,
+  goalRuleLine,
+  ruleNotes,
+  tally,
+} from "@/lib/stats-count";
+import {
+  ALL_TIME,
+  PERIOD_WORDS,
+  parseGoalYear,
+  parsePeriod,
+  periodWindow,
+  statsHref,
+  yearWindow,
+} from "@/lib/stats-period";
+import { loadStatsInputs } from "@/lib/stats-query";
+import { GoalCard } from "@/components/goal-card";
 import { ReadingHeatmap } from "@/components/reading-heatmap";
 import { Bar, StatCard } from "@/components/stat-blocks";
+import { StatsPeriodNav } from "@/components/stats-period-nav";
 import { Stars } from "@/components/stars";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Card,
   CardContent,
@@ -33,38 +41,32 @@ import {
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Stats · MyReads" };
 
-export default async function StatsPage() {
+export default async function StatsPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const session = await auth();
   if (!session?.user?.id) redirect("/login"); // revoked session (see auth.ts)
 
   const userId = session.user.id;
+  const sp = await searchParams;
   const prefs = await getPreferences();
   const hidden = new Set(prefs.hiddenStats);
   const ratings = prefs.ratingStyle !== "off";
+  const fmt = (n: number) => formatNumber(n, prefs);
 
-  const [books, pastReads, goals, pageTotals, quoteCount, randomQuotes] =
-    await Promise.all([
-    prisma.book.findMany({
-      where: { userId },
-      select: {
-        id: true,
-        status: true,
-        rating: true,
-        pageCount: true,
-        dateFinished: true,
-        tags: true,
-        format: true,
-      },
-    }),
-    // Archived passes from the read-history table: re-reads and pre-app reads.
-    prisma.read.findMany({
-      where: { book: { userId } },
-      select: {
-        bookId: true,
-        dateFinished: true,
-        book: { select: { pageCount: true } },
-      },
-    }),
+  // Today, and the period the buttons (or Preferences) chose, in the
+  // reader's zone.
+  const todayKey = dayKey(new Date(), prefs.timeZone);
+  const currentYear = Number(todayKey.slice(0, 4));
+  const period = parsePeriod(sp.period, prefs.statsPeriod);
+  const words = PERIOD_WORDS[period];
+
+  const [inputs, goals, pageTotals, quoteCount, randomQuotes] = await Promise.all([
+    // Books, past reads and the log by book and day: what lib/stats-count.ts
+    // turns into passes, by the "What counts" preferences.
+    loadStatsInputs(userId, prefs.timeZone),
     prisma.readingGoal.findMany({
       where: { userId },
       orderBy: { year: "desc" },
@@ -89,63 +91,90 @@ export default async function StatsPage() {
   ]);
 
   const randomQuote = randomQuotes[0] ?? null;
-
-  const read = books.filter((b) => b.status === ReadingStatus.READ);
+  const { books } = inputs;
   const reading = books.filter((b) => b.status === ReadingStatus.READING);
 
-  // Pages read: every finished pass counts — the current one on each READ
-  // book plus every archived past read.
-  const pagesRead =
-    read.reduce((sum, b) => sum + (b.pageCount ?? 0), 0) +
-    pastReads.reduce((sum, r) => sum + (r.book.pageCount ?? 0), 0);
+  // Every pass through every book, counted all time and in the period.
+  const passes = buildPasses(inputs, prefs, prefs.timeZone);
+  const allTime = countWindow(passes, ALL_TIME, prefs);
+  const counted =
+    period === "all" ? allTime : countWindow(passes, periodWindow(period, todayKey), prefs);
+  const totals = tally(counted);
 
-  // Average rating across every rated book (any status), in stars.
-  const rated = books.filter((b) => b.rating != null);
+  // Books read: all time it's the books on the Read shelf, each once. In a
+  // period it's finishes, re-reads included, so it says "Books finished".
+  const readAllTime = booksReadAllTime(books, prefs);
+  const notes = ruleNotes(
+    prefs,
+    period === "all"
+      ? { putDown: readAllTime.putDown }
+      : { rereads: totals.rereads, putDown: totals.putDown },
+    fmt,
+  );
+  const booksLabel =
+    period === "all" || prefs.statsStoppedBooks === "book" ? "Books read" : "Books finished";
+
+  // Average rating: all time, every rated book (any status); in a period,
+  // the rated finishes in it.
+  const ratingValues =
+    period === "all"
+      ? books
+          .filter((b) => !(prefs.statsAudiobooks === "out" && b.format === "AUDIOBOOK"))
+          .flatMap((b) => (b.rating != null ? [b.rating] : []))
+      : counted.flatMap((i) =>
+          i.books > 0 && i.pass.kind === "finished" && i.pass.rating != null
+            ? [i.pass.rating]
+            : [],
+        );
   const avgRating =
-    rated.length > 0
-      ? rated.reduce((sum, b) => sum + b.rating!, 0) / rated.length / 2
+    ratingValues.length > 0
+      ? ratingValues.reduce((sum, r) => sum + r, 0) / ratingValues.length / 2
       : null;
 
-  // Every dated finish — current passes and archived past reads — tagged
-  // with its calendar year and whether it was a re-read. A 2026 re-read of
-  // an old favourite shows up in 2026, and counts toward that year's goal
-  // unless the goal leaves re-reads out.
-  const finishes = markRereads(
-    [
-      ...read
-        .filter((b) => b.dateFinished)
-        .map((b) => ({ bookId: b.id, dateFinished: b.dateFinished!, pageCount: b.pageCount })),
-      ...pastReads
-        .filter((r) => r.dateFinished)
-        .map((r) => ({
-          bookId: r.bookId,
-          dateFinished: r.dateFinished!,
-          pageCount: r.book.pageCount,
-        })),
-    ],
-    new Set(pastReads.filter((r) => !r.dateFinished).map((r) => r.bookId)),
-  ).map((f) => ({ ...f, year: Number(calendarDay(f.dateFinished, prefs.timeZone).slice(0, 4)) }));
-  const finishesIn = (year: number) => finishes.filter((f) => f.year === year);
-
+  // Books per year: every dated pass that counts as a book, re-reads
+  // included. A 2026 re-read of an old favourite shows up in 2026.
   const perYear = new Map<number, number>();
-  for (const f of finishes) perYear.set(f.year, (perYear.get(f.year) ?? 0) + 1);
+  for (const i of allTime) {
+    if (i.books === 0 || !i.pass.day) continue;
+    const year = Number(i.pass.day.slice(0, 4));
+    perYear.set(year, (perYear.get(year) ?? 0) + i.books);
+  }
   const years = [...perYear.entries()].sort((a, b) => a[0] - b[0]);
   const maxYear = Math.max(...perYear.values(), 0);
 
-  // Reading goals: progress is derived from each year's finishes, by the
-  // goal's own rule (books or pages, with or without re-reads).
-  const currentYear = Number(calendarDay(new Date(), prefs.timeZone).slice(0, 4));
-  const currentGoal = goals.find((g) => g.year === currentYear) ?? null;
-  const progressFor = (g: (typeof goals)[number]) => goalProgress(finishesIn(g.year), g);
-  const currentProgress = currentGoal ? progressFor(currentGoal) : 0;
-  const goalMet = currentGoal !== null && currentProgress >= currentGoal.target;
-  const pastGoals = goals.filter((g) => g.year !== currentYear);
-  const unitWord = (unit: GoalUnit, n: number) =>
-    unit === GoalUnit.PAGES ? (n === 1 ? "page" : "pages") : n === 1 ? "book" : "books";
+  // Reading goals: one year at a time (this year unless the address picks
+  // next year or a past one), with progress by the goal's own rule and the
+  // same counting as the cards.
+  const { upcoming, past } = splitGoals(goals, currentYear);
+  const goalYear = parseGoalYear(sp.goalYear, currentYear, new Set(past.map((g) => g.year)));
+  const shownYear = goalYear ?? currentYear;
+  const shownGoal = goals.find((g) => g.year === shownYear) ?? null;
+  const progressFor = (g: (typeof goals)[number]) =>
+    goalProgress(countWindow(passes, yearWindow(g.year), prefs), g);
+  const clock = yearClock(todayKey, shownYear);
+  const goalDone = shownGoal ? progressFor(shownGoal) : 0;
+  const nextGoal = upcoming.find((g) => g.year === currentYear + 1) ?? null;
+
+  // Genres and formats: every book in the library, or (Preferences) the
+  // books read in the period, each once however many times it was read.
+  const byPeriod = prefs.statsBreakdown === "period";
+  const breakdownBooks = byPeriod
+    ? [
+        ...new Map(
+          counted.filter((i) => i.books > 0).map((i) => [i.pass.book.id, i.pass.book]),
+        ).values(),
+      ]
+    : books;
+  const breakdownNote = byPeriod
+    ? `books read · ${words}`
+    : period === "all"
+      ? null
+      : "every book in the library";
+  const nothingRead = period === "all" ? "Nothing read yet." : "Nothing in this period.";
 
   // Genre/tag breakdown, top 10.
   const tagCounts = new Map<string, number>();
-  for (const b of books) {
+  for (const b of breakdownBooks) {
     for (const t of b.tags) tagCounts.set(t, (tagCounts.get(t) ?? 0) + 1);
   }
   const topTags = [...tagCounts.entries()]
@@ -155,7 +184,7 @@ export default async function StatsPage() {
 
   // Format breakdown.
   const formatCounts = new Map<string, number>();
-  for (const b of books) {
+  for (const b of breakdownBooks) {
     const label = FORMAT_LABELS[b.format];
     formatCounts.set(label, (formatCounts.get(label) ?? 0) + 1);
   }
@@ -163,151 +192,94 @@ export default async function StatsPage() {
 
   return (
     <div className="grid gap-6">
-      <h1 className="text-2xl font-semibold tracking-tight">Stats</h1>
+      <div className="grid gap-3">
+        <h1 className="text-2xl font-semibold tracking-tight">Stats</h1>
+        <StatsPeriodNav period={period} goalYear={goalYear} />
+      </div>
 
-      <div className={`grid grid-cols-2 gap-4 ${ratings ? "lg:grid-cols-5" : "lg:grid-cols-4"}`}>
-        <StatCard label="Books in library">{formatNumber(books.length, prefs)}</StatCard>
-        <StatCard label="Books read">{formatNumber(read.length, prefs)}</StatCard>
-        <StatCard label="Currently reading">{formatNumber(reading.length, prefs)}</StatCard>
-        <StatCard label="Pages read">{formatNumber(pagesRead, prefs)}</StatCard>
-        {ratings && (
-          <StatCard label="Average rating">
-            {avgRating != null ? (
-              <AverageRating stars={avgRating} style={prefs.ratingStyle} />
-            ) : (
-              "–"
-            )}
+      <div className="grid gap-3">
+        <div className={`grid grid-cols-2 gap-4 ${ratings ? "lg:grid-cols-5" : "lg:grid-cols-4"}`}>
+          <StatCard label="Books in library">{fmt(books.length)}</StatCard>
+          <StatCard label={`${booksLabel} · ${words}`} note={notes.books.join(" · ")}>
+            {fmt(period === "all" ? readAllTime.books : totals.books)}
           </StatCard>
+          <StatCard label="Currently reading">{fmt(reading.length)}</StatCard>
+          <StatCard
+            label={`Pages read · ${words}${notes.pagesSuffix}`}
+            note={notes.pages.join(" · ")}
+          >
+            {fmt(totals.pages)}
+          </StatCard>
+          {ratings && (
+            <StatCard
+              label={`Average rating · ${words}`}
+              note={`${fmt(ratingValues.length)} rated`}
+            >
+              {avgRating != null ? (
+                <AverageRating stars={avgRating} style={prefs.ratingStyle} />
+              ) : (
+                "–"
+              )}
+            </StatCard>
+          )}
+        </div>
+        {period === "year" && (
+          <p className="text-sm">
+            <Link
+              href={`/stats/year/${currentYear}`}
+              className="text-muted-foreground hover:text-foreground hover:underline"
+            >
+              See {currentYear} in review
+            </Link>
+          </p>
         )}
       </div>
 
       {!hidden.has("goal") && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Reading goal {currentYear}</CardTitle>
-          </CardHeader>
-          <CardContent className="grid gap-4">
-            {currentGoal ? (
-              <div className="flex flex-wrap items-center gap-6">
-                {goalMet && (
-                  <GoalReached year={currentYear}>
-                    <GoldMedal animate className="h-20 w-[60px] shrink-0" />
-                  </GoalReached>
-                )}
-                <div className="min-w-56 flex-1">
-                  <p className="text-2xl font-semibold tabular-nums">
-                    {formatNumber(currentProgress, prefs)}{" "}
-                    <span className="text-base font-normal text-muted-foreground">
-                      of {formatNumber(currentGoal.target, prefs)}{" "}
-                      {unitWord(currentGoal.unit, currentGoal.target)}
-                    </span>
-                  </p>
-                  <div className="mt-2 h-3 rounded-full bg-muted">
-                    <div
-                      className={`bar-grow h-full rounded-full ${goalMet ? "bg-amber-500" : "bg-primary/80"}`}
-                      style={{
-                        width: `${Math.min((currentProgress / currentGoal.target) * 100, 100)}%`,
-                      }}
-                    />
-                  </div>
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    {goalMet
-                      ? "Goal achieved — you've earned the gold medal! 🎉"
-                      : `${formatNumber(currentGoal.target - currentProgress, prefs)} more ${unitWord(
-                          currentGoal.unit,
-                          currentGoal.target - currentProgress,
-                        )} to go.`}
-                    {!currentGoal.countRereads && " Re-reads don't count toward this goal."}
-                  </p>
-                </div>
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                Set a goal for the year — finish that many books (or pages)
-                and earn a gold medal.
-              </p>
-            )}
-
-            <form action={setReadingGoal} className="flex flex-wrap items-end gap-2">
-              <input type="hidden" name="year" value={currentYear} />
-              <div className="grid gap-1">
-                <label
-                  htmlFor="goal-target"
-                  className="text-xs text-muted-foreground"
-                >
-                  Goal for {currentYear}
-                </label>
-                <Input
-                  id="goal-target"
-                  name="target"
-                  type="number"
-                  min={0}
-                  max={1000000}
-                  defaultValue={currentGoal?.target}
-                  placeholder="24"
-                  className="w-28"
-                />
-              </div>
-              <div className="grid gap-1">
-                <span className="text-xs text-muted-foreground">Counting</span>
-                <Select name="unit" defaultValue={currentGoal?.unit ?? GoalUnit.BOOKS}>
-                  <SelectTrigger className="w-28" aria-label="What the goal counts">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value={GoalUnit.BOOKS}>Books</SelectItem>
-                    <SelectItem value={GoalUnit.PAGES}>Pages</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <label className="flex h-9 items-center gap-2 text-sm">
-                <input
-                  type="checkbox"
-                  name="countRereads"
-                  defaultChecked={currentGoal?.countRereads ?? true}
-                  className="size-4 accent-primary"
-                />
-                Count re-reads
-              </label>
-              <Button type="submit" variant="outline" size="sm">
-                {currentGoal ? "Update goal" : "Set goal"}
-              </Button>
-              {currentGoal && (
-                <span className="pb-2 text-xs text-muted-foreground">
-                  Set to 0 to remove the goal.
-                </span>
-              )}
-            </form>
-            <p className="-mt-2 text-xs text-muted-foreground">
-              A pages goal adds up the page counts of the books you finish.
-            </p>
-
-            {pastGoals.length > 0 && (
-              <div className="grid gap-1.5 border-t pt-3">
-                {pastGoals.map((g) => {
-                  const done = progressFor(g);
-                  const met = done >= g.target;
-                  return (
-                    <div key={g.year} className="flex items-center gap-3 text-sm">
-                      <span className="w-12 text-muted-foreground">{g.year}</span>
-                      <span className="tabular-nums">
-                        {formatNumber(done, prefs)} of {formatNumber(g.target, prefs)}
-                        {g.unit === GoalUnit.PAGES && " pages"}
-                      </span>
-                      {met && <GoldMedal className="h-6 w-[18px]" />}
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        <GoalCard
+          year={shownYear}
+          currentYear={currentYear}
+          goal={shownGoal}
+          done={goalDone}
+          pace={
+            shownGoal ? goalPace(goalDone, shownGoal.target, shownGoal.unit, clock) : null
+          }
+          clock={clock}
+          nextYear={
+            nextGoal && { ...nextGoal, href: statsHref({ period, goalYear: nextGoal.year }) }
+          }
+          past={past.map((g) => {
+            const done = progressFor(g);
+            return {
+              year: g.year,
+              target: g.target,
+              unit: g.unit,
+              done,
+              met: done >= g.target,
+              editHref: statsHref({ period, goalYear: g.year, hash: "goal" }),
+            };
+          })}
+          yearOptions={[...new Set([currentYear, currentYear + 1, shownYear])]
+            .sort((a, b) => a - b)
+            .map((y) => ({
+              year: y,
+              href: statsHref({ period, goalYear: y === currentYear ? null : y }),
+            }))}
+          ruleLine={goalRuleLine(prefs)}
+          prefs={prefs}
+        />
       )}
 
       {!hidden.has("heatmap") && (
         <Card>
           <CardHeader>
-            <CardTitle>Reading days</CardTitle>
+            <CardTitle>
+              Reading days
+              {/* The calendar is always the last 12 months. */}
+              {(period === "year" || period === "30d") && (
+                <span className="font-normal text-muted-foreground"> · last 12 months</span>
+              )}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <ReadingHeatmap totals={pageTotals} prefs={prefs} />
@@ -350,12 +322,19 @@ export default async function StatsPage() {
         {!hidden.has("tags") && (
           <Card>
             <CardHeader>
-              <CardTitle>Genres &amp; tags</CardTitle>
+              <CardTitle>
+                Genres &amp; tags
+                {breakdownNote && (
+                  <span className="font-normal text-muted-foreground"> · {breakdownNote}</span>
+                )}
+              </CardTitle>
             </CardHeader>
             <CardContent className="grid gap-2">
               {topTags.length === 0 ? (
                 <p className="text-sm text-muted-foreground">
-                  Tag your books to see the breakdown.
+                  {byPeriod && breakdownBooks.length === 0
+                    ? nothingRead
+                    : "Tag your books to see the breakdown."}
                 </p>
               ) : (
                 topTags.map(([tag, count]) => (
@@ -369,14 +348,21 @@ export default async function StatsPage() {
         {!hidden.has("formats") && (
           <Card>
             <CardHeader>
-              <CardTitle>Formats</CardTitle>
+              <CardTitle>
+                Formats
+                {breakdownNote && (
+                  <span className="font-normal text-muted-foreground"> · {breakdownNote}</span>
+                )}
+              </CardTitle>
             </CardHeader>
             <CardContent className="grid gap-2">
               {[...formatCounts.entries()].map(([label, count]) => (
                 <Bar key={label} label={label} value={count} max={maxFormat} />
               ))}
               {formatCounts.size === 0 && (
-                <p className="text-sm text-muted-foreground">No books yet.</p>
+                <p className="text-sm text-muted-foreground">
+                  {byPeriod ? nothingRead : "No books yet."}
+                </p>
               )}
             </CardContent>
           </Card>

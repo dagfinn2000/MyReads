@@ -52,9 +52,13 @@ reading, and what you thought of them, on your own server.
 **Stats**
 
 - Books read per year, pages read, ratings, genres and formats, and a
-  calendar of the days you read.
+  calendar of the days you read. Look at all time, this year, the last 12
+  months or the last 30 days.
+- Decide what counts: whole books when you finish them or the pages you
+  log, whether books you stop reading count, and how audiobooks count.
 - A "year in review" page for every year, and yearly reading goals in books
-  or pages, with or without re-reads.
+  or pages, with or without re-reads. The goal shows whether you're on
+  track, and next year's can be set ahead of time.
 
 **Everything else**
 

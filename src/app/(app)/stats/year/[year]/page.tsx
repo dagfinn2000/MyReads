@@ -1,14 +1,18 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { GoalUnit, ReadingStatus } from "@prisma/client";
+import { GoalUnit } from "@prisma/client";
 import { ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { getPreferences } from "@/lib/current-user";
-import { calendarDay } from "@/lib/dates";
-import { formatDate, formatNumber } from "@/lib/display";
-import { goalProgress, markRereads } from "@/lib/goals";
-import { dailyPageTotals, readingStreaks } from "@/lib/progress";
+import { dayKey } from "@/lib/dates";
+import { formatDate, formatDayKey, formatNumber } from "@/lib/display";
+import { describePace, goalPace, goalProgress, yearClock } from "@/lib/goals";
+import { readingStreaks } from "@/lib/progress";
+import { dailyPageTotalsForUser } from "@/lib/progress-query";
+import { buildPasses, countWindow, ruleNotes, tally } from "@/lib/stats-count";
+import { yearWindow } from "@/lib/stats-period";
+import { loadStatsInputs, type StatsBook } from "@/lib/stats-query";
 import { BookCover } from "@/components/book-card";
 import { GoldMedal } from "@/components/gold-medal";
 import { Bar, StatCard } from "@/components/stat-blocks";
@@ -47,14 +51,7 @@ export async function generateMetadata({
 
 /** One finished pass through a book, in the review year. */
 interface Finish {
-  book: {
-    id: string;
-    title: string;
-    authors: string[];
-    coverUrl: string | null;
-    pageCount: number | null;
-    tags: string[];
-  };
+  book: StatsBook;
   dateStarted: Date | null;
   dateFinished: Date;
   rating: number | null;
@@ -64,7 +61,8 @@ interface Finish {
 /**
  * The year's wrap-up: everything finished that year — current passes on READ
  * books plus archived re-reads — turned into highlights, distributions, and
- * a top-rated shelf. Linked from the per-year bars on the stats page.
+ * a top-rated shelf. Linked from the per-year bars on the stats page. What
+ * counts follows the reader's "What counts" preferences, as on Stats.
  */
 export default async function YearInReviewPage({
   params,
@@ -80,81 +78,77 @@ export default async function YearInReviewPage({
   if (year === null) notFound();
   const prefs = await getPreferences();
   const ratings = prefs.ratingStyle !== "off";
-  /** "2026-05-12" for a finish date, in the reader's zone (see calendarDay). */
-  const dayOf = (d: Date) => calendarDay(d, prefs.timeZone);
+  const fmt = (n: number) => formatNumber(n, prefs);
 
-  const bookSelect = {
-    id: true,
-    title: true,
-    authors: true,
-    coverUrl: true,
-    pageCount: true,
-    tags: true,
-  } as const;
-
-  // Fetch everything and slice by year in JS, with calendarDay() — the same
-  // bucketing the stats page uses, so the numbers always agree.
-  const [readBooks, allReads, goal, progressEntries] = await Promise.all([
-    prisma.book.findMany({
-      where: { userId, status: ReadingStatus.READ, dateFinished: { not: null } },
-      select: { ...bookSelect, rating: true, dateStarted: true, dateFinished: true },
-    }),
-    prisma.read.findMany({
-      where: { book: { userId } },
-      select: {
-        bookId: true,
-        dateStarted: true,
-        dateFinished: true,
-        rating: true,
-        book: { select: { ...bookSelect, rating: true } },
-      },
-    }),
+  // Fetch everything and slice by year in JS, with the same counting the
+  // stats page uses (lib/stats-count.ts), so the numbers always agree.
+  const [inputs, goal, pageTotals] = await Promise.all([
+    loadStatsInputs(userId, prefs.timeZone),
     prisma.readingGoal.findUnique({
       where: { userId_year: { userId, year } },
     }),
-    // The full reading log — deltas need each entry's predecessor, so the
-    // year slice happens after totals are computed.
-    prisma.progressEntry.findMany({
-      where: { book: { userId } },
-      select: { bookId: true, page: true, date: true },
-    }),
+    // Pages per day, as the reading calendar counts them. No date bound:
+    // deltas need each entry's predecessor, so the year slice comes after.
+    dailyPageTotalsForUser(userId, prefs.timeZone),
   ]);
 
-  // Every dated finish, tagged as a re-read when the book had been finished
-  // before (or has an undated read, presumed earlier) — see markRereads.
-  const marked = markRereads(
-    [
-      ...readBooks.map((b) => ({
-        bookId: b.id,
-        dateFinished: b.dateFinished!,
-        book: b,
-        dateStarted: b.dateStarted,
-        rating: b.rating,
-      })),
-      ...allReads
-        .filter((r) => r.dateFinished)
-        .map((r) => ({
-          bookId: r.bookId,
-          dateFinished: r.dateFinished!,
-          book: r.book,
-          dateStarted: r.dateStarted,
-          // A pass without its own rating falls back to the book's rating.
-          rating: r.rating ?? r.book.rating,
-        })),
-    ],
-    new Set(allReads.filter((r) => !r.dateFinished).map((r) => r.bookId)),
-  );
+  // Every pass that counts in this year: dated finishes (re-reads tagged,
+  // see markRereads), plus books put down and pages logged when the "What
+  // counts" preferences say so.
+  const passes = buildPasses(inputs, prefs, prefs.timeZone);
+  const counted = countWindow(passes, yearWindow(year), prefs);
+  const totals = tally(counted);
+  const notes = ruleNotes(prefs, { putDown: totals.putDown }, fmt);
+  /** Passes that add a book this year: finishes, and books put down when
+   *  they count as books. */
+  const bookItems = counted.filter((i) => i.books > 0);
 
-  const finishes: Finish[] = marked
-    .filter((f) => dayOf(f.dateFinished).startsWith(`${year}-`))
-    .map((f) => ({
-      book: f.book,
-      dateStarted: f.dateStarted,
-      dateFinished: f.dateFinished,
-      rating: f.rating,
-      isReread: f.isReread,
+  const finishes: Finish[] = bookItems
+    .filter((i) => i.pass.kind === "finished")
+    .map((i) => ({
+      book: i.pass.book,
+      dateStarted: i.pass.dateStarted,
+      dateFinished: i.pass.date!,
+      rating: i.pass.rating,
+      isReread: i.isReread,
     }));
   finishes.sort((a, b) => a.dateFinished.getTime() - b.dateFinished.getTime());
+
+  // Books put down this year, dated by their finish date or last log entry.
+  const putDown =
+    prefs.statsStoppedBooks === "none"
+      ? []
+      : counted
+          .filter((i) => i.pass.kind === "stopped" && i.pass.day?.startsWith(`${year}-`))
+          .sort((a, b) => (a.pass.day! < b.pass.day! ? -1 : a.pass.day! > b.pass.day! ? 1 : 0));
+
+  // The reading-log rhythm for this year. Day keys are "YYYY-MM-DD", so
+  // slicing by prefix matches the same local-time bucketing the heatmap uses.
+  const yearDays = [...pageTotals]
+    .filter(([key]) => key.startsWith(`${year}-`))
+    .sort((a, b) => (a[0] < b[0] ? -1 : 1));
+
+  // The goal, with the pace while the year is under way.
+  const goalDone = goal ? goalProgress(counted, goal) : 0;
+  const clock = yearClock(dayKey(new Date(), prefs.timeZone), year);
+  const pace = goal ? goalPace(goalDone, goal.target, goal.unit, clock) : null;
+  const goalMet = pace?.kind === "reached";
+  const goalLine = goal && pace && (
+    <Card>
+      <CardContent className="flex flex-wrap items-center gap-4 pt-0">
+        {goalMet && <GoldMedal animate className="h-14 w-[42px] shrink-0" />}
+        <p className="text-sm">
+          <span className="font-semibold tabular-nums">
+            {fmt(goalDone)} of {fmt(goal.target)}
+          </span>{" "}
+          {goal.unit === GoalUnit.PAGES ? "pages" : "books"} toward the {year} goal
+          {!goal.countRereads && " (first reads only)"}.{" "}
+          {describePace(pace, goal.unit, fmt, formatDayKey(`${year}-01-01`, prefs.dateFormat))}
+          {goalMet && " 🎉"}
+        </p>
+      </CardContent>
+    </Card>
+  );
 
   const header = (
     <div className="flex flex-wrap items-center gap-3">
@@ -182,20 +176,19 @@ export default async function YearInReviewPage({
     </div>
   );
 
-  if (finishes.length === 0) {
+  if (counted.length === 0 && yearDays.length === 0) {
     return (
       <div className="grid gap-6">
         {header}
         <p className="text-sm text-muted-foreground">
-          Nothing finished in {year} — no dated reads landed in this year.
+          Nothing finished in {year}. No dated reads landed in this year.
         </p>
+        {goalLine}
       </div>
     );
   }
 
   // Headline numbers.
-  const pagesRead = finishes.reduce((sum, f) => sum + (f.book.pageCount ?? 0), 0);
-  const rereads = finishes.filter((f) => f.isReread).length;
   const rated = finishes.filter((f) => f.rating != null);
   const avgRating =
     rated.length > 0
@@ -227,8 +220,8 @@ export default async function YearInReviewPage({
   const fastest = timed.length
     ? timed.reduce((a, b) => (b.days < a.days ? b : a))
     : null;
-  const first = finishes[0];
-  const last = finishes[finishes.length - 1];
+  const first = finishes[0] ?? null;
+  const last = finishes[finishes.length - 1] ?? null;
 
   // Top rated: best pass per book, once per book, top 6.
   const bestByBook = new Map<string, Finish>();
@@ -242,7 +235,7 @@ export default async function YearInReviewPage({
 
   // Distributions.
   const perMonth = Array.from({ length: 12 }, () => 0);
-  for (const f of finishes) perMonth[Number(dayOf(f.dateFinished).slice(5, 7)) - 1]++;
+  for (const i of bookItems) perMonth[Number(i.pass.day!.slice(5, 7)) - 1] += i.books;
   const maxMonth = Math.max(...perMonth);
 
   const ratingCounts = new Map<number, number>();
@@ -255,18 +248,14 @@ export default async function YearInReviewPage({
     : 0;
 
   const tagCounts = new Map<string, number>();
-  for (const f of finishes) {
-    for (const t of f.book.tags) tagCounts.set(t, (tagCounts.get(t) ?? 0) + 1);
+  for (const i of bookItems) {
+    for (const t of i.pass.book.tags) tagCounts.set(t, (tagCounts.get(t) ?? 0) + 1);
   }
   const topTags = [...tagCounts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8);
   const maxTag = topTags[0]?.[1] ?? 0;
 
   // Reading-log rhythm for this year: pages per day/month, biggest day, and
-  // the longest streak. Day keys are "YYYY-MM-DD", so slicing by prefix
-  // matches the same local-time bucketing the heatmap uses.
-  const yearDays = [...dailyPageTotals(progressEntries, prefs.timeZone)].filter(([key]) =>
-    key.startsWith(`${year}-`),
-  );
+  // the longest streak.
   const readingDays = yearDays.length;
   const pagesLogged = yearDays.reduce((sum, [, pages]) => sum + pages, 0);
   const pagesPerMonth = Array.from({ length: 12 }, () => 0);
@@ -287,22 +276,21 @@ export default async function YearInReviewPage({
     ? formatDate(new Date(`${biggestDay[0]}T00:00:00Z`), prefs)
     : null;
 
-  const goalDone = goal
-    ? goalProgress(
-        finishes.map((f) => ({ isReread: f.isReread, pageCount: f.book.pageCount })),
-        goal,
-      )
-    : 0;
-  const goalMet = goal !== null && goalDone >= goal.target;
-
   return (
     <div className="grid gap-6">
       {header}
 
       <div className={`grid grid-cols-2 gap-4 ${ratings ? "lg:grid-cols-4" : "lg:grid-cols-3"}`}>
-        <StatCard label="Books finished">{formatNumber(finishes.length, prefs)}</StatCard>
-        <StatCard label="Pages read">{formatNumber(pagesRead, prefs)}</StatCard>
-        <StatCard label="Re-reads">{formatNumber(rereads, prefs)}</StatCard>
+        <StatCard
+          label={prefs.statsStoppedBooks === "book" ? "Books read" : "Books finished"}
+          note={notes.books.join(" · ")}
+        >
+          {fmt(totals.books)}
+        </StatCard>
+        <StatCard label={`Pages read${notes.pagesSuffix}`} note={notes.pages.join(" · ")}>
+          {fmt(totals.pages)}
+        </StatCard>
+        <StatCard label="Re-reads">{fmt(totals.rereads)}</StatCard>
         {ratings && (
           <StatCard label="Average rating">
             {avgRating == null ? (
@@ -319,21 +307,7 @@ export default async function YearInReviewPage({
         )}
       </div>
 
-      {goal && (
-        <Card>
-          <CardContent className="flex flex-wrap items-center gap-4 pt-0">
-            {goalMet && <GoldMedal animate className="h-14 w-[42px] shrink-0" />}
-            <p className="text-sm">
-              <span className="font-semibold tabular-nums">
-                {formatNumber(goalDone, prefs)} of {formatNumber(goal.target, prefs)}
-              </span>{" "}
-              {goal.unit === GoalUnit.PAGES ? "pages" : "books"} toward the {year} goal
-              {!goal.countRereads && " (first reads only)"} —{" "}
-              {goalMet ? "achieved! 🎉" : "not reached."}
-            </p>
-          </CardContent>
-        </Card>
-      )}
+      {goalLine}
 
       {ratings && topRated.length > 0 && (
         <Card>
@@ -361,37 +335,53 @@ export default async function YearInReviewPage({
         </Card>
       )}
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Highlights</CardTitle>
-        </CardHeader>
-        <CardContent className="grid gap-2 text-sm">
-          {longest && (
-            <Highlight label="Longest book">
-              <BookLink finish={longest} /> · {longest.book.pageCount} pages
-            </Highlight>
-          )}
-          {shortest && shortest.book.id !== longest?.book.id && (
-            <Highlight label="Shortest book">
-              <BookLink finish={shortest} /> · {shortest.book.pageCount} pages
-            </Highlight>
-          )}
-          {fastest && (
-            <Highlight label="Fastest read">
-              <BookLink finish={fastest.finish} /> · {fastest.days}{" "}
-              {fastest.days === 1 ? "day" : "days"}
-            </Highlight>
-          )}
-          <Highlight label="First finish">
-            <BookLink finish={first} /> · {formatDate(first.dateFinished, prefs)}
-          </Highlight>
-          {last.book.id !== first.book.id && (
-            <Highlight label="Last finish">
-              <BookLink finish={last} /> · {formatDate(last.dateFinished, prefs)}
-            </Highlight>
-          )}
-        </CardContent>
-      </Card>
+      {(first || putDown.length > 0) && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Highlights</CardTitle>
+          </CardHeader>
+          <CardContent className="grid gap-2 text-sm">
+            {longest && (
+              <Highlight label="Longest book">
+                <BookLink book={longest.book} /> · {longest.book.pageCount} pages
+              </Highlight>
+            )}
+            {shortest && shortest.book.id !== longest?.book.id && (
+              <Highlight label="Shortest book">
+                <BookLink book={shortest.book} /> · {shortest.book.pageCount} pages
+              </Highlight>
+            )}
+            {fastest && (
+              <Highlight label="Fastest read">
+                <BookLink book={fastest.finish.book} /> · {fastest.days}{" "}
+                {fastest.days === 1 ? "day" : "days"}
+              </Highlight>
+            )}
+            {first && (
+              <Highlight label="First finish">
+                <BookLink book={first.book} /> · {formatDate(first.dateFinished, prefs)}
+              </Highlight>
+            )}
+            {first && last && last.book.id !== first.book.id && (
+              <Highlight label="Last finish">
+                <BookLink book={last.book} /> · {formatDate(last.dateFinished, prefs)}
+              </Highlight>
+            )}
+            {putDown.length > 0 && (
+              <Highlight label="Put down">
+                {putDown.slice(0, 5).map((i, n) => (
+                  <span key={i.pass.book.id}>
+                    {n > 0 && ", "}
+                    <BookLink book={i.pass.book} />
+                    {i.pass.book.currentPage != null && ` (p. ${i.pass.book.currentPage})`}
+                  </span>
+                ))}
+                {putDown.length > 5 && ` and ${fmt(putDown.length - 5)} more`}
+              </Highlight>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid gap-6 lg:grid-cols-2">
         <div className="grid content-start gap-6">
@@ -498,13 +488,13 @@ function Highlight({
   );
 }
 
-function BookLink({ finish }: { finish: Finish }) {
+function BookLink({ book }: { book: Pick<StatsBook, "id" | "title"> }) {
   return (
     <Link
-      href={`/books/${finish.book.id}`}
+      href={`/books/${book.id}`}
       className="font-medium hover:underline"
     >
-      {finish.book.title}
+      {book.title}
     </Link>
   );
 }
