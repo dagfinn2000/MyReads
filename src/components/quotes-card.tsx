@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useState, useTransition } from "react";
+import { useActionState, useEffect, useRef, useState, useTransition } from "react";
 import type { Quote } from "@prisma/client";
 import { Pencil, Trash2, X } from "lucide-react";
 import { addQuote, deleteQuote, updateQuote } from "@/lib/actions/quotes";
@@ -27,6 +27,24 @@ export function QuotesCard({
   quotes: Quote[];
 }) {
   const [editingId, setEditingId] = useState<string | null>(null);
+  const listRef = useRef<HTMLUListElement>(null);
+  const lastEditedId = useRef<string | null>(null);
+
+  // When an edit closes (saved or cancelled), put focus back on that
+  // quote's pencil rather than letting it drop to the page.
+  useEffect(() => {
+    if (editingId) {
+      lastEditedId.current = editingId;
+      return;
+    }
+    const id = lastEditedId.current;
+    lastEditedId.current = null;
+    if (id) {
+      listRef.current
+        ?.querySelector<HTMLElement>(`[data-quote-edit="${CSS.escape(id)}"]`)
+        ?.focus();
+    }
+  }, [editingId]);
 
   return (
     <Card>
@@ -35,9 +53,9 @@ export function QuotesCard({
       </CardHeader>
       {/* grid-cols-1 clamps the tracks so a long unbroken token (a pasted
           URL, say) wraps via break-words instead of stretching the card. */}
-      <CardContent className="grid grid-cols-1 gap-4">
+      <CardContent className="grid grid-cols-1 gap-4" data-quote-scope="">
         {quotes.length > 0 && (
-          <ul className="grid grid-cols-1 gap-3">
+          <ul ref={listRef} className="grid grid-cols-1 gap-3">
             {quotes.map((quote) => (
               <li key={quote.id} className="grid grid-cols-1 gap-1">
                 {editingId === quote.id ? (
@@ -64,6 +82,7 @@ export function QuotesCard({
                           variant="ghost"
                           size="icon-sm"
                           aria-label="Edit quote"
+                          data-quote-edit={quote.id}
                           onClick={() => setEditingId(quote.id)}
                         >
                           <Pencil className="size-3.5" />
@@ -83,14 +102,15 @@ export function QuotesCard({
   );
 }
 
-/** Add form (pass `bookId`) or inline edit form (pass `quote` + `onDone`). */
-function QuoteForm({
+/** Add form (pass `bookId`) or inline edit form (pass `quote` + `onDone`).
+ *  The edit form opens with the text focused, and Escape cancels it. */
+export function QuoteForm({
   bookId,
   quote,
   onDone,
 }: {
   bookId?: string;
-  quote?: Quote;
+  quote?: Pick<Quote, "id" | "text" | "page" | "note">;
   onDone?: () => void;
 }) {
   const action = quote ? updateQuote.bind(null, quote.id) : addQuote;
@@ -103,7 +123,20 @@ function QuoteForm({
   }, [state, onDone]);
 
   return (
-    <form action={formAction} className="grid gap-2">
+    <form
+      action={formAction}
+      className="grid gap-2"
+      onKeyDown={
+        quote
+          ? (e) => {
+              if (e.key === "Escape" && !pending) {
+                e.preventDefault();
+                onDone?.();
+              }
+            }
+          : undefined
+      }
+    >
       {!quote && bookId && <input type="hidden" name="bookId" value={bookId} />}
       <Textarea
         name="text"
@@ -113,6 +146,10 @@ function QuoteForm({
         placeholder="A passage worth keeping…"
         defaultValue={quote?.text ?? ""}
         aria-label={quote ? "Quote text" : "New quote"}
+        autoFocus={!!quote}
+        // The add form's box is where focus goes after deleting the last
+        // quote above it (see focusAfterDelete).
+        data-quote-fallback={quote ? undefined : ""}
       />
       <div className="flex flex-wrap items-center gap-2">
         <Input
@@ -153,9 +190,27 @@ function QuoteForm({
   );
 }
 
+/**
+ * Where focus goes once a quote is deleted and its row disappears: the next
+ * quote's pencil in the same list (`data-quote-scope`), else the previous
+ * one's, else the scope's fallback (the add form on a book page), else the
+ * page heading. Worked out before the delete, while the row is still there.
+ */
+function focusAfterDelete(from: HTMLElement): HTMLElement | null {
+  const scope = from.closest("[data-quote-scope]");
+  const own = from.closest("li")?.querySelector<HTMLElement>("[data-quote-edit]");
+  const pencils = scope ? [...scope.querySelectorAll<HTMLElement>("[data-quote-edit]")] : [];
+  const i = own ? pencils.indexOf(own) : -1;
+  return (
+    (i >= 0 ? (pencils[i + 1] ?? pencils[i - 1]) : undefined) ??
+    scope?.querySelector<HTMLElement>("[data-quote-fallback]") ??
+    document.querySelector<HTMLElement>("main h1[tabindex]")
+  );
+}
+
 /** Trash icon that expands to an inline confirm — no dialog for something
  *  this small, but still not a single misclick away from data loss. */
-function DeleteQuoteButton({ quoteId }: { quoteId: string }) {
+export function DeleteQuoteButton({ quoteId }: { quoteId: string }) {
   const [confirming, setConfirming] = useState(false);
   const [pending, startTransition] = useTransition();
 
@@ -179,7 +234,13 @@ function DeleteQuoteButton({ quoteId }: { quoteId: string }) {
         variant="destructive"
         size="sm"
         disabled={pending}
-        onClick={() => startTransition(() => deleteQuote(quoteId))}
+        onClick={(e) => {
+          const next = focusAfterDelete(e.currentTarget);
+          startTransition(async () => {
+            await deleteQuote(quoteId);
+            next?.focus();
+          });
+        }}
       >
         {pending ? "Deleting…" : "Delete quote"}
       </Button>

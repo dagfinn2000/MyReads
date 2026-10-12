@@ -92,10 +92,11 @@ export const BACKGROUNDS = [
 /** Colour steps for the reading calendar (see lib/heatmap.ts). */
 export const HEATMAP_SCALES = ["standard", "gentle", "heavy", "auto"] as const;
 
-export const START_PAGES = ["library", "stats", "add"] as const;
+export const START_PAGES = ["library", "stats", "add", "reading"] as const;
 
-/** Top-bar links that can be hidden. The rest are always shown. */
-export const HIDEABLE_NAV = ["check", "quotes"] as const;
+/** Top-bar links that can be hidden, in top-bar order. The rest are always
+ *  shown. */
+export const HIDEABLE_NAV = ["reading", "check", "quotes"] as const;
 
 /** Cards on the stats page that can be hidden. */
 export const HIDEABLE_STATS = [
@@ -106,6 +107,96 @@ export const HIDEABLE_STATS = [
   "formats",
   "quote",
 ] as const;
+
+/** What "Copy subjects from the catalogue as tags" does: nothing, only the
+ *  subjects that match a tag already in the library, or every subject. */
+export const IMPORT_TAGS_MODES = ["off", "known", "all"] as const;
+
+/** The finish date a book added as Read gets when none is picked. */
+export const ADDED_AS_READ_FINISHED = ["today", "undated"] as const;
+
+/** Where the add form goes after saving a book. */
+export const AFTER_ADD = ["open", "another", "library"] as const;
+
+/** The two quick-log buttons on a book being read: +10 and +25 pages, +5
+ *  and +10 pages, or +5% of the book. */
+export const QUICK_LOG_STEPS = ["10-25", "5-10", "5pct"] as const;
+
+/** How progress is entered and shown for an ebook. Positions are still
+ *  stored as pages either way (see lib/progress-units.ts). */
+export const EBOOK_UNITS = ["page", "percent"] as const;
+
+/** Same for an audiobook, which can also go by time listened. */
+export const AUDIOBOOK_UNITS = ["page", "percent", "time"] as const;
+
+/** Where the "pages a day" pace comes from: the whole current read, or only
+ *  the last 7 or 14 days. */
+export const PACE_FROM = ["read", "7d", "14d"] as const;
+
+/** Cards on a book's page, in their default order. */
+export const BOOK_PAGE_CARDS = ["shelves", "reading", "history", "lending", "quotes"] as const;
+
+export const BOOK_PAGE_CARD_LABELS: Record<(typeof BOOK_PAGE_CARDS)[number], string> = {
+  shelves: "Shelves",
+  reading: "My reading",
+  history: "Read history",
+  lending: "Lending",
+  quotes: "Quotes",
+};
+
+/** A long description in full, or its first lines with a More button. */
+export const BOOK_DESCRIPTIONS = ["full", "clamp"] as const;
+
+/** The Shelves card on a book: every shelf as a toggle, or only the shelves
+ *  the book is on plus an Add button. */
+export const SHELVES_CARD_MODES = ["all", "mine"] as const;
+
+/** Extra places the library search looks besides title, author and series. */
+export const SEARCH_FIELDS = ["tags", "isbn", "review"] as const;
+
+/** What "pages read" counts on the stats page: whole books when finished,
+ *  or the pages logged on the day they were read. */
+export const STATS_PAGES_READ = ["finished", "logged"] as const;
+
+/** How a book you stopped reading (DNF) counts: not at all, by the pages
+ *  read before stopping, or as a whole book. */
+export const STATS_STOPPED_BOOKS = ["none", "pages", "book"] as const;
+
+/** How audiobooks count: fully, as books but not pages, or not at all. */
+export const STATS_AUDIOBOOKS = ["full", "books", "out"] as const;
+
+/** The period the stats page opens on. */
+export const STATS_PERIODS = ["all", "year", "12m", "30d"] as const;
+
+/** What the Genres & tags and Formats cards count: the whole library, or
+ *  only the books read in the chosen period. */
+export const STATS_BREAKDOWNS = ["library", "period"] as const;
+
+/** The quotes page's order. */
+export const QUOTE_ORDERS = ["newest", "oldest", "book", "shuffle"] as const;
+
+/** A reminder on the account page when the last backup is old. */
+export const BACKUP_REMINDERS = ["off", "monthly"] as const;
+
+/** "Find it at" links on a book's page: a name and an https:// address in
+ *  which {isbn}, {title} and {author} are filled in. */
+export type FindLink = { name: string; url: string };
+export const MAX_FIND_LINKS = 6;
+export const FIND_LINK_NAME_MAX = 40;
+export const FIND_LINK_URL_MAX = 500;
+export const FIND_LINK_PLACEHOLDERS = ["isbn", "title", "author"] as const;
+
+/** A tag rule from imported subjects: always rename `from` to `to`. */
+export type TagRename = { from: string; to: string };
+/** Rules kept per kind; the oldest go first. They ride along with every
+ *  page's preferences, so the list stays short. */
+export const MAX_TAG_RULES = 100;
+/** Same limit as a tag on a book (actions/tags.ts, bulk.ts). */
+export const TAG_RULE_MAX = 50;
+
+/** Ids kept in an order or hidden list. Above this, the rest fall back to
+ *  their usual order (by name) after the listed ones. */
+export const MAX_ORDERED_IDS = 500;
 
 export type DateFormat = (typeof DATE_FORMATS)[number];
 export type NumberFormat = (typeof NUMBER_FORMATS)[number];
@@ -126,6 +217,24 @@ export type HeatmapScale = (typeof HEATMAP_SCALES)[number];
 export type StartPage = (typeof START_PAGES)[number];
 export type HideableNav = (typeof HIDEABLE_NAV)[number];
 export type HideableStat = (typeof HIDEABLE_STATS)[number];
+export type ImportTagsMode = (typeof IMPORT_TAGS_MODES)[number];
+export type AddedAsReadFinished = (typeof ADDED_AS_READ_FINISHED)[number];
+export type AfterAdd = (typeof AFTER_ADD)[number];
+export type QuickLogSteps = (typeof QUICK_LOG_STEPS)[number];
+export type EbookUnit = (typeof EBOOK_UNITS)[number];
+export type AudiobookUnit = (typeof AUDIOBOOK_UNITS)[number];
+export type PaceFrom = (typeof PACE_FROM)[number];
+export type BookPageCard = (typeof BOOK_PAGE_CARDS)[number];
+export type BookDescriptionMode = (typeof BOOK_DESCRIPTIONS)[number];
+export type ShelvesCardMode = (typeof SHELVES_CARD_MODES)[number];
+export type SearchField = (typeof SEARCH_FIELDS)[number];
+export type StatsPagesRead = (typeof STATS_PAGES_READ)[number];
+export type StatsStoppedBooks = (typeof STATS_STOPPED_BOOKS)[number];
+export type StatsAudiobooks = (typeof STATS_AUDIOBOOKS)[number];
+export type StatsPeriod = (typeof STATS_PERIODS)[number];
+export type StatsBreakdown = (typeof STATS_BREAKDOWNS)[number];
+export type QuoteOrder = (typeof QUOTE_ORDERS)[number];
+export type BackupReminder = (typeof BACKUP_REMINDERS)[number];
 
 // A type alias (not an interface) so it satisfies Prisma's Json input type,
 // same as LibraryView.
@@ -134,8 +243,16 @@ export type Preferences = {
   newBookFormat: BookFormat;
   newBookStatus: ReadingStatus;
   newBookOwnership: BookOwnership;
-  /** Copy the subjects a catalogue returns into the tags field. */
-  importTags: boolean;
+  /** Copy the subjects a catalogue returns into the tags field: none, only
+   *  ones already used as tags, or all. Replaces the old importTags boolean,
+   *  which parsePreferences still reads. */
+  importTagsMode: ImportTagsMode;
+  /** Imported subjects renamed on the way in ("science fiction" → "sci-fi"). */
+  tagRenames: TagRename[];
+  /** Imported subjects never copied as tags. */
+  tagSkips: string[];
+  addedAsReadFinished: AddedAsReadFinished;
+  afterAdd: AfterAdd;
 
   // Dates and numbers
   dateFormat: DateFormat;
@@ -173,13 +290,62 @@ export type Preferences = {
   hiddenStats: HideableStat[];
   /** SavedView id the library opens on. Empty = the plain library. */
   defaultViewId: string;
+
+  // Pick for me
+  /** Pick for me skips wishlist and given-away books (borrowed ones count). */
+  pickOnlyHave: boolean;
+  /** Pick for me skips a Want to Read book while an earlier book in its
+   *  series is unread. */
+  pickNextInSeries: boolean;
+
+  // Reading
+  quickLogSteps: QuickLogSteps;
+  ebookUnit: EbookUnit;
+  audiobookUnit: AudiobookUnit;
+  paceFrom: PaceFrom;
+
+  // Book page
+  /** Every card, in the order shown. Always a full list (see parse). */
+  bookPageCards: BookPageCard[];
+  hiddenBookPageCards: BookPageCard[];
+  bookDescription: BookDescriptionMode;
+  shelvesCard: ShelvesCardMode;
+  findLinks: FindLink[];
+
+  // Library
+  searchAlsoIn: SearchField[];
+  /** Shelf ids in the order their chips show. Shelves not listed follow,
+   *  by name. */
+  shelfOrder: string[];
+  /** Shelf ids left out of the library's chips. */
+  hiddenShelves: string[];
+  /** SavedView ids in the order their chips show. */
+  savedViewOrder: string[];
+  /** Status tabs left out of the library. Never all four. */
+  hiddenStatusTabs: ReadingStatus[];
+
+  // Stats
+  statsPagesRead: StatsPagesRead;
+  statsStoppedBooks: StatsStoppedBooks;
+  statsAudiobooks: StatsAudiobooks;
+  statsPeriod: StatsPeriod;
+  statsBreakdown: StatsBreakdown;
+
+  // Quotes and backups
+  quotesOrder: QuoteOrder;
+  quotesGroupByBook: boolean;
+  backupReminder: BackupReminder;
 };
 
 export const DEFAULT_PREFERENCES: Preferences = {
   newBookFormat: BookFormat.PHYSICAL,
   newBookStatus: ReadingStatus.WANT_TO_READ,
   newBookOwnership: BookOwnership.OWNED,
-  importTags: true,
+  importTagsMode: "all",
+  tagRenames: [],
+  tagSkips: [],
+  addedAsReadFinished: "today",
+  afterAdd: "open",
   dateFormat: "d-mmm-y",
   numberFormat: "comma",
   weekStart: "monday",
@@ -202,6 +368,30 @@ export const DEFAULT_PREFERENCES: Preferences = {
   hiddenNav: [],
   hiddenStats: [],
   defaultViewId: "",
+  pickOnlyHave: false,
+  pickNextInSeries: false,
+  quickLogSteps: "10-25",
+  ebookUnit: "page",
+  audiobookUnit: "page",
+  paceFrom: "read",
+  bookPageCards: [...BOOK_PAGE_CARDS],
+  hiddenBookPageCards: [],
+  bookDescription: "full",
+  shelvesCard: "all",
+  findLinks: [],
+  searchAlsoIn: [],
+  shelfOrder: [],
+  hiddenShelves: [],
+  savedViewOrder: [],
+  hiddenStatusTabs: [],
+  statsPagesRead: "finished",
+  statsStoppedBooks: "none",
+  statsAudiobooks: "full",
+  statsPeriod: "all",
+  statsBreakdown: "library",
+  quotesOrder: "newest",
+  quotesGroupByBook: false,
+  backupReminder: "off",
 };
 
 /** True for a time zone this runtime knows ("Europe/Oslo", "UTC"). */
@@ -241,6 +431,105 @@ function bool(value: unknown, fallback: boolean): boolean {
   return typeof value === "boolean" ? value : fallback;
 }
 
+/** Record ids (cuids), each once, in the order given, at most `max`. Ids of
+ *  rows since deleted are kept; whoever uses the list skips them. */
+function idList(value: unknown, max: number): string[] {
+  if (!Array.isArray(value)) return [];
+  const out: string[] = [];
+  for (const v of value) {
+    if (out.length >= max) break;
+    if (typeof v === "string" && /^[A-Za-z0-9_-]{1,64}$/.test(v) && !out.includes(v)) out.push(v);
+  }
+  return out;
+}
+
+/**
+ * Why a "Find it at" link can't be saved, or null when it can. Checked on
+ * trimmed values, in the order a person would fix them.
+ */
+export function findLinkError(rawName: string, rawUrl: string): string | null {
+  const name = rawName.trim();
+  const url = rawUrl.trim();
+  if (!name) return "Give the link a name.";
+  if (name.length > FIND_LINK_NAME_MAX) {
+    return `Keep the name to ${FIND_LINK_NAME_MAX} characters or fewer.`;
+  }
+  if (!url) return "Add the link.";
+  if (url.length > FIND_LINK_URL_MAX) {
+    return `That link is too long (${FIND_LINK_URL_MAX} characters at most).`;
+  }
+  if (!/^https:\/\//i.test(url)) return "Links must start with https://.";
+  if (/[{}]/.test(url.replace(/\{(isbn|title|author)\}/g, ""))) {
+    return "Only {isbn}, {title} and {author} can be filled in.";
+  }
+  try {
+    const parsed = new URL(url.replace(/\{(isbn|title|author)\}/g, "x"));
+    if (parsed.protocol !== "https:" || !parsed.hostname || parsed.username || parsed.password) {
+      return "That isn't a web address.";
+    }
+  } catch {
+    return "That isn't a web address.";
+  }
+  return null;
+}
+
+function parseFindLinks(value: unknown): FindLink[] {
+  if (!Array.isArray(value)) return [];
+  const out: FindLink[] = [];
+  for (const item of value) {
+    if (out.length >= MAX_FIND_LINKS) break;
+    if (!item || typeof item !== "object" || Array.isArray(item)) continue;
+    const { name, url } = item as Record<string, unknown>;
+    if (typeof name !== "string" || typeof url !== "string") continue;
+    if (findLinkError(name, url) !== null) continue;
+    out.push({ name: name.trim(), url: url.trim() });
+  }
+  return out;
+}
+
+/** A tag as a tag rule stores it (trimmed, lower case), or null when it
+ *  could never be a tag. */
+export function normalizeRuleTag(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const tag = value.trim().toLowerCase();
+  if (!tag || tag.length > TAG_RULE_MAX || tag.includes(",")) return null;
+  return tag;
+}
+
+/** One rule per `from`, the newest winning, keeping the newest
+ *  MAX_TAG_RULES. */
+function parseTagRenames(value: unknown): TagRename[] {
+  if (!Array.isArray(value)) return [];
+  const byFrom = new Map<string, string>();
+  for (const item of value) {
+    if (!item || typeof item !== "object" || Array.isArray(item)) continue;
+    const from = normalizeRuleTag((item as Record<string, unknown>).from);
+    const to = normalizeRuleTag((item as Record<string, unknown>).to);
+    if (!from || !to || from === to) continue;
+    // Re-inserting moves it to the end, so the order stays oldest first.
+    byFrom.delete(from);
+    byFrom.set(from, to);
+  }
+  return [...byFrom].map(([from, to]) => ({ from, to })).slice(-MAX_TAG_RULES);
+}
+
+function parseTagSkips(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  const out: string[] = [];
+  for (const v of value) {
+    const tag = normalizeRuleTag(v);
+    if (tag && !out.includes(tag)) out.push(tag);
+  }
+  return out.slice(-MAX_TAG_RULES);
+}
+
+/** Every book-page card once: the stored order first, then any card it
+ *  leaves out (a card added in a later version, say) in default order. */
+function parseBookPageCards(value: unknown): BookPageCard[] {
+  const listed = pickList(BOOK_PAGE_CARDS, value);
+  return [...listed, ...BOOK_PAGE_CARDS.filter((c) => !listed.includes(c))];
+}
+
 /** Stored JSON (or anything else) → a complete, safe Preferences. */
 export function parsePreferences(raw: unknown): Preferences {
   const obj = (raw && typeof raw === "object" ? raw : {}) as Record<string, unknown>;
@@ -249,6 +538,8 @@ export function parsePreferences(raw: unknown): Preferences {
   const catalogues = Array.isArray(obj.catalogues)
     ? pickList(CATALOGUES, obj.catalogues)
     : d.catalogues;
+  const statuses = Object.values(ReadingStatus);
+  const hiddenStatusTabs = pickList(statuses, obj.hiddenStatusTabs);
 
   return {
     newBookFormat: pick(Object.values(BookFormat), obj.newBookFormat, d.newBookFormat),
@@ -258,7 +549,21 @@ export function parsePreferences(raw: unknown): Preferences {
       obj.newBookOwnership,
       d.newBookOwnership,
     ),
-    importTags: bool(obj.importTags, d.importTags),
+    // importTags was a boolean before the three-way setting; an account that
+    // turned it off keeps it off.
+    importTagsMode: pick(
+      IMPORT_TAGS_MODES,
+      obj.importTagsMode,
+      obj.importTags === false ? "off" : d.importTagsMode,
+    ),
+    tagRenames: parseTagRenames(obj.tagRenames),
+    tagSkips: parseTagSkips(obj.tagSkips),
+    addedAsReadFinished: pick(
+      ADDED_AS_READ_FINISHED,
+      obj.addedAsReadFinished,
+      d.addedAsReadFinished,
+    ),
+    afterAdd: pick(AFTER_ADD, obj.afterAdd, d.afterAdd),
     dateFormat: pick(DATE_FORMATS, obj.dateFormat, d.dateFormat),
     numberFormat: pick(NUMBER_FORMATS, obj.numberFormat, d.numberFormat),
     weekStart: pick(WEEK_STARTS, obj.weekStart, d.weekStart),
@@ -289,6 +594,32 @@ export function parsePreferences(raw: unknown): Preferences {
       typeof obj.defaultViewId === "string" && obj.defaultViewId.length <= 64
         ? obj.defaultViewId
         : d.defaultViewId,
+    pickOnlyHave: bool(obj.pickOnlyHave, d.pickOnlyHave),
+    pickNextInSeries: bool(obj.pickNextInSeries, d.pickNextInSeries),
+    quickLogSteps: pick(QUICK_LOG_STEPS, obj.quickLogSteps, d.quickLogSteps),
+    ebookUnit: pick(EBOOK_UNITS, obj.ebookUnit, d.ebookUnit),
+    audiobookUnit: pick(AUDIOBOOK_UNITS, obj.audiobookUnit, d.audiobookUnit),
+    paceFrom: pick(PACE_FROM, obj.paceFrom, d.paceFrom),
+    bookPageCards: parseBookPageCards(obj.bookPageCards),
+    hiddenBookPageCards: pickList(BOOK_PAGE_CARDS, obj.hiddenBookPageCards),
+    bookDescription: pick(BOOK_DESCRIPTIONS, obj.bookDescription, d.bookDescription),
+    shelvesCard: pick(SHELVES_CARD_MODES, obj.shelvesCard, d.shelvesCard),
+    findLinks: parseFindLinks(obj.findLinks),
+    searchAlsoIn: pickList(SEARCH_FIELDS, obj.searchAlsoIn),
+    shelfOrder: idList(obj.shelfOrder, MAX_ORDERED_IDS),
+    hiddenShelves: idList(obj.hiddenShelves, MAX_ORDERED_IDS),
+    savedViewOrder: idList(obj.savedViewOrder, MAX_ORDERED_IDS),
+    // Hiding every status would leave the library with no tabs at all, so
+    // that reads as hiding none.
+    hiddenStatusTabs: hiddenStatusTabs.length < statuses.length ? hiddenStatusTabs : [],
+    statsPagesRead: pick(STATS_PAGES_READ, obj.statsPagesRead, d.statsPagesRead),
+    statsStoppedBooks: pick(STATS_STOPPED_BOOKS, obj.statsStoppedBooks, d.statsStoppedBooks),
+    statsAudiobooks: pick(STATS_AUDIOBOOKS, obj.statsAudiobooks, d.statsAudiobooks),
+    statsPeriod: pick(STATS_PERIODS, obj.statsPeriod, d.statsPeriod),
+    statsBreakdown: pick(STATS_BREAKDOWNS, obj.statsBreakdown, d.statsBreakdown),
+    quotesOrder: pick(QUOTE_ORDERS, obj.quotesOrder, d.quotesOrder),
+    quotesGroupByBook: bool(obj.quotesGroupByBook, d.quotesGroupByBook),
+    backupReminder: pick(BACKUP_REMINDERS, obj.backupReminder, d.backupReminder),
   };
 }
 
@@ -297,6 +628,7 @@ export const START_PAGE_PATHS: Record<StartPage, string> = {
   library: "/books",
   stats: "/stats",
   add: "/books/new",
+  reading: "/reading",
 };
 
 /** The zone this server runs in — what reading days used to be counted in,

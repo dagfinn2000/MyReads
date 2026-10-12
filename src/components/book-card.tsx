@@ -1,10 +1,25 @@
 import type { Book } from "@prisma/client";
-import { ReadingStatus } from "@prisma/client";
-import { BookOpen, HandHeart } from "lucide-react";
+import { BookOwnership, ReadingStatus } from "@prisma/client";
+import {
+  ArrowLeftRight,
+  BookOpen,
+  Gift,
+  HandHeart,
+  Heart,
+  type LucideIcon,
+} from "lucide-react";
 import { BookLink } from "@/components/book-link";
 import { Badge } from "@/components/ui/badge";
 import { Stars } from "@/components/stars";
-import { STATUS_BADGE_CLASS, STATUS_LABELS } from "@/lib/display";
+import {
+  OWNERSHIP_BADGE_LABELS,
+  OWNERSHIP_LABELS,
+  STATUS_BADGE_CLASS,
+  STATUS_LABELS,
+  formatDate,
+  formatNumber,
+  type FormatPrefs,
+} from "@/lib/display";
 import { coverArt } from "@/lib/cover-art";
 import type { LibraryDisplay } from "@/lib/library-view";
 import { cn } from "@/lib/utils";
@@ -107,12 +122,27 @@ export type BookCardBook = Pick<
   /** True when an unreturned loan exists. Passed as a flag rather than the
    *  loan rows so the grid payload stays the card's fields only. */
   lentOut?: boolean;
+  /** For the details the View menu can add: an ownership badge, and a list
+   *  row's date. */
+  ownership?: BookOwnership;
+  createdAt?: Date;
+  dateFinished?: Date | null;
 };
 
 /** Which details a card or row shows (the library's View menu). */
-export type CardDetails = Pick<LibraryDisplay, "showRating" | "showStatus" | "showSeries">;
+export type CardDetails = Pick<
+  LibraryDisplay,
+  "showRating" | "showStatus" | "showSeries" | "showOwnership" | "rowDate" | "showPageCount"
+>;
 
-const ALL_DETAILS: CardDetails = { showRating: true, showStatus: true, showSeries: true };
+const ALL_DETAILS: CardDetails = {
+  showRating: true,
+  showStatus: true,
+  showSeries: true,
+  showOwnership: false,
+  rowDate: "none",
+  showPageCount: false,
+};
 
 /** Reading progress as 0–1 while a book is being read, else null. */
 function readingProgress(book: BookCardBook): number | null {
@@ -134,8 +164,48 @@ function LentBadge() {
   );
 }
 
+const OWNERSHIP_ICONS: Record<Exclude<BookOwnership, "OWNED">, LucideIcon> = {
+  WISHLIST: Heart,
+  BORROWED: ArrowLeftRight,
+  GIVEN_AWAY: Gift,
+};
+
+/** Wishlist, Borrowed or Given away. Owned is the usual case and gets no
+ *  badge, so the ones worth noticing stand out. */
+function OwnershipBadge({ ownership }: { ownership: BookOwnership }) {
+  if (ownership === BookOwnership.OWNED) return null;
+  const Icon = OWNERSHIP_ICONS[ownership];
+  return (
+    <Badge
+      variant="outline"
+      className="text-[10px] text-muted-foreground"
+      title={OWNERSHIP_LABELS[ownership]}
+    >
+      <Icon className="size-3" aria-hidden="true" />
+      {OWNERSHIP_BADGE_LABELS[ownership]}
+    </Badge>
+  );
+}
+
 function seriesLabel(book: BookCardBook): string {
   return `${book.seriesName}${book.seriesNumber != null ? ` #${book.seriesNumber}` : ""}`;
+}
+
+/** A list row's extra line: the date added or finished and the page count,
+ *  as the View menu asks. Empty when there is nothing to show (a date
+ *  finished for a book not finished, say). */
+function rowFacts(book: BookCardBook, details: CardDetails, formatPrefs?: FormatPrefs): string {
+  const facts: string[] = [];
+  if (details.rowDate === "added" && book.createdAt) {
+    facts.push(`Added ${formatDate(book.createdAt, formatPrefs)}`);
+  }
+  if (details.rowDate === "finished" && book.dateFinished) {
+    facts.push(`Finished ${formatDate(book.dateFinished, formatPrefs)}`);
+  }
+  if (details.showPageCount && book.pageCount) {
+    facts.push(`${formatNumber(book.pageCount, formatPrefs)} pages`);
+  }
+  return facts.join(" · ");
 }
 
 /**
@@ -146,11 +216,17 @@ function seriesLabel(book: BookCardBook): string {
 export function BookRow({
   book,
   details = ALL_DETAILS,
+  formatPrefs,
 }: {
   book: BookCardBook;
   details?: CardDetails;
+  /** The reader's date and number formats, for the date and page count
+   *  line. Passed in so this file stays free of hooks: server pages import
+   *  BookCover from it. */
+  formatPrefs?: FormatPrefs;
 }) {
   const progress = readingProgress(book);
+  const facts = rowFacts(book, details, formatPrefs);
   return (
     <BookLink
       bookId={book.id}
@@ -167,6 +243,7 @@ export function BookRow({
             <span className="italic text-muted-foreground/80"> · {seriesLabel(book)}</span>
           )}
         </p>
+        {facts && <p className="truncate text-xs text-muted-foreground tabular-nums">{facts}</p>}
         {progress !== null && (
           <div
             className="mt-0.5 h-1 max-w-40 rounded-full bg-muted"
@@ -181,6 +258,7 @@ export function BookRow({
       </div>
       <div className="flex shrink-0 flex-wrap items-center justify-end gap-1.5">
         {details.showRating && book.rating ? <Stars value={book.rating} /> : null}
+        {details.showOwnership && book.ownership && <OwnershipBadge ownership={book.ownership} />}
         {book.lentOut && <LentBadge />}
         {details.showStatus && (
           <Badge className={`${STATUS_BADGE_CLASS[book.status]} hidden text-[10px] sm:inline-flex`}>
@@ -249,6 +327,9 @@ export function BookCard({
         <div className="mt-auto flex flex-wrap items-center justify-between gap-1 pt-1">
           {details.showRating && book.rating ? <Stars value={book.rating} /> : <span />}
           <span className="flex flex-wrap items-center gap-1">
+            {details.showOwnership && book.ownership && (
+              <OwnershipBadge ownership={book.ownership} />
+            )}
             {book.lentOut && <LentBadge />}
             {details.showStatus && (
               <Badge className={`${STATUS_BADGE_CLASS[book.status]} text-[10px]`}>

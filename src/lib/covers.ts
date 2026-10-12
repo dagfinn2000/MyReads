@@ -177,3 +177,44 @@ export async function deleteCachedCover(coverUrl: string | null | undefined) {
     // already gone — fine
   }
 }
+
+/**
+ * deleteCachedCover for many books at once (bulk delete). One look at every
+ * cached cover still in use, instead of a search of every book per cover,
+ * which for thousands of books is thousands of full scans. The rule is the
+ * same: a file any book still names stays.
+ */
+export async function deleteCachedCovers(coverUrls: (string | null | undefined)[]) {
+  const filenames = new Set(
+    coverUrls
+      .filter((url): url is string => !!url?.startsWith("/api/covers/"))
+      .map((url) => path.basename(url)),
+  );
+  if (filenames.size === 0) return;
+
+  const stillUsed = new Set<string>();
+  try {
+    const rows = await prisma.book.findMany({
+      where: { coverUrl: { contains: "/api/covers/" } },
+      select: { coverUrl: true },
+    });
+    for (const { coverUrl } of rows) {
+      if (!coverUrl) continue;
+      stillUsed.add(path.basename(coverUrl));
+      // A full address or one with a query string still names the file.
+      const named = /\/api\/covers\/([^/?#]+)/.exec(coverUrl)?.[1];
+      if (named) stillUsed.add(named);
+    }
+  } catch {
+    return; // can't tell — keep them all
+  }
+
+  for (const filename of filenames) {
+    if (stillUsed.has(filename)) continue;
+    try {
+      await fs.unlink(coverFilePath(filename));
+    } catch {
+      // already gone — fine
+    }
+  }
+}

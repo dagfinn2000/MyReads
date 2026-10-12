@@ -68,6 +68,7 @@ describe("export -> import round trip", () => {
         isbn: "9780765311788",
         description: "Ash falls from the sky.",
         pageCount: 541,
+        lengthMinutes: 1475,
         publishedDate: "2006",
         tags: ["fantasy", "epic"],
         format: "PHYSICAL",
@@ -86,7 +87,9 @@ describe("export -> import round trip", () => {
           create: [{ text: "There's always another secret.", page: 500, note: "!" }],
         },
         reads: {
-          create: [{ dateFinished: new Date("2019-06-01T00:00:00.000Z"), rating: 8 }],
+          create: [
+            { dateFinished: new Date("2019-06-01T00:00:00.000Z"), rating: 8, note: "Read aloud" },
+          ],
         },
         progress: {
           create: [
@@ -135,6 +138,7 @@ describe("export -> import round trip", () => {
     expect(restored.isbn).toBe("9780765311788");
     expect(restored.description).toBe("Ash falls from the sky.");
     expect(restored.pageCount).toBe(541);
+    expect(restored.lengthMinutes).toBe(1475);
     expect(restored.publishedDate).toBe("2006");
     expect([...restored.tags].sort()).toEqual(["epic", "fantasy"]);
     expect(restored.seriesName).toBe("Mistborn");
@@ -145,6 +149,8 @@ describe("export -> import round trip", () => {
     expect(restored.status).toBe(ReadingStatus.READ);
     expect(restored.rating).toBe(9);
     expect(restored.review).toBe("Superb.");
+    // Rebuilt, so review search finds a restored review.
+    expect(restored.reviewSearchText).toBe("superb.");
     expect(restored.dateFinished?.toISOString()).toBe("2026-01-20T00:00:00.000Z");
     expect(restored.timesRead).toBe(2);
 
@@ -154,6 +160,7 @@ describe("export -> import round trip", () => {
     expect(restored.quotes[0].page).toBe(500);
     expect(restored.reads).toHaveLength(1);
     expect(restored.reads[0].rating).toBe(8);
+    expect(restored.reads[0].note).toBe("Read aloud");
     expect(restored.progress.map((p) => p.page).sort((a, b) => a - b)).toEqual([0, 250]);
 
     // Lending survives, including which loan is still open.
@@ -190,14 +197,18 @@ describe("export -> import round trip", () => {
         userId: sourceUserId,
         title: "Elantris",
         searchText: "elantris",
+        review: "Good",
+        reviewSearchText: "good",
       },
     });
 
     const payload = await exportLibrary();
     // userId would tie a backup to an account it may be restored away from;
-    // searchText is derived and rebuilt on import.
+    // searchText and reviewSearchText are derived and rebuilt on import.
     expect(payload.books[0]).not.toHaveProperty("userId");
     expect(payload.books[0]).not.toHaveProperty("searchText");
+    expect(payload.books[0]).not.toHaveProperty("reviewSearchText");
+    expect(payload.books[0].review).toBe("Good");
   });
 
   it("survives a library with nothing in it", async () => {
@@ -301,6 +312,76 @@ describe("export -> import round trip", () => {
 
     const goal = await prisma.readingGoal.findFirstOrThrow({ where: { userId: targetUserId } });
     expect(goal).toMatchObject({ target: 9000, unit: "PAGES", countRereads: false });
+  });
+
+  it("keeps the shelf and saved-view order by name", async () => {
+    const [a, b, hidden] = await Promise.all(
+      ["Alpha", "Beta", "Hidden"].map((name) =>
+        prisma.shelf.create({ data: { userId: sourceUserId, name } }),
+      ),
+    );
+    const [v1, v2] = await Promise.all(
+      ["One", "Two"].map((name) =>
+        prisma.savedView.create({
+          data: { userId: sourceUserId, name, query: "group=none&sort=title&dir=asc" },
+        }),
+      ),
+    );
+    await prisma.user.update({
+      where: { id: sourceUserId },
+      data: {
+        preferences: {
+          shelfOrder: [b.id, a.id, "gone-shelf"],
+          hiddenShelves: [hidden.id],
+          savedViewOrder: [v2.id, v1.id],
+        },
+      },
+    });
+
+    const payload = await exportLibrary();
+    expect(payload.shelves.every((s: object) => !("id" in s))).toBe(true);
+    expect(payload.settings).toMatchObject({
+      shelfOrderNames: ["Beta", "Alpha"],
+      hiddenShelfNames: ["Hidden"],
+      savedViewOrderNames: ["Two", "One"],
+    });
+
+    await importLibrary(targetUserId, payload);
+    const target = await prisma.user.findUniqueOrThrow({
+      where: { id: targetUserId },
+      include: { shelves: true, savedViews: true },
+    });
+    const shelfId = (name: string) => target.shelves.find((s) => s.name === name)?.id;
+    const viewId = (name: string) => target.savedViews.find((v) => v.name === name)?.id;
+    expect(target.preferences).toMatchObject({
+      shelfOrder: [shelfId("Beta"), shelfId("Alpha")],
+      hiddenShelves: [shelfId("Hidden")],
+      savedViewOrder: [viewId("Two"), viewId("One")],
+    });
+  });
+
+  it("points a saved view kept to one shelf at the restored shelf", async () => {
+    const shelf = await prisma.shelf.create({ data: { userId: sourceUserId, name: "Cosy" } });
+    await prisma.savedView.create({
+      data: {
+        userId: sourceUserId,
+        name: "Cosy reads",
+        query: `shelfId=${shelf.id}&group=none&sort=title&dir=asc`,
+      },
+    });
+
+    const payload = await exportLibrary();
+    expect(payload.savedViews).toEqual([
+      { name: "Cosy reads", query: expect.any(String), shelfName: "Cosy" },
+    ]);
+
+    await importLibrary(targetUserId, payload);
+    const [restoredShelf, view] = await Promise.all([
+      prisma.shelf.findFirstOrThrow({ where: { userId: targetUserId, name: "Cosy" } }),
+      prisma.savedView.findFirstOrThrow({ where: { userId: targetUserId } }),
+    ]);
+    expect(restoredShelf.id).not.toBe(shelf.id);
+    expect(new URLSearchParams(view.query).get("shelfId")).toBe(restoredShelf.id);
   });
 
   it("leaves a theme the account already chose alone", async () => {

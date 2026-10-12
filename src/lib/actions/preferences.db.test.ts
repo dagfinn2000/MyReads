@@ -59,6 +59,21 @@ describe("savePreferences", () => {
     expect(await storedPreferences()).toEqual({ textSize: "normal" });
   });
 
+  it("stores only the Find it at links that are safe, and every book-page card", async () => {
+    await savePreferences({
+      findLinks: [
+        { name: "Sneaky", url: "javascript:alert(1)" },
+        { name: " Library ", url: " https://lib.example/search?q={isbn} " },
+        { name: "Unknown", url: "https://lib.example/?q={publisher}" },
+      ],
+      bookPageCards: ["quotes", "bogus"],
+    } as unknown as Parameters<typeof savePreferences>[0]);
+    expect(await storedPreferences()).toEqual({
+      findLinks: [{ name: "Library", url: "https://lib.example/search?q={isbn}" }],
+      bookPageCards: ["quotes", "shelves", "reading", "history", "lending"],
+    });
+  });
+
   it("changes only the signed-in account", async () => {
     await savePreferences({ weekStart: "sunday" });
     expect(await storedPreferences(otherUserId)).toBeNull();
@@ -83,7 +98,8 @@ describe("saved views", () => {
   it("stores the view's query in canonical form", async () => {
     const { id } = await saveView("Fantasy", "sort=title&tag=fantasy&limit=999");
     const view = await prisma.savedView.findUniqueOrThrow({ where: { id } });
-    expect(view.query).toBe("tag=fantasy&group=none&sort=title&dir=desc");
+    // No direction given: titles open A to Z, as the library would show them.
+    expect(view.query).toBe("tag=fantasy&group=none&sort=title&dir=asc");
   });
 
   it("replaces a view saved again under the same name", async () => {

@@ -1,3 +1,4 @@
+import { looksLikeIsbn, normalizeIsbn } from "@/lib/isbn";
 import { cachedLookup } from "./cache";
 import type { BookDetails, BookMetadata } from "./types";
 
@@ -126,4 +127,40 @@ export async function getOpenLibraryDetails(
     .map((s) => s.toLowerCase());
 
   return { description, pageCount: null, tags, coverUrl: null };
+}
+
+interface OlEdition {
+  number_of_pages?: number;
+  works?: { key?: string }[];
+}
+
+/**
+ * One edition by ISBN: its own page count (search rows only carry the
+ * median across every edition of the work) and the work it belongs to,
+ * which finds an Open Library id for a book that came from another
+ * catalogue. Null when Open Library has no such edition or can't be
+ * reached; a 404 is not cached, so an edition added later is found then.
+ */
+export async function getOpenLibraryEdition(
+  isbn: string,
+): Promise<{ pageCount: number | null; workId: string | null } | null> {
+  if (!looksLikeIsbn(isbn)) return null;
+  const code = normalizeIsbn(isbn);
+  // /isbn/{code}.json redirects to the edition's own record; fetch follows.
+  const edition = await cachedLookup<OlEdition>("ol-edition", code, async () => {
+    const res = await fetch(`https://openlibrary.org/isbn/${encodeURIComponent(code)}.json`, {
+      headers: { "User-Agent": UA },
+      signal: AbortSignal.timeout(10_000),
+    });
+    if (!res.ok) return null;
+    return (await res.json()) as OlEdition;
+  });
+  if (!edition) return null;
+
+  const pages = edition.number_of_pages;
+  const workKey = edition.works?.[0]?.key;
+  return {
+    pageCount: typeof pages === "number" && Number.isInteger(pages) && pages > 0 ? pages : null,
+    workId: typeof workKey === "string" ? workKey.replace("/works/", "") || null : null,
+  };
 }

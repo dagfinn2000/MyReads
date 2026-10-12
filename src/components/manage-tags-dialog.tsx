@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Check, Pencil, Tags, Trash2, X } from "lucide-react";
 import { deleteTag, renameTag } from "@/lib/actions/tags";
@@ -18,7 +19,9 @@ import {
 /**
  * Tag housekeeping: rename a tag everywhere (renaming onto an existing tag
  * merges them) or remove one from every book. Lives behind a small icon
- * button next to the tag filter.
+ * button next to the tag filter. Either can also become a rule for future
+ * imports: subjects by the old name come in under the new one, or a
+ * removed tag is never imported again (Preferences lists the rules).
  */
 export function ManageTagsDialog({
   tagCounts,
@@ -31,6 +34,10 @@ export function ManageTagsDialog({
   const [newName, setNewName] = useState("");
   const [confirmingDelete, setConfirmingDelete] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  // Renames usually mean "and from now on", so that's ticked; never
+  // importing a tag again is the bigger step, so it isn't.
+  const [remember, setRemember] = useState(true);
+  const [neverImport, setNeverImport] = useState(false);
 
   const tags = Object.keys(tagCounts).sort();
 
@@ -38,6 +45,8 @@ export function ManageTagsDialog({
     setEditing(null);
     setNewName("");
     setConfirmingDelete(null);
+    setRemember(true);
+    setNeverImport(false);
   }
 
   function submitRename(from: string) {
@@ -48,10 +57,12 @@ export function ManageTagsDialog({
     }
     const merging = to in tagCounts;
     startTransition(async () => {
-      const res = await renameTag(from, to);
+      const res = await renameTag(from, to, { remember });
       setMessage(
         res.error ??
-          `${merging ? "Merged into" : "Renamed to"} “${to}” on ${res.count} book${res.count === 1 ? "" : "s"}.`,
+          `${merging ? "Merged into" : "Renamed to"} “${to}” on ${res.count} book${res.count === 1 ? "" : "s"}.${
+            res.ruleSaved ? " Future imports will use it too." : ""
+          }`,
       );
       reset();
       router.refresh();
@@ -60,10 +71,12 @@ export function ManageTagsDialog({
 
   function submitDelete(tag: string) {
     startTransition(async () => {
-      const res = await deleteTag(tag);
+      const res = await deleteTag(tag, { neverImport });
       setMessage(
         res.error ??
-          `Removed “${tag}” from ${res.count} book${res.count === 1 ? "" : "s"}.`,
+          `Removed “${tag}” from ${res.count} book${res.count === 1 ? "" : "s"}.${
+            res.ruleSaved ? " It won't be imported again." : ""
+          }`,
       );
       reset();
       router.refresh();
@@ -94,7 +107,12 @@ export function ManageTagsDialog({
           <DialogTitle>Manage tags</DialogTitle>
           <DialogDescription>
             Rename or remove tags across your whole library. Renaming a tag to
-            an existing one merges them.
+            an existing one merges them. Rules for future imports are listed
+            in{" "}
+            <Link href="/account#new-books" className="underline underline-offset-2">
+              Account › Preferences › New books
+            </Link>
+            .
           </DialogDescription>
         </DialogHeader>
 
@@ -107,11 +125,11 @@ export function ManageTagsDialog({
             {tags.map((tag) => (
               <li
                 key={tag}
-                className="flex min-h-9 items-center gap-2 rounded-md px-2 py-1 hover:bg-muted/60"
+                className="flex min-h-9 flex-wrap items-center gap-2 rounded-md px-2 py-1 hover:bg-muted/60"
               >
                 {editing === tag ? (
                   <form
-                    className="flex flex-1 items-center gap-2"
+                    className="flex flex-1 flex-wrap items-center gap-2"
                     onSubmit={(e) => {
                       e.preventDefault();
                       submitRename(tag);
@@ -122,14 +140,40 @@ export function ManageTagsDialog({
                       onChange={(e) => setNewName(e.target.value)}
                       maxLength={50}
                       autoFocus
-                      className="h-8 flex-1"
+                      aria-label={`New name for “${tag}”`}
+                      className="h-8 min-w-0 flex-1"
                     />
-                    <Button type="submit" size="icon" variant="ghost" className="size-8" disabled={pending} title="Save">
+                    <Button
+                      type="submit"
+                      size="icon"
+                      variant="ghost"
+                      className="size-8"
+                      disabled={pending}
+                      title="Save"
+                      aria-label="Save"
+                    >
                       <Check />
                     </Button>
-                    <Button type="button" size="icon" variant="ghost" className="size-8" onClick={reset} title="Cancel">
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="ghost"
+                      className="size-8"
+                      onClick={reset}
+                      title="Cancel"
+                      aria-label="Cancel"
+                    >
                       <X />
                     </Button>
+                    <label className="flex basis-full items-center gap-2 text-xs text-muted-foreground">
+                      <input
+                        type="checkbox"
+                        checked={remember}
+                        onChange={(e) => setRemember(e.target.checked)}
+                        className="size-4 accent-primary"
+                      />
+                      Also on future imports
+                    </label>
                   </form>
                 ) : confirmingDelete === tag ? (
                   <>
@@ -140,9 +184,25 @@ export function ManageTagsDialog({
                     <Button size="sm" variant="destructive" className="h-8" disabled={pending} onClick={() => submitDelete(tag)}>
                       Remove
                     </Button>
-                    <Button size="icon" variant="ghost" className="size-8" onClick={reset} title="Cancel">
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="size-8"
+                      onClick={reset}
+                      title="Cancel"
+                      aria-label="Cancel"
+                    >
                       <X />
                     </Button>
+                    <label className="flex basis-full items-center gap-2 text-xs text-muted-foreground">
+                      <input
+                        type="checkbox"
+                        checked={neverImport}
+                        onChange={(e) => setNeverImport(e.target.checked)}
+                        className="size-4 accent-primary"
+                      />
+                      Never import this tag
+                    </label>
                   </>
                 ) : (
                   <>
@@ -155,10 +215,11 @@ export function ManageTagsDialog({
                       variant="ghost"
                       className="size-8"
                       title={`Rename “${tag}”`}
+                      aria-label={`Rename “${tag}”`}
                       onClick={() => {
+                        reset();
                         setEditing(tag);
                         setNewName(tag);
-                        setConfirmingDelete(null);
                       }}
                     >
                       <Pencil />
@@ -168,9 +229,10 @@ export function ManageTagsDialog({
                       variant="ghost"
                       className="size-8 hover:text-destructive"
                       title={`Remove “${tag}” from all books`}
+                      aria-label={`Remove “${tag}” from all books`}
                       onClick={() => {
+                        reset();
                         setConfirmingDelete(tag);
-                        setEditing(null);
                       }}
                     >
                       <Trash2 />

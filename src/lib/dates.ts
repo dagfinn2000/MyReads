@@ -67,3 +67,45 @@ export function calendarDay(d: Date, timeZone?: string): string {
     d.getUTCMilliseconds() === 0;
   return isMidnightUtc ? d.toISOString().slice(0, 10) : dayKey(d, timeZone);
 }
+
+const offsetFormatters = new Map<string, Intl.DateTimeFormat>();
+
+/** How far `timeZone`'s wall clock is ahead of UTC at `ms`, in ms. */
+function zoneOffset(ms: number, timeZone: string): number {
+  let f = offsetFormatters.get(timeZone);
+  if (!f) {
+    f = new Intl.DateTimeFormat("en-US", {
+      timeZone,
+      hourCycle: "h23",
+      year: "numeric",
+      month: "numeric",
+      day: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+      second: "numeric",
+    });
+    offsetFormatters.set(timeZone, f);
+  }
+  const parts = f.formatToParts(new Date(ms));
+  const get = (type: string) => Number(parts.find((p) => p.type === type)?.value ?? 0);
+  const wall = Date.UTC(get("year"), get("month") - 1, get("day"), get("hour"), get("minute"), get("second"));
+  return wall - Math.floor(ms / 1000) * 1000;
+}
+
+/**
+ * The moment day `key` starts in `timeZone` (default: the server's zone):
+ * local midnight as a real instant. The second pass corrects for a
+ * daylight-saving change between UTC midnight and local midnight.
+ */
+export function zonedDayStart(key: string, timeZone?: string): Date {
+  const [y, m, d] = key.split("-").map(Number);
+  if (!timeZone) return new Date(y, m - 1, d);
+  const utcMidnight = Date.UTC(y, m - 1, d);
+  const first = utcMidnight - zoneOffset(utcMidnight, timeZone);
+  return new Date(utcMidnight - zoneOffset(first, timeZone));
+}
+
+/** The last millisecond of day `key` in `timeZone`. */
+export function endOfZonedDay(key: string, timeZone?: string): Date {
+  return new Date(zonedDayStart(shiftDayKey(key, 1), timeZone).getTime() - 1);
+}

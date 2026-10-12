@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { BookOwnership } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { loanSchema } from "@/lib/validation";
 import { requireUserId } from "@/lib/actions/helpers";
@@ -19,7 +20,8 @@ import type { ActionState } from "@/lib/actions/helpers";
  */
 
 /** Lend the book out. Refuses if it's already out — two open loans would make
- *  "who has it?" unanswerable. */
+ *  "who has it?" unanswerable — and unless the copy is yours to lend (the
+ *  card hides the button for the rest). */
 export async function lendBook(
   bookId: string,
   _prev: ActionState,
@@ -29,9 +31,12 @@ export async function lendBook(
 
   const book = await prisma.book.findFirst({
     where: { id: bookId, userId },
-    select: { id: true },
+    select: { id: true, ownership: true },
   });
   if (!book) return { error: "Book not found" };
+  if (book.ownership !== BookOwnership.OWNED) {
+    return { error: "Only a copy you own can be lent out." };
+  }
 
   const parsed = loanSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) {

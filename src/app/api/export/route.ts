@@ -18,9 +18,14 @@ import { parsePreferences } from "@/lib/preferences";
  *
  * The JSON inside is still the version-1 export format — quotes, reads,
  * progress, loans, settings, saved views and pages goals are additive
- * fields (as is a goal's `countRereads`), and `owned` is still written
+ * fields (as are a goal's `countRereads`, a book's `lengthMinutes` and a
+ * past read's `note`), and `owned` is still written
  * alongside the newer `ownership` — so unzipping and feeding `library.json`
  * to an older instance keeps working.
+ *
+ * Once the client has read the whole zip, the account's `lastBackupAt` is
+ * set, so the Backup card can say when the newest copy was made. A download
+ * that fails or is cancelled part-way doesn't count.
  */
 export async function GET() {
   const session = await auth();
@@ -44,6 +49,7 @@ export async function GET() {
             dateStarted: true,
             dateFinished: true,
             rating: true,
+            note: true,
             createdAt: true,
           },
           orderBy: { createdAt: "asc" },
@@ -67,7 +73,7 @@ export async function GET() {
     prisma.shelf.findMany({
       where: { userId },
       orderBy: { name: "asc" },
-      select: { name: true, createdAt: true },
+      select: { id: true, name: true, createdAt: true },
     }),
     prisma.readingGoal.findMany({
       where: { userId },
@@ -85,13 +91,21 @@ export async function GET() {
     }),
   ]);
 
+  const prefs = parsePreferences(user?.preferences);
+  // Preferences that list shelves or saved views by id go out by name too,
+  // since ids don't survive a move.
+  const shelfNames = new Map(shelves.map((s) => [s.id, s.name]));
+  const viewNames = new Map(savedViews.map((v) => [v.id, v.name]));
+  const namesOf = (ids: string[], names: Map<string, string>) =>
+    ids.flatMap((id) => names.get(id) ?? []);
+
   const payload = {
     format: "myreads-export",
     version: 1,
     exportedAt: new Date().toISOString(),
     username: session.user.name ?? null,
     counts: { books: books.length, shelves: shelves.length },
-    shelves,
+    shelves: shelves.map(({ id: _id, ...shelf }) => shelf),
     // Pages goals get a list of their own: an older MyReads reads every
     // entry of readingGoals as a number of books.
     readingGoals: readingGoals
@@ -102,17 +116,28 @@ export async function GET() {
       .map(({ unit: _unit, ...goal }) => goal),
     // The account's own settings: theme, library view and Preferences. A
     // restore fills these in only where the account has none yet. The
-    // default saved view is kept by name, since ids don't survive a move.
+    // default saved view, and the shelf and view orders, are kept by name.
     settings: {
       theme: user?.theme ?? null,
       libraryView: user?.libraryView ?? null,
       preferences: user?.preferences ?? null,
-      defaultViewName:
-        savedViews.find((v) => v.id === parsePreferences(user?.preferences).defaultViewId)
-          ?.name ?? null,
+      defaultViewName: viewNames.get(prefs.defaultViewId) ?? null,
+      shelfOrderNames: namesOf(prefs.shelfOrder, shelfNames),
+      hiddenShelfNames: namesOf(prefs.hiddenShelves, shelfNames),
+      savedViewOrderNames: namesOf(prefs.savedViewOrder, viewNames),
     },
-    savedViews: savedViews.map(({ name, query }) => ({ name, query })),
-    books: books.map(({ userId: _userId, searchText: _searchText, ...book }) => ({
+    // A view kept to one shelf names it too, so a restore can point it at
+    // that shelf's new id.
+    savedViews: savedViews.map(({ name, query }) => {
+      const shelfName = shelfNames.get(new URLSearchParams(query).get("shelfId") ?? "");
+      return shelfName ? { name, query, shelfName } : { name, query };
+    }),
+    books: books.map(({
+      userId: _userId,
+      searchText: _searchText,
+      reviewSearchText: _reviewSearchText,
+      ...book
+    }) => ({
       ...book,
       // `owned` no longer exists on the row, but the export format promises
       // that an older instance can still read this file. Emitting the boolean
@@ -159,19 +184,81 @@ export async function GET() {
     compression: "DEFLATE",
   });
 
-  const body = new ReadableStream<Uint8Array>({
-    start(controller) {
-      zipStream
-        .on("data", (chunk: Uint8Array) => controller.enqueue(chunk))
-        .on("error", (err: Error) => controller.error(err))
-        .on("end", () => controller.close());
-      zipStream.resume();
+  // Pulled, not pushed: each chunk pauses the zip until the client reads
+  // again, so nothing is generated ahead of it. That keeps memory bounded
+  // on a slow connection, and it means the end of the zip is only reached
+  // once the client has actually read everything before it.
+  let cancelled = false;
+  let ended = false;
+  // The pull waiting on the next chunk, if any. The stream only pulls when
+  // a read is waiting and nothing is queued.
+  let waiting: (() => void) | null = null;
+  const wake = () => {
+    const resolve = waiting;
+    waiting = null;
+    resolve?.();
+  };
+
+  // The client has read the last chunk and asked for more: remember when,
+  // then end the stream. A failed write mustn't spoil a finished download,
+  // and the client may have gone away while it ran, in which case the
+  // stream is already closed.
+  const finish = async (controller: ReadableStreamDefaultController<Uint8Array>) => {
+    await prisma.user
+      .updateMany({ where: { id: userId }, data: { lastBackupAt: new Date() } })
+      .catch(() => {});
+    if (cancelled) return;
+    try {
+      controller.close();
+    } catch {
+      // already closed
+    }
+  };
+
+  const body = new ReadableStream<Uint8Array>(
+    {
+      start(controller) {
+        zipStream
+          .on("data", (chunk: Uint8Array) => {
+            zipStream.pause();
+            if (cancelled) return;
+            controller.enqueue(chunk);
+            wake();
+          })
+          .on("error", (err: Error) => {
+            if (cancelled) return;
+            cancelled = true; // a broken zip is no backup
+            controller.error(err);
+            wake();
+          })
+          .on("end", () => {
+            ended = true;
+            if (cancelled || !waiting) return;
+            // A read is already waiting on an empty queue, so the client
+            // has had every chunk.
+            const resolve = waiting;
+            waiting = null;
+            void finish(controller).finally(resolve);
+          });
+      },
+      pull(controller) {
+        if (cancelled) return;
+        if (ended) return finish(controller);
+        return new Promise<void>((resolve) => {
+          waiting = resolve;
+          zipStream.resume();
+        });
+      },
+      cancel() {
+        // Client went away mid-download — stop generating.
+        cancelled = true;
+        zipStream.pause();
+        wake();
+      },
     },
-    cancel() {
-      // Client went away mid-download — stop generating.
-      zipStream.pause();
-    },
-  });
+    // Nothing is read ahead of the client.
+    { highWaterMark: 0 },
+  );
 
   const date = new Date().toISOString().slice(0, 10);
   return new NextResponse(body, {

@@ -18,11 +18,55 @@ export const LIBRARY_SORTS = [
   "author",
   "rating",
   "dateFinished",
+  "dateStarted",
+  "pageCount",
+  "published",
+  "updatedAt",
 ] as const;
 
-export const LIBRARY_GROUPS = ["none", "author", "series"] as const;
+export const LIBRARY_GROUPS = [
+  "none",
+  "author",
+  "series",
+  "yearFinished",
+  "status",
+  "format",
+  "ownership",
+  "tag",
+  "shelf",
+  "rating",
+] as const;
 
 export const LIBRARY_DIRS = ["asc", "desc"] as const;
+
+export type LibrarySortKey = (typeof LIBRARY_SORTS)[number];
+// Not LibraryGroup: components/library-view.tsx uses that name for a group
+// of books.
+export type LibraryGroupKey = (typeof LIBRARY_GROUPS)[number];
+export type LibraryDir = (typeof LIBRARY_DIRS)[number];
+
+/** The direction each sort opens in when picked: A to Z for words, newest,
+ *  highest and longest first for the rest. */
+export const NATURAL_DIRS: Record<LibrarySortKey, LibraryDir> = {
+  createdAt: "desc",
+  title: "asc",
+  author: "asc",
+  rating: "desc",
+  dateFinished: "desc",
+  dateStarted: "desc",
+  pageCount: "desc",
+  published: "desc",
+  updatedAt: "desc",
+};
+
+export function naturalDir(sort: string): LibraryDir {
+  // Own keys only: `sort` comes from the URL, and ?sort=constructor would
+  // otherwise find Object's constructor.
+  return Object.hasOwn(NATURAL_DIRS, sort) ? NATURAL_DIRS[sort as LibrarySortKey] : "desc";
+}
+
+/** The date a list row shows next to the book, if any. */
+export const ROW_DATES = ["none", "added", "finished"] as const;
 
 /** How big the covers are, which sets how many fit across. */
 export const CARD_SIZES = ["small", "medium", "large"] as const;
@@ -37,9 +81,9 @@ export const CARD_STYLES = ["cards", "covers", "shelf"] as const;
 // A type alias (not an interface) so it satisfies Prisma's Json input type —
 // aliases get an implicit index signature for assignability, interfaces don't.
 export type LibraryView = {
-  sort: (typeof LIBRARY_SORTS)[number];
-  dir: (typeof LIBRARY_DIRS)[number];
-  group: (typeof LIBRARY_GROUPS)[number];
+  sort: LibrarySortKey;
+  dir: LibraryDir;
+  group: LibraryGroupKey;
   cardSize: (typeof CARD_SIZES)[number];
   layout: (typeof LIBRARY_LAYOUTS)[number];
   cardStyle: (typeof CARD_STYLES)[number];
@@ -49,12 +93,27 @@ export type LibraryView = {
   showRating: boolean;
   showStatus: boolean;
   showSeries: boolean;
+  /** A Wishlist, Borrowed or Given away badge (nothing for owned books). */
+  showOwnership: boolean;
+  /** List layout only. */
+  rowDate: (typeof ROW_DATES)[number];
+  /** List layout only. */
+  showPageCount: boolean;
 };
 
 /** The drawing half of a view — what the View menu changes. */
 export type LibraryDisplay = Pick<
   LibraryView,
-  "cardSize" | "layout" | "cardStyle" | "cover3d" | "showRating" | "showStatus" | "showSeries"
+  | "cardSize"
+  | "layout"
+  | "cardStyle"
+  | "cover3d"
+  | "showRating"
+  | "showStatus"
+  | "showSeries"
+  | "showOwnership"
+  | "rowDate"
+  | "showPageCount"
 >;
 
 export const DEFAULT_LIBRARY_VIEW: LibraryView = {
@@ -68,6 +127,9 @@ export const DEFAULT_LIBRARY_VIEW: LibraryView = {
   showRating: true,
   showStatus: true,
   showSeries: true,
+  showOwnership: false,
+  rowDate: "none",
+  showPageCount: false,
 };
 
 /** Stored JSON (or anything else) → a safe view, unknown fields defaulted. */
@@ -95,6 +157,9 @@ export function parseLibraryView(raw: unknown): LibraryView {
     showRating: bool(obj.showRating, d.showRating),
     showStatus: bool(obj.showStatus, d.showStatus),
     showSeries: bool(obj.showSeries, d.showSeries),
+    showOwnership: bool(obj.showOwnership, d.showOwnership),
+    rowDate: pick(ROW_DATES, obj.rowDate, d.rowDate),
+    showPageCount: bool(obj.showPageCount, d.showPageCount),
   };
 }
 

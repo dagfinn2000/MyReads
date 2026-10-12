@@ -1,11 +1,13 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { BookFormat, BookOwnership, ReadingStatus } from "@prisma/client";
-import { ArrowDown, ArrowUp, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, Pencil, Trash2 } from "lucide-react";
 import { savePreferences } from "@/lib/actions/preferences";
-import { deleteView } from "@/lib/actions/saved-views";
+import { deleteView, renameView } from "@/lib/actions/saved-views";
+import { moveId, orderByIds } from "@/lib/library-order";
+import { SAVED_VIEW_NAME_MAX } from "@/lib/saved-views";
 import {
   FORMAT_LABELS,
   OWNERSHIP_LABELS,
@@ -21,15 +23,22 @@ import {
   HIDEABLE_NAV,
   HIDEABLE_STATS,
   NUMBER_FORMATS,
+  STATS_PERIODS,
+  SEARCH_FIELDS,
   type Accent,
   type Background,
   type Catalogue,
   type HideableNav,
   type HideableStat,
   type Preferences,
+  type SearchField,
 } from "@/lib/preferences";
+import { PERIOD_LABELS } from "@/lib/stats-period";
 import { cn } from "@/lib/utils";
+import { BookPageCardList, FindLinksEditor } from "@/components/book-page-preferences";
+import { TagRulesList } from "@/components/tag-rules-list";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -44,7 +53,14 @@ const CATALOGUE_LABELS: Record<Catalogue, string> = {
   nb: "National Library of Norway",
 };
 
+const SEARCH_FIELD_LABELS: Record<SearchField, string> = {
+  tags: "Tags",
+  isbn: "ISBN",
+  review: "My review",
+};
+
 const NAV_LABELS: Record<HideableNav, string> = {
+  reading: "Now reading",
   check: "Check (“Do I own this?”)",
   quotes: "Quotes",
 };
@@ -237,9 +253,18 @@ function Toggle({
   );
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function Section({
+  title,
+  id,
+  children,
+}: {
+  title: string;
+  /** For links straight to the section (/account#pick-for-me). */
+  id?: string;
+  children: React.ReactNode;
+}) {
   return (
-    <section className="grid gap-3 border-t pt-4 first:border-t-0 first:pt-0">
+    <section id={id} className="grid scroll-mt-20 gap-3 border-t pt-4 first:border-t-0 first:pt-0">
       <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
         {title}
       </h3>
@@ -316,6 +341,12 @@ export function PreferencesForm({
   const zone = prefs.timeZone || serverTimeZone;
   const zoneOptions = timeZones.includes(zone) ? timeZones : [zone, ...timeZones];
 
+  // Saved views in the reader's order, which moving one changes at once.
+  const views = orderByIds(savedViews, prefs.savedViewOrder);
+  const shownStatusTabs = Object.values(ReadingStatus).filter(
+    (s) => !prefs.hiddenStatusTabs.includes(s),
+  ).length;
+
   return (
     <div className="grid gap-5">
       <p className="text-sm text-muted-foreground" aria-live="polite">
@@ -328,7 +359,7 @@ export function PreferencesForm({
               : "Changes save as you make them."}
       </p>
 
-      <Section title="New books">
+      <Section title="New books" id="new-books">
         <Choice
           label="Format"
           value={prefs.newBookFormat}
@@ -350,10 +381,136 @@ export function PreferencesForm({
           }))}
           onChange={(v) => update({ newBookOwnership: v })}
         />
-        <Toggle
+        <Choice
+          label="Books I add as Read were finished"
+          hint="Bulk edit's Set status: Read follows this too."
+          value={prefs.addedAsReadFinished}
+          options={[
+            { value: "today", label: "Today" },
+            { value: "undated", label: "No date, unless I pick one" },
+          ]}
+          onChange={(v) => update({ addedAsReadFinished: v })}
+        />
+        <Choice
+          label="After adding a book"
+          value={prefs.afterAdd}
+          options={[
+            { value: "open", label: "Open the book" },
+            { value: "another", label: "Add another" },
+            { value: "library", label: "Go to the library" },
+          ]}
+          onChange={(v) => update({ afterAdd: v })}
+        />
+        <Choice
           label="Copy subjects from the catalogue as tags"
-          checked={prefs.importTags}
-          onChange={(c) => update({ importTags: c })}
+          value={prefs.importTagsMode}
+          options={[
+            { value: "off", label: "Off" },
+            { value: "known", label: "Only tags I already use" },
+            { value: "all", label: "All of them" },
+          ]}
+          onChange={(v) => update({ importTagsMode: v })}
+        />
+        {/* From the server's copy, not this form's state: rules are added
+            elsewhere (Manage tags) and removed through their own action. */}
+        <TagRulesList renames={initial.tagRenames} skips={initial.tagSkips} />
+      </Section>
+
+      <Section title="Book search">
+        <p className="text-xs text-muted-foreground">
+          Which catalogues to search when adding a book, and which comes first.
+        </p>
+        <ul className="grid gap-1.5">
+          {catalogueRows.map((c) => {
+            const on = enabled.includes(c);
+            const i = enabled.indexOf(c);
+            return (
+              <li key={c} className="flex items-center gap-2">
+                <Toggle
+                  label={CATALOGUE_LABELS[c]}
+                  checked={on}
+                  // At least one catalogue stays on.
+                  disabled={on && enabled.length === 1}
+                  onChange={(checked) =>
+                    update({
+                      catalogues: checked
+                        ? [...prefs.catalogues, c]
+                        : prefs.catalogues.filter((x) => x !== c),
+                    })
+                  }
+                />
+                {on && enabled.length > 1 && (
+                  <span className="ml-auto flex gap-1">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon-sm"
+                      title="Search earlier"
+                      disabled={i === 0}
+                      onClick={() => moveCatalogue(c, -1)}
+                    >
+                      <ArrowUp data-slot="icon" />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon-sm"
+                      title="Search later"
+                      disabled={i === enabled.length - 1}
+                      onClick={() => moveCatalogue(c, 1)}
+                    >
+                      <ArrowDown data-slot="icon" />
+                    </Button>
+                  </span>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      </Section>
+
+      <Section title="Reading">
+        <Choice
+          label="Step buttons"
+          hint="The buttons next to the page box, in the book's own unit: pages, percent or minutes."
+          value={prefs.quickLogSteps}
+          options={[
+            { value: "10-25", label: "+10 and +25" },
+            { value: "5-10", label: "+5 and +10" },
+            { value: "5pct", label: "+5% of the book" },
+          ]}
+          onChange={(v) => update({ quickLogSteps: v })}
+        />
+        <Choice
+          label="Ebooks: track by"
+          value={prefs.ebookUnit}
+          options={[
+            { value: "page", label: "Page" },
+            { value: "percent", label: "Percent" },
+          ]}
+          onChange={(v) => update({ ebookUnit: v })}
+        />
+        <Choice
+          label="Audiobooks: track by"
+          hint="Time needs the book's length and a page count, both on its Edit page."
+          value={prefs.audiobookUnit}
+          options={[
+            { value: "page", label: "Page" },
+            { value: "percent", label: "Percent" },
+            { value: "time", label: "Time listened" },
+          ]}
+          onChange={(v) => update({ audiobookUnit: v })}
+        />
+        <Choice
+          label="Pace from"
+          hint="Used for pages a day and the finish forecast while you read."
+          value={prefs.paceFrom}
+          options={[
+            { value: "read", label: "The whole read" },
+            { value: "7d", label: "The last 7 days" },
+            { value: "14d", label: "The last 14 days" },
+          ]}
+          onChange={(v) => update({ paceFrom: v })}
         />
       </Section>
 
@@ -421,57 +578,69 @@ export function PreferencesForm({
         />
       </Section>
 
-      <Section title="Book search">
-        <p className="text-xs text-muted-foreground">
-          Which catalogues to search when adding a book, and which comes first.
-        </p>
-        <ul className="grid gap-1.5">
-          {catalogueRows.map((c) => {
-            const on = enabled.includes(c);
-            const i = enabled.indexOf(c);
+      <Section title="Library" id="library">
+        <div className="grid gap-1.5">
+          <div>
+            <p className="text-sm font-medium">Status tabs to show</p>
+            <p className="text-xs text-muted-foreground">The All tab always shows.</p>
+          </div>
+          {Object.values(ReadingStatus).map((s) => {
+            const shown = !prefs.hiddenStatusTabs.includes(s);
             return (
-              <li key={c} className="flex items-center gap-2">
-                <Toggle
-                  label={CATALOGUE_LABELS[c]}
-                  checked={on}
-                  // At least one catalogue stays on.
-                  disabled={on && enabled.length === 1}
-                  onChange={(checked) =>
-                    update({
-                      catalogues: checked
-                        ? [...prefs.catalogues, c]
-                        : prefs.catalogues.filter((x) => x !== c),
-                    })
-                  }
-                />
-                {on && enabled.length > 1 && (
-                  <span className="ml-auto flex gap-1">
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon-sm"
-                      title="Search earlier"
-                      disabled={i === 0}
-                      onClick={() => moveCatalogue(c, -1)}
-                    >
-                      <ArrowUp data-slot="icon" />
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon-sm"
-                      title="Search later"
-                      disabled={i === enabled.length - 1}
-                      onClick={() => moveCatalogue(c, 1)}
-                    >
-                      <ArrowDown data-slot="icon" />
-                    </Button>
-                  </span>
-                )}
-              </li>
+              <Toggle
+                key={s}
+                label={STATUS_LABELS[s]}
+                checked={shown}
+                // At least one status tab stays.
+                disabled={shown && shownStatusTabs === 1}
+                onChange={(on) =>
+                  update({ hiddenStatusTabs: toggleIn(prefs.hiddenStatusTabs, s, !on) })
+                }
+              />
             );
           })}
-        </ul>
+        </div>
+        <div role="group" aria-labelledby="search-also-in" className="grid gap-1.5">
+          <p id="search-also-in" className="text-sm font-medium">
+            Search also looks in
+          </p>
+          <p className="text-xs text-muted-foreground">
+            Title, author and series are always searched.
+          </p>
+          {SEARCH_FIELDS.map((field) => (
+            <Toggle
+              key={field}
+              label={SEARCH_FIELD_LABELS[field]}
+              checked={prefs.searchAlsoIn.includes(field)}
+              onChange={(on) => update({ searchAlsoIn: toggleIn(prefs.searchAlsoIn, field, on) })}
+            />
+          ))}
+        </div>
+        <p className="text-xs text-muted-foreground">
+          Order and hide shelf chips from Manage shelves in the library.
+        </p>
+      </Section>
+
+      {savedViews.length > 0 && (
+        <SavedViewsList views={views} onReorder={(ids) => update({ savedViewOrder: ids })} />
+      )}
+
+      <Section title="Pick for me" id="pick-for-me">
+        <Toggle
+          label="Only books I have"
+          checked={prefs.pickOnlyHave}
+          onChange={(c) => update({ pickOnlyHave: c })}
+        />
+        <Toggle
+          label="Only the next book in a series"
+          checked={prefs.pickNextInSeries}
+          onChange={(c) => update({ pickNextInSeries: c })}
+        />
+        <p className="text-xs text-muted-foreground">
+          Borrowed books count as books you have. Wishlist, given-away and
+          lent-out books don&apos;t. A Want to Read book in a series is skipped
+          while an earlier one is still unread.
+        </p>
       </Section>
 
       <Section title="Ratings">
@@ -575,6 +744,7 @@ export function PreferencesForm({
             { value: "library", label: "Library" },
             { value: "stats", label: "Stats" },
             { value: "add", label: "Add book" },
+            { value: "reading", label: "Now reading" },
           ]}
           onChange={(v) => update({ startPage: v })}
         />
@@ -586,7 +756,7 @@ export function PreferencesForm({
             }
             options={[
               { value: "none", label: "The whole library" },
-              ...savedViews.map((v) => ({ value: v.id, label: `Saved view: ${v.name}` })),
+              ...views.map((v) => ({ value: v.id, label: `Saved view: ${v.name}` })),
             ]}
             onChange={(v) => update({ defaultViewId: v === "none" ? "" : v })}
           />
@@ -601,7 +771,36 @@ export function PreferencesForm({
               onChange={(shown) => update({ hiddenNav: toggleIn(prefs.hiddenNav, item, !shown) })}
             />
           ))}
+          {prefs.hiddenNav.includes("quotes") && !prefs.hiddenBookPageCards.includes("quotes") && (
+            <p className="text-xs text-muted-foreground">
+              The Quotes card still shows on book pages. You can hide it under Book page below.
+            </p>
+          )}
         </div>
+      </Section>
+
+      <Section title="Book page" id="book-page">
+        <BookPageCardList prefs={prefs} update={update} />
+        <Choice
+          label="Long descriptions"
+          value={prefs.bookDescription}
+          options={[
+            { value: "full", label: "In full" },
+            { value: "clamp", label: "First 4 lines, with More" },
+          ]}
+          onChange={(v) => update({ bookDescription: v })}
+        />
+        <Choice
+          label="Shelves card"
+          hint="What the Shelves card lists on a book."
+          value={prefs.shelvesCard}
+          options={[
+            { value: "all", label: "Every shelf" },
+            { value: "mine", label: "Only this book's shelves, plus Add" },
+          ]}
+          onChange={(v) => update({ shelvesCard: v })}
+        />
+        <FindLinksEditor prefs={prefs} update={update} />
       </Section>
 
       <Section title="Stats page">
@@ -630,43 +829,256 @@ export function PreferencesForm({
           ]}
           onChange={(v) => update({ heatmapScale: v })}
         />
+        <Choice
+          label="Stats open on"
+          hint="The buttons on the Stats page switch it any time."
+          value={prefs.statsPeriod}
+          options={STATS_PERIODS.map((p) => ({ value: p, label: PERIOD_LABELS[p] }))}
+          onChange={(v) => update({ statsPeriod: v })}
+        />
+        <Choice
+          label="Genres and Formats count"
+          value={prefs.statsBreakdown}
+          options={[
+            { value: "library", label: "Every book in the library" },
+            { value: "period", label: "Books I read in the period" },
+          ]}
+          onChange={(v) => update({ statsBreakdown: v })}
+        />
+        {/* Linked from the goal card's "Change what counts". */}
+        <div
+          id="what-counts"
+          role="group"
+          aria-labelledby="what-counts-heading"
+          className="grid scroll-mt-20 gap-3"
+        >
+          <div>
+            <p id="what-counts-heading" className="text-sm font-medium">
+              What counts
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Used by the stats cards, your reading goal and the year in review.
+            </p>
+          </div>
+          <Choice
+            label="Pages read means"
+            hint="Books you finish without logging still add their page count."
+            value={prefs.statsPagesRead}
+            options={[
+              { value: "finished", label: "Whole books when I finish" },
+              { value: "logged", label: "Pages I logged" },
+            ]}
+            onChange={(v) => update({ statsPagesRead: v })}
+          />
+          <Choice
+            label="Books I stop reading"
+            value={prefs.statsStoppedBooks}
+            options={[
+              { value: "none", label: "Don't count" },
+              { value: "pages", label: "Count the pages I read" },
+              { value: "book", label: "Count as a book" },
+            ]}
+            onChange={(v) => update({ statsStoppedBooks: v })}
+          />
+          <Choice
+            label="Audiobooks"
+            value={prefs.statsAudiobooks}
+            options={[
+              { value: "full", label: "Count fully" },
+              { value: "books", label: "Books, not pages" },
+              { value: "out", label: "Leave out" },
+            ]}
+            onChange={(v) => update({ statsAudiobooks: v })}
+          />
+        </div>
       </Section>
-
-      {savedViews.length > 0 && <SavedViewsList views={savedViews} />}
     </div>
   );
 }
 
-/** Saved library views, with a delete button each. Saving and renaming
- *  happen in the library (saving under the same name updates a view). */
-function SavedViewsList({ views }: { views: { id: string; name: string }[] }) {
+/** Saved library views: rename, reorder (the chips above the library
+ *  follow this order) or delete. Views are saved from the library's filter
+ *  bar. */
+function SavedViewsList({
+  views,
+  onReorder,
+}: {
+  /** In the reader's order. */
+  views: { id: string; name: string }[];
+  /** Saves a new order, through the form's own save and status line. */
+  onReorder: (ids: string[]) => void;
+}) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
+  const [editing, setEditing] = useState<string | null>(null);
+  const [newName, setNewName] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  // A deleted view leaves the list at once, so focus can go to the next.
+  const [gone, setGone] = useState<string[]>([]);
+  const listRef = useRef<HTMLUListElement>(null);
+
+  const rows = views.filter((v) => !gone.includes(v.id));
+
+  /** Focus the first of `selectors` that is there and enabled, once React
+   *  has redrawn the list: a moved or removed row takes the focus with it
+   *  otherwise. */
+  function focusSoon(...selectors: string[]) {
+    requestAnimationFrame(() => {
+      for (const selector of selectors) {
+        const el = listRef.current?.querySelector<HTMLButtonElement>(selector);
+        if (el && !el.disabled) {
+          el.focus();
+          return;
+        }
+      }
+    });
+  }
+
+  function cancel(id: string) {
+    setEditing(null);
+    setError(null);
+    focusSoon(`[data-rename="${id}"]`);
+  }
+
+  function submitRename(view: { id: string; name: string }) {
+    const to = newName.trim();
+    if (!to || to === view.name) {
+      cancel(view.id);
+      return;
+    }
+    startTransition(async () => {
+      const res = await renameView(view.id, to);
+      if (res.error) {
+        setError(res.error);
+        return;
+      }
+      cancel(view.id);
+      router.refresh();
+    });
+  }
+
+  function move(view: { id: string }, by: -1 | 1) {
+    onReorder(
+      moveId(
+        rows.map((v) => v.id),
+        view.id,
+        by,
+      ),
+    );
+    focusSoon(`[data-move="${view.id}:${by}"]`, `[data-move="${view.id}:${-by}"]`);
+  }
+
+  function remove(view: { id: string }) {
+    const i = rows.findIndex((v) => v.id === view.id);
+    const neighbour = rows[i + 1] ?? rows[i - 1];
+    startTransition(async () => {
+      await deleteView(view.id);
+      setGone((g) => [...g, view.id]);
+      if (neighbour) focusSoon(`[data-rename="${neighbour.id}"]`);
+      router.refresh();
+    });
+  }
 
   return (
     <Section title="Saved views">
-      <ul className="grid gap-1">
-        {views.map((v) => (
-          <li key={v.id} className="flex min-h-8 items-center gap-2 text-sm">
-            <span className="min-w-0 flex-1 truncate">{v.name}</span>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-sm"
-              title={`Delete “${v.name}”`}
-              disabled={pending}
-              onClick={() =>
-                startTransition(async () => {
-                  await deleteView(v.id);
-                  router.refresh();
-                })
-              }
-            >
-              <Trash2 data-slot="icon" />
-            </Button>
+      <ul ref={listRef} className="grid gap-1">
+        {rows.map((v, i) => (
+          <li key={v.id} className="flex min-h-8 flex-wrap items-center gap-x-2 gap-y-1 text-sm">
+            {editing === v.id ? (
+              <form
+                className="flex min-w-0 flex-1 flex-wrap items-center gap-2"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  submitRename(v);
+                }}
+              >
+                <Input
+                  value={newName}
+                  onChange={(e) => setNewName(e.target.value)}
+                  onFocus={(e) => e.currentTarget.select()}
+                  onKeyDown={(e) => {
+                    if (e.key === "Escape") {
+                      e.preventDefault();
+                      cancel(v.id);
+                    }
+                  }}
+                  maxLength={SAVED_VIEW_NAME_MAX}
+                  autoFocus
+                  aria-label={`New name for “${v.name}”`}
+                  className="h-8 min-w-0 flex-1 basis-40"
+                />
+                <span className="flex gap-1">
+                  <Button type="submit" size="sm" disabled={pending}>
+                    Save
+                  </Button>
+                  <Button type="button" size="sm" variant="ghost" onClick={() => cancel(v.id)}>
+                    Cancel
+                  </Button>
+                </span>
+              </form>
+            ) : (
+              <>
+                <span className="min-w-0 flex-1 truncate">{v.name}</span>
+                <span className="flex shrink-0 gap-1">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    data-rename={v.id}
+                    title="Rename"
+                    aria-label={`Rename “${v.name}”`}
+                    onClick={() => {
+                      setEditing(v.id);
+                      setNewName(v.name);
+                      setError(null);
+                    }}
+                  >
+                    <Pencil data-slot="icon" />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    data-move={`${v.id}:-1`}
+                    title="Move up"
+                    aria-label={`Move “${v.name}” up`}
+                    disabled={i === 0}
+                    onClick={() => move(v, -1)}
+                  >
+                    <ArrowUp data-slot="icon" />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    data-move={`${v.id}:1`}
+                    title="Move down"
+                    aria-label={`Move “${v.name}” down`}
+                    disabled={i === rows.length - 1}
+                    onClick={() => move(v, 1)}
+                  >
+                    <ArrowDown data-slot="icon" />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    title={`Delete “${v.name}”`}
+                    aria-label={`Delete “${v.name}”`}
+                    disabled={pending}
+                    onClick={() => remove(v)}
+                  >
+                    <Trash2 data-slot="icon" />
+                  </Button>
+                </span>
+              </>
+            )}
           </li>
         ))}
       </ul>
+      <p aria-live="polite" className="text-sm text-destructive">
+        {error}
+      </p>
     </Section>
   );
 }

@@ -1,3 +1,4 @@
+import { BackupReminder } from "@/components/backup-reminder";
 import { Nav } from "@/components/nav";
 import { PreferencesProvider } from "@/components/preferences-provider";
 import { getCurrentUser, getPreferences } from "@/lib/current-user";
@@ -14,7 +15,10 @@ export default async function AppLayout({
       detectTimeZone={!!user && user.preferences.timeZone === ""}
     >
       <Nav />
-      <main className="mx-auto max-w-6xl px-4 py-6">{children}</main>
+      <main className="mx-auto max-w-6xl px-4 py-6">
+        <BackupReminder />
+        {children}
+      </main>
     </PreferencesProvider>
   );
 }

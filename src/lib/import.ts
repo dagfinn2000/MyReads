@@ -5,7 +5,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { coverFilePath, coversDir } from "@/lib/covers";
 import { sniffImageKind } from "@/lib/image-type";
-import { buildSearchText } from "@/lib/utils";
+import { buildSearchText, foldForSearch } from "@/lib/utils";
 import { isAllowedCoverUrl } from "@/lib/validation";
 import { cleanLibraryViewPatch } from "@/lib/library-view";
 import { cleanPreferencesPatch } from "@/lib/preferences";
@@ -57,6 +57,8 @@ const importedReadSchema = z.object({
   dateStarted: dateField,
   dateFinished: dateField,
   rating: z.number().int().min(1).max(10).nullable().optional().catch(null),
+  /** Additive: older exports have no notes on past reads. */
+  note: z.string().trim().max(2000).nullable().optional().catch(null),
   createdAt: dateField,
 });
 
@@ -84,8 +86,15 @@ const importedBookSchema = z.object({
   // Same rule as the book form; a bad value drops the cover, not the book.
   coverUrl: z.string().max(2000).refine(isAllowedCoverUrl).nullable().optional().catch(null),
   pageCount: z.number().int().min(1).max(100000).nullable().optional().catch(null),
+  /** Additive: an audiobook's running time in minutes. */
+  lengthMinutes: z.number().int().min(1).max(60000).nullable().optional().catch(null),
   publishedDate: z.string().trim().max(20).nullable().optional(),
-  tags: z.array(z.string().trim().toLowerCase().max(50)).catch([]),
+  // Split at commas: the library's tag filter lists tags comma-separated,
+  // so "science, fiction" from an older backup becomes two tags.
+  tags: z
+    .array(z.string().trim().toLowerCase().max(50))
+    .catch([])
+    .transform((tags) => tags.flatMap((t) => t.split(",").map((s) => s.trim())).filter(Boolean)),
   format: z.nativeEnum(BookFormat).catch(BookFormat.PHYSICAL),
   /** Legacy field, still written by exports for older instances to read. */
   owned: z.boolean().nullable().optional().catch(null),
@@ -116,6 +125,9 @@ const goalSchema = z.object({
   countRereads: z.boolean().catch(true),
 });
 
+/** Shelf or saved-view names in a preference, as exported. */
+const nameList = z.array(z.string().max(100)).max(500).optional().catch([]);
+
 const exportPayloadSchema = z.object({
   format: z.literal("myreads-export"),
   version: z.literal(1),
@@ -132,6 +144,10 @@ const exportPayloadSchema = z.object({
       libraryView: z.unknown(),
       preferences: z.unknown(),
       defaultViewName: z.string().max(SAVED_VIEW_NAME_MAX).nullable().catch(null),
+      // Shelf and saved-view preferences, by name (see restoreSettings).
+      shelfOrderNames: nameList,
+      hiddenShelfNames: nameList,
+      savedViewOrderNames: nameList,
     })
     .nullable()
     .optional()
@@ -141,6 +157,9 @@ const exportPayloadSchema = z.object({
       z.object({
         name: z.string().trim().min(1).max(SAVED_VIEW_NAME_MAX),
         query: z.string().max(4000),
+        /** The shelf the query's `shelfId` named, since the id doesn't
+         *  survive a move. Additive: older backups don't have it. */
+        shelfName: z.string().trim().min(1).max(50).optional().catch(undefined),
       }),
     )
     .catch([]),
@@ -344,12 +363,30 @@ export async function importLibrary(
 
   // Saved views: add the ones whose names are new here, up to the cap.
   // Queries are rebuilt the same way saving one does, so a hand-edited
-  // backup can't store parameters the library doesn't know.
+  // backup can't store parameters the library doesn't know. A view kept to
+  // one shelf is pointed at that shelf here, found by name; when there's no
+  // such shelf (or an older backup gave only an id from elsewhere), the
+  // shelf is dropped rather than left naming one that matches nothing.
+  const ownShelfIds = new Set(shelfIdByName.values());
+  const restoredQuery = (view: { query: string; shelfName?: string }) => {
+    const params = new URLSearchParams(view.query);
+    const oldId = params.get("shelfId");
+    if (oldId) {
+      const id = view.shelfName
+        ? shelfIdByName.get(view.shelfName)
+        : ownShelfIds.has(oldId)
+          ? oldId
+          : undefined;
+      if (id) params.set("shelfId", id);
+      else params.delete("shelfId");
+    }
+    return canonicalViewQueryFromString(params.toString());
+  };
   const existingViewCount = await prisma.savedView.count({ where: { userId } });
   const viewsCreated = await prisma.savedView.createMany({
     data: data.savedViews
       .slice(0, Math.max(0, MAX_SAVED_VIEWS - existingViewCount))
-      .map((v) => ({ userId, name: v.name, query: canonicalViewQueryFromString(v.query) })),
+      .map((v) => ({ userId, name: v.name, query: restoredQuery(v) })),
     skipDuplicates: true,
   });
 
@@ -412,17 +449,24 @@ export async function importLibrary(
     // lives on the Book row), exactly like the migration backfill. Either
     // way timesRead ends up consistent with the restored rows.
     const isRead = b.status === ReadingStatus.READ;
-    const pastReads: { dateStarted: Date | null; dateFinished: Date | null; rating: number | null; createdAt: Date | null }[] =
+    const pastReads: {
+      dateStarted: Date | null;
+      dateFinished: Date | null;
+      rating: number | null;
+      note: string | null;
+      createdAt: Date | null;
+    }[] =
       b.reads.length > 0
         ? b.reads.map((r) => ({
             dateStarted: r.dateStarted,
             dateFinished: r.dateFinished,
             rating: r.rating ?? null,
+            note: r.note || null,
             createdAt: r.createdAt,
           }))
         : Array.from(
             { length: Math.max(b.timesRead - (isRead ? 1 : 0), 0) },
-            () => ({ dateStarted: null, dateFinished: null, rating: null, createdAt: null }),
+            () => ({ dateStarted: null, dateFinished: null, rating: null, note: null, createdAt: null }),
           );
     const timesRead = pastReads.length + (isRead ? 1 : 0);
 
@@ -435,6 +479,7 @@ export async function importLibrary(
         description: b.description ?? null,
         coverUrl: cover.url,
         pageCount: b.pageCount ?? null,
+        lengthMinutes: b.lengthMinutes ?? null,
         publishedDate: b.publishedDate ?? null,
         tags: [...new Set(b.tags)],
         format: b.format,
@@ -445,6 +490,7 @@ export async function importLibrary(
         status: b.status,
         rating: b.rating ?? null,
         review: b.review ?? null,
+        reviewSearchText: foldForSearch(b.review ?? ""),
         dateStarted: b.dateStarted,
         dateFinished: b.dateFinished,
         timesRead,
@@ -471,6 +517,7 @@ export async function importLibrary(
             dateStarted: r.dateStarted,
             dateFinished: r.dateFinished,
             rating: r.rating,
+            note: r.note,
             ...(r.createdAt && { createdAt: r.createdAt }),
           })),
         },
@@ -552,6 +599,9 @@ async function restoreSettings(
     libraryView?: unknown;
     preferences?: unknown;
     defaultViewName: string | null;
+    shelfOrderNames?: string[];
+    hiddenShelfNames?: string[];
+    savedViewOrderNames?: string[];
   },
 ): Promise<boolean> {
   const user = await prisma.user.findUnique({
@@ -578,15 +628,36 @@ async function restoreSettings(
   }
 
   const storedPrefs = asObject(user.preferences);
-  // The backup's own defaultViewId points at a view on the old instance.
-  const { defaultViewId: _oldId, ...backupPrefs } = cleanPreferencesPatch(settings.preferences);
+  // The backup's own ids point at shelves and views on the old instance;
+  // they come back through the names exported beside them.
+  const {
+    defaultViewId: _oldViewId,
+    shelfOrder: _oldShelfOrder,
+    hiddenShelves: _oldHiddenShelves,
+    savedViewOrder: _oldViewOrder,
+    ...backupPrefs
+  } = cleanPreferencesPatch(settings.preferences);
   const prefAdds: Record<string, unknown> = missing(storedPrefs, backupPrefs);
+
+  const [shelves, views] = await Promise.all([
+    prisma.shelf.findMany({ where: { userId }, select: { id: true, name: true } }),
+    prisma.savedView.findMany({ where: { userId }, select: { id: true, name: true } }),
+  ]);
+  const shelfIds = new Map(shelves.map((s) => [s.name, s.id]));
+  const viewIds = new Map(views.map((v) => [v.name, v.id]));
+  const idsOf = (names: string[] | undefined, ids: Map<string, string>) =>
+    (names ?? []).flatMap((name) => ids.get(name) ?? []);
+  const byName: [string, string[]][] = [
+    ["shelfOrder", idsOf(settings.shelfOrderNames, shelfIds)],
+    ["hiddenShelves", idsOf(settings.hiddenShelfNames, shelfIds)],
+    ["savedViewOrder", idsOf(settings.savedViewOrderNames, viewIds)],
+  ];
+  for (const [key, ids] of byName) {
+    if (ids.length > 0 && !(key in storedPrefs)) prefAdds[key] = ids;
+  }
   if (settings.defaultViewName && !("defaultViewId" in storedPrefs)) {
-    const view = await prisma.savedView.findUnique({
-      where: { userId_name: { userId, name: settings.defaultViewName } },
-      select: { id: true },
-    });
-    if (view) prefAdds.defaultViewId = view.id;
+    const id = viewIds.get(settings.defaultViewName);
+    if (id) prefAdds.defaultViewId = id;
   }
   if (Object.keys(prefAdds).length > 0) {
     data.preferences = { ...storedPrefs, ...prefAdds } as Prisma.InputJsonObject;

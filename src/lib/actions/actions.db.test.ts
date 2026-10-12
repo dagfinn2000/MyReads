@@ -26,9 +26,11 @@ vi.mock("@/auth", () => ({
 // Server actions call revalidatePath, which needs a request scope.
 vi.mock("next/cache", () => ({ revalidatePath: () => {} }));
 
-const { readAgain, addPastRead, deletePastRead } = await import("@/lib/actions/reads");
+const { readAgain, addPastRead, deletePastRead, updatePastRead } = await import(
+  "@/lib/actions/reads"
+);
 const { bulkUpdateBooks } = await import("@/lib/actions/bulk");
-const { renameTag, deleteTag } = await import("@/lib/actions/tags");
+const { renameTag, deleteTag, removeTagRule } = await import("@/lib/actions/tags");
 const { lendBook, returnLoan, deleteLoan } = await import("@/lib/actions/loans");
 const { createShelf } = await import("@/lib/actions/shelves");
 
@@ -153,6 +155,66 @@ describe("read history bookkeeping", () => {
 
     expect(res).toHaveProperty("error");
     expect(await prisma.read.count({ where: { bookId: bk.id } })).toBe(0);
+  });
+});
+
+describe("past-read notes", () => {
+  async function onlyRead(bookId: string) {
+    return prisma.read.findFirstOrThrow({ where: { bookId } });
+  }
+
+  it("addPastRead stores the note trimmed, and an empty one as nothing", async () => {
+    const bk = await makeBook();
+    await addPastRead({}, form({ bookId: bk.id, note: "  Read it aloud to the kids  " }));
+    expect((await onlyRead(bk.id)).note).toBe("Read it aloud to the kids");
+
+    const other = await makeBook();
+    await addPastRead({}, form({ bookId: other.id, note: "   " }));
+    expect((await onlyRead(other.id)).note).toBeNull();
+  });
+
+  it("updatePastRead changes the note, and an empty field clears it", async () => {
+    const bk = await makeBook();
+    const read = await prisma.read.create({ data: { bookId: bk.id, note: "First go" } });
+
+    const res = await updatePastRead(read.id, {}, form({ note: "Second go", rating: "6" }));
+    expect(res).toEqual({ success: true });
+    expect(await onlyRead(bk.id)).toMatchObject({ note: "Second go", rating: 6 });
+
+    await updatePastRead(read.id, {}, form({ note: "" }));
+    expect((await onlyRead(bk.id)).note).toBeNull();
+  });
+
+  it("updatePastRead keeps the note when the field isn't sent", async () => {
+    const bk = await makeBook();
+    const read = await prisma.read.create({ data: { bookId: bk.id, note: "Keep me" } });
+
+    await updatePastRead(read.id, {}, form({ dateFinished: "2019-05-01" }));
+    expect((await onlyRead(bk.id)).note).toBe("Keep me");
+  });
+
+  it("updatePastRead refuses another account's read and changes nothing", async () => {
+    const bk = await makeBook({}, otherUserId);
+    const read = await prisma.read.create({ data: { bookId: bk.id, note: "Theirs", rating: 8 } });
+
+    const res = await updatePastRead(read.id, {}, form({ note: "Mine now", rating: "2" }));
+    expect(res).toEqual({ error: "Read not found" });
+    expect(await onlyRead(bk.id)).toMatchObject({ note: "Theirs", rating: 8 });
+  });
+
+  it("updatePastRead turns away a note over 2000 characters", async () => {
+    const bk = await makeBook();
+    const read = await prisma.read.create({ data: { bookId: bk.id, note: "Short" } });
+
+    const res = await updatePastRead(read.id, {}, form({ note: "x".repeat(2001) }));
+    expect(res).toEqual({ error: "Keep the note to 2000 characters or fewer." });
+    expect((await onlyRead(bk.id)).note).toBe("Short");
+  });
+
+  it("readAgain archives the pass without a note", async () => {
+    const bk = await makeBook({ status: ReadingStatus.READ, timesRead: 1 });
+    await readAgain(bk.id);
+    expect((await onlyRead(bk.id)).note).toBeNull();
   });
 });
 
@@ -301,6 +363,16 @@ describe("tag management", () => {
     }
   });
 
+  it("won't rename a tag to one with a comma", async () => {
+    // The library's tag filter keeps its tags comma-separated in the URL.
+    await makeBook({ tags: ["scifi"] });
+    expect(await renameTag("scifi", "science, fiction")).toEqual({
+      error: "Tags can't contain commas.",
+    });
+    const bk = await prisma.book.findFirstOrThrow({ where: { userId } });
+    expect(bk.tags).toEqual(["scifi"]);
+  });
+
   it("deletes a tag everywhere without touching other tags", async () => {
     await makeBook({ tags: ["scifi", "fantasy"] });
     const res = await deleteTag("scifi");
@@ -380,6 +452,17 @@ describe("lending", () => {
     expect(await prisma.loan.count({ where: { bookId: bk.id } })).toBe(0);
   });
 
+  it("only lends a copy you own", async () => {
+    // The card hides "Lend out" for these; the action refuses them too.
+    for (const ownership of ["BORROWED", "GIVEN_AWAY", "WISHLIST"]) {
+      const bk = await makeBook({ ownership });
+      const res = await lendBook(bk.id, {}, form({ borrower: "Kari" }));
+
+      expect(res.error).toBe("Only a copy you own can be lent out.");
+      expect(await prisma.loan.count({ where: { bookId: bk.id } })).toBe(0);
+    }
+  });
+
   it("refuses to lend another account's book", async () => {
     const theirs = await makeBook({}, otherUserId);
     const res = await lendBook(theirs.id, {}, form({ borrower: "Kari" }));
@@ -429,5 +512,100 @@ describe("lending", () => {
     await prisma.book.delete({ where: { id: bk.id } });
 
     expect(await prisma.loan.count({ where: { bookId: bk.id } })).toBe(0);
+  });
+});
+
+describe("tag rules for future imports", () => {
+  async function prefsOf(id: string) {
+    const user = await prisma.user.findUniqueOrThrow({ where: { id } });
+    return (user.preferences ?? {}) as Record<string, unknown>;
+  }
+
+  it("renameTag with remember stores the rule, without it stores nothing", async () => {
+    await makeBook({ tags: ["science fiction"] });
+
+    const plain = await renameTag("science fiction", "scifi");
+    expect(plain.ruleSaved).toBeUndefined();
+    expect((await prefsOf(userId)).tagRenames).toBeUndefined();
+
+    // Recorded even though no book carries the tag any more.
+    const res = await renameTag("Science Fiction", "sci-fi", { remember: true });
+    expect(res).toEqual({ count: 0, ruleSaved: true });
+    expect((await prefsOf(userId)).tagRenames).toEqual([{ from: "science fiction", to: "sci-fi" }]);
+  });
+
+  it("refuses a new name with a comma in it", async () => {
+    await makeBook({ tags: ["sf"] });
+    expect((await renameTag("sf", "sci, fi", { remember: true })).error).toBe(
+      "Tags can't contain commas.",
+    );
+    expect((await prisma.book.findFirstOrThrow({ where: { userId } })).tags).toEqual(["sf"]);
+  });
+
+  it("deleteTag with neverImport stores the skip", async () => {
+    await makeBook({ tags: ["fiction"] });
+    const res = await deleteTag("fiction", { neverImport: true });
+    expect(res).toEqual({ count: 1, ruleSaved: true });
+    expect((await prefsOf(userId)).tagSkips).toEqual(["fiction"]);
+  });
+
+  it("keeps the other preferences when it writes a rule", async () => {
+    await prisma.user.update({
+      where: { id: userId },
+      data: { preferences: { dateFormat: "iso", tagSkips: ["general"] } },
+    });
+    await renameTag("sf", "sci-fi", { remember: true });
+
+    const prefs = await prefsOf(userId);
+    expect(prefs.dateFormat).toBe("iso");
+    expect(prefs.tagSkips).toEqual(["general"]);
+    expect(prefs.tagRenames).toEqual([{ from: "sf", to: "sci-fi" }]);
+  });
+
+  it("removeTagRule takes one rule out and keeps the rest", async () => {
+    await renameTag("sf", "sci-fi", { remember: true });
+    await renameTag("ya", "young adult", { remember: true });
+    await deleteTag("general", { neverImport: true });
+
+    expect(await removeTagRule({ from: "sf" })).toEqual({});
+    expect(await removeTagRule({ skip: "general" })).toEqual({});
+    const prefs = await prefsOf(userId);
+    expect(prefs.tagRenames).toEqual([{ from: "ya", to: "young adult" }]);
+    expect(prefs.tagSkips).toEqual([]);
+    expect((await removeTagRule({})).error).toBe("Invalid input");
+  });
+
+  it("stores rules on the signed-in account only", async () => {
+    await renameTag("sf", "sci-fi", { remember: true });
+    await deleteTag("fiction", { neverImport: true });
+    expect(await prefsOf(otherUserId)).toEqual({});
+  });
+});
+
+describe("bulk Set status: Read and the finish-date preference", () => {
+  it("leaves the finish date empty when undated is chosen, and keeps a date already there", async () => {
+    await prisma.user.update({
+      where: { id: userId },
+      data: { preferences: { addedAsReadFinished: "undated" } },
+    });
+    const finished = new Date("2024-03-10T00:00:00.000Z");
+    const plain = await makeBook({ status: ReadingStatus.READING });
+    const dated = await makeBook({ status: ReadingStatus.DNF, dateFinished: finished });
+
+    const res = await bulkUpdateBooks({ bookIds: [plain.id, dated.id], status: ReadingStatus.READ });
+    expect(res.count).toBe(2);
+
+    const a = await prisma.book.findUniqueOrThrow({ where: { id: plain.id } });
+    expect(a.dateFinished).toBeNull();
+    expect(a.timesRead).toBe(1);
+    const b = await prisma.book.findUniqueOrThrow({ where: { id: dated.id } });
+    expect(b.dateFinished).toEqual(finished);
+  });
+
+  it("still finishes them today by default", async () => {
+    const bk = await makeBook({ status: ReadingStatus.WANT_TO_READ });
+    await bulkUpdateBooks({ bookIds: [bk.id], status: ReadingStatus.READ });
+    const after = await prisma.book.findUniqueOrThrow({ where: { id: bk.id } });
+    expect(after.dateFinished?.toDateString()).toBe(new Date().toDateString());
   });
 });

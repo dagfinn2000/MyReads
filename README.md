@@ -16,7 +16,21 @@ reading, and what you thought of them, on your own server.
   [National Library of Norway](https://api.nb.no/) as extra sources. You
   choose which of them to search and in what order. You can check and edit
   everything before saving, or type a book in by hand.
-- Scan the barcode on a book with your phone's camera.
+- Scan the barcode on a book with your phone's camera. Switch on Keep
+  scanning to work through a whole shelf: each book is looked up and added
+  as you scan it, with Undo, and books you already have are pointed out.
+- "Add and add another" brings you straight back for the next book (with
+  the camera open again if you scanned). In Preferences you choose what
+  adding a book does: open it, add another, or go to the library.
+- A book added as Read can say when you finished it, or that you don't
+  remember, so years of old reading don't land in this year's stats. A book
+  added as Currently Reading can say when you started and what page you're
+  on.
+- Subjects from the catalogues can be copied in as tags: all of them, only
+  the tags you already use, or none. Renaming or removing a tag in Manage
+  tags can apply to future imports too.
+- "Look up details" on a book's edit page fills in what's missing, like a
+  page count, from the catalogues.
 - Choose a cover from the search results, paste an image link, or upload a
   photo. Covers are stored on your server.
 - **Do I own this?** In a bookshop, scan a barcode on the Check page to see
@@ -46,15 +60,22 @@ reading, and what you thought of them, on your own server.
   hardbacks, and books without a cover get one drawn with their title. Save
   the searches and filters you use often as views, and open the library on
   one of them if you like.
-- Edit many books at once: set their status, add tags, or put them on a
-  shelf or take them off it.
+- Edit many books at once: set their status, format or ownership, add or
+  remove tags, put them on a shelf or take them off it, or delete them.
+  Pick the books on screen, or every book that matches your filters.
+- Rename, merge, reorder and hide shelves, and choose which status tabs the
+  library shows. Saved views can be renamed and reordered too.
 
 **Stats**
 
 - Books read per year, pages read, ratings, genres and formats, and a
-  calendar of the days you read.
+  calendar of the days you read. Look at all time, this year, the last 12
+  months or the last 30 days.
+- Decide what counts: whole books when you finish them or the pages you
+  log, whether books you stop reading count, and how audiobooks count.
 - A "year in review" page for every year, and yearly reading goals in books
-  or pages, with or without re-reads.
+  or pages, with or without re-reads. The goal shows whether you're on
+  track, and next year's can be set ahead of time.
 
 **Everything else**
 
@@ -158,7 +179,9 @@ automatically.
 - **Make backups.** On the Account page, **Download backup** saves
   everything as a zip. **Restore backup** on the same page loads one into any
   MyReads server. Books you already have are skipped, so restoring twice is
-  safe.
+  safe. The Backup card shows when you last downloaded one, and its
+  **Remind me to back up** setting (not in Preferences) can put a note on
+  the Library and Stats pages once a month.
 - **Know where your data is.** The library lives in two Docker volumes:
   `pgdata` (the database) and `covers` (cover images).
 - **Update.** Run `git pull`, then `docker compose up -d --build`. Database

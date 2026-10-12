@@ -88,6 +88,19 @@ export const bookSchema = z.object({
     .nullable()
     .optional()
     .catch(null),
+  /** An audiobook's running time in whole minutes (the form's hours and
+   *  minutes, added up). Blank is "not known". Same bounds as the backup
+   *  import, and a bad value is reported rather than quietly dropped. */
+  lengthMinutes: z.preprocess(
+    (v) => (typeof v === "string" && v.trim() === "" ? null : v),
+    z.coerce
+      .number()
+      .int("Length must be whole minutes")
+      .min(1, "Length must be at least 1 minute")
+      .max(60000, "Length must be at most 1,000 hours")
+      .nullable()
+      .optional(),
+  ),
   publishedDate: z
     .string()
     .trim()
@@ -198,6 +211,9 @@ export const readingSchema = z.object({
     .nullable()
     .optional()
     .catch(null),
+  /** The "Don't remember" box next to the finish date: a ticked checkbox
+   *  sends "on", an unticked one sends nothing. */
+  finishedUnknown: z.preprocess((v) => v === "on" || v === "true" || v === true, z.boolean()),
 }).superRefine(checkReadDates);
 
 /** A past read of a book (the read-history card). Everything is optional:
@@ -216,6 +232,14 @@ export const pastReadSchema = z.object({
     .optional(),
   /** 1–10 half-star units; empty string/0 means "unrated that time". */
   rating: z.coerce.number().int().min(0).max(10).nullable().optional().catch(null),
+  /** "Read it aloud to the kids"; empty clears it. Same limit as restore. */
+  note: z
+    .string()
+    .trim()
+    .max(2000, "Keep the note to 2000 characters or fewer.")
+    .transform((s) => s || null)
+    .nullable()
+    .optional(),
 }).superRefine(checkReadDates);
 
 /** A quote/highlight from the book detail page. Forms submit strings. */

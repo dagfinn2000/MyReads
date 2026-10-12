@@ -1,14 +1,18 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ReadingStatus } from "@prisma/client";
+import { BookFormat, BookOwnership, ReadingStatus } from "@prisma/client";
 import { Check, Dices, SquareCheckBig, X } from "lucide-react";
-import { bulkUpdateBooks } from "@/lib/actions/bulk";
+import { bulkDeleteBooks, bulkUpdateBooks } from "@/lib/actions/bulk";
 import { pickRandomBook } from "@/lib/actions/pick";
-import { STATUS_LABELS } from "@/lib/display";
+import { FORMAT_LABELS, OWNERSHIP_LABELS, STATUS_LABELS, formatNumber } from "@/lib/display";
+import { orderByIds } from "@/lib/library-order";
 import { cn } from "@/lib/utils";
 import type { LibraryDisplay } from "@/lib/library-view";
+import { pickButtonTitle, tabStatus } from "@/lib/pick";
+import { usePreferences } from "@/components/preferences-provider";
 import {
   BookCard,
   BookCoverTile,
@@ -17,6 +21,15 @@ import {
   type BookCardBook,
 } from "@/components/book-card";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -27,10 +40,16 @@ import {
 } from "@/components/ui/select";
 
 export interface LibraryGroup {
+  /** Unique among the sections ("tag:fantasy", "year:2026"). */
+  key: string;
   title: string;
   books: BookCardBook[];
   /** The section's real size, which may exceed what's rendered. */
   total: number;
+  /** Shown instead of the count: "5 books · 3 read · next #4". */
+  detail?: string;
+  /** A warning after it: "#3 missing". */
+  note?: string;
 }
 
 /** How many more cards each "Show more" asks the server for. */
@@ -55,11 +74,22 @@ const GRID_GAPS: Record<LibraryDisplay["cardSize"], string> = {
   large: "gap-4",
 };
 
+/** Comma-separated tags as typed, cleaned the way tags are stored. */
+function splitTags(text: string): string[] {
+  return text
+    .split(",")
+    .map((t) => t.trim().toLowerCase())
+    .filter(Boolean);
+}
+
 /**
  * The library grid with bulk-edit support. Normally the cards are plain
  * links; toggling select mode overlays each card with a checkbox hitbox and
- * shows a floating action bar (set status / add to or remove from a shelf /
- * add tags) that applies to every selected book in one server action.
+ * shows a floating action bar (status, shelf, format, ownership, tags to
+ * add or remove, or delete) that applies to every selected book in one
+ * server action. Once every card on screen is picked, "Select all N books
+ * that match" widens the selection to every book the filters match, which
+ * the server finds again from the same URL parameters.
  *
  * Renders only the slice the server sent. "Show more" and "Pick for me" both
  * go back to the server rather than working from a full in-memory library.
@@ -67,15 +97,28 @@ const GRID_GAPS: Record<LibraryDisplay["cardSize"], string> = {
 export function LibraryView({
   books,
   groups,
+  limit,
+  maxLimit,
+  hasMore = false,
   totalCount,
   searchParams,
   shelves,
   display,
+  empty,
 }: {
-  /** Only the books being rendered — the server sorts everything and slices. */
+  /** Only the books being rendered — the server sorts everything and slices.
+   *  Grouped: every book in the shown sections, once each. */
   books: BookCardBook[];
-  /** Pre-grouped sections (author/series view) or null for the flat grid. */
+  /** Pre-grouped sections (a group-by view) or null for the flat grid. */
   groups: LibraryGroup[] | null;
+  /** How many entries the server rendered (the URL's limit). A grouped view
+   *  can show a book in more than one section, so it can differ from
+   *  books.length. */
+  limit?: number;
+  /** The most the server will render, however high the URL's limit. */
+  maxLimit: number;
+  /** Sections were cut short, even if every book already shows in one. */
+  hasMore?: boolean;
   /** How many books match the current filters, rendered or not. */
   totalCount: number;
   /** Current URL params, so "Show more" can raise the limit in place. */
@@ -83,15 +126,54 @@ export function LibraryView({
   shelves: { id: string; name: string }[];
   /** Cover size, grid or list, and which details cards show. */
   display: LibraryDisplay;
+  /** What to show when no book matches. */
+  empty: React.ReactNode;
 }) {
   const router = useRouter();
+  const prefs = usePreferences();
   const [selectMode, setSelectMode] = useState(false);
   const [selected, setSelected] = useState<ReadonlySet<string>>(new Set());
   const [status, setStatus] = useState("keep");
   const [shelfId, setShelfId] = useState("keep");
+  const [format, setFormat] = useState("keep");
+  const [ownership, setOwnership] = useState("keep");
   const [tags, setTags] = useState("");
+  const [removeTags, setRemoveTags] = useState("");
+  // The filters (as matchKey below) for which "every book that matches" was
+  // chosen. Any other filters on screen and it no longer applies.
+  const [matchingFor, setMatchingFor] = useState<string | null>(null);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleting, startDelete] = useTransition();
+  const cancelDeleteRef = useRef<HTMLButtonElement>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const messageRef = useRef<HTMLSpanElement>(null);
   const [pending, startTransition] = useTransition();
+  // Why the last pick opened nothing, for the view it was made in, so it
+  // clears itself when the tab or filters change.
+  const [pickNote, setPickNote] = useState<{
+    key: string;
+    reason: "none" | "settings" | "error";
+  } | null>(null);
+  const viewKey = new URLSearchParams(searchParams).toString();
+
+  // --- Bulk selection ---
+  // Only books on screen count as picked. The selection outlives a change
+  // of filters (this component stays mounted), and acting on books no
+  // longer shown, Delete above all, is never what anyone means.
+  const shownIds = new Set((groups ? groups.flatMap((g) => g.books) : books).map((b) => b.id));
+  const picked = [...selected].filter((id) => shownIds.has(id));
+  const matchKey = (() => {
+    const params = new URLSearchParams(searchParams);
+    params.delete("limit");
+    return params.toString();
+  })();
+  const allMatching = matchingFor === matchKey;
+  const selCount = allMatching ? totalCount : picked.length;
+  const canSelectMatching =
+    !allMatching && picked.length === shownIds.size && totalCount > shownIds.size;
+  const booksLabel = (n: number) => `${formatNumber(n, prefs)} book${n === 1 ? "" : "s"}`;
+  const target = () =>
+    allMatching ? { matching: searchParams } : { bookIds: picked };
 
   function toggle(id: string) {
     setSelected((prev) => {
@@ -100,68 +182,118 @@ export function LibraryView({
       else next.add(id);
       return next;
     });
+    setMatchingFor(null);
     setMessage(null);
+  }
+
+  function clearSelection() {
+    setSelected(new Set());
+    setMatchingFor(null);
   }
 
   function exitSelectMode() {
     setSelectMode(false);
-    setSelected(new Set());
+    clearSelection();
     setStatus("keep");
     setShelfId("keep");
+    setFormat("keep");
+    setOwnership("keep");
     setTags("");
+    setRemoveTags("");
     setMessage(null);
   }
 
-  /** Random pick from Want to Read within the current filters (any filtered
-   *  book when the current view has no unread ones).
+  /** Random pick from the current tab and filters, narrowed by the Pick for
+   *  me switches; the All tab prefers Want to Read (actions/pick.ts).
    *
    *  Runs on the server: the page no longer ships the whole library, so
    *  picking from `books` would silently narrow the shuffle to the loaded
    *  slice instead of everything matching the filters. */
   function pickForMe() {
+    const key = viewKey;
+    setPickNote(null);
     startTransition(async () => {
-      const pick = await pickRandomBook(searchParams);
-      if (pick) router.push(`/books/${pick.id}`);
+      try {
+        const res = await pickRandomBook(searchParams);
+        if ("id" in res) router.push(`/books/${res.id}`);
+        else setPickNote({ key, reason: res.reason });
+      } catch {
+        setPickNote({ key, reason: "error" });
+      }
     });
   }
+  const shownPickNote = pickNote?.key === viewKey ? pickNote.reason : null;
 
   function apply() {
-    const addTags = tags
-      .split(",")
-      .map((t) => t.trim().toLowerCase())
-      .filter(Boolean);
+    const addTags = splitTags(tags);
+    const dropTags = splitTags(removeTags);
     // The shelf select's values are "add:<id>" and "remove:<id>".
     const [shelfAction, shelfTarget] = shelfId.split(":");
-    if (status === "keep" && shelfId === "keep" && addTags.length === 0) {
-      setMessage("Pick a status, shelf, or tags first.");
+    if (
+      status === "keep" &&
+      shelfId === "keep" &&
+      format === "keep" &&
+      ownership === "keep" &&
+      addTags.length === 0 &&
+      dropTags.length === 0
+    ) {
+      setMessage("Pick a change first.");
       return;
     }
     startTransition(async () => {
       const res = await bulkUpdateBooks({
-        bookIds: [...selected],
+        ...target(),
         status: status === "keep" ? undefined : (status as ReadingStatus),
+        format: format === "keep" ? undefined : (format as BookFormat),
+        ownership: ownership === "keep" ? undefined : (ownership as BookOwnership),
         addShelfId: shelfAction === "add" ? shelfTarget : undefined,
         removeShelfId: shelfAction === "remove" ? shelfTarget : undefined,
         addTags: addTags.length ? addTags : undefined,
+        removeTags: dropTags.length ? dropTags : undefined,
       });
       if (res.error) {
         setMessage(res.error);
       } else {
-        setMessage(`Updated ${res.count} book${res.count === 1 ? "" : "s"}.`);
-        setSelected(new Set());
+        setMessage(`Updated ${booksLabel(res.count ?? 0)}.`);
+        clearSelection();
+        // Apply is disabled with nothing selected; focus goes to how it went
+        // rather than falling to the page.
+        messageRef.current?.focus();
+        router.refresh();
+      }
+    });
+  }
+
+  function deleteSelected() {
+    startDelete(async () => {
+      const res = await bulkDeleteBooks({
+        ...target(),
+        // The count the dialog named: if the matches have changed since,
+        // the server refuses rather than delete a different set.
+        expectedCount: allMatching ? totalCount : undefined,
+      });
+      setDeleteOpen(false);
+      if (res.error) {
+        setMessage(res.error);
+      } else {
+        setMessage(`Deleted ${booksLabel(res.count ?? 0)}.`);
+        clearSelection();
         router.refresh();
       }
     });
   }
 
   const hiddenCount = totalCount - books.length;
+  const shownLimit = limit ?? books.length;
+  /** Past the server's cap a bigger limit would bring nothing more. */
+  const atCap = shownLimit >= maxLimit;
 
   /** Raise ?limit= and let the server send the next slice. View state lives
    *  in the URL throughout this app, so "Show more" is shareable and survives
    *  a reload like every other part of the view. */
   function showMore() {
     const next = new URLSearchParams(searchParams);
-    next.set("limit", String(books.length + PAGE_STEP));
+    next.set("limit", String(Math.min(shownLimit + PAGE_STEP, maxLimit)));
     router.push(`/books?${next}`, { scroll: false });
   }
 
@@ -192,7 +324,7 @@ export function LibraryView({
             style={{ "--i": i < STAGGERED_CARDS ? i : 0 } as React.CSSProperties}
           >
             {list ? (
-              <BookRow book={book} details={display} />
+              <BookRow book={book} details={display} formatPrefs={prefs} />
             ) : style === "shelf" ? (
               <BookOnShelf book={book} />
             ) : style === "covers" ? (
@@ -229,8 +361,15 @@ export function LibraryView({
     </div>
   );
 
+  // While selecting, an empty view keeps the bar, so a change that emptied
+  // it (a delete, or a status moving every book off this tab) shows how it
+  // went; otherwise there's nothing here to count or pick.
+  if (totalCount === 0 && !selectMode) return empty;
+
   return (
-    <div className="grid gap-4">
+    // While selecting, room at the bottom so the action bar never covers
+    // the last books.
+    <div className={cn("grid gap-4", selectMode && "pb-80 sm:pb-48")}>
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground tabular-nums">
           {totalCount} book{totalCount === 1 ? "" : "s"}
@@ -243,7 +382,7 @@ export function LibraryView({
               size="sm"
               onClick={pickForMe}
               disabled={books.length === 0}
-              title="Open a random book from Want to Read (respects your filters)"
+              title={pickButtonTitle(tabStatus(searchParams.shelf), prefs)}
             >
               <Dices data-slot="icon" />
               Pick for me
@@ -258,7 +397,10 @@ export function LibraryView({
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setSelected(new Set(books.map((b) => b.id)))}
+              onClick={() => {
+                setSelected(new Set(shownIds));
+                setMatchingFor(null);
+              }}
               title="Selects the books currently shown"
             >
               Select all
@@ -271,18 +413,43 @@ export function LibraryView({
         )}
       </div>
 
-      {groups ? (
+      {/* Why Pick for me opened nothing. Always mounted so screen readers
+          hear it; visually hidden (and out of the grid) while empty. */}
+      <p
+        role="status"
+        className={cn("text-sm text-muted-foreground", !shownPickNote && "sr-only")}
+      >
+        {shownPickNote === "none" && "No books match these filters."}
+        {shownPickNote === "settings" && (
+          <>
+            Nothing here fits your Pick for me settings.{" "}
+            <Link href="/account#pick-for-me" className="underline underline-offset-2">
+              Change them
+            </Link>
+          </>
+        )}
+        {shownPickNote === "error" && "Couldn't pick a book. Try again."}
+      </p>
+
+      {totalCount === 0 ? (
+        empty
+      ) : groups ? (
         <div className="grid gap-6">
           {groups.map((g) => (
-            <section key={g.title} className="grid gap-3">
-              <h2 className="border-b pb-1 font-heading text-lg font-medium">
-                {g.title}
-                <span className="ml-2 text-sm font-normal text-muted-foreground tabular-nums">
+            <section key={g.key} className="grid gap-3">
+              <h2 className="flex flex-wrap items-baseline gap-x-2 border-b pb-1 font-heading text-lg font-medium">
+                <span className="min-w-0 break-words">{g.title}</span>
+                <span className="text-sm font-normal text-muted-foreground tabular-nums">
                   {/* The group's real size, even when only part of it is
                       rendered — the heading describes the shelf, not the
                       slice. */}
-                  {g.total}
+                  {g.detail ?? g.total}
                 </span>
+                {g.note && (
+                  <span className="text-sm font-normal text-amber-700 dark:text-amber-300">
+                    {g.note}
+                  </span>
+                )}
               </h2>
               {renderGrid(g.books)}
             </section>
@@ -292,73 +459,194 @@ export function LibraryView({
         renderGrid(books)
       )}
 
-      {hiddenCount > 0 && (
-        <div className="flex justify-center">
-          <Button variant="outline" onClick={showMore}>
-            Show more ({hiddenCount} not shown)
-          </Button>
-        </div>
-      )}
+      {(hiddenCount > 0 || hasMore) &&
+        (atCap ? (
+          <p className="text-center text-sm text-muted-foreground">
+            That&apos;s as many as the library shows at once. Search or filter to
+            find the rest.
+          </p>
+        ) : (
+          <div className="flex justify-center">
+            <Button variant="outline" onClick={showMore}>
+              {/* Counts books, never repeats: grouped by tag, a book can be
+                  cut from one section while it shows in another. */}
+              {hiddenCount > 0 ? `Show more (${hiddenCount} not shown)` : "Show more"}
+            </Button>
+          </div>
+        ))}
 
       {selectMode && (
-        <div className="fixed bottom-4 left-1/2 z-50 flex w-[min(64rem,calc(100vw-2rem))] -translate-x-1/2 flex-wrap items-center gap-2 rounded-xl border bg-card p-3 shadow-lg">
-          {/* Mobile rows: count / status+shelf / tags / apply. From sm up
-              everything sits on one wrapping row with fixed widths. */}
-          <span className="w-full text-sm font-medium tabular-nums sm:w-auto">
-            {selected.size} selected
-          </span>
-          <Select value={status} onValueChange={setStatus}>
-            <SelectTrigger className="min-w-0 flex-1 basis-[calc(50%-0.5rem)] sm:w-44 sm:flex-initial sm:basis-auto">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="keep">Status: don&apos;t change</SelectItem>
-              {Object.values(ReadingStatus).map((s) => (
-                <SelectItem key={s} value={s}>
-                  {STATUS_LABELS[s]}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {shelves.length > 0 && (
-            <Select value={shelfId} onValueChange={setShelfId}>
-              <SelectTrigger className="min-w-0 flex-1 basis-[calc(50%-0.5rem)] sm:w-44 sm:flex-initial sm:basis-auto">
+        <div className="fixed bottom-4 left-1/2 z-50 grid max-h-[min(70dvh,34rem)] w-[min(64rem,calc(100vw-2rem))] -translate-x-1/2 gap-2 overflow-y-auto rounded-xl border bg-card p-3 shadow-lg">
+          {/* Rows: the count (and "all that match"), the changes in two
+              columns on phones and four from sm up, then Apply, Delete and
+              how it went. The bar scrolls if a short screen can't fit it. */}
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+            <span className="font-medium tabular-nums">
+              {formatNumber(selCount, prefs)} selected
+            </span>
+            {allMatching ? (
+              <>
+                <span className="text-muted-foreground">
+                  All {booksLabel(totalCount)} that match are selected.
+                </span>
+                <Button variant="link" size="sm" className="h-auto p-0" onClick={clearSelection}>
+                  Clear selection
+                </Button>
+              </>
+            ) : canSelectMatching ? (
+              <Button
+                variant="link"
+                size="sm"
+                className="h-auto p-0"
+                onClick={() => setMatchingFor(matchKey)}
+              >
+                Select all {booksLabel(totalCount)} that match
+              </Button>
+            ) : null}
+          </div>
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+            <Select value={status} onValueChange={setStatus}>
+              <SelectTrigger aria-label="Status" className="w-full min-w-0">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="keep">Shelf: don&apos;t change</SelectItem>
-                {shelves.map((s) => (
-                  <SelectItem key={s.id} value={`add:${s.id}`}>
-                    Add to “{s.name}”
-                  </SelectItem>
-                ))}
-                {shelves.map((s) => (
-                  <SelectItem key={`remove-${s.id}`} value={`remove:${s.id}`}>
-                    Remove from “{s.name}”
+                <SelectItem value="keep">Status: don&apos;t change</SelectItem>
+                {Object.values(ReadingStatus).map((s) => (
+                  <SelectItem key={s} value={s}>
+                    {STATUS_LABELS[s]}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-          )}
-          <Input
-            value={tags}
-            onChange={(e) => setTags(e.target.value)}
-            placeholder="Add tags, comma separated"
-            className="min-w-0 flex-1 basis-full sm:w-52 sm:flex-initial sm:basis-auto"
-          />
-          <Button
-            size="sm"
-            onClick={apply}
-            disabled={pending || selected.size === 0}
-            className="flex-1 sm:flex-initial"
-          >
-            {pending ? "Applying…" : "Apply"}
-          </Button>
-          {message && (
-            <span className="text-sm text-muted-foreground">{message}</span>
-          )}
+            {shelves.length > 0 && (
+              <Select value={shelfId} onValueChange={setShelfId}>
+                <SelectTrigger aria-label="Shelf" className="w-full min-w-0">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="keep">Shelf: don&apos;t change</SelectItem>
+                  {/* Hidden shelves too: hiding is only about the chip row. */}
+                  {orderByIds(shelves, prefs.shelfOrder).map((s) => (
+                    <SelectItem key={s.id} value={`add:${s.id}`}>
+                      Add to “{s.name}”
+                    </SelectItem>
+                  ))}
+                  {orderByIds(shelves, prefs.shelfOrder).map((s) => (
+                    <SelectItem key={`remove-${s.id}`} value={`remove:${s.id}`}>
+                      Remove from “{s.name}”
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+            <Select value={format} onValueChange={setFormat}>
+              <SelectTrigger aria-label="Format" className="w-full min-w-0">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="keep">Format: don&apos;t change</SelectItem>
+                {Object.values(BookFormat).map((f) => (
+                  <SelectItem key={f} value={f}>
+                    {FORMAT_LABELS[f]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={ownership} onValueChange={setOwnership}>
+              <SelectTrigger aria-label="Ownership" className="w-full min-w-0">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="keep">Ownership: don&apos;t change</SelectItem>
+                {Object.values(BookOwnership).map((o) => (
+                  <SelectItem key={o} value={o}>
+                    {OWNERSHIP_LABELS[o]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Input
+              value={tags}
+              onChange={(e) => setTags(e.target.value)}
+              placeholder="Add tags, comma separated"
+              aria-label="Add tags, comma separated"
+              className="col-span-2"
+            />
+            <Input
+              value={removeTags}
+              onChange={(e) => setRemoveTags(e.target.value)}
+              placeholder="Remove tags, comma separated"
+              aria-label="Remove tags, comma separated"
+              className="col-span-2"
+            />
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              size="sm"
+              onClick={apply}
+              disabled={pending || deleting || selCount === 0}
+              className="flex-1 sm:flex-initial"
+            >
+              {pending ? "Applying…" : "Apply"}
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              className="text-destructive hover:text-destructive"
+              onClick={() => setDeleteOpen(true)}
+              disabled={pending || deleting || selCount === 0}
+            >
+              Delete…
+            </Button>
+            <span
+              ref={messageRef}
+              tabIndex={-1}
+              role="status"
+              className="basis-full text-sm text-muted-foreground outline-none sm:basis-auto"
+            >
+              {message}
+            </span>
+          </div>
         </div>
       )}
+
+      <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <DialogContent
+          // Start on Cancel, not the backup link: Enter shouldn't delete.
+          onOpenAutoFocus={(e) => {
+            e.preventDefault();
+            cancelDeleteRef.current?.focus();
+          }}
+          // After a delete nothing is selected and the Delete button that
+          // opened this is disabled, so focus goes to how it went instead
+          // of falling to the page.
+          onCloseAutoFocus={(e) => {
+            if (selCount > 0) return;
+            e.preventDefault();
+            messageRef.current?.focus();
+          }}
+        >
+          <DialogHeader>
+            <DialogTitle>Delete {booksLabel(selCount)}?</DialogTitle>
+            <DialogDescription>
+              They leave your library with their reading history, quotes and
+              loans. This can&apos;t be undone, so{" "}
+              <a href="/api/export">download a backup</a> first if you might
+              want them back.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button ref={cancelDeleteRef} variant="outline">
+                Cancel
+              </Button>
+            </DialogClose>
+            <Button variant="destructive" disabled={deleting} onClick={deleteSelected}>
+              {deleting ? "Deleting…" : `Delete ${booksLabel(selCount)}`}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

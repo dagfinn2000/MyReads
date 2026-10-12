@@ -1,10 +1,15 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { BookOpen, Loader2 } from "lucide-react";
-import { SOURCE_LABELS, type BookMetadata } from "@/lib/metadata/types";
+import { catalogueBookValues } from "@/lib/catalogue-values";
+import { looksLikeIsbn } from "@/lib/isbn";
+import { SOURCE_LABELS, type BookDetails, type BookMetadata } from "@/lib/metadata/types";
+import type { TagImportSettings } from "@/lib/tag-rules";
 import type { BookFormValues } from "@/components/book-form";
 import { BarcodeScanner } from "@/components/barcode-scanner";
+import { NEWEST_FIRST_HREF, type ShelfScan } from "@/components/shelf-scan";
 import { Input } from "@/components/ui/input";
 
 /** Shortest query worth sending: one or two letters match most of a
@@ -16,25 +21,45 @@ const MIN_QUERY_LENGTH = 3;
  *  each distinct prefix is a fresh cache miss against free services. */
 const DEBOUNCE_MS = 700;
 
+/** Everything copied, no tag rules: for a caller with no settings. */
+const IMPORT_ALL_TAGS: TagImportSettings = {
+  mode: "all",
+  rules: { renames: [], skips: [] },
+  knownTags: [],
+};
+
 /**
  * Search-as-you-type against /api/metadata/search (Open Library, with
  * optional Google Books fallback server-side). Picking a result fetches the
  * lazy details (description, subjects) and hands a prefilled form-value
  * object to the parent, which switches to the review form.
+ *
+ * With `shelfScan`, the barcode scanner also offers "Keep scanning",
+ * which adds each scanned book straight away (components/shelf-scan.tsx).
+ * The session is the parent's, so codes still in line when this unmounts
+ * (Manual entry, a picked result) are looked up and added all the same.
  */
 export function ImportSearch({
   onPick,
   initialQuery,
-  importTags = true,
+  tagImport = IMPORT_ALL_TAGS,
+  openScannerOnMount = false,
+  shelfScan,
 }: {
-  onPick: (values: BookFormValues) => void;
+  /** `scanned`: the pick came from the barcode scanner, so adding another
+   *  can open the camera again. */
+  onPick: (values: BookFormValues, how: { scanned: boolean }) => void;
   /** Seeds the search box (e.g. an ISBN from the check page) and auto-picks
    *  a single match, exactly like a barcode scan. */
   initialQuery?: string;
-  /** Copy the catalogue's subjects into tags (Preferences). Off leaves the
-   *  tags field empty for the reader's own. */
-  importTags?: boolean;
+  /** How catalogue subjects become tags (Preferences, New books). */
+  tagImport?: TagImportSettings;
+  openScannerOnMount?: boolean;
+  /** The page's shelf-scan session, and "Add by hand" for a scanned code
+   *  no catalogue knows. */
+  shelfScan?: { scan: ShelfScan; onAddByHand: (isbn: string) => void };
 }) {
+  const router = useRouter();
   const [query, setQuery] = useState(initialQuery ?? "");
   // Results are stored with the query they answer. Everything the UI needs —
   // which results to show, and whether a search is outstanding — is then
@@ -53,6 +78,16 @@ export function ImportSearch({
   // Set when the query came from the barcode scanner (or an initialQuery):
   // an ISBN search that returns exactly one result skips the picking step.
   const autoPickRef = useRef(Boolean(initialQuery));
+  // Whether that query came from the camera itself.
+  const scannedRef = useRef(false);
+  // The parent's callback and settings, read when a pick lands. Kept out of
+  // `pick`'s dependencies: they change identity whenever the page re-renders
+  // (after a book is added, say), and `pick` changing would rerun the search
+  // effect, aborting the search in flight and spending another lookup.
+  const latest = useRef({ onPick, tagImport });
+  useEffect(() => {
+    latest.current = { onPick, tagImport };
+  });
 
   const trimmed = query.trim();
   const longEnough = trimmed.length >= MIN_QUERY_LENGTH;
@@ -66,48 +101,44 @@ export function ImportSearch({
   /** Barcode scanner handoff — the ISBN just becomes the search query. */
   const handleScan = useCallback((isbn: string) => {
     autoPickRef.current = true;
+    scannedRef.current = true;
     setQuery(isbn);
   }, []);
 
   /** Fetch description/subjects for the chosen result, then prefill.
-   *  Stable across renders (onPick is a setState from the parent), so the
-   *  search effect can depend on it honestly instead of omitting it. */
-  const pick = useCallback(async (result: BookMetadata, key: string) => {
+   *  Stable across renders (it reads the parent's callback through a ref),
+   *  so the search effect can depend on it honestly instead of omitting it.
+   *  `searched` is the query: an ISBN there is the book in hand, and beats
+   *  whatever edition's ISBN the row carries (an Open Library row's can be
+   *  any edition of the work). */
+  const pick = useCallback(async (result: BookMetadata, key: string, searched: string) => {
     setPickingId(key);
-    let details = {
-      description: result.description,
-      pageCount: null as number | null,
-      tags: result.tags,
-      coverUrl: null as string | null,
-    };
+    const scannedIsbn = looksLikeIsbn(searched) ? searched : undefined;
+    let details: Partial<BookDetails> | null = null;
     try {
       const params = new URLSearchParams();
       if (result.openLibraryId) params.set("olid", result.openLibraryId);
-      if (result.isbn) params.set("isbn", result.isbn);
+      const isbn = scannedIsbn ?? result.isbn;
+      if (isbn) params.set("isbn", isbn);
       params.set("title", result.title);
       if (result.authors[0]) params.set("author", result.authors[0]);
       const res = await fetch(`/api/metadata/details?${params}`);
       if (res.ok) {
         const data = await res.json();
-        details = { ...details, ...data.details };
+        details = data.details;
       }
     } catch {
       // details are a bonus; the search result alone is enough to prefill
     }
 
-    onPick({
-      title: result.title,
-      authors: result.authors.join(", "),
-      isbn: result.isbn ?? "",
-      description: details.description ?? result.description ?? "",
-      coverUrl: result.coverUrl ?? details.coverUrl ?? "",
-      pageCount: (result.pageCount ?? details.pageCount)?.toString() ?? "",
-      publishedDate: result.publishedDate ?? "",
-      tags: importTags ? [...new Set([...result.tags, ...details.tags])].join(", ") : "",
-      openLibraryId: result.openLibraryId ?? "",
-    });
+    const scanned = scannedRef.current;
+    scannedRef.current = false;
+    latest.current.onPick(
+      catalogueBookValues(result, details, latest.current.tagImport, scannedIsbn),
+      { scanned },
+    );
     setPickingId(null);
-  }, [onPick, importTags]);
+  }, []);
 
   // Debounced search: waits for a pause in typing, then cancels any in-flight
   // request so stale responses can't overwrite newer ones. An ISBN scan is
@@ -133,7 +164,9 @@ export function ImportSearch({
         if (autoPickRef.current) {
           autoPickRef.current = false;
           if (list.length === 1) {
-            void pick(list[0], list[0].openLibraryId ?? `${list[0].title}-0`);
+            void pick(list[0], list[0].openLibraryId ?? `${list[0].title}-0`, trimmed);
+          } else {
+            scannedRef.current = false;
           }
         }
       } catch {
@@ -163,7 +196,16 @@ export function ImportSearch({
           onChange={(e) => setQuery(e.target.value)}
           autoFocus
         />
-        <BarcodeScanner onDetected={handleScan} />
+        <BarcodeScanner
+          onDetected={handleScan}
+          defaultOpen={openScannerOnMount}
+          shelfScan={
+            shelfScan && {
+              ...shelfScan,
+              onDone: () => router.push(NEWEST_FIRST_HREF),
+            }
+          }
+        />
       </div>
 
       {searching && (
@@ -190,7 +232,7 @@ export function ImportSearch({
             <li key={key}>
               <button
                 type="button"
-                onClick={() => pick(r, key)}
+                onClick={() => pick(r, key, trimmed)}
                 disabled={pickingId !== null}
                 className="flex w-full items-center gap-3 rounded-lg border bg-card p-3 text-left transition-colors hover:border-ring/60 disabled:opacity-60"
               >

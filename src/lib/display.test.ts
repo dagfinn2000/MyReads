@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { formatDate, formatNumber, toDateInputValue } from "@/lib/display";
+import {
+  formatDate,
+  formatNumber,
+  formatShortDay,
+  formatWeekdayDay,
+  toDateInputValue,
+} from "@/lib/display";
 
 describe("formatDate", () => {
   const d = new Date("2024-05-02T00:00:00.000Z");
@@ -45,5 +51,31 @@ describe("formatNumber", () => {
     expect(formatNumber(12345, { numberFormat: "period" })).toBe("12.345");
     // Norwegian grouping uses a no-break space.
     expect(formatNumber(12345, { numberFormat: "space" }).replace(/\s/g, " ")).toBe("12 345");
+  });
+});
+
+describe("formatWeekdayDay", () => {
+  const d = new Date("2026-10-12T10:00:00.000Z");
+
+  it("names the weekday and month", () => {
+    expect(formatWeekdayDay(d, { timeZone: "UTC" })).toBe("Monday 12 October");
+  });
+
+  it("puts the month first for month-first date styles", () => {
+    expect(formatWeekdayDay(d, { timeZone: "UTC", dateFormat: "mmm-d-y" })).toBe("Monday, October 12");
+    expect(formatWeekdayDay(d, { timeZone: "UTC", dateFormat: "mm/dd/y" })).toBe("Monday, October 12");
+  });
+
+  it("follows the reader's zone across midnight", () => {
+    const late = new Date("2026-10-12T23:30:00.000Z");
+    expect(formatWeekdayDay(late, { timeZone: "Asia/Tokyo" })).toBe("Tuesday 13 October");
+    expect(formatWeekdayDay(late, { timeZone: "America/New_York" })).toBe("Monday 12 October");
+  });
+});
+
+describe("formatShortDay", () => {
+  it("abbreviates for a menu", () => {
+    expect(formatShortDay("2026-10-10")).toBe("Sat 10 Oct");
+    expect(formatShortDay("2026-10-10", "mmm-d-y")).toBe("Sat, Oct 10");
   });
 });

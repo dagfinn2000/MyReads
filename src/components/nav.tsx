@@ -1,6 +1,7 @@
 import Link from "next/link";
 import {
   BookOpen,
+  BookOpenText,
   ChartColumn,
   HardDriveDownload,
   LibraryBig,
@@ -16,24 +17,24 @@ import { Button } from "@/components/ui/button";
 import { ThemePicker } from "@/components/theme-picker";
 
 /** Top navigation for authenticated pages. Server component — reads the
- *  session directly and signs out via a server action. The Check and
- *  Quotes links can be hidden in Preferences; the logo goes to the start
- *  page chosen there. */
+ *  session directly and signs out via a server action. The Now reading,
+ *  Check and Quotes links can be hidden in Preferences; the logo goes to
+ *  the start page chosen there. */
 export async function Nav() {
   const [session, prefs] = await Promise.all([auth(), getPreferences()]);
   const hidden = new Set(prefs.hiddenNav);
 
   return (
     <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur">
-      {/* Below lg the nav buttons collapse to icons. With five labelled
-          links plus the right-hand group the bar needs about 900px, so
+      {/* Below lg the nav buttons collapse to icons. With six labelled
+          links plus the right-hand group the bar needs about 1000px, so
           labels from sm (640px) overflowed tablets and narrow windows.
-          On phones the icons sit a little closer together and the
-          wordmark waits for room, so the bar fits from 360px up. */}
-      <div className="mx-auto flex h-14 max-w-6xl items-center gap-0.5 px-3 max-sm:[&_[data-slot=button]]:px-2 sm:gap-1 sm:px-4">
+          On phones the icons sit closer together and the wordmark waits
+          for room, so the bar fits from 360px up with every link shown. */}
+      <div className="mx-auto flex h-14 max-w-6xl items-center gap-0.5 px-3 max-sm:[&_[data-slot=button]]:px-1.5 sm:gap-1 sm:px-4">
         <Link
           href="/"
-          className="mr-2 flex items-center gap-2 text-lg font-semibold tracking-tight sm:mr-4"
+          className="mr-1 flex items-center gap-2 text-lg font-semibold tracking-tight sm:mr-4"
         >
           <BookOpen className="size-5" />
           <span className="hidden min-[480px]:inline">MyReads</span>
@@ -44,6 +45,14 @@ export async function Nav() {
             <span className="hidden lg:inline">Library</span>
           </Link>
         </Button>
+        {!hidden.has("reading") && (
+          <Button asChild variant="ghost" size="sm" title="Now reading">
+            <Link href="/reading">
+              <BookOpenText data-slot="icon" />
+              <span className="hidden lg:inline">Now reading</span>
+            </Link>
+          </Button>
+        )}
         <Button asChild variant="ghost" size="sm" title="Add book">
           <Link href="/books/new">
             <Plus data-slot="icon" />
@@ -72,7 +81,7 @@ export async function Nav() {
             <span className="hidden lg:inline">Stats</span>
           </Link>
         </Button>
-        <div className="ml-auto flex items-center gap-1 sm:gap-3">
+        <div className="ml-auto flex items-center gap-0.5 sm:gap-3">
           <Button
             asChild
             variant="ghost"

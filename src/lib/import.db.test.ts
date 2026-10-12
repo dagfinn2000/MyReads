@@ -64,7 +64,8 @@ describe("importLibrary", () => {
       payload([
         book({
           quotes: [{ text: "Life before death.", page: 42, note: "oath" }],
-          reads: [{ dateFinished: "2019-05-01T00:00:00.000Z", rating: 8 }],
+          reads: [{ dateFinished: "2019-05-01T00:00:00.000Z", rating: 8, note: "Read aloud" }],
+          lengthMinutes: 1475,
           progress: [{ page: 100, date: "2026-01-02T10:00:00.000Z" }],
           timesRead: 2,
         }),
@@ -87,9 +88,17 @@ describe("importLibrary", () => {
     expect(saved.title).toBe("The Final Empire");
     expect(saved.quotes[0].text).toBe("Life before death.");
     expect(saved.reads[0].rating).toBe(8);
+    expect(saved.reads[0].note).toBe("Read aloud");
+    expect(saved.lengthMinutes).toBe(1475);
     expect(saved.progress[0].page).toBe(100);
     // Derived, not trusted from the file: one archived pass + the current one.
     expect(saved.timesRead).toBe(2);
+  });
+
+  it("splits a tag with a comma in it, which the tag filter couldn't hold", async () => {
+    await importLibrary(userId, payload([book({ tags: ["Science, Fiction", "fantasy", "fantasy,"] })]));
+    const saved = await prisma.book.findFirstOrThrow({ where: { userId } });
+    expect([...saved.tags].sort()).toEqual(["fantasy", "fiction", "science"]);
   });
 
   it("skips a book already present by ISBN, and does not duplicate it", async () => {
@@ -506,5 +515,81 @@ describe("ownership and lending", () => {
     );
     // The book still lands; only the unusable loan is discarded.
     expect(res).toMatchObject({ booksCreated: 1, loansRestored: 0 });
+  });
+});
+
+describe("book-page settings", () => {
+  it("restores them cleaned the way a save is", async () => {
+    await importLibrary(
+      userId,
+      payload([], {
+        settings: {
+          theme: null,
+          defaultViewName: null,
+          preferences: {
+            bookPageCards: ["reading", "bogus", "reading"],
+            hiddenBookPageCards: ["lending"],
+            findLinks: [
+              { name: "Old", url: "http://lib.example/?q={isbn}" },
+              { name: "Library", url: "https://lib.example/?q={isbn}" },
+            ],
+          },
+        },
+      }),
+    );
+    const user = await prisma.user.findUniqueOrThrow({ where: { id: userId } });
+    expect(user.preferences).toEqual({
+      bookPageCards: ["reading", "shelves", "history", "lending", "quotes"],
+      hiddenBookPageCards: ["lending"],
+      findLinks: [{ name: "Library", url: "https://lib.example/?q={isbn}" }],
+    });
+  });
+});
+
+describe("saved views kept to one shelf", () => {
+  const query = (shelfId: string) => `shelfId=${shelfId}&group=none&sort=title&dir=asc`;
+  const restoredShelfId = async () =>
+    new URLSearchParams(
+      (await prisma.savedView.findFirstOrThrow({ where: { userId } })).query,
+    ).get("shelfId");
+
+  it("finds the shelf by name", async () => {
+    const shelf = await prisma.shelf.create({ data: { userId, name: "Cosy" } });
+    await importLibrary(
+      userId,
+      payload([], {
+        savedViews: [{ name: "Cosy reads", query: query("old-id"), shelfName: "Cosy" }],
+      }),
+    );
+    expect(await restoredShelfId()).toBe(shelf.id);
+  });
+
+  it("drops the shelf when no shelf here has that name", async () => {
+    await importLibrary(
+      userId,
+      payload([], {
+        savedViews: [{ name: "Cosy reads", query: query("old-id"), shelfName: "Cosy" }],
+      }),
+    );
+    expect(await restoredShelfId()).toBeNull();
+    expect(await prisma.savedView.count({ where: { userId } })).toBe(1);
+  });
+
+  it("keeps an older backup's id only when it is one of this account's shelves", async () => {
+    const shelf = await prisma.shelf.create({ data: { userId, name: "Cosy" } });
+    await importLibrary(
+      userId,
+      payload([], {
+        savedViews: [
+          { name: "Here", query: query(shelf.id) },
+          { name: "Elsewhere", query: query("old-id") },
+        ],
+      }),
+    );
+    const views = await prisma.savedView.findMany({ where: { userId } });
+    const shelfOf = (name: string) =>
+      new URLSearchParams(views.find((v) => v.name === name)!.query).get("shelfId");
+    expect(shelfOf("Here")).toBe(shelf.id);
+    expect(shelfOf("Elsewhere")).toBeNull();
   });
 });
