@@ -49,6 +49,8 @@ describe("parsePreferences", () => {
     expect(parsePreferences({ coverArt: 3 }).coverArt).toBe("drawn");
     expect(parsePreferences({ accent: "teal" }).accent).toBe("teal");
     expect(parsePreferences({ accent: "#ff0000" }).accent).toBe("theme");
+    expect(parsePreferences({ headingFont: "serif" }).headingFont).toBe("serif");
+    expect(parsePreferences({ headingFont: "Comic Sans" }).headingFont).toBe("sans");
   });
 
   it("drops a time zone the runtime doesn't know", () => {

@@ -43,6 +43,10 @@ export const TEXT_SIZES = ["normal", "large", "larger"] as const;
 
 export const LONG_TEXT_FONTS = ["sans", "serif"] as const;
 
+/** The face for page titles, book titles and card titles: the app's own
+ *  sans (Geist), a book serif (Literata) or a rounded sans (Nunito). */
+export const HEADING_FONTS = ["sans", "serif", "rounded"] as const;
+
 /** Animations on or off. Off is also forced whenever the device asks for
  *  reduced motion, whatever this says (see globals.css and lib/motion.ts). */
 export const MOTIONS = ["on", "off"] as const;
@@ -95,6 +99,7 @@ export type Catalogue = (typeof CATALOGUES)[number];
 export type RatingStyle = (typeof RATING_STYLES)[number];
 export type TextSize = (typeof TEXT_SIZES)[number];
 export type LongTextFont = (typeof LONG_TEXT_FONTS)[number];
+export type HeadingFont = (typeof HEADING_FONTS)[number];
 export type Motion = (typeof MOTIONS)[number];
 export type CoverArtStyle = (typeof COVER_ARTS)[number];
 export type Accent = (typeof ACCENTS)[number];
@@ -134,6 +139,7 @@ export type Preferences = {
 
   textSize: TextSize;
   longTextFont: LongTextFont;
+  headingFont: HeadingFont;
 
   // Appearance
   motion: Motion;
@@ -164,6 +170,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
   ratingStyle: "half",
   textSize: "normal",
   longTextFont: "sans",
+  headingFont: "sans",
   motion: "on",
   coverArt: "drawn",
   accent: "theme",
@@ -245,6 +252,7 @@ export function parsePreferences(raw: unknown): Preferences {
     ratingStyle: pick(RATING_STYLES, obj.ratingStyle, d.ratingStyle),
     textSize: pick(TEXT_SIZES, obj.textSize, d.textSize),
     longTextFont: pick(LONG_TEXT_FONTS, obj.longTextFont, d.longTextFont),
+    headingFont: pick(HEADING_FONTS, obj.headingFont, d.headingFont),
     motion: pick(MOTIONS, obj.motion, d.motion),
     coverArt: pick(COVER_ARTS, obj.coverArt, d.coverArt),
     accent: pick(ACCENTS, obj.accent, d.accent),

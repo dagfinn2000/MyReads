@@ -67,6 +67,7 @@ const ACCENT_LABELS: Record<Accent, string> = {
  * server round trip; the refreshed layout then writes the same value.
  */
 const HTML_ATTRIBUTES: Partial<Record<keyof Preferences, string>> = {
+  headingFont: "data-heading-font",
   motion: "data-motion",
   coverArt: "data-covers",
   accent: "data-accent",
@@ -481,6 +482,17 @@ export function PreferencesForm({
             { value: "serif", label: "Book-style serif" },
           ]}
           onChange={(v) => update({ longTextFont: v })}
+        />
+        <Choice
+          label="Headings"
+          hint="Page titles, book titles and card titles."
+          value={prefs.headingFont}
+          options={[
+            { value: "sans", label: "Same as everything else" },
+            { value: "serif", label: "Book-style serif" },
+            { value: "rounded", label: "Rounded" },
+          ]}
+          onChange={(v) => update({ headingFont: v })}
         />
       </Section>
 

@@ -275,7 +275,7 @@ export function LibraryView({
         <div className="grid gap-6">
           {groups.map((g) => (
             <section key={g.title} className="grid gap-3">
-              <h2 className="border-b pb-1 text-lg font-medium">
+              <h2 className="border-b pb-1 font-heading text-lg font-medium">
                 {g.title}
                 <span className="ml-2 text-sm font-normal text-muted-foreground tabular-nums">
                   {/* The group's real size, even when only part of it is

@@ -158,7 +158,9 @@ export function BookRow({
     >
       <BookCover book={book} className="aspect-[2/3] w-10 shrink-0" />
       <div className="grid min-w-0 flex-1 gap-0.5">
-        <p className="truncate text-sm font-medium group-hover:underline">{book.title}</p>
+        <p className="truncate font-heading text-sm font-medium group-hover:underline">
+          {book.title}
+        </p>
         <p className="truncate text-xs text-muted-foreground">
           {book.authors.join(", ")}
           {details.showSeries && book.seriesName && (
@@ -226,7 +228,7 @@ export function BookCard({
       <div className="flex flex-1 flex-col gap-1">
         <p
           className={cn(
-            "line-clamp-2 font-medium leading-snug group-hover:underline",
+            "line-clamp-2 font-heading font-medium leading-snug group-hover:underline",
             compact ? "text-xs" : "text-sm",
           )}
         >
@@ -279,7 +281,7 @@ export function BookCoverTile({ book, compact = false }: { book: BookCardBook; c
       )}
       <p
         className={cn(
-          "line-clamp-2 leading-snug text-muted-foreground group-hover:text-foreground group-hover:underline",
+          "line-clamp-2 font-heading leading-snug text-muted-foreground group-hover:text-foreground group-hover:underline",
           compact ? "text-[11px]" : "text-xs",
         )}
       >
