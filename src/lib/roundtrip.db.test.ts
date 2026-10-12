@@ -149,6 +149,8 @@ describe("export -> import round trip", () => {
     expect(restored.status).toBe(ReadingStatus.READ);
     expect(restored.rating).toBe(9);
     expect(restored.review).toBe("Superb.");
+    // Rebuilt, so review search finds a restored review.
+    expect(restored.reviewSearchText).toBe("superb.");
     expect(restored.dateFinished?.toISOString()).toBe("2026-01-20T00:00:00.000Z");
     expect(restored.timesRead).toBe(2);
 
@@ -195,14 +197,18 @@ describe("export -> import round trip", () => {
         userId: sourceUserId,
         title: "Elantris",
         searchText: "elantris",
+        review: "Good",
+        reviewSearchText: "good",
       },
     });
 
     const payload = await exportLibrary();
     // userId would tie a backup to an account it may be restored away from;
-    // searchText is derived and rebuilt on import.
+    // searchText and reviewSearchText are derived and rebuilt on import.
     expect(payload.books[0]).not.toHaveProperty("userId");
     expect(payload.books[0]).not.toHaveProperty("searchText");
+    expect(payload.books[0]).not.toHaveProperty("reviewSearchText");
+    expect(payload.books[0].review).toBe("Good");
   });
 
   it("survives a library with nothing in it", async () => {

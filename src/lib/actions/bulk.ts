@@ -251,14 +251,16 @@ export async function bulkDeleteBooks(input: BulkDeleteInput): Promise<BulkResul
 
   const target = await resolveTarget(userId, parsed.data);
   if ("error" in target) return target;
-  if (parsed.data.matching && target.count !== parsed.data.expectedCount) {
-    return { error: "The books that match have changed. Check the count and try again." };
-  }
 
+  // Checked against the rows about to go, not target.count: a book added
+  // between counting and this read would otherwise join the delete.
   const doomed = await prisma.book.findMany({
     where: target.where,
     select: { id: true, coverUrl: true },
   });
+  if (parsed.data.matching && doomed.length !== parsed.data.expectedCount) {
+    return { error: "The books that match have changed. Check the count and try again." };
+  }
   if (doomed.length === 0) return { error: "No matching books" };
 
   const outcome = await prisma.$transaction(async (tx) => {

@@ -98,11 +98,13 @@ export function LibraryView({
   books,
   groups,
   limit,
+  maxLimit,
   hasMore = false,
   totalCount,
   searchParams,
   shelves,
   display,
+  empty,
 }: {
   /** Only the books being rendered — the server sorts everything and slices.
    *  Grouped: every book in the shown sections, once each. */
@@ -113,6 +115,8 @@ export function LibraryView({
    *  can show a book in more than one section, so it can differ from
    *  books.length. */
   limit?: number;
+  /** The most the server will render, however high the URL's limit. */
+  maxLimit: number;
   /** Sections were cut short, even if every book already shows in one. */
   hasMore?: boolean;
   /** How many books match the current filters, rendered or not. */
@@ -122,6 +126,8 @@ export function LibraryView({
   shelves: { id: string; name: string }[];
   /** Cover size, grid or list, and which details cards show. */
   display: LibraryDisplay;
+  /** What to show when no book matches. */
+  empty: React.ReactNode;
 }) {
   const router = useRouter();
   const prefs = usePreferences();
@@ -140,6 +146,7 @@ export function LibraryView({
   const [deleting, startDelete] = useTransition();
   const cancelDeleteRef = useRef<HTMLButtonElement>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const messageRef = useRef<HTMLSpanElement>(null);
   const [pending, startTransition] = useTransition();
   // Why the last pick opened nothing, for the view it was made in, so it
   // clears itself when the tab or filters change.
@@ -249,6 +256,9 @@ export function LibraryView({
       } else {
         setMessage(`Updated ${booksLabel(res.count ?? 0)}.`);
         clearSelection();
+        // Apply is disabled with nothing selected; focus goes to how it went
+        // rather than falling to the page.
+        messageRef.current?.focus();
         router.refresh();
       }
     });
@@ -274,13 +284,16 @@ export function LibraryView({
   }
 
   const hiddenCount = totalCount - books.length;
+  const shownLimit = limit ?? books.length;
+  /** Past the server's cap a bigger limit would bring nothing more. */
+  const atCap = shownLimit >= maxLimit;
 
   /** Raise ?limit= and let the server send the next slice. View state lives
    *  in the URL throughout this app, so "Show more" is shareable and survives
    *  a reload like every other part of the view. */
   function showMore() {
     const next = new URLSearchParams(searchParams);
-    next.set("limit", String((limit ?? books.length) + PAGE_STEP));
+    next.set("limit", String(Math.min(shownLimit + PAGE_STEP, maxLimit)));
     router.push(`/books?${next}`, { scroll: false });
   }
 
@@ -348,6 +361,11 @@ export function LibraryView({
     </div>
   );
 
+  // While selecting, an empty view keeps the bar, so a change that emptied
+  // it (a delete, or a status moving every book off this tab) shows how it
+  // went; otherwise there's nothing here to count or pick.
+  if (totalCount === 0 && !selectMode) return empty;
+
   return (
     // While selecting, room at the bottom so the action bar never covers
     // the last books.
@@ -413,7 +431,9 @@ export function LibraryView({
         {shownPickNote === "error" && "Couldn't pick a book. Try again."}
       </p>
 
-      {groups ? (
+      {totalCount === 0 ? (
+        empty
+      ) : groups ? (
         <div className="grid gap-6">
           {groups.map((g) => (
             <section key={g.key} className="grid gap-3">
@@ -439,15 +459,21 @@ export function LibraryView({
         renderGrid(books)
       )}
 
-      {(hiddenCount > 0 || hasMore) && (
-        <div className="flex justify-center">
-          <Button variant="outline" onClick={showMore}>
-            {/* Counts books, never repeats: grouped by tag, a book can be
-                cut from one section while it shows in another. */}
-            {hiddenCount > 0 ? `Show more (${hiddenCount} not shown)` : "Show more"}
-          </Button>
-        </div>
-      )}
+      {(hiddenCount > 0 || hasMore) &&
+        (atCap ? (
+          <p className="text-center text-sm text-muted-foreground">
+            That&apos;s as many as the library shows at once. Search or filter to
+            find the rest.
+          </p>
+        ) : (
+          <div className="flex justify-center">
+            <Button variant="outline" onClick={showMore}>
+              {/* Counts books, never repeats: grouped by tag, a book can be
+                  cut from one section while it shows in another. */}
+              {hiddenCount > 0 ? `Show more (${hiddenCount} not shown)` : "Show more"}
+            </Button>
+          </div>
+        ))}
 
       {selectMode && (
         <div className="fixed bottom-4 left-1/2 z-50 grid max-h-[min(70dvh,34rem)] w-[min(64rem,calc(100vw-2rem))] -translate-x-1/2 gap-2 overflow-y-auto rounded-xl border bg-card p-3 shadow-lg">
@@ -572,7 +598,12 @@ export function LibraryView({
             >
               Delete…
             </Button>
-            <span role="status" className="basis-full text-sm text-muted-foreground sm:basis-auto">
+            <span
+              ref={messageRef}
+              tabIndex={-1}
+              role="status"
+              className="basis-full text-sm text-muted-foreground outline-none sm:basis-auto"
+            >
               {message}
             </span>
           </div>
@@ -585,6 +616,14 @@ export function LibraryView({
           onOpenAutoFocus={(e) => {
             e.preventDefault();
             cancelDeleteRef.current?.focus();
+          }}
+          // After a delete nothing is selected and the Delete button that
+          // opened this is disabled, so focus goes to how it went instead
+          // of falling to the page.
+          onCloseAutoFocus={(e) => {
+            if (selCount > 0) return;
+            e.preventDefault();
+            messageRef.current?.focus();
           }}
         >
           <DialogHeader>

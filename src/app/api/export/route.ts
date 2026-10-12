@@ -127,7 +127,12 @@ export async function GET() {
       savedViewOrderNames: namesOf(prefs.savedViewOrder, viewNames),
     },
     savedViews: savedViews.map(({ name, query }) => ({ name, query })),
-    books: books.map(({ userId: _userId, searchText: _searchText, ...book }) => ({
+    books: books.map(({
+      userId: _userId,
+      searchText: _searchText,
+      reviewSearchText: _reviewSearchText,
+      ...book
+    }) => ({
       ...book,
       // `owned` no longer exists on the row, but the export format promises
       // that an older instance can still read this file. Emitting the boolean

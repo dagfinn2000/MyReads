@@ -5,7 +5,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { coverFilePath, coversDir } from "@/lib/covers";
 import { sniffImageKind } from "@/lib/image-type";
-import { buildSearchText } from "@/lib/utils";
+import { buildSearchText, foldForSearch } from "@/lib/utils";
 import { isAllowedCoverUrl } from "@/lib/validation";
 import { cleanLibraryViewPatch } from "@/lib/library-view";
 import { cleanPreferencesPatch } from "@/lib/preferences";
@@ -469,6 +469,7 @@ export async function importLibrary(
         status: b.status,
         rating: b.rating ?? null,
         review: b.review ?? null,
+        reviewSearchText: foldForSearch(b.review ?? ""),
         dateStarted: b.dateStarted,
         dateFinished: b.dateFinished,
         timesRead,

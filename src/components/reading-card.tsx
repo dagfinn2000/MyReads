@@ -48,7 +48,8 @@ export function ReadingCard({
   book,
   progress,
 }: {
-  book: Book;
+  /** Without the folded search copies, which have no business in the page. */
+  book: Omit<Book, "searchText" | "reviewSearchText">;
   progress: ProgressEntry[];
 }) {
   const action = updateReading.bind(null, book.id);
