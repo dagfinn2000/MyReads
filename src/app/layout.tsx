@@ -64,6 +64,8 @@ export default async function RootLayout({
       data-motion={prefs?.motion}
       data-covers={prefs?.coverArt}
       data-accent={prefs?.accent}
+      data-corners={prefs?.corners}
+      data-background={prefs?.background}
       // 3D covers, from the library's View menu.
       data-cover-3d={user?.libraryView.cover3d ? "" : undefined}
       suppressHydrationWarning

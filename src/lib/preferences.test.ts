@@ -51,6 +51,10 @@ describe("parsePreferences", () => {
     expect(parsePreferences({ accent: "#ff0000" }).accent).toBe("theme");
     expect(parsePreferences({ headingFont: "serif" }).headingFont).toBe("serif");
     expect(parsePreferences({ headingFont: "Comic Sans" }).headingFont).toBe("sans");
+    expect(parsePreferences({ corners: "square" }).corners).toBe("square");
+    expect(parsePreferences({ corners: "0px" }).corners).toBe("rounded");
+    expect(parsePreferences({ background: "dots" }).background).toBe("dots");
+    expect(parsePreferences({ background: "url(x)" }).background).toBe("plain");
   });
 
   it("drops a time zone the runtime doesn't know", () => {

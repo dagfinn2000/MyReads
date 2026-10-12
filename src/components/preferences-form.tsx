@@ -71,6 +71,8 @@ const HTML_ATTRIBUTES: Partial<Record<keyof Preferences, string>> = {
   motion: "data-motion",
   coverArt: "data-covers",
   accent: "data-accent",
+  corners: "data-corners",
+  background: "data-background",
 };
 
 /** The accent colour swatches, one round button each. */
@@ -446,6 +448,27 @@ export function PreferencesForm({
             { value: "plain", label: "A plain grey box" },
           ]}
           onChange={(v) => update({ coverArt: v })}
+        />
+        <Choice
+          label="Corners"
+          value={prefs.corners}
+          options={[
+            { value: "square", label: "Square" },
+            { value: "rounded", label: "Rounded" },
+            { value: "round", label: "Round" },
+          ]}
+          onChange={(v) => update({ corners: v })}
+        />
+        <Choice
+          label="Background"
+          hint="Behind the pages, not the cards on them."
+          value={prefs.background}
+          options={[
+            { value: "plain", label: "Plain" },
+            { value: "grain", label: "Paper grain" },
+            { value: "dots", label: "Dots" },
+          ]}
+          onChange={(v) => update({ background: v })}
         />
       </Section>
 

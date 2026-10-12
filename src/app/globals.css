@@ -745,6 +745,35 @@ html.dark[data-accent]:not([data-accent="theme"]) {
   --primary-foreground: #111111;
 }
 
+/* ── Corners and background ────────────────────────────────────────────────
+   "Corners" in Preferences moves --radius, which every rounded-* size
+   derives from (the @theme block above), so cards, buttons, inputs and
+   menus change together; pills and avatars stay fully round. "Background"
+   lays a texture over the page colour behind everything: a faint paper
+   grain (SVG noise, mid-grey, so it reads on light and dark themes alike)
+   or a dot grid in the theme's own text colour. Cards keep their solid
+   fill on top. */
+html[data-corners="square"] {
+  --radius: 0.15rem;
+}
+html[data-corners="round"] {
+  --radius: 1rem;
+}
+html[data-background="grain"] body {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.5 0 0 0 0 0.5 0 0 0 0 0.5 0.22 0 0 0 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+/* Light specks show more on a dark page, so dark themes get a fainter grain. */
+html.dark[data-background="grain"] body {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.5 0 0 0 0 0.5 0 0 0 0 0.5 0.12 0 0 0 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+html[data-background="dots"] body {
+  background-image: radial-gradient(
+    color-mix(in oklab, var(--foreground) 14%, transparent) 1px,
+    transparent 1.5px
+  );
+  background-size: 22px 22px;
+}
+
 /* ── Drawn covers ──────────────────────────────────────────────────────────
    The stand-in for a book with no cover image (BookCover in
    components/book-card.tsx): a coloured board with a spine shadow, a thin

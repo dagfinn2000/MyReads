@@ -72,6 +72,13 @@ export const ACCENTS = [
   "fuchsia",
 ] as const;
 
+/** How round corners are, through the --radius token every radius in the
+ *  app derives from. */
+export const CORNERS = ["square", "rounded", "round"] as const;
+
+/** A texture behind the pages: none, a faint paper grain, or a dot grid. */
+export const BACKGROUNDS = ["plain", "grain", "dots"] as const;
+
 /** Colour steps for the reading calendar (see lib/heatmap.ts). */
 export const HEATMAP_SCALES = ["standard", "gentle", "heavy", "auto"] as const;
 
@@ -103,6 +110,8 @@ export type HeadingFont = (typeof HEADING_FONTS)[number];
 export type Motion = (typeof MOTIONS)[number];
 export type CoverArtStyle = (typeof COVER_ARTS)[number];
 export type Accent = (typeof ACCENTS)[number];
+export type Corners = (typeof CORNERS)[number];
+export type Background = (typeof BACKGROUNDS)[number];
 export type HeatmapScale = (typeof HEATMAP_SCALES)[number];
 export type StartPage = (typeof START_PAGES)[number];
 export type HideableNav = (typeof HIDEABLE_NAV)[number];
@@ -145,6 +154,8 @@ export type Preferences = {
   motion: Motion;
   coverArt: CoverArtStyle;
   accent: Accent;
+  corners: Corners;
+  background: Background;
 
   heatmapScale: HeatmapScale;
   startPage: StartPage;
@@ -174,6 +185,8 @@ export const DEFAULT_PREFERENCES: Preferences = {
   motion: "on",
   coverArt: "drawn",
   accent: "theme",
+  corners: "rounded",
+  background: "plain",
   heatmapScale: "standard",
   startPage: "library",
   hiddenNav: [],
@@ -256,6 +269,8 @@ export function parsePreferences(raw: unknown): Preferences {
     motion: pick(MOTIONS, obj.motion, d.motion),
     coverArt: pick(COVER_ARTS, obj.coverArt, d.coverArt),
     accent: pick(ACCENTS, obj.accent, d.accent),
+    corners: pick(CORNERS, obj.corners, d.corners),
+    background: pick(BACKGROUNDS, obj.background, d.background),
     heatmapScale: pick(HEATMAP_SCALES, obj.heatmapScale, d.heatmapScale),
     startPage: pick(START_PAGES, obj.startPage, d.startPage),
     hiddenNav: pickList(HIDEABLE_NAV, obj.hiddenNav),
