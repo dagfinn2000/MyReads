@@ -18,9 +18,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 /**
- * The library's View menu: cover size, grid or list, and which details the
- * cards show. Saved on the account like the sort, and applied by the server
- * on the next render — so the menu only saves and refreshes.
+ * The library's View menu: grid or list, cover size, card style, 3D covers,
+ * and which details the cards show. Saved on the account like the sort, and
+ * applied by the server on the next render — so the menu only saves and
+ * refreshes. 3D covers also show at once, since they live on <html>.
  */
 export function LibraryViewMenu({
   display,
@@ -32,8 +33,13 @@ export function LibraryViewMenu({
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
+  // Covers only and Bookshelf draw no details, so there is nothing to show.
+  const showsDetails = display.layout === "list" || display.cardStyle === "cards";
 
   function save(patch: Partial<LibraryDisplay>) {
+    if (patch.cover3d !== undefined) {
+      document.documentElement.toggleAttribute("data-cover-3d", patch.cover3d);
+    }
     startTransition(async () => {
       await saveLibraryView(patch);
       router.refresh();
@@ -47,7 +53,7 @@ export function LibraryViewMenu({
           variant="outline"
           size="icon"
           className="shrink-0"
-          title="View: card size, grid or list, card details"
+          title="View: layout, cover size, card style, card details"
           disabled={pending}
         >
           <LayoutGrid />
@@ -60,7 +66,7 @@ export function LibraryViewMenu({
           value={display.layout}
           onValueChange={(v) => save({ layout: v as LibraryDisplay["layout"] })}
         >
-          <DropdownMenuRadioItem value="grid">Covers</DropdownMenuRadioItem>
+          <DropdownMenuRadioItem value="grid">Grid</DropdownMenuRadioItem>
           <DropdownMenuRadioItem value="list">List</DropdownMenuRadioItem>
         </DropdownMenuRadioGroup>
 
@@ -76,34 +82,58 @@ export function LibraryViewMenu({
               <DropdownMenuRadioItem value="medium">Medium</DropdownMenuRadioItem>
               <DropdownMenuRadioItem value="large">Large</DropdownMenuRadioItem>
             </DropdownMenuRadioGroup>
+
+            <DropdownMenuSeparator />
+            <DropdownMenuLabel>Style</DropdownMenuLabel>
+            <DropdownMenuRadioGroup
+              value={display.cardStyle}
+              onValueChange={(v) => save({ cardStyle: v as LibraryDisplay["cardStyle"] })}
+            >
+              <DropdownMenuRadioItem value="cards">Cards</DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="covers">Covers only</DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="shelf">Bookshelf</DropdownMenuRadioItem>
+            </DropdownMenuRadioGroup>
           </>
         )}
 
         <DropdownMenuSeparator />
-        <DropdownMenuLabel>Show</DropdownMenuLabel>
-        {ratings && (
-          <DropdownMenuCheckboxItem
-            checked={display.showRating}
-            onCheckedChange={(c) => save({ showRating: c === true })}
-            onSelect={(e) => e.preventDefault()}
-          >
-            Rating
-          </DropdownMenuCheckboxItem>
+        <DropdownMenuCheckboxItem
+          checked={display.cover3d}
+          onCheckedChange={(c) => save({ cover3d: c === true })}
+          onSelect={(e) => e.preventDefault()}
+        >
+          3D covers
+        </DropdownMenuCheckboxItem>
+
+        {showsDetails && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuLabel>Show</DropdownMenuLabel>
+            {ratings && (
+              <DropdownMenuCheckboxItem
+                checked={display.showRating}
+                onCheckedChange={(c) => save({ showRating: c === true })}
+                onSelect={(e) => e.preventDefault()}
+              >
+                Rating
+              </DropdownMenuCheckboxItem>
+            )}
+            <DropdownMenuCheckboxItem
+              checked={display.showStatus}
+              onCheckedChange={(c) => save({ showStatus: c === true })}
+              onSelect={(e) => e.preventDefault()}
+            >
+              Reading status
+            </DropdownMenuCheckboxItem>
+            <DropdownMenuCheckboxItem
+              checked={display.showSeries}
+              onCheckedChange={(c) => save({ showSeries: c === true })}
+              onSelect={(e) => e.preventDefault()}
+            >
+              Series
+            </DropdownMenuCheckboxItem>
+          </>
         )}
-        <DropdownMenuCheckboxItem
-          checked={display.showStatus}
-          onCheckedChange={(c) => save({ showStatus: c === true })}
-          onSelect={(e) => e.preventDefault()}
-        >
-          Reading status
-        </DropdownMenuCheckboxItem>
-        <DropdownMenuCheckboxItem
-          checked={display.showSeries}
-          onCheckedChange={(c) => save({ showSeries: c === true })}
-          onSelect={(e) => e.preventDefault()}
-        >
-          Series
-        </DropdownMenuCheckboxItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );

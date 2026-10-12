@@ -57,6 +57,17 @@ describe("parseLibraryView", () => {
     });
     expect(parseLibraryView({ cardSize: "huge", layout: 1 })).toEqual(DEFAULT_LIBRARY_VIEW);
   });
+
+  it("keeps the card style and 3D covers and defaults bad ones", () => {
+    expect(parseLibraryView({ cardStyle: "shelf", cover3d: true })).toEqual({
+      ...DEFAULT_LIBRARY_VIEW,
+      cardStyle: "shelf",
+      cover3d: true,
+    });
+    expect(parseLibraryView({ cardStyle: "tiles", cover3d: "yes" })).toEqual(
+      DEFAULT_LIBRARY_VIEW,
+    );
+  });
 });
 
 describe("cleanLibraryViewPatch", () => {
@@ -65,6 +76,14 @@ describe("cleanLibraryViewPatch", () => {
     expect(cleanLibraryViewPatch({ cardSize: "huge", sort: "title" })).toEqual({
       cardSize: "medium",
       sort: "title",
+    });
+  });
+
+  it("cleans the card style and 3D switch like the other display fields", () => {
+    expect(cleanLibraryViewPatch({ cardStyle: "covers" })).toEqual({ cardStyle: "covers" });
+    expect(cleanLibraryViewPatch({ cardStyle: "tiles", cover3d: 1 })).toEqual({
+      cardStyle: "cards",
+      cover3d: false,
     });
   });
 

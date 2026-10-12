@@ -939,6 +939,87 @@ html[data-covers="plain"] .drawn-cover {
   animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
+/* ── Card styles and 3D covers ───────────────────────────────────────────
+   "Covers only" and "Bookshelf" (the library's View menu) drop the card
+   frame, so the cover carries its own shadow and rises on its own under the
+   pointer. A bookshelf has no gap between columns: each slot draws its
+   stretch of ledge under its cover, so a row of slots reads as one shelf,
+   and the last slot's ledge runs on to the grid's edge, which clips it. */
+.cover-shadow {
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 0.14),
+    0 10px 18px -12px rgb(0 0 0 / 0.55);
+}
+.bookshelf {
+  overflow-x: clip;
+}
+.shelf-slot {
+  padding: 0 clamp(0.375rem, 1.5vw, 0.875rem) 0.75rem;
+}
+.shelf-slot::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 0.75rem;
+  pointer-events: none;
+  background: linear-gradient(
+    color-mix(in oklab, var(--foreground) 8%, var(--background)) 0 0.25rem,
+    color-mix(in oklab, var(--foreground) 20%, var(--background)) 0.25rem
+  );
+  box-shadow: 0 10px 12px -8px rgb(0 0 0 / 0.4);
+}
+.shelf-slot:last-child::after {
+  right: -100vw;
+}
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-motion="off"]) .lift-cover .book-cover {
+    transition: translate 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  html:not([data-motion="off"]) .lift-cover:hover .book-cover {
+    translate: 0 -4px;
+  }
+  html:not([data-motion="off"]) .no-lift .lift-cover:hover .book-cover {
+    translate: none;
+  }
+}
+
+/* 3D covers (the View menu's switch, data-cover-3d on <html>): every cover
+   in the app becomes a little hardback, with a squarer spine edge, a crease
+   and shine down the spine, a few page edges peeking out on the right and a
+   shadow underneath. The pages stay paper-coloured on any theme, a little
+   dimmer on dark ones. Offsets are small enough for the tiny covers in
+   lists. */
+html {
+  --cover-pages: #f3efe4;
+}
+html.dark {
+  --cover-pages: #d6d0c2;
+}
+html[data-cover-3d] .book-cover {
+  border-radius: 2px 5px 5px 2px;
+  box-shadow:
+    2px 0 0 -1px var(--cover-pages),
+    3px 0 0 -1px rgb(0 0 0 / 0.16),
+    4px 0 0 -2px var(--cover-pages),
+    5px 0 0 -2px rgb(0 0 0 / 0.16),
+    6px 8px 14px -6px rgb(0 0 0 / 0.55);
+}
+html[data-cover-3d] .book-cover::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    to right,
+    rgb(0 0 0 / 0.3) 0,
+    rgb(255 255 255 / 0.2) 2.5%,
+    rgb(0 0 0 / 0.14) 5%,
+    transparent 9%,
+    transparent 72%,
+    rgb(255 255 255 / 0.08)
+  );
+}
+
 /* Theme switch: the new theme grows out of the palette button as a circle
    (revealTheme in components/theme-picker.tsx), so the default cross-fade
    between the two snapshots is turned off while it runs. */

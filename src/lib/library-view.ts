@@ -1,7 +1,7 @@
 /**
  * The library's view preference — which sort/direction/grouping the user
- * last chose, plus how the books are drawn (card size, grid or list, and
- * which details each card shows). Saved on the User row (User.libraryView)
+ * last chose, plus how the books are drawn (card size, grid or list, card
+ * style, 3D covers, and which details each card shows). Saved on the User row (User.libraryView)
  * whenever it changes in the filter bar. Sort and grouping are applied by
  * the books page when the URL carries no explicit view params, so clicking
  * away and back doesn't reset the view; the display settings always apply.
@@ -29,6 +29,10 @@ export const CARD_SIZES = ["small", "medium", "large"] as const;
 /** Cover grid, or one compact row per book. */
 export const LIBRARY_LAYOUTS = ["grid", "list"] as const;
 
+/** How the grid draws each book: a framed card with its details, the bare
+ *  cover and title, or covers standing on a shelf. */
+export const CARD_STYLES = ["cards", "covers", "shelf"] as const;
+
 // A type alias (not an interface) so it satisfies Prisma's Json input type —
 // aliases get an implicit index signature for assignability, interfaces don't.
 export type LibraryView = {
@@ -37,6 +41,10 @@ export type LibraryView = {
   group: (typeof LIBRARY_GROUPS)[number];
   cardSize: (typeof CARD_SIZES)[number];
   layout: (typeof LIBRARY_LAYOUTS)[number];
+  cardStyle: (typeof CARD_STYLES)[number];
+  /** Covers drawn as little books (spine, page edges, shadow), here and on
+   *  every other page; see globals.css. */
+  cover3d: boolean;
   showRating: boolean;
   showStatus: boolean;
   showSeries: boolean;
@@ -45,7 +53,7 @@ export type LibraryView = {
 /** The drawing half of a view — what the View menu changes. */
 export type LibraryDisplay = Pick<
   LibraryView,
-  "cardSize" | "layout" | "showRating" | "showStatus" | "showSeries"
+  "cardSize" | "layout" | "cardStyle" | "cover3d" | "showRating" | "showStatus" | "showSeries"
 >;
 
 export const DEFAULT_LIBRARY_VIEW: LibraryView = {
@@ -54,6 +62,8 @@ export const DEFAULT_LIBRARY_VIEW: LibraryView = {
   group: "none",
   cardSize: "medium",
   layout: "grid",
+  cardStyle: "cards",
+  cover3d: false,
   showRating: true,
   showStatus: true,
   showSeries: true,
@@ -79,6 +89,8 @@ export function parseLibraryView(raw: unknown): LibraryView {
     group: pick(LIBRARY_GROUPS, obj.group, d.group),
     cardSize: pick(CARD_SIZES, obj.cardSize, d.cardSize),
     layout: pick(LIBRARY_LAYOUTS, obj.layout, d.layout),
+    cardStyle: pick(CARD_STYLES, obj.cardStyle, d.cardStyle),
+    cover3d: bool(obj.cover3d, d.cover3d),
     showRating: bool(obj.showRating, d.showRating),
     showStatus: bool(obj.showStatus, d.showStatus),
     showSeries: bool(obj.showSeries, d.showSeries),

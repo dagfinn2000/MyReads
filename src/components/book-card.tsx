@@ -259,3 +259,44 @@ export function BookCard({
     </BookLink>
   );
 }
+
+/** "Covers only": the cover and title with no frame, details or badges. */
+export function BookCoverTile({ book, compact = false }: { book: BookCardBook; compact?: boolean }) {
+  const progress = readingProgress(book);
+  return (
+    <BookLink bookId={book.id} className="lift-cover group flex flex-col gap-1.5">
+      <BookCover book={book} className="cover-shadow aspect-[2/3] w-full" />
+      {progress !== null && (
+        <div
+          className="h-1 rounded-full bg-muted"
+          title={`Page ${book.currentPage} of ${book.pageCount}`}
+        >
+          <div
+            className="bar-grow h-full rounded-full bg-primary/80"
+            style={{ width: `${progress * 100}%` }}
+          />
+        </div>
+      )}
+      <p
+        className={cn(
+          "line-clamp-2 leading-snug text-muted-foreground group-hover:text-foreground group-hover:underline",
+          compact ? "text-[11px]" : "text-xs",
+        )}
+      >
+        {book.title}
+      </p>
+    </BookLink>
+  );
+}
+
+/** "Bookshelf": just the cover, standing on the shelf its slot draws
+ *  (globals.css). The title shows on hover and to screen readers. */
+export function BookOnShelf({ book }: { book: BookCardBook }) {
+  const byline = book.authors.length ? ` by ${book.authors.join(", ")}` : "";
+  return (
+    <BookLink bookId={book.id} className="lift-cover block" title={`${book.title}${byline}`}>
+      <BookCover book={book} className="cover-shadow aspect-[2/3] w-full" />
+      <span className="sr-only">{book.title}</span>
+    </BookLink>
+  );
+}
