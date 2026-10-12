@@ -102,7 +102,9 @@ function revealTheme(change: () => void, origin: HTMLElement | null) {
     // A transition can be skipped (another one started, the tab was
     // hidden); the change itself has still happened.
     .catch(() => {});
-  transition.finished.finally(() => root.classList.remove("theme-reveal"));
+  transition.finished
+    .finally(() => root.classList.remove("theme-reveal"))
+    .catch(() => {});
 }
 
 export function ThemePicker() {

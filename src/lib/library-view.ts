@@ -1,10 +1,11 @@
 /**
  * The library's view preference — which sort/direction/grouping the user
  * last chose, plus how the books are drawn (card size, grid or list, card
- * style, 3D covers, and which details each card shows). Saved on the User row (User.libraryView)
- * whenever it changes in the filter bar. Sort and grouping are applied by
- * the books page when the URL carries no explicit view params, so clicking
- * away and back doesn't reset the view; the display settings always apply.
+ * style, 3D covers, and which details each card shows). Saved on the User
+ * row (User.libraryView) whenever it changes in the filter bar. Sort and
+ * grouping are applied by the books page when the URL carries no explicit
+ * view params, so clicking away and back doesn't reset the view; the
+ * display settings always apply.
  *
  * The value lists here are the source of truth shared by the filter bar's
  * dropdowns, the save action's validation, and the books page's fallback —
