@@ -76,8 +76,18 @@ export const ACCENTS = [
  *  app derives from. */
 export const CORNERS = ["square", "rounded", "round"] as const;
 
-/** A texture behind the pages: none, a faint paper grain, or a dot grid. */
-export const BACKGROUNDS = ["plain", "grain", "dots"] as const;
+/** A texture behind the pages (globals.css draws each one). */
+export const BACKGROUNDS = [
+  "plain",
+  "grain",
+  "dots",
+  "lines",
+  "grid",
+  "linen",
+  "books",
+  "waves",
+  "glow",
+] as const;
 
 /** Colour steps for the reading calendar (see lib/heatmap.ts). */
 export const HEATMAP_SCALES = ["standard", "gentle", "heavy", "auto"] as const;

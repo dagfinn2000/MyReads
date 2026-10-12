@@ -15,12 +15,14 @@ import {
 } from "@/lib/display";
 import {
   ACCENTS,
+  BACKGROUNDS,
   CATALOGUES,
   DATE_FORMATS,
   HIDEABLE_NAV,
   HIDEABLE_STATS,
   NUMBER_FORMATS,
   type Accent,
+  type Background,
   type Catalogue,
   type HideableNav,
   type HideableStat,
@@ -102,6 +104,61 @@ function AccentPicker({ value, onChange }: { value: Accent; onChange: (a: Accent
             style={a === "theme" ? undefined : { background: `var(--accent-${a})` }}
           >
             {a === "theme" ? "Theme" : null}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+const BACKGROUND_LABELS: Record<Background, string> = {
+  plain: "Plain",
+  grain: "Paper grain",
+  dots: "Dots",
+  lines: "Ruled lines",
+  grid: "Graph paper",
+  linen: "Linen",
+  books: "Little books",
+  waves: "Waves",
+  glow: "Glow",
+};
+
+/** The background textures as small previews of the page, one button
+ *  each. A swatch is drawn by the same CSS as the page (globals.css). */
+function BackgroundPicker({
+  value,
+  onChange,
+}: {
+  value: Background;
+  onChange: (b: Background) => void;
+}) {
+  return (
+    <div className="grid gap-1.5 sm:grid-cols-[14rem_1fr] sm:items-start sm:gap-4">
+      <div>
+        <p className="text-sm font-medium">Background</p>
+        <p className="text-xs text-muted-foreground">Behind the pages, not the cards on them.</p>
+      </div>
+      <div role="radiogroup" aria-label="Background" className="flex flex-wrap gap-2">
+        {BACKGROUNDS.map((b) => (
+          <button
+            key={b}
+            type="button"
+            role="radio"
+            aria-checked={value === b}
+            onClick={() => onChange(b)}
+            className="group grid w-16 justify-items-center gap-1 text-[11px] text-muted-foreground"
+          >
+            <span
+              className={cn(
+                "texture-swatch h-11 w-16 rounded-md border ring-offset-2 ring-offset-background transition-shadow group-hover:border-ring/60",
+                value === b && "ring-2 ring-foreground",
+              )}
+              data-texture={b}
+              aria-hidden="true"
+            />
+            <span className={cn("leading-tight", value === b && "font-medium text-foreground")}>
+              {BACKGROUND_LABELS[b]}
+            </span>
           </button>
         ))}
       </div>
@@ -459,17 +516,7 @@ export function PreferencesForm({
           ]}
           onChange={(v) => update({ corners: v })}
         />
-        <Choice
-          label="Background"
-          hint="Behind the pages, not the cards on them."
-          value={prefs.background}
-          options={[
-            { value: "plain", label: "Plain" },
-            { value: "grain", label: "Paper grain" },
-            { value: "dots", label: "Dots" },
-          ]}
-          onChange={(v) => update({ background: v })}
-        />
+        <BackgroundPicker value={prefs.background} onChange={(b) => update({ background: b })} />
       </Section>
 
       <Section title="Motion">

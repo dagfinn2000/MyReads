@@ -54,6 +54,7 @@ describe("parsePreferences", () => {
     expect(parsePreferences({ corners: "square" }).corners).toBe("square");
     expect(parsePreferences({ corners: "0px" }).corners).toBe("rounded");
     expect(parsePreferences({ background: "dots" }).background).toBe("dots");
+    expect(parsePreferences({ background: "books" }).background).toBe("books");
     expect(parsePreferences({ background: "url(x)" }).background).toBe("plain");
   });
 
