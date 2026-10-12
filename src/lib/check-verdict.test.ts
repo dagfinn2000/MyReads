@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { BookFormat, BookOwnership } from "@prisma/client";
-import { checkVerdict, duplicateNotice, ownershipParam } from "@/lib/check-verdict";
+import { checkVerdict, duplicateNotice, ownershipParam, scanMatchLabel } from "@/lib/check-verdict";
 
 const { OWNED, WISHLIST, BORROWED, GIVEN_AWAY } = BookOwnership;
 const { PHYSICAL, EBOOK, AUDIOBOOK } = BookFormat;
@@ -108,6 +108,23 @@ describe("duplicateNotice", () => {
       lead: "You gave a copy of this title away: ",
       tail: ". You can still add this edition.",
     });
+  });
+});
+
+describe("scanMatchLabel", () => {
+  it("keeps the short wording for a book you own", () => {
+    expect(scanMatchLabel("isbn", OWNED)).toBe("Already in your library");
+    expect(scanMatchLabel("title", OWNED)).toBe("Another edition in your library");
+  });
+
+  it("doesn't call a wishlist or given-away book one you have", () => {
+    // The bug: every match read "Already in your library".
+    expect(scanMatchLabel("isbn", WISHLIST)).toBe("On your wishlist");
+    expect(scanMatchLabel("isbn", GIVEN_AWAY)).toBe("You gave this copy away");
+    expect(scanMatchLabel("isbn", BORROWED)).toBe("You borrowed this copy");
+    expect(scanMatchLabel("title", WISHLIST)).toBe("This title is on your wishlist");
+    expect(scanMatchLabel("title", GIVEN_AWAY)).toBe("You gave a copy of this title away");
+    expect(scanMatchLabel("title", BORROWED)).toBe("You borrowed a copy of this title");
   });
 });
 

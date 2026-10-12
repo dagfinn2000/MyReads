@@ -1,8 +1,11 @@
 "use client";
 
 import { useEffect, useState, useSyncExternalStore } from "react";
+import { BookOwnership, type BookFormat } from "@prisma/client";
 import { Loader2 } from "lucide-react";
+import { setOwnership } from "@/lib/actions/ownership";
 import { removeScannedBook, scanAddBook, type ScanAnswer } from "@/lib/actions/shelf-scan";
+import { checkVerdict, scanMatchLabel } from "@/lib/check-verdict";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
@@ -21,7 +24,17 @@ type RowState =
   | { kind: "looking" }
   | { kind: "added"; bookId: string; title: string; authors: string[]; undoing?: boolean }
   | { kind: "removed"; title: string }
-  | { kind: "have"; match: "isbn" | "title"; title: string }
+  | {
+      kind: "have";
+      match: "isbn" | "title";
+      bookId: string;
+      title: string;
+      ownership: BookOwnership;
+      format: BookFormat;
+      /** "I bought it" pressed: saving, then done. */
+      marking?: boolean;
+      marked?: boolean;
+    }
   | { kind: "same"; title: string | null }
   | { kind: "notFound" }
   | { kind: "failed" };
@@ -61,9 +74,7 @@ function describe(row: ScanRow): string {
     case "removed":
       return `Removed: ${state.title}`;
     case "have":
-      return state.match === "isbn"
-        ? `Already in your library: ${state.title}`
-        : `Another edition in your library: ${state.title}`;
+      return `${haveLabel(state)}: ${state.title}`;
     case "same":
       return `Same barcode again${state.title ? `: ${state.title}` : ""}, ignored`;
     case "notFound":
@@ -75,12 +86,25 @@ function describe(row: ScanRow): string {
   }
 }
 
+/** What the library has, worded like the check page, or that it's now
+ *  marked owned from here. */
+function haveLabel(state: Extract<RowState, { kind: "have" }>): string {
+  return state.marked ? "Marked as owned" : scanMatchLabel(state.match, state.ownership);
+}
+
 function fromAnswer(answer: Exclude<ScanAnswer, { kind: "paused" }>): RowState {
   switch (answer.kind) {
     case "added":
       return { kind: "added", bookId: answer.book.id, title: answer.book.title, authors: answer.book.authors };
     case "have":
-      return { kind: "have", match: answer.match, title: answer.book.title };
+      return {
+        kind: "have",
+        match: answer.match,
+        bookId: answer.book.id,
+        title: answer.book.title,
+        ownership: answer.book.ownership,
+        format: answer.book.format,
+      };
     case "notFound":
       return { kind: "notFound" };
     case "error":
@@ -91,10 +115,11 @@ function fromAnswer(answer: Exclude<ScanAnswer, { kind: "paused" }>): RowState {
 /**
  * One shelf-scanning session: the list of scanned codes and the queue that
  * looks them up one at a time (server actions run one after another
- * anyway). It lives with the search box rather than inside the camera
- * dialog, so closing the dialog doesn't lose a code still in the queue:
- * those are still looked up and added, and the summary under the search
- * box counts them.
+ * anyway). It lives with the whole add page rather than inside the camera
+ * dialog or the search box, so closing the dialog, switching to Manual
+ * entry or picking a search result doesn't lose a code still in the queue:
+ * those are still looked up and added, and the summary at the top of the
+ * page counts them.
  */
 class ShelfScanSession {
   private snapshot: ShelfScanSnapshot = {
@@ -190,6 +215,22 @@ class ShelfScanSession {
     }
   };
 
+  /** "I bought it" / "I have it again" on a wishlist or given-away match. */
+  markOwned = async (id: number) => {
+    const row = this.row(id);
+    if (row?.state.kind !== "have" || row.state.marking || row.state.marked) return;
+    const have = row.state;
+    this.setRow(id, { state: { ...have, marking: true } });
+    try {
+      const res = await setOwnership(have.bookId, BookOwnership.OWNED);
+      if (res.error) throw new Error(res.error);
+      this.setRow(id, { state: { ...have, ownership: BookOwnership.OWNED, marked: true } }, true);
+    } catch {
+      this.setRow(id, { state: have });
+      this.set({ announcement: `Couldn't mark ${have.title} as owned` });
+    }
+  };
+
   addAnyway = (id: number) => {
     if (this.row(id)?.state.kind !== "have") return;
     this.setRow(id, { force: true, state: { kind: "waiting" } });
@@ -202,7 +243,7 @@ class ShelfScanSession {
     this.enqueue(id);
   };
 
-  /** Runs the queue while the search box is on screen. */
+  /** Runs the queue while the add page is open. */
   start = () => {
     this.active = true;
     void this.work();
@@ -262,7 +303,10 @@ class ShelfScanSession {
   }
 }
 
-export type ShelfScan = Pick<ShelfScanSession, "handleCode" | "undo" | "addAnyway" | "retry"> & {
+export type ShelfScan = Pick<
+  ShelfScanSession,
+  "handleCode" | "undo" | "markOwned" | "addAnyway" | "retry"
+> & {
   snapshot: ShelfScanSnapshot;
 };
 
@@ -279,6 +323,7 @@ export function useShelfScan(): ShelfScan {
     snapshot,
     handleCode: session.handleCode,
     undo: session.undo,
+    markOwned: session.markOwned,
     addAnyway: session.addAnyway,
     retry: session.retry,
   };
@@ -318,10 +363,11 @@ function RowLine({
   onAddByHand: (isbn: string) => void;
 }) {
   const { state } = row;
-  const label =
-    state.kind === "have" && state.match === "title"
-      ? "Another edition in your library"
-      : KIND_LABELS[state.kind];
+  const label = state.kind === "have" ? haveLabel(state) : KIND_LABELS[state.kind];
+  // A wishlist or given-away copy of this very edition is most likely the
+  // book in hand, so it can be marked owned from here (as on the check page).
+  const markOwned =
+    state.kind === "have" && !state.marked ? checkVerdict(state.match, state).markOwned : null;
   const text =
     state.kind === "added"
       ? [state.title, ...state.authors.slice(0, 1)].join(" · ")
@@ -334,8 +380,10 @@ function RowLine({
       <span
         className={cn(
           "flex items-center gap-1 text-xs font-medium",
-          state.kind === "added" && "text-emerald-700 dark:text-emerald-400",
-          (state.kind === "have" || state.kind === "notFound") && "text-amber-700 dark:text-amber-400",
+          (state.kind === "added" || (state.kind === "have" && state.marked)) &&
+            "text-emerald-700 dark:text-emerald-400",
+          ((state.kind === "have" && !state.marked) || state.kind === "notFound") &&
+            "text-amber-700 dark:text-amber-400",
           state.kind === "failed" && "text-destructive",
           (state.kind === "waiting" ||
             state.kind === "looking" ||
@@ -359,14 +407,26 @@ function RowLine({
           Undo
         </Button>
       )}
+      {state.kind === "have" && markOwned && (
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          disabled={state.marking}
+          onClick={() => void scan.markOwned(row.id)}
+        >
+          {state.marking ? "Saving…" : markOwned}
+        </Button>
+      )}
       {state.kind === "have" && state.match === "title" && (
         <Button type="button" variant="ghost" size="sm" onClick={() => scan.addAnyway(row.id)}>
           Add anyway
         </Button>
       )}
       {state.kind === "notFound" && (
-        // Opening the add form ends the session, so not while codes are
-        // still being looked up.
+        // The session outlives the add form, but saving it can open the
+        // book, leaving the page, so not while codes are still being
+        // looked up.
         <Button
           type="button"
           variant="ghost"

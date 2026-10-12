@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { BookOpen, Loader2 } from "lucide-react";
 import { catalogueBookValues } from "@/lib/catalogue-values";
@@ -10,7 +9,7 @@ import { SOURCE_LABELS, type BookDetails, type BookMetadata } from "@/lib/metada
 import type { TagImportSettings } from "@/lib/tag-rules";
 import type { BookFormValues } from "@/components/book-form";
 import { BarcodeScanner } from "@/components/barcode-scanner";
-import { NEWEST_FIRST_HREF, useShelfScan } from "@/components/shelf-scan";
+import { NEWEST_FIRST_HREF, type ShelfScan } from "@/components/shelf-scan";
 import { Input } from "@/components/ui/input";
 
 /** Shortest query worth sending: one or two letters match most of a
@@ -35,15 +34,17 @@ const IMPORT_ALL_TAGS: TagImportSettings = {
  * lazy details (description, subjects) and hands a prefilled form-value
  * object to the parent, which switches to the review form.
  *
- * With `onAddByHand`, the barcode scanner also offers "Keep scanning",
+ * With `shelfScan`, the barcode scanner also offers "Keep scanning",
  * which adds each scanned book straight away (components/shelf-scan.tsx).
+ * The session is the parent's, so codes still in line when this unmounts
+ * (Manual entry, a picked result) are looked up and added all the same.
  */
 export function ImportSearch({
   onPick,
   initialQuery,
   tagImport = IMPORT_ALL_TAGS,
   openScannerOnMount = false,
-  onAddByHand,
+  shelfScan,
 }: {
   /** `scanned`: the pick came from the barcode scanner, so adding another
    *  can open the camera again. */
@@ -54,11 +55,11 @@ export function ImportSearch({
   /** How catalogue subjects become tags (Preferences, New books). */
   tagImport?: TagImportSettings;
   openScannerOnMount?: boolean;
-  /** "Add by hand" for a shelf-scanned code no catalogue knows. */
-  onAddByHand?: (isbn: string) => void;
+  /** The page's shelf-scan session, and "Add by hand" for a scanned code
+   *  no catalogue knows. */
+  shelfScan?: { scan: ShelfScan; onAddByHand: (isbn: string) => void };
 }) {
   const router = useRouter();
-  const shelf = useShelfScan();
   const [query, setQuery] = useState(initialQuery ?? "");
   // Results are stored with the query they answer. Everything the UI needs —
   // which results to show, and whether a search is outstanding — is then
@@ -199,36 +200,13 @@ export function ImportSearch({
           onDetected={handleScan}
           defaultOpen={openScannerOnMount}
           shelfScan={
-            onAddByHand && {
-              scan: shelf,
-              onAddByHand,
+            shelfScan && {
+              ...shelfScan,
               onDone: () => router.push(NEWEST_FIRST_HREF),
             }
           }
         />
       </div>
-
-      {/* What a shelf scan added, once the camera is closed. Codes still
-          in the queue then are looked up and added all the same. The
-          sr-only line is always there, so the total is read out when it
-          changes; the visible one comes and goes. */}
-      <p role="status" className="sr-only">
-        {shelf.snapshot.pending === 0 && shelf.snapshot.added > 0
-          ? `Added ${shelf.snapshot.added} book${shelf.snapshot.added === 1 ? "" : "s"} from the shelf`
-          : ""}
-      </p>
-      <p className="text-sm text-muted-foreground empty:hidden">
-        {shelf.snapshot.pending > 0
-          ? `Still adding ${shelf.snapshot.pending} book${shelf.snapshot.pending === 1 ? "" : "s"}…`
-          : shelf.snapshot.added > 0 && (
-              <>
-                Added {shelf.snapshot.added} book{shelf.snapshot.added === 1 ? "" : "s"} from the shelf ·{" "}
-                <Link href={NEWEST_FIRST_HREF} className="underline underline-offset-2">
-                  See them in the library
-                </Link>
-              </>
-            )}
-      </p>
 
       {searching && (
         <p className="flex items-center gap-2 text-sm text-muted-foreground">

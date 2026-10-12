@@ -168,6 +168,39 @@ describe("scanAddBook", () => {
     expect(await prisma.book.count({ where: { userId } })).toBe(1);
   });
 
+  it("says how the library holds the match, so a wishlist copy isn't worded as one you have", async () => {
+    const wished = await prisma.book.create({
+      data: {
+        userId,
+        title: "The Hobbit",
+        searchText: "the hobbit",
+        isbn: SCANNED,
+        format: BookFormat.EBOOK,
+        ownership: BookOwnership.WISHLIST,
+      },
+    });
+    expect(await scanAddBook(SCANNED)).toMatchObject({
+      kind: "have",
+      match: "isbn",
+      book: { id: wished.id, ownership: BookOwnership.WISHLIST, format: BookFormat.EBOOK },
+    });
+
+    await prisma.book.update({
+      where: { id: wished.id },
+      data: {
+        isbn: null,
+        ownership: BookOwnership.GIVEN_AWAY,
+        authors: ["J.R.R. Tolkien"],
+        searchText: "the hobbit j.r.r. tolkien",
+      },
+    });
+    expect(await scanAddBook(SCANNED)).toMatchObject({
+      kind: "have",
+      match: "title",
+      book: { id: wished.id, ownership: BookOwnership.GIVEN_AWAY, format: BookFormat.EBOOK },
+    });
+  });
+
   it("reports the same title in another edition, and adds it when asked to", async () => {
     await prisma.book.create({
       data: {

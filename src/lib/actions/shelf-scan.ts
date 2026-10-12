@@ -1,5 +1,6 @@
 "use server";
 
+import type { BookFormat, BookOwnership } from "@prisma/client";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/actions/helpers";
@@ -20,7 +21,12 @@ import { bookSchema, isAllowedCoverUrl } from "@/lib/validation";
 /** What one scanned barcode came to. */
 export type ScanResult =
   | { kind: "added"; book: { id: string; title: string; authors: string[] } }
-  | { kind: "have"; match: "isbn" | "title"; book: { id: string; title: string } }
+  | {
+      kind: "have";
+      match: "isbn" | "title";
+      /** Ownership and format word the answer as the check page does. */
+      book: { id: string; title: string; ownership: BookOwnership; format: BookFormat };
+    }
   | { kind: "notFound"; isbn: string }
   /** The lookup budget is spent: try this code again after the wait. */
   | { kind: "paused"; retryInMs: number }

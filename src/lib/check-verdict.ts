@@ -145,6 +145,20 @@ export function duplicateNotice(
 }
 
 /**
+ * A shelf-scan row's label for a book the library already has. A wishlist,
+ * borrowed or given-away copy is worded as the check page words it (its
+ * headline, without the full stop), not as a book you have; one you own
+ * keeps the list's short wording.
+ */
+export function scanMatchLabel(match: "isbn" | "title", ownership: BookOwnership): string {
+  if (ownership === BookOwnership.OWNED) {
+    return match === "isbn" ? "Already in your library" : "Another edition in your library";
+  }
+  // The format only changes an owned title match's headline.
+  return checkVerdict(match, { ownership, format: BookFormat.PHYSICAL }).headline.replace(/\.$/, "");
+}
+
+/**
  * `?ownership=` on the add page ("Add to wishlist"). Only an exact enum
  * value counts; anything else (lower case, unknown, repeated) is ignored so
  * the Preferences default applies.
