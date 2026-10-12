@@ -147,7 +147,7 @@ export function BookRow({
   return (
     <Link
       href={`/books/${book.id}`}
-      className="group flex items-center gap-3 rounded-lg border bg-card p-2 transition-colors hover:border-ring/60"
+      className="lift group flex items-center gap-3 rounded-lg border bg-card p-2 transition-colors hover:border-ring/60"
     >
       <BookCover book={book} className="aspect-[2/3] w-10 shrink-0" />
       <div className="grid min-w-0 flex-1 gap-0.5">
@@ -200,7 +200,7 @@ export function BookCard({
     <Link
       href={`/books/${book.id}`}
       className={cn(
-        "group flex flex-col rounded-lg border bg-card transition-colors hover:border-ring/60",
+        "lift group flex flex-col rounded-lg border bg-card transition-colors hover:border-ring/60",
         compact ? "gap-1.5 p-2" : "gap-2 p-3",
       )}
     >

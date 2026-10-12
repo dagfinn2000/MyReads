@@ -786,6 +786,49 @@ html[data-covers="plain"] .drawn-cover {
   }
 }
 
+/* ── Page and library motion ───────────────────────────────────────────────
+   Pages fade up as they open ((app)/template.tsx), library cards rise into
+   place one after another (each card's --i is its position, capped in
+   library-view.tsx), and a card lifts a little under the pointer.
+   `backwards` fill only holds the start frame during the delay: once an
+   animation ends nothing is left applied, so a finished page wrapper never
+   becomes the containing block for the fixed bulk-edit bar. */
+@keyframes page-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+@keyframes card-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+.page-in {
+  animation: page-in 0.3s ease-out backwards;
+}
+.card-in {
+  animation: card-in 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+  animation-delay: calc(var(--i, 0) * 40ms);
+}
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-motion="off"]) .lift {
+    transition:
+      transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1),
+      box-shadow 0.2s,
+      border-color 0.15s;
+  }
+  html:not([data-motion="off"]) .lift:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 24px -14px rgb(0 0 0 / 0.45);
+  }
+  html:not([data-motion="off"]) .no-lift .lift:hover {
+    transform: none;
+    box-shadow: none;
+  }
+}
+
 /* ── Motion ────────────────────────────────────────────────────────────────
    Every animation and transition in the app, including the menu and dialog
    zoom from shadcn, stops when the device asks for reduced motion or the

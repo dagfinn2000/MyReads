@@ -30,6 +30,10 @@ export interface LibraryGroup {
 /** How many more cards each "Show more" asks the server for. */
 const PAGE_STEP = 200;
 
+/** Cards that fade in one after another when the library opens. The rest
+ *  appear together, so a big library (or "Show more") never waits. */
+const STAGGERED_CARDS = 24;
+
 /** Columns per breakpoint for each cover size (the View menu). */
 const GRID_CLASS: Record<LibraryDisplay["cardSize"], string> = {
   small: "grid grid-cols-3 gap-2 sm:grid-cols-4 sm:gap-3 md:grid-cols-6 lg:grid-cols-8",
@@ -149,16 +153,19 @@ export function LibraryView({
 
   const list = display.layout === "list";
   const renderGrid = (items: BookCardBook[]) => (
-    <div className={list ? "grid gap-2" : GRID_CLASS[display.cardSize]}>
-      {items.map((book) => {
+    // no-lift: cards stay put on hover while picking, so the selection ring
+    // keeps lining up with the card.
+    <div className={cn(list ? "grid gap-2" : GRID_CLASS[display.cardSize], selectMode && "no-lift")}>
+      {items.map((book, i) => {
         const isSelected = selected.has(book.id);
         return (
           <div
             key={book.id}
             className={cn(
-              "relative rounded-lg",
+              "card-in relative rounded-lg",
               selectMode && isSelected && "ring-2 ring-primary",
             )}
+            style={{ "--i": i < STAGGERED_CARDS ? i : 0 } as React.CSSProperties}
           >
             {list ? (
               <BookRow book={book} details={display} />
