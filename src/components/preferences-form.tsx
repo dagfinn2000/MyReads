@@ -29,6 +29,7 @@ import {
   type Preferences,
 } from "@/lib/preferences";
 import { cn } from "@/lib/utils";
+import { TagRulesList } from "@/components/tag-rules-list";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -338,7 +339,7 @@ export function PreferencesForm({
               : "Changes save as you make them."}
       </p>
 
-      <Section title="New books">
+      <Section title="New books" id="new-books">
         <Choice
           label="Format"
           value={prefs.newBookFormat}
@@ -360,11 +361,39 @@ export function PreferencesForm({
           }))}
           onChange={(v) => update({ newBookOwnership: v })}
         />
-        <Toggle
-          label="Copy subjects from the catalogue as tags"
-          checked={prefs.importTagsMode !== "off"}
-          onChange={(c) => update({ importTagsMode: c ? "all" : "off" })}
+        <Choice
+          label="Books I add as Read were finished"
+          hint="Bulk edit's Set status: Read follows this too."
+          value={prefs.addedAsReadFinished}
+          options={[
+            { value: "today", label: "Today" },
+            { value: "undated", label: "No date, unless I pick one" },
+          ]}
+          onChange={(v) => update({ addedAsReadFinished: v })}
         />
+        <Choice
+          label="After adding a book"
+          value={prefs.afterAdd}
+          options={[
+            { value: "open", label: "Open the book" },
+            { value: "another", label: "Add another" },
+            { value: "library", label: "Go to the library" },
+          ]}
+          onChange={(v) => update({ afterAdd: v })}
+        />
+        <Choice
+          label="Copy subjects from the catalogue as tags"
+          value={prefs.importTagsMode}
+          options={[
+            { value: "off", label: "Off" },
+            { value: "known", label: "Only tags I already use" },
+            { value: "all", label: "All of them" },
+          ]}
+          onChange={(v) => update({ importTagsMode: v })}
+        />
+        {/* From the server's copy, not this form's state: rules are added
+            elsewhere (Manage tags) and removed through their own action. */}
+        <TagRulesList renames={initial.tagRenames} skips={initial.tagSkips} />
       </Section>
 
       <Section title="Dates and numbers">

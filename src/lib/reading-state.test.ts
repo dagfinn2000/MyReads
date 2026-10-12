@@ -48,6 +48,59 @@ describe("settleReadingState", () => {
     expect(s.dateStarted).toBeNull();
   });
 
+  it("leaves a book marked Read undated when asked to, and still counts the read", () => {
+    const s = settleReadingState(
+      ReadingStatus.WANT_TO_READ,
+      { ...blank, status: ReadingStatus.READ },
+      0,
+      now,
+      { undatedFinish: true },
+    );
+    expect(s.dateFinished).toBeNull();
+    expect(s.timesRead).toBe(1);
+  });
+
+  it("keeps a given finish date over an undated finish", () => {
+    const s = settleReadingState(
+      null,
+      { ...blank, status: ReadingStatus.READ, dateFinished: earlier },
+      0,
+      now,
+      { undatedFinish: true },
+    );
+    expect(s.dateFinished).toBe(earlier);
+  });
+
+  it("keeps an already-Read book undated when it is saved without a date", () => {
+    // A later save (a new rating) must not stamp today on it.
+    const s = settleReadingState(ReadingStatus.READ, { ...blank, status: ReadingStatus.READ }, 0, now);
+    expect(s.dateFinished).toBeNull();
+    expect(s.timesRead).toBe(1);
+  });
+
+  it("still finishes today when a book moves to Read without a date", () => {
+    const s = settleReadingState(ReadingStatus.READING, { ...blank, status: ReadingStatus.READ }, 0, now, {});
+    expect(s.dateFinished).toBe(now);
+  });
+
+  it("ignores an undated finish for the other statuses", () => {
+    for (const status of [ReadingStatus.READING, ReadingStatus.DNF, ReadingStatus.WANT_TO_READ]) {
+      const s = settleReadingState(
+        ReadingStatus.WANT_TO_READ,
+        { ...blank, status, dateFinished: earlier },
+        0,
+        now,
+        { undatedFinish: true },
+      );
+      expect(s.dateFinished).toBe(earlier);
+      expect(s.timesRead).toBe(0);
+    }
+    const reading = settleReadingState(null, { ...blank, status: ReadingStatus.READING }, 0, now, {
+      undatedFinish: true,
+    });
+    expect(reading.dateStarted).toBe(now);
+  });
+
   it("keeps the page for Reading and Did Not Finish only", () => {
     const page = { ...blank, currentPage: 120 };
     expect(settleReadingState(null, { ...page, status: ReadingStatus.READING }, 0, now).currentPage).toBe(120);

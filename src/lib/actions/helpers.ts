@@ -7,6 +7,9 @@ export interface ActionState {
   /** Set by updateReading when the save marked the book as read, so the
    *  reading card can celebrate. */
   finished?: boolean;
+  /** Set by createBook when the reader chose "Add and add another": the
+   *  form stays on the add page and says what was added. */
+  added?: { id: string; title: string };
 }
 
 /** All actions require a session; returns the user id or throws. */

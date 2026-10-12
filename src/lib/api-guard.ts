@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { metadataLimiter } from "@/lib/rate-limit";
+import { METADATA_LOOKUPS_PER_MINUTE, metadataLimiter } from "@/lib/rate-limit";
 
 /**
  * Shared gate for the three /api/metadata routes: requires a session, then
@@ -48,4 +48,28 @@ export function spendMetadataBudget(userId: string): NextResponse | null {
   }
   metadataLimiter.hit(key);
   return null;
+}
+
+/**
+ * Takes `units` of `userId`'s outbound-lookup budget at once, or none when
+ * fewer are left. For callers that aren't routes (the shelf scan), which
+ * want to know how long to wait rather than a 429. `used` is the window's
+ * count after the call, to show the reader.
+ */
+export function takeMetadataBudget(
+  userId: string,
+  units = 1,
+): { ok: true; used: number } | { ok: false; retryInMs: number; used: number } {
+  const key = `metadata:${userId}`;
+  const { count, resetInMs } = metadataLimiter.usage(key);
+  if (count + units > METADATA_LOOKUPS_PER_MINUTE) {
+    return { ok: false, retryInMs: resetInMs, used: count };
+  }
+  for (let i = 0; i < units; i++) metadataLimiter.hit(key);
+  return { ok: true, used: count + units };
+}
+
+/** Lookups `userId` has made in the current minute. */
+export function metadataBudgetUsed(userId: string): number {
+  return metadataLimiter.usage(`metadata:${userId}`).count;
 }

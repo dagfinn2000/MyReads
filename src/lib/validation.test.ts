@@ -87,4 +87,10 @@ describe("reading dates", () => {
     expect(pastReadSchema.safeParse({ dateStarted: "2020-02-01", dateFinished: "2020-01-01" }).success).toBe(false);
     expect(pastReadSchema.safeParse({ dateFinished: "2019-05-01" }).success).toBe(true);
   });
+
+  it("reads a ticked Don't remember box as true and a missing one as false", () => {
+    expect(readingSchema.parse({ status: "READ", finishedUnknown: "on" }).finishedUnknown).toBe(true);
+    expect(readingSchema.parse({ status: "READ" }).finishedUnknown).toBe(false);
+    expect(readingSchema.parse({ status: "READ", finishedUnknown: "" }).finishedUnknown).toBe(false);
+  });
 });

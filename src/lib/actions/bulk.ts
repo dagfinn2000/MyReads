@@ -5,6 +5,7 @@ import { ReadingStatus } from "@prisma/client";
 import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { getPreferences } from "@/lib/current-user";
 import { settleReadingState } from "@/lib/reading-state";
 
 const bulkSchema = z.object({
@@ -82,6 +83,12 @@ export async function bulkUpdateBooks(
   // independent writes meant a failure partway through left some of the
   // selection changed and some not — while still reporting the whole batch
   // as updated. "Apply to 20 books" should either happen or not.
+  // Books moved to Read with no finish date follow the "Books I add as Read
+  // were finished" preference (New books): today, or no date at all.
+  const undatedFinish = status
+    ? (await getPreferences()).addedAsReadFinished === "undated"
+    : false;
+
   await prisma.$transaction(async (tx) => {
     if (status) {
       // Per book, through the same rules as the reading card: moving a book
@@ -100,6 +107,8 @@ export async function bulkUpdateBooks(
             currentPage: b.currentPage,
           },
           b._count.reads,
+          new Date(),
+          { undatedFinish },
         );
         await tx.book.update({ where: { id: b.id }, data: next });
       }

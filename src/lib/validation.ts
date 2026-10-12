@@ -198,6 +198,9 @@ export const readingSchema = z.object({
     .nullable()
     .optional()
     .catch(null),
+  /** The "Don't remember" box next to the finish date: a ticked checkbox
+   *  sends "on", an unticked one sends nothing. */
+  finishedUnknown: z.preprocess((v) => v === "on" || v === "true" || v === true, z.boolean()),
 }).superRefine(checkReadDates);
 
 /** A past read of a book (the read-history card). Everything is optional:

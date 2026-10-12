@@ -2,56 +2,22 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { after } from "next/server";
 import type { Prisma } from "@prisma/client";
 import { ReadingStatus } from "@prisma/client";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { bookSchema, readingSchema } from "@/lib/validation";
-import { cacheCoverImage, deleteCachedCover } from "@/lib/covers";
+import { deleteCachedCover } from "@/lib/covers";
+import { localizeCoverAfterResponse } from "@/lib/cover-localize";
+import { getPreferences } from "@/lib/current-user";
 import { requireUserId } from "@/lib/actions/helpers";
 import type { ActionState } from "@/lib/actions/helpers";
 import { currentPassEntries } from "@/lib/progress";
 import { settleReadingState } from "@/lib/reading-state";
 import { buildSearchText } from "@/lib/utils";
+import { AFTER_ADD } from "@/lib/preferences";
 
 const statusField = z.nativeEnum(ReadingStatus).catch(ReadingStatus.WANT_TO_READ);
-
-/**
- * If the book was saved with a remote cover URL, pull it into the local
- * cache and point the row at the cached copy. Best-effort: on failure the
- * remote URL stays and the UI still works.
- *
- * Runs via `after()` — the download can take seconds on a slow image host,
- * and the save response shouldn't wait for it. The page renders the remote
- * URL until the cached copy lands; every book page after that gets the
- * local file.
- *
- * One delayed retry: Open Library covers redirect to archive.org, which
- * extracts them from zip archives on demand — a cold request can take 10s+
- * or fail outright while the very next one is instant. Now that no user is
- * waiting, retrying is free and rescues most of those covers.
- */
-function localizeCoverAfterResponse(bookId: string, coverUrl: string | null) {
-  if (!coverUrl || !/^https?:\/\//.test(coverUrl)) return;
-  after(async () => {
-    let localUrl = await cacheCoverImage(coverUrl, bookId);
-    if (!localUrl) {
-      await new Promise((r) => setTimeout(r, 10_000));
-      localUrl = await cacheCoverImage(coverUrl, bookId);
-    }
-    if (localUrl) {
-      // Only if the book still has the cover this download was for. A save
-      // in the meantime may have picked another one, and this older
-      // download finishing late must not overwrite it.
-      const { count } = await prisma.book.updateMany({
-        where: { id: bookId, coverUrl },
-        data: { coverUrl: localUrl },
-      });
-      if (count === 0) await deleteCachedCover(localUrl);
-    }
-  });
-}
 
 /** Create a book from the add form (manual or import-prefilled). */
 export async function createBook(
@@ -60,24 +26,51 @@ export async function createBook(
 ): Promise<ActionState> {
   const userId = await requireUserId();
 
-  const parsed = bookSchema.safeParse(Object.fromEntries(formData));
+  const fields = Object.fromEntries(formData);
+  const parsed = bookSchema.safeParse(fields);
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
   }
+  // The shelf's own fields: Finished, Don't remember and Rating for Read;
+  // Started and Current page for Currently Reading. Same checks as the
+  // reading card (no dates in the future, none backwards).
+  const status = statusField.parse(formData.get("status"));
+  const readingParsed = readingSchema.safeParse({ ...fields, status });
+  if (!readingParsed.success) {
+    return { error: readingParsed.error.issues[0]?.message ?? "Invalid input" };
+  }
+  const r = readingParsed.data;
+  const prefs = await getPreferences();
+  // Which submit button was pressed; a form without one follows Preferences.
+  const afterAdd = z.enum(AFTER_ADD).catch(prefs.afterAdd).parse(formData.get("afterAdd"));
+
   // Adding a book straight onto Read or Currently Reading gets the same
-  // dates and read count as moving it there from the reading card.
+  // dates and read count as moving it there from the reading card. Without a
+  // date, Read means today unless the reader said they don't remember (or
+  // chose undated finishes in Preferences).
+  const now = new Date();
   const reading = settleReadingState(
     null,
     {
-      status: statusField.parse(formData.get("status")),
-      dateStarted: null,
-      dateFinished: null,
-      currentPage: null,
+      status,
+      dateStarted: status === ReadingStatus.READING ? (r.dateStarted ?? null) : null,
+      dateFinished:
+        status === ReadingStatus.READ && !r.finishedUnknown ? (r.dateFinished ?? null) : null,
+      currentPage: r.currentPage ?? null,
     },
     0,
+    now,
+    { undatedFinish: r.finishedUnknown || prefs.addedAsReadFinished === "undated" },
   );
 
   const data = parsed.data;
+  // Same rule as the reading card: a page past the end is a typo.
+  if (reading.currentPage != null && data.pageCount != null && reading.currentPage > data.pageCount) {
+    return {
+      error: `Page ${reading.currentPage} is past the end of the book (${data.pageCount} pages)`,
+    };
+  }
+
   const book = await prisma.book.create({
     data: {
       userId,
@@ -95,17 +88,35 @@ export async function createBook(
       ownership: data.ownership,
       openLibraryId: data.openLibraryId ?? null,
       status: reading.status,
+      rating: r.rating || null, // 0 = unrated
       dateStarted: reading.dateStarted,
       dateFinished: reading.dateFinished,
       timesRead: reading.timesRead,
+      currentPage: reading.currentPage,
       searchText: buildSearchText(data.title, data.authors, data.seriesName),
+      // A book added mid-read starts its log at the page given: one entry
+      // and no page-0 anchor before it, so no day is credited with the pages
+      // read before the book was added (see logProgress). Dated no earlier
+      // than the start, so it stays inside the current pass.
+      ...(reading.currentPage && {
+        progress: {
+          create: {
+            page: reading.currentPage,
+            date: reading.dateStarted && reading.dateStarted > now ? reading.dateStarted : now,
+          },
+        },
+      }),
     },
   });
 
   localizeCoverAfterResponse(book.id, book.coverUrl);
 
   revalidatePath("/books");
-  redirect(`/books/${book.id}`);
+  revalidatePath("/stats");
+  if (afterAdd === "another") {
+    return { success: true, added: { id: book.id, title: book.title } };
+  }
+  redirect(afterAdd === "library" ? "/books" : `/books/${book.id}`);
 }
 
 /** Update a book's bibliographic fields from the edit form. */
@@ -197,10 +208,12 @@ export async function updateReading(
     {
       status: data.status,
       dateStarted: data.dateStarted ?? null,
-      dateFinished: data.dateFinished ?? null,
+      dateFinished: data.finishedUnknown ? null : (data.dateFinished ?? null),
       currentPage: data.currentPage ?? null,
     },
     existing._count.reads,
+    new Date(),
+    { undatedFinish: data.finishedUnknown },
   );
 
   // A page past the end is a typo, and the reading log would keep it: every
@@ -288,9 +301,11 @@ async function logProgress(
 
   // Finishing a tracked book: close the log at the final page. An untracked
   // pass (no entries) logs nothing — marking a book Read weeks after the
-  // fact shouldn't credit every page of it to one day.
+  // fact shouldn't credit every page of it to one day. Nor does an undated
+  // finish: there is no day to credit the last pages to.
   if (
     next.status === ReadingStatus.READ &&
+    next.dateFinished != null &&
     prev.status !== ReadingStatus.READ &&
     prev.pageCount != null &&
     last != null &&

@@ -9,6 +9,7 @@ import { STATUS_LABELS, toDateInputValue } from "@/lib/display";
 import { usePreferences } from "@/components/preferences-provider";
 import { currentPassEntries } from "@/lib/progress";
 import { ProgressChart, ProgressLog } from "@/components/progress-log";
+import { FinishedDateField } from "@/components/finished-date-field";
 import { StarRatingInput } from "@/components/star-rating-input";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -113,16 +114,10 @@ export function ReadingCard({
                 defaultValue={toDateInputValue(book.dateStarted, prefs.timeZone)}
               />
             </div>
-            <div className="grid gap-2">
-              <Label htmlFor="dateFinished">Finished</Label>
-              <Input
-                id="dateFinished"
-                name="dateFinished"
-                type="date"
-                className="w-40"
-                defaultValue={toDateInputValue(book.dateFinished, prefs.timeZone)}
-              />
-            </div>
+            <FinishedDateField
+              defaultDate={toDateInputValue(book.dateFinished, prefs.timeZone)}
+              defaultUnknown={book.status === ReadingStatus.READ && !book.dateFinished}
+            />
             <div className="grid gap-2">
               <Label htmlFor="currentPage">
                 Current page{book.pageCount ? ` (of ${book.pageCount})` : ""}
