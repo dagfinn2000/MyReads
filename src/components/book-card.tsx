@@ -1,7 +1,7 @@
-import Link from "next/link";
 import type { Book } from "@prisma/client";
 import { ReadingStatus } from "@prisma/client";
 import { BookOpen, HandHeart } from "lucide-react";
+import { BookLink } from "@/components/book-link";
 import { Badge } from "@/components/ui/badge";
 import { Stars } from "@/components/stars";
 import { STATUS_BADGE_CLASS, STATUS_LABELS } from "@/lib/display";
@@ -17,13 +17,20 @@ export function BookCover({
   book,
   className,
   loading = "lazy",
+  flightTarget,
 }: {
   book: Pick<Book, "title" | "coverUrl"> & { authors?: string[] };
   className?: string;
   loading?: "eager" | "lazy";
+  /** The book's id, on the book page's own cover: where a cover clicked
+   *  elsewhere flies to (lib/cover-flight.ts). */
+  flightTarget?: string;
 }) {
   return (
-    <div className={cn("book-cover relative overflow-hidden rounded-md bg-muted", className)}>
+    <div
+      className={cn("book-cover relative overflow-hidden rounded-md bg-muted", className)}
+      data-cover-for={flightTarget}
+    >
       {book.coverUrl ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img
@@ -145,8 +152,8 @@ export function BookRow({
 }) {
   const progress = readingProgress(book);
   return (
-    <Link
-      href={`/books/${book.id}`}
+    <BookLink
+      bookId={book.id}
       className="lift group flex items-center gap-3 rounded-lg border bg-card p-2 transition-colors hover:border-ring/60"
     >
       <BookCover book={book} className="aspect-[2/3] w-10 shrink-0" />
@@ -179,7 +186,7 @@ export function BookRow({
           </Badge>
         )}
       </div>
-    </Link>
+    </BookLink>
   );
 }
 
@@ -197,8 +204,8 @@ export function BookCard({
   const progress = readingProgress(book);
 
   return (
-    <Link
-      href={`/books/${book.id}`}
+    <BookLink
+      bookId={book.id}
       className={cn(
         "lift group flex flex-col rounded-lg border bg-card transition-colors hover:border-ring/60",
         compact ? "gap-1.5 p-2" : "gap-2 p-3",
@@ -249,6 +256,6 @@ export function BookCard({
           </span>
         </div>
       </div>
-    </Link>
+    </BookLink>
   );
 }

@@ -12,6 +12,7 @@ import {
   STATUS_LABELS,
 } from "@/lib/display";
 import { BookCover } from "@/components/book-card";
+import { BookLink } from "@/components/book-link";
 import { BookShelvesCard } from "@/components/book-shelves-card";
 import { DeleteBookButton } from "@/components/delete-book-button";
 import { QuotesCard } from "@/components/quotes-card";
@@ -98,7 +99,12 @@ export default async function BookDetailPage({
     // Library URLs, say) would stretch the whole page past the viewport.
     <div className="grid grid-cols-1 gap-6 md:grid-cols-[240px_minmax(0,1fr)]">
       <div className="grid content-start gap-3">
-        <BookCover book={book} className="aspect-[2/3] w-full max-w-60" loading="eager" />
+        <BookCover
+          book={book}
+          className="aspect-[2/3] w-full max-w-60"
+          loading="eager"
+          flightTarget={book.id}
+        />
         <div className="flex gap-2">
           <Button asChild variant="outline" size="sm">
             <Link href={`/books/${book.id}/edit`}>
@@ -198,9 +204,9 @@ export default async function BookDetailPage({
             </h2>
             <div className="flex flex-wrap gap-3">
               {seriesBooks.map((b) => (
-                <Link
+                <BookLink
                   key={b.id}
-                  href={`/books/${b.id}`}
+                  bookId={b.id}
                   className="group w-20"
                   title={`${b.title}${b.seriesNumber != null ? ` (#${b.seriesNumber})` : ""}`}
                 >
@@ -209,7 +215,7 @@ export default async function BookDetailPage({
                     {b.seriesNumber != null ? `#${b.seriesNumber} · ` : ""}
                     {b.title}
                   </p>
-                </Link>
+                </BookLink>
               ))}
             </div>
           </section>
