@@ -57,6 +57,21 @@ describe("bookSchema seriesNumber", () => {
   });
 });
 
+describe("bookSchema lengthMinutes", () => {
+  it("saves a blank length as not known", () => {
+    expect(bookSchema.parse({ ...minimalForm, lengthMinutes: "" }).lengthMinutes).toBeNull();
+    expect(bookSchema.parse(minimalForm).lengthMinutes).toBeUndefined();
+    expect(bookSchema.parse({ ...minimalForm, lengthMinutes: "700" }).lengthMinutes).toBe(700);
+  });
+
+  it("reports a length out of range instead of dropping it", () => {
+    const zero = bookSchema.safeParse({ ...minimalForm, lengthMinutes: "0" });
+    expect(zero.error?.issues[0]?.message).toBe("Length must be at least 1 minute");
+    const huge = bookSchema.safeParse({ ...minimalForm, lengthMinutes: "60001" });
+    expect(huge.error?.issues[0]?.message).toBe("Length must be at most 1,000 hours");
+  });
+});
+
 describe("reading dates", () => {
   const dayAfterTomorrow = new Date(Date.now() + 2 * 86_400_000).toISOString().slice(0, 10);
 

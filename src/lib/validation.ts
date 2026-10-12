@@ -88,6 +88,19 @@ export const bookSchema = z.object({
     .nullable()
     .optional()
     .catch(null),
+  /** An audiobook's running time in whole minutes (the form's hours and
+   *  minutes, added up). Blank is "not known". Same bounds as the backup
+   *  import, and a bad value is reported rather than quietly dropped. */
+  lengthMinutes: z.preprocess(
+    (v) => (typeof v === "string" && v.trim() === "" ? null : v),
+    z.coerce
+      .number()
+      .int("Length must be whole minutes")
+      .min(1, "Length must be at least 1 minute")
+      .max(60000, "Length must be at most 1,000 hours")
+      .nullable()
+      .optional(),
+  ),
   publishedDate: z
     .string()
     .trim()

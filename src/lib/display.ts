@@ -1,5 +1,5 @@
 import { BookFormat, BookOwnership, ReadingStatus } from "@prisma/client";
-import { calendarDay } from "@/lib/dates";
+import { calendarDay, dayKey, keyToUtcDate } from "@/lib/dates";
 import type { DateFormat, NumberFormat } from "@/lib/preferences";
 
 export const STATUS_LABELS: Record<ReadingStatus, string> = {
@@ -107,4 +107,33 @@ export function formatNumber(n: number, prefs?: FormatPrefs): string {
 export function toDateInputValue(d: Date | null | undefined, timeZone?: string): string {
   if (!d) return "";
   return calendarDay(d, timeZone);
+}
+
+const WEEKDAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+const MONTHS_LONG = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December",
+];
+
+/** Month-first date styles write "October 12", the rest "12 October". */
+function monthFirst(format: DateFormat | undefined): boolean {
+  return format === "mmm-d-y" || format === "mm/dd/y";
+}
+
+/** Today as a heading: "Monday 12 October", or "Monday, October 12" for the
+ *  month-first date styles. The day is the reader's, in their zone. */
+export function formatWeekdayDay(d: Date, prefs?: FormatPrefs): string {
+  const key = dayKey(d, prefs?.timeZone);
+  const [, m, day] = key.split("-").map(Number);
+  const weekday = WEEKDAYS[keyToUtcDate(key).getUTCDay()];
+  const month = MONTHS_LONG[m - 1];
+  return monthFirst(prefs?.dateFormat) ? `${weekday}, ${month} ${day}` : `${weekday} ${day} ${month}`;
+}
+
+/** A recent day in a short menu: "Sat 10 Oct", or "Sat, Oct 10". */
+export function formatShortDay(key: string, format?: DateFormat): string {
+  const [, m, day] = key.split("-").map(Number);
+  const weekday = WEEKDAYS[keyToUtcDate(key).getUTCDay()].slice(0, 3);
+  const month = MONTHS_SHORT[m - 1];
+  return monthFirst(format) ? `${weekday}, ${month} ${day}` : `${weekday} ${day} ${month}`;
 }

@@ -178,6 +178,30 @@ describe("createBook", () => {
     expect(book.seriesNumber).toBeNull();
   });
 
+  it("saves an audiobook's length, and no length for other formats", async () => {
+    await redirectOf(
+      createBook({}, form({ ...bookFields, title: "Heard", format: "AUDIOBOOK", lengthMinutes: "970" })),
+    );
+    await redirectOf(
+      createBook({}, form({ ...bookFields, title: "Held", format: "PHYSICAL", lengthMinutes: "970" })),
+    );
+
+    const books = await prisma.book.findMany({ where: { userId }, orderBy: { title: "asc" } });
+    expect(books.map((b) => [b.title, b.lengthMinutes])).toEqual([
+      ["Heard", 970],
+      ["Held", null],
+    ]);
+  });
+
+  it("refuses a length out of range", async () => {
+    const result = await createBook(
+      {},
+      form({ ...bookFields, format: "AUDIOBOOK", lengthMinutes: "60001" }),
+    );
+    expect(result.error).toBe("Length must be at most 1,000 hours");
+    expect(await prisma.book.count({ where: { userId } })).toBe(0);
+  });
+
   it("returns the validation error and saves nothing", async () => {
     const result = await createBook({}, form({ ...bookFields, title: "  " }));
     expect(result.error).toBe("Title is required");
@@ -322,6 +346,15 @@ describe("updateBook", () => {
     );
   });
 
+  it("drops the length when the book stops being an audiobook", async () => {
+    const bk = await makeBook();
+    await redirectOf(updateBook(bk.id, {}, form({ ...bookFields, format: "AUDIOBOOK", lengthMinutes: "600" })));
+    expect((await prisma.book.findUniqueOrThrow({ where: { id: bk.id } })).lengthMinutes).toBe(600);
+
+    await redirectOf(updateBook(bk.id, {}, form({ ...bookFields, format: "EBOOK", lengthMinutes: "600" })));
+    expect((await prisma.book.findUniqueOrThrow({ where: { id: bk.id } })).lengthMinutes).toBeNull();
+  });
+
   it("refuses another account's book", async () => {
     const bk = await makeBook({}, otherUserId);
     const result = await updateBook(bk.id, {}, form({ ...bookFields, title: "Mine now" }));
@@ -384,6 +417,19 @@ describe("updateReading and the reading log", () => {
     // Saving without a page change logs nothing new.
     await updateReading(bk.id, {}, form({ status: "READING", dateStarted: started, currentPage: "120" }));
     expect(await progressOf(bk.id)).toHaveLength(3);
+  });
+
+  it("never anchors a read after its first entry", async () => {
+    // East of UTC, a Started date typed today is midnight UTC, which can
+    // still be ahead of the moment the first page is logged. Tomorrow's
+    // date (allowed, a day's slack) stands in for that here.
+    const tomorrow = new Date(Date.now() + 86_400_000).toISOString().slice(0, 10);
+    const bk = await makeBook({ status: ReadingStatus.READING });
+    await updateReading(bk.id, {}, form({ status: "READING", dateStarted: tomorrow, currentPage: "30" }));
+
+    const log = await progressOf(bk.id);
+    expect(log.map((e) => e.page)).toEqual([0, 30]);
+    expect(log[0].date.getTime()).toBe(log[1].date.getTime());
   });
 
   it("finishing a tracked book closes the log at the last page", async () => {

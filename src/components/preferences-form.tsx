@@ -416,6 +416,51 @@ export function PreferencesForm({
         <TagRulesList renames={initial.tagRenames} skips={initial.tagSkips} />
       </Section>
 
+      <Section title="Reading">
+        <Choice
+          label="Step buttons"
+          hint="The buttons next to the page box, in the book's own unit: pages, percent or minutes."
+          value={prefs.quickLogSteps}
+          options={[
+            { value: "10-25", label: "+10 and +25" },
+            { value: "5-10", label: "+5 and +10" },
+            { value: "5pct", label: "+5% of the book" },
+          ]}
+          onChange={(v) => update({ quickLogSteps: v })}
+        />
+        <Choice
+          label="Ebooks: track by"
+          value={prefs.ebookUnit}
+          options={[
+            { value: "page", label: "Page" },
+            { value: "percent", label: "Percent" },
+          ]}
+          onChange={(v) => update({ ebookUnit: v })}
+        />
+        <Choice
+          label="Audiobooks: track by"
+          hint="Time needs the book's length and a page count, both on its Edit page."
+          value={prefs.audiobookUnit}
+          options={[
+            { value: "page", label: "Page" },
+            { value: "percent", label: "Percent" },
+            { value: "time", label: "Time listened" },
+          ]}
+          onChange={(v) => update({ audiobookUnit: v })}
+        />
+        <Choice
+          label="Pace from"
+          hint="Used for pages a day and the finish forecast while you read."
+          value={prefs.paceFrom}
+          options={[
+            { value: "read", label: "The whole read" },
+            { value: "7d", label: "The last 7 days" },
+            { value: "14d", label: "The last 14 days" },
+          ]}
+          onChange={(v) => update({ paceFrom: v })}
+        />
+      </Section>
+
       <Section title="Dates and numbers">
         <Choice
           label="Dates"

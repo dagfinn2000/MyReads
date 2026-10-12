@@ -9,6 +9,7 @@ import type { CatalogueDiffRow, CatalogueValues } from "@/lib/catalogue-values";
 import { FORMAT_LABELS, OWNERSHIP_LABELS, STATUS_LABELS, toDateInputValue } from "@/lib/display";
 import type { AfterAdd } from "@/lib/preferences";
 import type { TagImportSettings } from "@/lib/tag-rules";
+import { AudiobookLengthField } from "@/components/audiobook-length-field";
 import { CoverPicker } from "@/components/cover-picker";
 import { FinishedDateField } from "@/components/finished-date-field";
 import { LookupDetails } from "@/components/lookup-details";
@@ -34,6 +35,7 @@ export interface BookFormValues {
   description?: string;
   coverUrl?: string;
   pageCount?: string;
+  lengthMinutes?: string; // audiobooks only
   publishedDate?: string;
   tags?: string; // comma-separated
   seriesName?: string;
@@ -88,6 +90,11 @@ export function BookForm({
   const formRef = useRef<HTMLFormElement>(null);
   // Controlled so the cover picker and upload can set it programmatically.
   const [coverUrl, setCoverUrl] = useState(initial.coverUrl ?? "");
+  // Tracked so the audiobook length shows only for audiobooks.
+  const [format, setFormat] = useState<BookFormat>(
+    initial.format ?? BookFormat.PHYSICAL,
+  );
+
   // Kept on every save (editing used to drop it), and filled in by Look up
   // details when the catalogue knows the work.
   const [openLibraryId, setOpenLibraryId] = useState(initial.openLibraryId ?? "");
@@ -273,7 +280,11 @@ export function BookForm({
         <div className="flex flex-wrap items-end gap-4">
           <div className="grid gap-2">
             <Label htmlFor="format">Format</Label>
-            <Select name="format" defaultValue={initial.format ?? BookFormat.PHYSICAL}>
+            <Select
+              name="format"
+              defaultValue={initial.format ?? BookFormat.PHYSICAL}
+              onValueChange={(v) => setFormat(v as BookFormat)}
+            >
               <SelectTrigger id="format" className="w-36">
                 <SelectValue />
               </SelectTrigger>
@@ -286,6 +297,10 @@ export function BookForm({
               </SelectContent>
             </Select>
           </div>
+          <AudiobookLengthField
+            initialMinutes={initial.lengthMinutes}
+            hidden={format !== BookFormat.AUDIOBOOK}
+          />
           {showStatus && (
             <div className="grid gap-2">
               <Label htmlFor="status">Shelf</Label>

@@ -15,8 +15,15 @@ export default function manifest(): MetadataRoute.Manifest {
     display: "standalone",
     background_color: "#1e293b",
     theme_color: "#1e293b",
-    // Long-press the home-screen icon → jump straight into bookstore mode.
+    // Long-press the home-screen icon → jump straight into bookstore mode,
+    // or to the books being read.
     shortcuts: [
+      {
+        name: "Now reading",
+        short_name: "Reading",
+        url: "/reading",
+        icons: [{ src: "/icons/icon-192.png", sizes: "192x192", type: "image/png" }],
+      },
       {
         name: "Do I own this?",
         short_name: "Check",
