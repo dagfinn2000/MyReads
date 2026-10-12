@@ -6,7 +6,8 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { getPreferences } from "@/lib/current-user";
 import { groupBooks, sortBooks, type SortOptions } from "@/lib/library-sort";
-import { buildBookWhere, parseFilters } from "@/lib/library-filters";
+import { parseFilters } from "@/lib/library-filters";
+import { resolveBookWhere } from "@/lib/library-where";
 import { parseLibraryView } from "@/lib/library-view";
 import { canonicalViewQuery } from "@/lib/saved-views";
 import { FilterBar, type FilterValues } from "@/components/filter-bar";
@@ -107,7 +108,7 @@ export default async function BooksPage({
     sp.sort !== undefined || sp.dir !== undefined || sp.group !== undefined;
 
   const filters = parseFilters(sp);
-  const where = buildBookWhere(userId, filters);
+  const where = await resolveBookWhere(userId, filters, prefs);
 
   // How many cards to render. Sorting and grouping stay in JS — the
   // surname-filing and series-block rules have no SQL equivalent — so the

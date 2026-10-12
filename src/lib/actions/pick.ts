@@ -3,7 +3,9 @@
 import { ReadingStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/actions/helpers";
-import { buildBookWhere, parseFilters } from "@/lib/library-filters";
+import { getPreferences } from "@/lib/current-user";
+import { parseFilters } from "@/lib/library-filters";
+import { resolveBookWhere } from "@/lib/library-where";
 
 /**
  * Picks a random book from Want to Read within the current filters, falling
@@ -20,7 +22,11 @@ export async function pickRandomBook(
   searchParams: Record<string, string>,
 ): Promise<{ id: string } | null> {
   const userId = await requireUserId();
-  const where = buildBookWhere(userId, parseFilters(searchParams));
+  const where = await resolveBookWhere(
+    userId,
+    parseFilters(searchParams),
+    await getPreferences(),
+  );
 
   const pickFrom = async (status?: ReadingStatus) => {
     const rows = await prisma.book.findMany({
