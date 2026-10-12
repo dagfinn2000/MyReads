@@ -42,6 +42,11 @@ describe("parsePreferences", () => {
     );
   });
 
+  it("keeps the appearance settings and defaults unknown ones", () => {
+    expect(parsePreferences({ motion: "off" }).motion).toBe("off");
+    expect(parsePreferences({ motion: "wobbly" }).motion).toBe("on");
+  });
+
   it("drops a time zone the runtime doesn't know", () => {
     expect(parsePreferences({ timeZone: "Europe/Oslo" }).timeZone).toBe("Europe/Oslo");
     expect(parsePreferences({ timeZone: "Mars/Olympus" }).timeZone).toBe("");

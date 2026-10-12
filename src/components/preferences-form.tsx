@@ -369,6 +369,19 @@ export function PreferencesForm({
         </p>
       </Section>
 
+      <Section title="Motion">
+        <Choice
+          label="Animations"
+          hint="Always off when your device asks for reduced motion."
+          value={prefs.motion}
+          options={[
+            { value: "on", label: "On" },
+            { value: "off", label: "Off" },
+          ]}
+          onChange={(v) => update({ motion: v })}
+        />
+      </Section>
+
       <Section title="Text">
         <Choice
           label="Text size"

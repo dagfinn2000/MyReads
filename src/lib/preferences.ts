@@ -43,6 +43,10 @@ export const TEXT_SIZES = ["normal", "large", "larger"] as const;
 
 export const LONG_TEXT_FONTS = ["sans", "serif"] as const;
 
+/** Animations on or off. Off is also forced whenever the device asks for
+ *  reduced motion, whatever this says (see globals.css and lib/motion.ts). */
+export const MOTIONS = ["on", "off"] as const;
+
 /** Colour steps for the reading calendar (see lib/heatmap.ts). */
 export const HEATMAP_SCALES = ["standard", "gentle", "heavy", "auto"] as const;
 
@@ -70,6 +74,7 @@ export type Catalogue = (typeof CATALOGUES)[number];
 export type RatingStyle = (typeof RATING_STYLES)[number];
 export type TextSize = (typeof TEXT_SIZES)[number];
 export type LongTextFont = (typeof LONG_TEXT_FONTS)[number];
+export type Motion = (typeof MOTIONS)[number];
 export type HeatmapScale = (typeof HEATMAP_SCALES)[number];
 export type StartPage = (typeof START_PAGES)[number];
 export type HideableNav = (typeof HIDEABLE_NAV)[number];
@@ -107,6 +112,9 @@ export type Preferences = {
   textSize: TextSize;
   longTextFont: LongTextFont;
 
+  // Appearance
+  motion: Motion;
+
   heatmapScale: HeatmapScale;
   startPage: StartPage;
   hiddenNav: HideableNav[];
@@ -131,6 +139,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
   ratingStyle: "half",
   textSize: "normal",
   longTextFont: "sans",
+  motion: "on",
   heatmapScale: "standard",
   startPage: "library",
   hiddenNav: [],
@@ -209,6 +218,7 @@ export function parsePreferences(raw: unknown): Preferences {
     ratingStyle: pick(RATING_STYLES, obj.ratingStyle, d.ratingStyle),
     textSize: pick(TEXT_SIZES, obj.textSize, d.textSize),
     longTextFont: pick(LONG_TEXT_FONTS, obj.longTextFont, d.longTextFont),
+    motion: pick(MOTIONS, obj.motion, d.motion),
     heatmapScale: pick(HEATMAP_SCALES, obj.heatmapScale, d.heatmapScale),
     startPage: pick(START_PAGES, obj.startPage, d.startPage),
     hiddenNav: pickList(HIDEABLE_NAV, obj.hiddenNav),

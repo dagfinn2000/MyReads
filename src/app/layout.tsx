@@ -47,6 +47,8 @@ export default async function RootLayout({
       // Text size and the long-text font (Preferences); see globals.css.
       data-text-size={prefs?.textSize}
       data-long-font={prefs?.longTextFont}
+      // Appearance (Preferences); see globals.css.
+      data-motion={prefs?.motion}
       suppressHydrationWarning
     >
       <body className="min-h-screen bg-background text-foreground antialiased">

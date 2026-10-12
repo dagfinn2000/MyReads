@@ -677,3 +677,34 @@ html[data-long-font="serif"] .long-text {
   font-family: ui-serif, "Iowan Old Style", "Palatino Linotype", Palatino, Georgia,
     Cambria, "Times New Roman", serif;
 }
+
+/* ── Motion ────────────────────────────────────────────────────────────────
+   Every animation and transition in the app, including the menu and dialog
+   zoom from shadcn, stops when the device asks for reduced motion or the
+   reader turns Animations off in Preferences (data-motion="off" on <html>).
+   Durations drop to almost nothing rather than to `none`, so an animation
+   that holds its end state still lands on it. Animations started from
+   script check the same two things through motionAllowed() in
+   lib/motion.ts. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0s !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0s !important;
+    scroll-behavior: auto !important;
+  }
+}
+html[data-motion="off"] *,
+html[data-motion="off"] *::before,
+html[data-motion="off"] *::after {
+  animation-duration: 0.01ms !important;
+  animation-delay: 0s !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  transition-delay: 0s !important;
+  scroll-behavior: auto !important;
+}
