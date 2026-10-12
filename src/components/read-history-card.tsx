@@ -112,7 +112,7 @@ export function ReadHistoryCard({
                 <span>
                   {readLabel(book, prefs)}
                   <span className="ml-2 text-xs text-muted-foreground">
-                    latest — edit in the reading card
+                    latest · edit it in the reading card
                   </span>
                 </span>
                 {book.rating != null && <Stars value={book.rating} />}
