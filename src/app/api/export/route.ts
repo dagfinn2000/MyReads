@@ -23,9 +23,9 @@ import { parsePreferences } from "@/lib/preferences";
  * alongside the newer `ownership` — so unzipping and feeding `library.json`
  * to an older instance keeps working.
  *
- * Once the whole zip has gone out, the account's `lastBackupAt` is set, so
- * the Backup card can say when the newest copy was made. A download that
- * fails or is cancelled part-way doesn't count.
+ * Once the client has read the whole zip, the account's `lastBackupAt` is
+ * set, so the Backup card can say when the newest copy was made. A download
+ * that fails or is cancelled part-way doesn't count.
  */
 export async function GET() {
   const session = await auth();
@@ -126,7 +126,12 @@ export async function GET() {
       hiddenShelfNames: namesOf(prefs.hiddenShelves, shelfNames),
       savedViewOrderNames: namesOf(prefs.savedViewOrder, viewNames),
     },
-    savedViews: savedViews.map(({ name, query }) => ({ name, query })),
+    // A view kept to one shelf names it too, so a restore can point it at
+    // that shelf's new id.
+    savedViews: savedViews.map(({ name, query }) => {
+      const shelfName = shelfNames.get(new URLSearchParams(query).get("shelfId") ?? "");
+      return shelfName ? { name, query, shelfName } : { name, query };
+    }),
     books: books.map(({ userId: _userId, searchText: _searchText, ...book }) => ({
       ...book,
       // `owned` no longer exists on the row, but the export format promises
@@ -174,37 +179,81 @@ export async function GET() {
     compression: "DEFLATE",
   });
 
+  // Pulled, not pushed: each chunk pauses the zip until the client reads
+  // again, so nothing is generated ahead of it. That keeps memory bounded
+  // on a slow connection, and it means the end of the zip is only reached
+  // once the client has actually read everything before it.
   let cancelled = false;
-  const body = new ReadableStream<Uint8Array>({
-    start(controller) {
-      zipStream
-        .on("data", (chunk: Uint8Array) => controller.enqueue(chunk))
-        .on("error", (err: Error) => controller.error(err))
-        .on("end", () => {
-          if (cancelled) return;
-          // The whole zip is out: remember when. A failed write mustn't
-          // spoil a finished download, and the client may have gone away
-          // while it ran, in which case the stream is already closed.
-          prisma.user
-            .updateMany({ where: { id: userId }, data: { lastBackupAt: new Date() } })
-            .catch(() => {})
-            .finally(() => {
-              if (cancelled) return;
-              try {
-                controller.close();
-              } catch {
-                // already closed
-              }
-            });
+  let ended = false;
+  // The pull waiting on the next chunk, if any. The stream only pulls when
+  // a read is waiting and nothing is queued.
+  let waiting: (() => void) | null = null;
+  const wake = () => {
+    const resolve = waiting;
+    waiting = null;
+    resolve?.();
+  };
+
+  // The client has read the last chunk and asked for more: remember when,
+  // then end the stream. A failed write mustn't spoil a finished download,
+  // and the client may have gone away while it ran, in which case the
+  // stream is already closed.
+  const finish = async (controller: ReadableStreamDefaultController<Uint8Array>) => {
+    await prisma.user
+      .updateMany({ where: { id: userId }, data: { lastBackupAt: new Date() } })
+      .catch(() => {});
+    if (cancelled) return;
+    try {
+      controller.close();
+    } catch {
+      // already closed
+    }
+  };
+
+  const body = new ReadableStream<Uint8Array>(
+    {
+      start(controller) {
+        zipStream
+          .on("data", (chunk: Uint8Array) => {
+            zipStream.pause();
+            if (cancelled) return;
+            controller.enqueue(chunk);
+            wake();
+          })
+          .on("error", (err: Error) => {
+            if (cancelled) return;
+            cancelled = true; // a broken zip is no backup
+            controller.error(err);
+            wake();
+          })
+          .on("end", () => {
+            ended = true;
+            if (cancelled || !waiting) return;
+            // A read is already waiting on an empty queue, so the client
+            // has had every chunk.
+            const resolve = waiting;
+            waiting = null;
+            void finish(controller).finally(resolve);
+          });
+      },
+      pull(controller) {
+        if (cancelled) return;
+        if (ended) return finish(controller);
+        return new Promise<void>((resolve) => {
+          waiting = resolve;
+          zipStream.resume();
         });
-      zipStream.resume();
+      },
+      cancel() {
+        // Client went away mid-download — stop generating.
+        cancelled = true;
+        zipStream.pause();
+        wake();
+      },
     },
-    cancel() {
-      // Client went away mid-download — stop generating.
-      cancelled = true;
-      zipStream.pause();
-    },
-  });
+    // Nothing is read ahead of the client.
+    { highWaterMark: 0 },
+  );
 
   const date = new Date().toISOString().slice(0, 10);
   return new NextResponse(body, {

@@ -545,3 +545,51 @@ describe("book-page settings", () => {
     });
   });
 });
+
+describe("saved views kept to one shelf", () => {
+  const query = (shelfId: string) => `shelfId=${shelfId}&group=none&sort=title&dir=asc`;
+  const restoredShelfId = async () =>
+    new URLSearchParams(
+      (await prisma.savedView.findFirstOrThrow({ where: { userId } })).query,
+    ).get("shelfId");
+
+  it("finds the shelf by name", async () => {
+    const shelf = await prisma.shelf.create({ data: { userId, name: "Cosy" } });
+    await importLibrary(
+      userId,
+      payload([], {
+        savedViews: [{ name: "Cosy reads", query: query("old-id"), shelfName: "Cosy" }],
+      }),
+    );
+    expect(await restoredShelfId()).toBe(shelf.id);
+  });
+
+  it("drops the shelf when no shelf here has that name", async () => {
+    await importLibrary(
+      userId,
+      payload([], {
+        savedViews: [{ name: "Cosy reads", query: query("old-id"), shelfName: "Cosy" }],
+      }),
+    );
+    expect(await restoredShelfId()).toBeNull();
+    expect(await prisma.savedView.count({ where: { userId } })).toBe(1);
+  });
+
+  it("keeps an older backup's id only when it is one of this account's shelves", async () => {
+    const shelf = await prisma.shelf.create({ data: { userId, name: "Cosy" } });
+    await importLibrary(
+      userId,
+      payload([], {
+        savedViews: [
+          { name: "Here", query: query(shelf.id) },
+          { name: "Elsewhere", query: query("old-id") },
+        ],
+      }),
+    );
+    const views = await prisma.savedView.findMany({ where: { userId } });
+    const shelfOf = (name: string) =>
+      new URLSearchParams(views.find((v) => v.name === name)!.query).get("shelfId");
+    expect(shelfOf("Here")).toBe(shelf.id);
+    expect(shelfOf("Elsewhere")).toBeNull();
+  });
+});
