@@ -37,6 +37,7 @@ export async function addQuote(
   });
 
   revalidatePath(`/books/${bookId}`);
+  revalidatePath("/quotes");
   return { success: true };
 }
 
@@ -70,6 +71,7 @@ export async function updateQuote(
   });
 
   revalidatePath(`/books/${existing.bookId}`);
+  revalidatePath("/quotes");
   return { success: true };
 }
 
@@ -85,4 +87,5 @@ export async function deleteQuote(quoteId: string): Promise<void> {
 
   await prisma.quote.delete({ where: { id: quoteId } });
   revalidatePath(`/books/${existing.bookId}`);
+  revalidatePath("/quotes");
 }

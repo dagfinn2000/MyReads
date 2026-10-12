@@ -32,13 +32,15 @@ export const getCurrentUser = cache(
     preferences: Preferences;
     /** For the 3D covers switch, which the root layout applies everywhere. */
     libraryView: LibraryView;
+    /** For the backup reminder the shell shows. */
+    lastBackupAt: Date | null;
   } | null> => {
     const session = await auth();
     if (!session?.user?.id) return null;
 
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
-      select: { id: true, theme: true, preferences: true, libraryView: true },
+      select: { id: true, theme: true, preferences: true, libraryView: true, lastBackupAt: true },
     });
     if (!user) return null;
     return {
