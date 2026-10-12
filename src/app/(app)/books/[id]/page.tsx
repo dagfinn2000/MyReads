@@ -158,7 +158,9 @@ export default async function BookDetailPage({
       </div>
 
       <div className="grid grid-cols-1 content-start gap-4">
-        <div>
+        {/* A title, author or series with no spaces to break at wraps
+            anywhere, instead of pushing the page sideways. */}
+        <div className="wrap-anywhere">
           <h1 className="text-3xl font-semibold tracking-tight">{book.title}</h1>
           {book.authors.length > 0 && (
             <p className="mt-1 text-lg text-muted-foreground">

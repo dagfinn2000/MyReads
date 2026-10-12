@@ -42,7 +42,7 @@ export default async function EditBookPage({
 
   return (
     <div className="mx-auto grid max-w-3xl gap-4">
-      <h1 className="text-2xl font-semibold tracking-tight">
+      <h1 className="text-2xl font-semibold tracking-tight wrap-anywhere">
         Edit “{book.title}”
       </h1>
       <BookForm

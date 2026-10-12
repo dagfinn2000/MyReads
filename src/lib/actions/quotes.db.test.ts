@@ -91,6 +91,28 @@ describe("quote actions", () => {
     expect(await prisma.quote.count({ where: { bookId: theirs.bookId } })).toBe(1);
   });
 
+  it("refuses a page past the end of the book, as the reading card does", async () => {
+    const q = await makeQuote(userId);
+    await prisma.book.update({ where: { id: q.bookId }, data: { pageCount: 300 } });
+
+    const added = await addQuote({}, form({ bookId: q.bookId, text: "Typo", page: "3000" }));
+    expect(added).toEqual({ error: "Page 3000 is past the end of the book (300 pages)" });
+    const edited = await updateQuote(q.id, {}, form({ text: "Edited", page: "301" }));
+    expect(edited).toEqual({ error: "Page 301 is past the end of the book (300 pages)" });
+    expect(await prisma.quote.findMany({ where: { bookId: q.bookId } })).toMatchObject([
+      { text: "Original", page: 10 },
+    ]);
+
+    // The last page itself, and any page of a book with no page count, are fine.
+    expect(await updateQuote(q.id, {}, form({ text: "Last", page: "300" }))).toEqual({
+      success: true,
+    });
+    await prisma.book.update({ where: { id: q.bookId }, data: { pageCount: null } });
+    expect(await addQuote({}, form({ bookId: q.bookId, text: "Any", page: "3000" }))).toEqual({
+      success: true,
+    });
+  });
+
   it("all of them need a session", async () => {
     const q = await makeQuote(userId);
     currentUserId = null;
