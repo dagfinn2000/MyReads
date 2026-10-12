@@ -51,6 +51,23 @@ export const MOTIONS = ["on", "off"] as const;
  *  or the plain grey box. */
 export const COVER_ARTS = ["drawn", "plain"] as const;
 
+/** Accent colours that can replace a theme's own: buttons, links, focus
+ *  rings and progress bars. "theme" keeps the theme's accent. Each has a
+ *  deeper shade for light themes and a lighter one for dark themes
+ *  (globals.css). */
+export const ACCENTS = [
+  "theme",
+  "rose",
+  "orange",
+  "amber",
+  "emerald",
+  "teal",
+  "sky",
+  "indigo",
+  "violet",
+  "fuchsia",
+] as const;
+
 /** Colour steps for the reading calendar (see lib/heatmap.ts). */
 export const HEATMAP_SCALES = ["standard", "gentle", "heavy", "auto"] as const;
 
@@ -80,6 +97,7 @@ export type TextSize = (typeof TEXT_SIZES)[number];
 export type LongTextFont = (typeof LONG_TEXT_FONTS)[number];
 export type Motion = (typeof MOTIONS)[number];
 export type CoverArtStyle = (typeof COVER_ARTS)[number];
+export type Accent = (typeof ACCENTS)[number];
 export type HeatmapScale = (typeof HEATMAP_SCALES)[number];
 export type StartPage = (typeof START_PAGES)[number];
 export type HideableNav = (typeof HIDEABLE_NAV)[number];
@@ -120,6 +138,7 @@ export type Preferences = {
   // Appearance
   motion: Motion;
   coverArt: CoverArtStyle;
+  accent: Accent;
 
   heatmapScale: HeatmapScale;
   startPage: StartPage;
@@ -147,6 +166,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
   longTextFont: "sans",
   motion: "on",
   coverArt: "drawn",
+  accent: "theme",
   heatmapScale: "standard",
   startPage: "library",
   hiddenNav: [],
@@ -227,6 +247,7 @@ export function parsePreferences(raw: unknown): Preferences {
     longTextFont: pick(LONG_TEXT_FONTS, obj.longTextFont, d.longTextFont),
     motion: pick(MOTIONS, obj.motion, d.motion),
     coverArt: pick(COVER_ARTS, obj.coverArt, d.coverArt),
+    accent: pick(ACCENTS, obj.accent, d.accent),
     heatmapScale: pick(HEATMAP_SCALES, obj.heatmapScale, d.heatmapScale),
     startPage: pick(START_PAGES, obj.startPage, d.startPage),
     hiddenNav: pickList(HIDEABLE_NAV, obj.hiddenNav),

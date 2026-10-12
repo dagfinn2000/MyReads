@@ -678,6 +678,54 @@ html[data-long-font="serif"] .long-text {
     Cambria, "Times New Roman", serif;
 }
 
+/* ── Accent colour ─────────────────────────────────────────────────────────
+   "Accent colour" in Preferences replaces the theme's accent (--primary,
+   which buttons, links, progress bars and checkboxes use, and --ring for
+   focus outlines) with one of these. Light themes get the deeper shade,
+   with white text on it; dark themes the lighter shade, with near-black
+   text. Every pairing passes 4.5:1. The --accent-<name>
+   values also colour the swatches in Preferences, so they follow the mode
+   too. html[data-accent]:not(…) outranks the [data-theme] blocks above. */
+:root {
+  --accent-rose: #be123c;
+  --accent-orange: #c2410c;
+  --accent-amber: #b45309;
+  --accent-emerald: #047857;
+  --accent-teal: #0f766e;
+  --accent-sky: #0369a1;
+  --accent-indigo: #4338ca;
+  --accent-violet: #6d28d9;
+  --accent-fuchsia: #a21caf;
+}
+.dark {
+  --accent-rose: #fb7185;
+  --accent-orange: #fb923c;
+  --accent-amber: #fbbf24;
+  --accent-emerald: #34d399;
+  --accent-teal: #2dd4bf;
+  --accent-sky: #38bdf8;
+  --accent-indigo: #818cf8;
+  --accent-violet: #a78bfa;
+  --accent-fuchsia: #e879f9;
+}
+html[data-accent="rose"] { --accent-color: var(--accent-rose); }
+html[data-accent="orange"] { --accent-color: var(--accent-orange); }
+html[data-accent="amber"] { --accent-color: var(--accent-amber); }
+html[data-accent="emerald"] { --accent-color: var(--accent-emerald); }
+html[data-accent="teal"] { --accent-color: var(--accent-teal); }
+html[data-accent="sky"] { --accent-color: var(--accent-sky); }
+html[data-accent="indigo"] { --accent-color: var(--accent-indigo); }
+html[data-accent="violet"] { --accent-color: var(--accent-violet); }
+html[data-accent="fuchsia"] { --accent-color: var(--accent-fuchsia); }
+html[data-accent]:not([data-accent="theme"]) {
+  --primary: var(--accent-color);
+  --primary-foreground: #ffffff;
+  --ring: var(--accent-color);
+}
+html.dark[data-accent]:not([data-accent="theme"]) {
+  --primary-foreground: #111111;
+}
+
 /* ── Drawn covers ──────────────────────────────────────────────────────────
    The stand-in for a book with no cover image (BookCover in
    components/book-card.tsx): a coloured board with a spine shadow, a thin

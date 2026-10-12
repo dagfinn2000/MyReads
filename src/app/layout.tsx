@@ -53,6 +53,7 @@ export default async function RootLayout({
       // Appearance (Preferences); see globals.css.
       data-motion={prefs?.motion}
       data-covers={prefs?.coverArt}
+      data-accent={prefs?.accent}
       suppressHydrationWarning
     >
       <body className="min-h-screen bg-background text-foreground antialiased">
