@@ -21,12 +21,14 @@ import {
   HIDEABLE_NAV,
   HIDEABLE_STATS,
   NUMBER_FORMATS,
+  SEARCH_FIELDS,
   type Accent,
   type Background,
   type Catalogue,
   type HideableNav,
   type HideableStat,
   type Preferences,
+  type SearchField,
 } from "@/lib/preferences";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -42,6 +44,12 @@ const CATALOGUE_LABELS: Record<Catalogue, string> = {
   openlibrary: "Open Library",
   google: "Google Books",
   nb: "National Library of Norway",
+};
+
+const SEARCH_FIELD_LABELS: Record<SearchField, string> = {
+  tags: "Tags",
+  isbn: "ISBN",
+  review: "My review",
 };
 
 const NAV_LABELS: Record<HideableNav, string> = {
@@ -429,6 +437,25 @@ export function PreferencesForm({
           ]}
           onChange={(v) => update({ sortAlphabet: v })}
         />
+      </Section>
+
+      <Section title="Library" id="library">
+        <div role="group" aria-labelledby="search-also-in" className="grid gap-1.5">
+          <p id="search-also-in" className="text-sm font-medium">
+            Search also looks in
+          </p>
+          <p className="text-xs text-muted-foreground">
+            Title, author and series are always searched.
+          </p>
+          {SEARCH_FIELDS.map((field) => (
+            <Toggle
+              key={field}
+              label={SEARCH_FIELD_LABELS[field]}
+              checked={prefs.searchAlsoIn.includes(field)}
+              onChange={(on) => update({ searchAlsoIn: toggleIn(prefs.searchAlsoIn, field, on) })}
+            />
+          ))}
+        </div>
       </Section>
 
       <Section title="Book search">

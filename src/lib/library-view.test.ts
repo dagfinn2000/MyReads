@@ -111,6 +111,10 @@ describe("the newer sorts, groupings and display options", () => {
     expect(naturalDir("rating")).toBe("desc");
     expect(naturalDir("pageCount")).toBe("desc");
     expect(naturalDir("bogus")).toBe("desc");
+    // Straight from the URL: never a property of Object.prototype.
+    expect(naturalDir("constructor")).toBe("desc");
+    expect(naturalDir("__proto__")).toBe("desc");
+    expect(naturalDir("toString")).toBe("desc");
   });
 
   it("parses the list-row and ownership options", () => {

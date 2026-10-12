@@ -3,6 +3,8 @@ import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { PrismaClient } from "@prisma/client";
 import { buildBookWhere, parseFilters } from "@/lib/library-filters";
+import { resolveBookWhere } from "@/lib/library-where";
+import type { SearchField } from "@/lib/preferences";
 import { buildSearchText } from "@/lib/utils";
 
 /**
@@ -71,6 +73,106 @@ describe("library search", () => {
     // Postgres refuses \0 in text; the page used to crash on ?tag=%00.
     const where = buildBookWhere(userId, parseFilters({ tag: "\0", q: "hob\0bit" }));
     await expect(prisma.book.count({ where })).resolves.toBe(1);
+  });
+});
+
+describe("searching tags, ISBN and reviews too", () => {
+  /** Search as the reader with these Preferences would. */
+  async function searchIn(q: string, fields: SearchField[]): Promise<string[]> {
+    const where = await resolveBookWhere(userId, parseFilters({ q }), {
+      searchAlsoIn: fields,
+      timeZone: "UTC",
+    });
+    const rows = await prisma.book.findMany({ where, select: { title: true }, orderBy: { title: "asc" } });
+    return rows.map((r) => r.title);
+  }
+
+  beforeEach(async () => {
+    const set = (title: string, data: object) =>
+      prisma.book.updateMany({ where: { userId, title }, data });
+    await set("The Hobbit", { tags: ["fantasy", "æventyr"], isbn: "9780261102217" });
+    await set("Jane Eyre", { review: "ÆRØ ÉMILE, all in capitals" });
+    await set("Lykkeland", { review: "Better than anything by a Brontë.", isbn: "080442957x" });
+    await set("100% Cotton", { isbn: "9781984000000", review: "Half_way there" });
+  });
+
+  it("looks only where it always has until asked", async () => {
+    expect(await searchIn("fantasy", [])).toEqual([]);
+    expect(await searchIn("better", [])).toEqual([]);
+    expect(await searchIn("9780261102217", [])).toEqual([]);
+  });
+
+  it("finds tags, accents folded", async () => {
+    expect(await searchIn("fantasy", ["tags"])).toEqual(["The Hobbit"]);
+    expect(await searchIn("aeventyr", ["tags"])).toEqual(["The Hobbit"]);
+    expect(await searchIn("Æventyr", ["tags"])).toEqual(["The Hobbit"]);
+  });
+
+  it("still wants every word to match somewhere", async () => {
+    expect(await searchIn("tolkien fantasy", ["tags"])).toEqual(["The Hobbit"]);
+    expect(await searchIn("rowling fantasy", ["tags"])).toEqual([]);
+  });
+
+  it("finds reviews, accents and capitals folded either way", async () => {
+    // Jane Eyre by its author, Lykkeland by its review.
+    expect(await searchIn("bronte", ["review"])).toEqual(["Jane Eyre", "Lykkeland"]);
+    expect(await searchIn("Brontë better", ["review"])).toEqual(["Lykkeland"]);
+    expect(await searchIn("aero emile", ["review"])).toEqual(["Jane Eyre"]);
+  });
+
+  it("treats % and _ in a review as plain characters", async () => {
+    expect(await searchIn("half_way", ["review"])).toEqual(["100% Cotton"]);
+    expect(await searchIn("half%way", ["review"])).toEqual([]);
+  });
+
+  it("finds an ISBN however it's typed", async () => {
+    for (const q of ["9780261102217", "978-0-261-10221-7", "978 0 261 10221 7", "0261102214", "0-261"]) {
+      expect(await searchIn(q, ["isbn"]), q).toEqual(["The Hobbit"]);
+    }
+    // Stored with a lowercase check digit.
+    expect(await searchIn("080442957X", ["isbn"])).toEqual(["Lykkeland"]);
+    expect(await searchIn("9780804429573", ["isbn"])).toEqual(["Lykkeland"]);
+  });
+
+  it("doesn't take a year for part of an ISBN", async () => {
+    expect(await searchIn("1984", ["isbn"])).toEqual([]);
+  });
+
+  it("never matches another reader's tags or reviews", async () => {
+    const other = await prisma.user.create({
+      data: { username: `srch-o-${Date.now()}-${Math.random()}`, passwordHash: "x" },
+    });
+    try {
+      await prisma.book.create({
+        data: {
+          userId: other.id,
+          title: "Theirs",
+          searchText: "theirs",
+          tags: ["secret-tag"],
+          review: "secret words",
+          isbn: "9780000000002",
+        },
+      });
+      expect(await searchIn("secret", ["tags", "review", "isbn"])).toEqual([]);
+      expect(await searchIn("9780000000002", ["tags", "review", "isbn"])).toEqual([]);
+    } finally {
+      await prisma.user.delete({ where: { id: other.id } });
+    }
+  });
+
+  it("still works when the review matches are too many for one query", async () => {
+    // Past MAX_REVIEW_IDS the search is worked out word by word instead.
+    await prisma.book.createMany({
+      data: Array.from({ length: 10_001 }, (_, i) => ({
+        userId,
+        title: `Filler ${i}`,
+        searchText: `filler ${i}`,
+        review: "the end",
+      })),
+    });
+    await prisma.book.updateMany({ where: { userId, title: "The Hobbit" }, data: { review: "the end" } });
+    expect(await searchIn("end hobbit", ["review"])).toEqual(["The Hobbit"]);
+    expect(await searchIn("fantasy end", ["review", "tags"])).toEqual(["The Hobbit"]);
   });
 });
 

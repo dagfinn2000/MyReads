@@ -27,6 +27,8 @@ export async function renameTag(
   const target = normalizeTag(to);
   if (!source || !target) return { error: "Tag name is required" };
   if (target.length > 50) return { error: "Tag must be at most 50 characters" };
+  // The library's tag filter lists tags comma-separated in the address.
+  if (target.includes(",")) return { error: "Tags can't contain commas." };
   if (source === target) return { count: 0 };
 
   const books = await prisma.book.findMany({

@@ -89,7 +89,12 @@ const importedBookSchema = z.object({
   /** Additive: an audiobook's running time in minutes. */
   lengthMinutes: z.number().int().min(1).max(60000).nullable().optional().catch(null),
   publishedDate: z.string().trim().max(20).nullable().optional(),
-  tags: z.array(z.string().trim().toLowerCase().max(50)).catch([]),
+  // Split at commas: the library's tag filter lists tags comma-separated,
+  // so "science, fiction" from an older backup becomes two tags.
+  tags: z
+    .array(z.string().trim().toLowerCase().max(50))
+    .catch([])
+    .transform((tags) => tags.flatMap((t) => t.split(",").map((s) => s.trim())).filter(Boolean)),
   format: z.nativeEnum(BookFormat).catch(BookFormat.PHYSICAL),
   /** Legacy field, still written by exports for older instances to read. */
   owned: z.boolean().nullable().optional().catch(null),

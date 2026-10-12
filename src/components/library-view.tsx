@@ -27,10 +27,16 @@ import {
 } from "@/components/ui/select";
 
 export interface LibraryGroup {
+  /** Unique among the sections ("tag:fantasy", "year:2026"). */
+  key: string;
   title: string;
   books: BookCardBook[];
   /** The section's real size, which may exceed what's rendered. */
   total: number;
+  /** Shown instead of the count: "5 books · 3 read · next #4". */
+  detail?: string;
+  /** A warning after it: "#3 missing". */
+  note?: string;
 }
 
 /** How many more cards each "Show more" asks the server for. */
@@ -67,15 +73,24 @@ const GRID_GAPS: Record<LibraryDisplay["cardSize"], string> = {
 export function LibraryView({
   books,
   groups,
+  limit,
+  hasMore = false,
   totalCount,
   searchParams,
   shelves,
   display,
 }: {
-  /** Only the books being rendered — the server sorts everything and slices. */
+  /** Only the books being rendered — the server sorts everything and slices.
+   *  Grouped: every book in the shown sections, once each. */
   books: BookCardBook[];
-  /** Pre-grouped sections (author/series view) or null for the flat grid. */
+  /** Pre-grouped sections (a group-by view) or null for the flat grid. */
   groups: LibraryGroup[] | null;
+  /** How many entries the server rendered (the URL's limit). A grouped view
+   *  can show a book in more than one section, so it can differ from
+   *  books.length. */
+  limit?: number;
+  /** Sections were cut short, even if every book already shows in one. */
+  hasMore?: boolean;
   /** How many books match the current filters, rendered or not. */
   totalCount: number;
   /** Current URL params, so "Show more" can raise the limit in place. */
@@ -161,7 +176,7 @@ export function LibraryView({
    *  a reload like every other part of the view. */
   function showMore() {
     const next = new URLSearchParams(searchParams);
-    next.set("limit", String(books.length + PAGE_STEP));
+    next.set("limit", String((limit ?? books.length) + PAGE_STEP));
     router.push(`/books?${next}`, { scroll: false });
   }
 
@@ -274,15 +289,20 @@ export function LibraryView({
       {groups ? (
         <div className="grid gap-6">
           {groups.map((g) => (
-            <section key={g.title} className="grid gap-3">
-              <h2 className="border-b pb-1 font-heading text-lg font-medium">
-                {g.title}
-                <span className="ml-2 text-sm font-normal text-muted-foreground tabular-nums">
+            <section key={g.key} className="grid gap-3">
+              <h2 className="flex flex-wrap items-baseline gap-x-2 border-b pb-1 font-heading text-lg font-medium">
+                <span className="min-w-0 break-words">{g.title}</span>
+                <span className="text-sm font-normal text-muted-foreground tabular-nums">
                   {/* The group's real size, even when only part of it is
                       rendered — the heading describes the shelf, not the
                       slice. */}
-                  {g.total}
+                  {g.detail ?? g.total}
                 </span>
+                {g.note && (
+                  <span className="text-sm font-normal text-amber-700 dark:text-amber-300">
+                    {g.note}
+                  </span>
+                )}
               </h2>
               {renderGrid(g.books)}
             </section>
@@ -292,10 +312,12 @@ export function LibraryView({
         renderGrid(books)
       )}
 
-      {hiddenCount > 0 && (
+      {(hiddenCount > 0 || hasMore) && (
         <div className="flex justify-center">
           <Button variant="outline" onClick={showMore}>
-            Show more ({hiddenCount} not shown)
+            {/* Counts books, never repeats: grouped by tag, a book can be
+                cut from one section while it shows in another. */}
+            {hiddenCount > 0 ? `Show more (${hiddenCount} not shown)` : "Show more"}
           </Button>
         </div>
       )}
