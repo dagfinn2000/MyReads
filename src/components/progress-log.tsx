@@ -11,7 +11,7 @@ import { chartPaceText } from "@/lib/pace";
 import { currentPassEntries } from "@/lib/progress";
 import {
   formatPosition,
-  parseUnitText,
+  parseBoxText,
   positionText,
   unitFor,
   type UnitInfo,
@@ -177,7 +177,7 @@ export function RecentEntries({
   const prefs = usePreferences();
   const info = unitFor(book, prefs);
   const today = dayKey(new Date(), prefs.timeZone);
-  const recent = currentPassEntries(entries, book.dateStarted)
+  const recent = currentPassEntries(entries, book.dateStarted, prefs.timeZone)
     .filter((e) => e.page > 0)
     .slice(-limit)
     .reverse();
@@ -315,19 +315,24 @@ function EntryEditor({
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const today = dayKey(new Date(), prefs.timeZone);
+  // An entry of the read in progress can't move before its Started day.
+  const startKey = book.dateStarted ? calendarDay(book.dateStarted, prefs.timeZone) : null;
+  const minDay = startKey && calendarDay(entry.date, prefs.timeZone) >= startKey ? startKey : undefined;
 
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
 
   function save() {
-    const parsed = parseUnitText(text, info);
+    // The entry's own page while the box still shows it, so changing only
+    // the day doesn't turn 42% back into a different page.
+    const parsed = parseBoxText(text, info, entry.page);
     if (!parsed || "error" in parsed) return setError(parsed?.error ?? "Type where you were.");
     if (parsed.page < 1) return setError("An entry needs at least page 1.");
     if (!day) return setError("Pick a day.");
     setError(null);
     startTransition(async () => {
-      const result = await updateProgressEntry(entry.id, { page: parsed.page, day });
+      const result = await updateProgressEntry(entry.id, { page: parsed.page, day, value: parsed.value });
       if (result.error) setError(result.error);
       else onDone(result.message ?? null);
     });
@@ -363,6 +368,7 @@ function EntryEditor({
           type="date"
           aria-label="Day"
           className="w-40"
+          min={minDay}
           max={today}
           value={day}
           onChange={(e) => setDay(e.target.value)}
@@ -381,7 +387,14 @@ function EntryEditor({
           <X className="size-3.5" />
         </Button>
       </form>
-      <ProgressNotes id={id} info={info} text={text} bookId={book.id} className="mt-1" />
+      <ProgressNotes
+        id={id}
+        info={info}
+        text={text}
+        bookId={book.id}
+        showSaved={text !== positionText(entry.page, info)}
+        className="mt-1"
+      />
       <p aria-live="polite" className="text-xs text-destructive not-empty:mt-1">
         {error}
       </p>

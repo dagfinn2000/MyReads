@@ -100,7 +100,7 @@ function NowReadingRow({
 }) {
   const prefs = usePreferences();
   const info = unitFor(book, prefs);
-  const pass = currentPassEntries(book.progress, book.dateStarted);
+  const pass = currentPassEntries(book.progress, book.dateStarted, prefs.timeZone);
   const pace = nowReadingPaceText({ pass, info, from: prefs.paceFrom, now: new Date(), prefs });
   const pct =
     book.currentPage != null && book.pageCount

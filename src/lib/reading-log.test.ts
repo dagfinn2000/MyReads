@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
+import { BookFormat } from "@prisma/client";
 import { dayKey, zonedDayStart } from "@/lib/dates";
+import { unitFor } from "@/lib/progress-units";
 import {
   anchorMoment,
   describeDay,
@@ -9,6 +11,7 @@ import {
   loggedWhen,
   passAround,
   placeInLog,
+  positionTexts,
   recentDays,
   resolveLogDay,
   subjectDay,
@@ -166,6 +169,33 @@ describe("passAround", () => {
     const seeded = [e("x", 40, "2025-01-01T10:00:00Z"), e("y", 90, "2025-01-03T10:00:00Z")];
     expect(passAround(seeded, "x")).toEqual({ pass: seeded, previous: null, nextAnchor: null, isCurrent: true });
     expect(passAround(seeded, "nope")).toBeNull();
+  });
+});
+
+describe("positionTexts", () => {
+  const prefs = { ebookUnit: "percent", audiobookUnit: "time" } as const;
+  const ebook = unitFor({ format: BookFormat.EBOOK, pageCount: 412, lengthMinutes: null }, prefs);
+  const audio = unitFor({ format: BookFormat.AUDIOBOOK, pageCount: 400, lengthMinutes: 700 }, prefs);
+  const paper = unitFor({ format: BookFormat.PHYSICAL, pageCount: 300, lengthMinutes: null }, prefs);
+
+  it("says a typed value back as typed", () => {
+    // 5:11 saves as page 178, which reads back as 5:12.
+    expect(positionTexts(audio, { page: 178 })).toEqual(["5:12"]);
+    expect(positionTexts(audio, { page: 178, value: 311 })).toEqual(["5:11"]);
+    // A value that isn't that page is ignored.
+    expect(positionTexts(audio, { page: 100, value: 311 })).toEqual(["2:55"]);
+  });
+
+  it("adds pages when two different pages would read the same", () => {
+    expect(positionTexts(ebook, { page: 173, value: 42, capital: true }, { page: 175 })).toEqual([
+      "42% (page 173)",
+      "42% (page 175)",
+    ]);
+    expect(positionTexts(ebook, { page: 173, value: 42 }, { page: 180 })).toEqual(["42%", "44%"]);
+    expect(positionTexts(paper, { page: 120, capital: true }, { page: 130 })).toEqual([
+      "Page 120",
+      "page 130",
+    ]);
   });
 });
 

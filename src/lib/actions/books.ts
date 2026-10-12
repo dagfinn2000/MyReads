@@ -12,6 +12,7 @@ import { localizeCoverAfterResponse } from "@/lib/cover-localize";
 import { getPreferences } from "@/lib/current-user";
 import { requireUserId } from "@/lib/actions/helpers";
 import type { ActionState } from "@/lib/actions/helpers";
+import { calendarDay, dayKey, endOfZonedDay, zonedDayStart } from "@/lib/dates";
 import { currentPassEntries } from "@/lib/progress";
 import { anchorMoment } from "@/lib/reading-log";
 import { settleReadingState } from "@/lib/reading-state";
@@ -72,6 +73,7 @@ export async function createBook(
     };
   }
 
+  const startKey = reading.dateStarted ? calendarDay(reading.dateStarted, prefs.timeZone) : null;
   const book = await prisma.book.create({
     data: {
       userId,
@@ -99,13 +101,20 @@ export async function createBook(
       searchText: buildSearchText(data.title, data.authors, data.seriesName),
       // A book added mid-read starts its log at the page given: one entry
       // and no page-0 anchor before it, so no day is credited with the pages
-      // read before the book was added (see logProgress). Dated no earlier
-      // than the start, so it stays inside the current pass.
+      // read before the book was added (see logProgress). Dated now, not
+      // at the Started date: typed today, that is midnight UTC, which east
+      // of UTC is still to come, and the day's next log would sort before
+      // it. The pass goes by Started's calendar day, so the entry is still
+      // part of the read; only a start on a later day (the date field
+      // allows a day's slack) moves it to the start of that day.
       ...(reading.currentPage && {
         progress: {
           create: {
             page: reading.currentPage,
-            date: reading.dateStarted && reading.dateStarted > now ? reading.dateStarted : now,
+            date:
+              startKey && dayKey(now, prefs.timeZone) < startKey
+                ? zonedDayStart(startKey, prefs.timeZone)
+                : now,
           },
         },
       }),
@@ -193,6 +202,7 @@ export async function updateReading(
       status: true,
       currentPage: true,
       pageCount: true,
+      dateStarted: true,
       _count: { select: { reads: true } },
     },
   });
@@ -203,6 +213,7 @@ export async function updateReading(
     return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
   }
   const data = parsed.data;
+  const prefs = await getPreferences();
 
   // Fills in "finished today" / "started today" when the dates were left
   // empty, derives timesRead, and drops the page once the book is finished
@@ -213,7 +224,11 @@ export async function updateReading(
       status: data.status,
       dateStarted: data.dateStarted ?? null,
       dateFinished: data.finishedUnknown ? null : (data.dateFinished ?? null),
-      currentPage: data.currentPage ?? null,
+      // A book being read logs its pages through the quick row; the card
+      // has no page box then, and sends back the page it was rendered with,
+      // which a log since (in another tab, say) has left behind.
+      currentPage:
+        existing.status === ReadingStatus.READING ? existing.currentPage : (data.currentPage ?? null),
     },
     existing._count.reads,
     new Date(),
@@ -244,12 +259,13 @@ export async function updateReading(
       },
     });
 
-    await logProgress(tx, bookId, existing, {
-      status: data.status,
-      currentPage,
-      dateStarted,
-      dateFinished,
-    });
+    await logProgress(
+      tx,
+      bookId,
+      existing,
+      { status: data.status, currentPage, dateStarted, dateFinished },
+      prefs.timeZone,
+    );
   });
 
   revalidatePath("/books");
@@ -274,13 +290,20 @@ export async function updateReading(
 async function logProgress(
   db: Prisma.TransactionClient,
   bookId: string,
-  prev: { status: ReadingStatus; currentPage: number | null; pageCount: number | null },
+  prev: {
+    status: ReadingStatus;
+    currentPage: number | null;
+    pageCount: number | null;
+    dateStarted: Date | null;
+  },
   next: {
     status: ReadingStatus;
     currentPage: number | null;
     dateStarted: Date | null;
     dateFinished: Date | null;
   },
+  /** The reader's zone. */
+  timeZone: string,
 ): Promise<void> {
   const now = new Date();
 
@@ -289,10 +312,30 @@ async function logProgress(
   const all = await db.progressEntry.findMany({
     where: { bookId },
     orderBy: [{ date: "asc" }, { page: "asc" }],
-    select: { page: true, date: true },
+    select: { id: true, page: true, date: true },
   });
-  const pass = currentPassEntries(all, next.dateStarted);
+  const pass = currentPassEntries(all, next.dateStarted, timeZone);
   const last = pass[pass.length - 1] ?? null;
+
+  // Started moved earlier on a book being read: its anchor moves back too,
+  // or the days in between would still be refused as before the read
+  // started. Never onto or over the read before it.
+  const anchor = pass[0]?.page === 0 ? pass[0] : null;
+  if (
+    anchor &&
+    next.status === ReadingStatus.READING &&
+    prev.status === ReadingStatus.READING &&
+    next.dateStarted &&
+    next.dateStarted.getTime() !== prev.dateStarted?.getTime() &&
+    next.dateStarted < anchor.date
+  ) {
+    const before = all[all.indexOf(anchor) - 1];
+    const floor = before ? before.date.getTime() + 1 : -Infinity;
+    const date = new Date(Math.max(next.dateStarted.getTime(), floor));
+    if (date < anchor.date) {
+      await db.progressEntry.update({ where: { id: anchor.id }, data: { date } });
+    }
+  }
 
   if (next.currentPage != null && next.currentPage !== prev.currentPage) {
     const entries: { bookId: string; page: number; date: Date }[] = [];
@@ -316,9 +359,15 @@ async function logProgress(
     last != null &&
     last.page < prev.pageCount
   ) {
-    await db.progressEntry.create({
-      data: { bookId, page: prev.pageCount, date: next.dateFinished ?? now },
-    });
+    // On the finish day in the reader's zone. A typed date is midnight UTC,
+    // which west of UTC is still the evening before and east of UTC can
+    // be later today; that takes the end of its day, or now if sooner.
+    const finished = next.dateFinished;
+    const day = calendarDay(finished, timeZone);
+    const end = endOfZonedDay(day, timeZone);
+    const date =
+      dayKey(finished, timeZone) === day && finished <= now ? finished : end < now ? end : now;
+    await db.progressEntry.create({ data: { bookId, page: prev.pageCount, date } });
   }
 }
 

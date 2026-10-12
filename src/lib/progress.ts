@@ -1,5 +1,5 @@
 import type { ProgressEntry } from "@prisma/client";
-import { dayKey, shiftDayKey } from "@/lib/dates";
+import { calendarDay, dayKey, shiftDayKey } from "@/lib/dates";
 
 export { dayKey };
 
@@ -12,17 +12,25 @@ type LogPoint = Pick<ProgressEntry, "bookId" | "page" | "date">;
  * never logs it — so the latest one marks the pass start exactly, even when
  * a re-read begins on a day that already has entries (the started-date form
  * field only keeps day precision). Logs without an anchor (upgrade-seeded
- * books) fall back to the started-date window.
+ * books, books added mid-read) fall back to the started-date window, by
+ * calendar day in the reader's zone: a typed Started date is midnight UTC,
+ * which east of UTC is still ahead of that morning's entries.
+ * lib/stats-query.ts applies the same rule in SQL.
  */
 export function currentPassEntries<T extends Pick<ProgressEntry, "page" | "date">>(
   entries: T[], // sorted by date ascending
   dateStarted: Date | null,
+  /** The reader's zone; default the server's. */
+  timeZone?: string,
 ): T[] {
   for (let i = entries.length - 1; i >= 0; i--) {
     if (entries[i].page === 0) return entries.slice(i);
   }
   if (!dateStarted) return entries;
-  return entries.filter((e) => e.date.getTime() >= dateStarted.getTime());
+  const startDay = calendarDay(dateStarted, timeZone);
+  return entries.filter(
+    (e) => e.date.getTime() >= dateStarted.getTime() || dayKey(e.date, timeZone) >= startDay,
+  );
 }
 
 /**

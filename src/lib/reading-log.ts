@@ -2,6 +2,7 @@ import { z } from "zod";
 import { calendarDay, dayKey, endOfZonedDay, keyToUtcDate, shiftDayKey } from "@/lib/dates";
 import { formatDayKey, formatShortDay } from "@/lib/display";
 import type { DateFormat } from "@/lib/preferences";
+import { formatPosition, formatUnitValue, unitToPage, type UnitInfo } from "@/lib/progress-units";
 
 /**
  * The rules for logging a page on any day and fixing a log entry, shared by
@@ -41,14 +42,20 @@ const pageField = z.coerce
   .min(1, "Log at least page 1")
   .max(MAX_PAGE, "That page is too high");
 
+/** The position as typed, in the book's unit, so messages can say it back
+ *  as typed. Only ever shown; anything odd is dropped, never refused. */
+const typedValue = z.number().int().min(0).max(1_000_000).optional().catch(undefined);
+
 export const logPageSchema = z.object({
   page: pageField,
   day: dayChoiceSchema.default("today"),
+  value: typedValue,
 });
 
 export const editEntrySchema = z.object({
   page: pageField,
   day: dayKeySchema,
+  value: typedValue,
 });
 
 export const moveTargetSchema = z.enum(["READ", "DNF"]);
@@ -216,6 +223,30 @@ export function passAround<T extends LogPoint>(
     nextAnchor,
     isCurrent: nextAnchor === null,
   };
+}
+
+/**
+ * Positions for one message, in the book's unit. A position given with the
+ * value the reader typed reads as typed, when that value still saves as its
+ * page: percent and time don't convert back exactly, and 5:11 shouldn't
+ * come back as 5:12. Two different pages that would read the same (42% for
+ * both page 173 and page 175) each get their page, so a message never says
+ * 42% is before 42%.
+ */
+export function positionTexts(
+  info: UnitInfo,
+  ...points: { page: number; value?: number; capital?: boolean }[]
+): string[] {
+  const texts = points.map((p) =>
+    p.value !== undefined && unitToPage(p.value, info) === p.page
+      ? formatUnitValue(p.value, info, p)
+      : formatPosition(p.page, info, p),
+  );
+  return texts.map((t, i) =>
+    points.some((q, j) => texts[j].toLowerCase() === t.toLowerCase() && q.page !== points[i].page)
+      ? `${t} (page ${points[i].page})`
+      : t,
+  );
 }
 
 /** A day in a sentence: "today", "yesterday" or "9 Oct 2026". */

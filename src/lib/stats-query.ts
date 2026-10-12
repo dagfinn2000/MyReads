@@ -31,10 +31,11 @@ export type StatsBook = Prisma.BookGetPayload<{ select: typeof statsBookSelect }
  * which stats-query.db.test.ts checks. If the delta rule there changes, this
  * must change with it.
  *
- * The current pass starts at the latest page-0 anchor, else at the book's
- * start date, else at the first entry: the rule currentPassEntries in
- * lib/progress.ts uses. Earlier pages belong to archived passes, which is
- * what keeps a re-read's pages off the pass before it.
+ * The current pass starts at the latest page-0 anchor, else on the book's
+ * start date (that calendar day in the reader's zone, or later), else at
+ * the first entry: the rule currentPassEntries in lib/progress.ts uses.
+ * Earlier pages belong to archived passes, which is what keeps a re-read's
+ * pages off the pass before it.
  */
 export async function bookDayPageTotalsForUser(
   userId: string,
@@ -50,7 +51,12 @@ export async function bookDayPageTotalsForUser(
         (t."date" AT TIME ZONE 'UTC') AT TIME ZONE ${timeZone},
         'YYYY-MM-DD'
       ) AS day,
-      (t."passStart" IS NULL OR t."date" >= t."passStart") AS "current",
+      (CASE
+        WHEN t."anchor" IS NOT NULL THEN t."date" >= t."anchor"
+        WHEN t."dateStarted" IS NULL THEN true
+        ELSE t."date" >= t."dateStarted"
+          OR to_char((t."date" AT TIME ZONE 'UTC') AT TIME ZONE ${timeZone}, 'YYYY-MM-DD') >= t."startDay"
+      END) AS "current",
       SUM(t.delta)::int AS pages
     FROM (
       SELECT
@@ -60,10 +66,14 @@ export async function bookDayPageTotalsForUser(
           PARTITION BY pe."bookId"
           ORDER BY pe."date" ASC, pe."page" ASC
         ) AS delta,
-        COALESCE(
-          MAX(pe."date") FILTER (WHERE pe."page" = 0) OVER (PARTITION BY pe."bookId"),
-          b."dateStarted"
-        ) AS "passStart"
+        MAX(pe."date") FILTER (WHERE pe."page" = 0) OVER (PARTITION BY pe."bookId") AS "anchor",
+        b."dateStarted",
+        -- calendarDay: a typed date (midnight UTC) is that day anywhere.
+        CASE
+          WHEN b."dateStarted" = date_trunc('day', b."dateStarted")
+            THEN to_char(b."dateStarted", 'YYYY-MM-DD')
+          ELSE to_char((b."dateStarted" AT TIME ZONE 'UTC') AT TIME ZONE ${timeZone}, 'YYYY-MM-DD')
+        END AS "startDay"
       FROM "ProgressEntry" pe
       JOIN "Book" b ON b."id" = pe."bookId"
       WHERE b."userId" = ${userId}

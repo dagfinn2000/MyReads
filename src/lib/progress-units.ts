@@ -193,14 +193,30 @@ export function parseUnitText(text: string, info: UnitInfo): ParsedPosition | nu
   return { value: page, page };
 }
 
+/**
+ * What a box holding a stored page saves: that page itself while the box
+ * still shows it unchanged, else what's typed. Percent and time don't
+ * convert back exactly (page 175 of 412 shows as 42%, and 42% is page 173),
+ * so re-sending the shown text would move the page without anyone typing.
+ */
+export function parseBoxText(text: string, info: UnitInfo, stored: number | null): ParsedPosition | null {
+  if (stored != null && text === positionText(stored, info)) {
+    return { value: pageToUnit(stored, info), page: stored };
+  }
+  return parseUnitText(text, info);
+}
+
+/** A value in the book's unit in running text: "page 212", "42%", "5:11". */
+export function formatUnitValue(value: number, info: UnitInfo, opts?: { capital?: boolean }): string {
+  if (info.unit === "percent") return `${value}%`;
+  if (info.unit === "time") return formatDuration(value);
+  return `${opts?.capital ? "Page" : "page"} ${value}`;
+}
+
 /** A position in running text: "page 212", "42%", "5:12". `capital` gives
  *  "Page 212" for the start of a line. */
 export function formatPosition(page: number, info: UnitInfo, opts?: { capital?: boolean }): string {
-  if (info.unit === "percent") return `${pageToPercent(page, info.pageCount!)}%`;
-  if (info.unit === "time") {
-    return formatDuration(pageToMinutes(page, info.pageCount!, info.lengthMinutes!));
-  }
-  return `${opts?.capital ? "Page" : "page"} ${page}`;
+  return formatUnitValue(pageToUnit(page, info), info, opts);
 }
 
 /** The line under a progress bar: "212 of 412 · 51%", "51%",
