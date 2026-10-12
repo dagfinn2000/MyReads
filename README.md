@@ -158,7 +158,9 @@ automatically.
 - **Make backups.** On the Account page, **Download backup** saves
   everything as a zip. **Restore backup** on the same page loads one into any
   MyReads server. Books you already have are skipped, so restoring twice is
-  safe.
+  safe. The Backup card shows when you last downloaded one, and its
+  **Remind me to back up** setting (not in Preferences) can put a note on
+  the Library and Stats pages once a month.
 - **Know where your data is.** The library lives in two Docker volumes:
   `pgdata` (the database) and `covers` (cover images).
 - **Update.** Run `git pull`, then `docker compose up -d --build`. Database

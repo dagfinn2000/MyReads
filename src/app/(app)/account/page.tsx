@@ -3,9 +3,11 @@ import { HardDriveDownload } from "lucide-react";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser, getPreferences } from "@/lib/current-user";
+import { backupStatusText } from "@/lib/backup";
 import { formatDate, formatNumber } from "@/lib/display";
 import { googleBooksEnabled } from "@/lib/metadata/googlebooks";
 import { DEFAULT_PREFERENCES, serverTimeZone } from "@/lib/preferences";
+import { BackupDownloadButton, BackupReminderSetting } from "@/components/backup-download";
 import { ChangePasswordForm } from "@/components/change-password-form";
 import { DeleteAccount } from "@/components/delete-account";
 import { PreferencesForm } from "@/components/preferences-form";
@@ -29,7 +31,7 @@ export default async function AccountPage() {
   const [user, bookCount, current, prefs, savedViews] = await Promise.all([
     prisma.user.findUnique({
       where: { id: userId },
-      select: { username: true, createdAt: true },
+      select: { username: true, createdAt: true, lastBackupAt: true },
     }),
     prisma.book.count({ where: { userId } }),
     getCurrentUser(),
@@ -89,7 +91,9 @@ export default async function AccountPage() {
         </CardContent>
       </Card>
 
-      <Card>
+      {/* scroll-mt clears the sticky top bar for /account#backup, where
+          the backup reminder links. */}
+      <Card id="backup" className="scroll-mt-20">
         <CardHeader>
           <CardTitle>Backup</CardTitle>
         </CardHeader>
@@ -100,15 +104,14 @@ export default async function AccountPage() {
             from older versions). Restoring merges: books you already have
             are skipped.
           </p>
+          <p className="text-sm" aria-live="polite">
+            {backupStatusText(user.lastBackupAt, new Date(), prefs)}
+          </p>
           <div className="flex flex-wrap items-start gap-2">
-            <Button asChild variant="outline" size="sm">
-              <a href="/api/export">
-                <HardDriveDownload data-slot="icon" />
-                Download backup
-              </a>
-            </Button>
+            <BackupDownloadButton lastBackupAt={user.lastBackupAt?.toISOString() ?? null} />
             <RestoreBackup />
           </div>
+          <BackupReminderSetting initial={stored.backupReminder} />
         </CardContent>
       </Card>
 
