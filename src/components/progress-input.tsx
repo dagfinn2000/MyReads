@@ -23,7 +23,7 @@ import { Label } from "@/components/ui/label";
  * is a page (see lib/progress-units.ts).
  *
  * Split in two so the quick-log row can keep the box inline and put the
- * notes (an error, "Saved as page N", a hint) under the whole row:
+ * notes (an error, "Saves as page N", a hint) under the whole row:
  * ProgressField is the box and its suffix, ProgressNotes the lines under it.
  * Both take the same `id`.
  */
@@ -143,7 +143,7 @@ export function ProgressNotes({
   } else if (parsed && info.unit !== "page" && showSaved) {
     note = (
       <p className="text-muted-foreground tabular-nums">
-        Saved as page {parsed.page} of {info.pageCount}.
+        Saves as page {parsed.page} of {info.pageCount}.
       </p>
     );
   }
