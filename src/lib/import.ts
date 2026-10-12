@@ -157,6 +157,9 @@ const exportPayloadSchema = z.object({
       z.object({
         name: z.string().trim().min(1).max(SAVED_VIEW_NAME_MAX),
         query: z.string().max(4000),
+        /** The shelf the query's `shelfId` named, since the id doesn't
+         *  survive a move. Additive: older backups don't have it. */
+        shelfName: z.string().trim().min(1).max(50).optional().catch(undefined),
       }),
     )
     .catch([]),
@@ -360,12 +363,30 @@ export async function importLibrary(
 
   // Saved views: add the ones whose names are new here, up to the cap.
   // Queries are rebuilt the same way saving one does, so a hand-edited
-  // backup can't store parameters the library doesn't know.
+  // backup can't store parameters the library doesn't know. A view kept to
+  // one shelf is pointed at that shelf here, found by name; when there's no
+  // such shelf (or an older backup gave only an id from elsewhere), the
+  // shelf is dropped rather than left naming one that matches nothing.
+  const ownShelfIds = new Set(shelfIdByName.values());
+  const restoredQuery = (view: { query: string; shelfName?: string }) => {
+    const params = new URLSearchParams(view.query);
+    const oldId = params.get("shelfId");
+    if (oldId) {
+      const id = view.shelfName
+        ? shelfIdByName.get(view.shelfName)
+        : ownShelfIds.has(oldId)
+          ? oldId
+          : undefined;
+      if (id) params.set("shelfId", id);
+      else params.delete("shelfId");
+    }
+    return canonicalViewQueryFromString(params.toString());
+  };
   const existingViewCount = await prisma.savedView.count({ where: { userId } });
   const viewsCreated = await prisma.savedView.createMany({
     data: data.savedViews
       .slice(0, Math.max(0, MAX_SAVED_VIEWS - existingViewCount))
-      .map((v) => ({ userId, name: v.name, query: canonicalViewQueryFromString(v.query) })),
+      .map((v) => ({ userId, name: v.name, query: restoredQuery(v) })),
     skipDuplicates: true,
   });
 

@@ -354,6 +354,30 @@ describe("export -> import round trip", () => {
     });
   });
 
+  it("points a saved view kept to one shelf at the restored shelf", async () => {
+    const shelf = await prisma.shelf.create({ data: { userId: sourceUserId, name: "Cosy" } });
+    await prisma.savedView.create({
+      data: {
+        userId: sourceUserId,
+        name: "Cosy reads",
+        query: `shelfId=${shelf.id}&group=none&sort=title&dir=asc`,
+      },
+    });
+
+    const payload = await exportLibrary();
+    expect(payload.savedViews).toEqual([
+      { name: "Cosy reads", query: expect.any(String), shelfName: "Cosy" },
+    ]);
+
+    await importLibrary(targetUserId, payload);
+    const [restoredShelf, view] = await Promise.all([
+      prisma.shelf.findFirstOrThrow({ where: { userId: targetUserId, name: "Cosy" } }),
+      prisma.savedView.findFirstOrThrow({ where: { userId: targetUserId } }),
+    ]);
+    expect(restoredShelf.id).not.toBe(shelf.id);
+    expect(new URLSearchParams(view.query).get("shelfId")).toBe(restoredShelf.id);
+  });
+
   it("leaves a theme the account already chose alone", async () => {
     await prisma.user.update({ where: { id: sourceUserId }, data: { theme: "dracula" } });
     await prisma.user.update({ where: { id: targetUserId }, data: { theme: "sage" } });
