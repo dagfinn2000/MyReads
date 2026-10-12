@@ -39,7 +39,6 @@ export function FinishedDateField({
           value={unknown ? "" : date}
           disabled={unknown}
           onChange={(e) => setDate(e.target.value)}
-          aria-describedby={unknown ? `${id}-hint` : undefined}
         />
       </div>
       <label className="flex h-9 items-center gap-2 text-sm">
@@ -47,6 +46,7 @@ export function FinishedDateField({
           type="checkbox"
           name="finishedUnknown"
           checked={unknown}
+          aria-describedby={unknown ? `${id}-hint` : undefined}
           onChange={(e) => {
             setUnknown(e.target.checked);
             if (!e.target.checked && !date) setDate(toDateInputValue(new Date(), timeZone));

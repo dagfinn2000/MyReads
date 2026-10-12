@@ -424,7 +424,15 @@ export function ShelfScanPanel({
         </ul>
       )}
       <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-        <Button type="button" variant="outline" size="sm" disabled={s.added === 0} onClick={onDone}>
+        {/* Not while codes are still in line: leaving the page would drop
+            them. */}
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          disabled={s.added === 0 || s.pending > 0}
+          onClick={onDone}
+        >
           Done
         </Button>
         <span className="text-xs text-muted-foreground">

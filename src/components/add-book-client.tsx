@@ -60,8 +60,9 @@ export function AddBookClient({
     setPrefill({ values, scanned: how.scanned });
     setReopenScanner(false);
   }, []);
+  // From the shelf scan, so adding another goes back to the camera.
   const handleAddByHand = useCallback((isbn: string) => {
-    setPrefill({ values: { isbn }, scanned: false, byHand: true });
+    setPrefill({ values: { isbn }, scanned: true, byHand: true });
     setReopenScanner(false);
   }, []);
 
