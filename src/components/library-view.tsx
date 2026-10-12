@@ -1,13 +1,14 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ReadingStatus } from "@prisma/client";
+import { BookFormat, BookOwnership, ReadingStatus } from "@prisma/client";
 import { Check, Dices, SquareCheckBig, X } from "lucide-react";
-import { bulkUpdateBooks } from "@/lib/actions/bulk";
+import { bulkDeleteBooks, bulkUpdateBooks } from "@/lib/actions/bulk";
 import { pickRandomBook } from "@/lib/actions/pick";
-import { STATUS_LABELS } from "@/lib/display";
+import { FORMAT_LABELS, OWNERSHIP_LABELS, STATUS_LABELS, formatNumber } from "@/lib/display";
+import { orderByIds } from "@/lib/library-order";
 import { cn } from "@/lib/utils";
 import type { LibraryDisplay } from "@/lib/library-view";
 import { pickButtonTitle, tabStatus } from "@/lib/pick";
@@ -20,6 +21,15 @@ import {
   type BookCardBook,
 } from "@/components/book-card";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -58,11 +68,22 @@ const GRID_GAPS: Record<LibraryDisplay["cardSize"], string> = {
   large: "gap-4",
 };
 
+/** Comma-separated tags as typed, cleaned the way tags are stored. */
+function splitTags(text: string): string[] {
+  return text
+    .split(",")
+    .map((t) => t.trim().toLowerCase())
+    .filter(Boolean);
+}
+
 /**
  * The library grid with bulk-edit support. Normally the cards are plain
  * links; toggling select mode overlays each card with a checkbox hitbox and
- * shows a floating action bar (set status / add to or remove from a shelf /
- * add tags) that applies to every selected book in one server action.
+ * shows a floating action bar (status, shelf, format, ownership, tags to
+ * add or remove, or delete) that applies to every selected book in one
+ * server action. Once every card on screen is picked, "Select all N books
+ * that match" widens the selection to every book the filters match, which
+ * the server finds again from the same URL parameters.
  *
  * Renders only the slice the server sent. "Show more" and "Pick for me" both
  * go back to the server rather than working from a full in-memory library.
@@ -88,14 +109,23 @@ export function LibraryView({
   display: LibraryDisplay;
 }) {
   const router = useRouter();
+  const prefs = usePreferences();
   const [selectMode, setSelectMode] = useState(false);
   const [selected, setSelected] = useState<ReadonlySet<string>>(new Set());
   const [status, setStatus] = useState("keep");
   const [shelfId, setShelfId] = useState("keep");
+  const [format, setFormat] = useState("keep");
+  const [ownership, setOwnership] = useState("keep");
   const [tags, setTags] = useState("");
+  const [removeTags, setRemoveTags] = useState("");
+  // The filters (as matchKey below) for which "every book that matches" was
+  // chosen. Any other filters on screen and it no longer applies.
+  const [matchingFor, setMatchingFor] = useState<string | null>(null);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleting, startDelete] = useTransition();
+  const cancelDeleteRef = useRef<HTMLButtonElement>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
-  const prefs = usePreferences();
   // Why the last pick opened nothing, for the view it was made in, so it
   // clears itself when the tab or filters change.
   const [pickNote, setPickNote] = useState<{
@@ -104,6 +134,25 @@ export function LibraryView({
   } | null>(null);
   const viewKey = new URLSearchParams(searchParams).toString();
 
+  // --- Bulk selection ---
+  // Only books on screen count as picked. The selection outlives a change
+  // of filters (this component stays mounted), and acting on books no
+  // longer shown, Delete above all, is never what anyone means.
+  const shownIds = new Set((groups ? groups.flatMap((g) => g.books) : books).map((b) => b.id));
+  const picked = [...selected].filter((id) => shownIds.has(id));
+  const matchKey = (() => {
+    const params = new URLSearchParams(searchParams);
+    params.delete("limit");
+    return params.toString();
+  })();
+  const allMatching = matchingFor === matchKey;
+  const selCount = allMatching ? totalCount : picked.length;
+  const canSelectMatching =
+    !allMatching && picked.length === shownIds.size && totalCount > shownIds.size;
+  const booksLabel = (n: number) => `${formatNumber(n, prefs)} book${n === 1 ? "" : "s"}`;
+  const target = () =>
+    allMatching ? { matching: searchParams } : { bookIds: picked };
+
   function toggle(id: string) {
     setSelected((prev) => {
       const next = new Set(prev);
@@ -111,15 +160,24 @@ export function LibraryView({
       else next.add(id);
       return next;
     });
+    setMatchingFor(null);
     setMessage(null);
+  }
+
+  function clearSelection() {
+    setSelected(new Set());
+    setMatchingFor(null);
   }
 
   function exitSelectMode() {
     setSelectMode(false);
-    setSelected(new Set());
+    clearSelection();
     setStatus("keep");
     setShelfId("keep");
+    setFormat("keep");
+    setOwnership("keep");
     setTags("");
+    setRemoveTags("");
     setMessage(null);
   }
 
@@ -145,29 +203,56 @@ export function LibraryView({
   const shownPickNote = pickNote?.key === viewKey ? pickNote.reason : null;
 
   function apply() {
-    const addTags = tags
-      .split(",")
-      .map((t) => t.trim().toLowerCase())
-      .filter(Boolean);
+    const addTags = splitTags(tags);
+    const dropTags = splitTags(removeTags);
     // The shelf select's values are "add:<id>" and "remove:<id>".
     const [shelfAction, shelfTarget] = shelfId.split(":");
-    if (status === "keep" && shelfId === "keep" && addTags.length === 0) {
-      setMessage("Pick a status, shelf, or tags first.");
+    if (
+      status === "keep" &&
+      shelfId === "keep" &&
+      format === "keep" &&
+      ownership === "keep" &&
+      addTags.length === 0 &&
+      dropTags.length === 0
+    ) {
+      setMessage("Pick a change first.");
       return;
     }
     startTransition(async () => {
       const res = await bulkUpdateBooks({
-        bookIds: [...selected],
+        ...target(),
         status: status === "keep" ? undefined : (status as ReadingStatus),
+        format: format === "keep" ? undefined : (format as BookFormat),
+        ownership: ownership === "keep" ? undefined : (ownership as BookOwnership),
         addShelfId: shelfAction === "add" ? shelfTarget : undefined,
         removeShelfId: shelfAction === "remove" ? shelfTarget : undefined,
         addTags: addTags.length ? addTags : undefined,
+        removeTags: dropTags.length ? dropTags : undefined,
       });
       if (res.error) {
         setMessage(res.error);
       } else {
-        setMessage(`Updated ${res.count} book${res.count === 1 ? "" : "s"}.`);
-        setSelected(new Set());
+        setMessage(`Updated ${booksLabel(res.count ?? 0)}.`);
+        clearSelection();
+        router.refresh();
+      }
+    });
+  }
+
+  function deleteSelected() {
+    startDelete(async () => {
+      const res = await bulkDeleteBooks({
+        ...target(),
+        // The count the dialog named: if the matches have changed since,
+        // the server refuses rather than delete a different set.
+        expectedCount: allMatching ? totalCount : undefined,
+      });
+      setDeleteOpen(false);
+      if (res.error) {
+        setMessage(res.error);
+      } else {
+        setMessage(`Deleted ${booksLabel(res.count ?? 0)}.`);
+        clearSelection();
         router.refresh();
       }
     });
@@ -211,7 +296,7 @@ export function LibraryView({
             style={{ "--i": i < STAGGERED_CARDS ? i : 0 } as React.CSSProperties}
           >
             {list ? (
-              <BookRow book={book} details={display} />
+              <BookRow book={book} details={display} formatPrefs={prefs} />
             ) : style === "shelf" ? (
               <BookOnShelf book={book} />
             ) : style === "covers" ? (
@@ -249,7 +334,9 @@ export function LibraryView({
   );
 
   return (
-    <div className="grid gap-4">
+    // While selecting, room at the bottom so the action bar never covers
+    // the last books.
+    <div className={cn("grid gap-4", selectMode && "pb-80 sm:pb-48")}>
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground tabular-nums">
           {totalCount} book{totalCount === 1 ? "" : "s"}
@@ -277,7 +364,10 @@ export function LibraryView({
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setSelected(new Set(books.map((b) => b.id)))}
+              onClick={() => {
+                setSelected(new Set(shownIds));
+                setMatchingFor(null);
+              }}
               title="Selects the books currently shown"
             >
               Select all
@@ -338,64 +428,164 @@ export function LibraryView({
       )}
 
       {selectMode && (
-        <div className="fixed bottom-4 left-1/2 z-50 flex w-[min(64rem,calc(100vw-2rem))] -translate-x-1/2 flex-wrap items-center gap-2 rounded-xl border bg-card p-3 shadow-lg">
-          {/* Mobile rows: count / status+shelf / tags / apply. From sm up
-              everything sits on one wrapping row with fixed widths. */}
-          <span className="w-full text-sm font-medium tabular-nums sm:w-auto">
-            {selected.size} selected
-          </span>
-          <Select value={status} onValueChange={setStatus}>
-            <SelectTrigger className="min-w-0 flex-1 basis-[calc(50%-0.5rem)] sm:w-44 sm:flex-initial sm:basis-auto">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="keep">Status: don&apos;t change</SelectItem>
-              {Object.values(ReadingStatus).map((s) => (
-                <SelectItem key={s} value={s}>
-                  {STATUS_LABELS[s]}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {shelves.length > 0 && (
-            <Select value={shelfId} onValueChange={setShelfId}>
-              <SelectTrigger className="min-w-0 flex-1 basis-[calc(50%-0.5rem)] sm:w-44 sm:flex-initial sm:basis-auto">
+        <div className="fixed bottom-4 left-1/2 z-50 grid max-h-[min(70dvh,34rem)] w-[min(64rem,calc(100vw-2rem))] -translate-x-1/2 gap-2 overflow-y-auto rounded-xl border bg-card p-3 shadow-lg">
+          {/* Rows: the count (and "all that match"), the changes in two
+              columns on phones and four from sm up, then Apply, Delete and
+              how it went. The bar scrolls if a short screen can't fit it. */}
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+            <span className="font-medium tabular-nums">
+              {formatNumber(selCount, prefs)} selected
+            </span>
+            {allMatching ? (
+              <>
+                <span className="text-muted-foreground">
+                  All {booksLabel(totalCount)} that match are selected.
+                </span>
+                <Button variant="link" size="sm" className="h-auto p-0" onClick={clearSelection}>
+                  Clear selection
+                </Button>
+              </>
+            ) : canSelectMatching ? (
+              <Button
+                variant="link"
+                size="sm"
+                className="h-auto p-0"
+                onClick={() => setMatchingFor(matchKey)}
+              >
+                Select all {booksLabel(totalCount)} that match
+              </Button>
+            ) : null}
+          </div>
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+            <Select value={status} onValueChange={setStatus}>
+              <SelectTrigger aria-label="Status" className="w-full min-w-0">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="keep">Shelf: don&apos;t change</SelectItem>
-                {shelves.map((s) => (
-                  <SelectItem key={s.id} value={`add:${s.id}`}>
-                    Add to “{s.name}”
-                  </SelectItem>
-                ))}
-                {shelves.map((s) => (
-                  <SelectItem key={`remove-${s.id}`} value={`remove:${s.id}`}>
-                    Remove from “{s.name}”
+                <SelectItem value="keep">Status: don&apos;t change</SelectItem>
+                {Object.values(ReadingStatus).map((s) => (
+                  <SelectItem key={s} value={s}>
+                    {STATUS_LABELS[s]}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-          )}
-          <Input
-            value={tags}
-            onChange={(e) => setTags(e.target.value)}
-            placeholder="Add tags, comma separated"
-            className="min-w-0 flex-1 basis-full sm:w-52 sm:flex-initial sm:basis-auto"
-          />
-          <Button
-            size="sm"
-            onClick={apply}
-            disabled={pending || selected.size === 0}
-            className="flex-1 sm:flex-initial"
-          >
-            {pending ? "Applying…" : "Apply"}
-          </Button>
-          {message && (
-            <span className="text-sm text-muted-foreground">{message}</span>
-          )}
+            {shelves.length > 0 && (
+              <Select value={shelfId} onValueChange={setShelfId}>
+                <SelectTrigger aria-label="Shelf" className="w-full min-w-0">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="keep">Shelf: don&apos;t change</SelectItem>
+                  {/* Hidden shelves too: hiding is only about the chip row. */}
+                  {orderByIds(shelves, prefs.shelfOrder).map((s) => (
+                    <SelectItem key={s.id} value={`add:${s.id}`}>
+                      Add to “{s.name}”
+                    </SelectItem>
+                  ))}
+                  {orderByIds(shelves, prefs.shelfOrder).map((s) => (
+                    <SelectItem key={`remove-${s.id}`} value={`remove:${s.id}`}>
+                      Remove from “{s.name}”
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+            <Select value={format} onValueChange={setFormat}>
+              <SelectTrigger aria-label="Format" className="w-full min-w-0">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="keep">Format: don&apos;t change</SelectItem>
+                {Object.values(BookFormat).map((f) => (
+                  <SelectItem key={f} value={f}>
+                    {FORMAT_LABELS[f]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={ownership} onValueChange={setOwnership}>
+              <SelectTrigger aria-label="Ownership" className="w-full min-w-0">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="keep">Ownership: don&apos;t change</SelectItem>
+                {Object.values(BookOwnership).map((o) => (
+                  <SelectItem key={o} value={o}>
+                    {OWNERSHIP_LABELS[o]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Input
+              value={tags}
+              onChange={(e) => setTags(e.target.value)}
+              placeholder="Add tags, comma separated"
+              aria-label="Add tags, comma separated"
+              className="col-span-2"
+            />
+            <Input
+              value={removeTags}
+              onChange={(e) => setRemoveTags(e.target.value)}
+              placeholder="Remove tags, comma separated"
+              aria-label="Remove tags, comma separated"
+              className="col-span-2"
+            />
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              size="sm"
+              onClick={apply}
+              disabled={pending || deleting || selCount === 0}
+              className="flex-1 sm:flex-initial"
+            >
+              {pending ? "Applying…" : "Apply"}
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              className="text-destructive hover:text-destructive"
+              onClick={() => setDeleteOpen(true)}
+              disabled={pending || deleting || selCount === 0}
+            >
+              Delete…
+            </Button>
+            <span role="status" className="basis-full text-sm text-muted-foreground sm:basis-auto">
+              {message}
+            </span>
+          </div>
         </div>
       )}
+
+      <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <DialogContent
+          // Start on Cancel, not the backup link: Enter shouldn't delete.
+          onOpenAutoFocus={(e) => {
+            e.preventDefault();
+            cancelDeleteRef.current?.focus();
+          }}
+        >
+          <DialogHeader>
+            <DialogTitle>Delete {booksLabel(selCount)}?</DialogTitle>
+            <DialogDescription>
+              They leave your library with their reading history, quotes and
+              loans. This can&apos;t be undone, so{" "}
+              <a href="/api/export">download a backup</a> first if you might
+              want them back.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button ref={cancelDeleteRef} variant="outline">
+                Cancel
+              </Button>
+            </DialogClose>
+            <Button variant="destructive" disabled={deleting} onClick={deleteSelected}>
+              {deleting ? "Deleting…" : `Delete ${booksLabel(selCount)}`}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

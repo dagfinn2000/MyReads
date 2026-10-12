@@ -1,11 +1,13 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { BookFormat, BookOwnership, ReadingStatus } from "@prisma/client";
-import { ArrowDown, ArrowUp, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, Pencil, Trash2 } from "lucide-react";
 import { savePreferences } from "@/lib/actions/preferences";
-import { deleteView } from "@/lib/actions/saved-views";
+import { deleteView, renameView } from "@/lib/actions/saved-views";
+import { moveId, orderByIds } from "@/lib/library-order";
+import { SAVED_VIEW_NAME_MAX } from "@/lib/saved-views";
 import {
   FORMAT_LABELS,
   OWNERSHIP_LABELS,
@@ -31,6 +33,7 @@ import {
 import { cn } from "@/lib/utils";
 import { BookPageCardList, FindLinksEditor } from "@/components/book-page-preferences";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -327,6 +330,12 @@ export function PreferencesForm({
   const zone = prefs.timeZone || serverTimeZone;
   const zoneOptions = timeZones.includes(zone) ? timeZones : [zone, ...timeZones];
 
+  // Saved views in the reader's order, which moving one changes at once.
+  const views = orderByIds(savedViews, prefs.savedViewOrder);
+  const shownStatusTabs = Object.values(ReadingStatus).filter(
+    (s) => !prefs.hiddenStatusTabs.includes(s),
+  ).length;
+
   return (
     <div className="grid gap-5">
       <p className="text-sm text-muted-foreground" aria-live="polite">
@@ -430,6 +439,33 @@ export function PreferencesForm({
           ]}
           onChange={(v) => update({ sortAlphabet: v })}
         />
+      </Section>
+
+      <Section title="Library" id="library">
+        <div className="grid gap-1.5">
+          <div>
+            <p className="text-sm font-medium">Status tabs to show</p>
+            <p className="text-xs text-muted-foreground">The All tab always shows.</p>
+          </div>
+          {Object.values(ReadingStatus).map((s) => {
+            const shown = !prefs.hiddenStatusTabs.includes(s);
+            return (
+              <Toggle
+                key={s}
+                label={STATUS_LABELS[s]}
+                checked={shown}
+                // At least one status tab stays.
+                disabled={shown && shownStatusTabs === 1}
+                onChange={(on) =>
+                  update({ hiddenStatusTabs: toggleIn(prefs.hiddenStatusTabs, s, !on) })
+                }
+              />
+            );
+          })}
+        </div>
+        <p className="text-xs text-muted-foreground">
+          Order and hide shelf chips from Manage shelves in the library.
+        </p>
       </Section>
 
       <Section title="Pick for me" id="pick-for-me">
@@ -616,7 +652,7 @@ export function PreferencesForm({
             }
             options={[
               { value: "none", label: "The whole library" },
-              ...savedViews.map((v) => ({ value: v.id, label: `Saved view: ${v.name}` })),
+              ...views.map((v) => ({ value: v.id, label: `Saved view: ${v.name}` })),
             ]}
             onChange={(v) => update({ defaultViewId: v === "none" ? "" : v })}
           />
@@ -691,41 +727,196 @@ export function PreferencesForm({
         />
       </Section>
 
-      {savedViews.length > 0 && <SavedViewsList views={savedViews} />}
+      {savedViews.length > 0 && (
+        <SavedViewsList views={views} onReorder={(ids) => update({ savedViewOrder: ids })} />
+      )}
     </div>
   );
 }
 
-/** Saved library views, with a delete button each. Saving and renaming
- *  happen in the library (saving under the same name updates a view). */
-function SavedViewsList({ views }: { views: { id: string; name: string }[] }) {
+/** Saved library views: rename, reorder (the chips above the library
+ *  follow this order) or delete. Views are saved from the library's filter
+ *  bar. */
+function SavedViewsList({
+  views,
+  onReorder,
+}: {
+  /** In the reader's order. */
+  views: { id: string; name: string }[];
+  /** Saves a new order, through the form's own save and status line. */
+  onReorder: (ids: string[]) => void;
+}) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
+  const [editing, setEditing] = useState<string | null>(null);
+  const [newName, setNewName] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  // A deleted view leaves the list at once, so focus can go to the next.
+  const [gone, setGone] = useState<string[]>([]);
+  const listRef = useRef<HTMLUListElement>(null);
+
+  const rows = views.filter((v) => !gone.includes(v.id));
+
+  /** Focus the first of `selectors` that is there and enabled, once React
+   *  has redrawn the list: a moved or removed row takes the focus with it
+   *  otherwise. */
+  function focusSoon(...selectors: string[]) {
+    requestAnimationFrame(() => {
+      for (const selector of selectors) {
+        const el = listRef.current?.querySelector<HTMLButtonElement>(selector);
+        if (el && !el.disabled) {
+          el.focus();
+          return;
+        }
+      }
+    });
+  }
+
+  function cancel(id: string) {
+    setEditing(null);
+    setError(null);
+    focusSoon(`[data-rename="${id}"]`);
+  }
+
+  function submitRename(view: { id: string; name: string }) {
+    const to = newName.trim();
+    if (!to || to === view.name) {
+      cancel(view.id);
+      return;
+    }
+    startTransition(async () => {
+      const res = await renameView(view.id, to);
+      if (res.error) {
+        setError(res.error);
+        return;
+      }
+      cancel(view.id);
+      router.refresh();
+    });
+  }
+
+  function move(view: { id: string }, by: -1 | 1) {
+    onReorder(
+      moveId(
+        rows.map((v) => v.id),
+        view.id,
+        by,
+      ),
+    );
+    focusSoon(`[data-move="${view.id}:${by}"]`, `[data-move="${view.id}:${-by}"]`);
+  }
+
+  function remove(view: { id: string }) {
+    const i = rows.findIndex((v) => v.id === view.id);
+    const neighbour = rows[i + 1] ?? rows[i - 1];
+    startTransition(async () => {
+      await deleteView(view.id);
+      setGone((g) => [...g, view.id]);
+      if (neighbour) focusSoon(`[data-rename="${neighbour.id}"]`);
+      router.refresh();
+    });
+  }
 
   return (
     <Section title="Saved views">
-      <ul className="grid gap-1">
-        {views.map((v) => (
-          <li key={v.id} className="flex min-h-8 items-center gap-2 text-sm">
-            <span className="min-w-0 flex-1 truncate">{v.name}</span>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-sm"
-              title={`Delete “${v.name}”`}
-              disabled={pending}
-              onClick={() =>
-                startTransition(async () => {
-                  await deleteView(v.id);
-                  router.refresh();
-                })
-              }
-            >
-              <Trash2 data-slot="icon" />
-            </Button>
+      <ul ref={listRef} className="grid gap-1">
+        {rows.map((v, i) => (
+          <li key={v.id} className="flex min-h-8 flex-wrap items-center gap-x-2 gap-y-1 text-sm">
+            {editing === v.id ? (
+              <form
+                className="flex min-w-0 flex-1 flex-wrap items-center gap-2"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  submitRename(v);
+                }}
+              >
+                <Input
+                  value={newName}
+                  onChange={(e) => setNewName(e.target.value)}
+                  onFocus={(e) => e.currentTarget.select()}
+                  onKeyDown={(e) => {
+                    if (e.key === "Escape") {
+                      e.preventDefault();
+                      cancel(v.id);
+                    }
+                  }}
+                  maxLength={SAVED_VIEW_NAME_MAX}
+                  autoFocus
+                  aria-label={`New name for “${v.name}”`}
+                  className="h-8 min-w-0 flex-1 basis-40"
+                />
+                <span className="flex gap-1">
+                  <Button type="submit" size="sm" disabled={pending}>
+                    Save
+                  </Button>
+                  <Button type="button" size="sm" variant="ghost" onClick={() => cancel(v.id)}>
+                    Cancel
+                  </Button>
+                </span>
+              </form>
+            ) : (
+              <>
+                <span className="min-w-0 flex-1 truncate">{v.name}</span>
+                <span className="flex shrink-0 gap-1">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    data-rename={v.id}
+                    title="Rename"
+                    aria-label={`Rename “${v.name}”`}
+                    onClick={() => {
+                      setEditing(v.id);
+                      setNewName(v.name);
+                      setError(null);
+                    }}
+                  >
+                    <Pencil data-slot="icon" />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    data-move={`${v.id}:-1`}
+                    title="Move up"
+                    aria-label={`Move “${v.name}” up`}
+                    disabled={i === 0}
+                    onClick={() => move(v, -1)}
+                  >
+                    <ArrowUp data-slot="icon" />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    data-move={`${v.id}:1`}
+                    title="Move down"
+                    aria-label={`Move “${v.name}” down`}
+                    disabled={i === rows.length - 1}
+                    onClick={() => move(v, 1)}
+                  >
+                    <ArrowDown data-slot="icon" />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    title={`Delete “${v.name}”`}
+                    aria-label={`Delete “${v.name}”`}
+                    disabled={pending}
+                    onClick={() => remove(v)}
+                  >
+                    <Trash2 data-slot="icon" />
+                  </Button>
+                </span>
+              </>
+            )}
           </li>
         ))}
       </ul>
+      <p aria-live="polite" className="text-sm text-destructive">
+        {error}
+      </p>
     </Section>
   );
 }

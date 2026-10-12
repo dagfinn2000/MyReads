@@ -6,8 +6,9 @@ import { cn } from "@/lib/utils";
  * Saved views above the library: one chip per view, opening its filters,
  * sort and grouping. The view on screen (if any) is highlighted, with an ×
  * that clears its filters but keeps the sort. Views are saved from the
- * filter bar and renamed or deleted on the Account page. Renders nothing
- * until there is at least one.
+ * filter bar, and renamed, reordered or deleted on the Account page; the
+ * page passes them in that order. Renders nothing until there is at least
+ * one.
  */
 export function SavedViewChips({
   views,

@@ -19,9 +19,10 @@ import {
 
 /**
  * The library's View menu: grid or list, cover size, card style, 3D covers,
- * and which details the cards show. Saved on the account like the sort, and
- * applied by the server on the next render — so the menu only saves and
- * refreshes. 3D covers also show at once, since they live on <html>.
+ * and which details the cards show (list rows can add a date and the page
+ * count). Saved on the account like the sort, and applied by the server on
+ * the next render — so the menu only saves and refreshes. 3D covers also
+ * show at once, since they live on <html>.
  */
 export function LibraryViewMenu({
   display,
@@ -60,7 +61,7 @@ export function LibraryViewMenu({
           <span className="sr-only">View options</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-52">
+      <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuLabel>Layout</DropdownMenuLabel>
         <DropdownMenuRadioGroup
           value={display.layout}
@@ -132,6 +133,38 @@ export function LibraryViewMenu({
             >
               Series
             </DropdownMenuCheckboxItem>
+            <DropdownMenuCheckboxItem
+              checked={display.showOwnership}
+              onCheckedChange={(c) => save({ showOwnership: c === true })}
+              onSelect={(e) => e.preventDefault()}
+            >
+              Ownership
+            </DropdownMenuCheckboxItem>
+            {display.layout === "list" && (
+              <DropdownMenuCheckboxItem
+                checked={display.showPageCount}
+                onCheckedChange={(c) => save({ showPageCount: c === true })}
+                onSelect={(e) => e.preventDefault()}
+              >
+                Page count
+              </DropdownMenuCheckboxItem>
+            )}
+          </>
+        )}
+
+        {/* List rows only: a date under the author. */}
+        {display.layout === "list" && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuLabel>Date</DropdownMenuLabel>
+            <DropdownMenuRadioGroup
+              value={display.rowDate}
+              onValueChange={(v) => save({ rowDate: v as LibraryDisplay["rowDate"] })}
+            >
+              <DropdownMenuRadioItem value="none">None</DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="added">Date added</DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="finished">Date finished</DropdownMenuRadioItem>
+            </DropdownMenuRadioGroup>
           </>
         )}
       </DropdownMenuContent>

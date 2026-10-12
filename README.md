@@ -46,8 +46,11 @@ reading, and what you thought of them, on your own server.
   hardbacks, and books without a cover get one drawn with their title. Save
   the searches and filters you use often as views, and open the library on
   one of them if you like.
-- Edit many books at once: set their status, add tags, or put them on a
-  shelf or take them off it.
+- Edit many books at once: set their status, format or ownership, add or
+  remove tags, put them on a shelf or take them off it, or delete them.
+  Pick the books on screen, or every book that matches your filters.
+- Rename, merge, reorder and hide shelves, and choose which status tabs the
+  library shows. Saved views can be renamed and reordered too.
 
 **Stats**
 

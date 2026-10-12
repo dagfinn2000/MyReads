@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { getCurrentUser, getPreferences } from "@/lib/current-user";
 import { backupStatusText } from "@/lib/backup";
 import { formatDate, formatNumber } from "@/lib/display";
+import { orderByIds } from "@/lib/library-order";
 import { googleBooksEnabled } from "@/lib/metadata/googlebooks";
 import { DEFAULT_PREFERENCES, serverTimeZone } from "@/lib/preferences";
 import { BackupDownloadButton, BackupReminderSetting } from "@/components/backup-download";
@@ -77,7 +78,7 @@ export default async function AccountPage() {
             serverTimeZone={serverTimeZone()}
             timeZones={timeZones}
             googleAvailable={googleBooksEnabled()}
-            savedViews={savedViews}
+            savedViews={orderByIds(savedViews, prefs.savedViewOrder)}
           />
         </CardContent>
       </Card>
