@@ -678,6 +678,114 @@ html[data-long-font="serif"] .long-text {
     Cambria, "Times New Roman", serif;
 }
 
+/* ── Drawn covers ──────────────────────────────────────────────────────────
+   The stand-in for a book with no cover image (BookCover in
+   components/book-card.tsx): a coloured board with a spine shadow, a thin
+   inset frame, the title in a book face and the author in small capitals.
+   The colour comes from the title (lib/cover-art.ts) through --cover-hue,
+   --cover-sat and --cover-light. Sizes are in cqi (percent of the cover's
+   width), so the same cover reads at every size; covers too small for
+   text (list rows, quotes) show just the board.
+   "Books without a cover: Plain" in Preferences (data-covers="plain")
+   shows the grey box with a book icon instead. */
+.book-cover {
+  container-type: inline-size;
+}
+.plain-cover {
+  display: none;
+}
+html[data-covers="plain"] .plain-cover {
+  display: flex;
+}
+html[data-covers="plain"] .drawn-cover {
+  display: none;
+}
+.drawn-cover {
+  position: absolute;
+  inset: 0;
+  background: hsl(var(--cover-hue) var(--cover-sat) var(--cover-light));
+  color: hsl(var(--cover-hue) 45% 93%);
+}
+.drawn-cover::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 6%;
+  background: linear-gradient(90deg, rgb(0 0 0 / 0.3), rgb(255 255 255 / 0.1) 75%, transparent);
+}
+.drawn-cover-frame {
+  position: absolute;
+  inset: 7% 7% 7% 11%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5cqi;
+  padding: 12cqi 6cqi 7cqi;
+  overflow: hidden;
+  border: 1px solid hsl(var(--cover-hue) 45% 88% / 0.42);
+  text-align: center;
+}
+.drawn-cover-title {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 5;
+  overflow: hidden;
+  font-family: var(--font-literata), ui-serif, Georgia, serif;
+  font-size: var(--cover-title, 11.5cqi);
+  font-weight: 600;
+  line-height: 1.14;
+  overflow-wrap: break-word;
+  text-wrap: balance;
+}
+.drawn-cover-rule {
+  flex: none;
+  width: 16cqi;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.6;
+}
+.drawn-cover-author {
+  margin-top: auto;
+  font-size: 6.4cqi;
+  letter-spacing: 0.12em;
+  line-height: 1.3;
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+/* Three arrangements, picked per title so a shelf doesn't look stamped
+   out: title at the top (0), everything centred (1), or the title on a
+   band across the middle with no frame (2). */
+.drawn-cover[data-layout="1"] .drawn-cover-frame {
+  justify-content: center;
+}
+.drawn-cover[data-layout="1"] .drawn-cover-author {
+  margin-top: 2cqi;
+}
+.drawn-cover[data-layout="2"] .drawn-cover-frame {
+  inset: 0 0 0 6%;
+  justify-content: center;
+  padding-inline: 10cqi;
+  border: 0;
+}
+.drawn-cover[data-layout="2"] .drawn-cover-frame::before {
+  content: "";
+  position: absolute;
+  inset: 30% 0 36%;
+  border-block: 1px solid hsl(var(--cover-hue) 45% 88% / 0.35);
+  background: hsl(var(--cover-hue) 40% 90% / 0.13);
+}
+.drawn-cover[data-layout="2"] .drawn-cover-frame > * {
+  position: relative;
+}
+.drawn-cover[data-layout="2"] .drawn-cover-author {
+  margin-top: 3cqi;
+}
+@container (max-width: 4.5rem) {
+  .drawn-cover-frame {
+    display: none;
+  }
+}
+
 /* ── Motion ────────────────────────────────────────────────────────────────
    Every animation and transition in the app, including the menu and dialog
    zoom from shadcn, stops when the device asks for reduced motion or the

@@ -5,10 +5,11 @@ import { BookOpen, HandHeart } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Stars } from "@/components/stars";
 import { STATUS_BADGE_CLASS, STATUS_LABELS } from "@/lib/display";
+import { coverArt } from "@/lib/cover-art";
 import type { LibraryDisplay } from "@/lib/library-view";
 import { cn } from "@/lib/utils";
 
-/** Cover image with a graceful placeholder when there's no cover.
+/** Cover image, or a stand-in when the book has none.
  *  Lazy by default — grids request hundreds of covers at once, and the
  *  below-the-fold ones shouldn't compete with the visible page. The detail
  *  page passes `loading="eager"` for its above-the-fold hero cover. */
@@ -17,14 +18,12 @@ export function BookCover({
   className,
   loading = "lazy",
 }: {
-  book: Pick<Book, "title" | "coverUrl">;
+  book: Pick<Book, "title" | "coverUrl"> & { authors?: string[] };
   className?: string;
   loading?: "eager" | "lazy";
 }) {
   return (
-    <div
-      className={`overflow-hidden rounded-md bg-muted ${className ?? ""}`}
-    >
+    <div className={cn("book-cover relative overflow-hidden rounded-md bg-muted", className)}>
       {book.coverUrl ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img
@@ -35,11 +34,50 @@ export function BookCover({
           className="h-full w-full object-cover"
         />
       ) : (
-        <div className="flex h-full w-full items-center justify-center">
-          <BookOpen className="size-10 text-muted-foreground/40" />
-        </div>
+        <MissingCover title={book.title} author={book.authors?.[0]} />
       )}
     </div>
+  );
+}
+
+/**
+ * The stand-in for a book without a cover image. Both kinds are rendered and
+ * CSS shows one, following "Books without a cover" in Preferences
+ * (`data-covers` on <html>; see globals.css) — so this stays a plain
+ * component that server and client pages can share without passing the
+ * setting down.
+ *
+ * The drawn cover is a coloured board with the title and first author,
+ * coloured from the title (lib/cover-art.ts). The plain one is the old grey
+ * box with a book icon.
+ */
+function MissingCover({ title, author }: { title: string; author?: string }) {
+  const art = coverArt(title);
+  return (
+    <>
+      <div
+        className="drawn-cover"
+        data-layout={art.layout}
+        style={
+          {
+            "--cover-hue": art.hue,
+            "--cover-sat": `${art.saturation}%`,
+            "--cover-light": `${art.lightness}%`,
+            "--cover-title": `${art.titleSize}cqi`,
+          } as React.CSSProperties
+        }
+        aria-hidden="true"
+      >
+        <div className="drawn-cover-frame">
+          <span className="drawn-cover-title">{title}</span>
+          <span className="drawn-cover-rule" />
+          {author && <span className="drawn-cover-author">{author}</span>}
+        </div>
+      </div>
+      <div className="plain-cover h-full w-full items-center justify-center">
+        <BookOpen className="size-10 text-muted-foreground/40" />
+      </div>
+    </>
   );
 }
 

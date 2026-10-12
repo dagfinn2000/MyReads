@@ -45,6 +45,8 @@ describe("parsePreferences", () => {
   it("keeps the appearance settings and defaults unknown ones", () => {
     expect(parsePreferences({ motion: "off" }).motion).toBe("off");
     expect(parsePreferences({ motion: "wobbly" }).motion).toBe("on");
+    expect(parsePreferences({ coverArt: "plain" }).coverArt).toBe("plain");
+    expect(parsePreferences({ coverArt: 3 }).coverArt).toBe("drawn");
   });
 
   it("drops a time zone the runtime doesn't know", () => {

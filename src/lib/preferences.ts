@@ -47,6 +47,10 @@ export const LONG_TEXT_FONTS = ["sans", "serif"] as const;
  *  reduced motion, whatever this says (see globals.css and lib/motion.ts). */
 export const MOTIONS = ["on", "off"] as const;
 
+/** What a book without a cover image shows: a drawn cover with its title,
+ *  or the plain grey box. */
+export const COVER_ARTS = ["drawn", "plain"] as const;
+
 /** Colour steps for the reading calendar (see lib/heatmap.ts). */
 export const HEATMAP_SCALES = ["standard", "gentle", "heavy", "auto"] as const;
 
@@ -75,6 +79,7 @@ export type RatingStyle = (typeof RATING_STYLES)[number];
 export type TextSize = (typeof TEXT_SIZES)[number];
 export type LongTextFont = (typeof LONG_TEXT_FONTS)[number];
 export type Motion = (typeof MOTIONS)[number];
+export type CoverArtStyle = (typeof COVER_ARTS)[number];
 export type HeatmapScale = (typeof HEATMAP_SCALES)[number];
 export type StartPage = (typeof START_PAGES)[number];
 export type HideableNav = (typeof HIDEABLE_NAV)[number];
@@ -114,6 +119,7 @@ export type Preferences = {
 
   // Appearance
   motion: Motion;
+  coverArt: CoverArtStyle;
 
   heatmapScale: HeatmapScale;
   startPage: StartPage;
@@ -140,6 +146,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
   textSize: "normal",
   longTextFont: "sans",
   motion: "on",
+  coverArt: "drawn",
   heatmapScale: "standard",
   startPage: "library",
   hiddenNav: [],
@@ -219,6 +226,7 @@ export function parsePreferences(raw: unknown): Preferences {
     textSize: pick(TEXT_SIZES, obj.textSize, d.textSize),
     longTextFont: pick(LONG_TEXT_FONTS, obj.longTextFont, d.longTextFont),
     motion: pick(MOTIONS, obj.motion, d.motion),
+    coverArt: pick(COVER_ARTS, obj.coverArt, d.coverArt),
     heatmapScale: pick(HEATMAP_SCALES, obj.heatmapScale, d.heatmapScale),
     startPage: pick(START_PAGES, obj.startPage, d.startPage),
     hiddenNav: pickList(HIDEABLE_NAV, obj.hiddenNav),

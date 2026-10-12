@@ -369,6 +369,18 @@ export function PreferencesForm({
         </p>
       </Section>
 
+      <Section title="Appearance">
+        <Choice
+          label="Books without a cover"
+          value={prefs.coverArt}
+          options={[
+            { value: "drawn", label: "A drawn cover with the title" },
+            { value: "plain", label: "A plain grey box" },
+          ]}
+          onChange={(v) => update({ coverArt: v })}
+        />
+      </Section>
+
       <Section title="Motion">
         <Choice
           label="Animations"
