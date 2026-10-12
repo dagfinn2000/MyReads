@@ -27,14 +27,16 @@ export async function Nav() {
     <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur">
       {/* Below lg the nav buttons collapse to icons. With five labelled
           links plus the right-hand group the bar needs about 900px, so
-          labels from sm (640px) overflowed tablets and narrow windows. */}
-      <div className="mx-auto flex h-14 max-w-6xl items-center gap-0.5 px-3 sm:gap-1 sm:px-4">
+          labels from sm (640px) overflowed tablets and narrow windows.
+          On phones the icons sit a little closer together and the
+          wordmark waits for room, so the bar fits from 360px up. */}
+      <div className="mx-auto flex h-14 max-w-6xl items-center gap-0.5 px-3 max-sm:[&_[data-slot=button]]:px-2 sm:gap-1 sm:px-4">
         <Link
           href="/"
           className="mr-2 flex items-center gap-2 text-lg font-semibold tracking-tight sm:mr-4"
         >
           <BookOpen className="size-5" />
-          <span className="hidden min-[400px]:inline">MyReads</span>
+          <span className="hidden min-[480px]:inline">MyReads</span>
         </Link>
         <Button asChild variant="ghost" size="sm" title="Library">
           <Link href="/books">
