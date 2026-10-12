@@ -70,6 +70,9 @@ model User {
   /// migration — parsePreferences fills in a default for anything missing.
   /// Null = never changed anything.
   preferences  Json?
+  /// When this account last downloaded its backup zip (GET /api/export), so
+  /// the Backup card can say how old the newest copy is. Null = never.
+  lastBackupAt DateTime?
   createdAt    DateTime      @default(now())
   books        Book[]
   shelves      Shelf[]
@@ -145,6 +148,10 @@ model Book {
   /// Either a local cached path ("/api/covers/<id>.jpg") or a remote URL.
   coverUrl      String?
   pageCount     Int?
+  /// Running time of an audiobook, in minutes, so progress can be logged as
+  /// time listened. Positions are still stored as the matching page of
+  /// pageCount, so stats never need to know about it. Null = not known.
+  lengthMinutes Int?
   /// Kept as a string because metadata APIs return partial dates ("1999", "2003-07").
   publishedDate String?
   tags          String[]   @default([])
@@ -212,6 +219,9 @@ model Read {
   /// What you rated it *that* time, 1–10 half-star units. Null = unrated;
   /// the Book row's rating stays your current overall rating.
   rating Int?
+  /// What you thought that time, or how you read it ("read it aloud to the
+  /// kids"). Optional, kept with the pass's dates and rating.
+  note   String?
 
   createdAt DateTime @default(now())
 

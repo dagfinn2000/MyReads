@@ -64,7 +64,8 @@ describe("importLibrary", () => {
       payload([
         book({
           quotes: [{ text: "Life before death.", page: 42, note: "oath" }],
-          reads: [{ dateFinished: "2019-05-01T00:00:00.000Z", rating: 8 }],
+          reads: [{ dateFinished: "2019-05-01T00:00:00.000Z", rating: 8, note: "Read aloud" }],
+          lengthMinutes: 1475,
           progress: [{ page: 100, date: "2026-01-02T10:00:00.000Z" }],
           timesRead: 2,
         }),
@@ -87,6 +88,8 @@ describe("importLibrary", () => {
     expect(saved.title).toBe("The Final Empire");
     expect(saved.quotes[0].text).toBe("Life before death.");
     expect(saved.reads[0].rating).toBe(8);
+    expect(saved.reads[0].note).toBe("Read aloud");
+    expect(saved.lengthMinutes).toBe(1475);
     expect(saved.progress[0].page).toBe(100);
     // Derived, not trusted from the file: one archived pass + the current one.
     expect(saved.timesRead).toBe(2);

@@ -57,6 +57,8 @@ const importedReadSchema = z.object({
   dateStarted: dateField,
   dateFinished: dateField,
   rating: z.number().int().min(1).max(10).nullable().optional().catch(null),
+  /** Additive: older exports have no notes on past reads. */
+  note: z.string().trim().max(2000).nullable().optional().catch(null),
   createdAt: dateField,
 });
 
@@ -84,6 +86,8 @@ const importedBookSchema = z.object({
   // Same rule as the book form; a bad value drops the cover, not the book.
   coverUrl: z.string().max(2000).refine(isAllowedCoverUrl).nullable().optional().catch(null),
   pageCount: z.number().int().min(1).max(100000).nullable().optional().catch(null),
+  /** Additive: an audiobook's running time in minutes. */
+  lengthMinutes: z.number().int().min(1).max(60000).nullable().optional().catch(null),
   publishedDate: z.string().trim().max(20).nullable().optional(),
   tags: z.array(z.string().trim().toLowerCase().max(50)).catch([]),
   format: z.nativeEnum(BookFormat).catch(BookFormat.PHYSICAL),
@@ -412,17 +416,24 @@ export async function importLibrary(
     // lives on the Book row), exactly like the migration backfill. Either
     // way timesRead ends up consistent with the restored rows.
     const isRead = b.status === ReadingStatus.READ;
-    const pastReads: { dateStarted: Date | null; dateFinished: Date | null; rating: number | null; createdAt: Date | null }[] =
+    const pastReads: {
+      dateStarted: Date | null;
+      dateFinished: Date | null;
+      rating: number | null;
+      note: string | null;
+      createdAt: Date | null;
+    }[] =
       b.reads.length > 0
         ? b.reads.map((r) => ({
             dateStarted: r.dateStarted,
             dateFinished: r.dateFinished,
             rating: r.rating ?? null,
+            note: r.note || null,
             createdAt: r.createdAt,
           }))
         : Array.from(
             { length: Math.max(b.timesRead - (isRead ? 1 : 0), 0) },
-            () => ({ dateStarted: null, dateFinished: null, rating: null, createdAt: null }),
+            () => ({ dateStarted: null, dateFinished: null, rating: null, note: null, createdAt: null }),
           );
     const timesRead = pastReads.length + (isRead ? 1 : 0);
 
@@ -435,6 +446,7 @@ export async function importLibrary(
         description: b.description ?? null,
         coverUrl: cover.url,
         pageCount: b.pageCount ?? null,
+        lengthMinutes: b.lengthMinutes ?? null,
         publishedDate: b.publishedDate ?? null,
         tags: [...new Set(b.tags)],
         format: b.format,
@@ -471,6 +483,7 @@ export async function importLibrary(
             dateStarted: r.dateStarted,
             dateFinished: r.dateFinished,
             rating: r.rating,
+            note: r.note,
             ...(r.createdAt && { createdAt: r.createdAt }),
           })),
         },

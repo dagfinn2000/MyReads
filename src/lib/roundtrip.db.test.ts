@@ -68,6 +68,7 @@ describe("export -> import round trip", () => {
         isbn: "9780765311788",
         description: "Ash falls from the sky.",
         pageCount: 541,
+        lengthMinutes: 1475,
         publishedDate: "2006",
         tags: ["fantasy", "epic"],
         format: "PHYSICAL",
@@ -86,7 +87,9 @@ describe("export -> import round trip", () => {
           create: [{ text: "There's always another secret.", page: 500, note: "!" }],
         },
         reads: {
-          create: [{ dateFinished: new Date("2019-06-01T00:00:00.000Z"), rating: 8 }],
+          create: [
+            { dateFinished: new Date("2019-06-01T00:00:00.000Z"), rating: 8, note: "Read aloud" },
+          ],
         },
         progress: {
           create: [
@@ -135,6 +138,7 @@ describe("export -> import round trip", () => {
     expect(restored.isbn).toBe("9780765311788");
     expect(restored.description).toBe("Ash falls from the sky.");
     expect(restored.pageCount).toBe(541);
+    expect(restored.lengthMinutes).toBe(1475);
     expect(restored.publishedDate).toBe("2006");
     expect([...restored.tags].sort()).toEqual(["epic", "fantasy"]);
     expect(restored.seriesName).toBe("Mistborn");
@@ -154,6 +158,7 @@ describe("export -> import round trip", () => {
     expect(restored.quotes[0].page).toBe(500);
     expect(restored.reads).toHaveLength(1);
     expect(restored.reads[0].rating).toBe(8);
+    expect(restored.reads[0].note).toBe("Read aloud");
     expect(restored.progress.map((p) => p.page).sort((a, b) => a - b)).toEqual([0, 250]);
 
     // Lending survives, including which loan is still open.
