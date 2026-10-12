@@ -1,9 +1,13 @@
+import { Fragment } from "react";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { ReadingStatus } from "@prisma/client";
 import { Library, Pencil, Repeat } from "lucide-react";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { getPreferences } from "@/lib/current-user";
+import { arrangeBookCards, FORCED_CARD_NOTES } from "@/lib/book-page";
+import type { BookPageCard } from "@/lib/preferences";
 import {
   formatDate,
   FORMAT_LABELS,
@@ -12,9 +16,11 @@ import {
   STATUS_LABELS,
 } from "@/lib/display";
 import { BookCover } from "@/components/book-card";
+import { BookDescription } from "@/components/book-description";
 import { BookLink } from "@/components/book-link";
 import { BookShelvesCard } from "@/components/book-shelves-card";
 import { DeleteBookButton } from "@/components/delete-book-button";
+import { FindItAt } from "@/components/find-it-at";
 import { QuotesCard } from "@/components/quotes-card";
 import { LendingCard } from "@/components/lending-card";
 import { ReadHistoryCard } from "@/components/read-history-card";
@@ -92,6 +98,29 @@ export default async function BookDetailPage({
   const seriesHref = book.seriesName
     ? `/books?series=${encodeURIComponent(book.seriesName)}&group=series`
     : null;
+
+  // The cards below the details, in the reader's order (Preferences > Book
+  // page). A hidden card still shows when it holds something written down
+  // nowhere else on the page, with a line saying why.
+  const cards: Record<BookPageCard, React.ReactNode> = {
+    shelves: (
+      <BookShelvesCard
+        bookId={book.id}
+        shelves={allShelves}
+        memberIds={book.shelves.map((s) => s.id)}
+      />
+    ),
+    reading: <ReadingCard book={book} progress={book.progress} />,
+    history: <ReadHistoryCard book={book} reads={book.reads} />,
+    lending: <LendingCard bookId={book.id} loans={book.loans} />,
+    quotes: <QuotesCard bookId={book.id} quotes={book.quotes} />,
+  };
+  const arranged = arrangeBookCards(prefs, {
+    reading: book.status === ReadingStatus.READING || !!book.review?.trim(),
+    history: book.reads.length > 0,
+    lending: book.loans.some((l) => l.returnedAt === null),
+    quotes: book.quotes.length > 0,
+  });
 
   return (
     // Both column definitions clamp their track minimums to 0 — with the
@@ -186,13 +215,18 @@ export default async function BookDetailPage({
           )}
         </dl>
 
-        {book.description && (
-          // break-words: imported descriptions can contain long raw URLs,
-          // which would otherwise refuse to wrap and overflow on phones.
-          <p className="long-text max-w-prose whitespace-pre-line break-words text-sm leading-relaxed text-muted-foreground">
-            {book.description}
-          </p>
-        )}
+        <FindItAt book={book} links={prefs.findLinks} />
+
+        {book.description &&
+          (prefs.bookDescription === "clamp" ? (
+            <BookDescription text={book.description} />
+          ) : (
+            // break-words: imported descriptions can contain long raw URLs,
+            // which would otherwise refuse to wrap and overflow on phones.
+            <p className="long-text max-w-prose whitespace-pre-line break-words text-sm leading-relaxed text-muted-foreground">
+              {book.description}
+            </p>
+          ))}
 
         {seriesBooks.length > 0 && seriesHref && (
           <section className="grid gap-2">
@@ -221,19 +255,25 @@ export default async function BookDetailPage({
           </section>
         )}
 
-        <BookShelvesCard
-          bookId={book.id}
-          shelves={allShelves}
-          memberIds={book.shelves.map((s) => s.id)}
-        />
-
-        <ReadingCard book={book} progress={book.progress} />
-
-        <ReadHistoryCard book={book} reads={book.reads} />
-
-        <LendingCard bookId={book.id} loans={book.loans} />
-
-        <QuotesCard bookId={book.id} quotes={book.quotes} />
+        {arranged.map(({ key, forced }) =>
+          // A card left out here (null) gets no "shown although hidden" line.
+          forced && cards[key] ? (
+            <div key={key} className="grid grid-cols-1 gap-1.5">
+              {cards[key]}
+              <p className="text-xs text-amber-700 dark:text-amber-400">
+                {FORCED_CARD_NOTES[key]}{" "}
+                <Link
+                  href="/account#book-page"
+                  className="font-medium underline underline-offset-4 hover:text-foreground"
+                >
+                  Book page settings
+                </Link>
+              </p>
+            </div>
+          ) : (
+            <Fragment key={key}>{cards[key]}</Fragment>
+          ),
+        )}
       </div>
     </div>
   );
