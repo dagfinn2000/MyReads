@@ -21,7 +21,6 @@ import {
   passAround,
   placeInLog,
   resolveLogDay,
-  subjectDay,
   undoMoveSchema,
   type EntryEditResult,
   type LogPageResult,
@@ -129,15 +128,15 @@ export async function logPage(
     if (!placement.ok) {
       const n = placement.neighbour;
       const when = loggedWhen(calendarDay(n.date, tz), today, prefs.dateFormat);
-      const subject = subjectDay(key, today, prefs.dateFormat);
+      const subject = `${formatPosition(page, info, { capital: true })} for ${describeDay(key, today, prefs.dateFormat)}`;
       if (placement.reason === "beforeStart") {
         return { error: `That's before this read started (${formatDate(n.date, prefs)}).` };
       }
       return {
         error:
           placement.reason === "below"
-            ? `${subject} can't be before ${pos(n.page)}, which you logged ${when}. If that entry is wrong, fix it with its pencil.`
-            : `${subject} can't be past ${pos(n.page)}, which you logged ${when}. Log it for a later day, or fix that entry.`,
+            ? `${subject} is before ${pos(n.page)}, which you logged ${when}. If that entry is wrong, fix it with its pencil.`
+            : `${subject} is past ${pos(n.page)}, which you logged ${when}. Log it for a later day, or fix that entry.`,
       };
     }
 

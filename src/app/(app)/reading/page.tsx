@@ -116,7 +116,7 @@ export default async function NowReadingPage() {
             </Link>
           </div>
           {/* Scrolls inside its own box on a phone, never the page. */}
-          <ul className="flex gap-3 overflow-x-auto pb-1">
+          <ul className="relative flex gap-3 overflow-x-auto pb-1">
             {next.map((b) => (
               <li key={b.id} className="shrink-0">
                 <BookLink bookId={b.id} className="lift-cover block w-14 sm:w-16" title={b.title}>

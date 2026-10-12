@@ -145,7 +145,7 @@ describe("logPage", () => {
     await addEntries(book.id, [[0, "2026-10-05T00:00:00.000Z"], [188, "2026-10-12T07:00:00.000Z"]]);
     expect(await logPage(book.id, { page: 200, day: "yesterday" })).toEqual({
       error:
-        "Yesterday can't be past page 188, which you logged today. Log it for a later day, or fix that entry.",
+        "Page 200 for yesterday is past page 188, which you logged today. Log it for a later day, or fix that entry.",
     });
     expect(await log(book.id)).toHaveLength(2);
   });
@@ -155,7 +155,7 @@ describe("logPage", () => {
     await addEntries(book.id, [[0, "2026-10-05T00:00:00.000Z"], [400, "2026-10-11T18:00:00.000Z"]]);
     expect(await logPage(book.id, { page: 380, day: "today" })).toEqual({
       error:
-        "Today can't be before page 400, which you logged yesterday. If that entry is wrong, fix it with its pencil.",
+        "Page 380 for today is before page 400, which you logged yesterday. If that entry is wrong, fix it with its pencil.",
     });
   });
 
