@@ -511,3 +511,31 @@ describe("ownership and lending", () => {
     expect(res).toMatchObject({ booksCreated: 1, loansRestored: 0 });
   });
 });
+
+describe("book-page settings", () => {
+  it("restores them cleaned the way a save is", async () => {
+    await importLibrary(
+      userId,
+      payload([], {
+        settings: {
+          theme: null,
+          defaultViewName: null,
+          preferences: {
+            bookPageCards: ["reading", "bogus", "reading"],
+            hiddenBookPageCards: ["lending"],
+            findLinks: [
+              { name: "Old", url: "http://lib.example/?q={isbn}" },
+              { name: "Library", url: "https://lib.example/?q={isbn}" },
+            ],
+          },
+        },
+      }),
+    );
+    const user = await prisma.user.findUniqueOrThrow({ where: { id: userId } });
+    expect(user.preferences).toEqual({
+      bookPageCards: ["reading", "shelves", "history", "lending", "quotes"],
+      hiddenBookPageCards: ["lending"],
+      findLinks: [{ name: "Library", url: "https://lib.example/?q={isbn}" }],
+    });
+  });
+});

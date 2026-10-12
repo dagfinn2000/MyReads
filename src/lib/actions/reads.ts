@@ -111,6 +111,7 @@ export async function addPastRead(
         dateStarted: data.dateStarted ?? null,
         dateFinished: data.dateFinished ?? null,
         rating: data.rating || null, // 0 = unrated
+        note: data.note ?? null,
       },
     });
     await syncTimesRead(tx, bookId);
@@ -146,6 +147,9 @@ export async function updatePastRead(
       dateStarted: data.dateStarted ?? null,
       dateFinished: data.dateFinished ?? null,
       rating: data.rating || null,
+      // Only when the form sent one (an empty one clears it): a note is
+      // free text, so a request without the field mustn't wipe it.
+      ...(data.note !== undefined && { note: data.note }),
     },
   });
 

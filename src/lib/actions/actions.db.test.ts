@@ -26,7 +26,9 @@ vi.mock("@/auth", () => ({
 // Server actions call revalidatePath, which needs a request scope.
 vi.mock("next/cache", () => ({ revalidatePath: () => {} }));
 
-const { readAgain, addPastRead, deletePastRead } = await import("@/lib/actions/reads");
+const { readAgain, addPastRead, deletePastRead, updatePastRead } = await import(
+  "@/lib/actions/reads"
+);
 const { bulkUpdateBooks } = await import("@/lib/actions/bulk");
 const { renameTag, deleteTag } = await import("@/lib/actions/tags");
 const { lendBook, returnLoan, deleteLoan } = await import("@/lib/actions/loans");
@@ -153,6 +155,66 @@ describe("read history bookkeeping", () => {
 
     expect(res).toHaveProperty("error");
     expect(await prisma.read.count({ where: { bookId: bk.id } })).toBe(0);
+  });
+});
+
+describe("past-read notes", () => {
+  async function onlyRead(bookId: string) {
+    return prisma.read.findFirstOrThrow({ where: { bookId } });
+  }
+
+  it("addPastRead stores the note trimmed, and an empty one as nothing", async () => {
+    const bk = await makeBook();
+    await addPastRead({}, form({ bookId: bk.id, note: "  Read it aloud to the kids  " }));
+    expect((await onlyRead(bk.id)).note).toBe("Read it aloud to the kids");
+
+    const other = await makeBook();
+    await addPastRead({}, form({ bookId: other.id, note: "   " }));
+    expect((await onlyRead(other.id)).note).toBeNull();
+  });
+
+  it("updatePastRead changes the note, and an empty field clears it", async () => {
+    const bk = await makeBook();
+    const read = await prisma.read.create({ data: { bookId: bk.id, note: "First go" } });
+
+    const res = await updatePastRead(read.id, {}, form({ note: "Second go", rating: "6" }));
+    expect(res).toEqual({ success: true });
+    expect(await onlyRead(bk.id)).toMatchObject({ note: "Second go", rating: 6 });
+
+    await updatePastRead(read.id, {}, form({ note: "" }));
+    expect((await onlyRead(bk.id)).note).toBeNull();
+  });
+
+  it("updatePastRead keeps the note when the field isn't sent", async () => {
+    const bk = await makeBook();
+    const read = await prisma.read.create({ data: { bookId: bk.id, note: "Keep me" } });
+
+    await updatePastRead(read.id, {}, form({ dateFinished: "2019-05-01" }));
+    expect((await onlyRead(bk.id)).note).toBe("Keep me");
+  });
+
+  it("updatePastRead refuses another account's read and changes nothing", async () => {
+    const bk = await makeBook({}, otherUserId);
+    const read = await prisma.read.create({ data: { bookId: bk.id, note: "Theirs", rating: 8 } });
+
+    const res = await updatePastRead(read.id, {}, form({ note: "Mine now", rating: "2" }));
+    expect(res).toEqual({ error: "Read not found" });
+    expect(await onlyRead(bk.id)).toMatchObject({ note: "Theirs", rating: 8 });
+  });
+
+  it("updatePastRead turns away a note over 2000 characters", async () => {
+    const bk = await makeBook();
+    const read = await prisma.read.create({ data: { bookId: bk.id, note: "Short" } });
+
+    const res = await updatePastRead(read.id, {}, form({ note: "x".repeat(2001) }));
+    expect(res).toEqual({ error: "Keep the note to 2000 characters or fewer." });
+    expect((await onlyRead(bk.id)).note).toBe("Short");
+  });
+
+  it("readAgain archives the pass without a note", async () => {
+    const bk = await makeBook({ status: ReadingStatus.READ, timesRead: 1 });
+    await readAgain(bk.id);
+    expect((await onlyRead(bk.id)).note).toBeNull();
   });
 });
 

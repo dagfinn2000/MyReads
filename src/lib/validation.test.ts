@@ -88,3 +88,36 @@ describe("reading dates", () => {
     expect(pastReadSchema.safeParse({ dateFinished: "2019-05-01" }).success).toBe(true);
   });
 });
+
+describe("pastReadSchema note", () => {
+  it("is trimmed", () => {
+    expect(pastReadSchema.parse({ note: "  Read it aloud to the kids \n" }).note).toBe(
+      "Read it aloud to the kids",
+    );
+  });
+
+  it("is null when empty or only spaces", () => {
+    expect(pastReadSchema.parse({ note: "" }).note).toBeNull();
+    expect(pastReadSchema.parse({ note: "   \n " }).note).toBeNull();
+  });
+
+  it("is left undefined when not sent", () => {
+    expect(pastReadSchema.parse({}).note).toBeUndefined();
+  });
+
+  it("refuses a note over 2000 characters", () => {
+    expect(pastReadSchema.parse({ note: "x".repeat(2000) }).note).toHaveLength(2000);
+    const res = pastReadSchema.safeParse({ note: "x".repeat(2001) });
+    expect(res.success).toBe(false);
+    expect(res.error?.issues[0]?.message).toBe("Keep the note to 2000 characters or fewer.");
+  });
+
+  it("still checks the dates when there is a note", () => {
+    const res = pastReadSchema.safeParse({
+      dateStarted: "2020-02-01",
+      dateFinished: "2020-01-01",
+      note: "Second time round",
+    });
+    expect(res.success).toBe(false);
+  });
+});

@@ -216,6 +216,14 @@ export const pastReadSchema = z.object({
     .optional(),
   /** 1–10 half-star units; empty string/0 means "unrated that time". */
   rating: z.coerce.number().int().min(0).max(10).nullable().optional().catch(null),
+  /** "Read it aloud to the kids"; empty clears it. Same limit as restore. */
+  note: z
+    .string()
+    .trim()
+    .max(2000, "Keep the note to 2000 characters or fewer.")
+    .transform((s) => s || null)
+    .nullable()
+    .optional(),
 }).superRefine(checkReadDates);
 
 /** A quote/highlight from the book detail page. Forms submit strings. */

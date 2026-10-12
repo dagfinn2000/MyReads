@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useState, useTransition } from "react";
+import { useActionState, useEffect, useId, useState, useTransition } from "react";
 import type { Book, Read } from "@prisma/client";
 import { ReadingStatus } from "@prisma/client";
 import { Pencil, Repeat, Trash2, X } from "lucide-react";
@@ -17,6 +17,7 @@ import { StarRatingInput } from "@/components/star-rating-input";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Card,
   CardContent,
@@ -64,35 +65,45 @@ export function ReadHistoryCard({
         <CardTitle>Read history</CardTitle>
         {finished && <ReadAgainButton bookId={book.id} />}
       </CardHeader>
-      <CardContent className="grid gap-4">
+      {/* grid-cols-1 clamps the tracks so a long unbroken token in a note
+          (a pasted URL, say) wraps via break-words instead of stretching
+          the card. */}
+      <CardContent className="grid grid-cols-1 gap-4">
         {(reads.length > 0 || finished) && (
-          <ul className="grid gap-2">
+          <ul className="grid grid-cols-1 gap-2">
             {reads.map((read) => (
-              <li key={read.id} className="grid gap-1">
+              <li key={read.id} className="grid grid-cols-1 gap-1">
                 {editingId === read.id ? (
                   <PastReadForm
                     read={read}
                     onDone={() => setEditingId(null)}
                   />
                 ) : (
-                  <div className="flex min-h-7 flex-wrap items-center gap-x-3 gap-y-1 text-sm">
-                    <span className="text-muted-foreground">
-                      {readLabel(read, prefs)}
-                    </span>
-                    {read.rating != null && <Stars value={read.rating} />}
-                    <span className="ml-auto flex items-center gap-1">
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon-sm"
-                        aria-label="Edit read"
-                        onClick={() => setEditingId(read.id)}
-                      >
-                        <Pencil className="size-3.5" />
-                      </Button>
-                      <DeleteReadButton readId={read.id} />
-                    </span>
-                  </div>
+                  <>
+                    <div className="flex min-h-7 flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+                      <span className="text-muted-foreground">
+                        {readLabel(read, prefs)}
+                      </span>
+                      {read.rating != null && <Stars value={read.rating} />}
+                      <span className="ml-auto flex items-center gap-1">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon-sm"
+                          aria-label="Edit read"
+                          onClick={() => setEditingId(read.id)}
+                        >
+                          <Pencil className="size-3.5" />
+                        </Button>
+                        <DeleteReadButton readId={read.id} />
+                      </span>
+                    </div>
+                    {read.note && (
+                      <p className="long-text whitespace-pre-line break-words text-sm text-muted-foreground">
+                        {read.note}
+                      </p>
+                    )}
+                  </>
                 )}
               </li>
             ))}
@@ -135,6 +146,9 @@ function PastReadForm({
   const action = read ? updatePastRead.bind(null, read.id) : addPastRead;
   const [state, formAction, pending] = useActionState(action, {});
   const { timeZone } = usePreferences();
+  const startId = useId();
+  const finishId = useId();
+  const noteId = useId();
 
   // Editing: close the form once the save lands. (The add form instead
   // relies on React resetting an uncontrolled form after its action.)
@@ -147,8 +161,11 @@ function PastReadForm({
       {!read && bookId && <input type="hidden" name="bookId" value={bookId} />}
       <div className="flex flex-wrap items-end gap-3">
         <div className="grid gap-1">
-          <Label className="text-xs text-muted-foreground">Started</Label>
+          <Label htmlFor={startId} className="text-xs text-muted-foreground">
+            Started
+          </Label>
           <Input
+            id={startId}
             name="dateStarted"
             type="date"
             className="w-40"
@@ -156,8 +173,11 @@ function PastReadForm({
           />
         </div>
         <div className="grid gap-1">
-          <Label className="text-xs text-muted-foreground">Finished</Label>
+          <Label htmlFor={finishId} className="text-xs text-muted-foreground">
+            Finished
+          </Label>
           <Input
+            id={finishId}
             name="dateFinished"
             type="date"
             className="w-40"
@@ -170,26 +190,40 @@ function PastReadForm({
           </Label>
           <StarRatingInput name="rating" defaultValue={read?.rating ?? 0} />
         </div>
-        <div className="flex items-center gap-2">
-          <Button type="submit" variant="outline" size="sm" disabled={pending}>
-            {read
-              ? pending
-                ? "Saving…"
-                : "Save"
-              : pending
-                ? "Adding…"
-                : "Add read"}
-          </Button>
-          {read && (
-            <Button type="button" variant="ghost" size="sm" onClick={onDone}>
-              Cancel
-            </Button>
-          )}
-        </div>
+      </div>
+      <div className="grid gap-1">
+        <Label htmlFor={noteId} className="text-xs text-muted-foreground">
+          Note
+        </Label>
+        <Textarea
+          id={noteId}
+          name="note"
+          rows={2}
+          maxLength={2000}
+          placeholder="Optional. For example, read it aloud to the kids"
+          defaultValue={read?.note ?? ""}
+          className="long-text"
+        />
       </div>
       <p className="text-xs text-muted-foreground">
-        Dates are optional — an undated read still counts in your totals.
+        Dates and note are optional. An undated read still counts in your totals.
       </p>
+      <div className="flex items-center gap-2">
+        <Button type="submit" variant="outline" size="sm" disabled={pending}>
+          {read
+            ? pending
+              ? "Saving…"
+              : "Save"
+            : pending
+              ? "Adding…"
+              : "Add read"}
+        </Button>
+        {read && (
+          <Button type="button" variant="ghost" size="sm" onClick={onDone}>
+            Cancel
+          </Button>
+        )}
+      </div>
       {state.error && <p className="text-sm text-destructive">{state.error}</p>}
     </form>
   );

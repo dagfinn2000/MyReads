@@ -29,6 +29,7 @@ import {
   type Preferences,
 } from "@/lib/preferences";
 import { cn } from "@/lib/utils";
+import { BookPageCardList, FindLinksEditor } from "@/components/book-page-preferences";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -612,7 +613,36 @@ export function PreferencesForm({
               onChange={(shown) => update({ hiddenNav: toggleIn(prefs.hiddenNav, item, !shown) })}
             />
           ))}
+          {prefs.hiddenNav.includes("quotes") && !prefs.hiddenBookPageCards.includes("quotes") && (
+            <p className="text-xs text-muted-foreground">
+              The Quotes card still shows on book pages. You can hide it under Book page below.
+            </p>
+          )}
         </div>
+      </Section>
+
+      <Section title="Book page" id="book-page">
+        <BookPageCardList prefs={prefs} update={update} />
+        <Choice
+          label="Long descriptions"
+          value={prefs.bookDescription}
+          options={[
+            { value: "full", label: "In full" },
+            { value: "clamp", label: "First 4 lines, with More" },
+          ]}
+          onChange={(v) => update({ bookDescription: v })}
+        />
+        <Choice
+          label="Shelves card"
+          hint="What the Shelves card lists on a book."
+          value={prefs.shelvesCard}
+          options={[
+            { value: "all", label: "Every shelf" },
+            { value: "mine", label: "Only this book's shelves, plus Add" },
+          ]}
+          onChange={(v) => update({ shelvesCard: v })}
+        />
+        <FindLinksEditor prefs={prefs} update={update} />
       </Section>
 
       <Section title="Stats page">
