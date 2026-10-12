@@ -83,12 +83,12 @@ export function CheckBookClient() {
       if (!res.ok) {
         // The route explains a bad ISBN or a spent lookup budget itself.
         const data = (await res.json().catch(() => null)) as { error?: string } | null;
-        setError(data?.error ?? "Check failed — are you online?");
+        setError(data?.error ?? "Check failed. Are you online?");
         return;
       }
       setResult((await res.json()) as LibraryCheckResult);
     } catch {
-      setError("Check failed — are you online?");
+      setError("Check failed. Are you online?");
     } finally {
       setChecking(false);
     }
@@ -273,7 +273,7 @@ function NoMatch({ result, isbn }: { result: LibraryCheckResult; isbn: string })
         <p className="text-sm text-muted-foreground">
           Looked up: <span className="font-medium">{result.lookedUp.title}</span>
           {result.lookedUp.authors.length > 0
-            ? ` — ${result.lookedUp.authors.join(", ")}`
+            ? ` by ${result.lookedUp.authors.join(", ")}`
             : ""}
         </p>
       )}

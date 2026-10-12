@@ -136,7 +136,8 @@ export function BookPageCardList({ prefs, update }: { prefs: Preferences; update
       <p className="text-xs text-muted-foreground">
         A hidden card still shows on a book when it has something in it: your
         review or a read in progress, past reads, an open loan or saved quotes.
-        Hiding Read history also hides Read it again.
+        Hiding Read history also hides Read it again, and hiding My reading
+        hides the status menu (Select in the library can still change it).
       </p>
     </div>
   );

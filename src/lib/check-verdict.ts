@@ -63,7 +63,7 @@ export function checkVerdict(
       default:
         return {
           tone: "success",
-          headline: "In your library — this exact edition.",
+          headline: "In your library: this exact edition.",
           detail: null,
           markOwned: null,
           addAnyway: false,
@@ -105,7 +105,7 @@ export function checkVerdict(
             ? "You have this as an ebook."
             : book.format === BookFormat.AUDIOBOOK
               ? "You have this as an audiobook."
-              : "You have this title — as a different edition.",
+              : "You have this title, as a different edition.",
         detail: null,
         markOwned: null,
         addAnyway: true,
@@ -128,7 +128,7 @@ export function duplicateNotice(
       lead: exact
         ? "This exact edition is already in your library: "
         : "You already have this title: ",
-      tail: ". You can still add it (say, a second copy) — just so you know.",
+      tail: ". You can still add it, say as a second copy.",
     };
   }
   const lead = {

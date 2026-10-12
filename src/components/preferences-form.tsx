@@ -416,6 +416,59 @@ export function PreferencesForm({
         <TagRulesList renames={initial.tagRenames} skips={initial.tagSkips} />
       </Section>
 
+      <Section title="Book search">
+        <p className="text-xs text-muted-foreground">
+          Which catalogues to search when adding a book, and which comes first.
+        </p>
+        <ul className="grid gap-1.5">
+          {catalogueRows.map((c) => {
+            const on = enabled.includes(c);
+            const i = enabled.indexOf(c);
+            return (
+              <li key={c} className="flex items-center gap-2">
+                <Toggle
+                  label={CATALOGUE_LABELS[c]}
+                  checked={on}
+                  // At least one catalogue stays on.
+                  disabled={on && enabled.length === 1}
+                  onChange={(checked) =>
+                    update({
+                      catalogues: checked
+                        ? [...prefs.catalogues, c]
+                        : prefs.catalogues.filter((x) => x !== c),
+                    })
+                  }
+                />
+                {on && enabled.length > 1 && (
+                  <span className="ml-auto flex gap-1">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon-sm"
+                      title="Search earlier"
+                      disabled={i === 0}
+                      onClick={() => moveCatalogue(c, -1)}
+                    >
+                      <ArrowUp data-slot="icon" />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon-sm"
+                      title="Search later"
+                      disabled={i === enabled.length - 1}
+                      onClick={() => moveCatalogue(c, 1)}
+                    >
+                      <ArrowDown data-slot="icon" />
+                    </Button>
+                  </span>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      </Section>
+
       <Section title="Reading">
         <Choice
           label="Step buttons"
@@ -568,6 +621,10 @@ export function PreferencesForm({
         </p>
       </Section>
 
+      {savedViews.length > 0 && (
+        <SavedViewsList views={views} onReorder={(ids) => update({ savedViewOrder: ids })} />
+      )}
+
       <Section title="Pick for me" id="pick-for-me">
         <Toggle
           label="Only books I have"
@@ -584,59 +641,6 @@ export function PreferencesForm({
           lent-out books don&apos;t. A Want to Read book in a series is skipped
           while an earlier one is still unread.
         </p>
-      </Section>
-
-      <Section title="Book search">
-        <p className="text-xs text-muted-foreground">
-          Which catalogues to search when adding a book, and which comes first.
-        </p>
-        <ul className="grid gap-1.5">
-          {catalogueRows.map((c) => {
-            const on = enabled.includes(c);
-            const i = enabled.indexOf(c);
-            return (
-              <li key={c} className="flex items-center gap-2">
-                <Toggle
-                  label={CATALOGUE_LABELS[c]}
-                  checked={on}
-                  // At least one catalogue stays on.
-                  disabled={on && enabled.length === 1}
-                  onChange={(checked) =>
-                    update({
-                      catalogues: checked
-                        ? [...prefs.catalogues, c]
-                        : prefs.catalogues.filter((x) => x !== c),
-                    })
-                  }
-                />
-                {on && enabled.length > 1 && (
-                  <span className="ml-auto flex gap-1">
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon-sm"
-                      title="Search earlier"
-                      disabled={i === 0}
-                      onClick={() => moveCatalogue(c, -1)}
-                    >
-                      <ArrowUp data-slot="icon" />
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon-sm"
-                      title="Search later"
-                      disabled={i === enabled.length - 1}
-                      onClick={() => moveCatalogue(c, 1)}
-                    >
-                      <ArrowDown data-slot="icon" />
-                    </Button>
-                  </span>
-                )}
-              </li>
-            );
-          })}
-        </ul>
       </Section>
 
       <Section title="Ratings">
@@ -888,10 +892,6 @@ export function PreferencesForm({
           />
         </div>
       </Section>
-
-      {savedViews.length > 0 && (
-        <SavedViewsList views={views} onReorder={(ids) => update({ savedViewOrder: ids })} />
-      )}
     </div>
   );
 }

@@ -9,7 +9,7 @@ describe("checkVerdict on the exact edition", () => {
   it("keeps the green answer for a book you own", () => {
     expect(checkVerdict("isbn", { ownership: OWNED, format: PHYSICAL })).toEqual({
       tone: "success",
-      headline: "In your library — this exact edition.",
+      headline: "In your library: this exact edition.",
       detail: null,
       markOwned: null,
       addAnyway: false,
@@ -53,7 +53,7 @@ describe("checkVerdict on another edition", () => {
       "You have this as an audiobook.",
     );
     expect(checkVerdict("title", { ownership: OWNED, format: PHYSICAL }).headline).toBe(
-      "You have this title — as a different edition.",
+      "You have this title, as a different edition.",
     );
   });
 
