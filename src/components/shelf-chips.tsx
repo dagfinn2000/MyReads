@@ -5,7 +5,10 @@ import Link from "next/link";
 import { Plus, X } from "lucide-react";
 import { createShelf, deleteShelf } from "@/lib/actions/shelves";
 import type { ActionState } from "@/lib/actions/helpers";
+import { orderByIds } from "@/lib/library-order";
 import { cn } from "@/lib/utils";
+import { ManageShelvesDialog } from "@/components/manage-shelves-dialog";
+import { usePreferences } from "@/components/preferences-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -27,8 +30,12 @@ export interface ShelfInfo {
 
 /**
  * Custom-shelf row on the library page: one chip per shelf (click to
- * filter, "All" to clear), a "+ New shelf" chip, and a delete button on the
+ * filter, "All" to clear), a "+ New shelf" chip, a "Manage shelves" chip
+ * (rename, merge, reorder, hide, delete), and a delete button on the
  * active shelf (confirm dialog — deleting a shelf never touches its books).
+ *
+ * Chips follow the reader's own order (shelfOrder; shelves not in it
+ * follow by name) and leave out hidden shelves, except the one on screen.
  *
  * Like every other library control, the selection lives in the URL
  * (?shelfId=…) so it composes with status tabs, search, and sorting.
@@ -38,10 +45,16 @@ export function ShelfChips({
   activeShelfId,
   searchParams,
 }: {
+  /** By name; the reader's order is applied here. */
   shelves: ShelfInfo[];
   activeShelfId: string;
   searchParams: Record<string, string>;
 }) {
+  const prefs = usePreferences();
+  const ordered = orderByIds(shelves, prefs.shelfOrder);
+  const visible = ordered.filter(
+    (s) => s.id === activeShelfId || !prefs.hiddenShelves.includes(s.id),
+  );
   const [dialogOpen, setDialogOpen] = useState(false);
   const [, startTransition] = useTransition();
 
@@ -81,7 +94,7 @@ export function ShelfChips({
       >
         All
       </Link>
-      {shelves.map((shelf) => (
+      {visible.map((shelf) => (
         <span key={shelf.id} className="inline-flex items-center">
           <Link
             href={shelfHref(shelf.id)}
@@ -170,6 +183,14 @@ export function ShelfChips({
           </form>
         </DialogContent>
       </Dialog>
+
+      {shelves.length > 0 && (
+        <ManageShelvesDialog
+          shelves={ordered}
+          activeShelfId={activeShelfId}
+          shelfHref={shelfHref}
+        />
+      )}
     </div>
   );
 }

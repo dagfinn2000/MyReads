@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { Prisma } from "@prisma/client";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/actions/helpers";
@@ -47,6 +48,46 @@ export async function saveView(
   revalidatePath("/books");
   revalidatePath("/account");
   return { id: view.id };
+}
+
+/**
+ * Renames a saved view. Names are unique per account exactly as typed (as
+ * saving treats them), so another view's name is refused rather than
+ * merged: two views can hold different filters.
+ */
+export async function renameView(id: string, name: string): Promise<{ error?: string }> {
+  const userId = await requireUserId();
+  if (!z.string().min(1).max(64).safeParse(id).success) return { error: "View not found" };
+  const parsed = nameSchema.safeParse(name);
+  if (!parsed.success) {
+    return { error: `Give the view a name (up to ${SAVED_VIEW_NAME_MAX} characters).` };
+  }
+  const newName = parsed.data;
+
+  const view = await prisma.savedView.findFirst({
+    where: { id, userId },
+    select: { id: true, name: true },
+  });
+  if (!view) return { error: "View not found" };
+  if (view.name === newName) return {};
+
+  const taken = { error: `You already have a view called “${newName}”.` };
+  const clash = await prisma.savedView.findUnique({
+    where: { userId_name: { userId, name: newName } },
+    select: { id: true },
+  });
+  if (clash) return taken;
+
+  try {
+    await prisma.savedView.update({ where: { id: view.id, userId }, data: { name: newName } });
+  } catch (err) {
+    // Saved under that name from another tab a moment ago.
+    if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") return taken;
+    throw err;
+  }
+  revalidatePath("/books");
+  revalidatePath("/account");
+  return {};
 }
 
 /** Deletes a saved view. If the library opened on it, it opens on the plain

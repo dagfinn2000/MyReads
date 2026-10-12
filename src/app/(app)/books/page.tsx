@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import type { Prisma } from "@prisma/client";
 import { LibraryBig, Plus } from "lucide-react";
 import { auth } from "@/auth";
+import { BULK_MAX_IDS } from "@/lib/bulk";
+import { orderByIds } from "@/lib/library-order";
 import { prisma } from "@/lib/prisma";
 import { getPreferences } from "@/lib/current-user";
 import { groupBooks, sortBooks, type SortOptions } from "@/lib/library-sort";
@@ -21,9 +23,10 @@ export const dynamic = "force-dynamic";
 
 /** Cards rendered per page load, and the ceiling "Show more" can reach.
  *  The cap keeps a crafted ?limit= from asking the server to serialize an
- *  entire library in one response. */
+ *  entire library in one response. It is bulk edit's id limit too, so
+ *  "Select all" after Show more always fits. */
 const DEFAULT_PAGE_SIZE = 200;
-const MAX_PAGE_SIZE = 2000;
+const MAX_PAGE_SIZE = BULK_MAX_IDS;
 
 function param(v: string | string[] | undefined): string {
   return typeof v === "string" ? v : "";
@@ -63,6 +66,7 @@ const librarySelect = {
   seriesNumber: true,
   dateFinished: true,
   createdAt: true,
+  ownership: true,
   // Just enough to know whether the copy is out — one row at most, rather
   // than the loan history the card would never render.
   loans: { where: { returnedAt: null }, select: { id: true }, take: 1 },
@@ -226,7 +230,12 @@ export default async function BooksPage({
         </Button>
       </div>
 
-      <ShelfTabs current={values.shelf} counts={counts} searchParams={flatParams} />
+      <ShelfTabs
+        current={values.shelf}
+        counts={counts}
+        searchParams={flatParams}
+        hidden={prefs.hiddenStatusTabs}
+      />
       <ShelfChips
         shelves={shelves.map((s) => ({
           id: s.id,
@@ -237,7 +246,7 @@ export default async function BooksPage({
         searchParams={flatParams}
       />
       <SavedViewChips
-        views={savedViews}
+        views={orderByIds(savedViews, prefs.savedViewOrder)}
         currentQuery={canonicalViewQuery({ ...flatParams, ...values })}
         clearHref={`/books?${new URLSearchParams({
           group: values.group,
