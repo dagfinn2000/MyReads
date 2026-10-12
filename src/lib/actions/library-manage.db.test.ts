@@ -26,6 +26,7 @@ vi.mock("next/cache", () => ({ revalidatePath: () => {} }));
 const { renameShelf } = await import("@/lib/actions/shelves");
 const { renameView } = await import("@/lib/actions/saved-views");
 const { bulkUpdateBooks, bulkDeleteBooks } = await import("@/lib/actions/bulk");
+const { prisma: appPrisma } = await import("@/lib/prisma");
 
 let userId: string;
 let otherUserId: string;
@@ -345,6 +346,24 @@ describe("bulkDeleteBooks", () => {
     expect(await prisma.book.findMany({ where: { userId }, select: { id: true } })).toEqual([
       { id: other.id },
     ]);
+  });
+
+  it("refuses when a match turns up after the count", async () => {
+    await Promise.all([makeBook({ tags: ["weed"] }), makeBook({ tags: ["weed"] })]);
+    // Another tab adds a matching book just after the server counted two.
+    const count = vi.spyOn(appPrisma.book, "count").mockImplementationOnce((async (
+      args: Parameters<typeof appPrisma.book.count>[0],
+    ) => {
+      count.mockRestore();
+      const n = await appPrisma.book.count(args);
+      await makeBook({ tags: ["weed"] });
+      return n;
+    }) as never);
+
+    expect(await bulkDeleteBooks({ matching: { tag: "weed" }, expectedCount: 2 })).toEqual({
+      error: "The books that match have changed. Check the count and try again.",
+    });
+    expect(await prisma.book.count({ where: { userId } })).toBe(3);
   });
 
   it("removes cached covers no other book uses, and keeps shared ones", async () => {

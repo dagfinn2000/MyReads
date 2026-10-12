@@ -5,7 +5,7 @@ import { PrismaClient } from "@prisma/client";
 import { buildBookWhere, parseFilters } from "@/lib/library-filters";
 import { resolveBookWhere } from "@/lib/library-where";
 import type { SearchField } from "@/lib/preferences";
-import { buildSearchText } from "@/lib/utils";
+import { buildSearchText, foldForSearch } from "@/lib/utils";
 
 /**
  * Library search against a real database: the words, accents and LIKE
@@ -91,9 +91,12 @@ describe("searching tags, ISBN and reviews too", () => {
     const set = (title: string, data: object) =>
       prisma.book.updateMany({ where: { userId, title }, data });
     await set("The Hobbit", { tags: ["fantasy", "æventyr"], isbn: "9780261102217" });
-    await set("Jane Eyre", { review: "ÆRØ ÉMILE, all in capitals" });
-    await set("Lykkeland", { review: "Better than anything by a Brontë.", isbn: "080442957x" });
-    await set("100% Cotton", { isbn: "9781984000000", review: "Half_way there" });
+    // Saved the way updateReading and import save a review: with its
+    // folded copy, which is what search reads.
+    const review = (text: string) => ({ review: text, reviewSearchText: foldForSearch(text) });
+    await set("Jane Eyre", review("ÆRØ ÉMILE, all in capitals"));
+    await set("Lykkeland", { ...review("Better than anything by a Brontë."), isbn: "080442957x" });
+    await set("100% Cotton", { isbn: "9781984000000", ...review("Half_way there") });
   });
 
   it("looks only where it always has until asked", async () => {
@@ -150,6 +153,7 @@ describe("searching tags, ISBN and reviews too", () => {
           searchText: "theirs",
           tags: ["secret-tag"],
           review: "secret words",
+          reviewSearchText: "secret words",
           isbn: "9780000000002",
         },
       });
@@ -160,19 +164,16 @@ describe("searching tags, ISBN and reviews too", () => {
     }
   });
 
-  it("still works when the review matches are too many for one query", async () => {
-    // Past MAX_REVIEW_IDS the search is worked out word by word instead.
-    await prisma.book.createMany({
-      data: Array.from({ length: 10_001 }, (_, i) => ({
-        userId,
-        title: `Filler ${i}`,
-        searchText: `filler ${i}`,
-        review: "the end",
-      })),
+  it("matches reviews in SQL, without reading them first", async () => {
+    // However many reviews match, the search is one condition per word.
+    const where = await resolveBookWhere(userId, parseFilters({ q: "bronte better" }), {
+      searchAlsoIn: ["review"],
+      timeZone: "UTC",
     });
-    await prisma.book.updateMany({ where: { userId, title: "The Hobbit" }, data: { review: "the end" } });
-    expect(await searchIn("end hobbit", ["review"])).toEqual(["The Hobbit"]);
-    expect(await searchIn("fantasy end", ["review", "tags"])).toEqual(["The Hobbit"]);
+    expect(where.AND).toEqual([
+      { OR: [{ searchText: { contains: "bronte" } }, { reviewSearchText: { contains: "bronte" } }] },
+      { OR: [{ searchText: { contains: "better" } }, { reviewSearchText: { contains: "better" } }] },
+    ]);
   });
 });
 
@@ -209,5 +210,37 @@ describe("accent_insensitive_search migration", () => {
       const row = await prisma.book.findUniqueOrThrow({ where: { id: created[i].id } });
       expect(row.searchText, title).toBe(buildSearchText(title, authors, series));
     }
+  });
+});
+
+describe("review_search_text migration", () => {
+  it("folds stored reviews exactly as foldForSearch does", async () => {
+    // Capitals the database's own lower() may not know, and a final sigma.
+    const reviews = [
+      "ÉMILE BRONTË, ÆRØ ŒUVRE",
+      "Straße der Ölsardinen, ŁUKASZ ÞÓRSSON, ĐẶNG THÙY TRÂM",
+      "ΟΔΟΣ and İstanbul",
+      "がっこう 김영하",
+    ];
+    const created = await Promise.all(
+      reviews.map((review) =>
+        prisma.book.create({ data: { userId, title: "Reviewed", review } }),
+      ),
+    );
+    const unreviewed = await prisma.book.create({ data: { userId, title: "Unreviewed" } });
+
+    const sql = await fs.readFile(
+      path.join(__dirname, "../../prisma/migrations/20261012010000_review_search_text/migration.sql"),
+      "utf8",
+    );
+    // The backfill only: the column is there already.
+    await prisma.$executeRawUnsafe(sql.slice(sql.indexOf("DO $do$")));
+
+    for (const [i, review] of reviews.entries()) {
+      const row = await prisma.book.findUniqueOrThrow({ where: { id: created[i].id } });
+      expect(row.reviewSearchText, review).toBe(foldForSearch(review));
+    }
+    const row = await prisma.book.findUniqueOrThrow({ where: { id: unreviewed.id } });
+    expect(row.reviewSearchText).toBe("");
   });
 });

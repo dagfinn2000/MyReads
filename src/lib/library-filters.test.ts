@@ -183,21 +183,18 @@ describe("buildBookWhere", () => {
   it("adds the tag and review matches for each word", () => {
     const w = where(
       { q: "tolkien fantasy" },
-      { searchIn: ["tags", "review"], tagsByTerm: [[], ["fantasy", "dark fantasy"]], reviewIdsByTerm: [["r1"], []] },
+      { searchIn: ["tags", "review"], tagsByTerm: [[], ["fantasy", "dark fantasy"]] },
     );
     expect(w.AND).toEqual([
-      { OR: [{ searchText: { contains: "tolkien" } }, { id: { in: ["r1"] } }] },
+      { OR: [{ searchText: { contains: "tolkien" } }, { reviewSearchText: { contains: "tolkien" } }] },
       {
         OR: [
           { searchText: { contains: "fantasy" } },
           { tags: { hasSome: ["fantasy", "dark fantasy"] } },
+          { reviewSearchText: { contains: "fantasy" } },
         ],
       },
     ]);
-  });
-
-  it("takes a search worked out ahead as one list", () => {
-    expect(where({ q: "a b" }, { searchIds: ["x", "y"] }).AND).toEqual([{ id: { in: ["x", "y"] } }]);
   });
 });
 

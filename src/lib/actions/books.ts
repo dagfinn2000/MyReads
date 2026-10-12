@@ -15,7 +15,7 @@ import type { ActionState } from "@/lib/actions/helpers";
 import { currentPassEntries } from "@/lib/progress";
 import { anchorMoment } from "@/lib/reading-log";
 import { settleReadingState } from "@/lib/reading-state";
-import { buildSearchText } from "@/lib/utils";
+import { buildSearchText, foldForSearch } from "@/lib/utils";
 import { AFTER_ADD } from "@/lib/preferences";
 
 const statusField = z.nativeEnum(ReadingStatus).catch(ReadingStatus.WANT_TO_READ);
@@ -236,6 +236,7 @@ export async function updateReading(
         status: data.status,
         rating: data.rating || null, // 0 = cleared
         review: data.review ?? null,
+        reviewSearchText: foldForSearch(data.review ?? ""),
         dateStarted,
         dateFinished,
         timesRead,

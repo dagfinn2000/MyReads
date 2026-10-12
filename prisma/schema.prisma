@@ -180,6 +180,10 @@ model Book {
   /// Denormalized lowercase "title + authors" so search can be a single
   /// case-insensitive `contains` (Prisma can't substring-search String[]).
   searchText String @default("")
+  /// The review, folded the same way (foldForSearch), for readers who search
+  /// reviews too; "" without one. Written wherever review is, never sent to
+  /// the browser or into a backup.
+  reviewSearchText String @default("")
 
   quotes   Quote[]
   reads    Read[]

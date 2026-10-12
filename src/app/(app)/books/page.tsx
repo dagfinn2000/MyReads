@@ -354,39 +354,41 @@ export default async function BooksPage({
         finishedYears={finishedYears}
       />
 
-      {sorted.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed py-16 text-center">
-          <LibraryBig className="size-10 text-muted-foreground/40" />
-          <p className="text-muted-foreground">
-            {counts.all === 0
-              ? "Your library is empty. Add your first book!"
-              : hasFilters
-                ? "No books match these filters."
-                : "Nothing on this shelf yet."}
-          </p>
-          {counts.all === 0 && (
-            <Button asChild variant="outline">
-              <Link href="/books/new">
-                <Plus data-slot="icon" />
-                Add a book
-              </Link>
-            </Button>
-          )}
-        </div>
-      ) : (
-        <LibraryView
-          books={visibleBooks.map(toCardBook)}
-          groups={
-            sliced?.groups.map((g) => ({ ...g, books: g.books.map(toCardBook) })) ?? null
-          }
-          limit={limit}
-          hasMore={!!sliced && sliced.shownEntries < sliced.totalEntries}
-          totalCount={sorted.length}
-          searchParams={flatParams}
-          shelves={shelves.map((s) => ({ id: s.id, name: s.name }))}
-          display={accountView}
-        />
-      )}
+      {/* Mounted even when nothing matches, so a bulk change that empties
+          the view still shows how it went (LibraryView shows `empty`). */}
+      <LibraryView
+        books={visibleBooks.map(toCardBook)}
+        groups={
+          sliced?.groups.map((g) => ({ ...g, books: g.books.map(toCardBook) })) ?? null
+        }
+        limit={limit}
+        maxLimit={MAX_PAGE_SIZE}
+        hasMore={!!sliced && sliced.shownEntries < sliced.totalEntries}
+        totalCount={sorted.length}
+        searchParams={flatParams}
+        shelves={shelves.map((s) => ({ id: s.id, name: s.name }))}
+        display={accountView}
+        empty={
+          <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed py-16 text-center">
+            <LibraryBig className="size-10 text-muted-foreground/40" />
+            <p className="text-muted-foreground">
+              {counts.all === 0
+                ? "Your library is empty. Add your first book!"
+                : hasFilters
+                  ? "No books match these filters."
+                  : "Nothing on this shelf yet."}
+            </p>
+            {counts.all === 0 && (
+              <Button asChild variant="outline">
+                <Link href="/books/new">
+                  <Plus data-slot="icon" />
+                  Add a book
+                </Link>
+              </Button>
+            )}
+          </div>
+        }
+      />
     </div>
   );
 }

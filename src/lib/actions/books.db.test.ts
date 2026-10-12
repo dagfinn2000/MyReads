@@ -400,6 +400,19 @@ describe("updateBook", () => {
   });
 });
 
+describe("updateReading and review search", () => {
+  it("keeps the folded copy search reads in step with the review", async () => {
+    const bk = await makeBook({ status: ReadingStatus.READ });
+    await updateReading(bk.id, {}, form({ status: "READ", review: "Better than ÉMILE Brontë" }));
+    let row = await prisma.book.findUniqueOrThrow({ where: { id: bk.id } });
+    expect(row.reviewSearchText).toBe("better than emile bronte");
+
+    await updateReading(bk.id, {}, form({ status: "READ", review: "" }));
+    row = await prisma.book.findUniqueOrThrow({ where: { id: bk.id } });
+    expect(row.reviewSearchText).toBe("");
+  });
+});
+
 describe("updateReading and the reading log", () => {
   it("anchors the first progress update at page 0, then logs each change", async () => {
     const started = "2026-03-01";

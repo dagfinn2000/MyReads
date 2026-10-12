@@ -161,7 +161,19 @@ export function FilterBar({
   const router = useRouter();
   const { searchAlsoIn } = usePreferences();
   const [search, setSearch] = useState(values.q);
-  const first = useRef(true);
+  // The search the URL holds, or was last sent. The box follows the URL when
+  // it changes from elsewhere (a saved view opened, Back), compared during
+  // render like TagFilter; the echo of its own search leaves it alone, so
+  // words typed during the round trip aren't undone.
+  const [urlQ, setUrlQ] = useState(values.q);
+  const [seenQ, setSeenQ] = useState(values.q);
+  if (values.q !== seenQ) {
+    setSeenQ(values.q);
+    if (values.q !== urlQ) {
+      setUrlQ(values.q);
+      setSearch(values.q);
+    }
+  }
   const moreFiltersRef = useRef<HTMLButtonElement>(null);
   // Changes already sent but not back from the server yet. A second change
   // made before the page re-renders (two chips removed in quick succession)
@@ -175,6 +187,7 @@ export function FilterBar({
   function navigate(overrides: Partial<FilterValues>) {
     setSent({ base: values, changes: { ...pending, ...overrides } });
     const next = { ...current, q: search, ...overrides };
+    setUrlQ(next.q.trim());
     // Same order as a saved view's address (saved-views.ts).
     const params = new URLSearchParams();
     if (next.shelf && next.shelf !== "all") params.set("shelf", next.shelf);
@@ -211,13 +224,11 @@ export function FilterBar({
     }
   }
 
-  // Debounced text search. Skips the initial render so mounting doesn't
-  // cause a redundant navigation.
+  // Debounced text search. Skips a box that already says what the URL does
+  // (on mount, and after following the URL), which would only navigate to
+  // the page already showing.
   useEffect(() => {
-    if (first.current) {
-      first.current = false;
-      return;
-    }
+    if (search.trim() === urlQ) return;
     const t = setTimeout(() => navigate({ q: search }), 300);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps

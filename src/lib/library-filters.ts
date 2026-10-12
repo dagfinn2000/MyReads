@@ -144,11 +144,6 @@ export interface WhereContext {
   searchIn?: readonly SearchField[];
   /** Per search word, in searchTerms order: the reader's tags containing it. */
   tagsByTerm?: string[][];
-  /** Per search word: books whose review contains it. */
-  reviewIdsByTerm?: string[][];
-  /** Every book that matches the whole search, worked out ahead when the
-   *  per-word lists would be too long for one query. Replaces them. */
-  searchIds?: string[];
   /** Books finished in the `finished` year close to New Year, by the
    *  reader's clock. */
   finishedEdgeIds?: string[];
@@ -179,8 +174,7 @@ export function searchTermWhere(
   const isbn = ctx.searchIn?.includes("isbn") ? isbnFragment(term) : null;
   // Insensitive: stored ISBNs can end in a lowercase x.
   if (isbn) or.push({ isbn: { contains: isbn, mode: "insensitive" } });
-  const ids = ctx.reviewIdsByTerm?.[i];
-  if (ids?.length) or.push({ id: { in: ids } });
+  if (ctx.searchIn?.includes("review")) or.push({ reviewSearchText: { contains: term } });
   return or.length === 1 ? or[0] : { OR: or };
 }
 
@@ -215,9 +209,7 @@ export function buildBookWhere(
   if (terms.length > 0) {
     // Every word has to appear somewhere: in title, authors or series, or
     // in a field the reader added to search.
-    const words: Prisma.BookWhereInput[] = ctx.searchIds
-      ? [{ id: { in: ctx.searchIds } }]
-      : terms.map((t, i) => searchTermWhere(t, i, ctx));
+    const words = terms.map((t, i) => searchTermWhere(t, i, ctx));
     // A whole ISBN typed with spaces, or in its other 10/13-digit form,
     // isn't any one word: match it as a whole as well.
     const wholeIsbn =

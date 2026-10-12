@@ -8,6 +8,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { getPreferences } from "@/lib/current-user";
 import { arrangeBookCards, FORCED_CARD_NOTES } from "@/lib/book-page";
+import { orderByIds } from "@/lib/library-order";
 import type { BookPageCard } from "@/lib/preferences";
 import {
   formatDate,
@@ -58,6 +59,9 @@ export default async function BookDetailPage({
 
   const book = await prisma.book.findFirst({
     where: { id, userId },
+    // Search's folded copies of title, authors, series and review: the
+    // reading card is a client component and would carry them to the page.
+    omit: { searchText: true, reviewSearchText: true },
     include: {
       shelves: { select: { id: true } },
       quotes: {
@@ -110,7 +114,8 @@ export default async function BookDetailPage({
     shelves: (
       <BookShelvesCard
         bookId={book.id}
-        shelves={allShelves}
+        // In the reader's own order, as the library's shelf chips are.
+        shelves={orderByIds(allShelves, prefs.shelfOrder)}
         memberIds={book.shelves.map((s) => s.id)}
       />
     ),

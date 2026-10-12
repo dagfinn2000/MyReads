@@ -132,7 +132,12 @@ export async function GET() {
       const shelfName = shelfNames.get(new URLSearchParams(query).get("shelfId") ?? "");
       return shelfName ? { name, query, shelfName } : { name, query };
     }),
-    books: books.map(({ userId: _userId, searchText: _searchText, ...book }) => ({
+    books: books.map(({
+      userId: _userId,
+      searchText: _searchText,
+      reviewSearchText: _reviewSearchText,
+      ...book
+    }) => ({
       ...book,
       // `owned` no longer exists on the row, but the export format promises
       // that an older instance can still read this file. Emitting the boolean
