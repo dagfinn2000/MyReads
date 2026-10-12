@@ -363,6 +363,16 @@ describe("tag management", () => {
     }
   });
 
+  it("won't rename a tag to one with a comma", async () => {
+    // The library's tag filter keeps its tags comma-separated in the URL.
+    await makeBook({ tags: ["scifi"] });
+    expect(await renameTag("scifi", "science, fiction")).toEqual({
+      error: "Tags can't contain commas.",
+    });
+    const bk = await prisma.book.findFirstOrThrow({ where: { userId } });
+    expect(bk.tags).toEqual(["scifi"]);
+  });
+
   it("deletes a tag everywhere without touching other tags", async () => {
     await makeBook({ tags: ["scifi", "fantasy"] });
     const res = await deleteTag("scifi");

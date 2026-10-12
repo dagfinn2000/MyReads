@@ -1,16 +1,25 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import type { Prisma } from "@prisma/client";
+import { ReadingStatus, type Prisma } from "@prisma/client";
 import { LibraryBig, Plus } from "lucide-react";
 import { auth } from "@/auth";
 import { BULK_MAX_IDS } from "@/lib/bulk";
 import { orderByIds } from "@/lib/library-order";
 import { prisma } from "@/lib/prisma";
 import { getPreferences } from "@/lib/current-user";
-import { groupBooks, sortBooks, type SortOptions } from "@/lib/library-sort";
+import { calendarDay } from "@/lib/dates";
+import {
+  groupBooks,
+  seriesHeading,
+  seriesProgress,
+  sliceGroups,
+  sortBooks,
+  type SortOptions,
+} from "@/lib/library-sort";
 import { parseFilters } from "@/lib/library-filters";
 import { resolveBookWhere } from "@/lib/library-where";
-import { parseLibraryView } from "@/lib/library-view";
+import { naturalDir, parseLibraryView } from "@/lib/library-view";
+import { seriesKey } from "@/lib/series";
 import { canonicalViewQuery } from "@/lib/saved-views";
 import { FilterBar, type FilterValues } from "@/components/filter-bar";
 import { LibraryView } from "@/components/library-view";
@@ -32,27 +41,11 @@ function param(v: string | string[] | undefined): string {
   return typeof v === "string" ? v : "";
 }
 
-/** Fill grouped sections in order until the budget runs out. Sections keep
- *  their real size in the heading, so a partially shown group still says how
- *  many books it holds. */
-function sliceGroups(
-  groups: { title: string; books: LibraryBook[] }[],
-  limit: number,
-): { title: string; books: LibraryBook[]; total: number }[] {
-  let budget = limit;
-  const out: { title: string; books: LibraryBook[]; total: number }[] = [];
-  for (const g of groups) {
-    if (budget <= 0) break;
-    out.push({ title: g.title, books: g.books.slice(0, budget), total: g.books.length });
-    budget -= g.books.length;
-  }
-  return out;
-}
-
-/** What the library page fetches per book: the card fields plus the two
- *  sort keys the cards don't render. Everything else on Book — description,
- *  review, searchText, … — would be serialized into the client payload for
- *  every book on every visit, for nothing. */
+/** What the library page fetches per book: the card fields plus the sort
+ *  and group keys (toCardBook drops the ones cards don't render before they
+ *  reach the client). Everything else on Book — description, review,
+ *  searchText, … — would be serialized into the client payload for every
+ *  book on every visit, for nothing. */
 const librarySelect = {
   id: true,
   title: true,
@@ -66,7 +59,13 @@ const librarySelect = {
   seriesNumber: true,
   dateFinished: true,
   createdAt: true,
+  // Sort and group keys.
+  dateStarted: true,
+  publishedDate: true,
+  updatedAt: true,
+  format: true,
   ownership: true,
+  tags: true,
   // Just enough to know whether the copy is out — one row at most, rather
   // than the loan history the card would never render.
   loans: { where: { returnedAt: null }, select: { id: true }, take: 1 },
@@ -78,6 +77,20 @@ type LibraryBook = Omit<
   Prisma.BookGetPayload<{ select: typeof librarySelect }>,
   "loans"
 > & { lentOut: boolean };
+
+/** A book as its card gets it: the fields only sorting and grouping read
+ *  stay on the server. */
+function toCardBook<B extends LibraryBook & { shelves?: unknown }>({
+  dateStarted: _dateStarted,
+  publishedDate: _publishedDate,
+  updatedAt: _updatedAt,
+  format: _format,
+  tags: _tags,
+  shelves: _shelves,
+  ...card
+}: B) {
+  return card;
+}
 
 export default async function BooksPage({
   searchParams,
@@ -124,7 +137,8 @@ export default async function BooksPage({
     MAX_PAGE_SIZE,
   );
 
-  const [books, statusCounts, tagRows, shelves, viewUser] = await Promise.all([
+  const [books, statusCounts, tagRows, shelves, viewUser, bookFinishes, pastFinishes] =
+    await Promise.all([
     prisma.book.findMany({ where, select: librarySelect }),
     prisma.book.groupBy({
       by: ["status"],
@@ -150,6 +164,17 @@ export default async function BooksPage({
       where: { id: userId },
       select: { libraryView: true },
     }),
+    // The span of years anything was finished in, for "Finished in".
+    prisma.book.aggregate({
+      where: { userId, status: ReadingStatus.READ },
+      _min: { dateFinished: true },
+      _max: { dateFinished: true },
+    }),
+    prisma.read.aggregate({
+      where: { book: { userId } },
+      _min: { dateFinished: true },
+      _max: { dateFinished: true },
+    }),
   ]);
 
   const accountView = parseLibraryView(viewUser?.libraryView);
@@ -157,12 +182,47 @@ export default async function BooksPage({
   // display settings (card size, layout, card details) always apply.
   const savedView = hasViewParams ? parseLibraryView(null) : accountView;
 
+  const sortParam = param(sp.sort);
   const values: FilterValues = {
     ...filters,
     group: param(sp.group) || savedView.group,
-    sort: param(sp.sort) || savedView.sort,
-    dir: param(sp.dir) || savedView.dir,
+    sort: sortParam || savedView.sort,
+    // A link with a sort but no direction (an old bookmark, say) opens that
+    // sort the natural way round, as picking it in the menu would.
+    dir: param(sp.dir) || (sortParam ? naturalDir(sortParam) : savedView.dir),
   };
+
+  // "Finished in" offers this year back to the first year anything was
+  // finished (a hundred at most), plus a year already in the URL.
+  const yearOf = (d: Date | null) =>
+    d ? Number(calendarDay(d, prefs.timeZone).slice(0, 4)) : null;
+  const thisYear = Number(calendarDay(new Date(), prefs.timeZone).slice(0, 4));
+  const finishYears = [bookFinishes._min, bookFinishes._max, pastFinishes._min, pastFinishes._max]
+    .map((a) => yearOf(a.dateFinished))
+    .filter((y): y is number => y !== null);
+  const newestYear = Math.max(thisYear, ...finishYears);
+  const oldestYear = Math.max(Math.min(thisYear, ...finishYears), newestYear - 99);
+  const finishedYears: number[] = [];
+  for (let y = newestYear; y >= oldestYear; y--) finishedYears.push(y);
+  if (values.finished && !finishedYears.includes(Number(values.finished))) {
+    finishedYears.push(Number(values.finished));
+    finishedYears.sort((a, b) => b - a);
+  }
+
+  // Group by shelf needs each book's shelves: one query over the shelves
+  // rather than a join on every book in every other view.
+  const shelvesOf = new Map<string, { id: string; name: string }[]>();
+  if (values.group === "shelf") {
+    const memberships = await prisma.shelf.findMany({
+      where: { userId },
+      select: { id: true, name: true, books: { select: { id: true } } },
+    });
+    for (const s of memberships) {
+      for (const b of s.books) {
+        shelvesOf.set(b.id, [...(shelvesOf.get(b.id) ?? []), { id: s.id, name: s.name }]);
+      }
+    }
+  }
 
   // Sort and group the whole filtered set — the shelf-filing rules need every
   // book to place any of them — then hand the client only the slice it
@@ -173,18 +233,45 @@ export default async function BooksPage({
   const withLoanFlag = books.map(({ loans, ...b }) => ({
     ...b,
     lentOut: loans.length > 0,
+    shelves: shelvesOf.get(b.id) ?? [],
   }));
 
   const sortOptions: SortOptions = {
     ignoreArticles: prefs.ignoreArticles,
     authorOrder: prefs.authorOrder,
     alphabet: prefs.sortAlphabet,
+    timeZone: prefs.timeZone,
+    ratingStyle: prefs.ratingStyle,
+    shelfOrder: prefs.shelfOrder,
   };
   const sorted = sortBooks(withLoanFlag, values.sort, values.dir, sortOptions);
   const groups = groupBooks(sorted, values.group, sortOptions);
+  // Grouped views fill their sections up to `limit` entries. A book under
+  // three tags is three entries, so the books on screen are the shown
+  // sections' books, each once.
+  const sliced = groups ? sliceGroups(groups, limit) : null;
+  const visibleBooks = sliced
+    ? [...new Map(sliced.groups.flatMap((g) => g.books).map((b) => [b.id, b])).values()]
+    : sorted.slice(0, limit);
 
-  const visibleBooks = sorted.slice(0, limit);
-  const visibleGroups = groups ? sliceGroups(groups, limit) : null;
+  // Series headings say how far through each series the reader is. That
+  // takes the whole library: on the Want to Read tab, the books already
+  // read aren't on screen.
+  if (sliced && values.group === "series") {
+    const members = await prisma.book.findMany({
+      where: { userId, seriesName: { not: null } },
+      select: { seriesName: true, seriesNumber: true, status: true, timesRead: true },
+    });
+    const bySeries = new Map<string, typeof members>();
+    for (const m of members) {
+      const key = seriesKey(m.seriesName!);
+      bySeries.set(key, [...(bySeries.get(key) ?? []), m]);
+    }
+    for (const g of sliced.groups) {
+      const series = g.key === "series:none" ? undefined : bySeries.get(seriesKey(g.title));
+      if (series) Object.assign(g, seriesHeading(seriesProgress(series), g.total));
+    }
+  }
 
   const counts: Record<string, number> = { all: 0 };
   for (const row of statusCounts) {
@@ -211,10 +298,14 @@ export default async function BooksPage({
 
   const hasFilters =
     !!values.q ||
+    !!values.author ||
     !!values.tag ||
+    !!values.notTag ||
     !!values.format ||
     values.owned !== "all" ||
     !!values.minRating ||
+    !!values.finished ||
+    !!values.missing ||
     !!values.shelfId ||
     !!values.series;
 
@@ -260,6 +351,7 @@ export default async function BooksPage({
         tagCounts={tagCounts}
         display={accountView}
         ratingStyle={prefs.ratingStyle}
+        finishedYears={finishedYears}
       />
 
       {sorted.length === 0 ? (
@@ -283,8 +375,12 @@ export default async function BooksPage({
         </div>
       ) : (
         <LibraryView
-          books={visibleBooks}
-          groups={visibleGroups}
+          books={visibleBooks.map(toCardBook)}
+          groups={
+            sliced?.groups.map((g) => ({ ...g, books: g.books.map(toCardBook) })) ?? null
+          }
+          limit={limit}
+          hasMore={!!sliced && sliced.shownEntries < sliced.totalEntries}
           totalCount={sorted.length}
           searchParams={flatParams}
           shelves={shelves.map((s) => ({ id: s.id, name: s.name }))}

@@ -98,7 +98,8 @@ describe("saved views", () => {
   it("stores the view's query in canonical form", async () => {
     const { id } = await saveView("Fantasy", "sort=title&tag=fantasy&limit=999");
     const view = await prisma.savedView.findUniqueOrThrow({ where: { id } });
-    expect(view.query).toBe("tag=fantasy&group=none&sort=title&dir=desc");
+    // No direction given: titles open A to Z, as the library would show them.
+    expect(view.query).toBe("tag=fantasy&group=none&sort=title&dir=asc");
   });
 
   it("replaces a view saved again under the same name", async () => {

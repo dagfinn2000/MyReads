@@ -10,16 +10,20 @@ import {
   ArrowUpNarrowWide,
   Layers,
   Search,
-  X,
 } from "lucide-react";
 import { saveLibraryView } from "@/lib/actions/library-view";
 import { FORMAT_LABELS } from "@/lib/display";
-import type { LibraryDisplay } from "@/lib/library-view";
+import { activeFilterChips, searchPlaceholder } from "@/lib/library-filters";
+import { naturalDir, type LibraryDisplay } from "@/lib/library-view";
 import type { RatingStyle } from "@/lib/preferences";
 import { canonicalViewQuery } from "@/lib/saved-views";
+import { ActiveFilterChips } from "@/components/active-filter-chips";
 import { LibraryViewMenu } from "@/components/library-view-menu";
 import { ManageTagsDialog } from "@/components/manage-tags-dialog";
+import { MoreFilters, minRatingLabel } from "@/components/more-filters";
+import { usePreferences } from "@/components/preferences-provider";
 import { SaveViewDialog } from "@/components/save-view-dialog";
+import { TagFilter } from "@/components/tag-filter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -34,12 +38,18 @@ export interface FilterValues {
   shelf: string;
   shelfId: string;
   q: string;
+  author: string;
+  /** Comma-joined, like every list in the URL. */
   tag: string;
+  tagMatch: string;
+  notTag: string;
   format: string;
   /** Ownership filter: "all" | "owned" | "wishlist" | "borrowed" |
    *  "given_away" | "lent". Keeps the `owned` name so old links still work. */
   owned: string;
   minRating: string;
+  finished: string;
+  missing: string;
   series: string;
   group: string;
   sort: string;
@@ -52,30 +62,64 @@ const SORT_OPTIONS = [
   { value: "author", label: "Author" },
   { value: "rating", label: "Rating" },
   { value: "dateFinished", label: "Date finished" },
+  { value: "dateStarted", label: "Date started" },
+  { value: "pageCount", label: "Page count" },
+  { value: "published", label: "Year published" },
+  { value: "updatedAt", label: "Recently edited" },
 ];
 
+/** `short` is what the closed menu shows on a phone, next to its icon. */
 const GROUP_OPTIONS = [
-  { value: "none", label: "No grouping" },
-  { value: "author", label: "Group by author" },
-  { value: "series", label: "Group by series" },
+  { value: "none", label: "No grouping", short: "No grouping" },
+  { value: "author", label: "Group by author", short: "Author" },
+  { value: "series", label: "Group by series", short: "Series" },
+  { value: "yearFinished", label: "Group by year finished", short: "Year finished" },
+  { value: "status", label: "Group by status", short: "Status" },
+  { value: "format", label: "Group by format", short: "Format" },
+  { value: "ownership", label: "Group by ownership", short: "Ownership" },
+  { value: "tag", label: "Group by tag", short: "Tag" },
+  { value: "shelf", label: "Group by shelf", short: "Shelf" },
+  { value: "rating", label: "Group by rating", short: "Rating" },
 ];
 
-/** Direction-toggle tooltip: names the current order and what a click does,
- *  phrased for the active sort — letters for the text sorts, low/high for
- *  rating, old/new for the date sorts. */
+/** Sorts by words: their direction reads A to Z, and the icon shows letters. */
+const TEXT_SORTS = new Set(["title", "author"]);
+
+const LETTERS = { asc: "Sorted A to Z. Click for Z to A.", desc: "Sorted Z to A. Click for A to Z." };
+const DATES = {
+  asc: "Sorted oldest first. Click for newest first.",
+  desc: "Sorted newest first. Click for oldest first.",
+};
+
+/** Direction-toggle label per sort: names the current order and what a
+ *  click does, in that sort's own words. */
+const DIR_LABELS: Record<string, { asc: string; desc: string }> = {
+  title: LETTERS,
+  author: LETTERS,
+  rating: {
+    asc: "Sorted lowest rated first. Click for highest first.",
+    desc: "Sorted highest rated first. Click for lowest first.",
+  },
+  createdAt: DATES,
+  dateFinished: DATES,
+  dateStarted: DATES,
+  published: {
+    asc: "Sorted oldest published first. Click for newest first.",
+    desc: "Sorted newest published first. Click for oldest first.",
+  },
+  pageCount: {
+    asc: "Sorted shortest first. Click for longest first.",
+    desc: "Sorted longest first. Click for shortest first.",
+  },
+  updatedAt: {
+    asc: "Sorted least recently edited first. Click for most recent first.",
+    desc: "Sorted most recently edited first. Click for least recent first.",
+  },
+};
+
 function dirTooltip(sort: string, asc: boolean): string {
-  if (sort === "title" || sort === "author") {
-    return asc ? "Sorted A–Z — click for Z–A" : "Sorted Z–A — click for A–Z";
-  }
-  if (sort === "rating") {
-    return asc
-      ? "Sorted lowest rated first — click for highest first"
-      : "Sorted highest rated first — click for lowest first";
-  }
-  // createdAt / dateFinished
-  return asc
-    ? "Sorted oldest first — click for newest first"
-    : "Sorted newest first — click for oldest first";
+  const labels = Object.hasOwn(DIR_LABELS, sort) ? DIR_LABELS[sort] : DATES;
+  return asc ? labels.asc : labels.desc;
 }
 
 const OWNED_OPTIONS = [
@@ -87,34 +131,9 @@ const OWNED_OPTIONS = [
   { value: "wishlist", label: "Wishlist" },
 ];
 
-/** Minimum-rating choices, worded in the reader's rating style. Values are
- *  the stored 1–10. */
-const RATING_OPTIONS: Record<Exclude<RatingStyle, "off">, { value: string; label: string }[]> = {
-  half: [
-    { value: "all", label: "Any rating" },
-    { value: "4", label: "≥ 2 stars" },
-    { value: "6", label: "≥ 3 stars" },
-    { value: "8", label: "≥ 4 stars" },
-    { value: "9", label: "≥ 4.5 stars" },
-    { value: "10", label: "5 stars" },
-  ],
-  whole: [
-    { value: "all", label: "Any rating" },
-    { value: "4", label: "≥ 2 stars" },
-    { value: "6", label: "≥ 3 stars" },
-    { value: "8", label: "≥ 4 stars" },
-    { value: "10", label: "5 stars" },
-  ],
-  ten: [
-    { value: "all", label: "Any rating" },
-    { value: "5", label: "≥ 5/10" },
-    { value: "6", label: "≥ 6/10" },
-    { value: "7", label: "≥ 7/10" },
-    { value: "8", label: "≥ 8/10" },
-    { value: "9", label: "≥ 9/10" },
-    { value: "10", label: "10/10" },
-  ],
-};
+/** Each filter is at least half the row on phones, so they wrap two to a
+ *  line instead of squeezing "All formats" down to "All fo". */
+const HALF_ROW = "min-w-[calc(50%_-_0.25rem)] flex-1 sm:min-w-0 sm:flex-initial";
 
 /**
  * Search/filter/sort controls. All state lives in the URL: every change
@@ -127,30 +146,50 @@ export function FilterBar({
   tagCounts,
   display,
   ratingStyle,
+  finishedYears,
 }: {
   values: FilterValues;
   allTags: string[];
-  /** Books per tag, for the manage-tags dialog. */
+  /** Books per tag, for the tag list and the manage-tags dialog. */
   tagCounts: Record<string, number>;
   /** Card size, layout and card details, for the View menu. */
   display: LibraryDisplay;
   ratingStyle: RatingStyle;
+  /** Years "Finished in" offers, newest first. */
+  finishedYears: number[];
 }) {
   const router = useRouter();
+  const { searchAlsoIn } = usePreferences();
   const [search, setSearch] = useState(values.q);
   const first = useRef(true);
+  const moreFiltersRef = useRef<HTMLButtonElement>(null);
+  // Changes already sent but not back from the server yet. A second change
+  // made before the page re-renders (two chips removed in quick succession)
+  // builds on them rather than on the stale `values`, so it can't undo the
+  // first. New props from the server are a new object, which clears them.
+  const [sent, setSent] = useState({ base: values, changes: {} as Partial<FilterValues> });
+  const pending = sent.base === values ? sent.changes : {};
+  /** What the controls show: the server's values with those changes. */
+  const current: FilterValues = { ...values, ...pending };
 
   function navigate(overrides: Partial<FilterValues>) {
-    const next = { ...values, q: search, ...overrides };
+    setSent({ base: values, changes: { ...pending, ...overrides } });
+    const next = { ...current, q: search, ...overrides };
+    // Same order as a saved view's address (saved-views.ts).
     const params = new URLSearchParams();
     if (next.shelf && next.shelf !== "all") params.set("shelf", next.shelf);
     if (next.shelfId) params.set("shelfId", next.shelfId);
     if (next.q) params.set("q", next.q);
+    if (next.author) params.set("author", next.author);
     if (next.tag && next.tag !== "all") params.set("tag", next.tag);
+    if (next.tag && next.tagMatch === "all") params.set("tagMatch", "all");
+    if (next.notTag) params.set("notTag", next.notTag);
     if (next.format && next.format !== "all") params.set("format", next.format);
     if (next.owned && next.owned !== "all") params.set("owned", next.owned);
     if (next.minRating && next.minRating !== "all")
       params.set("minRating", next.minRating);
+    if (next.finished) params.set("finished", next.finished);
+    if (next.missing) params.set("missing", next.missing);
     if (next.series) params.set("series", next.series);
     // View params are always explicit in the URL, so the page never has to
     // guess between "reset to default" and "no preference stated" — the
@@ -184,166 +223,168 @@ export function FilterBar({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search]);
 
+  const chips = activeFilterChips(current, (v) => minRatingLabel(v, ratingStyle));
+  const group = GROUP_OPTIONS.find((o) => o.value === current.group);
+  const asc = current.dir === "asc";
+
   return (
-    // On phones the controls stack into tidy full-width rows (search with
-    // the view buttons, then filters, then grouping/sort); from sm up they
-    // keep their fixed widths and the view buttons go last.
-    <div className="flex flex-wrap items-center gap-2">
-      {/* Leaves exactly the room the two view buttons take: 2 × 2.25rem,
-          plus the gaps. */}
-      <div className="relative w-[calc(100%-5.25rem)] sm:w-auto">
-        <Search className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search title or author…"
-          className="w-full pl-8 sm:w-56"
+    <div className="grid gap-2">
+      {/* On phones the controls stack into tidy full-width rows (search with
+          the view buttons, then filters, then grouping/sort); from sm up
+          they keep their fixed widths and the view buttons go last. */}
+      <div className="flex flex-wrap items-center gap-2">
+        {/* Leaves exactly the room the two view buttons take: 2 × 2.25rem,
+            plus the gaps. */}
+        <div className="relative w-[calc(100%-5.25rem)] sm:w-auto">
+          <Search className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder={searchPlaceholder(searchAlsoIn)}
+            aria-label="Search the library"
+            className="w-full pl-8 sm:w-56"
+          />
+        </div>
+        <div className="flex shrink-0 items-center gap-1 sm:order-last">
+          <LibraryViewMenu display={display} ratings={ratingStyle !== "off"} />
+          <SaveViewDialog query={canonicalViewQuery({ ...current, q: search })} />
+        </div>
+
+        <TagFilter
+          allTags={allTags}
+          tagCounts={tagCounts}
+          tag={current.tag}
+          notTag={current.notTag}
+          tagMatch={current.tagMatch}
+          onChange={navigate}
+          className={`${HALF_ROW} sm:w-36`}
         />
-      </div>
-      <div className="flex shrink-0 items-center gap-1 sm:order-last">
-        <LibraryViewMenu display={display} ratings={ratingStyle !== "off"} />
-        <SaveViewDialog query={canonicalViewQuery({ ...values, q: search })} />
-      </div>
+        <ManageTagsDialog tagCounts={tagCounts} />
 
-      {/* Each filter is at least half the row on phones, so they wrap two
-          to a line instead of squeezing "All tags" down to "All ta". */}
-      <Select value={values.tag || "all"} onValueChange={(v) => navigate({ tag: v })}>
-        <SelectTrigger className="min-w-[calc(50%_-_0.25rem)] flex-1 sm:w-36 sm:min-w-0 sm:flex-initial">
-          <SelectValue placeholder="Tag" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">All tags</SelectItem>
-          {allTags.map((t) => (
-            <SelectItem key={t} value={t}>
-              {t}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-      <ManageTagsDialog tagCounts={tagCounts} />
-
-      <Select
-        value={values.format || "all"}
-        onValueChange={(v) => navigate({ format: v })}
-      >
-        <SelectTrigger className="min-w-[calc(50%_-_0.25rem)] flex-1 sm:w-32 sm:min-w-0 sm:flex-initial">
-          <SelectValue placeholder="Format" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">All formats</SelectItem>
-          {Object.values(BookFormat).map((f) => (
-            <SelectItem key={f} value={f}>
-              {FORMAT_LABELS[f]}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-
-      <Select
-        value={values.owned || "all"}
-        onValueChange={(v) => navigate({ owned: v })}
-      >
-        <SelectTrigger className="min-w-[calc(50%_-_0.25rem)] flex-1 sm:w-40 sm:min-w-0 sm:flex-initial">
-          <SelectValue placeholder="Owned" />
-        </SelectTrigger>
-        <SelectContent>
-          {OWNED_OPTIONS.map((o) => (
-            <SelectItem key={o.value} value={o.value}>
-              {o.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-
-      {ratingStyle !== "off" && (
         <Select
-          value={values.minRating || "all"}
-          onValueChange={(v) => navigate({ minRating: v })}
+          value={current.format || "all"}
+          onValueChange={(v) => navigate({ format: v })}
         >
-          <SelectTrigger className="min-w-[calc(50%_-_0.25rem)] flex-1 sm:w-32 sm:min-w-0 sm:flex-initial">
-            <SelectValue placeholder="Rating" />
+          <SelectTrigger className={`${HALF_ROW} sm:w-32`}>
+            <SelectValue placeholder="Format" />
           </SelectTrigger>
           <SelectContent>
-            {/* A filter set under another style (≥ 4.5 stars, say) still
-                shows, so the active filter is never invisible. */}
-            {(RATING_OPTIONS[ratingStyle].some((o) => o.value === (values.minRating || "all"))
-              ? RATING_OPTIONS[ratingStyle]
-              : [
-                  ...RATING_OPTIONS[ratingStyle],
-                  { value: values.minRating, label: `≥ ${values.minRating}/10` },
-                ]
-            ).map((o) => (
-              <SelectItem key={o.value} value={o.value}>
-                {o.label}
+            <SelectItem value="all">All formats</SelectItem>
+            {Object.values(BookFormat).map((f) => (
+              <SelectItem key={f} value={f}>
+                {FORMAT_LABELS[f]}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
-      )}
 
-      {values.series && (
-        <button
-          type="button"
-          onClick={() => navigate({ series: "" })}
-          className="inline-flex items-center gap-1 rounded-full border border-primary bg-primary/10 px-3 py-1 text-sm"
-          title="Clear series filter"
-        >
-          Series: {values.series}
-          <X className="size-3.5" />
-        </button>
-      )}
-
-      <div className="flex w-full items-center gap-1 sm:ml-auto sm:w-auto">
         <Select
-          value={values.group || "none"}
-          onValueChange={(v) => navigate({ group: v })}
+          value={current.owned || "all"}
+          onValueChange={(v) => navigate({ owned: v })}
         >
-          <SelectTrigger className="min-w-0 flex-1 sm:w-44 sm:flex-initial">
-            <Layers className="size-4 text-muted-foreground" />
-            <SelectValue />
+          <SelectTrigger className={`${HALF_ROW} sm:w-40`}>
+            <SelectValue placeholder="Owned" />
           </SelectTrigger>
           <SelectContent>
-            {GROUP_OPTIONS.map((o) => (
+            {OWNED_OPTIONS.map((o) => (
               <SelectItem key={o.value} value={o.value}>
                 {o.label}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
-        <Select value={values.sort} onValueChange={(v) => navigate({ sort: v })}>
-          <SelectTrigger className="min-w-0 flex-1 sm:w-36 sm:flex-initial">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {SORT_OPTIONS.filter(
-              (o) => o.value !== "rating" || ratingStyle !== "off" || values.sort === "rating",
-            ).map((o) => (
-              <SelectItem key={o.value} value={o.value}>
-                {o.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Button
-          variant="outline"
-          size="icon"
-          className="shrink-0"
-          // The icon shows the current direction; the tooltip names both the
-          // state and the action (a bare state label reads as "click for
-          // ascending" and makes the toggle feel reversed). Wording and icon
-          // follow the active sort — "A–Z" only makes sense for text sorts.
-          title={dirTooltip(values.sort, values.dir === "asc")}
-          onClick={() => navigate({ dir: values.dir === "asc" ? "desc" : "asc" })}
-        >
-          {values.sort === "title" || values.sort === "author" ? (
-            values.dir === "asc" ? <ArrowUpAZ /> : <ArrowDownAZ />
-          ) : values.dir === "asc" ? (
-            <ArrowUpNarrowWide />
-          ) : (
-            <ArrowDownWideNarrow />
-          )}
-        </Button>
+
+        <MoreFilters
+          values={current}
+          finishedYears={finishedYears}
+          ratingStyle={ratingStyle}
+          onChange={navigate}
+          triggerRef={moreFiltersRef}
+          className={`${HALF_ROW} sm:w-40`}
+        />
+
+        <div className="flex w-full items-center gap-1 sm:ml-auto sm:w-auto">
+          <Select
+            value={current.group || "none"}
+            onValueChange={(v) => navigate({ group: v })}
+          >
+            <SelectTrigger className="min-w-0 flex-1 sm:w-56 sm:flex-initial" aria-label="Group by">
+              <Layers className="size-4 text-muted-foreground" />
+              <SelectValue>
+                <span className="sm:hidden">{group?.short}</span>
+                <span className="hidden sm:inline">{group?.label}</span>
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              {GROUP_OPTIONS.filter(
+                (o) => o.value !== "rating" || ratingStyle !== "off" || current.group === "rating",
+              ).map((o) => (
+                <SelectItem key={o.value} value={o.value}>
+                  {o.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select
+            value={current.sort}
+            // Each sort opens its natural way round: titles A to Z, the
+            // rest newest, highest or longest first.
+            onValueChange={(v) => navigate({ sort: v, dir: naturalDir(v) })}
+          >
+            <SelectTrigger className="min-w-0 flex-1 sm:w-40 sm:flex-initial" aria-label="Sort by">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {SORT_OPTIONS.filter(
+                (o) => o.value !== "rating" || ratingStyle !== "off" || current.sort === "rating",
+              ).map((o) => (
+                <SelectItem key={o.value} value={o.value}>
+                  {o.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button
+            variant="outline"
+            size="icon"
+            className="shrink-0"
+            // The icon shows the current direction; the label names both the
+            // state and the action (a bare state label reads as "click for
+            // ascending" and makes the toggle feel reversed). Wording and
+            // icon follow the active sort — "A to Z" only makes sense for
+            // text sorts.
+            title={dirTooltip(current.sort, asc)}
+            aria-label={dirTooltip(current.sort, asc)}
+            onClick={() => navigate({ dir: asc ? "desc" : "asc" })}
+          >
+            {TEXT_SORTS.has(current.sort) ? (
+              asc ? <ArrowUpAZ /> : <ArrowDownAZ />
+            ) : asc ? (
+              <ArrowUpNarrowWide />
+            ) : (
+              <ArrowDownWideNarrow />
+            )}
+          </Button>
+        </div>
       </div>
+
+      <ActiveFilterChips
+        chips={chips}
+        onRemove={(chip) => navigate(chip.clear)}
+        onClearAll={() =>
+          navigate({
+            author: "",
+            tag: "",
+            tagMatch: "",
+            notTag: "",
+            finished: "",
+            minRating: "",
+            missing: "",
+            series: "",
+          })
+        }
+        fallbackFocus={moreFiltersRef}
+      />
     </div>
   );
 }

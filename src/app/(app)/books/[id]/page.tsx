@@ -15,6 +15,7 @@ import {
   STATUS_BADGE_CLASS,
   STATUS_LABELS,
 } from "@/lib/display";
+import { AuthorLinks } from "@/components/author-links";
 import { BookCover } from "@/components/book-card";
 import { BookDescription } from "@/components/book-description";
 import { BookLink } from "@/components/book-link";
@@ -154,7 +155,7 @@ export default async function BookDetailPage({
           <h1 className="text-3xl font-semibold tracking-tight">{book.title}</h1>
           {book.authors.length > 0 && (
             <p className="mt-1 text-lg text-muted-foreground">
-              {book.authors.join(", ")}
+              <AuthorLinks authors={book.authors} />
             </p>
           )}
           {book.seriesName && seriesHref && (
@@ -183,13 +184,21 @@ export default async function BookDetailPage({
               Read {book.timesRead}×
             </Badge>
           )}
-          {book.tags.map((tag) => (
-            <Link key={tag} href={`/books?tag=${encodeURIComponent(tag)}`}>
-              <Badge variant="secondary" className="hover:bg-accent">
+          {book.tags.map((tag) =>
+            // The tag filter lists tags comma-separated, so an old tag with
+            // a comma in it can't be linked to.
+            tag.includes(",") ? (
+              <Badge key={tag} variant="secondary">
                 {tag}
               </Badge>
-            </Link>
-          ))}
+            ) : (
+              <Link key={tag} href={`/books?tag=${encodeURIComponent(tag)}`}>
+                <Badge variant="secondary" className="hover:bg-accent">
+                  {tag}
+                </Badge>
+              </Link>
+            ),
+          )}
         </div>
 
         <dl className="grid grid-cols-2 gap-x-6 gap-y-1 text-sm sm:grid-cols-4">

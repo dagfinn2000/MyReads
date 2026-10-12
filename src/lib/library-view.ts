@@ -60,7 +60,9 @@ export const NATURAL_DIRS: Record<LibrarySortKey, LibraryDir> = {
 };
 
 export function naturalDir(sort: string): LibraryDir {
-  return (NATURAL_DIRS as Record<string, LibraryDir>)[sort] ?? "desc";
+  // Own keys only: `sort` comes from the URL, and ?sort=constructor would
+  // otherwise find Object's constructor.
+  return Object.hasOwn(NATURAL_DIRS, sort) ? NATURAL_DIRS[sort as LibrarySortKey] : "desc";
 }
 
 /** The date a list row shows next to the book, if any. */

@@ -24,12 +24,14 @@ import {
   HIDEABLE_STATS,
   NUMBER_FORMATS,
   STATS_PERIODS,
+  SEARCH_FIELDS,
   type Accent,
   type Background,
   type Catalogue,
   type HideableNav,
   type HideableStat,
   type Preferences,
+  type SearchField,
 } from "@/lib/preferences";
 import { PERIOD_LABELS } from "@/lib/stats-period";
 import { cn } from "@/lib/utils";
@@ -48,6 +50,12 @@ const CATALOGUE_LABELS: Record<Catalogue, string> = {
   openlibrary: "Open Library",
   google: "Google Books",
   nb: "National Library of Norway",
+};
+
+const SEARCH_FIELD_LABELS: Record<SearchField, string> = {
+  tags: "Tags",
+  isbn: "ISBN",
+  review: "My review",
 };
 
 const NAV_LABELS: Record<HideableNav, string> = {
@@ -464,6 +472,22 @@ export function PreferencesForm({
               />
             );
           })}
+        </div>
+        <div role="group" aria-labelledby="search-also-in" className="grid gap-1.5">
+          <p id="search-also-in" className="text-sm font-medium">
+            Search also looks in
+          </p>
+          <p className="text-xs text-muted-foreground">
+            Title, author and series are always searched.
+          </p>
+          {SEARCH_FIELDS.map((field) => (
+            <Toggle
+              key={field}
+              label={SEARCH_FIELD_LABELS[field]}
+              checked={prefs.searchAlsoIn.includes(field)}
+              onChange={(on) => update({ searchAlsoIn: toggleIn(prefs.searchAlsoIn, field, on) })}
+            />
+          ))}
         </div>
         <p className="text-xs text-muted-foreground">
           Order and hide shelf chips from Manage shelves in the library.

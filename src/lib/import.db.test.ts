@@ -95,6 +95,12 @@ describe("importLibrary", () => {
     expect(saved.timesRead).toBe(2);
   });
 
+  it("splits a tag with a comma in it, which the tag filter couldn't hold", async () => {
+    await importLibrary(userId, payload([book({ tags: ["Science, Fiction", "fantasy", "fantasy,"] })]));
+    const saved = await prisma.book.findFirstOrThrow({ where: { userId } });
+    expect([...saved.tags].sort()).toEqual(["fantasy", "fiction", "science"]);
+  });
+
   it("skips a book already present by ISBN, and does not duplicate it", async () => {
     await importLibrary(userId, payload([book()]));
     const second = await importLibrary(userId, payload([book({ title: "Different title" })]));

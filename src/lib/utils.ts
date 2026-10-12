@@ -53,12 +53,18 @@ export function escapeLike(s: string): string {
   return s.replace(/[\\%_]/g, "\\$&");
 }
 
+/** The words of a search query, folded like searchText, each once, at most
+ *  ten. For matching in JS; searchTerms is the same list escaped for SQL. */
+export function searchWords(q: string): string[] {
+  const words = foldForSearch(q).split(/\s+/).filter(Boolean);
+  return [...new Set(words)].slice(0, 10);
+}
+
 /**
  * The words of a search query, folded like searchText and escaped for
  * `contains`. Each word is matched on its own, so "tolkien hobbit" finds
  * The Hobbit by J.R.R. Tolkien even though that phrase appears nowhere.
  */
 export function searchTerms(q: string): string[] {
-  const words = foldForSearch(q).split(/\s+/).filter(Boolean);
-  return [...new Set(words)].slice(0, 10).map(escapeLike);
+  return searchWords(q).map(escapeLike);
 }
