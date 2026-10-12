@@ -431,6 +431,24 @@ export function PreferencesForm({
         />
       </Section>
 
+      <Section title="Pick for me" id="pick-for-me">
+        <Toggle
+          label="Only books I have"
+          checked={prefs.pickOnlyHave}
+          onChange={(c) => update({ pickOnlyHave: c })}
+        />
+        <Toggle
+          label="Only the next book in a series"
+          checked={prefs.pickNextInSeries}
+          onChange={(c) => update({ pickNextInSeries: c })}
+        />
+        <p className="text-xs text-muted-foreground">
+          Borrowed books count as books you have. Wishlist, given-away and
+          lent-out books don&apos;t. A Want to Read book in a series is skipped
+          while an earlier one is still unread.
+        </p>
+      </Section>
+
       <Section title="Book search">
         <p className="text-xs text-muted-foreground">
           Which catalogues to search when adding a book, and which comes first.
