@@ -442,6 +442,17 @@ describe("lending", () => {
     expect(await prisma.loan.count({ where: { bookId: bk.id } })).toBe(0);
   });
 
+  it("only lends a copy you own", async () => {
+    // The card hides "Lend out" for these; the action refuses them too.
+    for (const ownership of ["BORROWED", "GIVEN_AWAY", "WISHLIST"]) {
+      const bk = await makeBook({ ownership });
+      const res = await lendBook(bk.id, {}, form({ borrower: "Kari" }));
+
+      expect(res.error).toBe("Only a copy you own can be lent out.");
+      expect(await prisma.loan.count({ where: { bookId: bk.id } })).toBe(0);
+    }
+  });
+
   it("refuses to lend another account's book", async () => {
     const theirs = await makeBook({}, otherUserId);
     const res = await lendBook(theirs.id, {}, form({ borrower: "Kari" }));

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowLeft, TriangleAlert } from "lucide-react";
 import { createBook } from "@/lib/actions/books";
 import type { LibraryCheckResult } from "@/app/api/library/check/route";
+import { duplicateNotice } from "@/lib/check-verdict";
 import { BookForm, type BookFormValues } from "@/components/book-form";
 import { ImportSearch } from "@/components/import-search";
 import { Button } from "@/components/ui/button";
@@ -45,16 +46,14 @@ export function AddBookClient({
           <p className="flex items-start gap-2 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm dark:border-amber-900 dark:bg-amber-950/40">
             <TriangleAlert className="mt-0.5 size-4 shrink-0 text-amber-600 dark:text-amber-400" />
             <span>
-              {dupe.match === "isbn"
-                ? "This exact edition is already in your library: "
-                : "You already have this title: "}
+              {duplicateNotice(dupe.match, dupe.book.ownership).lead}
               <Link
                 href={`/books/${dupe.book.id}`}
                 className="font-medium underline underline-offset-2"
               >
                 {dupe.book.title}
               </Link>
-              . You can still add it (say, a second copy) — just so you know.
+              {duplicateNotice(dupe.match, dupe.book.ownership).tail}
             </span>
           </p>
         )}

@@ -1,13 +1,13 @@
 "use client";
 
 import { useActionState, useState, useTransition } from "react";
-import type { Loan } from "@prisma/client";
+import type { BookOwnership, Loan } from "@prisma/client";
 import { HandHeart, Trash2, Undo2 } from "lucide-react";
 import { deleteLoan, lendBook, returnLoan } from "@/lib/actions/loans";
 import type { ActionState } from "@/lib/actions/helpers";
 import { formatDate, toDateInputValue } from "@/lib/display";
 import { usePreferences } from "@/components/preferences-provider";
-import { outFor } from "@/lib/loans";
+import { LENDING_NOTE, lendingMode, outFor, showsLendingCard } from "@/lib/loans";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,12 +19,18 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
  *
  * The open loan (no `returnedAt`) is what makes a book "lent out", so it gets
  * the prominent treatment; returned loans collapse into a quiet list.
+ *
+ * Only a copy you own can be lent. A borrowed or given-away book says so
+ * instead of offering "Lend out", and a wishlist book has no card at all
+ * unless it has loans on record. Loans already made always show.
  */
 export function LendingCard({
   bookId,
+  ownership,
   loans,
 }: {
   bookId: string;
+  ownership: BookOwnership;
   /** Newest first. */
   loans: Loan[];
 }) {
@@ -44,11 +50,18 @@ export function LendingCard({
   const open = loans.find((l) => l.returnedAt === null) ?? null;
   const past = loans.filter((l) => l.returnedAt !== null);
 
+  if (!showsLendingCard(ownership, loans.length)) return null;
+  const mode = lendingMode(ownership);
+  const canLend = mode === "lendable";
+  // If the ownership changes while the form is open, the form hides and the
+  // card falls back to its note rather than going blank.
+  const formOpen = canLend && showForm && !open;
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0">
         <CardTitle>Lending</CardTitle>
-        {!open && !showForm && (
+        {canLend && !open && !formOpen && (
           <Button variant="outline" size="sm" onClick={() => setShowForm(true)}>
             <HandHeart data-slot="icon" />
             Lend out
@@ -77,14 +90,12 @@ export function LendingCard({
             </Button>
           </div>
         ) : (
-          !showForm && (
-            <p className="text-sm text-muted-foreground">
-              This copy is on your shelf.
-            </p>
+          !formOpen && (
+            <p className="text-sm text-muted-foreground">{LENDING_NOTE[mode]}</p>
           )
         )}
 
-        {showForm && !open && (
+        {formOpen && (
           <form action={formAction} className="grid gap-3">
             <div className="grid gap-3 sm:grid-cols-[1fr_10rem]">
               <div className="grid gap-2">

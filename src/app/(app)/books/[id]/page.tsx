@@ -23,6 +23,7 @@ import { DeleteBookButton } from "@/components/delete-book-button";
 import { FindItAt } from "@/components/find-it-at";
 import { QuotesCard } from "@/components/quotes-card";
 import { LendingCard } from "@/components/lending-card";
+import { showsLendingCard } from "@/lib/loans";
 import { ReadHistoryCard } from "@/components/read-history-card";
 import { ReadingCard } from "@/components/reading-card";
 import { Badge } from "@/components/ui/badge";
@@ -112,7 +113,10 @@ export default async function BookDetailPage({
     ),
     reading: <ReadingCard book={book} progress={book.progress} />,
     history: <ReadHistoryCard book={book} reads={book.reads} />,
-    lending: <LendingCard bookId={book.id} loans={book.loans} />,
+    // A wishlist copy with no loan history has nothing to show.
+    lending: showsLendingCard(book.ownership, book.loans.length) ? (
+      <LendingCard bookId={book.id} ownership={book.ownership} loans={book.loans} />
+    ) : null,
     quotes: <QuotesCard bookId={book.id} quotes={book.quotes} />,
   };
   const arranged = arrangeBookCards(prefs, {

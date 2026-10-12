@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ReadingStatus } from "@prisma/client";
 import { Check, Dices, SquareCheckBig, X } from "lucide-react";
@@ -9,6 +10,8 @@ import { pickRandomBook } from "@/lib/actions/pick";
 import { STATUS_LABELS } from "@/lib/display";
 import { cn } from "@/lib/utils";
 import type { LibraryDisplay } from "@/lib/library-view";
+import { pickButtonTitle, tabStatus } from "@/lib/pick";
+import { usePreferences } from "@/components/preferences-provider";
 import {
   BookCard,
   BookCoverTile,
@@ -92,6 +95,14 @@ export function LibraryView({
   const [tags, setTags] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const prefs = usePreferences();
+  // Why the last pick opened nothing, for the view it was made in, so it
+  // clears itself when the tab or filters change.
+  const [pickNote, setPickNote] = useState<{
+    key: string;
+    reason: "none" | "settings" | "error";
+  } | null>(null);
+  const viewKey = new URLSearchParams(searchParams).toString();
 
   function toggle(id: string) {
     setSelected((prev) => {
@@ -112,18 +123,26 @@ export function LibraryView({
     setMessage(null);
   }
 
-  /** Random pick from Want to Read within the current filters (any filtered
-   *  book when the current view has no unread ones).
+  /** Random pick from the current tab and filters, narrowed by the Pick for
+   *  me switches; the All tab prefers Want to Read (actions/pick.ts).
    *
    *  Runs on the server: the page no longer ships the whole library, so
    *  picking from `books` would silently narrow the shuffle to the loaded
    *  slice instead of everything matching the filters. */
   function pickForMe() {
+    const key = viewKey;
+    setPickNote(null);
     startTransition(async () => {
-      const pick = await pickRandomBook(searchParams);
-      if (pick) router.push(`/books/${pick.id}`);
+      try {
+        const res = await pickRandomBook(searchParams);
+        if ("id" in res) router.push(`/books/${res.id}`);
+        else setPickNote({ key, reason: res.reason });
+      } catch {
+        setPickNote({ key, reason: "error" });
+      }
     });
   }
+  const shownPickNote = pickNote?.key === viewKey ? pickNote.reason : null;
 
   function apply() {
     const addTags = tags
@@ -243,7 +262,7 @@ export function LibraryView({
               size="sm"
               onClick={pickForMe}
               disabled={books.length === 0}
-              title="Open a random book from Want to Read (respects your filters)"
+              title={pickButtonTitle(tabStatus(searchParams.shelf), prefs)}
             >
               <Dices data-slot="icon" />
               Pick for me
@@ -270,6 +289,24 @@ export function LibraryView({
           </div>
         )}
       </div>
+
+      {/* Why Pick for me opened nothing. Always mounted so screen readers
+          hear it; visually hidden (and out of the grid) while empty. */}
+      <p
+        role="status"
+        className={cn("text-sm text-muted-foreground", !shownPickNote && "sr-only")}
+      >
+        {shownPickNote === "none" && "No books match these filters."}
+        {shownPickNote === "settings" && (
+          <>
+            Nothing here fits your Pick for me settings.{" "}
+            <Link href="/account#pick-for-me" className="underline underline-offset-2">
+              Change them
+            </Link>
+          </>
+        )}
+        {shownPickNote === "error" && "Couldn't pick a book. Try again."}
+      </p>
 
       {groups ? (
         <div className="grid gap-6">
