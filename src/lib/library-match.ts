@@ -9,11 +9,15 @@ import { escapeLike, foldForSearch } from "@/lib/utils";
  * edition.
  */
 
+/** What a match says about the book: enough to word it the way the check
+ *  page does (lib/check-verdict.ts) and to mark it owned. */
+const matchSelect = { id: true, title: true, ownership: true, format: true } as const;
+
 /** The user's book with this ISBN, in its 10- or 13-digit form. */
 export function findBookByIsbn(userId: string, isbn: string) {
   return prisma.book.findFirst({
     where: { userId, isbn: { in: isbnVariants(isbn) } },
-    select: { id: true, title: true },
+    select: matchSelect,
   });
 }
 
@@ -32,6 +36,6 @@ export function findBookByTitle(userId: string, title: string, author?: string |
         ...(surname ? [{ searchText: { contains: escapeLike(foldForSearch(surname)) } }] : []),
       ],
     },
-    select: { id: true, title: true },
+    select: matchSelect,
   });
 }

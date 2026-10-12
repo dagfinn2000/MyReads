@@ -90,18 +90,22 @@ export function BookForm({
   const formRef = useRef<HTMLFormElement>(null);
   // Controlled so the cover picker and upload can set it programmatically.
   const [coverUrl, setCoverUrl] = useState(initial.coverUrl ?? "");
-  // Tracked so the audiobook length shows only for audiobooks.
+  // Format, ownership and shelf are controlled, each with a plain hidden
+  // input carrying it: the Radix Select's own hidden select reverts to its
+  // mount-time value when React resets the form after a save (see
+  // reading-card.tsx), failed saves included, while the trigger keeps
+  // showing the reader's choice. Format also decides whether the audiobook
+  // length shows (and is sent), and the shelf which reading fields show.
   const [format, setFormat] = useState<BookFormat>(
     initial.format ?? BookFormat.PHYSICAL,
+  );
+  const [ownership, setOwnership] = useState<BookOwnership>(
+    initial.ownership ?? BookOwnership.OWNED,
   );
 
   // Kept on every save (editing used to drop it), and filled in by Look up
   // details when the catalogue knows the work.
   const [openLibraryId, setOpenLibraryId] = useState(initial.openLibraryId ?? "");
-  // Controlled, with a plain hidden input carrying it: the Radix Select's
-  // own hidden select reverts to its mount-time value when React resets the
-  // form after a save (see reading-card.tsx), and the shelf decides which
-  // reading fields show.
   const [status, setStatus] = useState<ReadingStatus>(initial.status ?? ReadingStatus.WANT_TO_READ);
 
   // Each save returns a new state object, so this runs once per book added.
@@ -280,11 +284,8 @@ export function BookForm({
         <div className="flex flex-wrap items-end gap-4">
           <div className="grid gap-2">
             <Label htmlFor="format">Format</Label>
-            <Select
-              name="format"
-              defaultValue={initial.format ?? BookFormat.PHYSICAL}
-              onValueChange={(v) => setFormat(v as BookFormat)}
-            >
+            <input type="hidden" name="format" value={format} />
+            <Select value={format} onValueChange={(v) => setFormat(v as BookFormat)}>
               <SelectTrigger id="format" className="w-36">
                 <SelectValue />
               </SelectTrigger>
@@ -321,7 +322,8 @@ export function BookForm({
           )}
           <div className="grid gap-2">
             <Label htmlFor="ownership">Ownership</Label>
-            <Select name="ownership" defaultValue={initial.ownership ?? "OWNED"}>
+            <input type="hidden" name="ownership" value={ownership} />
+            <Select value={ownership} onValueChange={(v) => setOwnership(v as BookOwnership)}>
               <SelectTrigger id="ownership">
                 <SelectValue />
               </SelectTrigger>

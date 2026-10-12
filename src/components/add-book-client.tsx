@@ -10,6 +10,7 @@ import type { LibraryCheckResult } from "@/app/api/library/check/route";
 import { duplicateNotice } from "@/lib/check-verdict";
 import { BookForm, type BookFormValues } from "@/components/book-form";
 import { ImportSearch } from "@/components/import-search";
+import { NEWEST_FIRST_HREF, useShelfScan } from "@/components/shelf-scan";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -33,6 +34,11 @@ interface Prefill {
  * round starts afresh (the round number keys the search and the form), on
  * the tab it was added from, with the camera open again if the book was
  * scanned, and a line saying what was just added.
+ *
+ * A shelf scan's session lives here, not in the search: switching to
+ * Manual entry or reviewing a picked book unmounts the search box, and
+ * codes still in line then are looked up and added all the same, with the
+ * running total shown above whichever is on screen.
  */
 export function AddBookClient({
   seriesNames = [],
@@ -53,6 +59,7 @@ export function AddBookClient({
   const [prefill, setPrefill] = useState<Prefill | null>(null);
   const [lastAdded, setLastAdded] = useState<{ id: string; title: string } | null>(null);
   const [reopenScanner, setReopenScanner] = useState(false);
+  const shelf = useShelfScan();
   const dupe = useDuplicateCheck(prefill && !prefill.byHand ? prefill.values : null);
 
   // Stable, so the search never sees new callbacks (see ImportSearch).
@@ -110,6 +117,27 @@ export function AddBookClient({
           </Button>
         </div>
       )}
+
+      {/* What a shelf scan added, once the camera is closed. The sr-only
+          line is always there, so the total is read out when it changes;
+          the visible one comes and goes. */}
+      <p role="status" className="sr-only">
+        {shelf.snapshot.pending === 0 && shelf.snapshot.added > 0
+          ? `Added ${shelf.snapshot.added} book${shelf.snapshot.added === 1 ? "" : "s"} from the shelf`
+          : ""}
+      </p>
+      <p className="text-sm text-muted-foreground empty:hidden">
+        {shelf.snapshot.pending > 0
+          ? `Still adding ${shelf.snapshot.pending} book${shelf.snapshot.pending === 1 ? "" : "s"}…`
+          : shelf.snapshot.added > 0 && (
+              <>
+                Added {shelf.snapshot.added} book{shelf.snapshot.added === 1 ? "" : "s"} from the shelf ·{" "}
+                <Link href={NEWEST_FIRST_HREF} className="underline underline-offset-2">
+                  See them in the library
+                </Link>
+              </>
+            )}
+      </p>
 
       {prefill ? (
         <>
@@ -170,7 +198,7 @@ export function AddBookClient({
               initialQuery={round === 0 ? initialIsbn : undefined}
               tagImport={tagImport}
               openScannerOnMount={reopenScanner}
-              onAddByHand={handleAddByHand}
+              shelfScan={{ scan: shelf, onAddByHand: handleAddByHand }}
             />
           </TabsContent>
           <TabsContent value="manual" className="pt-4">
