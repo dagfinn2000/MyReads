@@ -23,6 +23,7 @@ import {
   HIDEABLE_NAV,
   HIDEABLE_STATS,
   NUMBER_FORMATS,
+  STATS_PERIODS,
   type Accent,
   type Background,
   type Catalogue,
@@ -30,6 +31,7 @@ import {
   type HideableStat,
   type Preferences,
 } from "@/lib/preferences";
+import { PERIOD_LABELS } from "@/lib/stats-period";
 import { cn } from "@/lib/utils";
 import { BookPageCardList, FindLinksEditor } from "@/components/book-page-preferences";
 import { Button } from "@/components/ui/button";
@@ -725,6 +727,68 @@ export function PreferencesForm({
           ]}
           onChange={(v) => update({ heatmapScale: v })}
         />
+        <Choice
+          label="Stats open on"
+          hint="The buttons on the Stats page switch it any time."
+          value={prefs.statsPeriod}
+          options={STATS_PERIODS.map((p) => ({ value: p, label: PERIOD_LABELS[p] }))}
+          onChange={(v) => update({ statsPeriod: v })}
+        />
+        <Choice
+          label="Genres and Formats count"
+          value={prefs.statsBreakdown}
+          options={[
+            { value: "library", label: "Every book in the library" },
+            { value: "period", label: "Books I read in the period" },
+          ]}
+          onChange={(v) => update({ statsBreakdown: v })}
+        />
+        {/* Linked from the goal card's "Change what counts". */}
+        <div
+          id="what-counts"
+          role="group"
+          aria-labelledby="what-counts-heading"
+          className="grid scroll-mt-20 gap-3"
+        >
+          <div>
+            <p id="what-counts-heading" className="text-sm font-medium">
+              What counts
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Used by the stats cards, your reading goal and the year in review.
+            </p>
+          </div>
+          <Choice
+            label="Pages read means"
+            hint="Books you finish without logging still add their page count."
+            value={prefs.statsPagesRead}
+            options={[
+              { value: "finished", label: "Whole books when I finish" },
+              { value: "logged", label: "Pages I logged" },
+            ]}
+            onChange={(v) => update({ statsPagesRead: v })}
+          />
+          <Choice
+            label="Books I stop reading"
+            value={prefs.statsStoppedBooks}
+            options={[
+              { value: "none", label: "Don't count" },
+              { value: "pages", label: "Count the pages I read" },
+              { value: "book", label: "Count as a book" },
+            ]}
+            onChange={(v) => update({ statsStoppedBooks: v })}
+          />
+          <Choice
+            label="Audiobooks"
+            value={prefs.statsAudiobooks}
+            options={[
+              { value: "full", label: "Count fully" },
+              { value: "books", label: "Books, not pages" },
+              { value: "out", label: "Leave out" },
+            ]}
+            onChange={(v) => update({ statsAudiobooks: v })}
+          />
+        </div>
       </Section>
 
       {savedViews.length > 0 && (
