@@ -1,8 +1,9 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
+import { useRef, useSyncExternalStore } from "react";
 import { Check, Palette, SunMoon } from "lucide-react";
 import { saveTheme } from "@/lib/actions/theme";
+import { motionAllowed } from "@/lib/motion";
 import {
   DARK_THEME_IDS,
   DEFAULT_AUTO_THEMES,
@@ -64,14 +65,58 @@ const readTheme = () => {
 // hydration.
 const readThemeOnServer = () => null;
 
+/**
+ * Runs `change` (the theme switch) inside a view transition that reveals
+ * the new colours in a circle growing out of `origin`, the palette button.
+ * The browser snapshots the page before and after; the after snapshot is
+ * clipped to the growing circle (the `theme-reveal` rule in globals.css
+ * turns off the default cross-fade). Browsers without view transitions,
+ * and readers with animations off, get the instant switch.
+ */
+function revealTheme(change: () => void, origin: HTMLElement | null) {
+  if (!origin || !document.startViewTransition || !motionAllowed()) {
+    change();
+    return;
+  }
+  const rect = origin.getBoundingClientRect();
+  const x = rect.left + rect.width / 2;
+  const y = rect.top + rect.height / 2;
+  const radius = Math.hypot(
+    Math.max(x, window.innerWidth - x),
+    Math.max(y, window.innerHeight - y),
+  );
+  const root = document.documentElement;
+  root.classList.add("theme-reveal");
+  const transition = document.startViewTransition(change);
+  transition.ready
+    .then(() => {
+      root.animate(
+        { clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${radius}px at ${x}px ${y}px)`] },
+        {
+          duration: 550,
+          easing: "cubic-bezier(0.4, 0, 0.2, 1)",
+          pseudoElement: "::view-transition-new(root)",
+        },
+      );
+    })
+    // A transition can be skipped (another one started, the tab was
+    // hidden); the change itself has still happened.
+    .catch(() => {});
+  transition.finished.finally(() => root.classList.remove("theme-reveal"));
+}
+
 export function ThemePicker() {
   const raw = useSyncExternalStore(subscribeToTheme, readTheme, readThemeOnServer);
   const current: ThemeSetting | null = raw === null ? null : parseThemeSetting(raw);
   const auto = current?.kind === "auto" ? current : null;
+  const triggerRef = useRef<HTMLButtonElement>(null);
 
   function apply(setting: ThemeSetting) {
     const value = serializeThemeSetting(setting);
-    applyThemeSetting(value, DARK_THEME_IDS, THEME_BACKGROUNDS);
+    revealTheme(
+      () => applyThemeSetting(value, DARK_THEME_IDS, THEME_BACKGROUNDS),
+      triggerRef.current,
+    );
     try {
       localStorage.setItem(THEME_STORAGE_KEY, value);
     } catch {
@@ -111,7 +156,7 @@ export function ThemePicker() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" title="Theme">
+        <Button ref={triggerRef} variant="ghost" size="icon" title="Theme">
           <Palette />
           <span className="sr-only">Choose theme</span>
         </Button>

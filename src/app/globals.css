@@ -877,6 +877,15 @@ html[data-covers="plain"] .drawn-cover {
   }
 }
 
+/* Theme switch: the new theme grows out of the palette button as a circle
+   (revealTheme in components/theme-picker.tsx), so the default cross-fade
+   between the two snapshots is turned off while it runs. */
+html.theme-reveal::view-transition-old(root),
+html.theme-reveal::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
 /* ── Motion ────────────────────────────────────────────────────────────────
    Every animation and transition in the app, including the menu and dialog
    zoom from shadcn, stops when the device asks for reduced motion or the
