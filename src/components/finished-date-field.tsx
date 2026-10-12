@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { toDateInputValue } from "@/lib/display";
 import { usePreferences } from "@/components/preferences-provider";
 import { Input } from "@/components/ui/input";
@@ -26,6 +26,16 @@ export function FinishedDateField({
   const id = useId();
   const [date, setDate] = useState(defaultDate);
   const [unknown, setUnknown] = useState(defaultUnknown);
+  // React keeps a controlled box's checked attribute at its mount-time
+  // value, and the form reset React does after a save, a failed one
+  // included, puts the box back to that while the date stays as the state
+  // says: unticked, with the date still off, and neither sent. Keeping the
+  // attribute in step makes the reset a no-op for it, as it is for the
+  // date's value.
+  const box = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (box.current) box.current.defaultChecked = unknown;
+  }, [unknown]);
 
   return (
     <div className="flex flex-wrap items-end gap-x-4 gap-y-2">
@@ -43,6 +53,7 @@ export function FinishedDateField({
       </div>
       <label className="flex h-9 items-center gap-2 text-sm">
         <input
+          ref={box}
           type="checkbox"
           name="finishedUnknown"
           checked={unknown}
