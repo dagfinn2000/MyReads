@@ -8,6 +8,7 @@ import type { ActionState } from "@/lib/actions/helpers";
 import { formatDate, toDateInputValue } from "@/lib/display";
 import { usePreferences } from "@/components/preferences-provider";
 import { LENDING_NOTE, lendingMode, outFor, showsLendingCard } from "@/lib/loans";
+import { submitKeepingInput } from "@/lib/submit-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -96,7 +97,11 @@ export function LendingCard({
         )}
 
         {formOpen && (
-          <form action={formAction} className="grid gap-3">
+          <form
+            action={formAction}
+            onSubmit={submitKeepingInput(formAction)}
+            className="grid gap-3"
+          >
             <div className="grid gap-3 sm:grid-cols-[1fr_10rem]">
               <div className="grid gap-2">
                 <Label htmlFor="borrower">Lent to</Label>

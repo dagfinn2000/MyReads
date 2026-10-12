@@ -7,6 +7,7 @@ import { createShelf, deleteShelf } from "@/lib/actions/shelves";
 import type { ActionState } from "@/lib/actions/helpers";
 import { orderByIds } from "@/lib/library-order";
 import { cn } from "@/lib/utils";
+import { submitKeepingInput } from "@/lib/submit-form";
 import { ManageShelvesDialog } from "@/components/manage-shelves-dialog";
 import { usePreferences } from "@/components/preferences-provider";
 import { Button } from "@/components/ui/button";
@@ -165,7 +166,11 @@ export function ShelfChips({
               their detail pages.
             </DialogDescription>
           </DialogHeader>
-          <form action={createAction} className="grid gap-3">
+          <form
+            action={createAction}
+            onSubmit={submitKeepingInput(createAction)}
+            className="grid gap-3"
+          >
             <Input name="name" placeholder="Shelf name" required maxLength={50} autoFocus />
             {createState.error && (
               <p className="text-sm text-destructive">{createState.error}</p>
