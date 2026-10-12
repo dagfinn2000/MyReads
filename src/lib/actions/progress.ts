@@ -20,6 +20,7 @@ import {
   moveTargetSchema,
   passAround,
   placeInLog,
+  positionTexts,
   resolveLogDay,
   undoMoveSchema,
   type EntryEditResult,
@@ -66,6 +67,10 @@ const NOT_READING = "Only books you're reading can log pages. Set this one to Cu
 const FUTURE = "That day hasn't happened yet.";
 const CHANGED = "This book has changed since. Open it to set its status.";
 
+function beforeStarted(dateStarted: Date, prefs: Preferences): string {
+  return `You started this book on ${formatDate(dateStarted, prefs)}. Pick that day or later.`;
+}
+
 /**
  * Log where you are in a book you're reading, for today or an earlier day.
  * The newest entry moves the book's page with it (writing the pass's page-0
@@ -75,14 +80,15 @@ const CHANGED = "This book has changed since. Open it to set its status.";
  */
 export async function logPage(
   bookId: string,
-  input: { page: number; day: string },
+  /** `value` is the position as typed, in the book's unit, for the message. */
+  input: { page: number; day: string; value?: number },
 ): Promise<LogPageResult> {
   const userId = await requireUserId();
   const id = idSchema.safeParse(bookId);
   if (!id.success) return { error: "Book not found" };
   const parsed = logPageSchema.safeParse(input);
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
-  const { page, day } = parsed.data;
+  const { page, day, value } = parsed.data;
 
   const book = await prisma.book.findFirst({
     where: { id: id.data, userId },
@@ -103,16 +109,14 @@ export async function logPage(
   const prefs = await readerPrefs(userId);
   const tz = prefs.timeZone;
   const info = unitFor(book, prefs);
-  const pos = (p: number) => formatPosition(p, info);
+  const [typed] = positionTexts(info, { page, value });
   const now = new Date();
   const today = dayKey(now, tz);
   const resolved = resolveLogDay(day, now, tz);
   if ("error" in resolved) return { error: FUTURE };
   const { key, at } = resolved;
   if (book.dateStarted && key < calendarDay(book.dateStarted, tz)) {
-    return {
-      error: `You started this book on ${formatDate(book.dateStarted, prefs)}. Pick that day or later.`,
-    };
+    return { error: beforeStarted(book.dateStarted, prefs) };
   }
 
   const result = await prisma.$transaction(async (tx): Promise<LogPageResult> => {
@@ -121,29 +125,30 @@ export async function logPage(
       orderBy: LOG_ORDER,
       select: LOG_FIELDS,
     });
-    const pass = currentPassEntries(all, book.dateStarted);
+    const pass = currentPassEntries(all, book.dateStarted, tz);
     const previous = pass.length > 0 ? (all[all.indexOf(pass[0]) - 1] ?? null) : null;
     const placement = placeInLog(pass, { page, date: at }, { timeZone: tz, previous });
 
     if (!placement.ok) {
       const n = placement.neighbour;
-      const when = loggedWhen(calendarDay(n.date, tz), today, prefs.dateFormat);
-      const subject = `${formatPosition(page, info, { capital: true })} for ${describeDay(key, today, prefs.dateFormat)}`;
       if (placement.reason === "beforeStart") {
         return { error: `That's before this read started (${formatDate(n.date, prefs)}).` };
       }
+      const when = loggedWhen(calendarDay(n.date, tz), today, prefs.dateFormat);
+      const [mine, theirs] = positionTexts(info, { page, value, capital: true }, { page: n.page });
+      const subject = `${mine} for ${describeDay(key, today, prefs.dateFormat)}`;
       return {
         error:
           placement.reason === "below"
-            ? `${subject} is before ${pos(n.page)}, which you logged ${when}. If that entry is wrong, fix it with its pencil.`
-            : `${subject} is past ${pos(n.page)}, which you logged ${when}. Log it for a later day, or fix that entry.`,
+            ? `${subject} is before ${theirs}, which you logged ${when}. If that entry is wrong, fix it with its pencil.`
+            : `${subject} is past ${theirs}, which you logged ${when}. Log it for a later day, or fix that entry.`,
       };
     }
 
     if (placement.moveAnchor) {
       await tx.progressEntry.update({ where: { id: placement.moveAnchor.id }, data: { date: at } });
     }
-    const logged = `Logged ${pos(page)} for ${describeDay(key, today, prefs.dateFormat)}.`;
+    const logged = `Logged ${typed} for ${describeDay(key, today, prefs.dateFormat)}.`;
 
     if (placement.after) {
       // An earlier day, between two entries: one more point in the log. The
@@ -159,7 +164,7 @@ export async function logPage(
     const lastPage = book.pageCount != null && page === book.pageCount;
     await tx.book.update({ where: { id: id.data }, data: { currentPage: page } });
     if (lastLogged(pass)?.page === page) {
-      return { ok: true, message: `Already at ${pos(page)}.`, page, lastPage };
+      return { ok: true, message: `Already at ${typed}.`, page, lastPage };
     }
     const entries = [];
     if (pass.length === 0) {
@@ -181,14 +186,15 @@ export async function logPage(
  */
 export async function updateProgressEntry(
   entryId: string,
-  input: { page: number; day: string },
+  /** `value` is the position as typed, in the book's unit, for the message. */
+  input: { page: number; day: string; value?: number },
 ): Promise<EntryEditResult> {
   const userId = await requireUserId();
   const id = idSchema.safeParse(entryId);
   if (!id.success) return { error: "Entry not found" };
   const parsed = editEntrySchema.safeParse(input);
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
-  const { page, day } = parsed.data;
+  const { page, day, value } = parsed.data;
 
   const entry = await prisma.progressEntry.findFirst({
     where: { id: id.data, book: { userId } },
@@ -220,12 +226,12 @@ export async function updateProgressEntry(
   const prefs = await readerPrefs(userId);
   const tz = prefs.timeZone;
   const info = unitFor(book, prefs);
-  const pos = (p: number) => formatPosition(p, info);
   const now = new Date();
   const today = dayKey(now, tz);
   // Same day: keep the entry's own moment, so a page fix doesn't reorder it.
   let at = entry.date;
-  if (day !== calendarDay(entry.date, tz)) {
+  const moved = day !== calendarDay(entry.date, tz);
+  if (moved) {
     const resolved = resolveLogDay(day, now, tz);
     if ("error" in resolved) return { error: FUTURE };
     at = resolved.at;
@@ -244,6 +250,19 @@ export async function updateProgressEntry(
         error: `That's after you started reading it again (${formatDate(around.nextAnchor.date, prefs)}).`,
       };
     }
+    // Without a page-0 anchor the read starts on its Started day, and an
+    // entry moved before that would drop out of it, taking the book's page
+    // with it (placeInLog only knows the anchor).
+    if (
+      moved &&
+      around.isCurrent &&
+      around.pass[0]?.page !== 0 &&
+      book.dateStarted &&
+      day < calendarDay(book.dateStarted, tz) &&
+      currentPassEntries(all, book.dateStarted, tz).some((e) => e.id === entry.id)
+    ) {
+      return { error: beforeStarted(book.dateStarted, prefs) };
+    }
     const placement = placeInLog(
       around.pass,
       { page, date: at },
@@ -253,13 +272,19 @@ export async function updateProgressEntry(
       if (placement.reason === "beforeStart") {
         return { error: `That's before this read started (${formatDate(placement.neighbour.date, prefs)}).` };
       }
-      const lo = pos(placement.before?.page ?? 0);
       const hi = placement.after?.page ?? book.pageCount;
+      // Read against what was typed, so 42% isn't "between 42% and 49%".
+      const [, lo, top] = positionTexts(
+        info,
+        { page, value },
+        { page: placement.before?.page ?? 0 },
+        ...(hi == null ? [] : [{ page: hi }]),
+      );
       return {
         error:
           hi == null
             ? `That entry can't be below ${lo}, to fit the days around it.`
-            : `That entry has to stay between ${lo} and ${pos(hi)}, to fit the days around it.`,
+            : `That entry has to stay between ${lo} and ${top}, to fit the days around it.`,
       };
     }
 
@@ -278,13 +303,14 @@ export async function updateProgressEntry(
         orderBy: LOG_ORDER,
         select: LOG_FIELDS,
       });
-      const pass = currentPassEntries(fresh, book.dateStarted);
+      const pass = currentPassEntries(fresh, book.dateStarted, tz);
       await tx.book.update({
         where: { id: entry.bookId },
         data: { currentPage: lastLogged(pass)?.page ?? null },
       });
     }
-    return { message: `Fixed: ${pos(page)} for ${describeDay(calendarDay(at, tz), today, prefs.dateFormat)}.` };
+    const [typed] = positionTexts(info, { page, value });
+    return { message: `Fixed: ${typed} for ${describeDay(calendarDay(at, tz), today, prefs.dateFormat)}.` };
   });
 
   if (!result.error) revalidateReading(entry.bookId);
@@ -308,6 +334,7 @@ export async function deleteProgressEntry(entryId: string): Promise<{ error?: st
   if (!existing) return { error: "Entry not found" };
   // Without its anchor a read would run on into the one before it.
   if (existing.page === 0) return { error: "The start of a read can't be deleted." };
+  const tz = (await readerPrefs(userId)).timeZone;
 
   await prisma.$transaction(async (tx) => {
     const all = await tx.progressEntry.findMany({
@@ -315,7 +342,7 @@ export async function deleteProgressEntry(entryId: string): Promise<{ error?: st
       orderBy: LOG_ORDER,
       select: LOG_FIELDS,
     });
-    const pass = currentPassEntries(all, existing.book.dateStarted);
+    const pass = currentPassEntries(all, existing.book.dateStarted, tz);
     await tx.progressEntry.delete({ where: { id: existing.id } });
     const { status } = existing.book;
     if (
@@ -377,6 +404,7 @@ export async function moveFromReading(bookId: string, to: "READ" | "DNF"): Promi
     },
     book._count.reads,
   );
+  const prefs = await readerPrefs(userId);
 
   await prisma.$transaction(async (tx) => {
     await tx.book.update({
@@ -396,7 +424,7 @@ export async function moveFromReading(bookId: string, to: "READ" | "DNF"): Promi
         orderBy: LOG_ORDER,
         select: LOG_FIELDS,
       });
-      const last = currentPassEntries(all, book.dateStarted).at(-1);
+      const last = currentPassEntries(all, book.dateStarted, prefs.timeZone).at(-1);
       if (last && last.page < book.pageCount) {
         await tx.progressEntry.create({
           data: { bookId: id.data, page: book.pageCount, date: next.dateFinished! },
@@ -406,7 +434,6 @@ export async function moveFromReading(bookId: string, to: "READ" | "DNF"): Promi
   });
 
   revalidateReading(id.data);
-  const prefs = await readerPrefs(userId);
   const info = unitFor(book, prefs);
   return {
     ok: true,
@@ -457,6 +484,7 @@ export async function undoMoveFromReading(
   if (from === "READ" && (!book.dateFinished || book.dateFinished.toISOString() !== finishedAt)) {
     return { error: CHANGED };
   }
+  const tz = (await readerPrefs(userId)).timeZone;
 
   await prisma.$transaction(async (tx) => {
     let currentPage = book.currentPage;
@@ -466,7 +494,7 @@ export async function undoMoveFromReading(
         orderBy: LOG_ORDER,
         select: LOG_FIELDS,
       });
-      let pass = currentPassEntries(all, book.dateStarted);
+      let pass = currentPassEntries(all, book.dateStarted, tz);
       const last = pass.at(-1);
       // The closing entry Finished wrote: the last page, at the finish moment.
       if (

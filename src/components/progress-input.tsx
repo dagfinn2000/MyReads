@@ -6,6 +6,7 @@ import {
   fallbackHint,
   formatDuration,
   pageToPercent,
+  parseBoxText,
   parseUnitText,
   positionText,
   type UnitInfo,
@@ -103,7 +104,6 @@ export function ProgressField({
           inputMode="numeric"
           min={0}
           max={info.pageCount ?? 100000}
-          placeholder="—"
           className="w-20"
         />
       )}
@@ -178,14 +178,24 @@ export function CurrentPageField({
   initialPage: number | null;
 }) {
   const [text, setText] = useState(() => positionText(initialPage, info));
-  const parsed = parseUnitText(text, info);
+  // Untouched, the box saves the page it was given (not 42% turned back
+  // into a page), so saving a rating never moves progress.
+  const edited = text !== positionText(initialPage, info);
+  const parsed = parseBoxText(text, info, initialPage);
   const page = parsed && "page" in parsed ? parsed.page : null;
   return (
     <div className="grid content-start gap-2">
       <Label htmlFor="currentPage">{unitLabel(info, true)}</Label>
       <ProgressField id="currentPage" info={info} text={text} onTextChange={setText} />
       <input type="hidden" name="currentPage" value={page ?? ""} />
-      <ProgressNotes id="currentPage" info={info} text={text} bookId={bookId} className="max-w-56" />
+      <ProgressNotes
+        id="currentPage"
+        info={info}
+        text={text}
+        bookId={bookId}
+        showSaved={edited}
+        className="max-w-56"
+      />
     </div>
   );
 }

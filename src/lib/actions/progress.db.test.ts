@@ -217,6 +217,30 @@ describe("logPage", () => {
     });
   });
 
+  it("says a percent or time back as typed", async () => {
+    await setPrefs({ timeZone: OSLO, audiobookUnit: "time" });
+    const book = await makeBook({ format: BookFormat.AUDIOBOOK, pageCount: 400, lengthMinutes: 700 });
+    // 5:11 saves as page 178, which on its own reads as 5:12.
+    expect(await logPage(book.id, { page: 178, day: "today", value: 311 })).toMatchObject({
+      message: "Logged 5:11 for today.",
+    });
+  });
+
+  it("never says 42% is before 42%", async () => {
+    await setPrefs({ timeZone: OSLO, ebookUnit: "percent" });
+    const book = await makeBook({ format: BookFormat.EBOOK, pageCount: 412, currentPage: 175 });
+    await addEntries(book.id, [[0, "2026-10-05T00:00:00.000Z"], [175, "2026-10-11T18:00:00.000Z"]]);
+    // 42% typed is page 173; yesterday's page 175 also reads 42%.
+    expect(await logPage(book.id, { page: 173, day: "today", value: 42 })).toEqual({
+      error:
+        "42% (page 173) for today is before 42% (page 175), which you logged yesterday. If that entry is wrong, fix it with its pencil.",
+    });
+    // Logging the box as it stands sends the book's own page.
+    expect(await logPage(book.id, { page: 175, day: "today", value: 42 })).toMatchObject({
+      message: "Already at 42%.",
+    });
+  });
+
   describe("east of UTC on the start day", () => {
     // 08:00 on the 12th in Tokyo, before the typed Started date's midnight UTC.
     const morning = new Date("2026-10-11T23:00:00.000Z");
@@ -240,6 +264,21 @@ describe("logPage", () => {
         "Asia/Tokyo",
       );
       expect(totals.get("2026-10-12")).toBe(30);
+    });
+
+    it("counts on from a book added mid-read earlier that morning", async () => {
+      // createBook's lone entry, from 07:30 in Tokyo, with no anchor.
+      const book = await makeBook({ dateStarted: started, currentPage: 50 });
+      await addEntries(book.id, [[50, "2026-10-11T22:30:00.000Z"]]);
+      expect(await logPage(book.id, { page: 70, day: "today" })).toMatchObject({
+        ok: true,
+        message: "Logged page 70 for today.",
+      });
+      expect(await log(book.id)).toEqual([
+        [50, "2026-10-11T22:30:00.000Z"],
+        [70, morning.toISOString()],
+      ]);
+      expect((await bookRow(book.id)).currentPage).toBe(70);
     });
 
     it("moves an existing start-date anchor back to the entry", async () => {
@@ -304,6 +343,35 @@ describe("updateProgressEntry", () => {
     });
     expect(await updateProgressEntry(rows[1].id, { page: 120, day: "2026-10-13" })).toEqual({
       error: "That day hasn't happened yet.",
+    });
+  });
+
+  it("keeps an entry of a read with no anchor on or after its Started day", async () => {
+    // A book added mid-read: one entry, no page-0 anchor. Moved before
+    // Started it would leave the read and take the book's page with it.
+    const book = await makeBook({ currentPage: 120 });
+    await addEntries(book.id, [[120, "2026-10-08T12:00:00.000Z"]]);
+    const [row] = await prisma.progressEntry.findMany({ where: { bookId: book.id } });
+    expect(await updateProgressEntry(row.id, { page: 120, day: "2026-09-28" })).toEqual({
+      error: "You started this book on 5 Oct 2026. Pick that day or later.",
+    });
+    expect(await log(book.id)).toEqual([[120, "2026-10-08T12:00:00.000Z"]]);
+    expect(await updateProgressEntry(row.id, { page: 120, day: "2026-10-05" })).toEqual({
+      message: "Fixed: page 120 for 5 Oct 2026.",
+    });
+    expect((await bookRow(book.id)).currentPage).toBe(120);
+  });
+
+  it("reads a refusal against what was typed", async () => {
+    await setPrefs({ timeZone: OSLO, ebookUnit: "percent" });
+    const { rows } = await seeded({ format: BookFormat.EBOOK, pageCount: 412 });
+    // 29% typed is page 119, just under the entry before it: page 120,
+    // which also reads 29%.
+    expect(await updateProgressEntry(rows[2].id, { page: 119, day: "2026-10-10", value: 29 })).toEqual({
+      error: "That entry has to stay between 29% (page 120) and 51%, to fit the days around it.",
+    });
+    expect(await updateProgressEntry(rows[2].id, { page: 165, day: "2026-10-10", value: 40 })).toEqual({
+      message: "Fixed: 40% for 10 Oct 2026.",
     });
   });
 

@@ -55,6 +55,7 @@ vi.mock("@/lib/covers", async (importOriginal) => ({
 const { createBook, updateBook, updateReading, deleteBook } = await import(
   "@/lib/actions/books"
 );
+const { logPage } = await import("@/lib/actions/progress");
 
 let userId: string;
 let otherUserId: string;
@@ -87,8 +88,19 @@ beforeEach(async () => {
 });
 
 afterEach(async () => {
+  vi.useRealTimers();
   await prisma.user.deleteMany({ where: { id: { in: [userId, otherUserId] } } });
 });
+
+async function setZone(timeZone: string) {
+  await prisma.user.update({ where: { id: userId }, data: { preferences: { timeZone } } });
+}
+
+/** Freezes the clock (only Date) at `iso`. */
+function clockAt(iso: string) {
+  vi.useFakeTimers({ toFake: ["Date"] });
+  vi.setSystemTime(new Date(iso));
+}
 
 function form(fields: Record<string, string>) {
   const fd = new FormData();
@@ -270,9 +282,32 @@ describe("createBook", () => {
     expect(log.map((e) => e.page)).toEqual([64]);
     expect(log[0].date.getTime()).toBeGreaterThanOrEqual(book.dateStarted!.getTime());
 
-    // The next page logged on the card counts from there.
-    await updateReading(book.id, {}, form({ status: "READING", dateStarted: "2026-10-08", currentPage: "80" }));
+    // The next page logged counts from there.
+    expect(await logPage(book.id, { page: 80, day: "today" })).toMatchObject({ ok: true });
     expect((await progressOf(book.id)).map((e) => e.page)).toEqual([64, 80]);
+  });
+
+  it("dates a book added mid-read now, even before a Started date typed today", async () => {
+    // 08:30 on 12 October in Tokyo. Started, typed as today, is midnight
+    // UTC: still half an hour ahead. Dated there, the entry would sit after
+    // the morning's next log and refuse it.
+    await setZone("Asia/Tokyo");
+    clockAt("2026-10-11T23:30:00.000Z");
+    await redirectOf(
+      createBook(
+        {},
+        form({ ...bookFields, pageCount: "300", status: "READING", dateStarted: "2026-10-12", currentPage: "50" }),
+      ),
+    );
+    const book = await prisma.book.findFirstOrThrow({ where: { userId } });
+    expect((await progressOf(book.id)).map((e) => [e.page, e.date.toISOString()])).toEqual([
+      [50, "2026-10-11T23:30:00.000Z"],
+    ]);
+
+    vi.setSystemTime(new Date("2026-10-11T23:40:00.000Z"));
+    expect(await logPage(book.id, { page: 60, day: "today" })).toMatchObject({ ok: true });
+    expect((await progressOf(book.id)).map((e) => e.page)).toEqual([50, 60]);
+    expect((await prisma.book.findUniqueOrThrow({ where: { id: book.id } })).currentPage).toBe(60);
   });
 
   it("logs nothing for a book added as Currently Reading on page 0", async () => {
@@ -401,22 +436,85 @@ describe("updateBook", () => {
 });
 
 describe("updateReading and the reading log", () => {
-  it("anchors the first progress update at page 0, then logs each change", async () => {
+  it("anchors the first progress update at page 0", async () => {
     const started = "2026-03-01";
-    const bk = await makeBook({ status: ReadingStatus.READING });
+    const bk = await makeBook({ status: ReadingStatus.WANT_TO_READ });
 
     await updateReading(bk.id, {}, form({ status: "READING", dateStarted: started, currentPage: "74" }));
-    let log = await progressOf(bk.id);
+    const log = await progressOf(bk.id);
     expect(log.map((e) => e.page)).toEqual([0, 74]);
     expect(log[0].date.toISOString().slice(0, 10)).toBe(started);
 
-    await updateReading(bk.id, {}, form({ status: "READING", dateStarted: started, currentPage: "120" }));
-    log = await progressOf(bk.id);
-    expect(log.map((e) => e.page)).toEqual([0, 74, 120]);
+    // Then each change, from a stopped book's page box.
+    await updateReading(bk.id, {}, form({ status: "DNF", dateStarted: started, currentPage: "74" }));
+    await updateReading(bk.id, {}, form({ status: "DNF", dateStarted: started, currentPage: "120" }));
+    expect((await progressOf(bk.id)).map((e) => e.page)).toEqual([0, 74, 120]);
 
     // Saving without a page change logs nothing new.
-    await updateReading(bk.id, {}, form({ status: "READING", dateStarted: started, currentPage: "120" }));
-    expect(await progressOf(bk.id)).toHaveLength(3);
+    await updateReading(bk.id, {}, form({ status: "DNF", dateStarted: started, currentPage: "120" }));
+    expect((await progressOf(bk.id)).map((e) => e.page)).toEqual([0, 74, 120]);
+  });
+
+  it("never moves a book being read off its own page", async () => {
+    // The quick row logs a book being read; the card has no page box then
+    // and sends the page it was rendered with, here from before a log made
+    // in another tab.
+    const bk = await makeBook({
+      status: ReadingStatus.READING,
+      dateStarted: new Date("2026-03-01T00:00:00Z"),
+      currentPage: 150,
+    });
+    await prisma.progressEntry.createMany({
+      data: [
+        { bookId: bk.id, page: 0, date: new Date("2026-03-01T00:00:00Z") },
+        { bookId: bk.id, page: 150, date: new Date("2026-03-05T12:00:00Z") },
+      ],
+    });
+
+    const saved = await updateReading(
+      bk.id,
+      {},
+      form({ status: "READING", dateStarted: "2026-03-01", currentPage: "120", rating: "8" }),
+    );
+    expect(saved.success).toBe(true);
+    let after = await prisma.book.findUniqueOrThrow({ where: { id: bk.id } });
+    expect(after.currentPage).toBe(150);
+    expect(after.rating).toBe(8);
+    expect((await progressOf(bk.id)).map((e) => e.page)).toEqual([0, 150]);
+
+    // Nor when it's stopped from the card.
+    await updateReading(bk.id, {}, form({ status: "DNF", dateStarted: "2026-03-01", currentPage: "120" }));
+    after = await prisma.book.findUniqueOrThrow({ where: { id: bk.id } });
+    expect(after.currentPage).toBe(150);
+    expect((await progressOf(bk.id)).map((e) => e.page)).toEqual([0, 150]);
+  });
+
+  it("moves the read's start back when Started is moved earlier, never over the read before", async () => {
+    await setZone("Europe/Oslo");
+    clockAt("2026-10-12T10:00:00.000Z");
+    const bk = await makeBook({
+      status: ReadingStatus.READING,
+      dateStarted: new Date("2026-10-05T00:00:00Z"),
+      currentPage: 120,
+    });
+    await prisma.progressEntry.createMany({
+      data: [
+        { bookId: bk.id, page: 0, date: new Date("2026-09-01T10:00:00Z") },
+        { bookId: bk.id, page: 300, date: new Date("2026-09-20T12:00:00Z") },
+        { bookId: bk.id, page: 0, date: new Date("2026-10-05T00:00:00Z") },
+        { bookId: bk.id, page: 120, date: new Date("2026-10-08T12:00:00Z") },
+      ],
+    });
+    const anchorDate = async () =>
+      (await progressOf(bk.id)).filter((e) => e.page === 0).at(-1)!.date.toISOString();
+
+    await updateReading(bk.id, {}, form({ status: "READING", dateStarted: "2026-10-02" }));
+    expect(await anchorDate()).toBe("2026-10-02T00:00:00.000Z");
+    expect(await logPage(bk.id, { page: 60, day: "2026-10-03" })).toMatchObject({ ok: true });
+
+    await updateReading(bk.id, {}, form({ status: "READING", dateStarted: "2026-09-15" }));
+    expect(await anchorDate()).toBe("2026-09-20T12:00:00.001Z");
+    expect((await progressOf(bk.id)).map((e) => e.page)).toEqual([0, 300, 0, 60, 120]);
   });
 
   it("never anchors a read after its first entry", async () => {
@@ -424,7 +522,7 @@ describe("updateReading and the reading log", () => {
     // still be ahead of the moment the first page is logged. Tomorrow's
     // date (allowed, a day's slack) stands in for that here.
     const tomorrow = new Date(Date.now() + 86_400_000).toISOString().slice(0, 10);
-    const bk = await makeBook({ status: ReadingStatus.READING });
+    const bk = await makeBook({ status: ReadingStatus.WANT_TO_READ });
     await updateReading(bk.id, {}, form({ status: "READING", dateStarted: tomorrow, currentPage: "30" }));
 
     const log = await progressOf(bk.id);
@@ -433,7 +531,7 @@ describe("updateReading and the reading log", () => {
   });
 
   it("finishing a tracked book closes the log at the last page", async () => {
-    const bk = await makeBook({ status: ReadingStatus.READING });
+    const bk = await makeBook({ status: ReadingStatus.WANT_TO_READ });
     await updateReading(bk.id, {}, form({ status: "READING", currentPage: "120" }));
     await updateReading(bk.id, {}, form({ status: "READ" }));
 
@@ -463,8 +561,33 @@ describe("updateReading and the reading log", () => {
     expect(after.rating).toBe(8);
   });
 
+  it("closes the log on a typed finish day in the reader's zone", async () => {
+    // 11:00 on 12 October in New York. 11 October typed is midnight UTC,
+    // which in New York is the evening of the 10th.
+    await setZone("America/New_York");
+    clockAt("2026-10-12T15:00:00.000Z");
+    const bk = await makeBook({
+      status: ReadingStatus.READING,
+      dateStarted: new Date("2026-10-05T00:00:00Z"),
+      currentPage: 120,
+    });
+    await prisma.progressEntry.createMany({
+      data: [
+        { bookId: bk.id, page: 0, date: new Date("2026-10-05T00:00:00Z") },
+        { bookId: bk.id, page: 120, date: new Date("2026-10-08T16:00:00Z") },
+      ],
+    });
+    await updateReading(
+      bk.id,
+      {},
+      form({ status: "READ", dateStarted: "2026-10-05", dateFinished: "2026-10-11" }),
+    );
+    // The last moment of the 11th in New York.
+    expect((await progressOf(bk.id)).at(-1)?.date.toISOString()).toBe("2026-10-12T03:59:59.999Z");
+  });
+
   it("finishing with Don't remember leaves no date and no closing log entry", async () => {
-    const bk = await makeBook({ status: ReadingStatus.READING });
+    const bk = await makeBook({ status: ReadingStatus.WANT_TO_READ });
     await updateReading(bk.id, {}, form({ status: "READING", currentPage: "120" }));
     await updateReading(bk.id, {}, form({ status: "READ", finishedUnknown: "on" }));
 
@@ -486,7 +609,7 @@ describe("updateReading and the reading log", () => {
   });
 
   it("keeps the page for DNF and clears it when reshelved", async () => {
-    const bk = await makeBook({ status: ReadingStatus.READING });
+    const bk = await makeBook({ status: ReadingStatus.WANT_TO_READ });
     await updateReading(bk.id, {}, form({ status: "DNF", currentPage: "218" }));
     expect((await prisma.book.findUniqueOrThrow({ where: { id: bk.id } })).currentPage).toBe(218);
 
@@ -495,7 +618,7 @@ describe("updateReading and the reading log", () => {
   });
 
   it("refuses a page past the end of the book, and logs nothing", async () => {
-    const bk = await makeBook({ status: ReadingStatus.READING, pageCount: 220 });
+    const bk = await makeBook({ status: ReadingStatus.WANT_TO_READ, pageCount: 220 });
     const result = await updateReading(bk.id, {}, form({ status: "READING", currentPage: "9999" }));
 
     expect(result.error).toBe("Page 9999 is past the end of the book (220 pages)");

@@ -9,7 +9,7 @@ import {
   addStep,
   formatPosition,
   pageToUnit,
-  parseUnitText,
+  parseBoxText,
   positionText,
   stepsFor,
   unitFor,
@@ -111,7 +111,9 @@ export function QuickLog({
 
   function log() {
     setLastPage(null);
-    const parsed = parseUnitText(text, info);
+    // The book's own page while the box still shows it, not that page
+    // turned into a percent and back.
+    const parsed = parseBoxText(text, info, book.currentPage);
     if (!parsed) return fail(EMPTY[info.unit]);
     if ("error" in parsed) return fail(parsed.error);
     if (parsed.page < 1) return fail(AT_LEAST[info.unit]);
@@ -131,7 +133,7 @@ export function QuickLog({
     }
 
     startTransition(async () => {
-      const result = await logPage(book.id, { page: parsed.page, day: when });
+      const result = await logPage(book.id, { page: parsed.page, day: when, value: parsed.value });
       if ("error" in result) return fail(result.error);
       setDraft(null);
       setDay("today");
@@ -255,7 +257,13 @@ export function QuickLog({
             </span>
           )}
         </form>
-        <ProgressNotes id={id} info={info} text={text} bookId={book.id} showSaved={draft !== null} />
+        <ProgressNotes
+          id={id}
+          info={info}
+          text={text}
+          bookId={book.id}
+          showSaved={text !== positionText(book.currentPage, info)}
+        />
         {lastPage !== null && (
           <div
             role="group"

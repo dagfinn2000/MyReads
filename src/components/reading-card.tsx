@@ -40,9 +40,10 @@ import {
  * which saves through the updateReading server action, and the log itself.
  *
  * While the book is Currently Reading, progress is logged only through the
- * quick row (its own form, outside this one); the reading form then sends
- * the page it was rendered with, so saving a review never moves progress.
- * Any other status keeps a progress box in the form.
+ * quick row (its own form, outside this one), and saving the reading form
+ * keeps the book's page as the server has it (updateReading), so saving a
+ * review never moves progress. Any other status keeps a progress box in the
+ * form.
  */
 export function ReadingCard({
   book,
@@ -85,7 +86,7 @@ export function ReadingCard({
 
   // The sparkline shows the current pass; entries from earlier passes still
   // feed the stats heatmap and stay in the log below.
-  const passEntries = currentPassEntries(progress, book.dateStarted);
+  const passEntries = currentPassEntries(progress, book.dateStarted, prefs.timeZone);
   const showBar = book.currentPage != null && !!book.pageCount;
 
   return (
@@ -155,8 +156,9 @@ export function ReadingCard({
               defaultUnknown={book.status === ReadingStatus.READ && !book.dateFinished}
             />
             {reading ? (
-              // Controlled, so it always carries the page the quick row last
-              // logged rather than the one this form was mounted with.
+              // Ignored while the book is still being read (the server keeps
+              // its own page); it matters only if another tab has moved the
+              // book off Currently Reading since.
               <input type="hidden" name="currentPage" value={book.currentPage ?? ""} />
             ) : (
               <CurrentPageField bookId={book.id} info={info} initialPage={book.currentPage} />

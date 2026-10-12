@@ -50,6 +50,16 @@ describe("currentPassEntries", () => {
     expect(currentPassEntries(entries, day(2026, 2, 1))).toEqual(entries.slice(1));
   });
 
+  it("goes by the start date's calendar day in the reader's zone", () => {
+    // Started typed as 12 October (midnight UTC); the book was added at
+    // 08:30 that morning in Tokyo, still 11 October in UTC.
+    const added = e(50, new Date("2026-10-11T23:30:00Z"));
+    const earlier = e(20, new Date("2026-10-11T12:00:00Z")); // 11 Oct in Tokyo too
+    const started = new Date("2026-10-12T00:00:00Z");
+    expect(currentPassEntries([earlier, added], started, "Asia/Tokyo")).toEqual([added]);
+    expect(currentPassEntries([earlier, added], started, "UTC")).toEqual([]);
+  });
+
   it("returns everything when there is no anchor and no start date", () => {
     const entries = [e(10, day(2026, 1, 1)), e(20, day(2026, 1, 2))];
     expect(currentPassEntries(entries, null)).toEqual(entries);

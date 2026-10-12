@@ -9,6 +9,7 @@ import {
   minutesToPage,
   pageToMinutes,
   pageToPercent,
+  parseBoxText,
   parseDuration,
   parseUnitText,
   percentToPage,
@@ -156,6 +157,23 @@ describe("parseUnitText", () => {
     expect(parseUnitText("17:00", audio(476, 700))).toEqual({
       error: "That's past the end (11:40).",
     });
+  });
+});
+
+describe("parseBoxText", () => {
+  it("keeps the stored page while the box still shows it", () => {
+    // Page 175 of 412 shows as 42%, and 42% on its own is page 173.
+    expect(positionText(175, ebook(412))).toBe("42");
+    expect(parseUnitText("42", ebook(412))).toEqual({ value: 42, page: 173 });
+    expect(parseBoxText("42", ebook(412), 175)).toEqual({ value: 42, page: 175 });
+    expect(parseBoxText("5:10", audio(400, 700), 177)).toEqual({ value: 310, page: 177 });
+  });
+
+  it("reads anything else as typed", () => {
+    expect(parseBoxText("43", ebook(412), 175)).toEqual({ value: 43, page: 177 });
+    expect(parseBoxText("42", ebook(412), null)).toEqual({ value: 42, page: 173 });
+    expect(parseBoxText("", ebook(412), null)).toBeNull();
+    expect(parseBoxText("120", paper(412), 120)).toEqual({ value: 120, page: 120 });
   });
 });
 

@@ -55,6 +55,8 @@ const entries: { bookId: string; page: number; date: Date }[] = [
 
   { bookId: "sq-f", page: 10, date: at("2026-04-01T12:00:00Z") },
   { bookId: "sq-f", page: 50, date: at("2026-04-02T12:00:00Z") },
+  // The morning of 10 April in Tokyo, still 9 April in UTC.
+  { bookId: "sq-f", page: 65, date: at("2026-04-09T20:00:00Z") },
   { bookId: "sq-f", page: 80, date: at("2026-04-11T12:00:00Z") },
 
   { bookId: "sq-e", page: 0, date: at("2026-05-01T12:00:00Z") },
@@ -130,8 +132,8 @@ describe("bookDayPageTotalsForUser", () => {
 
   it("marks which pages belong to the current pass", async () => {
     const rows = await bookDayPageTotalsForUser(USER, "UTC");
-    const of = (id: string) =>
-      rows
+    const of = (id: string, from = rows) =>
+      from
         .filter((r) => r.bookId === id)
         .map(({ day, pages, current }) => ({ day, pages, current }))
         .sort((a, b) => a.day.localeCompare(b.day) || Number(a.current) - Number(b.current));
@@ -143,10 +145,17 @@ describe("bookDayPageTotalsForUser", () => {
       { day: "2026-03-02", pages: 40, current: true },
       { day: "2026-03-03", pages: 50, current: true },
     ]);
-    // No anchor: the start date decides.
+    // No anchor: the start date decides, by calendar day in the reader's
+    // zone.
     expect(of("sq-f")).toEqual([
       { day: "2026-04-02", pages: 40, current: false },
-      { day: "2026-04-11", pages: 30, current: true },
+      { day: "2026-04-09", pages: 15, current: false },
+      { day: "2026-04-11", pages: 15, current: true },
+    ]);
+    expect(of("sq-f", await bookDayPageTotalsForUser(USER, "Asia/Tokyo"))).toEqual([
+      { day: "2026-04-02", pages: 40, current: false },
+      { day: "2026-04-10", pages: 15, current: true },
+      { day: "2026-04-11", pages: 15, current: true },
     ]);
     // Neither: everything is the current pass.
     expect(of("sq-b").every((r) => r.current)).toBe(true);
