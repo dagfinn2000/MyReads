@@ -231,7 +231,7 @@ export default async function BookDetailPage({
 
         <ReadHistoryCard book={book} reads={book.reads} />
 
-        <LendingCard bookId={book.id} loans={book.loans} />
+        <LendingCard bookId={book.id} ownership={book.ownership} loans={book.loans} />
 
         <QuotesCard bookId={book.id} quotes={book.quotes} />
       </div>

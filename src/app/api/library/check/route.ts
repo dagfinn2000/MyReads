@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import type { BookFormat, BookOwnership, ReadingStatus } from "@prisma/client";
 import { auth } from "@/auth";
 import { spendMetadataBudget } from "@/lib/api-guard";
 import { getPreferences } from "@/lib/current-user";
@@ -28,11 +29,11 @@ export interface LibraryCheckResult {
     title: string;
     authors: string[];
     coverUrl: string | null;
-    status: string;
+    status: ReadingStatus;
     rating: number | null;
     timesRead: number;
-    format: string;
-    ownership: string;
+    format: BookFormat;
+    ownership: BookOwnership;
   };
   /** What the ISBN resolved to in the metadata sources (scan flow only). */
   lookedUp?: { title: string; authors: string[] } | null;
