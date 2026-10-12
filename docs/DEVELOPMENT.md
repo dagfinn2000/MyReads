@@ -44,7 +44,8 @@ password matches `POSTGRES_PASSWORD`. Every setting is described in
   noticing: ISBN-10/13 conversion, reading pace and streaks, which day a date
   falls on in each time zone, sorting authors by surname and series in
   order, the sorting rules and alphabets, saved library views, reading
-  goals, reading preferences and themes, lending, the rate limiter, the
+  goals, reading preferences and themes, the colours of drawn covers,
+  lending, the rate limiter, the
   guard that stops cover downloads from reaching private addresses, and
   image type detection.
 - **`npm run test:db:docker`** starts a `postgres:16-alpine` container, runs
@@ -89,8 +90,10 @@ src/
 │  │                   the data belongs to the signed-in user
 │  ├─ metadata/        Open Library, Google Books and nb.no clients, plus
 │  │                   the database cache
+│  ├─ cover-art.ts     colours and layout of drawn covers
 │  ├─ covers.ts        downloading and caching cover images
 │  ├─ dates.ts         which calendar day a date falls on, by time zone
+│  ├─ motion.ts        whether animations may run right now
 │  ├─ net-guard.ts     blocks cover downloads from private addresses
 │  ├─ preferences.ts   the Preferences settings and their defaults
 │  ├─ rate-limit.ts    in-memory limits for sign-in, registration,
@@ -118,6 +121,17 @@ src/
   that fills in a default for anything missing or wrong. Adding a setting
   means adding it there; older rows just get the default. Saves merge the
   changed keys in SQL, so two quick changes can't undo each other.
+- **Appearance settings are attributes on `<html>`.** The root layout
+  writes the theme, accent, fonts, corners, background, cover style and
+  animation setting as `data-*` attributes, and
+  [globals.css](../src/app/globals.css) does the rest, so server and client
+  components never pass them down. Preferences sets the attribute at once
+  as well as saving, so a change shows without waiting for the server.
+- **Motion always has an off switch.** One CSS rule stops every animation
+  and transition when the device asks for reduced motion or Animations is
+  off, and animations started from script (confetti, the theme reveal, the
+  cover flight) check the same two things through `motionAllowed()` in
+  [motion.ts](../src/lib/motion.ts).
 - **Typed dates and moments are read differently.** A date typed into a date
   field is stored as midnight UTC and means that day everywhere. Anything
   else, like "finished today" or a reading-log entry, is a moment, and
