@@ -71,7 +71,7 @@ export function calendarDay(d: Date, timeZone?: string): string {
 const offsetFormatters = new Map<string, Intl.DateTimeFormat>();
 
 /** How far `timeZone`'s wall clock is ahead of UTC at `ms`, in ms. */
-function zoneOffset(ms: number, timeZone: string): number {
+export function zoneOffset(ms: number, timeZone: string): number {
   let f = offsetFormatters.get(timeZone);
   if (!f) {
     f = new Intl.DateTimeFormat("en-US", {

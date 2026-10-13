@@ -84,7 +84,9 @@ export const CARD_STYLES = ["flat", "raised", "frosted"] as const;
  *  nothing. */
 export const BOOK_BACKDROPS = ["cover", "plain"] as const;
 
-/** A texture behind the pages (globals.css draws each one). */
+/** A texture behind the pages (globals.css draws each one). Rain, snow,
+ *  stars, aurora and ripples move gently (components/background-scene.tsx);
+ *  sky follows the time of day (lib/sky.ts). */
 export const BACKGROUNDS = [
   "plain",
   "grain",
@@ -111,7 +113,13 @@ export const BACKGROUNDS = [
   "letterpress",
   "rain",
   "ripples",
+  "snow",
+  "sky",
 ] as const;
+
+/** Whether the moving backgrounds move, or stay still while the rest of
+ *  the app's animations play. */
+export const BACKGROUND_MOTIONS = ["moving", "still"] as const;
 
 /** Colour steps for the reading calendar (see lib/heatmap.ts). */
 export const HEATMAP_SCALES = ["standard", "gentle", "heavy", "auto"] as const;
@@ -239,6 +247,7 @@ export type Corners = (typeof CORNERS)[number];
 export type CardStyle = (typeof CARD_STYLES)[number];
 export type BookBackdrop = (typeof BOOK_BACKDROPS)[number];
 export type Background = (typeof BACKGROUNDS)[number];
+export type BackgroundMotion = (typeof BACKGROUND_MOTIONS)[number];
 export type HeatmapScale = (typeof HEATMAP_SCALES)[number];
 export type StartPage = (typeof START_PAGES)[number];
 export type HideableNav = (typeof HIDEABLE_NAV)[number];
@@ -310,6 +319,7 @@ export type Preferences = {
   corners: Corners;
   cardStyle: CardStyle;
   background: Background;
+  backgroundMotion: BackgroundMotion;
   bookBackdrop: BookBackdrop;
 
   heatmapScale: HeatmapScale;
@@ -392,6 +402,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
   corners: "rounded",
   cardStyle: "raised",
   background: "plain",
+  backgroundMotion: "moving",
   bookBackdrop: "cover",
   heatmapScale: "standard",
   startPage: "library",
@@ -617,6 +628,7 @@ export function parsePreferences(raw: unknown): Preferences {
     corners: pick(CORNERS, obj.corners, d.corners),
     cardStyle: pick(CARD_STYLES, obj.cardStyle, d.cardStyle),
     background: pick(BACKGROUNDS, obj.background, d.background),
+    backgroundMotion: pick(BACKGROUND_MOTIONS, obj.backgroundMotion, d.backgroundMotion),
     bookBackdrop: pick(BOOK_BACKDROPS, obj.bookBackdrop, d.bookBackdrop),
     heatmapScale: pick(HEATMAP_SCALES, obj.heatmapScale, d.heatmapScale),
     startPage: pick(START_PAGES, obj.startPage, d.startPage),

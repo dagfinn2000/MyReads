@@ -65,6 +65,11 @@ describe("parsePreferences", () => {
     expect(parsePreferences({ background: "url(x)" }).background).toBe("plain");
     expect(parsePreferences({ background: "aurora" }).background).toBe("aurora");
     expect(parsePreferences({ background: "ripples" }).background).toBe("ripples");
+    expect(parsePreferences({ background: "snow" }).background).toBe("snow");
+    expect(parsePreferences({ background: "sky" }).background).toBe("sky");
+    expect(parsePreferences({}).backgroundMotion).toBe("moving");
+    expect(parsePreferences({ backgroundMotion: "still" }).backgroundMotion).toBe("still");
+    expect(parsePreferences({ backgroundMotion: false }).backgroundMotion).toBe("moving");
     expect(parsePreferences({ cardStyle: "frosted" }).cardStyle).toBe("frosted");
     expect(parsePreferences({ cardStyle: "glass" }).cardStyle).toBe("raised");
     expect(parsePreferences({ bookBackdrop: "plain" }).bookBackdrop).toBe("plain");

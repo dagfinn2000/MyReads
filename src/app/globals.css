@@ -770,7 +770,9 @@ html[data-corners="round"] {
    the theme's own text (or accent) colour; the SVG ones are mid-grey with a
    little transparency, so they read on light and dark themes alike, a
    touch fainter on dark ones, where light marks stand out more. All of them
-   are still images: nothing here moves. */
+   are still images. A few have moving versions too (rain, snow, stars,
+   aurora, ripples), drawn over the page by "Moving backgrounds" below; this
+   still one is what shows while nothing may move. */
 .texture-swatch {
   background-color: var(--background);
 }
@@ -1061,6 +1063,493 @@ html.dark[data-background="ripples"] body,
   background-image:
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='419' height='419' fill='none' stroke='url(%23g)'%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop stop-color='rgb(128,128,128)'/%3E%3Cstop offset='1' stop-color='rgb(128,128,128)' stop-opacity='0.12'/%3E%3C/linearGradient%3E%3Cg stroke-opacity='0.29' stroke-width='0.9'%3E%3Ccircle cx='26' cy='20' r='7.2'/%3E%3Ccircle cx='352' cy='352' r='8.4'/%3E%3C/g%3E%3Cg stroke-opacity='0.28' stroke-width='0.9'%3E%3Ccircle cx='372' cy='150' r='11.2'/%3E%3Ccircle cx='190' cy='232' r='9.8'/%3E%3C/g%3E%3Cg stroke-opacity='0.24' stroke-width='0.79'%3E%3Ccircle cx='26' cy='20' r='12.1'/%3E%3Ccircle cx='190' cy='232' r='14.0'/%3E%3Ccircle cx='352' cy='352' r='14.1'/%3E%3C/g%3E%3Cg stroke-opacity='0.23' stroke-width='0.79'%3E%3Ccircle cx='372' cy='150' r='18.8'/%3E%3C/g%3E%3Cg stroke-opacity='0.19' stroke-width='0.68'%3E%3Ccircle cx='26' cy='20' r='18.0'/%3E%3Ccircle cx='352' cy='352' r='21.0'/%3E%3C/g%3E%3Cg stroke-opacity='0.18' stroke-width='0.68'%3E%3Ccircle cx='372' cy='150' r='28.0'/%3E%3C/g%3E%3C/svg%3E"),
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='593' height='593' fill='none' stroke='url(%23g)'%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop stop-color='rgb(128,128,128)'/%3E%3Cstop offset='1' stop-color='rgb(128,128,128)' stop-opacity='0.12'/%3E%3C/linearGradient%3E%3Cg stroke-opacity='0.29' stroke-width='0.9'%3E%3Ccircle cx='430' cy='86' r='8.8'/%3E%3Ccircle cx='312' cy='236' r='6.8'/%3E%3C/g%3E%3Cg stroke-opacity='0.28' stroke-width='0.9'%3E%3Ccircle cx='62' cy='50' r='12.8'/%3E%3Ccircle cx='528' cy='420' r='9.8'/%3E%3Ccircle cx='96' cy='476' r='11.2'/%3E%3C/g%3E%3Cg stroke-opacity='0.27' stroke-width='0.9'%3E%3Ccircle cx='250' cy='300' r='15.4'/%3E%3C/g%3E%3Cg stroke-opacity='0.24' stroke-width='0.79'%3E%3Ccircle cx='430' cy='86' r='14.7'/%3E%3Ccircle cx='528' cy='420' r='14.0'/%3E%3Ccircle cx='312' cy='236' r='11.4'/%3E%3C/g%3E%3Cg stroke-opacity='0.22' stroke-width='0.79'%3E%3Ccircle cx='62' cy='50' r='21.4'/%3E%3Ccircle cx='96' cy='476' r='20.0'/%3E%3C/g%3E%3Cg stroke-opacity='0.21' stroke-width='0.79'%3E%3Ccircle cx='250' cy='300' r='27.5'/%3E%3C/g%3E%3Cg stroke-opacity='0.2' stroke-width='0.68'%3E%3Ccircle cx='312' cy='236' r='17.0'/%3E%3C/g%3E%3Cg stroke-opacity='0.19' stroke-width='0.68'%3E%3Ccircle cx='430' cy='86' r='22.0'/%3E%3C/g%3E%3Cg stroke-opacity='0.18' stroke-width='0.68'%3E%3Ccircle cx='96' cy='476' r='29.6'/%3E%3C/g%3E%3Cg stroke-opacity='0.17' stroke-width='0.68'%3E%3Ccircle cx='62' cy='50' r='32.0'/%3E%3C/g%3E%3Cg stroke-opacity='0.16' stroke-width='0.68'%3E%3Ccircle cx='250' cy='300' r='40.7'/%3E%3C/g%3E%3Cg stroke-opacity='0.13' stroke-width='0.58'%3E%3Ccircle cx='96' cy='476' r='40.0'/%3E%3C/g%3E%3Cg stroke-opacity='0.11' stroke-width='0.58'%3E%3Ccircle cx='250' cy='300' r='55.0'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* Snow falling past: soft round flakes of a few sizes, the small ones
+   further off. Blue-grey by day, white at night. */
+html[data-background="snow"] body,
+.texture-swatch[data-texture="snow"] {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300' fill='rgb(118,128,150)'%3E%3Ccircle cx='156.6' cy='242.0' r='1.9' fill-opacity='0.28'/%3E%3Ccircle cx='229.8' cy='211.3' r='1.5' fill-opacity='0.24'/%3E%3Ccircle cx='8.1' cy='115.3' r='1.6' fill-opacity='0.27'/%3E%3Ccircle cx='150.5' cy='95.2' r='1.8' fill-opacity='0.41'/%3E%3Ccircle cx='120.5' cy='299.5' r='0.7' fill-opacity='0.38'/%3E%3Ccircle cx='120.5' cy='-0.5' r='0.7' fill-opacity='0.38'/%3E%3Ccircle cx='262.6' cy='45.3' r='1.6' fill-opacity='0.33'/%3E%3Ccircle cx='286.6' cy='63.0' r='1.4' fill-opacity='0.4'/%3E%3Ccircle cx='191.6' cy='92.8' r='0.7' fill-opacity='0.41'/%3E%3Ccircle cx='142.2' cy='298.9' r='0.8' fill-opacity='0.38'/%3E%3Ccircle cx='142.2' cy='-1.1' r='0.8' fill-opacity='0.38'/%3E%3Ccircle cx='244.0' cy='276.0' r='0.6' fill-opacity='0.29'/%3E%3Ccircle cx='15.5' cy='225.6' r='1.1' fill-opacity='0.41'/%3E%3Ccircle cx='112.4' cy='232.3' r='1.8' fill-opacity='0.27'/%3E%3Ccircle cx='167.0' cy='287.2' r='1.3' fill-opacity='0.29'/%3E%3Ccircle cx='80.2' cy='235.9' r='0.9' fill-opacity='0.34'/%3E%3Ccircle cx='166.7' cy='166.0' r='0.8' fill-opacity='0.35'/%3E%3Ccircle cx='275.0' cy='95.7' r='1.1' fill-opacity='0.4'/%3E%3Ccircle cx='173.5' cy='81.8' r='0.6' fill-opacity='0.37'/%3E%3Ccircle cx='104.4' cy='140.1' r='1.0' fill-opacity='0.35'/%3E%3Ccircle cx='218.7' cy='92.9' r='0.7' fill-opacity='0.42'/%3E%3Ccircle cx='273.0' cy='6.2' r='1.4' fill-opacity='0.36'/%3E%3Ccircle cx='120.9' cy='219.5' r='1.9' fill-opacity='0.34'/%3E%3Ccircle cx='117.5' cy='58.7' r='1.0' fill-opacity='0.25'/%3E%3Ccircle cx='33.1' cy='63.7' r='1.8' fill-opacity='0.33'/%3E%3Ccircle cx='241.5' cy='276.1' r='1.7' fill-opacity='0.23'/%3E%3Ccircle cx='277.8' cy='27.8' r='1.7' fill-opacity='0.39'/%3E%3Ccircle cx='197.2' cy='121.1' r='0.7' fill-opacity='0.24'/%3E%3Ccircle cx='191.0' cy='72.5' r='1.3' fill-opacity='0.27'/%3E%3Ccircle cx='49.0' cy='88.6' r='1.6' fill-opacity='0.32'/%3E%3Ccircle cx='117.8' cy='145.9' r='1.4' fill-opacity='0.32'/%3E%3Ccircle cx='133.5' cy='290.2' r='1.7' fill-opacity='0.27'/%3E%3C/svg%3E");
+  background-size: 300px 300px;
+}
+html.dark[data-background="snow"] body,
+.dark .texture-swatch[data-texture="snow"] {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300' fill='rgb(238,242,252)'%3E%3Ccircle cx='156.6' cy='242.0' r='1.9' fill-opacity='0.37'/%3E%3Ccircle cx='229.8' cy='211.3' r='1.5' fill-opacity='0.33'/%3E%3Ccircle cx='8.1' cy='115.3' r='1.6' fill-opacity='0.36'/%3E%3Ccircle cx='150.5' cy='95.2' r='1.8' fill-opacity='0.54'/%3E%3Ccircle cx='120.5' cy='299.5' r='0.7' fill-opacity='0.5'/%3E%3Ccircle cx='120.5' cy='-0.5' r='0.7' fill-opacity='0.5'/%3E%3Ccircle cx='262.6' cy='45.3' r='1.6' fill-opacity='0.44'/%3E%3Ccircle cx='286.6' cy='63.0' r='1.4' fill-opacity='0.52'/%3E%3Ccircle cx='191.6' cy='92.8' r='0.7' fill-opacity='0.53'/%3E%3Ccircle cx='142.2' cy='298.9' r='0.8' fill-opacity='0.5'/%3E%3Ccircle cx='142.2' cy='-1.1' r='0.8' fill-opacity='0.5'/%3E%3Ccircle cx='244.0' cy='276.0' r='0.6' fill-opacity='0.39'/%3E%3Ccircle cx='15.5' cy='225.6' r='1.1' fill-opacity='0.54'/%3E%3Ccircle cx='112.4' cy='232.3' r='1.8' fill-opacity='0.36'/%3E%3Ccircle cx='167.0' cy='287.2' r='1.3' fill-opacity='0.39'/%3E%3Ccircle cx='80.2' cy='235.9' r='0.9' fill-opacity='0.45'/%3E%3Ccircle cx='166.7' cy='166.0' r='0.8' fill-opacity='0.46'/%3E%3Ccircle cx='275.0' cy='95.7' r='1.1' fill-opacity='0.53'/%3E%3Ccircle cx='173.5' cy='81.8' r='0.6' fill-opacity='0.49'/%3E%3Ccircle cx='104.4' cy='140.1' r='1.0' fill-opacity='0.46'/%3E%3Ccircle cx='218.7' cy='92.9' r='0.7' fill-opacity='0.55'/%3E%3Ccircle cx='273.0' cy='6.2' r='1.4' fill-opacity='0.47'/%3E%3Ccircle cx='120.9' cy='219.5' r='1.9' fill-opacity='0.45'/%3E%3Ccircle cx='117.5' cy='58.7' r='1.0' fill-opacity='0.34'/%3E%3Ccircle cx='33.1' cy='63.7' r='1.8' fill-opacity='0.43'/%3E%3Ccircle cx='241.5' cy='276.1' r='1.7' fill-opacity='0.31'/%3E%3Ccircle cx='277.8' cy='27.8' r='1.7' fill-opacity='0.51'/%3E%3Ccircle cx='197.2' cy='121.1' r='0.7' fill-opacity='0.32'/%3E%3Ccircle cx='191.0' cy='72.5' r='1.3' fill-opacity='0.37'/%3E%3Ccircle cx='49.0' cy='88.6' r='1.6' fill-opacity='0.42'/%3E%3Ccircle cx='117.8' cy='145.9' r='1.4' fill-opacity='0.43'/%3E%3Ccircle cx='133.5' cy='290.2' r='1.7' fill-opacity='0.36'/%3E%3C/svg%3E");
+}
+/* At the swatch's size the page's tile would show a flake or two, so it
+   gets a handful of its own. */
+.texture-swatch[data-texture="snow"] {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='44' fill='rgb(118,128,150)'%3E%3Ccircle cx='6' cy='8' r='1.1' fill-opacity='0.38'/%3E%3Ccircle cx='19' cy='30' r='1.6' fill-opacity='0.34'/%3E%3Ccircle cx='30' cy='12' r='0.8' fill-opacity='0.46'/%3E%3Ccircle cx='41' cy='26' r='1.3' fill-opacity='0.32'/%3E%3Ccircle cx='52' cy='9' r='1.8' fill-opacity='0.43'/%3E%3Ccircle cx='57' cy='36' r='0.9' fill-opacity='0.39'/%3E%3Ccircle cx='12' cy='38' r='0.8' fill-opacity='0.31'/%3E%3Ccircle cx='35' cy='40' r='1.1' fill-opacity='0.43'/%3E%3Ccircle cx='24' cy='19' r='0.7' fill-opacity='0.31'/%3E%3Ccircle cx='47' cy='18' r='0.7' fill-opacity='0.41'/%3E%3C/svg%3E");
+  background-size: auto;
+}
+.dark .texture-swatch[data-texture="snow"] {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='44' fill='rgb(238,242,252)'%3E%3Ccircle cx='6' cy='8' r='1.1' fill-opacity='0.51'/%3E%3Ccircle cx='19' cy='30' r='1.6' fill-opacity='0.45'/%3E%3Ccircle cx='30' cy='12' r='0.8' fill-opacity='0.63'/%3E%3Ccircle cx='41' cy='26' r='1.3' fill-opacity='0.43'/%3E%3Ccircle cx='52' cy='9' r='1.8' fill-opacity='0.59'/%3E%3Ccircle cx='57' cy='36' r='0.9' fill-opacity='0.53'/%3E%3Ccircle cx='12' cy='38' r='0.8' fill-opacity='0.42'/%3E%3Ccircle cx='35' cy='40' r='1.1' fill-opacity='0.58'/%3E%3Ccircle cx='24' cy='19' r='0.7' fill-opacity='0.41'/%3E%3Ccircle cx='47' cy='18' r='0.7' fill-opacity='0.55'/%3E%3C/svg%3E");
+}
+/* Sky: the colours of the time of day where the reader is (lib/sky.ts),
+   drawn by "Moving backgrounds" below rather than here, because it is the
+   same whether or not anything may move. The swatch shows a whole day, from
+   night through dawn, noon and dusk to night again. */
+.texture-swatch[data-texture="sky"] {
+  background-image: linear-gradient(
+    90deg,
+    rgb(84 92 170 / 0.4),
+    rgb(255 168 160 / 0.45) 30%,
+    rgb(118 178 232 / 0.4) 50%,
+    rgb(255 160 96 / 0.45) 70%,
+    rgb(84 92 170 / 0.4)
+  );
+}
+.dark .texture-swatch[data-texture="sky"] {
+  background-image: linear-gradient(
+    90deg,
+    rgb(14 22 70 / 0.8),
+    rgb(230 120 130 / 0.45) 30%,
+    rgb(70 120 180 / 0.45) 50%,
+    rgb(235 120 60 / 0.45) 70%,
+    rgb(14 22 70 / 0.8)
+  );
+}
+
+/* ── Moving backgrounds ────────────────────────────────────────────────────
+   components/background-scene.tsx puts one fixed layer under the whole
+   page for the backgrounds that move. Each moving texture is a repeating
+   tile used as a mask over a flat colour, so the colour follows the theme,
+   and it moves by transform alone: the browser slides an image it has
+   already drawn, without redrawing the page. Every loop moves a tile by
+   exactly one repeat, so it never jumps.
+
+   The scene shows only while animations may play: Animations on in
+   Preferences, Moving backgrounds on, and the device not asking for
+   reduced motion. Otherwise it is hidden and the still texture above is
+   what shows. The sky is the exception: its colours tell the time of day
+   rather than move, so they always show, and only its stars twinkle. */
+.bg-scene {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  display: none;
+  overflow: hidden;
+  pointer-events: none;
+  contain: strict;
+}
+/* :where() keeps these from outranking the rules for each part below. */
+:where(.bg-scene) i,
+:where(.bg-scene) b {
+  position: absolute;
+  display: block;
+}
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-motion="off"], [data-background-motion="still"]) .bg-scene {
+    display: block;
+  }
+  /* These three are replaced by their moving versions; stars and ripples
+     keep the still texture and add to it. */
+  html:not([data-motion="off"], [data-background-motion="still"]):is(
+      [data-background="rain"],
+      [data-background="snow"],
+      [data-background="aurora"]
+    )
+    body {
+    background-image: none;
+  }
+}
+.bg-scene[data-scene="sky"] {
+  display: block;
+}
+@media print {
+  .bg-scene {
+    display: none !important;
+  }
+}
+
+/* Rain: fine, faint strokes further off and fewer, longer ones nearer,
+   falling along their own slant at two speeds. Each tile is three times
+   as tall as it is wide, and the strokes lean one across for three down,
+   so one tile's width left and its height down is one step of the fall. */
+.bg-rain-far,
+.bg-rain-near {
+  --mark: rgb(128 128 128 / 0.28);
+  background: var(--mark);
+  mask-repeat: repeat;
+  will-change: transform;
+}
+.dark .bg-rain-far,
+.dark .bg-rain-near {
+  --mark: rgb(210 215 230 / 0.22);
+}
+.bg-rain-far {
+  inset: -300px -100px 0 0;
+  mask-image: url("/textures/rain-far.svg");
+  mask-size: 100px 300px;
+  animation: bg-rain-far 3.6s linear infinite;
+}
+.bg-rain-near {
+  inset: -420px -140px 0 0;
+  mask-image: url("/textures/rain-near.svg");
+  mask-size: 140px 420px;
+  animation: bg-rain-near 2.2s linear infinite;
+}
+@keyframes bg-rain-far {
+  to {
+    transform: translate(-100px, 300px);
+  }
+}
+@keyframes bg-rain-near {
+  to {
+    transform: translate(-140px, 420px);
+  }
+}
+
+/* Snow: three depths drifting down, slower the further off, each swaying
+   gently from side to side out of step with the others. */
+.bg-sway {
+  inset: 0 -24px;
+  animation: bg-sway 9s ease-in-out infinite alternate;
+}
+.bg-sway-far {
+  --sway: 8px;
+  animation-duration: 7s;
+}
+.bg-sway-mid {
+  --sway: 12px;
+  animation-duration: 9.5s;
+  animation-delay: -3s;
+}
+.bg-sway-near {
+  --sway: 18px;
+  animation-duration: 12s;
+  animation-delay: -7s;
+}
+@keyframes bg-sway {
+  from {
+    transform: translateX(calc(var(--sway) * -1));
+  }
+  to {
+    transform: translateX(var(--sway));
+  }
+}
+.bg-snow-far,
+.bg-snow-mid,
+.bg-snow-near {
+  --mark: rgb(118 128 150 / 0.48);
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--mark);
+  mask-repeat: repeat;
+  will-change: transform;
+}
+.dark .bg-snow-far,
+.dark .bg-snow-mid,
+.dark .bg-snow-near {
+  --mark: rgb(238 242 252 / 0.62);
+}
+.bg-snow-far {
+  top: -180px;
+  mask-image: url("/textures/snow-far.svg");
+  mask-size: 180px 180px;
+  animation: bg-snow-far 15s linear infinite;
+}
+.bg-snow-mid {
+  top: -290px;
+  mask-image: url("/textures/snow-mid.svg");
+  mask-size: 290px 290px;
+  animation: bg-snow-mid 15s linear infinite;
+}
+.bg-snow-near {
+  top: -410px;
+  mask-image: url("/textures/snow-near.svg");
+  mask-size: 410px 410px;
+  animation: bg-snow-near 12s linear infinite;
+}
+@keyframes bg-snow-far {
+  to {
+    transform: translateY(180px);
+  }
+}
+@keyframes bg-snow-mid {
+  to {
+    transform: translateY(290px);
+  }
+}
+@keyframes bg-snow-near {
+  to {
+    transform: translateY(410px);
+  }
+}
+
+/* Stars: a few brighter ones on four tiles of different sizes, each tile
+   brightening and dimming on its own slow beat, so which stars shine
+   never repeats in a pattern. At night (dark themes), now and then a
+   shooting star. */
+.bg-twinkle {
+  --mark: rgb(110 110 110 / 0.55);
+  inset: 0;
+  background: var(--mark);
+  mask-repeat: repeat;
+  opacity: 0.2;
+  animation: bg-twinkle 4s ease-in-out infinite;
+}
+.dark .bg-twinkle {
+  --mark: rgb(255 250 232 / 0.9);
+}
+.bg-twinkle-0 {
+  mask-image: url("/textures/twinkle-0.svg");
+  mask-size: 310px 310px;
+  animation-duration: 3.4s;
+}
+.bg-twinkle-1 {
+  mask-image: url("/textures/twinkle-1.svg");
+  mask-size: 430px 430px;
+  animation-duration: 5.1s;
+  animation-delay: -2s;
+}
+.bg-twinkle-2 {
+  mask-image: url("/textures/twinkle-2.svg");
+  mask-size: 550px 550px;
+  animation-duration: 6.7s;
+  animation-delay: -5s;
+}
+.bg-twinkle-3 {
+  mask-image: url("/textures/twinkle-3.svg");
+  mask-size: 690px 690px;
+  animation-duration: 8.9s;
+  animation-delay: -1s;
+}
+@keyframes bg-twinkle {
+  50% {
+    opacity: 1;
+  }
+}
+.bg-meteor {
+  display: none;
+  width: 140px;
+  height: 1px;
+  background: linear-gradient(to right, rgb(255 250 235 / 0.95), rgb(255 250 235 / 0) 85%);
+  opacity: 0;
+  transform-origin: left center;
+  animation: bg-meteor 31s ease-in infinite;
+}
+.dark .bg-meteor {
+  display: block;
+}
+.bg-meteor-1 {
+  --angle: 152deg;
+  top: 14%;
+  left: 76%;
+  animation-delay: -24s;
+}
+.bg-meteor-2 {
+  --angle: 160deg;
+  top: 8%;
+  left: 38%;
+  animation-duration: 47s;
+  animation-delay: -9s;
+}
+.bg-meteor-3 {
+  --angle: 146deg;
+  top: 30%;
+  left: 92%;
+  animation-duration: 59s;
+  animation-delay: -40s;
+}
+/* A streak about a second long, then nothing for the rest of the loop. */
+@keyframes bg-meteor {
+  0%,
+  96.4% {
+    opacity: 0;
+    transform: rotate(var(--angle)) translateX(0);
+  }
+  97% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(var(--angle)) translateX(320px);
+  }
+}
+
+/* Aurora: the same three washes as the still one, each drifting and
+   swelling slowly on its own, so the light seems to shift. */
+.bg-aurora-1,
+.bg-aurora-2,
+.bg-aurora-3 {
+  inset: -15%;
+  will-change: transform;
+  animation: bg-drift 26s ease-in-out infinite alternate;
+}
+.bg-aurora-1 {
+  background: radial-gradient(60% 50% at 22% 12%, color-mix(in oklab, var(--primary) 18%, transparent), transparent 70%);
+  background: radial-gradient(60% 50% at 22% 12%, oklch(from var(--primary) 0.72 max(c, 0.12) h / 0.2), transparent 70%);
+  --drift: 4%, 3%;
+}
+.bg-aurora-2 {
+  background: radial-gradient(52% 44% at 82% 18%, color-mix(in oklab, var(--primary) 12%, transparent), transparent 70%);
+  background: radial-gradient(52% 44% at 82% 18%, oklch(from var(--primary) 0.74 max(c, 0.1) calc(h + 50) / 0.16), transparent 70%);
+  --drift: -5%, 4%;
+  animation-duration: 33s;
+  animation-delay: -12s;
+}
+.bg-aurora-3 {
+  background: radial-gradient(60% 40% at 62% 88%, color-mix(in oklab, var(--primary) 10%, transparent), transparent 70%);
+  background: radial-gradient(60% 40% at 62% 88%, oklch(from var(--primary) 0.7 max(c, 0.1) calc(h - 45) / 0.11), transparent 70%);
+  --drift: 3%, -4%;
+  animation-duration: 41s;
+  animation-delay: -20s;
+}
+@keyframes bg-drift {
+  from {
+    transform: translate(0, 0) scale(1);
+  }
+  to {
+    transform: translate(var(--drift)) scale(1.08);
+  }
+}
+
+/* Ripples: now and then a drop lands somewhere on the pond, and two rings
+   spread from it and fade. Each spot has its own beat. */
+.bg-drop {
+  --ring: rgb(128 128 128 / 0.45);
+  width: 0;
+  height: 0;
+}
+.dark .bg-drop {
+  --ring: rgb(200 210 225 / 0.32);
+}
+.bg-drop::before,
+.bg-drop::after {
+  content: "";
+  position: absolute;
+  left: -90px;
+  top: -90px;
+  width: 180px;
+  height: 180px;
+  border: 1px solid var(--ring);
+  border-radius: 50%;
+  opacity: 0;
+  animation: bg-ripple var(--t) ease-out infinite;
+  animation-delay: var(--d);
+}
+.bg-drop::after {
+  animation-name: bg-ripple-inner;
+  animation-delay: calc(var(--d) + 0.6s);
+}
+@keyframes bg-ripple {
+  0% {
+    opacity: 0;
+    transform: scale(0.05);
+  }
+  2% {
+    opacity: 1;
+  }
+  32%,
+  100% {
+    opacity: 0;
+    transform: scale(1);
+  }
+}
+@keyframes bg-ripple-inner {
+  0% {
+    opacity: 0;
+    transform: scale(0.05);
+  }
+  2% {
+    opacity: 0.8;
+  }
+  28%,
+  100% {
+    opacity: 0;
+    transform: scale(0.62);
+  }
+}
+
+/* Sky: a wash from the top of the window (overhead) to the bottom (the
+   horizon), mixed from day, night and the warm colours of dawn and dusk by
+   the numbers lib/sky.ts works out, with a soft light where the sun or the
+   moon is. Light themes get pale washes that keep text easy to read; dark
+   themes get a deeper night. The stars fade in as the sun goes down. */
+.bg-scene[data-scene="sky"] {
+  --sky-day: 1;
+  --sky-warm: 0;
+  --sky-evening: 0;
+  --sky-stars: 0;
+  --sky-sun-x: 50%;
+  --sky-sun-y: 14%;
+  --sky-moon-x: 70%;
+  --sky-moon-y: 24%;
+
+  --zenith-day: rgb(118 178 232 / 0.3);
+  --horizon-day: rgb(196 226 246 / 0.16);
+  --zenith-night: rgb(96 104 176 / 0.2);
+  --horizon-night: rgb(150 140 204 / 0.12);
+  --zenith-warm: rgb(186 150 214 / 0.24);
+  --dawn: rgb(255 168 160 / 0.32);
+  --dusk: rgb(255 160 96 / 0.34);
+  --sun-light: rgb(255 236 180 / 0.42);
+  --moon-light: rgb(225 232 255 / 0.3);
+
+  --zenith: color-mix(
+    in oklab,
+    var(--zenith-warm) calc(var(--sky-warm) * 70%),
+    color-mix(in oklab, var(--zenith-day) calc(var(--sky-day) * 100%), var(--zenith-night))
+  );
+  --horizon: color-mix(
+    in oklab,
+    color-mix(in oklab, var(--dusk) calc(var(--sky-evening) * 100%), var(--dawn))
+      calc(var(--sky-warm) * 100%),
+    color-mix(in oklab, var(--horizon-day) calc(var(--sky-day) * 100%), var(--horizon-night))
+  );
+  background:
+    radial-gradient(
+      circle at var(--sky-sun-x) var(--sky-sun-y),
+      color-mix(in oklab, var(--sun-light) calc(var(--sky-day) * 100%), transparent),
+      transparent 42vmax
+    ),
+    radial-gradient(
+      circle at var(--sky-moon-x) var(--sky-moon-y),
+      color-mix(in oklab, var(--moon-light) calc(var(--sky-stars) * 100%), transparent),
+      transparent 24vmax
+    ),
+    linear-gradient(var(--zenith), var(--horizon));
+}
+.dark .bg-scene[data-scene="sky"] {
+  --zenith-day: rgb(70 120 180 / 0.3);
+  --horizon-day: rgb(120 160 200 / 0.14);
+  --zenith-night: rgb(14 22 70 / 0.58);
+  --horizon-night: rgb(40 44 100 / 0.32);
+  --zenith-warm: rgb(96 70 150 / 0.4);
+  --dawn: rgb(230 120 130 / 0.32);
+  --dusk: rgb(235 120 60 / 0.34);
+  --sun-light: rgb(255 220 160 / 0.22);
+  --moon-light: rgb(200 215 255 / 0.16);
+}
+.bg-sky-night {
+  inset: 0;
+  opacity: var(--sky-stars);
+}
+.bg-sky-stars {
+  --mark: rgb(110 110 110 / 0.4);
+  inset: 0;
+  background: var(--mark);
+  mask-image: url("/textures/starfield.svg");
+  mask-size: 260px 260px;
+  mask-repeat: repeat;
+}
+.dark .bg-sky-stars {
+  --mark: rgb(255 250 232 / 0.6);
+}
+/* Twinkling and shooting stars only while things may move. */
+.bg-scene[data-scene="sky"] .bg-twinkle,
+.bg-scene[data-scene="sky"] .bg-meteor {
+  display: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-motion="off"], [data-background-motion="still"]) .bg-scene[data-scene="sky"] .bg-twinkle {
+    display: block;
+  }
+  html.dark:not([data-motion="off"], [data-background-motion="still"]) .bg-scene[data-scene="sky"] .bg-meteor {
+    display: block;
+  }
 }
 
 /* ── Drawn covers ──────────────────────────────────────────────────────────
