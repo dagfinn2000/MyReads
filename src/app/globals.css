@@ -667,6 +667,12 @@
        navigation) should land below it, with the page's own 1.5rem gap. */
     scroll-padding-top: 5rem;
     }
+  /* Buttons show the pointing hand, as links do. Tailwind 4 leaves them on
+     the arrow. */
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
 }
 /* ── Reading preferences ───────────────────────────────────────────────────
    Set on <html> by the root layout from the account's Preferences.
