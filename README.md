@@ -100,6 +100,11 @@ server.
   of the walls, the wood and the fabrics, hang a painting or one of five
   tapestries over the fireplace, put furniture away, and drag the furniture
   to wherever you like it (or move it with the arrow keys).
+- Add rooms over the library, each a floor of its own: a kitchen with the
+  kettle on the range, a bedroom under a patchwork quilt, a music room, a
+  conservatory with a songbird, a games room with a billiard table and a
+  studio with an easel. Their furniture can be moved anywhere in the house
+  or put away like the rest.
 - Make a little you who lives there, from a wardrobe: ten skin tones (an
   elf or a spaceman too), eyes, a mouth, blush or freckles, a beard, 17
   hairstyles in 14 colours, jumpers, shirts, hoodies, a coat, a dress or a

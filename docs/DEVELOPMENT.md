@@ -87,7 +87,8 @@ src/
 │                      library check, cover upload and serving,
 │                      backup export and import
 ├─ components/         UI components (shadcn/ui primitives in components/ui);
-│                      reading-room.tsx, room-art.tsx and room-shells.ts
+│                      reading-room.tsx, room-art.tsx, room-shells.ts
+│                      and room-rooms.tsx (the added rooms' furniture)
 │                      draw the reading room, with its colours in
 │                      reading-room.css; room-view.tsx is its Decorate panel;
 │                      avatar-art.ts draws the reader's avatar,
@@ -184,6 +185,9 @@ src/
   (`roomStyle`, `roomLayout` and the rest); placements name a floor and a
   place among the pieces there, so they survive a different screen width,
   falling back to where a piece would go by itself when it doesn't fit.
+  Added rooms (`roomRooms`) are floors over the library's own, in the
+  order they were added; a piece moved into one names the room rather
+  than a floor number, so it stays put as the library grows underneath.
   The avatar is painted dot by dot and outlined in code
   ([avatar-art.ts](../src/components/avatar-art.ts)) in layers, from a
   cape behind to a hat on top, and coloured from five `--av-*` colours, so

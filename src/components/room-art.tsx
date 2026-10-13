@@ -104,8 +104,8 @@ const KEY: Record<string, Paint> = {
 };
 
 /** A text grid as rectangles: each run of one character on a row becomes
- *  one rectangle. `ox`/`oy` shift it. */
-export function grid(rows: readonly string[], ox = 0, oy = 0): Rect[] {
+ *  one rectangle. `ox`/`oy` shift it; `key` adds or overrides characters. */
+export function grid(rows: readonly string[], ox = 0, oy = 0, key?: Record<string, Paint>): Rect[] {
   const out: Rect[] = [];
   rows.forEach((line, y) => {
     let x = 0;
@@ -113,7 +113,7 @@ export function grid(rows: readonly string[], ox = 0, oy = 0): Rect[] {
       const ch = line[x];
       let end = x + 1;
       while (end < line.length && line[end] === ch) end++;
-      const paint = KEY[ch];
+      const paint = key?.[ch] ?? KEY[ch];
       if (paint) out.push([ox + x, oy + y, end - x, 1, paint]);
       x = end;
     }
@@ -164,6 +164,48 @@ export function Rects({ rects, className }: { rects: readonly Rect[]; className?
     <rect key={i} x={x} y={y} width={w} height={h} className={`rp-${paint}`} />
   ));
   return className ? <g className={className}>{body}</g> : <>{body}</>;
+}
+
+/** A sprite standing on the floor, `x` from the scene's left. */
+export function Stand({ art: a, x, floorLine, scale: s, className, children }: {
+  art: Art;
+  x: number;
+  floorLine: number;
+  scale: number;
+  className?: string;
+  children?: React.ReactNode;
+}) {
+  return (
+    <Sprite
+      art={a}
+      scale={s}
+      className={`room-abs ${className ?? ""}`}
+      style={{ left: x * s, top: (floorLine - a.h) * s }}
+    >
+      {children}
+    </Sprite>
+  );
+}
+
+/** A warm pool of light, shown at night (dark themes) only. */
+export function Glow({ x, y, r, scale: s, className }: { x: number; y: number; r: number; scale: number; className?: string }) {
+  return (
+    <div
+      className={`room-glow ${className ?? ""}`}
+      aria-hidden="true"
+      style={{ left: (x - r) * s, top: (y - r) * s, width: 2 * r * s, height: 2 * r * s }}
+    />
+  );
+}
+
+/** A lamp hanging from the ceiling, with its glow. */
+export function Pendant({ x, ceiling, scale: s }: { x: number; ceiling: number; scale: number }) {
+  return (
+    <>
+      <Sprite art={PENDANT} scale={s} className="room-abs" style={{ left: x * s, top: ceiling * s }} />
+      <Glow x={x + 5.5} y={ceiling + 15} r={26} scale={s} />
+    </>
+  );
 }
 
 // ── Bookcase ──────────────────────────────────────────────────────────────

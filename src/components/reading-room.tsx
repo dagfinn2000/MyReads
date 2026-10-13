@@ -17,13 +17,15 @@ import {
   MANTEL_CLOCK,
   OPEN_BOOK,
   ORNAMENT_ART,
-  PENDANT,
+  Glow,
   PENDULUM,
   PLANT,
+  Pendant,
   Rects,
   SIDE_TABLE,
   STEAM,
   Sprite,
+  Stand,
   TEACUP,
   tapestryArt,
   armchairArt,
@@ -44,6 +46,7 @@ import {
 } from "@/components/room-art";
 import { HELD_BOOK, SEAT_OFFSET } from "@/components/avatar-art";
 import { SeatedAvatar, Walker, useAvatar, type Avatar } from "@/components/room-avatar";
+import { RoomPieceView } from "@/components/room-rooms";
 import type { AvatarLook } from "@/lib/avatar";
 import { chimneyFoot, chimneyRise, roofCrown, roofHeight, shellArt, type Moving, type Shell } from "@/components/room-shells";
 import { isClosingBook } from "@/lib/cover-flight";
@@ -57,6 +60,7 @@ import {
   NO_ARRANGEMENT,
   ORNAMENT_WIDTH,
   PAD,
+  ROOM_LABELS,
   PIECE_WIDTH,
   ROOM_HEIGHT,
   SHELF_BOARD,
@@ -491,7 +495,7 @@ export function ReadingRoom({
     const places = moveTo(layout.plan, kind, floor, slot);
     const wanted = places?.find((p) => p.kind === kind);
     if (!places || !wanted) return false;
-    const next: Arrangement = { places, away: arrangement.away };
+    const next: Arrangement = { ...arrangement, places };
     const plan = planHouse(layout.caseTotal, books.length, layout.maxInner, next);
     const landed = placementsOf(plan).find((p) => p.kind === kind);
     const name = FURNITURE_LABELS[kind];
@@ -501,7 +505,7 @@ export function ReadingRoom({
     }
     const row = plan.floors[plan.floors.length - 1 - landed.floor].filter((p) => p.kind !== "ladder");
     setNote({
-      text: `${name}: ${floorName(landed.floor)}, ${landed.slot + 1} of ${row.length} from the left.`,
+      text: `${name}: ${landed.room ? `the ${ROOM_LABELS[landed.room].name.toLowerCase()}` : floorName(landed.floor)}, ${landed.slot + 1} of ${row.length} from the left.`,
       shown: false,
     });
     onArrange(next);
@@ -1019,38 +1023,6 @@ const Bookcase = memo(function Bookcase({
   );
 });
 
-/** A sprite standing on the floor, `x` from the scene's left. */
-function Stand({ art: a, x, floorLine, scale: s, className, children }: {
-  art: Art;
-  x: number;
-  floorLine: number;
-  scale: number;
-  className?: string;
-  children?: React.ReactNode;
-}) {
-  return (
-    <Sprite
-      art={a}
-      scale={s}
-      className={`room-abs ${className ?? ""}`}
-      style={{ left: x * s, top: (floorLine - a.h) * s }}
-    >
-      {children}
-    </Sprite>
-  );
-}
-
-/** A warm pool of light, shown at night (dark themes) only. */
-function Glow({ x, y, r, scale: s, className }: { x: number; y: number; r: number; scale: number; className?: string }) {
-  return (
-    <div
-      className={`room-glow ${className ?? ""}`}
-      aria-hidden="true"
-      style={{ left: (x - r) * s, top: (y - r) * s, width: 2 * r * s, height: 2 * r * s }}
-    />
-  );
-}
-
 /** Smoke rising from the chimney pot whose top is at `x`, `y`, or steam
  *  from a stack. */
 function Smoke({ x, y, steam, scale: s }: { x: number; y: number; steam: boolean; scale: number }) {
@@ -1282,18 +1254,12 @@ function Furniture({
     case "ladder":
       // Hooked over the crown of the bookcase on its left.
       return stand(LADDER, -4);
-    default:
+    case "case":
       return null;
+    default:
+      // The furniture of an added room.
+      return <RoomPieceView kind={kind} x={x} floorLine={floorLine} ceiling={ceiling} scale={s} />;
   }
-}
-
-function Pendant({ x, ceiling, scale: s }: { x: number; ceiling: number; scale: number }) {
-  return (
-    <>
-      <Sprite art={PENDANT} scale={s} className="room-abs" style={{ left: x * s, top: ceiling * s }} />
-      <Glow x={x + 5.5} y={ceiling + 15} r={26} scale={s} />
-    </>
-  );
 }
 
 // ── Previews for Decorate ────────────────────────────────────────────────

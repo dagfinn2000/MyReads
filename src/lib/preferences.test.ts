@@ -342,6 +342,24 @@ describe("parsePreferences: the reading room", () => {
     expect(prefs.roomAway).toEqual(["plant", "ladder"]);
     expect(parsePreferences({ roomLayout: "nope" }).roomLayout).toEqual([]);
   });
+
+  it("keeps the rooms added, in order, and furniture put in them", () => {
+    const prefs = parsePreferences({
+      roomRooms: ["music", "dungeon", "kitchen", "music"],
+      roomLayout: [
+        { kind: "piano", floor: 2, slot: 0, room: "kitchen" },
+        { kind: "plant", floor: 1, slot: 1, room: "dungeon" },
+      ],
+      roomAway: ["harp"],
+    });
+    expect(prefs.roomRooms).toEqual(["music", "kitchen"]);
+    expect(prefs.roomLayout).toEqual([
+      { kind: "piano", floor: 2, slot: 0, room: "kitchen" },
+      { kind: "plant", floor: 1, slot: 1 },
+    ]);
+    expect(prefs.roomAway).toEqual(["harp"]);
+    expect(parsePreferences({}).roomRooms).toEqual([]);
+  });
 });
 
 describe("parsePreferences: the avatar", () => {

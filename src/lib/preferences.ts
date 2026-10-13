@@ -1,5 +1,5 @@
 import { BookFormat, BookOwnership, ReadingStatus } from "@prisma/client";
-import { MOVABLE, STOWABLE, type Placement, type Stowable } from "@/lib/room";
+import { MOVABLE, ROOMS, STOWABLE, type Placement, type RoomKind, type Stowable } from "@/lib/room";
 import {
   ROOM_FABRICS,
   ROOM_HANGINGS,
@@ -398,6 +398,8 @@ export type Preferences = {
   roomLayout: Placement[];
   /** Furniture put away. */
   roomAway: Stowable[];
+  /** Rooms added over the library (lib/room.ts), from the bottom up. */
+  roomRooms: RoomKind[];
   // The reader's avatar in the room (lib/avatar.ts)
   /** Whether the avatar is in the room at all. */
   avatarShown: boolean;
@@ -470,6 +472,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
   roomHanging: "painting",
   roomLayout: [],
   roomAway: [],
+  roomRooms: [],
   avatarShown: true,
   avatar: DEFAULT_AVATAR,
 };
@@ -610,12 +613,14 @@ function parseRoomLayout(value: unknown): Placement[] {
   const out: Placement[] = [];
   for (const item of value) {
     if (!item || typeof item !== "object" || Array.isArray(item)) continue;
-    const { kind, floor, slot } = item as Record<string, unknown>;
+    const { kind, floor, slot, room } = item as Record<string, unknown>;
     if (typeof kind !== "string" || !(MOVABLE as readonly string[]).includes(kind)) continue;
     if (out.some((p) => p.kind === kind)) continue;
     const whole = (n: unknown, max: number) => Number.isInteger(n) && (n as number) >= 0 && (n as number) <= max;
     if (!whole(floor, 100) || !whole(slot, 500)) continue;
-    out.push({ kind: kind as Placement["kind"], floor: floor as number, slot: slot as number });
+    const place: Placement = { kind: kind as Placement["kind"], floor: floor as number, slot: slot as number };
+    if (typeof room === "string" && (ROOMS as readonly string[]).includes(room)) place.room = room as RoomKind;
+    out.push(place);
   }
   return out;
 }
@@ -727,6 +732,7 @@ export function parsePreferences(raw: unknown): Preferences {
     roomHanging: pick(ROOM_HANGINGS, obj.roomHanging, d.roomHanging),
     roomLayout: parseRoomLayout(obj.roomLayout),
     roomAway: pickList(STOWABLE, obj.roomAway),
+    roomRooms: pickList(ROOMS, obj.roomRooms),
     avatarShown: bool(obj.avatarShown, d.avatarShown),
     avatar: parseAvatar(obj.avatar),
   };
