@@ -2,22 +2,54 @@ import { describe, expect, it } from "vitest";
 import { AVATAR_W, HELD_BOOK, SEAT_OFFSET, avatarArt } from "@/components/avatar-art";
 import type { Art } from "@/components/room-art";
 import {
+  AVATAR_ACCESSORIES,
   AVATAR_BOTTOMS,
-  AVATAR_EXTRAS,
+  AVATAR_CHEEKS,
+  AVATAR_EYES,
+  AVATAR_FACIAL_HAIR,
   AVATAR_HAIRS,
   AVATAR_HATS,
+  AVATAR_MOUTHS,
+  AVATAR_SHOES,
+  AVATAR_TOPS,
   DEFAULT_AVATAR,
-  randomLook,
+  LONG_TOPS,
   type AvatarLook,
 } from "@/lib/avatar";
 
-/** Every look that changes the drawing: each hair with each hat, each
- *  bottom, and each extra. Colours are CSS only. */
-const LOOKS: AvatarLook[] = AVATAR_HAIRS.flatMap((hair) =>
-  AVATAR_HATS.flatMap((hat) =>
-    AVATAR_BOTTOMS.map((bottom) => ({ ...DEFAULT_AVATAR, hair, hat, bottom, extras: [...AVATAR_EXTRAS] })),
+const all = [...AVATAR_ACCESSORIES];
+
+/** Looks that between them draw every part with every other part it
+ *  could meet: each hair with each hat, with and without everything else
+ *  worn; each top with each bottom and pair of shoes; and each face.
+ *  Colours are CSS only. */
+const LOOKS: AvatarLook[] = [
+  ...AVATAR_HAIRS.flatMap((hair) =>
+    AVATAR_HATS.flatMap((hat) => [
+      { ...DEFAULT_AVATAR, hair, hat },
+      { ...DEFAULT_AVATAR, hair, hat, facialHair: "longbeard" as const, accessories: all },
+    ]),
   ),
-);
+  ...AVATAR_TOPS.flatMap((top) =>
+    AVATAR_BOTTOMS.flatMap((bottom) =>
+      AVATAR_SHOES.map((shoes) => ({ ...DEFAULT_AVATAR, hair: "long" as const, top, bottom, shoes, accessories: all })),
+    ),
+  ),
+  ...AVATAR_EYES.flatMap((eyes) =>
+    AVATAR_MOUTHS.flatMap((mouth) =>
+      AVATAR_FACIAL_HAIR.map((facialHair) => ({
+        ...DEFAULT_AVATAR,
+        eyes,
+        mouth,
+        facialHair,
+        cheeks: [...AVATAR_CHEEKS],
+      })),
+    ),
+  ),
+];
+
+const name = (l: AvatarLook) =>
+  `${l.hair}/${l.hat}/${l.top}/${l.bottom}/${l.shoes}/${l.eyes}/${l.mouth}/${l.facialHair}`;
 
 const cells = (a: Art) => {
   const seen = new Map<string, string>();
@@ -28,16 +60,18 @@ const cells = (a: Art) => {
 };
 
 describe("avatarArt", () => {
+  const drawn = LOOKS.map((look) => [look, avatarArt(look)] as const);
+
   it("keeps every pose inside its sprite, with no dot drawn twice", () => {
     const wrong: string[] = [];
-    for (const look of LOOKS) {
-      for (const [name, pose] of Object.entries(avatarArt(look))) {
+    for (const [look, art] of drawn) {
+      for (const [pose, a] of Object.entries(art)) {
         let area = 0;
-        for (const [x, y, w, h] of pose.rects) {
-          if (x < 0 || y < 0 || x + w > pose.w || y + h > pose.h) wrong.push(`${look.hair}/${look.hat} ${name}`);
+        for (const [x, y, w, h] of a.rects) {
+          if (x < 0 || y < 0 || x + w > a.w || y + h > a.h) wrong.push(`${name(look)} ${pose}`);
           area += w * h;
         }
-        if (pose.w !== AVATAR_W || cells(pose).size !== area) wrong.push(`${look.hair}/${look.hat} ${name}`);
+        if (a.w !== AVATAR_W || cells(a).size !== area) wrong.push(`${name(look)} ${pose}`);
       }
     }
     expect(wrong).toEqual([]);
@@ -45,35 +79,43 @@ describe("avatarArt", () => {
 
   it("outlines the figure all round", () => {
     const gaps: string[] = [];
-    for (const look of LOOKS) {
-      for (const [name, pose] of Object.entries(avatarArt(look))) {
-        const drawn = cells(pose);
-        for (const [key, paint] of drawn) {
+    for (const [look, art] of drawn) {
+      for (const [pose, a] of Object.entries(art)) {
+        const dots = cells(a);
+        for (const [key, paint] of dots) {
           if (paint === "av-line") continue;
           const [x, y] = key.split(",").map(Number);
-          if (![[1, 0], [-1, 0], [0, 1], [0, -1]].every(([dx, dy]) => drawn.has(`${x + dx},${y + dy}`))) {
-            gaps.push(`${look.hair}/${look.hat}/${look.bottom} ${name} at ${x},${y}`);
+          if (
+            ![
+              [1, 0],
+              [-1, 0],
+              [0, 1],
+              [0, -1],
+            ].every(([dx, dy]) => dots.has(`${x + dx},${y + dy}`))
+          ) {
+            gaps.push(`${name(look)} ${pose} at ${x},${y}`);
           }
         }
       }
     }
-    expect(gaps).toEqual([]);
+    expect(gaps.slice(0, 10)).toEqual([]);
   });
 
-  it("stands on the floor: the bottom row of a standing pose is its shoes' outline", () => {
-    const { stand, stride, sit } = avatarArt(DEFAULT_AVATAR);
-    for (const pose of [stand, stride, sit]) {
-      const bottom = pose.rects.filter(([, y, , h]) => y + h === pose.h);
-      expect(bottom.length).toBeGreaterThan(0);
-      expect(bottom.every(([, , , , paint]) => paint === "av-line")).toBe(true);
+  it("stands on the floor: the bottom row of every pose is an outline", () => {
+    const wrong: string[] = [];
+    for (const [look, { stand, stride, sit }] of drawn) {
+      if (stand.h !== stride.h) wrong.push(`${name(look)} heights`);
+      for (const pose of [stand, stride, sit]) {
+        const bottom = pose.rects.filter(([, y, , h]) => y + h === pose.h);
+        if (bottom.length === 0 || bottom.some(([, , , , paint]) => paint !== "av-line")) wrong.push(name(look));
+      }
     }
-    expect(stand.h).toBe(stride.h);
+    expect(wrong).toEqual([]);
   });
 
   it("holds the book where the room puts its link", () => {
     const { sit } = avatarArt(DEFAULT_AVATAR);
-    const drawn = cells(sit);
-    const book = [...drawn].filter(([, paint]) => paint.startsWith("book") || paint.startsWith("paper"));
+    const book = [...cells(sit)].filter(([, paint]) => paint.startsWith("book") || paint.startsWith("paper"));
     expect(book.length).toBeGreaterThan(20);
     for (const [key] of book) {
       const [x, y] = key.split(",").map(Number);
@@ -84,35 +126,37 @@ describe("avatarArt", () => {
     }
   });
 
-  it("sits in the armchair with its feet on the floor", () => {
+  it("sits in the armchair with its feet on the floor, whatever it wears", () => {
     // The armchair (room-art.tsx) is 29 × 31, its arms 7 dots wide.
-    const { sit } = avatarArt({ ...DEFAULT_AVATAR, hair: "curly", hat: "wizard" });
-    expect(SEAT_OFFSET.y + sit.h).toBe(31);
-    const xs = sit.rects.filter(([, y]) => y >= -SEAT_OFFSET.y + 12).flatMap(([x, , w]) => [x, x + w]);
-    expect(SEAT_OFFSET.x + Math.min(...xs)).toBeGreaterThanOrEqual(7);
-    expect(SEAT_OFFSET.x + Math.max(...xs)).toBeLessThanOrEqual(22);
+    const wrong: string[] = [];
+    for (const [look, { sit }] of drawn) {
+      if (SEAT_OFFSET.y + sit.h !== 31) wrong.push(`${name(look)} height`);
+      const xs = sit.rects.filter(([, y]) => y >= -SEAT_OFFSET.y + 12).flatMap(([x, , w]) => [x, x + w]);
+      if (SEAT_OFFSET.x + Math.min(...xs) < 7 || SEAT_OFFSET.x + Math.max(...xs) > 22) wrong.push(name(look));
+    }
+    expect(wrong).toEqual([]);
   });
 
-  it("draws hats and beards differently, so every choice shows", () => {
-    const rects = (look: Partial<AvatarLook>) => JSON.stringify(avatarArt({ ...DEFAULT_AVATAR, ...look }).stand.rects);
-    const hats = new Set(AVATAR_HATS.map((hat) => rects({ hat })));
-    const hairs = new Set(AVATAR_HAIRS.map((hair) => rects({ hair })));
-    const extras = new Set(AVATAR_EXTRAS.map((e) => rects({ extras: [e] })));
-    expect(hats.size).toBe(AVATAR_HATS.length);
-    expect(hairs.size).toBe(AVATAR_HAIRS.length);
-    expect(extras.size).toBe(AVATAR_EXTRAS.length);
+  it("draws every choice differently, so each one shows", () => {
+    const art = (look: Partial<AvatarLook>) => JSON.stringify(avatarArt({ ...DEFAULT_AVATAR, ...look }));
+    const differ = <T extends string>(options: readonly T[], look: (o: T) => Partial<AvatarLook>) =>
+      new Set(options.map((o) => art(look(o)))).size;
+    expect(differ(AVATAR_EYES, (eyes) => ({ eyes }))).toBe(AVATAR_EYES.length);
+    expect(differ(AVATAR_MOUTHS, (mouth) => ({ mouth }))).toBe(AVATAR_MOUTHS.length);
+    expect(differ(AVATAR_CHEEKS, (c) => ({ cheeks: [c] }))).toBe(AVATAR_CHEEKS.length);
+    expect(differ(AVATAR_FACIAL_HAIR, (facialHair) => ({ facialHair }))).toBe(AVATAR_FACIAL_HAIR.length);
+    expect(differ(AVATAR_HAIRS, (hair) => ({ hair }))).toBe(AVATAR_HAIRS.length);
+    expect(differ(AVATAR_TOPS, (top) => ({ top }))).toBe(AVATAR_TOPS.length);
+    expect(differ(AVATAR_BOTTOMS, (bottom) => ({ bottom }))).toBe(AVATAR_BOTTOMS.length);
+    expect(differ(AVATAR_SHOES, (shoes) => ({ shoes }))).toBe(AVATAR_SHOES.length);
+    expect(differ(AVATAR_HATS, (hat) => ({ hat }))).toBe(AVATAR_HATS.length);
+    expect(differ(AVATAR_ACCESSORIES, (a) => ({ accessories: [a] }))).toBe(AVATAR_ACCESSORIES.length);
   });
-});
 
-describe("randomLook", () => {
-  it("only picks real choices", () => {
-    let seed = 1;
-    const random = () => ((seed = (seed * 16807) % 2147483647) - 1) / 2147483646;
-    for (let i = 0; i < 50; i++) {
-      const look = randomLook(random);
-      expect(AVATAR_HAIRS).toContain(look.hair);
-      expect(AVATAR_HATS).toContain(look.hat);
-      expect(look.extras.every((e) => AVATAR_EXTRAS.includes(e))).toBe(true);
+  it("hides the bottoms under a dress or a robe", () => {
+    for (const top of LONG_TOPS) {
+      const looks = AVATAR_BOTTOMS.map((bottom) => JSON.stringify(avatarArt({ ...DEFAULT_AVATAR, top, bottom })));
+      expect(new Set(looks).size).toBe(1);
     }
   });
 });

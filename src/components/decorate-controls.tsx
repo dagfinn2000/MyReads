@@ -27,8 +27,8 @@ export function Row({ label, hint, children }: { label: string; hint?: string; c
   );
 }
 
-/** A row of round colour buttons. An option called "style" keeps the house
- *  style's own colour. */
+/** A row of round colour buttons, smaller when there are lots. An option
+ *  called "style" keeps the house style's own colour. */
 export function Swatches<T extends string>({
   label,
   hint,
@@ -46,6 +46,7 @@ export function Swatches<T extends string>({
   labels: Record<string, string>;
   onChange: (value: T) => void;
 }) {
+  const small = options.length > 15;
   return (
     <Row label={label} hint={hint}>
       <div role="radiogroup" aria-label={label} className="flex flex-wrap items-center gap-1.5">
@@ -59,8 +60,9 @@ export function Swatches<T extends string>({
             title={labels[o] ?? o}
             onClick={() => onChange(o)}
             className={cn(
-              "h-7 rounded-full border-2 border-background ring-1 ring-border transition-shadow outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
-              o === "style" ? "bg-muted px-2.5 text-xs" : "w-7",
+              small ? "h-6" : "h-7",
+              "rounded-full border-2 border-background ring-1 ring-border transition-shadow outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
+              o === "style" ? "bg-muted px-2.5 text-xs" : small ? "w-6" : "w-7",
               value === o && "ring-2 ring-foreground",
             )}
             style={o === "style" ? undefined : { background: swatches[o] }}
@@ -97,7 +99,11 @@ export function Tiles<T extends string>({
 }) {
   return (
     <Row label={label} hint={hint}>
-      <div role={multiple ? "group" : "radiogroup"} aria-label={label} className="flex flex-wrap items-start gap-1.5">
+      <div
+        role={multiple ? "group" : "radiogroup"}
+        aria-label={label}
+        className="grid grid-cols-[repeat(auto-fill,minmax(3.5rem,1fr))] items-start gap-1.5"
+      >
         {options.map((o) => {
           const on = chosen(o);
           return (
@@ -108,7 +114,7 @@ export function Tiles<T extends string>({
               aria-checked={on}
               title={labels[o] ?? o}
               onClick={() => onPick(o)}
-              className="group grid w-14 justify-items-center gap-1.5 rounded-lg text-[11px] leading-tight text-muted-foreground outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+              className="group grid justify-items-center gap-1.5 rounded-lg text-[11px] leading-tight text-muted-foreground outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
             >
               <span
                 className={cn(
@@ -124,5 +130,66 @@ export function Tiles<T extends string>({
         })}
       </div>
     </Row>
+  );
+}
+
+/** Small tabs within a part of the panel, each opening a panel `${id}-${tab}`.
+ *  The arrow keys, Home and End move between them. */
+export function SubTabs<T extends string>({
+  id,
+  label,
+  tabs,
+  value,
+  onChange,
+}: {
+  id: string;
+  label: string;
+  tabs: readonly { value: T; label: string }[];
+  value: T;
+  onChange: (value: T) => void;
+}) {
+  const go = (i: number) => {
+    const next = tabs[(i + tabs.length) % tabs.length].value;
+    onChange(next);
+    document.getElementById(`${id}-tab-${next}`)?.focus();
+  };
+  return (
+    <div role="tablist" aria-label={label} className="flex w-fit max-w-full flex-wrap gap-1 rounded-lg bg-muted p-1">
+      {tabs.map((t, i) => (
+        <button
+          key={t.value}
+          type="button"
+          role="tab"
+          id={`${id}-tab-${t.value}`}
+          aria-selected={value === t.value}
+          aria-controls={`${id}-${t.value}`}
+          tabIndex={value === t.value ? 0 : -1}
+          onClick={() => onChange(t.value)}
+          onKeyDown={(e) => {
+            const to =
+              e.key === "ArrowLeft"
+                ? i - 1
+                : e.key === "ArrowRight"
+                  ? i + 1
+                  : e.key === "Home"
+                    ? 0
+                    : e.key === "End"
+                      ? tabs.length - 1
+                      : null;
+            if (to === null) return;
+            e.preventDefault();
+            go(to);
+          }}
+          className={cn(
+            "rounded-md px-3 py-1 text-sm font-medium outline-none transition-colors focus-visible:ring-3 focus-visible:ring-ring/50",
+            value === t.value
+              ? "bg-background text-foreground shadow-sm"
+              : "text-muted-foreground hover:text-foreground",
+          )}
+        >
+          {t.label}
+        </button>
+      ))}
+    </div>
   );
 }

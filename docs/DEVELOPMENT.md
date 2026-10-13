@@ -185,9 +185,13 @@ src/
   place among the pieces there, so they survive a different screen width,
   falling back to where a piece would go by itself when it doesn't fit.
   The avatar is painted dot by dot and outlined in code
-  ([avatar-art.ts](../src/components/avatar-art.ts)), coloured from four
-  `--av-*` colours; its look is one Preferences value (`avatar`), checked
-  by `parseAvatar` in [avatar.ts](../src/lib/avatar.ts). Its walk is the
+  ([avatar-art.ts](../src/components/avatar-art.ts)) in layers, from a
+  cape behind to a hat on top, and coloured from five `--av-*` colours, so
+  a colour pick redraws nothing. Its look is one Preferences value
+  (`avatar`), checked by `parseAvatar` in [avatar.ts](../src/lib/avatar.ts),
+  which also reads the looks saved before the wardrobe. The tests draw
+  every hairstyle under every hat and every outfit, and check each stays
+  outlined and fits the armchair. Its walk is the
   one piece of the room moved by script rather than CSS, so it checks
   [motion.ts](../src/lib/motion.ts) and stands still when animations are
   off.

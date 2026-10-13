@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useSyncExternalStore } from "react";
 import { AVATAR_W, avatarArt, type AvatarArt } from "@/components/avatar-art";
 import { Rects, Sprite } from "@/components/room-art";
-import { HAIR_SWATCHES, LEGS_SWATCHES, SKIN_SWATCHES, TOP_SWATCHES, type AvatarLook } from "@/lib/avatar";
+import { ACCENT_SWATCHES, CLOTH_SWATCHES, HAIR_SWATCHES, SKIN_SWATCHES, type AvatarLook } from "@/lib/avatar";
 import { motionAllowed, subscribeMotion } from "@/lib/motion";
 
 /** The avatar's art and the colours it's painted in, drawn once per look. */
@@ -20,8 +20,9 @@ export function avatarColours(look: AvatarLook): React.CSSProperties {
   return {
     "--av-skin": SKIN_SWATCHES[look.skin],
     "--av-hair": HAIR_SWATCHES[look.hairColour],
-    "--av-top": TOP_SWATCHES[look.top],
-    "--av-legs": LEGS_SWATCHES[look.legs],
+    "--av-top": CLOTH_SWATCHES[look.topColour],
+    "--av-bottom": CLOTH_SWATCHES[look.bottomColour],
+    "--av-accent": ACCENT_SWATCHES[look.accent],
   } as React.CSSProperties;
 }
 
