@@ -63,6 +63,40 @@ export function BookCover({
 }
 
 /**
+ * A soft wash of a book's cover colours behind the top of its page: the
+ * cover itself, stretched across the page width, blurred until only its
+ * colours are left, and faded out downwards (globals.css, `.book-backdrop`).
+ * A book without a cover image gets its drawn cover's colour instead, unless
+ * drawn covers are off. "Behind a book's page: Nothing" in Preferences hides
+ * it, through `data-book-backdrop` on <html>.
+ */
+export function BookBackdrop({ book }: { book: Pick<Book, "title" | "coverUrl"> }) {
+  if (book.coverUrl) {
+    return (
+      <div className="book-backdrop" aria-hidden="true">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={book.coverUrl} alt="" decoding="async" />
+      </div>
+    );
+  }
+  const art = coverArt(book.title);
+  return (
+    <div
+      className="book-backdrop"
+      data-drawn=""
+      aria-hidden="true"
+      style={
+        {
+          "--cover-hue": art.hue,
+          "--cover-sat": `${art.saturation}%`,
+          "--cover-light": `${art.lightness}%`,
+        } as React.CSSProperties
+      }
+    />
+  );
+}
+
+/**
  * The stand-in for a book without a cover image. Both kinds are rendered and
  * CSS shows one, following "Books without a cover" in Preferences
  * (`data-covers` on <html>; see globals.css) — so this stays a plain
@@ -230,7 +264,7 @@ export function BookRow({
   return (
     <BookLink
       bookId={book.id}
-      className="lift group flex items-center gap-3 rounded-lg border bg-card p-2 transition-colors hover:border-ring/60"
+      className="surface lift group flex items-center gap-3 rounded-lg border bg-card p-2 shadow-(--surface-shadow) transition-colors hover:border-ring/60"
     >
       <BookCover book={book} className="aspect-[2/3] w-10 shrink-0" />
       <div className="grid min-w-0 flex-1 gap-0.5">
@@ -287,7 +321,7 @@ export function BookCard({
     <BookLink
       bookId={book.id}
       className={cn(
-        "lift group flex flex-col rounded-lg border bg-card transition-colors hover:border-ring/60",
+        "surface lift group flex flex-col rounded-lg border bg-card shadow-(--surface-shadow) transition-colors hover:border-ring/60",
         compact ? "gap-1.5 p-2" : "gap-2 p-3",
       )}
     >

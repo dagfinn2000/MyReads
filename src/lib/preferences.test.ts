@@ -63,6 +63,11 @@ describe("parsePreferences", () => {
     expect(parsePreferences({ background: "dots" }).background).toBe("dots");
     expect(parsePreferences({ background: "books" }).background).toBe("books");
     expect(parsePreferences({ background: "url(x)" }).background).toBe("plain");
+    expect(parsePreferences({ background: "aurora" }).background).toBe("aurora");
+    expect(parsePreferences({ cardStyle: "frosted" }).cardStyle).toBe("frosted");
+    expect(parsePreferences({ cardStyle: "glass" }).cardStyle).toBe("raised");
+    expect(parsePreferences({ bookBackdrop: "plain" }).bookBackdrop).toBe("plain");
+    expect(parsePreferences({ bookBackdrop: true }).bookBackdrop).toBe("cover");
   });
 
   it("drops a time zone the runtime doesn't know", () => {

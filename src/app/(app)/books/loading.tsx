@@ -3,7 +3,7 @@
  *  until the whole grid is ready. */
 export default function LibraryLoading() {
   return (
-    <div className="grid animate-pulse gap-4">
+    <div className="shimmer grid gap-4">
       <div className="flex items-center justify-between">
         <div className="h-8 w-32 rounded bg-muted" />
         <div className="h-9 w-28 rounded bg-muted" />

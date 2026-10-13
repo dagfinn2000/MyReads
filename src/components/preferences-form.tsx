@@ -90,7 +90,9 @@ const HTML_ATTRIBUTES: Partial<Record<keyof Preferences, string>> = {
   coverArt: "data-covers",
   accent: "data-accent",
   corners: "data-corners",
+  cardStyle: "data-cards",
   background: "data-background",
+  bookBackdrop: "data-book-backdrop",
 };
 
 /** The accent colour swatches, one round button each. */
@@ -137,6 +139,12 @@ const BACKGROUND_LABELS: Record<Background, string> = {
   books: "Little books",
   waves: "Waves",
   glow: "Glow",
+  contours: "Contours",
+  stars: "Starry night",
+  leaves: "Leaves",
+  scallops: "Scallops",
+  parquet: "Parquet",
+  aurora: "Aurora",
 };
 
 /** The background textures as small previews of the page, one button
@@ -685,7 +693,27 @@ export function PreferencesForm({
           ]}
           onChange={(v) => update({ corners: v })}
         />
+        <Choice
+          label="Cards"
+          hint="Frosted lets the background show through, softly blurred."
+          value={prefs.cardStyle}
+          options={[
+            { value: "flat", label: "Flat, with a thin outline" },
+            { value: "raised", label: "Raised, with a soft shadow" },
+            { value: "frosted", label: "Frosted glass" },
+          ]}
+          onChange={(v) => update({ cardStyle: v })}
+        />
         <BackgroundPicker value={prefs.background} onChange={(b) => update({ background: b })} />
+        <Choice
+          label="Behind a book's page"
+          value={prefs.bookBackdrop}
+          options={[
+            { value: "cover", label: "A soft wash of its cover's colours" },
+            { value: "plain", label: "Nothing" },
+          ]}
+          onChange={(v) => update({ bookBackdrop: v })}
+        />
       </Section>
 
       <Section title="Motion">

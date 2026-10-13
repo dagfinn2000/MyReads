@@ -1,7 +1,15 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { GoalUnit } from "@prisma/client";
-import { ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  ArrowLeft,
+  BookCheck,
+  ChevronLeft,
+  ChevronRight,
+  FileText,
+  Repeat,
+  Star,
+} from "lucide-react";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { getPreferences } from "@/lib/current-user";
@@ -283,16 +291,21 @@ export default async function YearInReviewPage({
       <div className={`grid grid-cols-2 gap-4 ${ratings ? "lg:grid-cols-4" : "lg:grid-cols-3"}`}>
         <StatCard
           label={prefs.statsStoppedBooks === "book" ? "Books read" : "Books finished"}
+          icon={BookCheck}
           note={notes.books.join(" · ")}
         >
           {fmt(totals.books)}
         </StatCard>
-        <StatCard label={`Pages read${notes.pagesSuffix}`} note={notes.pages.join(" · ")}>
+        <StatCard
+          label={`Pages read${notes.pagesSuffix}`}
+          icon={FileText}
+          note={notes.pages.join(" · ")}
+        >
           {fmt(totals.pages)}
         </StatCard>
-        <StatCard label="Re-reads">{fmt(totals.rereads)}</StatCard>
+        <StatCard label="Re-reads" icon={Repeat}>{fmt(totals.rereads)}</StatCard>
         {ratings && (
-          <StatCard label="Average rating">
+          <StatCard label="Average rating" icon={Star}>
             {avgRating == null ? (
               "–"
             ) : prefs.ratingStyle === "ten" ? (

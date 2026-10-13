@@ -34,11 +34,11 @@ export const OWNERSHIP_BADGE_LABELS: Record<BookOwnership, string> = {
 /** Badge tint per reading status (light + dark variants). */
 export const STATUS_BADGE_CLASS: Record<ReadingStatus, string> = {
   WANT_TO_READ:
-    "bg-sky-100 text-sky-900 dark:bg-sky-950 dark:text-sky-200 border-transparent",
+    "status-badge bg-sky-100 text-sky-900 dark:bg-sky-950 dark:text-sky-200 border-transparent",
   READING:
-    "bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-200 border-transparent",
-  READ: "bg-emerald-100 text-emerald-900 dark:bg-emerald-950 dark:text-emerald-200 border-transparent",
-  DNF: "bg-rose-100 text-rose-900 dark:bg-rose-950 dark:text-rose-200 border-transparent",
+    "status-badge bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-200 border-transparent",
+  READ: "status-badge bg-emerald-100 text-emerald-900 dark:bg-emerald-950 dark:text-emerald-200 border-transparent",
+  DNF: "status-badge bg-rose-100 text-rose-900 dark:bg-rose-950 dark:text-rose-200 border-transparent",
 };
 
 /** What a date or number formatter needs from Preferences. Optional
