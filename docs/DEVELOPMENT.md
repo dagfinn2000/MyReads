@@ -91,8 +91,13 @@ src/
 │  ├─ metadata/        Open Library, Google Books and nb.no clients, plus
 │  │                   the database cache
 │  ├─ cover-art.ts     colours and layout of drawn covers
+│  ├─ cover-flight.ts  a book's cover flying to its page, and back to the
+│  │                   library when the page is closed
 │  ├─ covers.ts        downloading and caching cover images
 │  ├─ dates.ts         which calendar day a date falls on, by time zone
+│  ├─ library-return.ts
+│  │                   where a book page's X goes back to: the library
+│  │                   page it was opened from, and how far down it was
 │  ├─ motion.ts        whether animations may run right now
 │  ├─ net-guard.ts     blocks cover downloads from private addresses
 │  ├─ preferences.ts   the Preferences settings and their defaults
@@ -131,8 +136,8 @@ src/
 - **Motion always has an off switch.** One CSS rule stops every animation
   and transition when the device asks for reduced motion or Animations is
   off, and animations started from script (confetti, the theme reveal, the
-  cover flight) check the same two things through `motionAllowed()` in
-  [motion.ts](../src/lib/motion.ts).
+  cover flying to a book's page and back) check the same two things through
+  `motionAllowed()` in [motion.ts](../src/lib/motion.ts).
 - **Typed dates and moments are read differently.** A date typed into a date
   field is stored as midnight UTC and means that day everywhere. Anything
   else, like "finished today" or a reading-log entry, is a moment, and

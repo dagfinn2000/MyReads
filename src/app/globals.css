@@ -1288,6 +1288,14 @@ html[data-covers="plain"] .book-backdrop[data-drawn] {
     0 2px 4px rgb(0 0 0 / 0.12),
     0 24px 40px -20px rgb(0 0 0 / 0.55);
 }
+/* The X back to the library (components/close-book-button.tsx) sits in the
+   page's top right corner. On a wide screen that is beside the title, which
+   leaves it room; on a phone the title is below the cover and clear of it. */
+@media (width >= 48rem) {
+  .book-page:has(.close-book) .book-title {
+    padding-right: 3rem;
+  }
+}
 /* Pages, published, ISBN and finished: each after a hairline, with its
    label in small capitals. */
 .book-facts > div {

@@ -23,6 +23,7 @@ import { BookBackdrop, BookCover } from "@/components/book-card";
 import { BookDescription } from "@/components/book-description";
 import { BookLink } from "@/components/book-link";
 import { BookShelvesCard } from "@/components/book-shelves-card";
+import { CloseBookButton } from "@/components/close-book-button";
 import { DeleteBookButton } from "@/components/delete-book-button";
 import { FindItAt } from "@/components/find-it-at";
 import { QuotesCard } from "@/components/quotes-card";
@@ -135,179 +136,185 @@ export default async function BookDetailPage({
   });
 
   return (
-    // Both column definitions clamp their track minimums to 0 — with the
-    // default (auto) minimum, one unbreakable token in the description (Open
-    // Library URLs, say) would stretch the whole page past the viewport.
-    <div className="grid grid-cols-1 gap-6 md:grid-cols-[240px_minmax(0,1fr)]">
+    <>
+      {/* Outside the positioned page below, so the wash still runs the
+          full width of the window. */}
       <BookBackdrop book={book} />
-      <div className="grid content-start gap-3">
-        <BookCover
-          book={book}
-          className="hero-cover aspect-[2/3] w-full max-w-60"
-          loading="eager"
-          flightTarget={book.id}
-        />
-        <div className="flex gap-2">
-          <Button asChild variant="outline" size="sm">
-            <Link href={`/books/${book.id}/edit`}>
-              <Pencil data-slot="icon" />
-              Edit
-            </Link>
-          </Button>
-          <DeleteBookButton bookId={book.id} title={book.title} />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 content-start gap-4">
-        {/* A title, author or series with no spaces to break at wraps
-            anywhere, instead of pushing the page sideways. */}
-        <div className="wrap-anywhere">
-          <h1 className="text-3xl leading-tight font-semibold tracking-tight text-balance sm:text-4xl">
-            {book.title}
-          </h1>
-          {book.authors.length > 0 && (
-            <p className="mt-1.5 text-lg text-muted-foreground">
-              <AuthorLinks authors={book.authors} />
-            </p>
-          )}
-          {book.seriesName && seriesHref && (
-            <Link
-              href={seriesHref}
-              className="mt-1 inline-flex items-center gap-1.5 text-sm italic text-muted-foreground hover:text-foreground hover:underline"
-            >
-              <Library className="size-3.5" />
-              {book.seriesName}
-              {book.seriesNumber != null ? ` #${book.seriesNumber}` : ""}
-            </Link>
-          )}
+      {/* Both column definitions clamp their track minimums to 0 — with the
+          default (auto) minimum, one unbreakable token in the description
+          (Open Library URLs, say) would stretch the whole page past the
+          viewport. */}
+      <div className="book-page relative grid grid-cols-1 gap-6 md:grid-cols-[240px_minmax(0,1fr)]">
+        <CloseBookButton bookId={book.id} />
+        <div className="grid content-start gap-3">
+          <BookCover
+            book={book}
+            className="hero-cover aspect-[2/3] w-full max-w-60"
+            loading="eager"
+            flightTarget={book.id}
+          />
+          <div className="flex gap-2">
+            <Button asChild variant="outline" size="sm">
+              <Link href={`/books/${book.id}/edit`}>
+                <Pencil data-slot="icon" />
+                Edit
+              </Link>
+            </Button>
+            <DeleteBookButton bookId={book.id} title={book.title} />
+          </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <Badge className={STATUS_BADGE_CLASS[book.status]}>
-            {STATUS_LABELS[book.status]}
-          </Badge>
-          <Badge variant="secondary">{FORMAT_LABELS[book.format]}</Badge>
-          <Badge variant="outline">
-            {OWNERSHIP_BADGE_LABELS[book.ownership]}
-          </Badge>
-          {book.timesRead > 1 && (
-            <Badge variant="outline">
-              <Repeat data-slot="icon" className="size-3" />
-              Read {book.timesRead}×
+        <div className="grid grid-cols-1 content-start gap-4">
+          {/* A title, author or series with no spaces to break at wraps
+              anywhere, instead of pushing the page sideways. */}
+          <div className="book-title wrap-anywhere">
+            <h1 className="text-3xl leading-tight font-semibold tracking-tight text-balance sm:text-4xl">
+              {book.title}
+            </h1>
+            {book.authors.length > 0 && (
+              <p className="mt-1.5 text-lg text-muted-foreground">
+                <AuthorLinks authors={book.authors} />
+              </p>
+            )}
+            {book.seriesName && seriesHref && (
+              <Link
+                href={seriesHref}
+                className="mt-1 inline-flex items-center gap-1.5 text-sm italic text-muted-foreground hover:text-foreground hover:underline"
+              >
+                <Library className="size-3.5" />
+                {book.seriesName}
+                {book.seriesNumber != null ? ` #${book.seriesNumber}` : ""}
+              </Link>
+            )}
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge className={STATUS_BADGE_CLASS[book.status]}>
+              {STATUS_LABELS[book.status]}
             </Badge>
-          )}
-          {book.tags.map((tag) =>
-            // The tag filter lists tags comma-separated, so an old tag with
-            // a comma in it can't be linked to.
-            tag.includes(",") ? (
-              <Badge key={tag} variant="secondary">
-                {tag}
+            <Badge variant="secondary">{FORMAT_LABELS[book.format]}</Badge>
+            <Badge variant="outline">
+              {OWNERSHIP_BADGE_LABELS[book.ownership]}
+            </Badge>
+            {book.timesRead > 1 && (
+              <Badge variant="outline">
+                <Repeat data-slot="icon" className="size-3" />
+                Read {book.timesRead}×
               </Badge>
-            ) : (
-              <Link key={tag} href={`/books?tag=${encodeURIComponent(tag)}`}>
-                <Badge variant="secondary" className="hover:bg-accent">
+            )}
+            {book.tags.map((tag) =>
+              // The tag filter lists tags comma-separated, so an old tag with
+              // a comma in it can't be linked to.
+              tag.includes(",") ? (
+                <Badge key={tag} variant="secondary">
                   {tag}
                 </Badge>
-              </Link>
+              ) : (
+                <Link key={tag} href={`/books?tag=${encodeURIComponent(tag)}`}>
+                  <Badge variant="secondary" className="hover:bg-accent">
+                    {tag}
+                  </Badge>
+                </Link>
+              ),
+            )}
+          </div>
+
+          {/* Each fact sits after a hairline, with its label in small
+              capitals above the value (globals.css, `.book-facts`). */}
+          <dl className="book-facts grid grid-cols-2 gap-x-6 gap-y-3 text-sm sm:grid-cols-4">
+            {book.pageCount && (
+              <div>
+                <dt className="text-muted-foreground">Pages</dt>
+                <dd>{book.pageCount}</dd>
+              </div>
+            )}
+            {book.format === BookFormat.AUDIOBOOK && book.lengthMinutes != null && (
+              <div>
+                <dt className="text-muted-foreground">Length</dt>
+                <dd>{formatLength(book.lengthMinutes)}</dd>
+              </div>
+            )}
+            {book.publishedDate && (
+              <div>
+                <dt className="text-muted-foreground">Published</dt>
+                <dd>{book.publishedDate}</dd>
+              </div>
+            )}
+            {book.isbn && (
+              <div>
+                <dt className="text-muted-foreground">ISBN</dt>
+                <dd>{book.isbn}</dd>
+              </div>
+            )}
+            {book.dateFinished && (
+              <div>
+                <dt className="text-muted-foreground">Finished</dt>
+                <dd>{formatDate(book.dateFinished, prefs)}</dd>
+              </div>
+            )}
+          </dl>
+
+          <FindItAt book={book} links={prefs.findLinks} />
+
+          {book.description &&
+            (prefs.bookDescription === "clamp" ? (
+              <BookDescription text={book.description} />
+            ) : (
+              // break-words: imported descriptions can contain long raw URLs,
+              // which would otherwise refuse to wrap and overflow on phones.
+              <p className="long-text max-w-prose whitespace-pre-line break-words text-sm leading-relaxed text-muted-foreground">
+                {book.description}
+              </p>
+            ))}
+
+          {seriesBooks.length > 0 && seriesHref && (
+            <section className="grid gap-2">
+              <h2 className="text-sm font-medium text-muted-foreground">
+                More in{" "}
+                <Link href={seriesHref} className="italic hover:underline">
+                  {book.seriesName}
+                </Link>
+              </h2>
+              <div className="flex flex-wrap gap-3">
+                {seriesBooks.map((b) => (
+                  <BookLink
+                    key={b.id}
+                    bookId={b.id}
+                    className="group w-20"
+                    title={`${b.title}${b.seriesNumber != null ? ` (#${b.seriesNumber})` : ""}`}
+                  >
+                    <BookCover book={b} className="aspect-[2/3] w-20" />
+                    <p className="mt-1 line-clamp-2 text-xs leading-tight text-muted-foreground group-hover:text-foreground">
+                      {b.seriesNumber != null ? `#${b.seriesNumber} · ` : ""}
+                      {b.title}
+                    </p>
+                  </BookLink>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {arranged.map(({ key, forced }) =>
+            // A card left out here (null) gets no "shown although hidden" line.
+            forced && cards[key] ? (
+              <div key={key} className="grid grid-cols-1 gap-1.5">
+                {cards[key]}
+                <p className="text-xs text-amber-700 dark:text-amber-400">
+                  {FORCED_CARD_NOTES[key]}{" "}
+                  <Link
+                    href="/account#book-page"
+                    className="font-medium underline underline-offset-4 hover:text-foreground"
+                  >
+                    Book page settings
+                  </Link>
+                </p>
+              </div>
+            ) : (
+              <Fragment key={key}>{cards[key]}</Fragment>
             ),
           )}
         </div>
-
-        {/* Each fact sits after a hairline, with its label in small
-            capitals above the value (globals.css, `.book-facts`). */}
-        <dl className="book-facts grid grid-cols-2 gap-x-6 gap-y-3 text-sm sm:grid-cols-4">
-          {book.pageCount && (
-            <div>
-              <dt className="text-muted-foreground">Pages</dt>
-              <dd>{book.pageCount}</dd>
-            </div>
-          )}
-          {book.format === BookFormat.AUDIOBOOK && book.lengthMinutes != null && (
-            <div>
-              <dt className="text-muted-foreground">Length</dt>
-              <dd>{formatLength(book.lengthMinutes)}</dd>
-            </div>
-          )}
-          {book.publishedDate && (
-            <div>
-              <dt className="text-muted-foreground">Published</dt>
-              <dd>{book.publishedDate}</dd>
-            </div>
-          )}
-          {book.isbn && (
-            <div>
-              <dt className="text-muted-foreground">ISBN</dt>
-              <dd>{book.isbn}</dd>
-            </div>
-          )}
-          {book.dateFinished && (
-            <div>
-              <dt className="text-muted-foreground">Finished</dt>
-              <dd>{formatDate(book.dateFinished, prefs)}</dd>
-            </div>
-          )}
-        </dl>
-
-        <FindItAt book={book} links={prefs.findLinks} />
-
-        {book.description &&
-          (prefs.bookDescription === "clamp" ? (
-            <BookDescription text={book.description} />
-          ) : (
-            // break-words: imported descriptions can contain long raw URLs,
-            // which would otherwise refuse to wrap and overflow on phones.
-            <p className="long-text max-w-prose whitespace-pre-line break-words text-sm leading-relaxed text-muted-foreground">
-              {book.description}
-            </p>
-          ))}
-
-        {seriesBooks.length > 0 && seriesHref && (
-          <section className="grid gap-2">
-            <h2 className="text-sm font-medium text-muted-foreground">
-              More in{" "}
-              <Link href={seriesHref} className="italic hover:underline">
-                {book.seriesName}
-              </Link>
-            </h2>
-            <div className="flex flex-wrap gap-3">
-              {seriesBooks.map((b) => (
-                <BookLink
-                  key={b.id}
-                  bookId={b.id}
-                  className="group w-20"
-                  title={`${b.title}${b.seriesNumber != null ? ` (#${b.seriesNumber})` : ""}`}
-                >
-                  <BookCover book={b} className="aspect-[2/3] w-20" />
-                  <p className="mt-1 line-clamp-2 text-xs leading-tight text-muted-foreground group-hover:text-foreground">
-                    {b.seriesNumber != null ? `#${b.seriesNumber} · ` : ""}
-                    {b.title}
-                  </p>
-                </BookLink>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {arranged.map(({ key, forced }) =>
-          // A card left out here (null) gets no "shown although hidden" line.
-          forced && cards[key] ? (
-            <div key={key} className="grid grid-cols-1 gap-1.5">
-              {cards[key]}
-              <p className="text-xs text-amber-700 dark:text-amber-400">
-                {FORCED_CARD_NOTES[key]}{" "}
-                <Link
-                  href="/account#book-page"
-                  className="font-medium underline underline-offset-4 hover:text-foreground"
-                >
-                  Book page settings
-                </Link>
-              </p>
-            </div>
-          ) : (
-            <Fragment key={key}>{cards[key]}</Fragment>
-          ),
-        )}
       </div>
-    </div>
+    </>
   );
 }
