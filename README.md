@@ -104,15 +104,17 @@ server.
   and the first day of the week, how titles and authors sort, what new books
   start as, text size, a serif font for reviews and quotes, the font for
   headings, how round the corners are, flat, raised or frosted cards, one
-  of 24 background textures, a wash of the cover's colours behind each
-  book's page, which page opens first, and which links and stats cards you
-  see.
+  of 26 background textures (one of them, Sky, follows the time of day
+  where you are), a wash of the cover's colours behind each book's page,
+  which page opens first, and which links and stats cards you see.
 - A little motion: pages fade in, a book's cover flies to its page and back
   into its place in the library when you close it, bars fill up,
   finishing a book or reaching your goal sets off confetti, and the
-  reading room's fire flickers.
-  Animations can be turned off, and stay off when your device asks for
-  reduced motion.
+  reading room's fire flickers. On the Rain, Snow, Starry night, Aurora and
+  Ripples backgrounds, rain falls, snow drifts, stars twinkle, the light
+  shifts and drops ripple the pond.
+  Animations can be turned off (or only the backgrounds kept still), and
+  stay off when your device asks for reduced motion.
 - Install it on your phone's home screen like an app.
 
 Deliberately out of scope: anything social, recommendation engines, and CSV

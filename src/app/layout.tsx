@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Geist, Literata, Nunito } from "next/font/google";
+import { BackgroundScene } from "@/components/background-scene";
 import { getCurrentUser } from "@/lib/current-user";
+import { serverTimeZone } from "@/lib/preferences";
+import { skyAt, skyStyle } from "@/lib/sky";
 import { cn } from "@/lib/utils";
 import { DARK_THEME_IDS, THEME_INIT_SCRIPT, parseThemeSetting } from "@/lib/themes";
 
@@ -42,6 +45,12 @@ export default async function RootLayout({
         ? { "data-theme-auto": `${setting.light}:${setting.dark}` }
         : {};
   const dark = setting?.kind === "fixed" && DARK_THEME_IDS.includes(setting.id);
+  // The Sky background's colours for right now, so the first paint already
+  // shows the time of day (components/background-scene.tsx keeps it going).
+  const sky =
+    prefs?.background === "sky"
+      ? skyStyle(skyAt(new Date(), prefs.timeZone || serverTimeZone()))
+      : undefined;
 
   return (
     // suppressHydrationWarning: the theme init script mutates data-theme and
@@ -67,6 +76,7 @@ export default async function RootLayout({
       data-corners={prefs?.corners}
       data-cards={prefs?.cardStyle}
       data-background={prefs?.background}
+      data-background-motion={prefs?.backgroundMotion}
       data-book-backdrop={prefs?.bookBackdrop}
       // 3D covers, from the library's View menu.
       data-cover-3d={user?.libraryView.cover3d ? "" : undefined}
@@ -77,6 +87,11 @@ export default async function RootLayout({
             the default theme, and sets the browser's title bar colour to
             match. Must stay ahead of {children}. */}
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+        <BackgroundScene
+          background={prefs?.background ?? "plain"}
+          timeZone={prefs?.timeZone ?? ""}
+          sky={sky}
+        />
         {children}
       </body>
     </html>

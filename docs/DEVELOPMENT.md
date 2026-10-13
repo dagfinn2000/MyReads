@@ -109,6 +109,8 @@ src/
 │  │                   catalogue lookups and cover uploads
 │  ├─ room.ts          the reading room's layout: spine sizes, shelves,
 │  │                   and where bookcases and furniture go as it grows
+│  ├─ sky.ts           the Sky background: how high the sun is where
+│  │                   the reader's time zone is, as colours
 │  ├─ spine-colour.ts  a spine's colour, picked from its cover
 │  └─ validation.ts    Zod schemas shared by actions and API routes
 ├─ auth.config.ts      Auth.js config that is safe to run in proxy.ts
@@ -145,6 +147,16 @@ src/
   off, and animations started from script (confetti, the theme reveal, the
   cover flying to a book's page and back) check the same two things through
   `motionAllowed()` in [motion.ts](../src/lib/motion.ts).
+- **Moving backgrounds slide pictures, they don't redraw them.**
+  [background-scene.tsx](../src/components/background-scene.tsx) puts one
+  fixed layer under the page, and each moving texture is a repeating tile
+  (in `public/textures`) used as a mask over a theme colour, moved by
+  `transform` alone, one tile per loop so it never jumps. The layer is
+  hidden whenever animations may not play, or "Moving backgrounds" is off,
+  and the still texture shows instead. The Sky background is worked out
+  from the sun's height where the reader's time zone is
+  ([sky.ts](../src/lib/sky.ts)), on the server for the first paint and
+  then once a minute in the browser.
 - **The reading room is drawn in code**, with no image files. Its pixel art
   is rectangles ([room-art.tsx](../src/components/room-art.tsx)), each
   naming a paint whose colour lives in

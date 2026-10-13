@@ -93,6 +93,7 @@ const HTML_ATTRIBUTES: Partial<Record<keyof Preferences, string>> = {
   corners: "data-corners",
   cardStyle: "data-cards",
   background: "data-background",
+  backgroundMotion: "data-background-motion",
   bookBackdrop: "data-book-backdrop",
 };
 
@@ -156,6 +157,8 @@ const BACKGROUND_LABELS: Record<Background, string> = {
   letterpress: "Letterpress",
   rain: "Rain",
   ripples: "Ripples",
+  snow: "Snow",
+  sky: "Sky",
 };
 
 /** The background textures as small previews of the page, one button
@@ -171,7 +174,10 @@ function BackgroundPicker({
     <div className="grid gap-1.5 sm:grid-cols-[14rem_1fr] sm:items-start sm:gap-4">
       <div>
         <p className="text-sm font-medium">Background</p>
-        <p className="text-xs text-muted-foreground">Behind the pages, not the cards on them.</p>
+        <p className="text-xs text-muted-foreground">
+          Behind the pages, not the cards on them. Rain, snow, stars, aurora and
+          ripples move gently. Sky follows the time of day where you are.
+        </p>
       </div>
       <div role="radiogroup" aria-label="Background" className="flex flex-wrap gap-2">
         {BACKGROUNDS.map((b) => (
@@ -737,6 +743,16 @@ export function PreferencesForm({
             { value: "off", label: "Off" },
           ]}
           onChange={(v) => update({ motion: v })}
+        />
+        <Choice
+          label="Moving backgrounds"
+          hint="Falling rain and snow, twinkling stars, drifting aurora and ripples."
+          value={prefs.backgroundMotion}
+          options={[
+            { value: "moving", label: "On" },
+            { value: "still", label: "Off, keep them still" },
+          ]}
+          onChange={(v) => update({ backgroundMotion: v })}
         />
       </Section>
 
