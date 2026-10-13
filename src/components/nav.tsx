@@ -1,5 +1,6 @@
 import Link from "next/link";
 import {
+  Armchair,
   BookOpen,
   BookOpenText,
   ChartColumn,
@@ -19,20 +20,20 @@ import { ThemePicker } from "@/components/theme-picker";
 
 /** Top navigation for authenticated pages. Server component — reads the
  *  session directly and signs out via a server action. The Now reading,
- *  Check and Quotes links can be hidden in Preferences; the logo goes to
- *  the start page chosen there. */
+ *  Check, Quotes and Reading room links can be hidden in Preferences; the
+ *  logo goes to the start page chosen there. */
 export async function Nav() {
   const [session, prefs] = await Promise.all([auth(), getPreferences()]);
   const hidden = new Set(prefs.hiddenNav);
 
   return (
     <header className="top-bar sticky top-0 z-40 border-b bg-background/75 backdrop-blur-md backdrop-saturate-150">
-      {/* Below lg the nav buttons collapse to icons. With six labelled
+      {/* Below lg the nav buttons collapse to icons. With seven labelled
           links plus the right-hand group the bar needs about 1000px, so
           labels from sm (640px) overflowed tablets and narrow windows.
           On phones the icons sit closer together and the wordmark waits
           for room, so the bar fits from 360px up with every link shown. */}
-      <div className="mx-auto flex h-14 max-w-6xl items-center gap-0.5 px-3 max-sm:[&_[data-slot=button]]:px-1.5 sm:gap-1 sm:px-4">
+      <div className="mx-auto flex h-14 max-w-6xl items-center gap-0.5 px-3 max-sm:[&_[data-slot=button]]:px-[5px] sm:gap-1 sm:px-4">
         <Link
           href="/"
           className="wordmark mr-1 flex items-center gap-2 text-lg sm:mr-4"
@@ -70,6 +71,12 @@ export async function Nav() {
           <ChartColumn data-slot="icon" />
           <span className="hidden lg:inline">Stats</span>
         </NavLink>
+        {!hidden.has("room") && (
+          <NavLink href="/room" title="Reading room">
+            <Armchair data-slot="icon" />
+            <span className="hidden lg:inline">Room</span>
+          </NavLink>
+        )}
         <div className="ml-auto flex items-center gap-0.5 sm:gap-3">
           <Button
             asChild

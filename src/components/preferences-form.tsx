@@ -63,6 +63,7 @@ const NAV_LABELS: Record<HideableNav, string> = {
   reading: "Now reading",
   check: "Check (“Do I own this?”)",
   quotes: "Quotes",
+  room: "Reading room",
 };
 
 const ACCENT_LABELS: Record<Accent, string> = {

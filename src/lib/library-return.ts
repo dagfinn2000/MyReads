@@ -4,9 +4,10 @@
  *
  * Clicking a book in the library notes which book, the library's address
  * (with its filters, sort and "Show more" count) and how far down it was
- * scrolled. The book page shows its X only when that note is for its own
- * book, so a book opened from Now reading, Stats or another book's series
- * strip looks as it always did.
+ * scrolled. The reading room, the library drawn as a house, notes the same
+ * for a spine clicked there. The book page shows its X only when that note
+ * is for its own book, so a book opened from Now reading, Stats or another
+ * book's series strip looks as it always did.
  *
  * The note lives in sessionStorage: it belongs to this tab, survives a
  * reload of the book page, and is gone when the tab closes.
@@ -17,7 +18,8 @@ const STORAGE_KEY = "myreads:library-return";
 export interface LibraryReturn {
   /** The book that was opened. */
   bookId: string;
-  /** The library page it was opened from, path and query: "/books?sort=title". */
+  /** The library page it was opened from, path and query: "/books?sort=title",
+   *  or the reading room, "/room". */
   href: string;
   /** How far down the library was scrolled. */
   scrollY: number;
@@ -26,10 +28,11 @@ export interface LibraryReturn {
   coverY: number;
 }
 
-/** True for the library page itself, with or without a query. Anything else
- *  (a book, /books/new, another site) is not somewhere the X should go. */
+/** True for the library page itself, with or without a query, and for the
+ *  reading room. Anything else (a book, /books/new, another site) is not
+ *  somewhere the X should go. */
 export function isLibraryHref(href: string): boolean {
-  return href === "/books" || href.startsWith("/books?");
+  return href === "/books" || href.startsWith("/books?") || href === "/room";
 }
 
 /** The note as stored, or null when it is missing, from an older version of
@@ -52,11 +55,11 @@ export function parseLibraryReturn(raw: string | null, bookId: string): LibraryR
 }
 
 /** What following a book link from `pathname` does to the note: the
- *  library writes a new one; a book page's series strip keeps it, so Back
- *  from the next book still finds the X on this one; anywhere else (Now
- *  reading, Stats) forgets it. */
+ *  library and the reading room write a new one; a book page's series strip
+ *  keeps it, so Back from the next book still finds the X on this one;
+ *  anywhere else (Now reading, Stats) forgets it. */
 export function noteAction(pathname: string): "write" | "keep" | "forget" {
-  if (pathname === "/books") return "write";
+  if (pathname === "/books" || pathname === "/room") return "write";
   if (/^\/books\/(?!new$|check$)[^/]+$/.test(pathname)) return "keep";
   return "forget";
 }

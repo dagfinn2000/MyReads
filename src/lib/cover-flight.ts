@@ -60,13 +60,13 @@ export function flyCover(cover: HTMLElement, bookId: string, navigate: () => voi
     .catch(() => {});
 }
 
-/** The library's card for a book: the cover inside its BookLink. A grouped
- *  library can show a book in more than one group. */
+/** The library's card for a book: the cover inside its BookLink, or the
+ *  link itself for a spine in the reading room. A grouped library can show a
+ *  book in more than one group. */
 function libraryCovers(bookId: string): HTMLElement[] {
+  const link = `[data-book-link="${CSS.escape(bookId)}"]`;
   return [
-    ...document.querySelectorAll<HTMLElement>(
-      `[data-book-link="${CSS.escape(bookId)}"] .book-cover`,
-    ),
+    ...document.querySelectorAll<HTMLElement>(`${link} .book-cover, ${link}[data-flight-cover]`),
   ];
 }
 
@@ -99,7 +99,7 @@ function whenLibraryShows(back: LibraryReturn): Promise<HTMLElement | null> {
     };
     const observer = new MutationObserver(() => {
       // [data-library-view] marks the library proper (or its "no books"
-      // box), not its loading skeleton.
+      // box, or the reading room's house), not its loading skeleton.
       const view = document.querySelector("[data-library-view]");
       if (!view?.getClientRects().length) return;
 

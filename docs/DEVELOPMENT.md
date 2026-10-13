@@ -45,7 +45,8 @@ password matches `POSTGRES_PASSWORD`. Every setting is described in
   falls on in each time zone, sorting authors by surname and series in
   order, the sorting rules and alphabets, saved library views, reading
   goals, reading preferences and themes, the colours of drawn covers,
-  lending, the rate limiter, the
+  the reading room's shelves and spine colours, lending, the rate
+  limiter, the
   guard that stops cover downloads from reaching private addresses, image
   type detection, and the size limits on uploads and backup files.
 - **`npm run test:db:docker`** starts a `postgres:16-alpine` container, runs
@@ -80,11 +81,14 @@ src/
 │  ├─ (auth)/          login and register pages
 │  ├─ (app)/           pages behind login: books (the library), books/new,
 │  │                   books/[id], books/[id]/edit, books/check, quotes,
-│  │                   stats, stats/year/[year], account
+│  │                   room (the reading room), stats, stats/year/[year],
+│  │                   account
 │  └─ api/             Auth.js, register, metadata search/details/covers,
 │                      library check, cover upload and serving,
 │                      backup export and import
-├─ components/         UI components (shadcn/ui primitives in components/ui)
+├─ components/         UI components (shadcn/ui primitives in components/ui);
+│                      reading-room.tsx and room-art.tsx draw the reading
+│                      room, with its colours in reading-room.css
 ├─ lib/
 │  ├─ actions/         server actions for every change, each checking that
 │  │                   the data belongs to the signed-in user
@@ -103,6 +107,9 @@ src/
 │  ├─ preferences.ts   the Preferences settings and their defaults
 │  ├─ rate-limit.ts    in-memory limits for sign-in, registration,
 │  │                   catalogue lookups and cover uploads
+│  ├─ room.ts          the reading room's layout: spine sizes, shelves,
+│  │                   and where bookcases and furniture go as it grows
+│  ├─ spine-colour.ts  a spine's colour, picked from its cover
 │  └─ validation.ts    Zod schemas shared by actions and API routes
 ├─ auth.config.ts      Auth.js config that is safe to run in proxy.ts
 ├─ auth.ts             full Auth.js config (credentials, Prisma, bcrypt)
@@ -138,6 +145,14 @@ src/
   off, and animations started from script (confetti, the theme reveal, the
   cover flying to a book's page and back) check the same two things through
   `motionAllowed()` in [motion.ts](../src/lib/motion.ts).
+- **The reading room is drawn in code**, with no image files. Its pixel art
+  is rectangles ([room-art.tsx](../src/components/room-art.tsx)), each
+  naming a paint whose colour lives in
+  [reading-room.css](../src/components/reading-room.css), which has a day
+  palette for light themes and a night one for dark themes. Spine colours
+  are read from the covers in the browser as each floor scrolls into view,
+  and kept in localStorage by cover address, which changes whenever the
+  image does. Nothing about the room is stored on the server.
 - **Typed dates and moments are read differently.** A date typed into a date
   field is stored as midnight UTC and means that day everywhere. Anything
   else, like "finished today" or a reading-log entry, is a moment, and
