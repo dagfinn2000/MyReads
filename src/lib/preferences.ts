@@ -12,25 +12,7 @@ import {
   type RoomWalls,
   type RoomWood,
 } from "@/lib/room-styles";
-import {
-  AVATAR_BOTTOMS,
-  AVATAR_EXTRAS,
-  AVATAR_HAIRS,
-  AVATAR_HAIR_COLOURS,
-  AVATAR_HATS,
-  AVATAR_LEGS,
-  AVATAR_SKINS,
-  AVATAR_TOPS,
-  DEFAULT_AVATAR,
-  type AvatarBottom,
-  type AvatarExtra,
-  type AvatarHair,
-  type AvatarHairColour,
-  type AvatarHat,
-  type AvatarLegs,
-  type AvatarSkin,
-  type AvatarTop,
-} from "@/lib/avatar";
+import { DEFAULT_AVATAR, parseAvatar, type AvatarLook } from "@/lib/avatar";
 
 /**
  * Per-account preferences — everything on the Account page's Preferences
@@ -417,15 +399,10 @@ export type Preferences = {
   /** Furniture put away. */
   roomAway: Stowable[];
   // The reader's avatar in the room (lib/avatar.ts)
+  /** Whether the avatar is in the room at all. */
   avatarShown: boolean;
-  avatarSkin: AvatarSkin;
-  avatarHair: AvatarHair;
-  avatarHairColour: AvatarHairColour;
-  avatarTop: AvatarTop;
-  avatarBottom: AvatarBottom;
-  avatarLegs: AvatarLegs;
-  avatarHat: AvatarHat;
-  avatarExtras: AvatarExtra[];
+  /** How it looks; saved whole. */
+  avatar: AvatarLook;
 };
 
 export const DEFAULT_PREFERENCES: Preferences = {
@@ -494,14 +471,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
   roomLayout: [],
   roomAway: [],
   avatarShown: true,
-  avatarSkin: DEFAULT_AVATAR.skin,
-  avatarHair: DEFAULT_AVATAR.hair,
-  avatarHairColour: DEFAULT_AVATAR.hairColour,
-  avatarTop: DEFAULT_AVATAR.top,
-  avatarBottom: DEFAULT_AVATAR.bottom,
-  avatarLegs: DEFAULT_AVATAR.legs,
-  avatarHat: DEFAULT_AVATAR.hat,
-  avatarExtras: DEFAULT_AVATAR.extras,
+  avatar: DEFAULT_AVATAR,
 };
 
 /** True for a time zone this runtime knows ("Europe/Oslo", "UTC"). */
@@ -758,14 +728,7 @@ export function parsePreferences(raw: unknown): Preferences {
     roomLayout: parseRoomLayout(obj.roomLayout),
     roomAway: pickList(STOWABLE, obj.roomAway),
     avatarShown: bool(obj.avatarShown, d.avatarShown),
-    avatarSkin: pick(AVATAR_SKINS, obj.avatarSkin, d.avatarSkin),
-    avatarHair: pick(AVATAR_HAIRS, obj.avatarHair, d.avatarHair),
-    avatarHairColour: pick(AVATAR_HAIR_COLOURS, obj.avatarHairColour, d.avatarHairColour),
-    avatarTop: pick(AVATAR_TOPS, obj.avatarTop, d.avatarTop),
-    avatarBottom: pick(AVATAR_BOTTOMS, obj.avatarBottom, d.avatarBottom),
-    avatarLegs: pick(AVATAR_LEGS, obj.avatarLegs, d.avatarLegs),
-    avatarHat: pick(AVATAR_HATS, obj.avatarHat, d.avatarHat),
-    avatarExtras: pickList(AVATAR_EXTRAS, obj.avatarExtras),
+    avatar: parseAvatar(obj.avatar),
   };
 }
 

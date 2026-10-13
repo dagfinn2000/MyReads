@@ -203,9 +203,8 @@ function hair(c: Canvas, look: AvatarLook, view: View) {
       if (side) {
         c.set(1, 2, "av-tie");
         c.block(0, 1, 3, 10, h);
-        c.block(-1, 0, 6, 9, h);
+        c.set(1, 11, lo);
         c.set(0, 11, lo);
-        c.set(-1, 10, lo);
         c.block(0, 0, 3, 7, hi);
       } else {
         // Behind the head; only the band and a little hair show.
@@ -430,7 +429,14 @@ export interface AvatarArt {
  *  seat, between the arms, its feet on the floor. */
 export const SEAT_OFFSET = { x: 8 - PAD, y: -2 - HEADROOM };
 
-function figure(look: AvatarLook, pose: "stand" | "stride" | "sit"): Art {
+export type AvatarPose = "stand" | "stride" | "sit";
+
+/** Rows of a standing figure from the top of its sprite to its chin, and
+ *  to its waist: for showing just the head or the top half. */
+export const HEAD_ROWS = HEADROOM + 12;
+export const WAIST_ROWS = HEADROOM + 24;
+
+export function avatarPose(look: AvatarLook, pose: AvatarPose): Art {
   const sit = pose === "sit";
   const c = new Canvas(sit ? 33 : 38);
   const view: View = sit ? "front" : "side";
@@ -444,5 +450,5 @@ function figure(look: AvatarLook, pose: "stand" | "stride" | "sit"): Art {
 }
 
 export function avatarArt(look: AvatarLook): AvatarArt {
-  return { stand: figure(look, "stand"), stride: figure(look, "stride"), sit: figure(look, "sit") };
+  return { stand: avatarPose(look, "stand"), stride: avatarPose(look, "stride"), sit: avatarPose(look, "sit") };
 }

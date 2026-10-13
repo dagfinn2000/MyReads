@@ -344,6 +344,41 @@ describe("parsePreferences: the reading room", () => {
   });
 });
 
+describe("parsePreferences: the avatar", () => {
+  it("keeps a chosen look, defaulting anything unknown", () => {
+    const prefs = parsePreferences({
+      avatarShown: false,
+      avatar: {
+        skin: "deep",
+        hair: "mohawk", // not a style
+        hairColour: "pink",
+        top: "navy",
+        bottom: "skirt",
+        legs: "plum",
+        hat: "wizard",
+        extras: ["beard", "monocle", "glasses", "beard"],
+      },
+    });
+    expect(prefs.avatarShown).toBe(false);
+    expect(prefs.avatar).toEqual({
+      skin: "deep",
+      hair: "short",
+      hairColour: "pink",
+      top: "navy",
+      bottom: "skirt",
+      legs: "plum",
+      hat: "wizard",
+      extras: ["glasses", "beard"],
+    });
+  });
+
+  it("starts everyone with the same little reader, shown", () => {
+    const prefs = parsePreferences({ avatar: "junk" });
+    expect(prefs.avatarShown).toBe(true);
+    expect(prefs.avatar).toEqual(parsePreferences({}).avatar);
+  });
+});
+
 describe("isValidTimeZone", () => {
   it("accepts IANA zones and UTC", () => {
     expect(isValidTimeZone("America/New_York")).toBe(true);

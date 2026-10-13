@@ -42,6 +42,9 @@ import {
   type HouseGeometry,
   type Rect,
 } from "@/components/room-art";
+import { HELD_BOOK, SEAT_OFFSET } from "@/components/avatar-art";
+import { SeatedAvatar, Walker, useAvatar, type Avatar } from "@/components/room-avatar";
+import type { AvatarLook } from "@/lib/avatar";
 import { chimneyFoot, chimneyRise, roofCrown, roofHeight, shellArt, type Moving, type Shell } from "@/components/room-shells";
 import { isClosingBook } from "@/lib/cover-flight";
 import { OWNERSHIP_LABELS, STATUS_LABELS } from "@/lib/display";
@@ -385,6 +388,9 @@ const floorName = (fromGround: number) => FLOOR_NAMES[fromGround] ?? `floor ${fr
  * While `arranging`, the furniture has handles to drag it about, or move
  * it with the arrow keys; `onArrange` gets where it now stands.
  *
+ * The reader's `avatar` wanders the floor with the fireplace, and sits in
+ * the armchair with the book they're reading, if there is one.
+ *
  * It is drawn in the browser only: how many bookcases fit side by side
  * depends on the width it has.
  */
@@ -395,9 +401,11 @@ export function ReadingRoom({
   arranging = false,
   onArrange,
   onDone,
+  avatar = null,
 }: {
   books: RoomBook[];
   decor?: RoomDecor;
+  avatar?: AvatarLook | null;
   arrangement?: Arrangement;
   arranging?: boolean;
   onArrange?: (next: Arrangement) => void;
@@ -430,6 +438,7 @@ export function ReadingRoom({
   );
   const shell = useMemo(() => (layout ? shellArt(layout.geo, style) : null), [layout, style]);
   const reading = books.findIndex((b) => b.status === ReadingStatus.READING && isOnShelf(b));
+  const figure = useAvatar(avatar);
 
   // Which floors have come near the screen: their covers get read.
   useEffect(() => {
@@ -626,6 +635,7 @@ export function ReadingRoom({
             openBook={openBook}
             hanging={decor.hanging}
             arranging={arranging}
+            avatar={figure}
           />
         ))}
 
@@ -847,6 +857,7 @@ const Floor = memo(function Floor({
   openBook,
   hanging,
   arranging,
+  avatar,
 }: {
   index: number;
   pieces: Piece[];
@@ -864,8 +875,10 @@ const Floor = memo(function Floor({
   hanging: RoomHanging;
   /** While the furniture is being moved, the books stay put. */
   arranging: boolean;
+  avatar: Avatar | null;
 }) {
   const floorLine = STOREY;
+  const hearth = pieces.find((p) => p.kind === "hearth");
   return (
     <div
       className="room-floor"
@@ -905,9 +918,15 @@ const Floor = memo(function Floor({
             cat={cat}
             openBook={openBook}
             hanging={hanging}
+            avatar={avatar}
           />
         );
       })}
+      {/* Up and about while no book is being read; out of the way while
+          the furniture moves. */}
+      {avatar && hearth && !openBook && !arranging && (
+        <Walker avatar={avatar} width={width} home={hearth.x + 40} floorLine={floorLine} scale={s} />
+      )}
     </div>
   );
 });
@@ -1108,6 +1127,7 @@ function Furniture({
   cat,
   openBook,
   hanging,
+  avatar,
 }: {
   kind: Piece["kind"];
   x: number;
@@ -1117,6 +1137,7 @@ function Furniture({
   cat: boolean;
   openBook: OpenBook | null;
   hanging: RoomHanging;
+  avatar: Avatar | null;
 }) {
   const stand = (a: Art, dx: number, extra?: { className?: string; children?: React.ReactNode; lift?: number }) => (
     <Stand
@@ -1134,6 +1155,8 @@ function Furniture({
   switch (kind) {
     case "hearth": {
       const fireTop = floorLine - FIREPLACE.h;
+      const chairTop = floorLine - ARMCHAIR.h;
+      const seated = avatar && openBook;
       const hung = hanging === "none" ? null : HANGINGS[hanging];
       return (
         <>
@@ -1161,9 +1184,20 @@ function Furniture({
           {stand(CANDLESTICK, 37, { lift: FIREPLACE.h })}
           {stand(MANTEL_CLOCK, 18, { lift: FIREPLACE.h })}
           {stand(ARMCHAIR, 50)}
+          {seated && (
+            <SeatedAvatar
+              avatar={avatar}
+              x={x + 50 + SEAT_OFFSET.x}
+              y={chairTop + SEAT_OFFSET.y}
+              spine={openBook.colour}
+              scale={s}
+            />
+          )}
+          {/* The cat has the armchair, unless someone's reading in it; then
+              it curls up on the rug at their feet. */}
           {cat &&
-            stand(CAT, 57, {
-              lift: 11,
+            stand(CAT, seated ? 70 : 57, {
+              lift: seated ? 0 : 11,
               children: <Rects className="room-tail" rects={CAT_TAIL} />,
             })}
           {stand(SIDE_TABLE, 81)}
@@ -1176,7 +1210,22 @@ function Furniture({
             className="room-abs room-steam"
             style={{ left: (x + 89) * s, top: (floorLine - SIDE_TABLE.h - TEACUP.h - 4) * s }}
           />
-          {openBook && (
+          {seated && (
+            <BookLink
+              bookId={openBook.book.id}
+              prefetch={false}
+              className="room-abs room-held-book"
+              data-book={openBook.index}
+              aria-label={`Reading in the armchair: ${spineLabel(openBook.book)}`}
+              style={{
+                left: (x + 50 + SEAT_OFFSET.x + HELD_BOOK.x) * s,
+                top: (chairTop + SEAT_OFFSET.y + HELD_BOOK.y) * s,
+                width: HELD_BOOK.w * s,
+                height: HELD_BOOK.h * s,
+              }}
+            />
+          )}
+          {openBook && !seated && (
             <BookLink
               bookId={openBook.book.id}
               prefetch={false}

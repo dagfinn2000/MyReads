@@ -63,6 +63,26 @@ export const DEFAULT_AVATAR: AvatarLook = {
   extras: [],
 };
 
+const pick = <T extends readonly string[]>(allowed: T, value: unknown, fallback: T[number]): T[number] =>
+  typeof value === "string" && (allowed as readonly string[]).includes(value) ? (value as T[number]) : fallback;
+
+/** A saved look, with a default for anything missing or unknown. */
+export function parseAvatar(value: unknown): AvatarLook {
+  const o = (value && typeof value === "object" ? value : {}) as Record<string, unknown>;
+  const d = DEFAULT_AVATAR;
+  const extras = Array.isArray(o.extras) ? o.extras : [];
+  return {
+    skin: pick(AVATAR_SKINS, o.skin, d.skin),
+    hair: pick(AVATAR_HAIRS, o.hair, d.hair),
+    hairColour: pick(AVATAR_HAIR_COLOURS, o.hairColour, d.hairColour),
+    top: pick(AVATAR_TOPS, o.top, d.top),
+    bottom: pick(AVATAR_BOTTOMS, o.bottom, d.bottom),
+    legs: pick(AVATAR_LEGS, o.legs, d.legs),
+    hat: pick(AVATAR_HATS, o.hat, d.hat),
+    extras: AVATAR_EXTRAS.filter((e) => extras.includes(e)),
+  };
+}
+
 export const SKIN_SWATCHES: Record<AvatarSkin, string> = {
   porcelain: "#f6dccb",
   fair: "#efc9a8",
@@ -154,3 +174,18 @@ export const AVATAR_LABELS: Record<string, string> = {
   beard: "Beard",
   freckles: "Freckles",
 };
+
+/** A look picked at random, for "Surprise me". `random` returns [0, 1). */
+export function randomLook(random: () => number = Math.random): AvatarLook {
+  const any = <T>(list: readonly T[]): T => list[Math.floor(random() * list.length)];
+  return {
+    skin: any(AVATAR_SKINS),
+    hair: any(AVATAR_HAIRS),
+    hairColour: any(AVATAR_HAIR_COLOURS),
+    top: any(AVATAR_TOPS),
+    bottom: any(AVATAR_BOTTOMS),
+    legs: any(AVATAR_LEGS),
+    hat: random() < 0.6 ? "none" : any(AVATAR_HATS.filter((h) => h !== "none")),
+    extras: AVATAR_EXTRAS.filter(() => random() < 0.25),
+  };
+}
