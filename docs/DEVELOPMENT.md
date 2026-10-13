@@ -149,14 +149,18 @@ src/
   `motionAllowed()` in [motion.ts](../src/lib/motion.ts).
 - **Moving backgrounds slide pictures, they don't redraw them.**
   [background-scene.tsx](../src/components/background-scene.tsx) puts one
-  fixed layer under the page, and each moving texture is a repeating tile
-  (in `public/textures`) used as a mask over a theme colour, moved by
-  `transform` alone, one tile per loop so it never jumps. The layer is
-  hidden whenever animations may not play, or "Moving backgrounds" is off,
-  and the still texture shows instead. The Sky background is worked out
-  from the sun's height where the reader's time zone is
-  ([sky.ts](../src/lib/sky.ts)), on the server for the first paint and
-  then once a minute in the browser.
+  fixed layer under the page, and everything in it moves by `transform` or
+  fades by `opacity` alone. Rain, snow and stars must not look tiled, so
+  the far-off marks are two or three tiles (in `public/textures`) of sizes
+  that share no factor, laid over each other as masks over a theme colour
+  and moved one tile per loop so they never jump; the near drops, flakes
+  and bright stars are each their own element, scattered by a seeded random
+  generator so the server and the browser agree. When animations may not
+  play, or "Moving backgrounds" is off, rain, snow and stars hold still
+  where they are, and aurora and ripples show their still textures. The
+  Sky background is worked out from the sun's height where the reader's
+  time zone is ([sky.ts](../src/lib/sky.ts)), on the server for the first
+  paint and then once a minute in the browser.
 - **The reading room is drawn in code**, with no image files. Its pixel art
   is rectangles ([room-art.tsx](../src/components/room-art.tsx)), each
   naming a paint whose colour lives in
