@@ -7,6 +7,7 @@ import { formatNumber } from "@/lib/display";
 import { sortBooks } from "@/lib/library-sort";
 import { caseCount, shelve, spineFor, type RoomBook } from "@/lib/room";
 import { RoomView } from "@/components/room-view";
+import { RoomSwitch } from "@/components/room-switch";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Reading room · MyReads" };
@@ -22,6 +23,19 @@ export default async function ReadingRoomPage() {
   if (!session?.user?.id) redirect("/login"); // revoked session (see auth.ts)
   const userId = session.user.id;
   const prefs = await getPreferences();
+  if (prefs.hiddenNav.includes("room")) {
+    // Turned off in Preferences: no house, just the way back to it.
+    return (
+      <div className="mx-auto grid max-w-md justify-items-center gap-3 py-16 text-center">
+        <h1 className="text-2xl font-semibold tracking-tight">Reading room</h1>
+        <p className="text-sm text-muted-foreground">
+          The reading room is turned off, so your books aren&apos;t drawn as a house here, and the Room tab is
+          hidden.
+        </p>
+        <RoomSwitch hiddenNav={prefs.hiddenNav} on />
+      </div>
+    );
+  }
 
   const rows = await prisma.book.findMany({
     where: { userId },
@@ -85,6 +99,7 @@ export default async function ReadingRoomPage() {
         layout={prefs.roomLayout}
         avatar={prefs.avatar}
         avatarShown={prefs.avatarShown}
+        hiddenNav={prefs.hiddenNav}
         away={prefs.roomAway}
         summary={
           books.length > 0

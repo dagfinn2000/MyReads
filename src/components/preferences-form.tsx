@@ -818,7 +818,8 @@ export function PreferencesForm({
         )}
         <div className="grid gap-1.5">
           <p className="text-sm font-medium">Show in the top bar</p>
-          {HIDEABLE_NAV.map((item) => (
+          {/* The reading room has its own section, below. */}
+          {HIDEABLE_NAV.filter((item) => item !== "room").map((item) => (
             <Toggle
               key={item}
               label={NAV_LABELS[item]}
@@ -832,6 +833,26 @@ export function PreferencesForm({
             </p>
           )}
         </div>
+      </Section>
+
+      <Section title="Reading room" id="reading-room">
+        <div className="grid gap-1">
+          <Toggle
+            label="The reading room"
+            checked={!prefs.hiddenNav.includes("room")}
+            onChange={(on) => update({ hiddenNav: toggleIn(prefs.hiddenNav, "room", !on) })}
+          />
+          <p className="pl-6 text-xs text-muted-foreground">
+            Your books as a pixel-art house, with an avatar who lives there. Turned off, the Room tab goes away.
+          </p>
+        </div>
+        {!prefs.hiddenNav.includes("room") && (
+          <Toggle
+            label="Show my avatar in the room"
+            checked={prefs.avatarShown}
+            onChange={(avatarShown) => update({ avatarShown })}
+          />
+        )}
       </Section>
 
       <Section title="Book page" id="book-page">
