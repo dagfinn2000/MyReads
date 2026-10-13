@@ -24,8 +24,9 @@ export interface CoverArt {
 
 /** 32-bit FNV-1a, finished with MurmurHash3's mixing step. FNV alone
  *  leaves titles that differ only in their last letter ("Book 1",
- *  "Book 2") with nearly the same low bits, which the hue comes from. */
-function hash(text: string): number {
+ *  "Book 2") with nearly the same low bits, which the hue comes from.
+ *  The reading room (lib/room.ts) uses it for spine heights too. */
+export function hash(text: string): number {
   let h = 2166136261;
   for (const ch of text) {
     h ^= ch.codePointAt(0)!;

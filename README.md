@@ -80,6 +80,19 @@ server.
   or pages, with or without re-reads. The goal shows whether you're on
   track, and next year's can be set ahead of time.
 
+**The reading room**
+
+- Your library drawn as a cozy pixel-art house. Every book is a spine on a
+  shelf, filed by author and coloured from its cover, with thick books on
+  wide spines. Point at one to see its title, click it to open the book;
+  the book's X puts it back on its shelf.
+- The house grows with your library: more bookcases, then more floors, and
+  furniture moves in as you add books, from a plant and a cat asleep in the
+  armchair to a clock, a library ladder, a window seat and a study.
+- A ribbon marks the books you're reading, and books on your wishlist, lent
+  out or given away keep their place as an outline. Light themes show it by
+  day; dark themes by lamplight, with the fire going.
+
 **Everything else**
 
 - Download a backup (a zip with everything, covers and settings included)
@@ -95,8 +108,9 @@ server.
   book's page, which page opens first, and which links and stats cards you
   see.
 - A little motion: pages fade in, a book's cover flies to its page and back
-  into its place in the library when you close it, bars fill up, and
-  finishing a book or reaching your goal sets off confetti.
+  into its place in the library when you close it, bars fill up,
+  finishing a book or reaching your goal sets off confetti, and the
+  reading room's fire flickers.
   Animations can be turned off, and stay off when your device asks for
   reduced motion.
 - Install it on your phone's home screen like an app.
@@ -107,7 +121,7 @@ import.
 ## Screenshots
 
 <details>
-<summary>Show screenshots: book page, adding a book, cover picker, series, stats, year in review, themes</summary>
+<summary>Show screenshots: book page, adding a book, cover picker, series, stats, year in review, reading room, themes</summary>
 
 **Book page**: details, the rest of the series, shelves, and your own
 reading data.
@@ -135,6 +149,12 @@ edition first.
 **Year in review**:
 
 ![Year in review](docs/year-in-review.png)
+
+**Reading room**: the library as a house, by day and by lamplight.
+
+![The reading room in a light theme, with a book's title showing over its spine](docs/room.png)
+
+![The reading room in a dark theme](docs/room-dark.png)
 
 **Themes**: a dark theme, and the theme picker.
 

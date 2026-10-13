@@ -25,7 +25,7 @@ function isEditable(el: Element | null): boolean {
 
 /**
  * The X on a book's page, shown when the book was opened from the library
- * (lib/library-return.ts). It goes back to the library with the same
+ * or the reading room (lib/library-return.ts). It goes back to the library with the same
  * filters and scroll position, and the cover flies back into its card
  * (lib/cover-flight.ts). Escape does the same, unless a menu or dialog is
  * open or the cursor is in a text field.
@@ -65,6 +65,7 @@ export function CloseBookButton({ bookId }: { bookId: string }) {
   }, [shown]);
 
   if (!back) return null;
+  const place = back.href === "/room" ? "the reading room" : "the library";
   return (
     <Button
       variant="outline"
@@ -73,8 +74,8 @@ export function CloseBookButton({ bookId }: { bookId: string }) {
       // the title (which leaves room for it, globals.css) on a wider screen.
       className="close-book absolute top-0 right-0 z-10 rounded-full bg-background/80 shadow-xs backdrop-blur-sm"
       onClick={close}
-      title="Back to the library (Esc)"
-      aria-label="Close, back to the library"
+      title={`Back to ${place} (Esc)`}
+      aria-label={`Close, back to ${place}`}
     >
       <X className="size-5" />
     </Button>

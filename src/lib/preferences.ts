@@ -110,7 +110,7 @@ export const START_PAGES = ["library", "stats", "add", "reading"] as const;
 
 /** Top-bar links that can be hidden, in top-bar order. The rest are always
  *  shown. */
-export const HIDEABLE_NAV = ["reading", "check", "quotes"] as const;
+export const HIDEABLE_NAV = ["reading", "check", "quotes", "room"] as const;
 
 /** Cards on the stats page that can be hidden. */
 export const HIDEABLE_STATS = [

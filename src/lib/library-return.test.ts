@@ -7,9 +7,10 @@ import {
 } from "./library-return";
 
 describe("isLibraryHref", () => {
-  it("accepts the library, with or without a query", () => {
+  it("accepts the library, with or without a query, and the reading room", () => {
     expect(isLibraryHref("/books")).toBe(true);
     expect(isLibraryHref("/books?sort=title&shelf=READ")).toBe(true);
+    expect(isLibraryHref("/room")).toBe(true);
   });
 
   it("rejects book pages, other pages and other sites", () => {
@@ -17,14 +18,16 @@ describe("isLibraryHref", () => {
     expect(isLibraryHref("/books/new")).toBe(false);
     expect(isLibraryHref("/booksx")).toBe(false);
     expect(isLibraryHref("/reading")).toBe(false);
+    expect(isLibraryHref("/room/x")).toBe(false);
     expect(isLibraryHref("//evil.example/books")).toBe(false);
     expect(isLibraryHref("https://evil.example/books")).toBe(false);
   });
 });
 
 describe("noteAction", () => {
-  it("writes a note when a book is opened from the library", () => {
+  it("writes a note when a book is opened from the library or the reading room", () => {
     expect(noteAction("/books")).toBe("write");
+    expect(noteAction("/room")).toBe("write");
   });
 
   it("keeps it when one book's series strip opens another", () => {

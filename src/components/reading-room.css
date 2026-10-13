@@ -1,0 +1,638 @@
+/* The reading room (components/reading-room.tsx).
+
+   Paints: every rectangle of the pixel art (room-art.tsx) carries a class
+   `rp-<paint>`, coloured here from a palette of --room-* colours. The
+   palette has a day version for light themes and a night version for dark
+   ones, where the lamps, the fire and the attic window glow. The wallpaper
+   stripe takes a little of the theme's accent, so the room belongs to
+   whichever theme it is in.
+
+   Sizes: --u is one dot of the art in screen pixels (2 or 3), set on the
+   scene. Spines are drawn in CSS in multiples of it.
+
+   Motion: the fire flickers, smoke rises, the clock ticks, the cat's tail
+   twitches, and books settle onto their shelves as the room opens. All of
+   it is CSS animation, which globals.css stops when Animations are off or
+   the device asks for reduced motion; every animation's resting state is
+   the still picture. */
+
+.room-scene {
+  /* Day. */
+  --room-wood-hi: #d39a5f;
+  --room-wood: #a96d3b;
+  --room-wood-lo: #7d4a26;
+  --room-wood-deep: #4e2c16;
+  --room-case-back: #5e3a22;
+  --room-case-seam: #4d2e1a;
+  --room-case-shadow: rgb(0 0 0 / 0.3);
+  --room-stone-hi: #d3cabc;
+  --room-stone: #aaa092;
+  --room-stone-lo: #827869;
+  --room-stone-deep: #574f47;
+  --room-soot: #241a16;
+  --room-ember: #4d2018;
+  --room-flame-1: #ffe58a;
+  --room-flame-2: #ffad42;
+  --room-flame-3: #e8552c;
+  --room-brass-hi: #f3d98c;
+  --room-brass: #cfa241;
+  --room-brass-lo: #8f6c28;
+  --room-chair-hi: #c0545c;
+  --room-chair: #9b3a43;
+  --room-chair-lo: #73262f;
+  --room-chair-deep: #4c161d;
+  --room-leaf-hi: #8fc069;
+  --room-leaf: #5f9a48;
+  --room-leaf-lo: #3d6c34;
+  --room-pot-hi: #d98a5c;
+  --room-pot: #b8603a;
+  --room-pot-lo: #85401f;
+  --room-cat-hi: #f6b56b;
+  --room-cat: #e08a3a;
+  --room-cat-lo: #b0622a;
+  --room-cat-deep: #5b3115;
+  --room-cat-white: #fbf1e1;
+  --room-shade-hi: #fff2c4;
+  --room-shade: #f0cb78;
+  --room-shade-lo: #c4943f;
+  --room-paper: #f6efdc;
+  --room-paper-lo: #d4c6a4;
+  --room-glass-hi: #e6f4fb;
+  --room-glass: #b5d8ea;
+  --room-glass-lo: #7ea7bd;
+  --room-sea: #4f8fc0;
+  --room-sea-lo: #2f6896;
+  --room-flower: #e2557a;
+  --room-lamp-green: #3f8f5a;
+  --room-ink: #2b201a;
+  --room-cushion-hi: #9fb8d4;
+  --room-cushion: #6f8fb3;
+  --room-cushion-lo: #4d6b8e;
+  --room-steam: rgb(255 255 255 / 0.7);
+  --room-sky-hi: #cbe9fa;
+  --room-sky: #9fd4f2;
+  --room-sky-body: #fff2b0;
+  --room-cloud: #ffffff;
+  --room-star: transparent;
+  --room-hill: #86b86f;
+  --room-glass-shine: rgb(255 255 255 / 0.55);
+  --room-attic: #b5d8ea;
+  --room-art-sky-hi: #d6ecf4;
+  --room-art-sky: #a9d3e6;
+  --room-art-sun: #ffe9a3;
+  --room-curtain-hi: #8ab27a;
+  --room-curtain: #5f8756;
+  --room-curtain-lo: #3f6038;
+  --room-rug-fringe: #eadbb8;
+  --room-rug: #8c3f34;
+  --room-rug-2: #e0b867;
+  --room-rug-3: #5d2b24;
+  --room-wall: #f1e5cd;
+  --room-wall-2: color-mix(in oklab, #e2cda6 88%, var(--primary));
+  --room-wall-shadow: rgb(0 0 0 / 0.08);
+  --room-wainscot-hi: #d2b48d;
+  --room-wainscot: #bc9c74;
+  --room-wainscot-lo: #977653;
+  --room-brick: #b5654b;
+  --room-brick-lo: #d2b698;
+  --room-roof-hi: #94503f;
+  --room-roof: #773b30;
+  --room-roof-lo: #5c2b24;
+  --room-roof-deep: #3d1c18;
+  --room-floor-hi: #cf945c;
+  --room-floor: #a86c3c;
+  --room-floor-lo: #7c4b27;
+  --room-grass-hi: #8cc46a;
+  --room-grass: #5f9d47;
+  --room-soil: #7a5636;
+  --room-soil-lo: #5d4028;
+  --room-spine-a: #3e6d8c;
+  --room-spine-b: #2c4f66;
+  --room-clock-glass: #2f241e;
+  --room-focus: #ffd75e;
+
+  position: relative;
+  margin-inline: auto;
+}
+
+:where(.dark) .room-scene {
+  /* Night. */
+  --room-wood-hi: #8d5c39;
+  --room-wood: #6c4529;
+  --room-wood-lo: #50311d;
+  --room-wood-deep: #2e1b10;
+  --room-case-back: #2d1b11;
+  --room-case-seam: #23140b;
+  --room-case-shadow: rgb(0 0 0 / 0.4);
+  --room-stone-hi: #8c857a;
+  --room-stone: #6d675e;
+  --room-stone-lo: #504b45;
+  --room-stone-deep: #35312d;
+  --room-brass-hi: #ecca78;
+  --room-brass: #ba9038;
+  --room-brass-lo: #7a5c22;
+  --room-chair-hi: #9e4651;
+  --room-chair: #7b303a;
+  --room-chair-lo: #571f28;
+  --room-chair-deep: #36121a;
+  --room-leaf-hi: #64934f;
+  --room-leaf: #446f3c;
+  --room-leaf-lo: #2b4a29;
+  --room-pot-hi: #ab6340;
+  --room-pot: #8a4a2c;
+  --room-pot-lo: #5f2f19;
+  --room-cat-hi: #dd9d5a;
+  --room-cat: #c27531;
+  --room-cat-lo: #8e5222;
+  --room-cat-deep: #3f200e;
+  --room-cat-white: #e6dac8;
+  --room-shade-hi: #fff4c6;
+  --room-shade: #ffd479;
+  --room-shade-lo: #d69c3a;
+  --room-paper: #e6ddc6;
+  --room-paper-lo: #b5a888;
+  --room-glass-hi: #9ab4c4;
+  --room-glass: #6f8ea1;
+  --room-glass-lo: #4c6878;
+  --room-sea: #3d6f96;
+  --room-sea-lo: #284f70;
+  --room-cushion-hi: #6f88a6;
+  --room-cushion: #4f6886;
+  --room-cushion-lo: #374b63;
+  --room-steam: rgb(255 255 255 / 0.4);
+  --room-sky-hi: #10183a;
+  --room-sky: #1c2650;
+  --room-sky-body: #f5ecc8;
+  --room-cloud: #313d68;
+  --room-star: #fff4cf;
+  --room-hill: #16213a;
+  --room-glass-shine: rgb(255 255 255 / 0.18);
+  --room-attic: #ffcf73;
+  --room-art-sky-hi: #8fa9b8;
+  --room-art-sky: #6d8b9e;
+  --room-art-sun: #e8d79a;
+  --room-curtain-hi: #557a4b;
+  --room-curtain: #3e5e37;
+  --room-curtain-lo: #283f24;
+  --room-rug-fringe: #b9a986;
+  --room-rug: #6e2f27;
+  --room-rug-2: #b8924a;
+  --room-rug-3: #45201b;
+  --room-wall: #3b303b;
+  --room-wall-2: color-mix(in oklab, #332833 82%, var(--primary));
+  --room-wall-shadow: rgb(0 0 0 / 0.2);
+  --room-wainscot-hi: #5c4230;
+  --room-wainscot: #4a3424;
+  --room-wainscot-lo: #35251a;
+  --room-brick: #7e4636;
+  --room-brick-lo: #8f7562;
+  --room-roof-hi: #553232;
+  --room-roof: #422727;
+  --room-roof-lo: #2f1a1a;
+  --room-roof-deep: #1d0f0f;
+  --room-floor-hi: #7d5233;
+  --room-floor: #5e3c23;
+  --room-floor-lo: #412817;
+  --room-grass-hi: #426e3c;
+  --room-grass: #30542d;
+  --room-soil: #4a3424;
+  --room-soil-lo: #36251a;
+  --room-spine-a: #345d77;
+  --room-spine-b: #243f52;
+}
+
+/* One rule per paint. */
+.rp-wood-hi { fill: var(--room-wood-hi); }
+.rp-wood { fill: var(--room-wood); }
+.rp-wood-lo { fill: var(--room-wood-lo); }
+.rp-wood-deep { fill: var(--room-wood-deep); }
+.rp-case-back { fill: var(--room-case-back); }
+.rp-case-seam { fill: var(--room-case-seam); }
+.rp-case-shadow { fill: var(--room-case-shadow); }
+.rp-stone-hi { fill: var(--room-stone-hi); }
+.rp-stone { fill: var(--room-stone); }
+.rp-stone-lo { fill: var(--room-stone-lo); }
+.rp-stone-deep { fill: var(--room-stone-deep); }
+.rp-soot { fill: var(--room-soot); }
+.rp-ember { fill: var(--room-ember); }
+.rp-flame-1 { fill: var(--room-flame-1); }
+.rp-flame-2 { fill: var(--room-flame-2); }
+.rp-flame-3 { fill: var(--room-flame-3); }
+.rp-brass-hi { fill: var(--room-brass-hi); }
+.rp-brass { fill: var(--room-brass); }
+.rp-brass-lo { fill: var(--room-brass-lo); }
+.rp-chair-hi { fill: var(--room-chair-hi); }
+.rp-chair { fill: var(--room-chair); }
+.rp-chair-lo { fill: var(--room-chair-lo); }
+.rp-chair-deep { fill: var(--room-chair-deep); }
+.rp-leaf-hi { fill: var(--room-leaf-hi); }
+.rp-leaf { fill: var(--room-leaf); }
+.rp-leaf-lo { fill: var(--room-leaf-lo); }
+.rp-pot-hi { fill: var(--room-pot-hi); }
+.rp-pot { fill: var(--room-pot); }
+.rp-pot-lo { fill: var(--room-pot-lo); }
+.rp-cat-hi { fill: var(--room-cat-hi); }
+.rp-cat { fill: var(--room-cat); }
+.rp-cat-lo { fill: var(--room-cat-lo); }
+.rp-cat-deep { fill: var(--room-cat-deep); }
+.rp-cat-white { fill: var(--room-cat-white); }
+.rp-shade-hi { fill: var(--room-shade-hi); }
+.rp-shade { fill: var(--room-shade); }
+.rp-shade-lo { fill: var(--room-shade-lo); }
+.rp-paper { fill: var(--room-paper); }
+.rp-paper-lo { fill: var(--room-paper-lo); }
+.rp-glass-hi { fill: var(--room-glass-hi); }
+.rp-glass { fill: var(--room-glass); }
+.rp-glass-lo { fill: var(--room-glass-lo); }
+.rp-sea { fill: var(--room-sea); }
+.rp-sea-lo { fill: var(--room-sea-lo); }
+.rp-flower { fill: var(--room-flower); }
+.rp-lamp-green { fill: var(--room-lamp-green); }
+.rp-ink { fill: var(--room-ink); }
+.rp-cushion-hi { fill: var(--room-cushion-hi); }
+.rp-cushion { fill: var(--room-cushion); }
+.rp-cushion-lo { fill: var(--room-cushion-lo); }
+.rp-steam { fill: var(--room-steam); }
+.rp-sky-hi { fill: var(--room-sky-hi); }
+.rp-sky { fill: var(--room-sky); }
+.rp-sky-body { fill: var(--room-sky-body); }
+.rp-cloud { fill: var(--room-cloud); }
+.rp-star { fill: var(--room-star); }
+.rp-hill { fill: var(--room-hill); }
+.rp-glass-shine { fill: var(--room-glass-shine); }
+.rp-attic { fill: var(--room-attic); }
+.rp-art-sky-hi { fill: var(--room-art-sky-hi); }
+.rp-art-sky { fill: var(--room-art-sky); }
+.rp-art-sun { fill: var(--room-art-sun); }
+.rp-curtain-hi { fill: var(--room-curtain-hi); }
+.rp-curtain { fill: var(--room-curtain); }
+.rp-curtain-lo { fill: var(--room-curtain-lo); }
+.rp-rug-fringe { fill: var(--room-rug-fringe); }
+.rp-rug { fill: var(--room-rug); }
+.rp-rug-2 { fill: var(--room-rug-2); }
+.rp-rug-3 { fill: var(--room-rug-3); }
+.rp-wall { fill: var(--room-wall); }
+.rp-wall-2 { fill: var(--room-wall-2); }
+.rp-wall-shadow { fill: var(--room-wall-shadow); }
+.rp-wainscot-hi { fill: var(--room-wainscot-hi); }
+.rp-wainscot { fill: var(--room-wainscot); }
+.rp-wainscot-lo { fill: var(--room-wainscot-lo); }
+.rp-brick { fill: var(--room-brick); }
+.rp-brick-lo { fill: var(--room-brick-lo); }
+.rp-roof-hi { fill: var(--room-roof-hi); }
+.rp-roof { fill: var(--room-roof); }
+.rp-roof-lo { fill: var(--room-roof-lo); }
+.rp-roof-deep { fill: var(--room-roof-deep); }
+.rp-floor-hi { fill: var(--room-floor-hi); }
+.rp-floor { fill: var(--room-floor); }
+.rp-floor-lo { fill: var(--room-floor-lo); }
+.rp-grass-hi { fill: var(--room-grass-hi); }
+.rp-grass { fill: var(--room-grass); }
+.rp-soil { fill: var(--room-soil); }
+.rp-soil-lo { fill: var(--room-soil-lo); }
+.rp-spine-a { fill: var(--room-spine-a); }
+.rp-spine-b { fill: var(--room-spine-b); }
+.rp-clock-glass { fill: var(--room-clock-glass); }
+.rp-book { fill: var(--spine); }
+.rp-book-lo { fill: color-mix(in oklab, var(--spine), #000 35%); }
+
+.room-abs {
+  position: absolute;
+  display: block;
+}
+/* A storey. Off screen the browser skips drawing it, which keeps a house
+   of thousands of books quick to scroll. */
+.room-floor {
+  position: absolute;
+  overflow: clip;
+  content-visibility: auto;
+}
+/* The painting dims a little at night, as if lit by the lamps. */
+:where(.dark) .room-art-dim {
+  filter: brightness(0.8);
+}
+
+/* ── Spines ───────────────────────────────────────────────────────────────
+   A strip of the book's colour with a lighter left edge and a darker right
+   one, so books standing together read as separate, and one of five
+   patterns: gilt bands, a paper label, a dark head band, a wide band, or a
+   small emblem. A book that isn't on the shelf (wishlist, lent out, given
+   away) keeps its place as an outline. A book being read has a ribbon
+   bookmark showing at the top. */
+.room-shelf {
+  position: absolute;
+  display: flex;
+  align-items: flex-end;
+}
+.room-spine {
+  --hi: color-mix(in oklab, var(--spine), #fff 24%);
+  --lo: color-mix(in oklab, var(--spine), #000 38%);
+  --gilt: color-mix(in oklab, var(--spine), #f2d27e 60%);
+  --dark: color-mix(in oklab, var(--spine), #000 30%);
+  position: relative;
+  flex: none;
+  display: block;
+  background:
+    linear-gradient(
+      to right,
+      var(--hi) 0 var(--u),
+      transparent var(--u) calc(100% - var(--u)),
+      var(--lo) calc(100% - var(--u))
+    ),
+    var(--spine);
+  outline: none;
+  animation: room-settle 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+  animation-delay: calc(var(--i, 0) * 25ms);
+}
+[data-returning] .room-spine {
+  animation: none;
+}
+.room-spine::before {
+  content: "";
+  position: absolute;
+  inset: 0 var(--u);
+  pointer-events: none;
+}
+/* Gilt bands near the head and the tail. */
+.room-spine[data-pattern="0"]::before {
+  background:
+    linear-gradient(var(--gilt), var(--gilt)) 0 calc(var(--u) * 2) / 100% var(--u) no-repeat,
+    linear-gradient(var(--gilt), var(--gilt)) 0 calc(100% - var(--u) * 3) / 100% var(--u) no-repeat;
+}
+/* A paper label. */
+.room-spine[data-pattern="1"]::before {
+  background: linear-gradient(var(--room-paper), var(--room-paper)) 0 calc(var(--u) * 3) / 100%
+    calc(var(--u) * 3) no-repeat;
+  opacity: 0.85;
+}
+/* A dark head band and a thin tail band. */
+.room-spine[data-pattern="2"]::before {
+  background:
+    linear-gradient(var(--dark), var(--dark)) 0 0 / 100% calc(var(--u) * 3) no-repeat,
+    linear-gradient(var(--gilt), var(--gilt)) 0 calc(100% - var(--u) * 2) / 100% var(--u) no-repeat;
+}
+/* One wide gilt band. */
+.room-spine[data-pattern="3"]::before {
+  background:
+    linear-gradient(var(--dark), var(--dark)) 0 calc(var(--u) * 4) / 100% calc(var(--u) * 3) no-repeat,
+    linear-gradient(var(--gilt), var(--gilt)) 0 calc(var(--u) * 5) / 100% var(--u) no-repeat;
+}
+/* A small emblem. */
+.room-spine[data-pattern="4"]::before {
+  background: linear-gradient(var(--gilt), var(--gilt)) 50% calc(var(--u) * 4) / var(--u) var(--u)
+    no-repeat;
+}
+.room-spine[data-away] {
+  background: color-mix(in oklab, var(--spine) 14%, transparent);
+  box-shadow: inset 0 0 0 var(--u) color-mix(in oklab, var(--spine) 70%, var(--room-paper));
+  opacity: 0.8;
+}
+.room-spine[data-away]:focus-visible {
+  box-shadow:
+    inset 0 0 0 var(--u) color-mix(in oklab, var(--spine) 70%, var(--room-paper)),
+    0 0 0 var(--u) var(--room-focus);
+}
+.room-spine[data-away]::before {
+  display: none;
+}
+.room-spine[data-reading]::after {
+  content: "";
+  position: absolute;
+  top: calc(var(--u) * -2);
+  right: var(--u);
+  width: var(--u);
+  height: calc(var(--u) * 4);
+  background: var(--room-flame-3);
+}
+.room-spine:hover,
+.room-spine:focus-visible {
+  translate: 0 calc(var(--u) * -2);
+  z-index: 1;
+}
+/* A bright ring hugging the spine, then a dark one round that, so focus
+   shows against pale paper and dark wood alike. */
+.room-spine:focus-visible {
+  box-shadow: 0 0 0 var(--u) var(--room-focus);
+  outline: var(--u) solid var(--room-ink);
+  outline-offset: var(--u);
+}
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-motion="off"]) .room-spine {
+    transition: translate 0.15s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+}
+@keyframes room-settle {
+  from {
+    opacity: 0;
+    translate: 0 calc(var(--u) * -5);
+  }
+}
+
+/* The book being read, open on the side table. */
+.room-open-book {
+  outline: none;
+}
+.room-open-book:hover,
+.room-open-book:focus-visible {
+  translate: 0 calc(var(--u) * -1);
+}
+.room-open-book:focus-visible {
+  box-shadow: 0 0 0 var(--u) var(--room-focus);
+  outline: var(--u) solid var(--room-ink);
+  outline-offset: var(--u);
+}
+
+/* ── The label over a book ───────────────────────────────────────────── */
+.room-tip {
+  position: absolute;
+  z-index: 5;
+  translate: -50% calc(-100% - 8px);
+  width: max-content;
+  max-width: 15rem;
+  padding: 0.375rem 0.5rem;
+  border: 2px solid var(--room-wood-deep);
+  background: var(--popover);
+  color: var(--popover-foreground);
+  box-shadow: 3px 3px 0 rgb(0 0 0 / 0.22);
+  font-size: 0.75rem;
+  line-height: 1.35;
+  pointer-events: none;
+}
+
+/* ── Light ────────────────────────────────────────────────────────────────
+   Warm pools around the fire and the lamps, at night only. The fire's
+   breathes a little. */
+.room-glow {
+  position: absolute;
+  display: none;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(
+    closest-side,
+    rgb(255 196 112 / 0.32),
+    rgb(255 170 80 / 0.12) 55%,
+    transparent
+  );
+  mix-blend-mode: screen;
+}
+:where(.dark) .room-glow {
+  display: block;
+}
+.room-glow-fire {
+  background: radial-gradient(
+    closest-side,
+    rgb(255 150 70 / 0.55),
+    rgb(255 120 50 / 0.18) 55%,
+    transparent
+  );
+  animation: room-breathe 2.6s ease-in-out infinite alternate;
+}
+@keyframes room-breathe {
+  50% {
+    opacity: 0.8;
+  }
+}
+
+/* By day, sunlight slants in through the window seat's window. */
+.room-sunbeam {
+  position: absolute;
+  pointer-events: none;
+  clip-path: polygon(0 0, 55.5% 0, 100% 100%, 44.5% 100%);
+  background: linear-gradient(rgb(255 250 225 / 0.55), rgb(255 250 225 / 0.12));
+}
+:where(.dark) .room-sunbeam {
+  display: none;
+}
+
+/* ── Things that move ────────────────────────────────────────────────── */
+
+/* Two frames of fire, swapped. */
+.room-frame-b {
+  opacity: 0;
+  animation: room-show 0.42s steps(1, end) infinite;
+}
+.room-frame-a {
+  animation: room-hide 0.42s steps(1, end) infinite;
+}
+@keyframes room-show {
+  50% {
+    opacity: 1;
+  }
+}
+@keyframes room-hide {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* The cat's tail twitches now and then. */
+.room-tail {
+  opacity: 0;
+  animation: room-twitch 7s steps(1, end) infinite;
+}
+@keyframes room-twitch {
+  88% {
+    opacity: 1;
+  }
+  92% {
+    opacity: 0;
+  }
+  95% {
+    opacity: 1;
+  }
+}
+
+/* The clock's pendulum: left, middle, right, middle. The middle frame is
+   the still picture. */
+.room-swing-0,
+.room-swing-2 {
+  opacity: 0;
+}
+.room-swing-0 {
+  animation: room-swing-left 2s steps(1, end) infinite;
+}
+.room-swing-1 {
+  animation: room-swing-middle 2s steps(1, end) infinite;
+}
+.room-swing-2 {
+  animation: room-swing-right 2s steps(1, end) infinite;
+}
+@keyframes room-swing-left {
+  0% {
+    opacity: 1;
+  }
+  25% {
+    opacity: 0;
+  }
+}
+@keyframes room-swing-middle {
+  0% {
+    opacity: 0;
+  }
+  25% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+  75% {
+    opacity: 1;
+  }
+}
+@keyframes room-swing-right {
+  50% {
+    opacity: 1;
+  }
+  75% {
+    opacity: 0;
+  }
+}
+
+/* Smoke from the chimney and steam from the cup: little squares that
+   rise, drift and fade. Still, there is none. */
+.room-smoke span {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: calc(var(--u) * 3);
+  height: calc(var(--u) * 3);
+  background: color-mix(in oklab, var(--room-stone-hi) 80%, transparent);
+  opacity: 0;
+  animation: room-rise 4.5s linear infinite;
+}
+.room-smoke span:nth-child(2) {
+  animation-delay: 1.5s;
+}
+.room-smoke span:nth-child(3) {
+  animation-delay: 3s;
+}
+@keyframes room-rise {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0);
+  }
+  15% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(var(--u) * 6), calc(var(--u) * -18)) scale(1.7);
+  }
+}
+.room-steam {
+  opacity: 0;
+  animation: room-steam 3s ease-out infinite;
+}
+@keyframes room-steam {
+  0% {
+    opacity: 0;
+    transform: translateY(0);
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(calc(var(--u) * -6));
+  }
+}
