@@ -15,7 +15,7 @@ const nunito = Nunito({ subsets: ["latin"], variable: "--font-nunito", preload: 
 
 export const metadata: Metadata = {
   title: "MyReads",
-  description: "Self-hosted personal book library",
+  description: "Personal self-hosted library and reading tracker",
   // Installed-PWA polish on iOS (the manifest covers Android/desktop).
   appleWebApp: { capable: true, title: "MyReads", statusBarStyle: "default" },
 };

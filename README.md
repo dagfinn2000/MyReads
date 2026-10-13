@@ -1,8 +1,8 @@
 # MyReads
 
-A book library you host yourself, for one reader. Think of it as Goodreads
-without the social side: keep track of the books you own, what you're
-reading, and what you thought of them, on your own server.
+Personal self-hosted library and reading tracker. Keep track of the books
+you own, what you're reading, and what you thought of them, on your own
+server.
 
 ![The library page with status shelves, search, filters and covers](docs/library.png)
 

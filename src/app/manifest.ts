@@ -9,7 +9,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "MyReads",
     short_name: "MyReads",
-    description: "Self-hosted personal book library",
+    description: "Personal self-hosted library and reading tracker",
     // The root route sends each reader to their chosen start page.
     start_url: "/",
     display: "standalone",

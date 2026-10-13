@@ -2,7 +2,7 @@
   "name": "myreads",
   "version": "2.0.0",
   "private": true,
-  "description": "Self-hosted personal book library — GoodReads for one.",
+  "description": "Personal self-hosted library and reading tracker",
   "scripts": {
     "dev": "next dev",
     "build": "prisma generate && next build",
