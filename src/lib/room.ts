@@ -96,15 +96,37 @@ export function shelve(widths: readonly number[]): number[][] {
   return shelves;
 }
 
-export type PieceKind =
-  | "hearth"
-  | "case"
-  | "ladder"
-  | "plant"
-  | "clock"
-  | "seat"
-  | "study"
-  | "gramophone";
+/** Rooms the reader can add to the house (Decorate › Rooms), each a floor
+ *  of its own over the library, with its own furniture. */
+export const ROOMS = ["kitchen", "bedroom", "music", "conservatory", "games", "studio"] as const;
+export type RoomKind = (typeof ROOMS)[number];
+
+/** Each room's furniture, left to right. */
+export const ROOM_PIECES = {
+  kitchen: ["range", "dresser", "table"],
+  bedroom: ["wardrobe", "bed", "nightstand"],
+  music: ["piano", "harp", "cello"],
+  conservatory: ["palm", "wicker", "birdcage", "ferns"],
+  games: ["darts", "billiards", "chess"],
+  studio: ["easel", "paints", "bust"],
+} as const satisfies Record<RoomKind, readonly string[]>;
+export type RoomPiece = (typeof ROOM_PIECES)[RoomKind][number];
+const ROOM_PIECE_LIST = Object.values(ROOM_PIECES).flat() as RoomPiece[];
+
+export const ROOM_LABELS: Record<RoomKind, { name: string; blurb: string }> = {
+  kitchen: { name: "Kitchen", blurb: "A range with the kettle on, a dresser of plates and the kitchen table." },
+  bedroom: { name: "Bedroom", blurb: "A big bed under a quilt, a wardrobe and a bedside lamp." },
+  music: { name: "Music room", blurb: "An upright piano, a harp and a cello." },
+  conservatory: { name: "Conservatory", blurb: "A palm, ferns, a wicker chair and a songbird." },
+  games: { name: "Games room", blurb: "A billiard table, a game of chess and a dartboard." },
+  studio: { name: "Studio", blurb: "An easel, a table of paints and a marble bust." },
+};
+
+/** The room a room's piece of furniture comes with. */
+export const roomOf = (kind: PieceKind): RoomKind | null =>
+  ROOMS.find((r) => (ROOM_PIECES[r] as readonly string[]).includes(kind)) ?? null;
+
+export type PieceKind = "hearth" | "case" | "ladder" | "plant" | "clock" | "seat" | "study" | "gramophone" | RoomPiece;
 
 /** How wide each piece of furniture stands. The hearth is the fireplace,
  *  armchair, side table and lamp together. The ladder leans on the end of
@@ -118,6 +140,25 @@ export const PIECE_WIDTH: Record<PieceKind, number> = {
   seat: 52,
   study: 50,
   gramophone: 24,
+  range: 34,
+  dresser: 36,
+  table: 46,
+  wardrobe: 30,
+  bed: 50,
+  nightstand: 14,
+  piano: 44,
+  harp: 20,
+  cello: 14,
+  palm: 22,
+  wicker: 24,
+  birdcage: 12,
+  ferns: 18,
+  darts: 14,
+  billiards: 60,
+  chess: 32,
+  easel: 26,
+  paints: 24,
+  bust: 14,
 };
 
 /** How many books it takes for each piece of furniture (and the cat) to
@@ -139,11 +180,11 @@ const FILLERS = ["plant", "clock"] as const;
 
 /** Furniture the reader can move about (Decorate › Arrange). Bookcases
  *  keep to the order of the books, and the ladder to the bookcases. */
-export const MOVABLE = ["hearth", "seat", "study", "gramophone", "plant", "clock"] as const;
+export const MOVABLE = ["hearth", "seat", "study", "gramophone", "plant", "clock", ...ROOM_PIECE_LIST] as const;
 export type Movable = (typeof MOVABLE)[number];
 /** Furniture that can be put away. The hearth stays: it is where the
  *  reading happens. */
-export const STOWABLE = ["seat", "study", "gramophone", "plant", "clock", "ladder"] as const;
+export const STOWABLE = ["seat", "study", "gramophone", "plant", "clock", "ladder", ...ROOM_PIECE_LIST] as const;
 export type Stowable = (typeof STOWABLE)[number];
 
 /** What the furniture is called in Decorate. */
@@ -155,23 +196,47 @@ export const FURNITURE_LABELS: Record<Movable | Stowable, string> = {
   plant: "Plant",
   clock: "Grandfather clock",
   ladder: "Library ladder",
+  range: "Range",
+  dresser: "Dresser",
+  table: "Kitchen table",
+  wardrobe: "Wardrobe",
+  bed: "Bed",
+  nightstand: "Bedside table",
+  piano: "Piano",
+  harp: "Harp",
+  cello: "Cello",
+  palm: "Palm",
+  wicker: "Wicker chair",
+  birdcage: "Birdcage",
+  ferns: "Ferns",
+  darts: "Dartboard",
+  billiards: "Billiard table",
+  chess: "Chess table",
+  easel: "Easel",
+  paints: "Paint table",
+  bust: "Marble bust",
 };
 
 /** Where the reader has put a piece: on which floor, counting up from the
  *  ground floor (0), and how many things stand to its left there,
- *  bookcases included and the ladder not. */
+ *  bookcases included and the ladder not. A piece put in one of the added
+ *  rooms names the room as well, so it stays there when the library
+ *  grows a floor underneath. */
 export interface Placement {
   kind: Movable;
   floor: number;
   slot: number;
+  room?: RoomKind;
 }
 
 export interface Arrangement {
   places: readonly Placement[];
   away: readonly Stowable[];
+  /** Rooms added over the library, from the bottom up. */
+  rooms?: readonly RoomKind[];
 }
 
-export const NO_ARRANGEMENT: Arrangement = { places: [], away: [] };
+export const NO_ARRANGEMENT: Arrangement = { places: [], away: [], rooms: [] };
 
 export interface Piece {
   kind: PieceKind;
@@ -187,6 +252,9 @@ export interface HousePlan {
   inner: number;
   /** Top floor first, so the page reads top to bottom. */
   floors: Piece[][];
+  /** Which added room each floor is, in the same order; null for the
+   *  library's own floors. */
+  rooms: (RoomKind | null)[];
   /** The cat asleep on the armchair. */
   cat: boolean;
 }
@@ -240,11 +308,13 @@ function withPins(row: readonly PieceKind[], pins: readonly { kind: PieceKind; s
  * cottage only as wide as it needs. Furniture that has arrived but has no
  * room waits for a floor with space.
  *
- * `arrangement` is where the reader has moved furniture to, and what they
- * have put away. A moved piece keeps its floor and place among its
- * neighbours whenever it fits there; on a screen too narrow for that, or
- * with fewer floors than it was put on, it goes wherever it would have
- * gone by itself. No floor is added just to hold furniture.
+ * `arrangement` is where the reader has moved furniture to, what they
+ * have put away, and the rooms they have added. Each room is a floor over
+ * the library with its own furniture. A moved piece keeps its floor and
+ * place among its neighbours whenever it fits there; on a screen too
+ * narrow for that, or with fewer floors than it was put on, it goes
+ * wherever it would have gone by itself. No floor is added just to hold
+ * furniture.
  */
 export function planHouse(
   caseCount: number,
@@ -253,18 +323,29 @@ export function planHouse(
   arrangement: Arrangement = NO_ARRANGEMENT,
 ): HousePlan {
   const away = new Set<string>(arrangement.away);
-  const has = (k: keyof typeof MILESTONES) => bookCount >= MILESTONES[k] && !away.has(k);
+  const rooms = [...new Set(arrangement.rooms ?? [])];
+  const inRooms = new Set<string>(rooms.flatMap((r) => ROOM_PIECES[r]));
+  /** Whether a piece is in the house: earned by the library, or come with
+   *  a room, and not put away. */
+  const has = (k: keyof typeof MILESTONES | RoomPiece) =>
+    !away.has(k) && (k in MILESTONES ? bookCount >= MILESTONES[k as keyof typeof MILESTONES] : inRooms.has(k));
   const fits = (kinds: PieceKind[]) => rowWidth(kinds) <= maxInner;
 
-  // Moved pieces, by floor and in slot order; one place per piece.
+  // Moved pieces, by floor (or room) and in slot order; one place per
+  // piece. One moved into a room that has since gone goes where it would
+  // by itself.
   const pinned = new Set<PieceKind>();
   const pinsByFloor = new Map<number, { kind: PieceKind; slot: number }[]>();
+  const pinsByRoom = new Map<RoomKind, { kind: PieceKind; slot: number }[]>();
   for (const p of arrangement.places) {
     if (pinned.has(p.kind) || (p.kind !== "hearth" && !has(p.kind))) continue;
+    if (p.room && !rooms.includes(p.room)) continue;
     pinned.add(p.kind);
-    pinsByFloor.set(p.floor, [...(pinsByFloor.get(p.floor) ?? []), { kind: p.kind, slot: p.slot }]);
+    const pin = { kind: p.kind, slot: p.slot };
+    if (p.room) pinsByRoom.set(p.room, [...(pinsByRoom.get(p.room) ?? []), pin]);
+    else pinsByFloor.set(p.floor, [...(pinsByFloor.get(p.floor) ?? []), pin]);
   }
-  for (const pins of pinsByFloor.values()) pins.sort((a, b) => a.slot - b.slot);
+  for (const pins of [...pinsByFloor.values(), ...pinsByRoom.values()]) pins.sort((a, b) => a.slot - b.slot);
   // As many floors as the house would have by itself: moving the hearth
   // upstairs frees room on the ground floor, but shouldn't squeeze the
   // furniture out of the floors it was moved to.
@@ -272,6 +353,7 @@ export function planHouse(
     ? planHouse(caseCount, bookCount, maxInner, { places: [], away: arrangement.away }).floors.length
     : 0;
 
+  const isStarter = (k: PieceKind) => (FLOOR_STARTERS as readonly PieceKind[]).includes(k);
   const starters: PieceKind[] = FLOOR_STARTERS.filter((k) => has(k) && !pinned.has(k));
   const fillers: PieceKind[] = FILLERS.filter((k) => has(k) && !pinned.has(k));
   /** Moved pieces that couldn't keep their place, and go where they would
@@ -284,13 +366,24 @@ export function planHouse(
   let left = Math.max(1, caseCount);
   for (let f = 0; ; f++) {
     const pins = [...(pinsByFloor.get(f) ?? [])];
+    const row: PieceKind[] = f === 0 && !pinned.has("hearth") ? ["hearth"] : [];
     // Moved pieces have to leave room for a bookcase, so a floor can't fill
-    // up with furniture alone.
-    while (pins.length && !fits([...pins.map((p) => p.kind), "case"])) homeless.push(pins.pop()!.kind);
+    // up with furniture alone; on a ground floor too narrow for the hearth
+    // and a bookcase, they have to leave room for the hearth. The hearth
+    // moved along the ground floor stays on it.
+    const roomy = (kinds: PieceKind[]) =>
+      fits([...kinds, ...row, "case"]) || (f === 0 && !fits(["hearth", "case"]) && fits([...kinds, ...row]));
+    while (!roomy(pins.map((p) => p.kind))) {
+      let i = pins.length - 1;
+      while (i >= 0 && f === 0 && pins[i].kind === "hearth") i--;
+      if (i < 0) break;
+      const [{ kind }] = pins.splice(i, 1);
+      // A big piece opens a floor of its own, as it would by itself.
+      if (isStarter(kind)) starters.splice(0, starters.length, ...FLOOR_STARTERS.filter((k) => k === kind || starters.includes(k)));
+      else homeless.push(kind);
+    }
     const fixed = pins.map((p) => p.kind);
-    const row: PieceKind[] = [];
-    if (f === 0 && !pinned.has("hearth")) row.push("hearth");
-    else if (f > 0 && !pins.length && starters.length && fits([starters[0], "case"])) {
+    if (f > 0 && !pins.length && starters.length && fits([starters[0], "case"])) {
       row.push(starters.shift()!);
     }
     // A floor always takes at least one bookcase unless it already holds
@@ -318,22 +411,47 @@ export function planHouse(
     }
   }
 
+  // Then the added rooms, each a floor of its own with its furniture,
+  // as much of it as fits.
+  const libraryFloors = rows.length;
+  const rowRooms: (RoomKind | null)[] = rows.map(() => null);
+  for (const room of rooms) {
+    const pins = [...(pinsByRoom.get(room) ?? [])];
+    while (pins.length && !fits(pins.map((p) => p.kind))) homeless.push(pins.pop()!.kind);
+    const row: PieceKind[] = ROOM_PIECES[room].filter((k) => has(k) && !pinned.has(k));
+    while (row.length && !fits(withPins(row, pins))) homeless.push(row.pop()!);
+    rows.push(row);
+    rowPins.push(pins);
+    rowRooms.push(room);
+  }
+
   // Furniture still waiting goes wherever it fits, top floor first: that
-  // is the newest floor, and usually the emptiest. The hearth and the big
-  // pieces open a floor; the small ones fill in.
-  const big = (k: PieceKind) => k === "hearth" || (FLOOR_STARTERS as readonly PieceKind[]).includes(k);
+  // is the newest floor, and usually the emptiest. The library's own
+  // furniture tries its floors before the rooms', and a room's the other
+  // way round. The hearth and the big pieces open a floor; the small ones
+  // fill in.
+  const big = (k: PieceKind) => k === "hearth" || isStarter(k);
+  const topFirst = (from: number, to: number) => Array.from({ length: to - from }, (_, i) => to - 1 - i);
+  const libraryRows = topFirst(0, libraryFloors);
+  const roomRows = topFirst(libraryFloors, rows.length);
   for (const kind of [...homeless.filter(big), ...starters, ...fillers, ...homeless.filter((k) => !big(k))]) {
     let placed = false;
-    for (let i = rows.length - 1; i >= 0 && !placed; i--) {
+    for (const i of roomOf(kind) ? [...roomRows, ...libraryRows] : [...libraryRows, ...roomRows]) {
       const next = big(kind) ? [kind, ...rows[i]] : withFiller(rows[i], kind);
       if (fits(withPins(next, rowPins[i]))) {
         rows[i] = next;
         placed = true;
+        break;
       }
     }
-    // The hearth is never left out: with no room anywhere it stands on the
-    // ground floor all the same, as it always has in a narrow house.
-    if (!placed && kind === "hearth") rows[0].unshift(kind);
+    // The hearth is never left out: moved to a floor that has no room for
+    // it, it goes back where it would be by itself, on the ground floor.
+    if (!placed && kind === "hearth") {
+      return planHouse(caseCount, bookCount, maxInner, {
+        ...arrangement,
+        places: arrangement.places.filter((p) => p.kind !== "hearth"),
+      });
+    }
   }
   for (let i = 0; i < rows.length; i++) rows[i] = withPins(rows[i], rowPins[i]);
 
@@ -353,6 +471,7 @@ export function planHouse(
 
   const inner = Math.max(...rows.map(rowWidth));
   rows.reverse();
+  rowRooms.reverse();
 
   let caseIndex = 0;
   const floors = rows.map((kinds) => {
@@ -376,10 +495,16 @@ export function planHouse(
     });
   });
 
-  return { inner, floors, cat: has("cat") };
+  return { inner, floors, rooms: rowRooms, cat: has("cat") };
 }
 
 export const isMovable = (k: PieceKind): k is Movable => (MOVABLE as readonly string[]).includes(k);
+
+/** A placement on a floor of a plan, naming the room when it is one. */
+function placement(plan: HousePlan, kind: Movable, floor: number, slot: number): Placement {
+  const room = plan.rooms[plan.floors.length - 1 - floor];
+  return room ? { kind, floor, slot, room } : { kind, floor, slot };
+}
 
 /** Where every movable piece stands in a plan, as placements that would
  *  put it back exactly there. */
@@ -390,7 +515,7 @@ export function placementsOf(plan: HousePlan): Placement[] {
     floor
       .filter((p) => p.kind !== "ladder")
       .forEach((p, slot) => {
-        if (isMovable(p.kind)) out.push({ kind: p.kind, floor: fromGround, slot });
+        if (isMovable(p.kind)) out.push(placement(plan, p.kind, fromGround, slot));
       });
   });
   return out;
@@ -409,9 +534,7 @@ export function moveTo(plan: HousePlan, kind: Movable, floor: number, slot: numb
   if (from < 0) return null;
   rows[from].splice(rows[from].indexOf(kind), 1);
   rows[floor].splice(Math.max(0, Math.min(slot, rows[floor].length)), 0, kind);
-  return rows.flatMap((row, f) =>
-    row.flatMap((k, s) => (isMovable(k) ? [{ kind: k, floor: f, slot: s }] : [])),
-  );
+  return rows.flatMap((row, f) => row.flatMap((k, s) => (isMovable(k) ? [placement(plan, k, f, s)] : [])));
 }
 
 /** Where a piece goes when nudged one step: along its floor, or to the
@@ -447,14 +570,31 @@ export function putAway(a: Arrangement, kind: Stowable): Arrangement {
   const places = a.places
     .filter((p) => p.kind !== kind)
     .map((p) => (was && p.floor === was.floor && p.slot > was.slot ? { ...p, slot: p.slot - 1 } : p));
-  return { places, away: [...a.away, kind] };
+  return { ...a, places, away: [...a.away, kind] };
 }
 
 /** `kind` out again, wherever it goes by itself. */
 export const bringOut = (a: Arrangement, kind: Stowable): Arrangement => ({
-  places: a.places,
+  ...a,
   away: a.away.filter((k) => k !== kind),
 });
+
+/** `room` added as a new top floor, with all its furniture. */
+export const addRoom = (a: Arrangement, room: RoomKind): Arrangement => ({
+  ...a,
+  rooms: [...(a.rooms ?? []).filter((r) => r !== room), room],
+});
+
+/** `room` taken off the house with its furniture. Anything else moved
+ *  into it goes back where it would go by itself. */
+export function removeRoom(a: Arrangement, room: RoomKind): Arrangement {
+  const pieces: readonly string[] = ROOM_PIECES[room];
+  return {
+    places: a.places.filter((p) => p.room !== room && !pieces.includes(p.kind)),
+    away: a.away.filter((k) => !pieces.includes(k)),
+    rooms: (a.rooms ?? []).filter((r) => r !== room),
+  };
+}
 
 /** How many bookcases a list of shelves fills. */
 export function caseCount(shelfCount: number): number {

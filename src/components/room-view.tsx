@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { Check, Move, Paintbrush, RotateCcw } from "lucide-react";
+import { Check, Move, Paintbrush, Plus, RotateCcw } from "lucide-react";
 import { AvatarMaker } from "@/components/avatar-maker";
 import { Group, Swatches } from "@/components/decorate-controls";
 import type { AvatarLook } from "@/lib/avatar";
@@ -11,15 +11,21 @@ import type { HideableNav, Preferences } from "@/lib/preferences";
 import {
   FURNITURE_LABELS,
   MILESTONES,
-  NO_ARRANGEMENT,
+  ROOMS,
+  ROOM_LABELS,
+  ROOM_PIECES,
   STOWABLE,
+  addRoom,
   bringOut,
   putAway,
+  removeRoom,
   type Arrangement,
   type Placement,
   type RoomBook,
+  type RoomKind,
   type Stowable,
 } from "@/lib/room";
+import { RoomPreview } from "@/components/room-rooms";
 import {
   COLOUR_LABELS,
   FABRIC_SWATCHES,
@@ -55,18 +61,26 @@ const PREFERENCE: Record<keyof RoomDecor, keyof Preferences> = {
 const sameDecor = (a: RoomDecor, b: RoomDecor) =>
   (Object.keys(PREFERENCE) as (keyof RoomDecor)[]).every((k) => a[k] === b[k]);
 
+const TABS = [
+  { value: "house", label: "House" },
+  { value: "rooms", label: "Rooms & furniture" },
+  { value: "avatar", label: "Avatar" },
+] as const;
+type Tab = (typeof TABS)[number]["value"];
+
 /**
  * The reading room with its Decorate panel: the house style, the colours of
- * the walls, wood and fabrics, what hangs over the fireplace, which
- * furniture is out, and a mode for moving the furniture about; and, on its
- * Avatar tab, the reader's own little self. Every change shows at once and
- * is saved on the account.
+ * the walls, wood and fabrics and what hangs over the fireplace; the rooms
+ * added over the library, which furniture is out, and a mode for moving it
+ * about; and, on its Avatar tab, the reader's own little self. Every change
+ * shows at once and is saved on the account.
  */
 export function RoomView({
   books,
   decor: savedDecor,
   layout,
   away,
+  rooms,
   avatar: savedAvatar,
   avatarShown: savedShown,
   hiddenNav,
@@ -76,6 +90,7 @@ export function RoomView({
   decor: RoomDecor;
   layout: Placement[];
   away: Stowable[];
+  rooms: RoomKind[];
   avatar: AvatarLook;
   avatarShown: boolean;
   /** For the switch that turns the whole room off. */
@@ -87,11 +102,12 @@ export function RoomView({
   const [arrangement, setArrangement] = useState<Arrangement>(() => ({
     places: layout,
     away,
+    rooms,
   }));
   const [avatar, setAvatar] = useState(savedAvatar);
   const [avatarShown, setAvatarShown] = useState(savedShown);
   const [panel, setPanel] = useState(false);
-  const [tab, setTab] = useState<"house" | "avatar">("house");
+  const [tab, setTab] = useState<Tab>("house");
   const [arranging, setArranging] = useState(false);
   const moveButton = useRef<HTMLButtonElement>(null);
 
@@ -108,6 +124,7 @@ export function RoomView({
     savePreferences({
       roomLayout: [...next.places],
       roomAway: [...next.away],
+      roomRooms: [...(next.rooms ?? [])],
     }).catch(() => {});
   };
 
@@ -127,8 +144,20 @@ export function RoomView({
   };
 
   const moved = arrangement.places.length > 0 || arrangement.away.length > 0;
+  const added = arrangement.rooms ?? [];
   // Only the furniture the library has earned so far.
-  const earned = STOWABLE.filter((k) => books.length >= MILESTONES[k]);
+  const earned = STOWABLE.filter((k) => k in MILESTONES && books.length >= MILESTONES[k as keyof typeof MILESTONES]);
+  const furnitureBox = (kind: Stowable) => (
+    <label key={kind} className="flex items-center gap-2 text-sm">
+      <input
+        type="checkbox"
+        className="size-4 accent-primary"
+        checked={!arrangement.away.includes(kind)}
+        onChange={(e) => arrange(e.target.checked ? bringOut(arrangement, kind) : putAway(arrangement, kind))}
+      />
+      {FURNITURE_LABELS[kind]}
+    </label>
+  );
 
   return (
     <>
@@ -170,36 +199,140 @@ export function RoomView({
           aria-label="Decorate"
           className="grid gap-5 rounded-xl border bg-card p-4 text-card-foreground shadow-sm sm:p-5"
         >
-          <div role="tablist" aria-label="Decorate" className="flex gap-1 border-b">
-            {(["house", "avatar"] as const).map((t) => (
+          <div role="tablist" aria-label="Decorate" className="flex gap-1 overflow-x-auto border-b">
+            {TABS.map((t, i) => (
               <button
-                key={t}
+                key={t.value}
                 type="button"
                 role="tab"
-                id={`decorate-tab-${t}`}
-                aria-selected={tab === t}
-                aria-controls={`decorate-${t}`}
-                tabIndex={tab === t ? 0 : -1}
-                onClick={() => setTab(t)}
+                id={`decorate-tab-${t.value}`}
+                aria-selected={tab === t.value}
+                aria-controls={`decorate-${t.value}`}
+                tabIndex={tab === t.value ? 0 : -1}
+                onClick={() => setTab(t.value)}
                 onKeyDown={(e) => {
                   if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
-                  const next = t === "house" ? "avatar" : "house";
+                  const next = TABS[(i + (e.key === "ArrowRight" ? 1 : TABS.length - 1)) % TABS.length].value;
                   setTab(next);
                   document.getElementById(`decorate-tab-${next}`)?.focus();
                 }}
                 className={cn(
-                  "-mb-px border-b-2 px-3 pb-2 text-sm font-medium outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
-                  tab === t
+                  "-mb-px shrink-0 border-b-2 px-3 pb-2 text-sm font-medium outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
+                  tab === t.value
                     ? "border-foreground text-foreground"
                     : "border-transparent text-muted-foreground hover:text-foreground",
                 )}
               >
-                {t === "house" ? "House" : "Avatar"}
+                {t.label}
               </button>
             ))}
           </div>
 
-          {tab === "avatar" ? (
+          {tab === "rooms" && (
+            <div id="decorate-rooms" role="tabpanel" aria-labelledby="decorate-tab-rooms" className="grid gap-5">
+              <Group title="Rooms">
+                <p className="-mt-1 text-sm text-muted-foreground">
+                  Each room you add is a new floor over your library, with its own furniture. Move it anywhere you like,
+                  or put pieces away.
+                </p>
+                <div className="grid grid-cols-[repeat(auto-fill,minmax(9.5rem,1fr))] gap-3">
+                  {ROOMS.map((room) => {
+                    const on = added.includes(room);
+                    return (
+                      <button
+                        key={room}
+                        type="button"
+                        role="checkbox"
+                        aria-checked={on}
+                        aria-describedby={`room-blurb-${room}`}
+                        onClick={() => arrange(on ? removeRoom(arrangement, room) : addRoom(arrangement, room))}
+                        className="group grid content-start gap-1.5 rounded-lg text-left outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+                      >
+                        <span
+                          className={cn(
+                            "room-scene room-room-thumb relative flex h-28 items-end justify-center overflow-hidden rounded-md border pb-1.5 ring-offset-2 ring-offset-card transition-shadow group-hover:border-ring/60",
+                            on && "ring-2 ring-foreground",
+                          )}
+                          {...decorData(decor)}
+                        >
+                          <RoomPreview pieces={ROOM_PIECES[room]} />
+                          <span
+                            className={cn(
+                              "absolute top-1.5 right-1.5 grid size-5 place-items-center rounded-full border bg-background/90 text-foreground shadow-sm",
+                              !on && "opacity-0 transition-opacity group-hover:opacity-100",
+                            )}
+                            aria-hidden="true"
+                          >
+                            {on ? <Check className="size-3.5" /> : <Plus className="size-3.5" />}
+                          </span>
+                        </span>
+                        <span className={cn("text-sm leading-tight", on && "font-medium")}>
+                          {ROOM_LABELS[room].name}
+                        </span>
+                        <span
+                          id={`room-blurb-${room}`}
+                          aria-hidden="true"
+                          className="text-xs leading-snug text-muted-foreground"
+                        >
+                          {ROOM_LABELS[room].blurb}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </Group>
+
+              <Group title="Furniture">
+                <div
+                  role="group"
+                  aria-labelledby={added.length > 0 ? "furniture-library" : undefined}
+                  className="grid gap-1.5"
+                >
+                  {added.length > 0 && (
+                    <p id="furniture-library" className="text-sm font-medium">
+                      Library
+                    </p>
+                  )}
+                  {earned.length > 0 ? (
+                    <div className="flex flex-wrap gap-x-5 gap-y-2">{earned.map(furnitureBox)}</div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      More furniture moves in as your library grows: a plant at 10 books, a clock at 50.
+                    </p>
+                  )}
+                </div>
+                {added.map((room) => (
+                  <div key={room} role="group" aria-labelledby={`furniture-${room}`} className="grid gap-1.5">
+                    <p id={`furniture-${room}`} className="text-sm font-medium">
+                      {ROOM_LABELS[room].name}
+                    </p>
+                    <div className="flex flex-wrap gap-x-5 gap-y-2">{ROOM_PIECES[room].map(furnitureBox)}</div>
+                  </div>
+                ))}
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      setPanel(false);
+                      setArranging(true);
+                    }}
+                  >
+                    <Move aria-hidden="true" />
+                    Move furniture
+                  </Button>
+                  {moved && (
+                    <Button size="sm" variant="ghost" onClick={() => arrange({ ...arrangement, places: [], away: [] })}>
+                      <RotateCcw aria-hidden="true" />
+                      Put it all back
+                    </Button>
+                  )}
+                </div>
+              </Group>
+            </div>
+          )}
+
+          {tab === "avatar" && (
             <div id="decorate-avatar" role="tabpanel" aria-labelledby="decorate-tab-avatar">
               <AvatarMaker
                 look={avatar}
@@ -209,7 +342,9 @@ export function RoomView({
                 scene={decorData(decor)}
               />
             </div>
-          ) : (
+          )}
+
+          {tab === "house" && (
             <div id="decorate-house" role="tabpanel" aria-labelledby="decorate-tab-house" className="grid gap-5">
               <Group title="House">
                 <div role="radiogroup" aria-label="House style" className="grid grid-cols-3 gap-2 sm:grid-cols-5">
@@ -299,49 +434,6 @@ export function RoomView({
                   ))}
                 </div>
               </Group>
-
-              <Group title="Furniture">
-                {earned.length > 0 ? (
-                  <div className="flex flex-wrap gap-x-5 gap-y-2">
-                    {earned.map((kind) => (
-                      <label key={kind} className="flex items-center gap-2 text-sm">
-                        <input
-                          type="checkbox"
-                          className="size-4 accent-primary"
-                          checked={!arrangement.away.includes(kind)}
-                          onChange={(e) =>
-                            arrange(e.target.checked ? bringOut(arrangement, kind) : putAway(arrangement, kind))
-                          }
-                        />
-                        {FURNITURE_LABELS[kind]}
-                      </label>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-sm text-muted-foreground">
-                    More furniture moves in as your library grows: a plant at 10 books, a clock at 50.
-                  </p>
-                )}
-                <div className="flex flex-wrap gap-2">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => {
-                      setPanel(false);
-                      setArranging(true);
-                    }}
-                  >
-                    <Move aria-hidden="true" />
-                    Move furniture
-                  </Button>
-                  {moved && (
-                    <Button size="sm" variant="ghost" onClick={() => arrange(NO_ARRANGEMENT)}>
-                      <RotateCcw aria-hidden="true" />
-                      Put it all back
-                    </Button>
-                  )}
-                </div>
-              </Group>
             </div>
           )}
 
@@ -366,7 +458,7 @@ export function RoomView({
           <p>Drag furniture to a new spot, or select it and use the arrow keys.</p>
           <div className="flex gap-2">
             {moved && (
-              <Button size="sm" variant="ghost" onClick={() => arrange({ places: [], away: arrangement.away })}>
+              <Button size="sm" variant="ghost" onClick={() => arrange({ ...arrangement, places: [] })}>
                 <RotateCcw aria-hidden="true" />
                 Put it back
               </Button>

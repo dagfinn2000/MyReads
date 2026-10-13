@@ -137,6 +137,20 @@
   --room-cap: #c8423a;
   --room-pine: #3f6b45;
   --room-pine-lo: #2a4a33;
+  /* For the added rooms (room-rooms.tsx), faded at night by --night. */
+  --room-felt-hi: color-mix(in oklab, #4f9a62, var(--dusk) calc(var(--night) * 45%));
+  --room-felt: color-mix(in oklab, #2f7a4a, var(--dusk) calc(var(--night) * 45%));
+  --room-felt-lo: color-mix(in oklab, #1f5636, var(--dusk) calc(var(--night) * 45%));
+  --room-marble-hi: color-mix(in oklab, #ffffff, var(--dusk) calc(var(--night) * 50%));
+  --room-marble: color-mix(in oklab, #e6e2da, var(--dusk) calc(var(--night) * 50%));
+  --room-marble-lo: color-mix(in oklab, #b9b3a8, var(--dusk) calc(var(--night) * 50%));
+  --room-wicker-hi: color-mix(in oklab, #ecd6a0, var(--dusk) calc(var(--night) * 45%));
+  --room-wicker: color-mix(in oklab, #cfae6a, var(--dusk) calc(var(--night) * 45%));
+  --room-wicker-lo: color-mix(in oklab, #9a7a3e, var(--dusk) calc(var(--night) * 45%));
+  --room-bird: color-mix(in oklab, #f6cf3a, var(--dusk) calc(var(--night) * 30%));
+  --room-bird-lo: color-mix(in oklab, #d49a1c, var(--dusk) calc(var(--night) * 30%));
+  --room-tile: color-mix(in oklab, #f4f1e8, var(--dusk) calc(var(--night) * 55%));
+  --room-tile-lo: color-mix(in oklab, #cfc7b6, var(--dusk) calc(var(--night) * 55%));
   --night: 0;
   /* What everything fades towards at night in the styles whose colours
      are worked out from a few base colours (below). */
@@ -360,6 +374,19 @@
 .rp-cap { fill: var(--room-cap); }
 .rp-pine { fill: var(--room-pine); }
 .rp-pine-lo { fill: var(--room-pine-lo); }
+.rp-felt-hi { fill: var(--room-felt-hi); }
+.rp-felt { fill: var(--room-felt); }
+.rp-felt-lo { fill: var(--room-felt-lo); }
+.rp-marble-hi { fill: var(--room-marble-hi); }
+.rp-marble { fill: var(--room-marble); }
+.rp-marble-lo { fill: var(--room-marble-lo); }
+.rp-wicker-hi { fill: var(--room-wicker-hi); }
+.rp-wicker { fill: var(--room-wicker); }
+.rp-wicker-lo { fill: var(--room-wicker-lo); }
+.rp-bird { fill: var(--room-bird); }
+.rp-bird-lo { fill: var(--room-bird-lo); }
+.rp-tile { fill: var(--room-tile); }
+.rp-tile-lo { fill: var(--room-tile-lo); }
 .rp-book { fill: var(--spine); }
 .rp-book-lo { fill: color-mix(in oklab, var(--spine), #000 35%); }
 
@@ -1085,6 +1112,44 @@
     opacity: 0;
     transform: translateY(calc(var(--u) * -6));
   }
+}
+
+.room-steam-late {
+  animation-delay: -1.5s;
+}
+
+/* The canary hops between its perches now and then; on the lower one is
+   the still picture. */
+.room-hop-b {
+  opacity: 0;
+  animation: room-show-long 9s steps(1, end) infinite;
+}
+.room-hop-a {
+  animation: room-hide-long 9s steps(1, end) infinite;
+}
+@keyframes room-show-long {
+  40% {
+    opacity: 1;
+  }
+  70% {
+    opacity: 0;
+  }
+}
+@keyframes room-hide-long {
+  40% {
+    opacity: 0;
+  }
+  70% {
+    opacity: 1;
+  }
+}
+
+/* A strip of wall and floor for showing an added room in Decorate. */
+/* A room in the Decorate panel: its furniture on a bit of wall and floor. */
+.room-room-thumb {
+  --u: 1px;
+  margin-inline: 0;
+  background: linear-gradient(to top, var(--room-floor) 0.375rem, var(--room-wall) 0.375rem);
 }
 
 /* A steam stack's puffs are whiter and quicker than chimney smoke. */
