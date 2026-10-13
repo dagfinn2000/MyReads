@@ -1,4 +1,17 @@
 import { BookFormat, BookOwnership, ReadingStatus } from "@prisma/client";
+import { MOVABLE, STOWABLE, type Placement, type Stowable } from "@/lib/room";
+import {
+  ROOM_FABRICS,
+  ROOM_HANGINGS,
+  ROOM_STYLES,
+  ROOM_WALLS,
+  ROOM_WOODS,
+  type RoomFabric,
+  type RoomHanging,
+  type RoomStyle,
+  type RoomWalls,
+  type RoomWood,
+} from "@/lib/room-styles";
 
 /**
  * Per-account preferences — everything on the Account page's Preferences
@@ -373,6 +386,17 @@ export type Preferences = {
   quotesOrder: QuoteOrder;
   quotesGroupByBook: boolean;
   backupReminder: BackupReminder;
+
+  // The reading room (Decorate on the Room page; lib/room-styles.ts)
+  roomStyle: RoomStyle;
+  roomWalls: RoomWalls;
+  roomWood: RoomWood;
+  roomFabric: RoomFabric;
+  roomHanging: RoomHanging;
+  /** Where furniture has been moved to. Empty = where it goes by itself. */
+  roomLayout: Placement[];
+  /** Furniture put away. */
+  roomAway: Stowable[];
 };
 
 export const DEFAULT_PREFERENCES: Preferences = {
@@ -433,6 +457,13 @@ export const DEFAULT_PREFERENCES: Preferences = {
   quotesOrder: "newest",
   quotesGroupByBook: false,
   backupReminder: "off",
+  roomStyle: "cottage",
+  roomWalls: "style",
+  roomWood: "style",
+  roomFabric: "style",
+  roomHanging: "painting",
+  roomLayout: [],
+  roomAway: [],
 };
 
 /** True for a time zone this runtime knows ("Europe/Oslo", "UTC"). */
@@ -564,6 +595,23 @@ function parseTagSkips(value: unknown): string[] {
   return out.slice(-MAX_TAG_RULES);
 }
 
+/** Furniture placements: a known piece once each, on a floor and in a
+ *  slot no house could be taller or wider than. */
+function parseRoomLayout(value: unknown): Placement[] {
+  if (!Array.isArray(value)) return [];
+  const out: Placement[] = [];
+  for (const item of value) {
+    if (!item || typeof item !== "object" || Array.isArray(item)) continue;
+    const { kind, floor, slot } = item as Record<string, unknown>;
+    if (typeof kind !== "string" || !(MOVABLE as readonly string[]).includes(kind)) continue;
+    if (out.some((p) => p.kind === kind)) continue;
+    const whole = (n: unknown, max: number) => Number.isInteger(n) && (n as number) >= 0 && (n as number) <= max;
+    if (!whole(floor, 100) || !whole(slot, 500)) continue;
+    out.push({ kind: kind as Placement["kind"], floor: floor as number, slot: slot as number });
+  }
+  return out;
+}
+
 /** Every book-page card once: the stored order first, then any card it
  *  leaves out (a card added in a later version, say) in default order. */
 function parseBookPageCards(value: unknown): BookPageCard[] {
@@ -664,6 +712,13 @@ export function parsePreferences(raw: unknown): Preferences {
     quotesOrder: pick(QUOTE_ORDERS, obj.quotesOrder, d.quotesOrder),
     quotesGroupByBook: bool(obj.quotesGroupByBook, d.quotesGroupByBook),
     backupReminder: pick(BACKUP_REMINDERS, obj.backupReminder, d.backupReminder),
+    roomStyle: pick(ROOM_STYLES, obj.roomStyle, d.roomStyle),
+    roomWalls: pick(ROOM_WALLS, obj.roomWalls, d.roomWalls),
+    roomWood: pick(ROOM_WOODS, obj.roomWood, d.roomWood),
+    roomFabric: pick(ROOM_FABRICS, obj.roomFabric, d.roomFabric),
+    roomHanging: pick(ROOM_HANGINGS, obj.roomHanging, d.roomHanging),
+    roomLayout: parseRoomLayout(obj.roomLayout),
+    roomAway: pickList(STOWABLE, obj.roomAway),
   };
 }
 

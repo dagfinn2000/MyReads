@@ -2,6 +2,7 @@
 
 import "./reading-room.css";
 import { memo, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import type { RoomFabric, RoomHanging, RoomStyle, RoomWalls, RoomWood } from "@/lib/room-styles";
 import { ReadingStatus } from "@prisma/client";
 import { BookLink } from "@/components/book-link";
 import {
@@ -20,11 +21,11 @@ import {
   PENDULUM,
   PLANT,
   Rects,
-  SHRUB,
   SIDE_TABLE,
   STEAM,
   Sprite,
   TEACUP,
+  tapestryArt,
   armchairArt,
   benchArt,
   bookcaseArt,
@@ -33,46 +34,55 @@ import {
   fireplaceArt,
   floorLampArt,
   gramophoneArt,
-  houseArt,
   ladderArt,
   paintingArt,
-  roofSurface,
   rugArt,
   windowArt,
   type Art,
   type HouseGeometry,
+  type Rect,
 } from "@/components/room-art";
+import { chimneyFoot, chimneyRise, roofCrown, roofHeight, shellArt, type Moving, type Shell } from "@/components/room-shells";
 import { isClosingBook } from "@/lib/cover-flight";
 import { OWNERSHIP_LABELS, STATUS_LABELS } from "@/lib/display";
 import {
   BEAM,
   CASE_CROWN,
   CASE_HEIGHT,
+  FURNITURE_LABELS,
+  GAP,
+  NO_ARRANGEMENT,
   ORNAMENT_WIDTH,
+  PAD,
+  PIECE_WIDTH,
   ROOM_HEIGHT,
   SHELF_BOARD,
   SHELF_SLOT,
+  SHELF_WIDTH,
   SHELVES_PER_CASE,
   WALL,
   caseCount,
   dressShelf,
+  isMovable,
   isOnShelf,
+  moveTo,
+  nudge,
+  placementsOf,
   planHouse,
   shelve,
   spineFor,
+  type Arrangement,
+  type HousePlan,
+  type Movable,
   type Piece,
   type RoomBook,
 } from "@/lib/room";
 import { drawnSpineColour, spineColour } from "@/lib/spine-colour";
 
-/** Garden either side of the house, and the stone and grass under it. */
-const YARD = 14;
+/** Stone and grass under the house. */
 const FOUNDATION = 6;
 const GROUND = 6;
-/** The chimney's height over the roof, pot included; and the room its
- *  smoke needs above that. */
-const CHIMNEY = 16;
-const CHIMNEY_WIDTH = 10;
+/** The room the chimney's smoke needs over the top of the chimney. */
 const SMOKE = 20;
 const STOREY = BEAM + ROOM_HEIGHT;
 /** Half the label's widest (15rem in reading-room.css). */
@@ -83,10 +93,20 @@ function scaleFor(width: number): number {
   return width < 560 ? 2 : 3;
 }
 
+/** The garden either side of the house: more of it on a wide screen. */
+const yardFor = (scale: number) => (scale === 3 ? 24 : 14);
+
 // Drawn once: the art never changes, only where it goes.
 const BOOKCASE = bookcaseArt();
 const FIREPLACE = fireplaceArt();
-const PAINTING = paintingArt("hills");
+const HANGINGS: Record<Exclude<RoomHanging, "none">, Art> = {
+  painting: paintingArt("hills"),
+  tree: tapestryArt("tree"),
+  stag: tapestryArt("stag"),
+  stars: tapestryArt("stars"),
+  waves: tapestryArt("waves"),
+  kilim: tapestryArt("kilim"),
+};
 const SEASCAPE = paintingArt("sea");
 const ARMCHAIR = armchairArt();
 const LAMP = floorLampArt();
@@ -213,10 +233,12 @@ interface Layout {
   scale: number;
   geo: HouseGeometry;
   sceneH: number;
+  plan: HousePlan;
+  /** What planHouse was given, to try other arrangements. */
+  caseTotal: number;
+  maxInner: number;
   floors: Piece[][];
   cat: boolean;
-  /** Top of the chimney pot, where the smoke starts. */
-  smoke: { x: number; y: number };
   /** Each bookcase's shelves, as indexes into the books. */
   cases: number[][][];
   /** The first and last book index in each floor, for the arrow keys'
@@ -224,34 +246,34 @@ interface Layout {
   floorRange: [number, number][];
 }
 
-function layoutRoom(books: RoomBook[], width: number): Layout {
-  const scale = scaleFor(width);
-  const shelves = shelve(books.map((b) => spineFor(b).width));
-  const count = caseCount(shelves.length);
-  const cases = Array.from({ length: count }, (_, i) =>
-    Array.from({ length: SHELVES_PER_CASE }, (_, j) => shelves[i * SHELVES_PER_CASE + j] ?? []),
+/** Where everything outside the storeys goes, for a house `houseW` wide
+ *  with its fireplace `hearthX` in from the inside of the left wall. */
+function houseGeometry(
+  style: RoomStyle,
+  yard: number,
+  houseW: number,
+  floorCount: number,
+  hearthX: number | null,
+): HouseGeometry {
+  const roofH = roofHeight(style, houseW);
+  const chimneyX = yard + WALL + (hearthX === null ? 12 : hearthX + 17);
+  // Sky over the roof for a spire or flag, or for the chimney and its
+  // smoke.
+  const box = { houseX: yard, houseW, roofTop: 0, roofH };
+  const rise = chimneyRise(style);
+  const roofTop = Math.max(
+    4,
+    roofCrown(style) + 2,
+    rise === null ? 0 : rise + SMOKE - chimneyFoot(style, box, chimneyX),
   );
-  const maxInner = Math.floor(width / scale) - 2 * YARD - 2 * WALL;
-  const plan = planHouse(count, books.length, maxInner);
-  const houseW = plan.inner + 2 * WALL;
-  const sceneW = houseW + 2 * YARD;
-  // 2 across for 1 up, flattened to a long ridge on a wide house.
-  const roofH = Math.max(14, Math.min(40, Math.floor((houseW + 8) / 4)));
-  const ground = plan.floors[plan.floors.length - 1];
-  const hearth = ground.find((p) => p.kind === "hearth");
-  const chimneyX = YARD + WALL + (hearth ? hearth.x + 17 : 12);
-  // Sky over the roof for the chimney (it stands CHIMNEY dots above the
-  // roof where it comes through) and SMOKE more for its smoke.
-  const flat = { sceneW, houseX: YARD, houseW, roofTop: 0, roofH } as HouseGeometry;
-  const roofTop = Math.max(4, CHIMNEY + SMOKE - roofSurface(flat, chimneyX + CHIMNEY_WIDTH));
-  const geo: HouseGeometry = {
-    sceneW,
-    houseX: YARD,
+  return {
+    sceneW: houseW + 2 * yard,
+    houseX: yard,
     houseW,
     roofTop,
     roofH,
     floorsTop: roofTop + roofH,
-    floorCount: plan.floors.length,
+    floorCount,
     storey: STOREY,
     roomH: ROOM_HEIGHT,
     beam: BEAM,
@@ -260,21 +282,29 @@ function layoutRoom(books: RoomBook[], width: number): Layout {
     ground: GROUND,
     chimneyX,
   };
-  const sceneH = geo.floorsTop + plan.floors.length * STOREY + BEAM + FOUNDATION + GROUND;
+}
+
+const sceneHeight = (geo: HouseGeometry) => geo.floorsTop + geo.floorCount * STOREY + BEAM + FOUNDATION + GROUND;
+
+function layoutRoom(books: RoomBook[], width: number, style: RoomStyle, arrangement: Arrangement): Layout {
+  const scale = scaleFor(width);
+  const shelves = shelve(books.map((b) => spineFor(b).width));
+  const count = caseCount(shelves.length);
+  const cases = Array.from({ length: count }, (_, i) =>
+    Array.from({ length: SHELVES_PER_CASE }, (_, j) => shelves[i * SHELVES_PER_CASE + j] ?? []),
+  );
+  const yard = yardFor(scale);
+  const maxInner = Math.floor(width / scale) - 2 * yard - 2 * WALL;
+  const plan = planHouse(count, books.length, maxInner, arrangement);
+  // The chimney stands over the fireplace, on whichever floor that is.
+  const hearth = plan.floors.flat().find((p) => p.kind === "hearth");
+  const geo = houseGeometry(style, yard, plan.inner + 2 * WALL, plan.floors.length, hearth ? hearth.x : null);
+  const sceneH = sceneHeight(geo);
   const floorRange = plan.floors.map((floor): [number, number] => {
     const inFloor = floor.flatMap((p) => (p.kind === "case" ? cases[p.caseIndex!].flat() : []));
     return inFloor.length ? [inFloor[0], inFloor[inFloor.length - 1]] : [-1, -1];
   });
-  return {
-    scale,
-    geo,
-    sceneH,
-    floors: plan.floors,
-    cat: plan.cat,
-    smoke: { x: chimneyX + 3, y: roofSurface(geo, chimneyX + CHIMNEY_WIDTH) - CHIMNEY },
-    cases,
-    floorRange,
-  };
+  return { scale, geo, sceneH, plan, caseTotal: count, maxInner, floors: plan.floors, cat: plan.cat, cases, floorRange };
 }
 
 /** `current` if it falls in `range`, else -1, so a memoised part of the
@@ -318,11 +348,32 @@ interface OpenBook {
 
 // ── The room ─────────────────────────────────────────────────────────────
 
+/** How the room is decorated (Decorate on the Room page). */
+export interface RoomDecor {
+  style: RoomStyle;
+  walls: RoomWalls;
+  wood: RoomWood;
+  fabric: RoomFabric;
+  hanging: RoomHanging;
+}
+
+export const PLAIN_DECOR: RoomDecor = {
+  style: "cottage",
+  walls: "style",
+  wood: "style",
+  fabric: "style",
+  hanging: "painting",
+};
+
+const FLOOR_NAMES = ["ground floor", "first floor", "second floor", "third floor", "fourth floor", "fifth floor"];
+const floorName = (fromGround: number) => FLOOR_NAMES[fromGround] ?? `floor ${fromGround}`;
+
 /**
  * The library as a cozy pixel-art house: every book a spine on a shelf, in
  * the order a bookshelf files them, and a house that gains bookcases,
  * furniture and floors as the library grows (lib/room.ts lays it out,
- * room-art.tsx draws it).
+ * room-art.tsx draws the furniture and room-shells.ts the house, in the
+ * style chosen in Decorate).
  *
  * Spines take their cover's main colour, or the drawn cover's colour for a
  * book without an image. Covers are read as their floor scrolls into view,
@@ -331,16 +382,35 @@ interface OpenBook {
  * X that flies it back onto its shelf. The shelves are one stop for Tab,
  * with the arrow keys moving from book to book.
  *
+ * While `arranging`, the furniture has handles to drag it about, or move
+ * it with the arrow keys; `onArrange` gets where it now stands.
+ *
  * It is drawn in the browser only: how many bookcases fit side by side
  * depends on the width it has.
  */
-export function ReadingRoom({ books }: { books: RoomBook[] }) {
+export function ReadingRoom({
+  books,
+  decor = PLAIN_DECOR,
+  arrangement = NO_ARRANGEMENT,
+  arranging = false,
+  onArrange,
+  onDone,
+}: {
+  books: RoomBook[];
+  decor?: RoomDecor;
+  arrangement?: Arrangement;
+  arranging?: boolean;
+  onArrange?: (next: Arrangement) => void;
+  /** Escape while arranging. */
+  onDone?: () => void;
+}) {
   const wrap = useRef<HTMLDivElement>(null);
   const scene = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(0);
   const [current, setCurrent] = useState(0);
   const [seen, setSeen] = useState<ReadonlySet<number>>(() => new Set());
   const [tip, setTip] = useState<{ index: number; left: number; top: number } | null>(null);
+  const [note, setNote] = useState<{ text: string; shown: boolean } | null>(null);
   // Back from a book's X: the books are already on their shelves as the
   // spine flies home, rather than settling onto them again.
   const [returning] = useState(isClosingBook);
@@ -353,8 +423,12 @@ export function ReadingRoom({ books }: { books: RoomBook[] }) {
     return () => observer.disconnect();
   }, []);
 
-  const layout = useMemo(() => (width ? layoutRoom(books, width) : null), [books, width]);
-  const shell = useMemo(() => (layout ? houseArt(layout.geo) : []), [layout]);
+  const style = decor.style;
+  const layout = useMemo(
+    () => (width ? layoutRoom(books, width, style, arrangement) : null),
+    [books, width, style, arrangement],
+  );
+  const shell = useMemo(() => (layout ? shellArt(layout.geo, style) : null), [layout, style]);
   const reading = books.findIndex((b) => b.status === ReadingStatus.READING && isOnShelf(b));
 
   // Which floors have come near the screen: their covers get read.
@@ -394,12 +468,43 @@ export function ReadingRoom({ books }: { books: RoomBook[] }) {
     [books, reading, known],
   );
 
+  // A note about the last move goes after a while.
+  useEffect(() => {
+    if (!note?.shown) return;
+    const timer = setTimeout(() => setNote(null), 3500);
+    return () => clearTimeout(timer);
+  }, [note]);
+
+  /** Moves a piece of furniture, if it fits there: `floor` counts up from
+   *  the ground floor. */
+  const move = (kind: Movable, floor: number, slot: number): boolean => {
+    if (!layout || !onArrange) return false;
+    const places = moveTo(layout.plan, kind, floor, slot);
+    const wanted = places?.find((p) => p.kind === kind);
+    if (!places || !wanted) return false;
+    const next: Arrangement = { places, away: arrangement.away };
+    const plan = planHouse(layout.caseTotal, books.length, layout.maxInner, next);
+    const landed = placementsOf(plan).find((p) => p.kind === kind);
+    const name = FURNITURE_LABELS[kind];
+    if (!landed || landed.floor !== wanted.floor || landed.slot !== wanted.slot) {
+      setNote({ text: `There isn't room for the ${name.toLowerCase()} there.`, shown: true });
+      return false;
+    }
+    const row = plan.floors[plan.floors.length - 1 - landed.floor].filter((p) => p.kind !== "ladder");
+    setNote({
+      text: `${name}: ${floorName(landed.floor)}, ${landed.slot + 1} of ${row.length} from the left.`,
+      shown: false,
+    });
+    onArrange(next);
+    return true;
+  };
+
   /** Shows the label over a spine (or the open book) being pointed at or
    *  focused. */
   const showTip = (el: Element | null) => {
     const target = el?.closest<HTMLElement>("[data-book]");
     const box = scene.current?.getBoundingClientRect();
-    if (!target || !box) return setTip(null);
+    if (!target || !box || arranging) return setTip(null);
     const rect = target.getBoundingClientRect();
     // Centred over the book, but kept inside the scene at its edges.
     const half = Math.min(TIP_HALF_WIDTH, box.width / 2);
@@ -413,6 +518,11 @@ export function ReadingRoom({ books }: { books: RoomBook[] }) {
   /** Arrow keys move along the shelves: left and right through the books in
    *  order, up and down to the nearest book on the shelf above or below. */
   const onKeyDown = (e: React.KeyboardEvent) => {
+    if (arranging && e.key === "Escape") {
+      e.preventDefault();
+      onDone?.();
+      return;
+    }
     const from = (e.target as HTMLElement).closest<HTMLElement>("[data-spine]");
     if (!from || e.altKey || e.ctrlKey || e.metaKey) return;
     const spines = [...(scene.current?.querySelectorAll<HTMLElement>("[data-spine]") ?? [])];
@@ -445,7 +555,7 @@ export function ReadingRoom({ books }: { books: RoomBook[] }) {
     next?.focus();
   };
 
-  if (!layout) {
+  if (!layout || !shell) {
     return <div ref={wrap} className="room-wrap" style={{ minHeight: "28rem" }} />;
   }
 
@@ -459,10 +569,12 @@ export function ReadingRoom({ books }: { books: RoomBook[] }) {
         ref={scene}
         className="room-scene"
         role="group"
-        aria-label="Your bookshelves"
-        aria-describedby="room-keys"
+        aria-label={arranging ? "Your reading room, moving furniture" : "Your bookshelves"}
+        aria-describedby={arranging ? "room-arrange-keys" : "room-keys"}
         data-library-view=""
         data-returning={returning ? "" : undefined}
+        {...decorData(decor)}
+        data-arranging={arranging ? "" : undefined}
         style={{ width: geo.sceneW * s, height: sceneH * s, "--u": `${s}px` } as React.CSSProperties}
         onPointerOver={(e) => showTip(e.target as Element)}
         onPointerLeave={() => setTip(null)}
@@ -479,19 +591,22 @@ export function ReadingRoom({ books }: { books: RoomBook[] }) {
           aria-hidden="true"
           focusable="false"
         >
-          <Rects rects={shell} />
+          <Rects rects={shell.rects} />
+          <Rects rects={shell.over} />
         </svg>
-        <Smoke x={layout.smoke.x} y={layout.smoke.y} scale={s} />
-        {geo.roofH >= 20 && (
-          <Glow x={geo.houseX + geo.houseW / 2} y={geo.roofTop + geo.roofH - 11} r={16} scale={s} />
-        )}
-        <Sprite art={SHRUB} scale={s} className="room-abs" style={at(1, sceneH - GROUND - SHRUB.h + 1)} />
-        <Sprite
-          art={SHRUB}
-          scale={s}
-          className="room-abs"
-          style={at(geo.sceneW - SHRUB.w - 1, sceneH - GROUND - SHRUB.h + 1)}
-        />
+        {shell.smoke && <Smoke x={shell.smoke.x} y={shell.smoke.y} steam={shell.smoke.steam} scale={s} />}
+        {shell.yard.map((y, i) => (
+          <Sprite key={i} art={y.art} scale={s} className="room-abs" style={at(y.x, y.y)} />
+        ))}
+        {shell.moving.map((m, i) => (
+          <MovingPart key={i} part={m} scale={s} />
+        ))}
+        {shell.lights.map((l, i) => (
+          <Glow key={i} x={l.x} y={l.y} r={l.r} scale={s} />
+        ))}
+        {shell.fireflies.map((box, i) => (
+          <Fireflies key={i} box={box} scale={s} />
+        ))}
 
         {layout.floors.map((pieces, f) => (
           <Floor
@@ -509,12 +624,35 @@ export function ReadingRoom({ books }: { books: RoomBook[] }) {
             onCurrent={setCurrent}
             cat={layout.cat}
             openBook={openBook}
+            hanging={decor.hanging}
+            arranging={arranging}
           />
         ))}
+
+        {arranging && (
+          <ArrangeHandles
+            layout={layout}
+            scene={scene}
+            onMove={move}
+            onEdge={(text) => setNote({ text, shown: true })}
+            onDone={onDone}
+          />
+        )}
 
         <p id="room-keys" className="sr-only">
           Use the arrow keys to move from book to book, and Enter to open one.
         </p>
+        <p id="room-arrange-keys" className="sr-only">
+          Drag a piece of furniture to move it, or use the arrow keys. Press Escape when you&apos;re done.
+        </p>
+        <p className="sr-only" aria-live="polite">
+          {arranging && note?.text}
+        </p>
+        {arranging && note?.shown && (
+          <p className="room-note" aria-hidden="true">
+            {note.text}
+          </p>
+        )}
         {tipBook && tip && (
           <div className="room-tip" style={{ left: tip.left, top: tip.top }} aria-hidden="true">
             <p className="font-heading font-medium">{tipBook.title}</p>
@@ -524,6 +662,169 @@ export function ReadingRoom({ books }: { books: RoomBook[] }) {
         )}
       </div>
     </div>
+  );
+}
+
+// ── Arranging ────────────────────────────────────────────────────────────
+
+interface Drag {
+  kind: Movable;
+  pointer: number;
+  /** Where the pointer took hold, and where it is now, in scene dots. */
+  fromX: number;
+  fromY: number;
+  x: number;
+  y: number;
+  /** The pointer's offset from the piece's left edge. */
+  grab: number;
+  moved: boolean;
+}
+
+const DIRECTIONS: Record<string, "left" | "right" | "up" | "down"> = {
+  ArrowLeft: "left",
+  ArrowRight: "right",
+  ArrowUp: "up",
+  ArrowDown: "down",
+};
+
+/**
+ * A handle over each piece of furniture that can move, to drag it to
+ * another place or floor, with a line where it would go. The arrow keys
+ * move a focused one a place at a time; it keeps focus as it goes.
+ */
+function ArrangeHandles({
+  layout,
+  scene,
+  onMove,
+  onEdge,
+  onDone,
+}: {
+  layout: Layout;
+  scene: React.RefObject<HTMLDivElement | null>;
+  onMove: (kind: Movable, floor: number, slot: number) => boolean;
+  /** A piece can't go any further that way. */
+  onEdge: (text: string) => void;
+  onDone?: () => void;
+}) {
+  const [drag, setDrag] = useState<Drag | null>(null);
+  const handles = useRef(new Map<Movable, HTMLButtonElement>());
+  const following = useRef<Movable | null>(null);
+  const { scale: s, geo, floors } = layout;
+  const left = geo.houseX + WALL;
+  const top = (f: number) => geo.floorsTop + f * STOREY + BEAM;
+
+  // A piece moved from the keyboard to another floor: keep it in view.
+  useEffect(() => {
+    const kind = following.current;
+    following.current = null;
+    if (kind) handles.current.get(kind)?.scrollIntoView({ block: "nearest" });
+  }, [layout]);
+
+  /** Where a dragged piece would land: the floor (top first), the place
+   *  among the pieces there, and the line between them, in scene dots. */
+  const target = (d: Drag) => {
+    const f = Math.max(0, Math.min(floors.length - 1, Math.floor((d.y - geo.floorsTop) / STOREY)));
+    const others = floors[f].filter((p) => p.kind !== d.kind);
+    const row = others.filter((p) => p.kind !== "ladder");
+    const middle = d.x - d.grab + PIECE_WIDTH[d.kind] / 2 - left;
+    const slot = row.filter((p) => p.x + PIECE_WIDTH[p.kind] / 2 < middle).length;
+    const next = row[slot];
+    const ends = others.filter((p) => !next || p.x < next.x).map((p) => p.x + PIECE_WIDTH[p.kind]);
+    const end = ends.length ? Math.max(...ends) : 0;
+    const line = next ? (end + next.x) / 2 : Math.min(end + GAP / 2, geo.houseW - 2 * WALL - 1);
+    return { f, slot, line: left + line };
+  };
+
+  const scenePoint = (e: React.PointerEvent) => {
+    const box = scene.current!.getBoundingClientRect();
+    return { x: (e.clientX - box.left) / s, y: (e.clientY - box.top) / s };
+  };
+
+  const pieces = floors.flatMap((row, f) =>
+    row.flatMap((p) => (isMovable(p.kind) ? [{ kind: p.kind, f, x: p.x }] : [])),
+  );
+  const drop = drag?.moved ? target(drag) : null;
+
+  return (
+    <>
+      {drop && (
+        <div
+          className="room-drop"
+          aria-hidden="true"
+          style={{ left: (drop.line - 1) * s, top: top(drop.f) * s, width: 2 * s, height: ROOM_HEIGHT * s }}
+        />
+      )}
+      {pieces.map(({ kind, f, x }) => {
+        const name = FURNITURE_LABELS[kind];
+        const dragging = drag?.kind === kind && drag.moved;
+        return (
+          <button
+            key={kind}
+            ref={(el) => {
+              if (el) handles.current.set(kind, el);
+              else handles.current.delete(kind);
+            }}
+            type="button"
+            className="room-handle"
+            data-dragging={dragging ? "" : undefined}
+            aria-label={`Move the ${name.toLowerCase()}`}
+            style={{
+              left: (left + x) * s,
+              top: top(f) * s,
+              width: PIECE_WIDTH[kind] * s,
+              height: ROOM_HEIGHT * s,
+              translate: dragging ? `${(drag.x - drag.fromX) * s}px ${(drag.y - drag.fromY) * s}px` : undefined,
+            }}
+            onPointerDown={(e) => {
+              if (e.button !== 0) return;
+              const p = scenePoint(e);
+              e.currentTarget.setPointerCapture(e.pointerId);
+              setDrag({ kind, pointer: e.pointerId, fromX: p.x, fromY: p.y, x: p.x, y: p.y, grab: p.x - left - x, moved: false });
+            }}
+            onPointerMove={(e) => {
+              if (drag?.pointer !== e.pointerId) return;
+              const p = scenePoint(e);
+              const moved = drag.moved || Math.abs(p.x - drag.fromX) + Math.abs(p.y - drag.fromY) > 3;
+              setDrag({ ...drag, x: p.x, y: p.y, moved });
+            }}
+            onPointerUp={(e) => {
+              if (drag?.pointer !== e.pointerId) return;
+              setDrag(null);
+              if (!drag.moved) return;
+              const t = target(drag);
+              onMove(kind, floors.length - 1 - t.f, t.slot);
+            }}
+            onPointerCancel={() => setDrag(null)}
+            onKeyDown={(e) => {
+              if (e.key === "Escape") {
+                e.preventDefault();
+                e.stopPropagation();
+                onDone?.();
+                return;
+              }
+              const direction = DIRECTIONS[e.key];
+              if (!direction || e.altKey || e.ctrlKey || e.metaKey) return;
+              e.preventDefault();
+              const to = nudge(layout.plan, kind, direction);
+              const it = `The ${name.toLowerCase()}`;
+              if (!to) {
+                onEdge(
+                  direction === "up"
+                    ? `${it} is on the top floor.`
+                    : direction === "down"
+                      ? `${it} is on the ground floor.`
+                      : `${it} is at the ${direction} wall.`,
+                );
+              } else if (onMove(kind, to.floor, to.slot) && (direction === "up" || direction === "down")) {
+                following.current = kind;
+              }
+            }}
+          >
+            <span className="room-handle-name">{name}</span>
+          </button>
+        );
+      })}
+    </>
   );
 }
 
@@ -544,6 +845,8 @@ const Floor = memo(function Floor({
   onCurrent,
   cat,
   openBook,
+  hanging,
+  arranging,
 }: {
   index: number;
   pieces: Piece[];
@@ -558,12 +861,16 @@ const Floor = memo(function Floor({
   onCurrent: (index: number) => void;
   cat: boolean;
   openBook: OpenBook | null;
+  hanging: RoomHanging;
+  /** While the furniture is being moved, the books stay put. */
+  arranging: boolean;
 }) {
   const floorLine = STOREY;
   return (
     <div
       className="room-floor"
       data-floor={index}
+      inert={arranging}
       style={{ left: left * s, top: top * s, width: width * s, height: STOREY * s }}
     >
       {pieces.map((piece) => {
@@ -597,6 +904,7 @@ const Floor = memo(function Floor({
             scale={s}
             cat={cat}
             openBook={openBook}
+            hanging={hanging}
           />
         );
       })}
@@ -724,13 +1032,69 @@ function Glow({ x, y, r, scale: s, className }: { x: number; y: number; r: numbe
   );
 }
 
-/** Smoke rising from the chimney pot whose top is at `x`, `y`. */
-function Smoke({ x, y, scale: s }: { x: number; y: number; scale: number }) {
+/** Smoke rising from the chimney pot whose top is at `x`, `y`, or steam
+ *  from a stack. */
+function Smoke({ x, y, steam, scale: s }: { x: number; y: number; steam: boolean; scale: number }) {
   return (
-    <div className="room-smoke room-abs" aria-hidden="true" style={{ left: x * s, top: (y - 3) * s }}>
+    <div
+      className={`room-smoke room-abs ${steam ? "room-smoke-steam" : ""}`}
+      aria-hidden="true"
+      style={{ left: x * s, top: (y - 3) * s }}
+    >
       <span />
       <span />
       <span />
+    </div>
+  );
+}
+
+/** A banner, gear, torch or beacon on the house, in its frames. */
+function MovingPart({ part, scale: s }: { part: Moving; scale: number }) {
+  const [first, second] = part.frames;
+  return (
+    <Sprite art={part.art} scale={s} className={`room-abs room-${part.motion}`} style={{ left: part.x * s, top: part.y * s }}>
+      {second ? (
+        <>
+          <Rects className="room-frame-a" rects={first} />
+          <Rects className="room-frame-b" rects={second} />
+        </>
+      ) : (
+        <Rects className="room-blinker" rects={first} />
+      )}
+    </Sprite>
+  );
+}
+
+/** Where the fireflies are, as fractions of their box, and their timing:
+ *  fixed, so they're in the same places on every visit. */
+const FIREFLIES = Array.from({ length: 5 }, (_, i) => ({
+  x: (i * 0.37 + 0.11) % 1,
+  y: (i * 0.61 + 0.23) % 1,
+  t: 5 + ((i * 1.7) % 3),
+  p: -((i * 2.3) % 6),
+}));
+
+/** Fireflies drifting over the garden, at night only. */
+function Fireflies({ box, scale: s }: { box: Shell["fireflies"][number]; scale: number }) {
+  return (
+    <div
+      className="room-fireflies room-abs"
+      aria-hidden="true"
+      style={{ left: box.x * s, top: box.y * s, width: box.w * s, height: box.h * s }}
+    >
+      {FIREFLIES.map((f, i) => (
+        <span
+          key={i}
+          style={
+            {
+              left: `${f.x * 100}%`,
+              top: `${f.y * 100}%`,
+              "--t": `${f.t}s`,
+              "--p": `${f.p}s`,
+            } as React.CSSProperties
+          }
+        />
+      ))}
     </div>
   );
 }
@@ -743,6 +1107,7 @@ function Furniture({
   scale: s,
   cat,
   openBook,
+  hanging,
 }: {
   kind: Piece["kind"];
   x: number;
@@ -751,6 +1116,7 @@ function Furniture({
   scale: number;
   cat: boolean;
   openBook: OpenBook | null;
+  hanging: RoomHanging;
 }) {
   const stand = (a: Art, dx: number, extra?: { className?: string; children?: React.ReactNode; lift?: number }) => (
     <Stand
@@ -768,10 +1134,19 @@ function Furniture({
   switch (kind) {
     case "hearth": {
       const fireTop = floorLine - FIREPLACE.h;
+      const hung = hanging === "none" ? null : HANGINGS[hanging];
       return (
         <>
           {stand(rugArt(56), 46)}
-          <Sprite art={PAINTING} scale={s} className="room-abs room-art-dim" style={{ left: (x + 7) * s, top: (floorLine - 92) * s }} />
+          {hung && (
+            // Centred over the fireplace; a tapestry hangs from higher up.
+            <Sprite
+              art={hung}
+              scale={s}
+              className="room-abs room-art-dim"
+              style={{ left: (x + 22 - hung.w / 2) * s, top: (floorLine - (hanging === "painting" ? 92 : 106)) * s }}
+            />
+          )}
           {stand(FIREPLACE, 0, {
             children: (
               <>
@@ -870,4 +1245,89 @@ function Pendant({ x, ceiling, scale: s }: { x: number; ceiling: number; scale: 
       <Glow x={x + 5.5} y={ceiling + 15} r={26} scale={s} />
     </>
   );
+}
+
+// ── Previews for Decorate ────────────────────────────────────────────────
+
+/** The data attributes that colour a scene (or a preview) in `decor`'s
+ *  style and colours (reading-room.css). */
+export function decorData(decor: RoomDecor): Record<string, string | undefined> {
+  const pick = (value: string) => (value === "style" ? undefined : value);
+  return {
+    "data-style": decor.style,
+    "data-derive": decor.style === "cottage" ? undefined : "",
+    "data-walls": pick(decor.walls),
+    "data-wood": pick(decor.wood),
+    "data-fabric": pick(decor.fabric),
+  };
+}
+
+const shift = (rects: readonly Rect[], dx: number, dy: number): Rect[] =>
+  rects.map(([x, y, w, h, p]): Rect => [x + dx, y + dy, w, h, p]);
+
+const PREVIEW_SPINES: Rect[] = (() => {
+  const paints = ["spine-a", "chair", "rug-2", "spine-b", "curtain", "wood-lo", "chair-lo"] as const;
+  const out: Rect[] = [];
+  let n = 0;
+  for (let j = 0; j < SHELVES_PER_CASE; j++) {
+    const bottom = CASE_CROWN + j * (SHELF_SLOT + SHELF_BOARD) + SHELF_SLOT;
+    for (let x = 3; x < 3 + SHELF_WIDTH - 6; n++) {
+      const w = 3 + ((n * 7) % 3);
+      const h = 13 + ((n * 5) % 6);
+      out.push([x, bottom - h, w, h, paints[(n * 3 + j) % paints.length]]);
+      x += w;
+    }
+  }
+  return out;
+})();
+
+/** A small picture of one floor of the house in a style: the fireplace,
+ *  armchair and lamp, and a bookcase of books. */
+function previewArt(style: RoomStyle, hanging: RoomHanging): { w: number; h: number; rects: Rect[] } {
+  const inner = 2 * PAD + PIECE_WIDTH.hearth + GAP + PIECE_WIDTH.case;
+  const geo = houseGeometry(style, yardFor(3), inner + 2 * WALL, 1, PAD);
+  const shell = shellArt(geo, style);
+  const R: Rect[] = [...shell.rects, ...shell.over];
+  for (const y of shell.yard) R.push(...shift(y.art.rects, y.x, y.y));
+  for (const m of shell.moving) R.push(...shift(m.frames[0], m.x, m.y));
+  const fx = geo.houseX + WALL + PAD;
+  const line = geo.floorsTop + STOREY;
+  const stand = (a: Art, dx: number, lift = 0) => R.push(...shift(a.rects, fx + dx, line - lift - a.h));
+  stand(rugArt(56), 46);
+  const hung = hanging === "none" ? null : HANGINGS[hanging];
+  if (hung) R.push(...shift(hung.rects, fx + 22 - hung.w / 2, line - (hanging === "painting" ? 92 : 106)));
+  stand(FIREPLACE, 0);
+  R.push(...shift(LOGS, fx + 15, line - FIREPLACE.h + 37), ...shift(FLAMES_A, fx + 15, line - FIREPLACE.h + 28));
+  stand(CANDLESTICK, 4, FIREPLACE.h);
+  stand(CANDLESTICK, 37, FIREPLACE.h);
+  stand(MANTEL_CLOCK, 18, FIREPLACE.h);
+  stand(ARMCHAIR, 50);
+  stand(SIDE_TABLE, 81);
+  stand(TEACUP, 88, SIDE_TABLE.h);
+  stand(LAMP, 93);
+  const bx = fx + PIECE_WIDTH.hearth + GAP;
+  R.push(...shift(BOOKCASE.rects, bx, line - CASE_HEIGHT), ...shift(PREVIEW_SPINES, bx, line - CASE_HEIGHT));
+  return { w: geo.sceneW, h: sceneHeight(geo), rects: R };
+}
+
+/** A house style in miniature, coloured by the scene (or element with
+ *  decorData) around it. */
+export const HousePreview = memo(function HousePreview({ style, hanging }: { style: RoomStyle; hanging: RoomHanging }) {
+  const a = useMemo(() => previewArt(style, hanging), [style, hanging]);
+  return (
+    <svg
+      className="room-preview"
+      viewBox={`0 0 ${a.w} ${a.h}`}
+      preserveAspectRatio="xMidYMax meet"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <Rects rects={a.rects} />
+    </svg>
+  );
+});
+
+/** What hangs over the fireplace, on its own. */
+export function HangingPreview({ hanging, scale = 2 }: { hanging: Exclude<RoomHanging, "none">; scale?: number }) {
+  return <Sprite art={HANGINGS[hanging]} scale={scale} className="block" />;
 }

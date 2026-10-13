@@ -6,7 +6,7 @@ import { getPreferences } from "@/lib/current-user";
 import { formatNumber } from "@/lib/display";
 import { sortBooks } from "@/lib/library-sort";
 import { caseCount, shelve, spineFor, type RoomBook } from "@/lib/room";
-import { ReadingRoom } from "@/components/reading-room";
+import { RoomView } from "@/components/room-view";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Reading room · MyReads" };
@@ -14,7 +14,8 @@ export const metadata = { title: "Reading room · MyReads" };
 /**
  * The reading room: the whole library as a little pixel-art house, every
  * book a spine on a shelf, filed by author the way a bookshelf is. The
- * house grows with the library (components/reading-room.tsx).
+ * house grows with the library (components/reading-room.tsx), and is
+ * decorated as the reader likes (components/room-view.tsx).
  */
 export default async function ReadingRoomPage() {
   const session = await auth();
@@ -72,17 +73,25 @@ export default async function ReadingRoomPage() {
 
   return (
     <div className="grid gap-4">
-      <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-        <h1 className="text-2xl font-semibold tracking-tight">Reading room</h1>
-        {books.length > 0 && (
-          <span className="text-sm text-muted-foreground">
-            {books.length === 1 ? "1 book" : `${formatNumber(books.length, prefs)} books`}
-            {" on "}
-            {cases === 1 ? "1 bookcase" : `${formatNumber(cases, prefs)} bookcases`}
-          </span>
-        )}
-      </div>
-      <ReadingRoom books={books} />
+      <RoomView
+        books={books}
+        decor={{
+          style: prefs.roomStyle,
+          walls: prefs.roomWalls,
+          wood: prefs.roomWood,
+          fabric: prefs.roomFabric,
+          hanging: prefs.roomHanging,
+        }}
+        layout={prefs.roomLayout}
+        away={prefs.roomAway}
+        summary={
+          books.length > 0
+            ? `${books.length === 1 ? "1 book" : `${formatNumber(books.length, prefs)} books`} on ${
+                cases === 1 ? "1 bookcase" : `${formatNumber(cases, prefs)} bookcases`
+              }`
+            : null
+        }
+      />
       {books.length === 0 ? (
         <p className="text-center text-sm text-muted-foreground">
           The shelves are waiting.{" "}
@@ -95,7 +104,8 @@ export default async function ReadingRoomPage() {
         <p className="mx-auto max-w-prose text-center text-xs text-muted-foreground">
           Books are filed by author. An outline keeps the place of a book that isn&apos;t on the
           shelf right now: wished for, lent out or given away. A red ribbon marks a book
-          you&apos;re reading. The room gets more furniture as your library grows.
+          you&apos;re reading. The room gets more furniture as your library grows, and
+          Decorate changes its style, colours and where the furniture stands.
         </p>
       )}
     </div>

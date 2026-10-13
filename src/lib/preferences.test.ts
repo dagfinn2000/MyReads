@@ -305,6 +305,45 @@ describe("parsePreferences: the newer settings", () => {
   });
 });
 
+describe("parsePreferences: the reading room", () => {
+  it("keeps a chosen style and colours, and defaults anything else", () => {
+    const prefs = parsePreferences({
+      roomStyle: "elven",
+      roomWalls: "sage",
+      roomWood: "plywood", // not a value
+      roomFabric: "teal",
+      roomHanging: "stag",
+    });
+    expect(prefs.roomStyle).toBe("elven");
+    expect(prefs.roomWalls).toBe("sage");
+    expect(prefs.roomWood).toBe("style");
+    expect(prefs.roomFabric).toBe("teal");
+    expect(prefs.roomHanging).toBe("stag");
+    expect(parsePreferences({ roomStyle: "igloo" }).roomStyle).toBe("cottage");
+  });
+
+  it("keeps one sound place for each piece of furniture", () => {
+    const prefs = parsePreferences({
+      roomLayout: [
+        { kind: "hearth", floor: 1, slot: 0 },
+        { kind: "hearth", floor: 0, slot: 2 }, // a second place for it
+        { kind: "case", floor: 0, slot: 1 }, // bookcases don't move
+        { kind: "plant", floor: -1, slot: 0 },
+        { kind: "clock", floor: 0, slot: 1.5 },
+        { kind: "seat", floor: 2, slot: 3 },
+        "junk",
+      ],
+      roomAway: ["plant", "hearth", "ladder", "ladder"],
+    });
+    expect(prefs.roomLayout).toEqual([
+      { kind: "hearth", floor: 1, slot: 0 },
+      { kind: "seat", floor: 2, slot: 3 },
+    ]);
+    expect(prefs.roomAway).toEqual(["plant", "ladder"]);
+    expect(parsePreferences({ roomLayout: "nope" }).roomLayout).toEqual([]);
+  });
+});
+
 describe("isValidTimeZone", () => {
   it("accepts IANA zones and UTC", () => {
     expect(isValidTimeZone("America/New_York")).toBe(true);
