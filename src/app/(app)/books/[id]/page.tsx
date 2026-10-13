@@ -19,7 +19,7 @@ import {
 } from "@/lib/display";
 import { AuthorLinks } from "@/components/author-links";
 import { formatLength } from "@/lib/progress-units";
-import { BookCover } from "@/components/book-card";
+import { BookBackdrop, BookCover } from "@/components/book-card";
 import { BookDescription } from "@/components/book-description";
 import { BookLink } from "@/components/book-link";
 import { BookShelvesCard } from "@/components/book-shelves-card";
@@ -139,10 +139,11 @@ export default async function BookDetailPage({
     // default (auto) minimum, one unbreakable token in the description (Open
     // Library URLs, say) would stretch the whole page past the viewport.
     <div className="grid grid-cols-1 gap-6 md:grid-cols-[240px_minmax(0,1fr)]">
+      <BookBackdrop book={book} />
       <div className="grid content-start gap-3">
         <BookCover
           book={book}
-          className="aspect-[2/3] w-full max-w-60"
+          className="hero-cover aspect-[2/3] w-full max-w-60"
           loading="eager"
           flightTarget={book.id}
         />
@@ -161,9 +162,11 @@ export default async function BookDetailPage({
         {/* A title, author or series with no spaces to break at wraps
             anywhere, instead of pushing the page sideways. */}
         <div className="wrap-anywhere">
-          <h1 className="text-3xl font-semibold tracking-tight">{book.title}</h1>
+          <h1 className="text-3xl leading-tight font-semibold tracking-tight text-balance sm:text-4xl">
+            {book.title}
+          </h1>
           {book.authors.length > 0 && (
-            <p className="mt-1 text-lg text-muted-foreground">
+            <p className="mt-1.5 text-lg text-muted-foreground">
               <AuthorLinks authors={book.authors} />
             </p>
           )}
@@ -210,7 +213,9 @@ export default async function BookDetailPage({
           )}
         </div>
 
-        <dl className="grid grid-cols-2 gap-x-6 gap-y-1 text-sm sm:grid-cols-4">
+        {/* Each fact sits after a hairline, with its label in small
+            capitals above the value (globals.css, `.book-facts`). */}
+        <dl className="book-facts grid grid-cols-2 gap-x-6 gap-y-3 text-sm sm:grid-cols-4">
           {book.pageCount && (
             <div>
               <dt className="text-muted-foreground">Pages</dt>

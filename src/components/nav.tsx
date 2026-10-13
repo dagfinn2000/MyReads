@@ -14,6 +14,7 @@ import {
 import { auth, signOut } from "@/auth";
 import { getPreferences } from "@/lib/current-user";
 import { Button } from "@/components/ui/button";
+import { NavLink } from "@/components/nav-link";
 import { ThemePicker } from "@/components/theme-picker";
 
 /** Top navigation for authenticated pages. Server component — reads the
@@ -25,7 +26,7 @@ export async function Nav() {
   const hidden = new Set(prefs.hiddenNav);
 
   return (
-    <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur">
+    <header className="top-bar sticky top-0 z-40 border-b bg-background/75 backdrop-blur-md backdrop-saturate-150">
       {/* Below lg the nav buttons collapse to icons. With six labelled
           links plus the right-hand group the bar needs about 1000px, so
           labels from sm (640px) overflowed tablets and narrow windows.
@@ -34,53 +35,41 @@ export async function Nav() {
       <div className="mx-auto flex h-14 max-w-6xl items-center gap-0.5 px-3 max-sm:[&_[data-slot=button]]:px-1.5 sm:gap-1 sm:px-4">
         <Link
           href="/"
-          className="mr-1 flex items-center gap-2 text-lg font-semibold tracking-tight sm:mr-4"
+          className="wordmark mr-1 flex items-center gap-2 text-lg sm:mr-4"
         >
           <BookOpen className="size-5" />
           <span className="hidden min-[480px]:inline">MyReads</span>
         </Link>
-        <Button asChild variant="ghost" size="sm" title="Library">
-          <Link href="/books">
-            <LibraryBig data-slot="icon" />
-            <span className="hidden lg:inline">Library</span>
-          </Link>
-        </Button>
+        <NavLink href="/books" title="Library">
+          <LibraryBig data-slot="icon" />
+          <span className="hidden lg:inline">Library</span>
+        </NavLink>
         {!hidden.has("reading") && (
-          <Button asChild variant="ghost" size="sm" title="Now reading">
-            <Link href="/reading">
-              <BookOpenText data-slot="icon" />
-              <span className="hidden lg:inline">Now reading</span>
-            </Link>
-          </Button>
+          <NavLink href="/reading" title="Now reading">
+            <BookOpenText data-slot="icon" />
+            <span className="hidden lg:inline">Now reading</span>
+          </NavLink>
         )}
-        <Button asChild variant="ghost" size="sm" title="Add book">
-          <Link href="/books/new">
-            <Plus data-slot="icon" />
-            <span className="hidden lg:inline">Add book</span>
-          </Link>
-        </Button>
+        <NavLink href="/books/new" title="Add book">
+          <Plus data-slot="icon" />
+          <span className="hidden lg:inline">Add book</span>
+        </NavLink>
         {!hidden.has("check") && (
-          <Button asChild variant="ghost" size="sm" title="Do I own this?">
-            <Link href="/books/check">
-              <ScanSearch data-slot="icon" />
-              <span className="hidden lg:inline">Check</span>
-            </Link>
-          </Button>
+          <NavLink href="/books/check" title="Do I own this?">
+            <ScanSearch data-slot="icon" />
+            <span className="hidden lg:inline">Check</span>
+          </NavLink>
         )}
         {!hidden.has("quotes") && (
-          <Button asChild variant="ghost" size="sm" title="Quotes">
-            <Link href="/quotes">
-              <Quote data-slot="icon" />
-              <span className="hidden lg:inline">Quotes</span>
-            </Link>
-          </Button>
+          <NavLink href="/quotes" title="Quotes">
+            <Quote data-slot="icon" />
+            <span className="hidden lg:inline">Quotes</span>
+          </NavLink>
         )}
-        <Button asChild variant="ghost" size="sm" title="Stats">
-          <Link href="/stats">
-            <ChartColumn data-slot="icon" />
-            <span className="hidden lg:inline">Stats</span>
-          </Link>
-        </Button>
+        <NavLink href="/stats" title="Stats">
+          <ChartColumn data-slot="icon" />
+          <span className="hidden lg:inline">Stats</span>
+        </NavLink>
         <div className="ml-auto flex items-center gap-0.5 sm:gap-3">
           <Button
             asChild

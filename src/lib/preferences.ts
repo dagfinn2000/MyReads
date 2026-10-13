@@ -76,6 +76,14 @@ export const ACCENTS = [
  *  app derives from. */
 export const CORNERS = ["square", "rounded", "round"] as const;
 
+/** How cards sit on the page: a hairline outline (the original look), a
+ *  soft shadow, or frosted glass that lets the background show through. */
+export const CARD_STYLES = ["flat", "raised", "frosted"] as const;
+
+/** Behind the top of a book's page: a soft wash of its cover's colours, or
+ *  nothing. */
+export const BOOK_BACKDROPS = ["cover", "plain"] as const;
+
 /** A texture behind the pages (globals.css draws each one). */
 export const BACKGROUNDS = [
   "plain",
@@ -87,6 +95,12 @@ export const BACKGROUNDS = [
   "books",
   "waves",
   "glow",
+  "contours",
+  "stars",
+  "leaves",
+  "scallops",
+  "parquet",
+  "aurora",
 ] as const;
 
 /** Colour steps for the reading calendar (see lib/heatmap.ts). */
@@ -212,6 +226,8 @@ export type Motion = (typeof MOTIONS)[number];
 export type CoverArtStyle = (typeof COVER_ARTS)[number];
 export type Accent = (typeof ACCENTS)[number];
 export type Corners = (typeof CORNERS)[number];
+export type CardStyle = (typeof CARD_STYLES)[number];
+export type BookBackdrop = (typeof BOOK_BACKDROPS)[number];
 export type Background = (typeof BACKGROUNDS)[number];
 export type HeatmapScale = (typeof HEATMAP_SCALES)[number];
 export type StartPage = (typeof START_PAGES)[number];
@@ -282,7 +298,9 @@ export type Preferences = {
   coverArt: CoverArtStyle;
   accent: Accent;
   corners: Corners;
+  cardStyle: CardStyle;
   background: Background;
+  bookBackdrop: BookBackdrop;
 
   heatmapScale: HeatmapScale;
   startPage: StartPage;
@@ -362,7 +380,9 @@ export const DEFAULT_PREFERENCES: Preferences = {
   coverArt: "drawn",
   accent: "theme",
   corners: "rounded",
+  cardStyle: "raised",
   background: "plain",
+  bookBackdrop: "cover",
   heatmapScale: "standard",
   startPage: "library",
   hiddenNav: [],
@@ -585,7 +605,9 @@ export function parsePreferences(raw: unknown): Preferences {
     coverArt: pick(COVER_ARTS, obj.coverArt, d.coverArt),
     accent: pick(ACCENTS, obj.accent, d.accent),
     corners: pick(CORNERS, obj.corners, d.corners),
+    cardStyle: pick(CARD_STYLES, obj.cardStyle, d.cardStyle),
     background: pick(BACKGROUNDS, obj.background, d.background),
+    bookBackdrop: pick(BOOK_BACKDROPS, obj.bookBackdrop, d.bookBackdrop),
     heatmapScale: pick(HEATMAP_SCALES, obj.heatmapScale, d.heatmapScale),
     startPage: pick(START_PAGES, obj.startPage, d.startPage),
     hiddenNav: pickList(HIDEABLE_NAV, obj.hiddenNav),

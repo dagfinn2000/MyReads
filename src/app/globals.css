@@ -844,6 +844,78 @@ html[data-background="glow"] body,
   );
   background-repeat: no-repeat;
 }
+/* Contour lines, like a walking map. The drawing is a file of its own
+   (public/textures/contours.svg) because, unlike the small patterns here,
+   it is a few kilobytes of smooth curves; the browser only fetches
+   it when it is chosen or previewed. It repeats seamlessly. */
+html[data-background="contours"] body,
+.texture-swatch[data-texture="contours"] {
+  background-image: url("/textures/contours.svg");
+  background-size: 480px 480px;
+}
+/* Small stars of a few sizes, with three four-pointed glints. Light
+   stars on dark themes, for a night sky; grey ones on light themes. */
+html[data-background="stars"] body,
+.texture-swatch[data-texture="stars"] {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240' fill='rgb(110,110,110)' fill-opacity='0.38'%3E%3Ccircle cx='109.0' cy='133.9' r='0.9' fill-opacity='0.7'/%3E%3Ccircle cx='202.4' cy='48.1' r='1.1' fill-opacity='0.71'/%3E%3Ccircle cx='146.4' cy='47.2' r='0.9' fill-opacity='0.62'/%3E%3Ccircle cx='25.0' cy='191.8' r='1.4' fill-opacity='0.8'/%3E%3Ccircle cx='142.1' cy='95.9' r='0.9' fill-opacity='0.81'/%3E%3Ccircle cx='146.8' cy='40.5' r='0.6' fill-opacity='0.91'/%3E%3Ccircle cx='18.7' cy='12.3' r='0.7' fill-opacity='0.78'/%3E%3Ccircle cx='184.5' cy='79.7' r='1.1' fill-opacity='0.91'/%3E%3Ccircle cx='124.4' cy='152.5' r='0.9' fill-opacity='0.45'/%3E%3Ccircle cx='23.7' cy='155.9' r='0.9' fill-opacity='1.0'/%3E%3Ccircle cx='235.0' cy='198.9' r='1.4' fill-opacity='0.59'/%3E%3Ccircle cx='179.9' cy='123.0' r='0.6' fill-opacity='0.49'/%3E%3Ccircle cx='181.8' cy='96.9' r='0.8' fill-opacity='0.66'/%3E%3Ccircle cx='226.3' cy='200.6' r='0.6' fill-opacity='0.57'/%3E%3Ccircle cx='219.1' cy='16.1' r='0.9' fill-opacity='0.99'/%3E%3Ccircle cx='96.2' cy='20.9' r='1.4' fill-opacity='0.56'/%3E%3Ccircle cx='160.6' cy='82.2' r='0.8' fill-opacity='0.63'/%3E%3Ccircle cx='227.7' cy='179.9' r='0.6' fill-opacity='0.52'/%3E%3Ccircle cx='168.0' cy='6.5' r='0.9' fill-opacity='0.89'/%3E%3Ccircle cx='45.2' cy='133.8' r='0.9' fill-opacity='0.73'/%3E%3Ccircle cx='232.6' cy='182.5' r='0.9' fill-opacity='0.8'/%3E%3Ccircle cx='31.0' cy='101.6' r='0.7' fill-opacity='0.45'/%3E%3Ccircle cx='204.5' cy='230.2' r='1.1' fill-opacity='0.62'/%3E%3Ccircle cx='209.3' cy='52.9' r='0.9' fill-opacity='1.0'/%3E%3Ccircle cx='143.7' cy='137.9' r='0.6' fill-opacity='0.99'/%3E%3Ccircle cx='53.5' cy='63.9' r='1.1' fill-opacity='0.63'/%3E%3Ccircle cx='72.7' cy='21.0' r='0.6' fill-opacity='0.56'/%3E%3Ccircle cx='151.7' cy='7.6' r='0.8' fill-opacity='0.65'/%3E%3Ccircle cx='109.1' cy='226.5' r='0.9' fill-opacity='0.91'/%3E%3Ccircle cx='35.5' cy='93.6' r='1.4' fill-opacity='0.53'/%3E%3Ccircle cx='214.8' cy='193.7' r='0.7' fill-opacity='0.85'/%3E%3Ccircle cx='40.8' cy='149.9' r='1.1' fill-opacity='0.56'/%3E%3Ccircle cx='224.4' cy='208.7' r='1.1' fill-opacity='0.49'/%3E%3Ccircle cx='15.0' cy='29.3' r='1.1' fill-opacity='0.98'/%3E%3Cpath transform='translate(52 64) scale(1)' d='M0-6C.6-1.2 1.2-.6 6 0 1.2.6.6 1.2 0 6-.6 1.2-1.2.6-6 0-1.2-.6-.6-1.2 0-6z'/%3E%3Cpath transform='translate(178 150) scale(0.75)' d='M0-6C.6-1.2 1.2-.6 6 0 1.2.6.6 1.2 0 6-.6 1.2-1.2.6-6 0-1.2-.6-.6-1.2 0-6z'/%3E%3Cpath transform='translate(120 214) scale(0.55)' d='M0-6C.6-1.2 1.2-.6 6 0 1.2.6.6 1.2 0 6-.6 1.2-1.2.6-6 0-1.2-.6-.6-1.2 0-6z'/%3E%3C/svg%3E");
+  background-size: 240px 240px;
+}
+html.dark[data-background="stars"] body,
+.dark .texture-swatch[data-texture="stars"] {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240' fill='rgb(235,235,225)' fill-opacity='0.45'%3E%3Ccircle cx='109.0' cy='133.9' r='0.9' fill-opacity='0.7'/%3E%3Ccircle cx='202.4' cy='48.1' r='1.1' fill-opacity='0.71'/%3E%3Ccircle cx='146.4' cy='47.2' r='0.9' fill-opacity='0.62'/%3E%3Ccircle cx='25.0' cy='191.8' r='1.4' fill-opacity='0.8'/%3E%3Ccircle cx='142.1' cy='95.9' r='0.9' fill-opacity='0.81'/%3E%3Ccircle cx='146.8' cy='40.5' r='0.6' fill-opacity='0.91'/%3E%3Ccircle cx='18.7' cy='12.3' r='0.7' fill-opacity='0.78'/%3E%3Ccircle cx='184.5' cy='79.7' r='1.1' fill-opacity='0.91'/%3E%3Ccircle cx='124.4' cy='152.5' r='0.9' fill-opacity='0.45'/%3E%3Ccircle cx='23.7' cy='155.9' r='0.9' fill-opacity='1.0'/%3E%3Ccircle cx='235.0' cy='198.9' r='1.4' fill-opacity='0.59'/%3E%3Ccircle cx='179.9' cy='123.0' r='0.6' fill-opacity='0.49'/%3E%3Ccircle cx='181.8' cy='96.9' r='0.8' fill-opacity='0.66'/%3E%3Ccircle cx='226.3' cy='200.6' r='0.6' fill-opacity='0.57'/%3E%3Ccircle cx='219.1' cy='16.1' r='0.9' fill-opacity='0.99'/%3E%3Ccircle cx='96.2' cy='20.9' r='1.4' fill-opacity='0.56'/%3E%3Ccircle cx='160.6' cy='82.2' r='0.8' fill-opacity='0.63'/%3E%3Ccircle cx='227.7' cy='179.9' r='0.6' fill-opacity='0.52'/%3E%3Ccircle cx='168.0' cy='6.5' r='0.9' fill-opacity='0.89'/%3E%3Ccircle cx='45.2' cy='133.8' r='0.9' fill-opacity='0.73'/%3E%3Ccircle cx='232.6' cy='182.5' r='0.9' fill-opacity='0.8'/%3E%3Ccircle cx='31.0' cy='101.6' r='0.7' fill-opacity='0.45'/%3E%3Ccircle cx='204.5' cy='230.2' r='1.1' fill-opacity='0.62'/%3E%3Ccircle cx='209.3' cy='52.9' r='0.9' fill-opacity='1.0'/%3E%3Ccircle cx='143.7' cy='137.9' r='0.6' fill-opacity='0.99'/%3E%3Ccircle cx='53.5' cy='63.9' r='1.1' fill-opacity='0.63'/%3E%3Ccircle cx='72.7' cy='21.0' r='0.6' fill-opacity='0.56'/%3E%3Ccircle cx='151.7' cy='7.6' r='0.8' fill-opacity='0.65'/%3E%3Ccircle cx='109.1' cy='226.5' r='0.9' fill-opacity='0.91'/%3E%3Ccircle cx='35.5' cy='93.6' r='1.4' fill-opacity='0.53'/%3E%3Ccircle cx='214.8' cy='193.7' r='0.7' fill-opacity='0.85'/%3E%3Ccircle cx='40.8' cy='149.9' r='1.1' fill-opacity='0.56'/%3E%3Ccircle cx='224.4' cy='208.7' r='1.1' fill-opacity='0.49'/%3E%3Ccircle cx='15.0' cy='29.3' r='1.1' fill-opacity='0.98'/%3E%3Cpath transform='translate(52 64) scale(1)' d='M0-6C.6-1.2 1.2-.6 6 0 1.2.6.6 1.2 0 6-.6 1.2-1.2.6-6 0-1.2-.6-.6-1.2 0-6z'/%3E%3Cpath transform='translate(178 150) scale(0.75)' d='M0-6C.6-1.2 1.2-.6 6 0 1.2.6.6 1.2 0 6-.6 1.2-1.2.6-6 0-1.2-.6-.6-1.2 0-6z'/%3E%3Cpath transform='translate(120 214) scale(0.55)' d='M0-6C.6-1.2 1.2-.6 6 0 1.2.6.6 1.2 0 6-.6 1.2-1.2.6-6 0-1.2-.6-.6-1.2 0-6z'/%3E%3C/svg%3E");
+}
+/* Line-drawn sprigs of leaves, scattered. */
+html[data-background="leaves"] body,
+.texture-swatch[data-texture="leaves"] {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='170' height='170' fill='none' stroke='rgb(128,128,128)' stroke-opacity='0.24' stroke-width='1.1' stroke-linecap='round' stroke-linejoin='round'%3E%3Cg transform='translate(26 58) rotate(-25) scale(1)'%3E%3Cpath d='M0 0C4 -10 4 -22 0 -34'/%3E%3Cpath d='M1.5 -8C7 -10 10 -15 10 -20 5 -19 2 -14 1.5 -8z'/%3E%3Cpath d='M2.6 -16C-3 -18 -6 -23 -6 -28 -1 -27 2 -22 2.6 -16z'/%3E%3Cpath d='M2 -25C6 -28 8 -32 7.5 -37 3 -35 1.5 -31 2 -25z'/%3E%3Cpath d='M0 -34C-2 -37 -2 -40 0 -43 2 -40 2 -37 0 -34z'/%3E%3C/g%3E%3Cg transform='translate(112 48) rotate(35) scale(0.85)'%3E%3Cpath d='M0 0C4 -10 4 -22 0 -34'/%3E%3Cpath d='M1.5 -8C7 -10 10 -15 10 -20 5 -19 2 -14 1.5 -8z'/%3E%3Cpath d='M2.6 -16C-3 -18 -6 -23 -6 -28 -1 -27 2 -22 2.6 -16z'/%3E%3Cpath d='M2 -25C6 -28 8 -32 7.5 -37 3 -35 1.5 -31 2 -25z'/%3E%3Cpath d='M0 -34C-2 -37 -2 -40 0 -43 2 -40 2 -37 0 -34z'/%3E%3C/g%3E%3Cg transform='translate(70 140) rotate(-70) scale(0.9)'%3E%3Cpath d='M0 0C4 -10 4 -22 0 -34'/%3E%3Cpath d='M1.5 -8C7 -10 10 -15 10 -20 5 -19 2 -14 1.5 -8z'/%3E%3Cpath d='M2.6 -16C-3 -18 -6 -23 -6 -28 -1 -27 2 -22 2.6 -16z'/%3E%3Cpath d='M2 -25C6 -28 8 -32 7.5 -37 3 -35 1.5 -31 2 -25z'/%3E%3Cpath d='M0 -34C-2 -37 -2 -40 0 -43 2 -40 2 -37 0 -34z'/%3E%3C/g%3E%3Cg transform='translate(150 150) rotate(10) scale(0.75)'%3E%3Cpath d='M0 0C4 -10 4 -22 0 -34'/%3E%3Cpath d='M1.5 -8C7 -10 10 -15 10 -20 5 -19 2 -14 1.5 -8z'/%3E%3Cpath d='M2.6 -16C-3 -18 -6 -23 -6 -28 -1 -27 2 -22 2.6 -16z'/%3E%3Cpath d='M2 -25C6 -28 8 -32 7.5 -37 3 -35 1.5 -31 2 -25z'/%3E%3Cpath d='M0 -34C-2 -37 -2 -40 0 -43 2 -40 2 -37 0 -34z'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 170px 170px;
+}
+html.dark[data-background="leaves"] body,
+.dark .texture-swatch[data-texture="leaves"] {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='170' height='170' fill='none' stroke='rgb(128,128,128)' stroke-opacity='0.18' stroke-width='1.1' stroke-linecap='round' stroke-linejoin='round'%3E%3Cg transform='translate(26 58) rotate(-25) scale(1)'%3E%3Cpath d='M0 0C4 -10 4 -22 0 -34'/%3E%3Cpath d='M1.5 -8C7 -10 10 -15 10 -20 5 -19 2 -14 1.5 -8z'/%3E%3Cpath d='M2.6 -16C-3 -18 -6 -23 -6 -28 -1 -27 2 -22 2.6 -16z'/%3E%3Cpath d='M2 -25C6 -28 8 -32 7.5 -37 3 -35 1.5 -31 2 -25z'/%3E%3Cpath d='M0 -34C-2 -37 -2 -40 0 -43 2 -40 2 -37 0 -34z'/%3E%3C/g%3E%3Cg transform='translate(112 48) rotate(35) scale(0.85)'%3E%3Cpath d='M0 0C4 -10 4 -22 0 -34'/%3E%3Cpath d='M1.5 -8C7 -10 10 -15 10 -20 5 -19 2 -14 1.5 -8z'/%3E%3Cpath d='M2.6 -16C-3 -18 -6 -23 -6 -28 -1 -27 2 -22 2.6 -16z'/%3E%3Cpath d='M2 -25C6 -28 8 -32 7.5 -37 3 -35 1.5 -31 2 -25z'/%3E%3Cpath d='M0 -34C-2 -37 -2 -40 0 -43 2 -40 2 -37 0 -34z'/%3E%3C/g%3E%3Cg transform='translate(70 140) rotate(-70) scale(0.9)'%3E%3Cpath d='M0 0C4 -10 4 -22 0 -34'/%3E%3Cpath d='M1.5 -8C7 -10 10 -15 10 -20 5 -19 2 -14 1.5 -8z'/%3E%3Cpath d='M2.6 -16C-3 -18 -6 -23 -6 -28 -1 -27 2 -22 2.6 -16z'/%3E%3Cpath d='M2 -25C6 -28 8 -32 7.5 -37 3 -35 1.5 -31 2 -25z'/%3E%3Cpath d='M0 -34C-2 -37 -2 -40 0 -43 2 -40 2 -37 0 -34z'/%3E%3C/g%3E%3Cg transform='translate(150 150) rotate(10) scale(0.75)'%3E%3Cpath d='M0 0C4 -10 4 -22 0 -34'/%3E%3Cpath d='M1.5 -8C7 -10 10 -15 10 -20 5 -19 2 -14 1.5 -8z'/%3E%3Cpath d='M2.6 -16C-3 -18 -6 -23 -6 -28 -1 -27 2 -22 2.6 -16z'/%3E%3Cpath d='M2 -25C6 -28 8 -32 7.5 -37 3 -35 1.5 -31 2 -25z'/%3E%3Cpath d='M0 -34C-2 -37 -2 -40 0 -43 2 -40 2 -37 0 -34z'/%3E%3C/g%3E%3C/svg%3E");
+}
+/* Overlapping scallops of rings, like Japanese wave paper (seigaiha).
+   Drawn with gradients rather than an image because each scallop is
+   filled with the page colour to hide the rings behind it, and only CSS
+   knows the theme's colour. */
+html[data-background="scallops"] body,
+.texture-swatch[data-texture="scallops"] {
+  --scallop-line: color-mix(in oklab, var(--foreground) 8%, var(--background));
+  background-image:
+    radial-gradient(circle at 100% 150%, var(--background) 24%, var(--scallop-line) 24% 26%, var(--background) 26% 36%, var(--scallop-line) 36% 38%, transparent 38%),
+    radial-gradient(circle at 0 150%, var(--background) 24%, var(--scallop-line) 24% 26%, var(--background) 26% 36%, var(--scallop-line) 36% 38%, transparent 38%),
+    radial-gradient(circle at 50% 100%, var(--background) 23%, var(--scallop-line) 23% 25.5%, var(--background) 25.5% 43%, var(--scallop-line) 43% 45.5%, var(--background) 45.5% 63%, var(--scallop-line) 63% 65.5%, transparent 65.5%),
+    radial-gradient(circle at 100% 50%, var(--background) 15%, var(--scallop-line) 15% 17%, var(--background) 17% 29%, var(--scallop-line) 29% 31%, var(--background) 31% 44%, var(--scallop-line) 44% 46%, transparent 46%),
+    radial-gradient(circle at 0 50%, var(--background) 15%, var(--scallop-line) 15% 17%, var(--background) 17% 29%, var(--scallop-line) 29% 31%, var(--background) 31% 44%, var(--scallop-line) 44% 46%, transparent 46%);
+  background-size: 64px 32px;
+}
+/* Boards laid in a zigzag, like a parquet floor. */
+html[data-background="parquet"] body,
+.texture-swatch[data-texture="parquet"] {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='20' fill='none' stroke='rgb(128,128,128)' stroke-opacity='0.16' stroke-width='1'%3E%3Cpath d='M0 20L20 0M0 0L0 20M20 0L40 20M20 0V20M40 0V20M-20 20L0 0M40 20 60 0' /%3E%3C/svg%3E");
+  background-size: 40px 20px;
+}
+html.dark[data-background="parquet"] body,
+.dark .texture-swatch[data-texture="parquet"] {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='20' fill='none' stroke='rgb(128,128,128)' stroke-opacity='0.12' stroke-width='1'%3E%3Cpath d='M0 20L20 0M0 0L0 20M20 0L40 20M20 0V20M40 0V20M-20 20L0 0M40 20 60 0' /%3E%3C/svg%3E");
+}
+/* Three soft washes of colour: the accent, and two neighbours of it on the
+   colour wheel. Pinned to the window, so the light stays put while the
+   page scrolls. A theme whose accent is grey gets warm rose and amber. */
+html[data-background="aurora"] body,
+.texture-swatch[data-texture="aurora"] {
+  background-image:
+    radial-gradient(70% 55% at 12% 0%, color-mix(in oklab, var(--primary) 18%, transparent), transparent 70%),
+    radial-gradient(60% 50% at 92% 8%, color-mix(in oklab, var(--primary) 12%, transparent), transparent 70%);
+  background-image:
+    radial-gradient(70% 55% at 12% 0%, oklch(from var(--primary) 0.72 max(c, 0.12) h / 0.2), transparent 70%),
+    radial-gradient(60% 50% at 92% 8%, oklch(from var(--primary) 0.74 max(c, 0.1) calc(h + 50) / 0.16), transparent 70%),
+    radial-gradient(70% 45% at 65% 100%, oklch(from var(--primary) 0.7 max(c, 0.1) calc(h - 45) / 0.11), transparent 70%);
+  background-repeat: no-repeat;
+}
+html[data-background="aurora"] body {
+  background-attachment: fixed;
+}
 
 /* ── Drawn covers ──────────────────────────────────────────────────────────
    The stand-in for a book with no cover image (BookCover in
@@ -1142,6 +1214,199 @@ html.theme-reveal::view-transition-old(root),
 html.theme-reveal::view-transition-new(root) {
   animation: none;
   mix-blend-mode: normal;
+}
+
+/* ── Cards ─────────────────────────────────────────────────────────────────
+   "Cards" in Preferences (data-cards on <html>). Cards and library tiles
+   carry `.surface` and take --surface-shadow as their shadow, next to the
+   hairline outline they always have. Raised, the default, adds a soft
+   shadow; dark themes get a faint light edge along the top as well, since a
+   shadow barely shows on a dark page. Frosted makes the card a little
+   see-through and blurs whatever is behind it: the background texture, or
+   the cover colours at the top of a book's page. */
+:root {
+  --surface-shadow: 0 0 #0000;
+}
+html:not([data-cards="flat"]) {
+  --surface-shadow: 0 1px 2px -1px rgb(0 0 0 / 0.08), 0 10px 24px -14px rgb(0 0 0 / 0.16);
+}
+html.dark:not([data-cards="flat"]) {
+  --surface-shadow: inset 0 1px 0 rgb(255 255 255 / 0.05), 0 12px 28px -14px rgb(0 0 0 / 0.6);
+}
+html[data-cards="frosted"] .surface {
+  background-color: color-mix(in oklab, var(--card) 72%, transparent);
+  backdrop-filter: blur(14px) saturate(1.4);
+}
+
+/* ── Book page ─────────────────────────────────────────────────────────────
+   The wash of cover colours behind the top of a book's page (BookBackdrop
+   in components/book-card.tsx). It is positioned against the whole page, so
+   it runs edge to edge under the top bar, sits behind everything else and
+   fades out downwards. It waits for the page's own fade-in before showing,
+   because while that runs the page is its containing block and the wash
+   would briefly sit at the content's width. */
+@keyframes backdrop-in {
+  from {
+    opacity: 0;
+  }
+}
+.book-backdrop {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: -1;
+  height: 34rem;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0.32;
+  mask-image: linear-gradient(to bottom, #000 25%, transparent);
+  animation: backdrop-in 0.9s 0.3s ease-out backwards;
+}
+.dark .book-backdrop {
+  opacity: 0.35;
+}
+.book-backdrop img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: blur(60px) saturate(1.6);
+  transform: scale(1.3);
+}
+.book-backdrop[data-drawn] {
+  background: radial-gradient(
+    90% 100% at 20% 0%,
+    hsl(var(--cover-hue) var(--cover-sat) var(--cover-light)),
+    transparent 75%
+  );
+}
+html[data-book-backdrop="plain"] .book-backdrop,
+html[data-covers="plain"] .book-backdrop[data-drawn] {
+  display: none;
+}
+/* The book's own cover, lifted off the page. */
+.hero-cover {
+  box-shadow:
+    0 2px 4px rgb(0 0 0 / 0.12),
+    0 24px 40px -20px rgb(0 0 0 / 0.55);
+}
+/* Pages, published, ISBN and finished: each after a hairline, with its
+   label in small capitals. */
+.book-facts > div {
+  border-left: 1px solid var(--border);
+  padding-left: 0.75rem;
+}
+.book-facts dt {
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.book-facts dd {
+  margin-top: 0.125rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Top bar ───────────────────────────────────────────────────────────────
+   The open page's link (NavLink, components/nav-link.tsx) gets a thin
+   accent line resting on the bar's bottom edge. The bar is see-through
+   and blurred, and picks up a soft shadow once the page scrolls under it,
+   where the browser can tie an animation to scrolling; elsewhere it just
+   keeps its border. */
+.nav-link {
+  position: relative;
+}
+.nav-link[aria-current="page"]::after {
+  content: "";
+  position: absolute;
+  inset: auto 0.5rem -0.875rem;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--primary);
+}
+@keyframes top-bar-lift {
+  to {
+    box-shadow: 0 10px 24px -18px rgb(0 0 0 / 0.5);
+  }
+}
+@supports (animation-timeline: scroll()) {
+  .top-bar {
+    animation: top-bar-lift linear both;
+    animation-timeline: scroll(root);
+    animation-range: 0 4rem;
+  }
+}
+/* The app's name, in the book face used for drawn covers. */
+.wordmark {
+  font-family: var(--font-literata), ui-serif, Georgia, serif;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+/* ── Small touches ─────────────────────────────────────────────────────────
+   Selected text and scrollbars take a tint of the accent colour. Headings
+   break into lines of even length, and paragraphs avoid a last line of one
+   word. A reading status badge leads with a dot of its colour. */
+::selection {
+  background: color-mix(in oklab, var(--primary) 24%, transparent);
+}
+html {
+  scrollbar-color: color-mix(in oklab, var(--primary) 35%, var(--muted)) transparent;
+}
+@layer base {
+  h1,
+  h2,
+  h3 {
+    text-wrap-style: balance;
+  }
+  p {
+    text-wrap-style: pretty;
+  }
+}
+.status-badge::before {
+  content: "";
+  flex: none;
+  width: 0.375rem;
+  height: 0.375rem;
+  border-radius: 9999px;
+  background: currentColor;
+  opacity: 0.65;
+}
+
+/* Loading placeholders (the loading.tsx pages): one band of light sweeps
+   across all of them together, instead of each blinking on its own. The
+   band is pinned to the window, so neighbouring blocks share it. */
+@keyframes shimmer {
+  from {
+    background-position: -120vw 0;
+  }
+  to {
+    background-position: 20vw 0;
+  }
+}
+.shimmer :where(.bg-muted, [class*="bg-muted/"]) {
+  background-image: linear-gradient(
+    100deg,
+    transparent 40%,
+    color-mix(in oklab, var(--background) 60%, transparent) 50%,
+    transparent 60%
+  );
+  background-size: 200vw 100%;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  animation: shimmer 1.8s ease-in-out infinite;
+}
+
+/* The sign-in and register pages: a soft wash of the accent colour from
+   the top, as the Glow background draws it. */
+.auth-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(
+    110% 60% at 50% 0%,
+    color-mix(in oklab, var(--primary) 14%, transparent),
+    transparent 70%
+  );
 }
 
 /* ── Motion ────────────────────────────────────────────────────────────────

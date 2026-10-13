@@ -122,8 +122,9 @@ src/
   means adding it there; older rows just get the default. Saves merge the
   changed keys in SQL, so two quick changes can't undo each other.
 - **Appearance settings are attributes on `<html>`.** The root layout
-  writes the theme, accent, fonts, corners, background, cover style and
-  animation setting as `data-*` attributes, and
+  writes the theme, accent, fonts, corners, card style, background, cover
+  style, book page backdrop and animation setting as `data-*` attributes,
+  and
   [globals.css](../src/app/globals.css) does the rest, so server and client
   components never pass them down. Preferences sets the attribute at once
   as well as saving, so a change shows without waiting for the server.

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BookCheck, BookOpenText, FileText, LibraryBig, Star } from "lucide-react";
 import { redirect } from "next/navigation";
 import { ReadingStatus } from "@prisma/client";
 import { auth } from "@/auth";
@@ -199,13 +200,14 @@ export default async function StatsPage({
 
       <div className="grid gap-3">
         <div className={`grid grid-cols-2 gap-4 ${ratings ? "lg:grid-cols-5" : "lg:grid-cols-4"}`}>
-          <StatCard label="Books in library">{fmt(books.length)}</StatCard>
-          <StatCard label={`${booksLabel} · ${words}`} note={notes.books.join(" · ")}>
+          <StatCard label="Books in library" icon={LibraryBig}>{fmt(books.length)}</StatCard>
+          <StatCard label={`${booksLabel} · ${words}`} icon={BookCheck} note={notes.books.join(" · ")}>
             {fmt(period === "all" ? readAllTime.books : totals.books)}
           </StatCard>
-          <StatCard label="Currently reading">{fmt(reading.length)}</StatCard>
+          <StatCard label="Currently reading" icon={BookOpenText}>{fmt(reading.length)}</StatCard>
           <StatCard
             label={`Pages read · ${words}${notes.pagesSuffix}`}
+            icon={FileText}
             note={notes.pages.join(" · ")}
           >
             {fmt(totals.pages)}
@@ -213,6 +215,7 @@ export default async function StatsPage({
           {ratings && (
             <StatCard
               label={`Average rating · ${words}`}
+              icon={Star}
               note={`${fmt(ratingValues.length)} rated`}
             >
               {avgRating != null ? (

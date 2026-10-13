@@ -87,8 +87,10 @@ reading, and what you thought of them, on your own server.
 - Preferences on the Account page: date and number formats, your time zone
   and the first day of the week, how titles and authors sort, what new books
   start as, text size, a serif font for reviews and quotes, the font for
-  headings, how round the corners are, a background texture, which
-  page opens first, and which links and stats cards you see.
+  headings, how round the corners are, flat, raised or frosted cards, one
+  of 14 background textures, a wash of the cover's colours behind each
+  book's page, which page opens first, and which links and stats cards you
+  see.
 - A little motion: pages fade in, a book's cover flies to its page, bars
   fill up, and finishing a book or reaching your goal sets off confetti.
   Animations can be turned off, and stay off when your device asks for

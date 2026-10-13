@@ -65,7 +65,9 @@ export default async function RootLayout({
       data-covers={prefs?.coverArt}
       data-accent={prefs?.accent}
       data-corners={prefs?.corners}
+      data-cards={prefs?.cardStyle}
       data-background={prefs?.background}
+      data-book-backdrop={prefs?.bookBackdrop}
       // 3D covers, from the library's View menu.
       data-cover-3d={user?.libraryView.cover3d ? "" : undefined}
       suppressHydrationWarning
