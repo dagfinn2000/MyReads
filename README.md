@@ -100,9 +100,13 @@ server.
   of the walls, the wood and the fabrics, hang a painting or one of five
   tapestries over the fireplace, put furniture away, and drag the furniture
   to wherever you like it (or move it with the arrow keys).
-- Make a little you who lives there: pick a skin tone, a hairstyle and its
-  colour, a hat or crown, glasses, a beard or freckles, a jumper and
-  trousers or a skirt, or let Surprise me pick. They potter about the house
+- Make a little you who lives there, from a wardrobe: ten skin tones (an
+  elf or a spaceman too), eyes, a mouth, blush or freckles, a beard, 17
+  hairstyles in 14 colours, jumpers, shirts, hoodies, a coat, a dress or a
+  robe, trousers, jeans, shorts, skirts or dungarees, six kinds of shoes,
+  16 hats from a beanie to a halo, and glasses, earrings, a scarf,
+  headphones, a backpack or a cape, all in colours of your choosing. Or
+  let Surprise me pick. They potter about the house
   and stop by the fire, and while you're reading a book they sit in the
   armchair reading it (the cat moves to the rug). With animations off they
   stand still by the fire.

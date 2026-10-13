@@ -345,31 +345,10 @@ describe("parsePreferences: the reading room", () => {
 });
 
 describe("parsePreferences: the avatar", () => {
-  it("keeps a chosen look, defaulting anything unknown", () => {
-    const prefs = parsePreferences({
-      avatarShown: false,
-      avatar: {
-        skin: "deep",
-        hair: "mohawk", // not a style
-        hairColour: "pink",
-        top: "navy",
-        bottom: "skirt",
-        legs: "plum",
-        hat: "wizard",
-        extras: ["beard", "monocle", "glasses", "beard"],
-      },
-    });
+  it("keeps a chosen look and whether it's shown", () => {
+    const prefs = parsePreferences({ avatarShown: false, avatar: { hair: "afro", hat: "crown", eyes: "nope" } });
     expect(prefs.avatarShown).toBe(false);
-    expect(prefs.avatar).toEqual({
-      skin: "deep",
-      hair: "short",
-      hairColour: "pink",
-      top: "navy",
-      bottom: "skirt",
-      legs: "plum",
-      hat: "wizard",
-      extras: ["glasses", "beard"],
-    });
+    expect(prefs.avatar).toEqual({ ...parsePreferences({}).avatar, hair: "afro", hat: "crown" });
   });
 
   it("starts everyone with the same little reader, shown", () => {

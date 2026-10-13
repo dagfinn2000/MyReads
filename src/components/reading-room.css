@@ -18,6 +18,12 @@
    the still picture. The avatar is walked about by script, which checks
    the same two rules (lib/motion.ts). */
 
+/* The room is drawn to fit the width it's given, so that width mustn't
+   come from the room: it can then shrink, as when a phone turns. */
+.room-wrap {
+  contain: inline-size;
+}
+
 .room-scene {
   /* Day. */
   --room-wood-hi: #d39a5f;
@@ -358,40 +364,74 @@
 .rp-book-lo { fill: color-mix(in oklab, var(--spine), #000 35%); }
 
 /* The avatar (avatar-art.ts): its element sets --av-skin, --av-hair,
-   --av-top and --av-legs from the reader's choices; the shades come from
-   them. */
+   --av-top, --av-bottom and --av-accent from the reader's choices; the
+   shades come from them. The rest are fixed: shoes, gold, glass. */
 .rp-av-line { fill: #231815; }
 .rp-av-eye { fill: #251a17; }
+.rp-av-eye-hi { fill: #fff; }
 .rp-av-skin { fill: var(--av-skin); }
 .rp-av-skin-hi { fill: color-mix(in oklab, var(--av-skin), #fff 35%); }
 .rp-av-skin-lo { fill: color-mix(in oklab, var(--av-skin), #4a1e10 24%); }
 .rp-av-blush { fill: color-mix(in oklab, var(--av-skin), #e2506a 28%); }
 .rp-av-freckle { fill: color-mix(in oklab, var(--av-skin), #6b3418 42%); }
 .rp-av-mouth { fill: color-mix(in oklab, var(--av-skin), #6e2228 42%); }
+.rp-av-mouth-in { fill: #5a1f26; }
+.rp-av-teeth { fill: #fbf7ef; }
+.rp-av-tongue { fill: #e0637a; }
+.rp-av-stubble { fill: color-mix(in oklab, var(--av-skin), var(--av-hair) 38%); }
 .rp-av-frame { fill: #8a6448; }
 .rp-av-lens { fill: #dfe9ee; }
+.rp-av-shades { fill: #24252e; }
+.rp-av-shades-hi { fill: #6c7a8c; }
 .rp-av-hair { fill: var(--av-hair); }
 .rp-av-hair-hi { fill: color-mix(in oklab, var(--av-hair), #fff 28%); }
 .rp-av-hair-lo { fill: color-mix(in oklab, var(--av-hair), #000 28%); }
+.rp-av-buzz { fill: color-mix(in oklab, var(--av-hair), var(--av-skin) 45%); }
 .rp-av-top { fill: var(--av-top); }
 .rp-av-top-hi { fill: color-mix(in oklab, var(--av-top), #fff 22%); }
 .rp-av-top-lo { fill: color-mix(in oklab, var(--av-top), #000 26%); }
-.rp-av-tie { fill: var(--av-top); }
-.rp-av-legs { fill: var(--av-legs); }
-.rp-av-legs-hi { fill: color-mix(in oklab, var(--av-legs), #fff 18%); }
-.rp-av-legs-lo { fill: color-mix(in oklab, var(--av-legs), #000 28%); }
+.rp-av-stripe { fill: color-mix(in oklab, var(--av-top), #fff 70%); }
+.rp-av-under { fill: #f0ebe0; }
+.rp-av-under-lo { fill: #d3cbbb; }
+.rp-av-bottom { fill: var(--av-bottom); }
+.rp-av-bottom-hi { fill: color-mix(in oklab, var(--av-bottom), #fff 20%); }
+.rp-av-bottom-lo { fill: color-mix(in oklab, var(--av-bottom), #000 28%); }
+.rp-av-accent { fill: var(--av-accent); }
+.rp-av-accent-hi { fill: color-mix(in oklab, var(--av-accent), #fff 30%); }
+.rp-av-accent-lo { fill: color-mix(in oklab, var(--av-accent), #000 28%); }
+.rp-av-belt { fill: #5a3c28; }
 .rp-av-shoe { fill: #4b3427; }
+.rp-av-shoe-hi { fill: #6a4c3a; }
 .rp-av-shoe-lo { fill: #2e1f18; }
+.rp-av-boot { fill: #3a2a22; }
+.rp-av-boot-hi { fill: #5a4434; }
+.rp-av-welly { fill: #3f7a45; }
+.rp-av-welly-hi { fill: #5c9a5f; }
+.rp-av-welly-lo { fill: #2a5530; }
+.rp-av-sole { fill: #f4f1ea; }
+.rp-av-slipper { fill: color-mix(in oklab, var(--av-accent), #fff 55%); }
+.rp-av-slipper-hi { fill: color-mix(in oklab, var(--av-accent), #fff 80%); }
+.rp-av-slipper-lo { fill: color-mix(in oklab, var(--av-accent), #fff 25%); }
+.rp-av-strap { fill: #7a5236; }
 .rp-av-pom { fill: #f1ebdf; }
 .rp-av-cap { fill: #7b6750; }
 .rp-av-cap-hi { fill: #9a8569; }
 .rp-av-cap-lo { fill: #574837; }
-.rp-av-wizard { fill: #4f4192; }
-.rp-av-wizard-hi { fill: #6d5fb8; }
-.rp-av-wizard-lo { fill: #362c6a; }
-.rp-av-wizard-band { fill: var(--room-brass); }
+.rp-av-tophat { fill: #26232a; }
+.rp-av-tophat-hi { fill: #45404c; }
+.rp-av-witch { fill: #2a2530; }
+.rp-av-witch-hi { fill: #463d52; }
+.rp-av-silver { fill: #c9ccd4; }
+.rp-av-silver-hi { fill: #f4f5f8; }
 .rp-av-gem { fill: #d23a4e; }
-.rp-av-gem-blue { fill: #3a7bd0; }
+.rp-av-ear-in { fill: #e7a2ae; }
+.rp-av-bunny { fill: #f3efe8; }
+.rp-av-horn { fill: #b99e75; }
+.rp-av-horn-lo { fill: #8a7152; }
+.rp-av-halo { fill: #f3d36a; }
+.rp-av-halo-lo { fill: #d1ab3c; }
+.rp-av-halo-hi { fill: #fbeaa6; }
+.rp-av-phones { fill: #3a3a42; }
 
 /* ── House styles and colours ─────────────────────────────────────────────
    The cottage keeps the hand-picked palette above. Every other style
