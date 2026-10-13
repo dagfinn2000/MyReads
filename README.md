@@ -55,6 +55,9 @@ reading, and what you thought of them, on your own server.
 - Search, filter, sort and group the library. Authors sort by surname, the
   way a bookshelf is filed. "Pick for me" opens a random book from Want to
   Read.
+- A book opened from the library has an X in its corner (or press Esc) that
+  takes you back to the same spot in the library, with your filters still
+  on.
 - Show the library as cards, bare covers or a bookshelf, in three sizes, or
   as a list, and choose what each book shows. Covers can look like little
   hardbacks, and books without a cover get one drawn with their title. Save
@@ -91,8 +94,9 @@ reading, and what you thought of them, on your own server.
   of 14 background textures, a wash of the cover's colours behind each
   book's page, which page opens first, and which links and stats cards you
   see.
-- A little motion: pages fade in, a book's cover flies to its page, bars
-  fill up, and finishing a book or reaching your goal sets off confetti.
+- A little motion: pages fade in, a book's cover flies to its page and back
+  into its place in the library when you close it, bars fill up, and
+  finishing a book or reaching your goal sets off confetti.
   Animations can be turned off, and stay off when your device asks for
   reduced motion.
 - Install it on your phone's home screen like an app.

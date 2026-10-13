@@ -369,7 +369,10 @@ export default async function BooksPage({
         shelves={shelves.map((s) => ({ id: s.id, name: s.name }))}
         display={accountView}
         empty={
-          <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed py-16 text-center">
+          <div
+            className="flex flex-col items-center gap-3 rounded-lg border border-dashed py-16 text-center"
+            data-library-view=""
+          >
             <LibraryBig className="size-10 text-muted-foreground/40" />
             <p className="text-muted-foreground">
               {counts.all === 0

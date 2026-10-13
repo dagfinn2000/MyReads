@@ -7,6 +7,7 @@ import { BookFormat, BookOwnership, ReadingStatus } from "@prisma/client";
 import { Check, Dices, SquareCheckBig, X } from "lucide-react";
 import { bulkDeleteBooks, bulkUpdateBooks } from "@/lib/actions/bulk";
 import { pickRandomBook } from "@/lib/actions/pick";
+import { isClosingBook } from "@/lib/cover-flight";
 import { FORMAT_LABELS, OWNERSHIP_LABELS, STATUS_LABELS, formatNumber } from "@/lib/display";
 import { orderByIds } from "@/lib/library-order";
 import { cn } from "@/lib/utils";
@@ -131,6 +132,9 @@ export function LibraryView({
 }) {
   const router = useRouter();
   const prefs = usePreferences();
+  // Back from a book's X: the cards are already in place as the cover flies
+  // home, rather than rising in again (lib/cover-flight.ts).
+  const [returning] = useState(isClosingBook);
   const [selectMode, setSelectMode] = useState(false);
   const [selected, setSelected] = useState<ReadonlySet<string>>(new Set());
   const [status, setStatus] = useState("keep");
@@ -317,7 +321,8 @@ export function LibraryView({
           <div
             key={book.id}
             className={cn(
-              "card-in relative rounded-lg",
+              "relative rounded-lg",
+              !returning && "card-in",
               style === "shelf" && "shelf-slot",
               selectMode && isSelected && "ring-2 ring-primary",
             )}
@@ -368,8 +373,9 @@ export function LibraryView({
 
   return (
     // While selecting, room at the bottom so the action bar never covers
-    // the last books.
-    <div className={cn("grid gap-4", selectMode && "pb-80 sm:pb-48")}>
+    // the last books. data-library-view tells a closing book page that the
+    // library itself is back, not its loading skeleton (lib/cover-flight.ts).
+    <div className={cn("grid gap-4", selectMode && "pb-80 sm:pb-48")} data-library-view="">
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground tabular-nums">
           {totalCount} book{totalCount === 1 ? "" : "s"}
