@@ -146,6 +146,16 @@ const BACKGROUND_LABELS: Record<Background, string> = {
   scallops: "Scallops",
   parquet: "Parquet",
   aurora: "Aurora",
+  trellis: "Trellis",
+  quatrefoil: "Quatrefoil",
+  asanoha: "Hemp leaf",
+  terrazzo: "Terrazzo",
+  marble: "Marble",
+  leather: "Leather",
+  ricepaper: "Rice paper",
+  letterpress: "Letterpress",
+  rain: "Rain",
+  ripples: "Ripples",
 };
 
 /** The background textures as small previews of the page, one button

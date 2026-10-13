@@ -101,6 +101,16 @@ export const BACKGROUNDS = [
   "scallops",
   "parquet",
   "aurora",
+  "trellis",
+  "quatrefoil",
+  "asanoha",
+  "terrazzo",
+  "marble",
+  "leather",
+  "ricepaper",
+  "letterpress",
+  "rain",
+  "ripples",
 ] as const;
 
 /** Colour steps for the reading calendar (see lib/heatmap.ts). */
