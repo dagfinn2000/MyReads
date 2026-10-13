@@ -770,9 +770,11 @@ html[data-corners="round"] {
    the theme's own text (or accent) colour; the SVG ones are mid-grey with a
    little transparency, so they read on light and dark themes alike, a
    touch fainter on dark ones, where light marks stand out more. All of them
-   are still images. A few have moving versions too (rain, snow, stars,
-   aurora, ripples), drawn over the page by "Moving backgrounds" below; this
-   still one is what shows while nothing may move. */
+   are still images. Aurora and ripples have moving versions too, drawn
+   over the page by "Moving backgrounds" below; the still one is what shows
+   while nothing may move. Rain, snow, stars and sky are drawn by "Moving
+   backgrounds" alone, scattered over the whole window, still or moving, so
+   their rules here only paint the swatch. */
 .texture-swatch {
   background-color: var(--background);
 }
@@ -863,12 +865,10 @@ html[data-background="contours"] body,
 }
 /* Small stars of a few sizes, with three four-pointed glints. Light
    stars on dark themes, for a night sky; grey ones on light themes. */
-html[data-background="stars"] body,
 .texture-swatch[data-texture="stars"] {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240' fill='rgb(110,110,110)' fill-opacity='0.38'%3E%3Ccircle cx='109.0' cy='133.9' r='0.9' fill-opacity='0.7'/%3E%3Ccircle cx='202.4' cy='48.1' r='1.1' fill-opacity='0.71'/%3E%3Ccircle cx='146.4' cy='47.2' r='0.9' fill-opacity='0.62'/%3E%3Ccircle cx='25.0' cy='191.8' r='1.4' fill-opacity='0.8'/%3E%3Ccircle cx='142.1' cy='95.9' r='0.9' fill-opacity='0.81'/%3E%3Ccircle cx='146.8' cy='40.5' r='0.6' fill-opacity='0.91'/%3E%3Ccircle cx='18.7' cy='12.3' r='0.7' fill-opacity='0.78'/%3E%3Ccircle cx='184.5' cy='79.7' r='1.1' fill-opacity='0.91'/%3E%3Ccircle cx='124.4' cy='152.5' r='0.9' fill-opacity='0.45'/%3E%3Ccircle cx='23.7' cy='155.9' r='0.9' fill-opacity='1.0'/%3E%3Ccircle cx='235.0' cy='198.9' r='1.4' fill-opacity='0.59'/%3E%3Ccircle cx='179.9' cy='123.0' r='0.6' fill-opacity='0.49'/%3E%3Ccircle cx='181.8' cy='96.9' r='0.8' fill-opacity='0.66'/%3E%3Ccircle cx='226.3' cy='200.6' r='0.6' fill-opacity='0.57'/%3E%3Ccircle cx='219.1' cy='16.1' r='0.9' fill-opacity='0.99'/%3E%3Ccircle cx='96.2' cy='20.9' r='1.4' fill-opacity='0.56'/%3E%3Ccircle cx='160.6' cy='82.2' r='0.8' fill-opacity='0.63'/%3E%3Ccircle cx='227.7' cy='179.9' r='0.6' fill-opacity='0.52'/%3E%3Ccircle cx='168.0' cy='6.5' r='0.9' fill-opacity='0.89'/%3E%3Ccircle cx='45.2' cy='133.8' r='0.9' fill-opacity='0.73'/%3E%3Ccircle cx='232.6' cy='182.5' r='0.9' fill-opacity='0.8'/%3E%3Ccircle cx='31.0' cy='101.6' r='0.7' fill-opacity='0.45'/%3E%3Ccircle cx='204.5' cy='230.2' r='1.1' fill-opacity='0.62'/%3E%3Ccircle cx='209.3' cy='52.9' r='0.9' fill-opacity='1.0'/%3E%3Ccircle cx='143.7' cy='137.9' r='0.6' fill-opacity='0.99'/%3E%3Ccircle cx='53.5' cy='63.9' r='1.1' fill-opacity='0.63'/%3E%3Ccircle cx='72.7' cy='21.0' r='0.6' fill-opacity='0.56'/%3E%3Ccircle cx='151.7' cy='7.6' r='0.8' fill-opacity='0.65'/%3E%3Ccircle cx='109.1' cy='226.5' r='0.9' fill-opacity='0.91'/%3E%3Ccircle cx='35.5' cy='93.6' r='1.4' fill-opacity='0.53'/%3E%3Ccircle cx='214.8' cy='193.7' r='0.7' fill-opacity='0.85'/%3E%3Ccircle cx='40.8' cy='149.9' r='1.1' fill-opacity='0.56'/%3E%3Ccircle cx='224.4' cy='208.7' r='1.1' fill-opacity='0.49'/%3E%3Ccircle cx='15.0' cy='29.3' r='1.1' fill-opacity='0.98'/%3E%3Cpath transform='translate(52 64) scale(1)' d='M0-6C.6-1.2 1.2-.6 6 0 1.2.6.6 1.2 0 6-.6 1.2-1.2.6-6 0-1.2-.6-.6-1.2 0-6z'/%3E%3Cpath transform='translate(178 150) scale(0.75)' d='M0-6C.6-1.2 1.2-.6 6 0 1.2.6.6 1.2 0 6-.6 1.2-1.2.6-6 0-1.2-.6-.6-1.2 0-6z'/%3E%3Cpath transform='translate(120 214) scale(0.55)' d='M0-6C.6-1.2 1.2-.6 6 0 1.2.6.6 1.2 0 6-.6 1.2-1.2.6-6 0-1.2-.6-.6-1.2 0-6z'/%3E%3C/svg%3E");
   background-size: 240px 240px;
 }
-html.dark[data-background="stars"] body,
 .dark .texture-swatch[data-texture="stars"] {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240' fill='rgb(235,235,225)' fill-opacity='0.45'%3E%3Ccircle cx='109.0' cy='133.9' r='0.9' fill-opacity='0.7'/%3E%3Ccircle cx='202.4' cy='48.1' r='1.1' fill-opacity='0.71'/%3E%3Ccircle cx='146.4' cy='47.2' r='0.9' fill-opacity='0.62'/%3E%3Ccircle cx='25.0' cy='191.8' r='1.4' fill-opacity='0.8'/%3E%3Ccircle cx='142.1' cy='95.9' r='0.9' fill-opacity='0.81'/%3E%3Ccircle cx='146.8' cy='40.5' r='0.6' fill-opacity='0.91'/%3E%3Ccircle cx='18.7' cy='12.3' r='0.7' fill-opacity='0.78'/%3E%3Ccircle cx='184.5' cy='79.7' r='1.1' fill-opacity='0.91'/%3E%3Ccircle cx='124.4' cy='152.5' r='0.9' fill-opacity='0.45'/%3E%3Ccircle cx='23.7' cy='155.9' r='0.9' fill-opacity='1.0'/%3E%3Ccircle cx='235.0' cy='198.9' r='1.4' fill-opacity='0.59'/%3E%3Ccircle cx='179.9' cy='123.0' r='0.6' fill-opacity='0.49'/%3E%3Ccircle cx='181.8' cy='96.9' r='0.8' fill-opacity='0.66'/%3E%3Ccircle cx='226.3' cy='200.6' r='0.6' fill-opacity='0.57'/%3E%3Ccircle cx='219.1' cy='16.1' r='0.9' fill-opacity='0.99'/%3E%3Ccircle cx='96.2' cy='20.9' r='1.4' fill-opacity='0.56'/%3E%3Ccircle cx='160.6' cy='82.2' r='0.8' fill-opacity='0.63'/%3E%3Ccircle cx='227.7' cy='179.9' r='0.6' fill-opacity='0.52'/%3E%3Ccircle cx='168.0' cy='6.5' r='0.9' fill-opacity='0.89'/%3E%3Ccircle cx='45.2' cy='133.8' r='0.9' fill-opacity='0.73'/%3E%3Ccircle cx='232.6' cy='182.5' r='0.9' fill-opacity='0.8'/%3E%3Ccircle cx='31.0' cy='101.6' r='0.7' fill-opacity='0.45'/%3E%3Ccircle cx='204.5' cy='230.2' r='1.1' fill-opacity='0.62'/%3E%3Ccircle cx='209.3' cy='52.9' r='0.9' fill-opacity='1.0'/%3E%3Ccircle cx='143.7' cy='137.9' r='0.6' fill-opacity='0.99'/%3E%3Ccircle cx='53.5' cy='63.9' r='1.1' fill-opacity='0.63'/%3E%3Ccircle cx='72.7' cy='21.0' r='0.6' fill-opacity='0.56'/%3E%3Ccircle cx='151.7' cy='7.6' r='0.8' fill-opacity='0.65'/%3E%3Ccircle cx='109.1' cy='226.5' r='0.9' fill-opacity='0.91'/%3E%3Ccircle cx='35.5' cy='93.6' r='1.4' fill-opacity='0.53'/%3E%3Ccircle cx='214.8' cy='193.7' r='0.7' fill-opacity='0.85'/%3E%3Ccircle cx='40.8' cy='149.9' r='1.1' fill-opacity='0.56'/%3E%3Ccircle cx='224.4' cy='208.7' r='1.1' fill-opacity='0.49'/%3E%3Ccircle cx='15.0' cy='29.3' r='1.1' fill-opacity='0.98'/%3E%3Cpath transform='translate(52 64) scale(1)' d='M0-6C.6-1.2 1.2-.6 6 0 1.2.6.6 1.2 0 6-.6 1.2-1.2.6-6 0-1.2-.6-.6-1.2 0-6z'/%3E%3Cpath transform='translate(178 150) scale(0.75)' d='M0-6C.6-1.2 1.2-.6 6 0 1.2.6.6 1.2 0 6-.6 1.2-1.2.6-6 0-1.2-.6-.6-1.2 0-6z'/%3E%3Cpath transform='translate(120 214) scale(0.55)' d='M0-6C.6-1.2 1.2-.6 6 0 1.2.6.6 1.2 0 6-.6 1.2-1.2.6-6 0-1.2-.6-.6-1.2 0-6z'/%3E%3C/svg%3E");
 }
@@ -1039,12 +1039,10 @@ html.dark[data-background="letterpress"] body,
 /* Light rain on a window: short slanted strokes, staggered and sparse,
    the fainter, thinner ones further off. Pale blue-grey on dark themes,
    for a moodier night rain. */
-html[data-background="rain"] body,
 .texture-swatch[data-texture="rain"] {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260' fill='none' stroke='rgb(128,128,128)' stroke-linecap='round'%3E%3Cpath stroke-opacity='0.13' stroke-width='0.95' d='M129.2 11.6l3.5-10.7M129.2 271.6l3.5-10.7M240.7 185.6l4.2-12.9M79.8 185.4l2.9-8.9M156.0 224.2l3.3-10.1M57.4 145.4l3.6-11.0M207.7 78.1l2.5-7.8M224.0 219.6l1.9-6.0M99.0 163.0l2.5-7.6'/%3E%3Cpath stroke-opacity='0.195' stroke-width='1.07' d='M38.6 13.3l2.8-8.6M9.0 165.3l2.8-8.6M123.2 165.9l1.9-5.7M181.4 61.1l3.6-11.0M176.1 185.2l3.1-9.4M108.3 65.8l2.0-6.1M232.4 239.7l1.9-5.9M137.9 208.9l2.4-7.4M172.5 91.7l1.9-6.0M56.3 242.0l2.0-6.1M128.7 97.8l2.6-7.9M78.3 40.3l3.2-9.9M103.4 106.1l4.8-14.9M52.1 70.0l2.4-7.5M12.0 222.7l3.6-11.0M5.2 84.0l2.5-7.6M40.4 192.4l4.1-12.5M163.9 125.6l2.7-8.2M106.8 137.6l2.1-6.6M217.2 36.6l1.9-6.0M1.2 68.0l2.0-6.3M261.2 68.0l2.0-6.3M159.2 253.9l1.9-5.8M245.7 11.0l2.4-7.4M140.3 85.0l1.9-5.8M-4.5 202.2l2.1-6.5M255.5 202.2l2.1-6.5M163.4 47.8l1.9-5.7'/%3E%3Cpath stroke-opacity='0.26' stroke-width='1.2' d='M8.3 25.2l3.4-10.5M25.8 42.7l4.3-13.3M54.1 32.7l3.7-11.4M74.6 230.5l2.2-6.9M196.7 111.7l2.0-6.2M204.3 153.7l1.9-5.8M63.0 108.7l1.9-5.8M240.6 102.6l4.9-15.0M251.8 147.1l2.0-6.3M30.9 172.3l3.7-11.4M223.2 160.7l1.9-5.7M239.2 131.7l2.5-7.8M154.6 178.3l2.8-8.6M124.0 194.4l2.8-8.7M223.2 0.4l2.0-6.3M223.2 260.4l2.0-6.3M24.7 197.5l3.8-11.7'/%3E%3C/svg%3E");
   background-size: 260px 260px;
 }
-html.dark[data-background="rain"] body,
 .dark .texture-swatch[data-texture="rain"] {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260' fill='none' stroke='rgb(210,215,230)' stroke-linecap='round'%3E%3Cpath stroke-opacity='0.1' stroke-width='0.95' d='M129.2 11.6l3.5-10.7M129.2 271.6l3.5-10.7M240.7 185.6l4.2-12.9M79.8 185.4l2.9-8.9M156.0 224.2l3.3-10.1M57.4 145.4l3.6-11.0M207.7 78.1l2.5-7.8M224.0 219.6l1.9-6.0M99.0 163.0l2.5-7.6'/%3E%3Cpath stroke-opacity='0.15' stroke-width='1.07' d='M38.6 13.3l2.8-8.6M9.0 165.3l2.8-8.6M123.2 165.9l1.9-5.7M181.4 61.1l3.6-11.0M176.1 185.2l3.1-9.4M108.3 65.8l2.0-6.1M232.4 239.7l1.9-5.9M137.9 208.9l2.4-7.4M172.5 91.7l1.9-6.0M56.3 242.0l2.0-6.1M128.7 97.8l2.6-7.9M78.3 40.3l3.2-9.9M103.4 106.1l4.8-14.9M52.1 70.0l2.4-7.5M12.0 222.7l3.6-11.0M5.2 84.0l2.5-7.6M40.4 192.4l4.1-12.5M163.9 125.6l2.7-8.2M106.8 137.6l2.1-6.6M217.2 36.6l1.9-6.0M1.2 68.0l2.0-6.3M261.2 68.0l2.0-6.3M159.2 253.9l1.9-5.8M245.7 11.0l2.4-7.4M140.3 85.0l1.9-5.8M-4.5 202.2l2.1-6.5M255.5 202.2l2.1-6.5M163.4 47.8l1.9-5.7'/%3E%3Cpath stroke-opacity='0.2' stroke-width='1.2' d='M8.3 25.2l3.4-10.5M25.8 42.7l4.3-13.3M54.1 32.7l3.7-11.4M74.6 230.5l2.2-6.9M196.7 111.7l2.0-6.2M204.3 153.7l1.9-5.8M63.0 108.7l1.9-5.8M240.6 102.6l4.9-15.0M251.8 147.1l2.0-6.3M30.9 172.3l3.7-11.4M223.2 160.7l1.9-5.7M239.2 131.7l2.5-7.8M154.6 178.3l2.8-8.6M124.0 194.4l2.8-8.7M223.2 0.4l2.0-6.3M223.2 260.4l2.0-6.3M24.7 197.5l3.8-11.7'/%3E%3C/svg%3E");
 }
@@ -1065,19 +1063,8 @@ html.dark[data-background="ripples"] body,
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='593' height='593' fill='none' stroke='url(%23g)'%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop stop-color='rgb(128,128,128)'/%3E%3Cstop offset='1' stop-color='rgb(128,128,128)' stop-opacity='0.12'/%3E%3C/linearGradient%3E%3Cg stroke-opacity='0.29' stroke-width='0.9'%3E%3Ccircle cx='430' cy='86' r='8.8'/%3E%3Ccircle cx='312' cy='236' r='6.8'/%3E%3C/g%3E%3Cg stroke-opacity='0.28' stroke-width='0.9'%3E%3Ccircle cx='62' cy='50' r='12.8'/%3E%3Ccircle cx='528' cy='420' r='9.8'/%3E%3Ccircle cx='96' cy='476' r='11.2'/%3E%3C/g%3E%3Cg stroke-opacity='0.27' stroke-width='0.9'%3E%3Ccircle cx='250' cy='300' r='15.4'/%3E%3C/g%3E%3Cg stroke-opacity='0.24' stroke-width='0.79'%3E%3Ccircle cx='430' cy='86' r='14.7'/%3E%3Ccircle cx='528' cy='420' r='14.0'/%3E%3Ccircle cx='312' cy='236' r='11.4'/%3E%3C/g%3E%3Cg stroke-opacity='0.22' stroke-width='0.79'%3E%3Ccircle cx='62' cy='50' r='21.4'/%3E%3Ccircle cx='96' cy='476' r='20.0'/%3E%3C/g%3E%3Cg stroke-opacity='0.21' stroke-width='0.79'%3E%3Ccircle cx='250' cy='300' r='27.5'/%3E%3C/g%3E%3Cg stroke-opacity='0.2' stroke-width='0.68'%3E%3Ccircle cx='312' cy='236' r='17.0'/%3E%3C/g%3E%3Cg stroke-opacity='0.19' stroke-width='0.68'%3E%3Ccircle cx='430' cy='86' r='22.0'/%3E%3C/g%3E%3Cg stroke-opacity='0.18' stroke-width='0.68'%3E%3Ccircle cx='96' cy='476' r='29.6'/%3E%3C/g%3E%3Cg stroke-opacity='0.17' stroke-width='0.68'%3E%3Ccircle cx='62' cy='50' r='32.0'/%3E%3C/g%3E%3Cg stroke-opacity='0.16' stroke-width='0.68'%3E%3Ccircle cx='250' cy='300' r='40.7'/%3E%3C/g%3E%3Cg stroke-opacity='0.13' stroke-width='0.58'%3E%3Ccircle cx='96' cy='476' r='40.0'/%3E%3C/g%3E%3Cg stroke-opacity='0.11' stroke-width='0.58'%3E%3Ccircle cx='250' cy='300' r='55.0'/%3E%3C/g%3E%3C/svg%3E");
 }
 
-/* Snow falling past: soft round flakes of a few sizes, the small ones
-   further off. Blue-grey by day, white at night. */
-html[data-background="snow"] body,
-.texture-swatch[data-texture="snow"] {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300' fill='rgb(118,128,150)'%3E%3Ccircle cx='156.6' cy='242.0' r='1.9' fill-opacity='0.28'/%3E%3Ccircle cx='229.8' cy='211.3' r='1.5' fill-opacity='0.24'/%3E%3Ccircle cx='8.1' cy='115.3' r='1.6' fill-opacity='0.27'/%3E%3Ccircle cx='150.5' cy='95.2' r='1.8' fill-opacity='0.41'/%3E%3Ccircle cx='120.5' cy='299.5' r='0.7' fill-opacity='0.38'/%3E%3Ccircle cx='120.5' cy='-0.5' r='0.7' fill-opacity='0.38'/%3E%3Ccircle cx='262.6' cy='45.3' r='1.6' fill-opacity='0.33'/%3E%3Ccircle cx='286.6' cy='63.0' r='1.4' fill-opacity='0.4'/%3E%3Ccircle cx='191.6' cy='92.8' r='0.7' fill-opacity='0.41'/%3E%3Ccircle cx='142.2' cy='298.9' r='0.8' fill-opacity='0.38'/%3E%3Ccircle cx='142.2' cy='-1.1' r='0.8' fill-opacity='0.38'/%3E%3Ccircle cx='244.0' cy='276.0' r='0.6' fill-opacity='0.29'/%3E%3Ccircle cx='15.5' cy='225.6' r='1.1' fill-opacity='0.41'/%3E%3Ccircle cx='112.4' cy='232.3' r='1.8' fill-opacity='0.27'/%3E%3Ccircle cx='167.0' cy='287.2' r='1.3' fill-opacity='0.29'/%3E%3Ccircle cx='80.2' cy='235.9' r='0.9' fill-opacity='0.34'/%3E%3Ccircle cx='166.7' cy='166.0' r='0.8' fill-opacity='0.35'/%3E%3Ccircle cx='275.0' cy='95.7' r='1.1' fill-opacity='0.4'/%3E%3Ccircle cx='173.5' cy='81.8' r='0.6' fill-opacity='0.37'/%3E%3Ccircle cx='104.4' cy='140.1' r='1.0' fill-opacity='0.35'/%3E%3Ccircle cx='218.7' cy='92.9' r='0.7' fill-opacity='0.42'/%3E%3Ccircle cx='273.0' cy='6.2' r='1.4' fill-opacity='0.36'/%3E%3Ccircle cx='120.9' cy='219.5' r='1.9' fill-opacity='0.34'/%3E%3Ccircle cx='117.5' cy='58.7' r='1.0' fill-opacity='0.25'/%3E%3Ccircle cx='33.1' cy='63.7' r='1.8' fill-opacity='0.33'/%3E%3Ccircle cx='241.5' cy='276.1' r='1.7' fill-opacity='0.23'/%3E%3Ccircle cx='277.8' cy='27.8' r='1.7' fill-opacity='0.39'/%3E%3Ccircle cx='197.2' cy='121.1' r='0.7' fill-opacity='0.24'/%3E%3Ccircle cx='191.0' cy='72.5' r='1.3' fill-opacity='0.27'/%3E%3Ccircle cx='49.0' cy='88.6' r='1.6' fill-opacity='0.32'/%3E%3Ccircle cx='117.8' cy='145.9' r='1.4' fill-opacity='0.32'/%3E%3Ccircle cx='133.5' cy='290.2' r='1.7' fill-opacity='0.27'/%3E%3C/svg%3E");
-  background-size: 300px 300px;
-}
-html.dark[data-background="snow"] body,
-.dark .texture-swatch[data-texture="snow"] {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300' fill='rgb(238,242,252)'%3E%3Ccircle cx='156.6' cy='242.0' r='1.9' fill-opacity='0.37'/%3E%3Ccircle cx='229.8' cy='211.3' r='1.5' fill-opacity='0.33'/%3E%3Ccircle cx='8.1' cy='115.3' r='1.6' fill-opacity='0.36'/%3E%3Ccircle cx='150.5' cy='95.2' r='1.8' fill-opacity='0.54'/%3E%3Ccircle cx='120.5' cy='299.5' r='0.7' fill-opacity='0.5'/%3E%3Ccircle cx='120.5' cy='-0.5' r='0.7' fill-opacity='0.5'/%3E%3Ccircle cx='262.6' cy='45.3' r='1.6' fill-opacity='0.44'/%3E%3Ccircle cx='286.6' cy='63.0' r='1.4' fill-opacity='0.52'/%3E%3Ccircle cx='191.6' cy='92.8' r='0.7' fill-opacity='0.53'/%3E%3Ccircle cx='142.2' cy='298.9' r='0.8' fill-opacity='0.5'/%3E%3Ccircle cx='142.2' cy='-1.1' r='0.8' fill-opacity='0.5'/%3E%3Ccircle cx='244.0' cy='276.0' r='0.6' fill-opacity='0.39'/%3E%3Ccircle cx='15.5' cy='225.6' r='1.1' fill-opacity='0.54'/%3E%3Ccircle cx='112.4' cy='232.3' r='1.8' fill-opacity='0.36'/%3E%3Ccircle cx='167.0' cy='287.2' r='1.3' fill-opacity='0.39'/%3E%3Ccircle cx='80.2' cy='235.9' r='0.9' fill-opacity='0.45'/%3E%3Ccircle cx='166.7' cy='166.0' r='0.8' fill-opacity='0.46'/%3E%3Ccircle cx='275.0' cy='95.7' r='1.1' fill-opacity='0.53'/%3E%3Ccircle cx='173.5' cy='81.8' r='0.6' fill-opacity='0.49'/%3E%3Ccircle cx='104.4' cy='140.1' r='1.0' fill-opacity='0.46'/%3E%3Ccircle cx='218.7' cy='92.9' r='0.7' fill-opacity='0.55'/%3E%3Ccircle cx='273.0' cy='6.2' r='1.4' fill-opacity='0.47'/%3E%3Ccircle cx='120.9' cy='219.5' r='1.9' fill-opacity='0.45'/%3E%3Ccircle cx='117.5' cy='58.7' r='1.0' fill-opacity='0.34'/%3E%3Ccircle cx='33.1' cy='63.7' r='1.8' fill-opacity='0.43'/%3E%3Ccircle cx='241.5' cy='276.1' r='1.7' fill-opacity='0.31'/%3E%3Ccircle cx='277.8' cy='27.8' r='1.7' fill-opacity='0.51'/%3E%3Ccircle cx='197.2' cy='121.1' r='0.7' fill-opacity='0.32'/%3E%3Ccircle cx='191.0' cy='72.5' r='1.3' fill-opacity='0.37'/%3E%3Ccircle cx='49.0' cy='88.6' r='1.6' fill-opacity='0.42'/%3E%3Ccircle cx='117.8' cy='145.9' r='1.4' fill-opacity='0.43'/%3E%3Ccircle cx='133.5' cy='290.2' r='1.7' fill-opacity='0.36'/%3E%3C/svg%3E");
-}
-/* At the swatch's size the page's tile would show a flake or two, so it
-   gets a handful of its own. */
+/* Snow falling past: soft round flakes of a few sizes. Blue-grey by
+   day, white at night. */
 .texture-swatch[data-texture="snow"] {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='44' fill='rgb(118,128,150)'%3E%3Ccircle cx='6' cy='8' r='1.1' fill-opacity='0.38'/%3E%3Ccircle cx='19' cy='30' r='1.6' fill-opacity='0.34'/%3E%3Ccircle cx='30' cy='12' r='0.8' fill-opacity='0.46'/%3E%3Ccircle cx='41' cy='26' r='1.3' fill-opacity='0.32'/%3E%3Ccircle cx='52' cy='9' r='1.8' fill-opacity='0.43'/%3E%3Ccircle cx='57' cy='36' r='0.9' fill-opacity='0.39'/%3E%3Ccircle cx='12' cy='38' r='0.8' fill-opacity='0.31'/%3E%3Ccircle cx='35' cy='40' r='1.1' fill-opacity='0.43'/%3E%3Ccircle cx='24' cy='19' r='0.7' fill-opacity='0.31'/%3E%3Ccircle cx='47' cy='18' r='0.7' fill-opacity='0.41'/%3E%3C/svg%3E");
   background-size: auto;
@@ -1112,17 +1099,24 @@ html.dark[data-background="snow"] body,
 
 /* ── Moving backgrounds ────────────────────────────────────────────────────
    components/background-scene.tsx puts one fixed layer under the whole
-   page for the backgrounds that move. Each moving texture is a repeating
-   tile used as a mask over a flat colour, so the colour follows the theme,
-   and it moves by transform alone: the browser slides an image it has
-   already drawn, without redrawing the page. Every loop moves a tile by
-   exactly one repeat, so it never jumps.
+   page for the backgrounds that are scenes. Everything in it moves by
+   transform and fades by opacity alone, so the browser slides and fades
+   what it has already drawn, without redrawing the page.
 
-   The scene shows only while animations may play: Animations on in
+   Rain, snow and stars are scattered over the whole window, not repeated
+   on a small tile, so nothing lines up in rows. The far-off marks are
+   tiles used as masks over a flat colour, so the colour follows the theme,
+   and each depth is two or three tiles of sizes that share no factor, laid
+   over each other, so the pattern never visibly repeats; every loop moves
+   a tile by exactly one repeat, so it never jumps. The near ones are each
+   their own element, at their own place and pace.
+
+   Things move only while animations may play: Animations on in
    Preferences, Moving backgrounds on, and the device not asking for
-   reduced motion. Otherwise it is hidden and the still texture above is
-   what shows. The sky is the exception: its colours tell the time of day
-   rather than move, so they always show, and only its stars twinkle. */
+   reduced motion. Otherwise rain, snow and stars hold still where they
+   are, and aurora and ripples are hidden, leaving their still textures
+   above. The sky's colours tell the time of day rather than move, so they
+   always show. */
 .bg-scene {
   position: fixed;
   inset: 0;
@@ -1138,87 +1132,200 @@ html.dark[data-background="snow"] body,
   position: absolute;
   display: block;
 }
+.bg-scene:is([data-scene="rain"], [data-scene="snow"], [data-scene="stars"], [data-scene="sky"]) {
+  display: block;
+}
 @media (prefers-reduced-motion: no-preference) {
   html:not([data-motion="off"], [data-background-motion="still"]) .bg-scene {
     display: block;
   }
-  /* These three are replaced by their moving versions; stars and ripples
-     keep the still texture and add to it. */
-  html:not([data-motion="off"], [data-background-motion="still"]):is(
-      [data-background="rain"],
-      [data-background="snow"],
-      [data-background="aurora"]
-    )
-    body {
+  /* The moving aurora replaces the still one; ripples keep the still
+     texture and add to it. */
+  html:not([data-motion="off"], [data-background-motion="still"])[data-background="aurora"] body {
     background-image: none;
   }
-}
-.bg-scene[data-scene="sky"] {
-  display: block;
 }
 @media print {
   .bg-scene {
     display: none !important;
   }
 }
-
-/* Rain: fine, faint strokes further off and fewer, longer ones nearer,
-   falling along their own slant at two speeds. Each tile is three times
-   as tall as it is wide, and the strokes lean one across for three down,
-   so one tile's width left and its height down is one step of the fall. */
-.bg-rain-far,
-.bg-rain-near {
-  --mark: rgb(128 128 128 / 0.28);
-  background: var(--mark);
-  mask-repeat: repeat;
-  will-change: transform;
+/* The near drops, flakes and stars are spread for a big window. Smaller
+   windows show two in three of them, and phones one in three, so they
+   are as thick on the ground everywhere. */
+.bg-many {
+  inset: 0;
 }
-.dark .bg-rain-far,
-.dark .bg-rain-near {
+@media (max-width: 1100px) {
+  .bg-many > :nth-child(3n) {
+    display: none;
+  }
+}
+@media (max-width: 700px) {
+  .bg-many > :nth-child(3n + 1) {
+    display: none;
+  }
+}
+
+/* Rain: fine, faint strokes far off, falling along their own slant (one
+   across for three down), and nearer, longer drops, each falling at its
+   own speed. A far tile is three times as tall as it is wide, so one
+   tile's width left and its height down is one step of the fall. A near
+   drop's --p is where it is in its fall: 0 just above the window, 1 just
+   below it. */
+.bg-scene[data-scene="rain"] {
+  --mark: rgb(128 128 128 / 0.28);
+}
+.dark .bg-scene[data-scene="rain"] {
   --mark: rgb(210 215 230 / 0.22);
 }
-.bg-rain-far {
-  inset: -300px -100px 0 0;
-  mask-image: url("/textures/rain-far.svg");
-  mask-size: 100px 300px;
-  animation: bg-rain-far 3.6s linear infinite;
+.bg-rain-far-a,
+.bg-rain-far-b {
+  background: var(--mark);
+  mask-repeat: repeat;
 }
+.bg-rain-far-a {
+  inset: -453px -151px 0 0;
+  mask-image: url("/textures/rain-far-a.svg");
+  mask-size: 151px 453px;
+}
+.bg-rain-far-b {
+  inset: -633px -211px 0 0;
+  mask-image: url("/textures/rain-far-b.svg");
+  mask-size: 211px 633px;
+}
+/* Wider than the window on the right, for the drops that slant in. */
 .bg-rain-near {
-  inset: -420px -140px 0 0;
-  mask-image: url("/textures/rain-near.svg");
-  mask-size: 140px 420px;
-  animation: bg-rain-near 2.2s linear infinite;
+  inset: 0 -42vh 0 0;
 }
-@keyframes bg-rain-far {
-  to {
-    transform: translate(-100px, 300px);
+.bg-raindrop {
+  top: 0;
+  width: 1px;
+  background: linear-gradient(transparent, var(--mark) 70%);
+  rotate: 18.43deg;
+  translate: calc(var(--p) * -41.33vh) calc(var(--p) * 124vh - 12vh);
+}
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-motion="off"], [data-background-motion="still"]) .bg-rain-far-a {
+    animation: bg-rain-far-a 5.2s linear infinite;
+  }
+  html:not([data-motion="off"], [data-background-motion="still"]) .bg-rain-far-b {
+    animation: bg-rain-far-b 7.9s linear infinite;
+  }
+  html:not([data-motion="off"], [data-background-motion="still"]) .bg-raindrop {
+    animation: bg-rain-fall var(--t) linear calc(var(--p) * var(--t) * -1) infinite;
   }
 }
-@keyframes bg-rain-near {
+@keyframes bg-rain-far-a {
   to {
-    transform: translate(-140px, 420px);
+    transform: translate(-151px, 453px);
+  }
+}
+@keyframes bg-rain-far-b {
+  to {
+    transform: translate(-211px, 633px);
+  }
+}
+@keyframes bg-rain-fall {
+  from {
+    translate: 0 -12vh;
+  }
+  to {
+    translate: -41.33vh 112vh;
   }
 }
 
-/* Snow: three depths drifting down, slower the further off, each swaying
-   gently from side to side out of step with the others. */
+/* Snow: two layers far off and two in the middle distance drifting down,
+   slower the further off, each swaying gently from side to side out of
+   step with the others; and nearer, bigger flakes, each falling and
+   swaying at its own pace. */
+.bg-scene[data-scene="snow"] {
+  --mark: rgb(118 128 150 / 0.48);
+}
+.dark .bg-scene[data-scene="snow"] {
+  --mark: rgb(238 242 252 / 0.62);
+}
 .bg-sway {
   inset: 0 -24px;
-  animation: bg-sway 9s ease-in-out infinite alternate;
 }
-.bg-sway-far {
-  --sway: 8px;
-  animation-duration: 7s;
+.bg-sway-far-a {
+  --sway: 7px;
+  --s: 7s;
 }
-.bg-sway-mid {
+.bg-sway-far-b {
+  --sway: 9px;
+  --s: 8.5s;
+  --sd: -4s;
+}
+.bg-sway-mid-a {
   --sway: 12px;
-  animation-duration: 9.5s;
-  animation-delay: -3s;
+  --s: 10s;
+  --sd: -3s;
 }
-.bg-sway-near {
-  --sway: 18px;
-  animation-duration: 12s;
-  animation-delay: -7s;
+.bg-sway-mid-b {
+  --sway: 14px;
+  --s: 12.5s;
+  --sd: -8s;
+}
+.bg-snow-far-a,
+.bg-snow-far-b,
+.bg-snow-mid-a,
+.bg-snow-mid-b {
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--mark);
+  mask-repeat: repeat;
+}
+.bg-snow-far-a {
+  top: -223px;
+  mask-image: url("/textures/snow-far-a.svg");
+  mask-size: 223px 223px;
+}
+.bg-snow-far-b {
+  top: -317px;
+  mask-image: url("/textures/snow-far-b.svg");
+  mask-size: 317px 317px;
+}
+.bg-snow-mid-a {
+  top: -389px;
+  mask-image: url("/textures/snow-mid-a.svg");
+  mask-size: 389px 389px;
+}
+.bg-snow-mid-b {
+  top: -547px;
+  mask-image: url("/textures/snow-mid-b.svg");
+  mask-size: 547px 547px;
+}
+.bg-flake {
+  top: 0;
+  width: var(--size);
+  height: var(--size);
+  border-radius: 50%;
+  background: radial-gradient(closest-side, var(--mark) 40%, transparent);
+  translate: 0 calc(var(--p) * 124vh - 12vh);
+}
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-motion="off"], [data-background-motion="still"]) .bg-sway {
+    animation: bg-sway var(--s) ease-in-out var(--sd, 0s) infinite alternate;
+  }
+  html:not([data-motion="off"], [data-background-motion="still"]) .bg-snow-far-a {
+    animation: bg-snow-far-a 18s linear infinite;
+  }
+  html:not([data-motion="off"], [data-background-motion="still"]) .bg-snow-far-b {
+    animation: bg-snow-far-b 27.5s linear infinite;
+  }
+  html:not([data-motion="off"], [data-background-motion="still"]) .bg-snow-mid-a {
+    animation: bg-snow-mid-a 19.5s linear infinite;
+  }
+  html:not([data-motion="off"], [data-background-motion="still"]) .bg-snow-mid-b {
+    animation: bg-snow-mid-b 29.5s linear infinite;
+  }
+  html:not([data-motion="off"], [data-background-motion="still"]) .bg-flake {
+    animation:
+      bg-snow-fall var(--t) linear calc(var(--p) * var(--t) * -1) infinite,
+      bg-sway var(--s) ease-in-out calc(var(--sp) * var(--s) * -1) infinite alternate;
+  }
 }
 @keyframes bg-sway {
   from {
@@ -1228,144 +1335,163 @@ html.dark[data-background="snow"] body,
     transform: translateX(var(--sway));
   }
 }
-.bg-snow-far,
-.bg-snow-mid,
-.bg-snow-near {
-  --mark: rgb(118 128 150 / 0.48);
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: var(--mark);
-  mask-repeat: repeat;
-  will-change: transform;
-}
-.dark .bg-snow-far,
-.dark .bg-snow-mid,
-.dark .bg-snow-near {
-  --mark: rgb(238 242 252 / 0.62);
-}
-.bg-snow-far {
-  top: -180px;
-  mask-image: url("/textures/snow-far.svg");
-  mask-size: 180px 180px;
-  animation: bg-snow-far 15s linear infinite;
-}
-.bg-snow-mid {
-  top: -290px;
-  mask-image: url("/textures/snow-mid.svg");
-  mask-size: 290px 290px;
-  animation: bg-snow-mid 15s linear infinite;
-}
-.bg-snow-near {
-  top: -410px;
-  mask-image: url("/textures/snow-near.svg");
-  mask-size: 410px 410px;
-  animation: bg-snow-near 12s linear infinite;
-}
-@keyframes bg-snow-far {
+@keyframes bg-snow-far-a {
   to {
-    transform: translateY(180px);
+    transform: translateY(223px);
   }
 }
-@keyframes bg-snow-mid {
+@keyframes bg-snow-far-b {
   to {
-    transform: translateY(290px);
+    transform: translateY(317px);
   }
 }
-@keyframes bg-snow-near {
+@keyframes bg-snow-mid-a {
   to {
-    transform: translateY(410px);
+    transform: translateY(389px);
+  }
+}
+@keyframes bg-snow-mid-b {
+  to {
+    transform: translateY(547px);
+  }
+}
+@keyframes bg-snow-fall {
+  from {
+    translate: 0 -12vh;
+  }
+  to {
+    translate: 0 112vh;
   }
 }
 
-/* Stars: a few brighter ones on four tiles of different sizes, each tile
-   brightening and dimming on its own slow beat, so which stars shine
-   never repeats in a pattern. At night (dark themes), now and then a
+/* Stars, for Stars and the Sky at night: a still field of faint ones on
+   three tiles, and brighter ones scattered over it, each twinkling on its
+   own beat, a few of them glinting. At night (dark themes), now and then a
    shooting star. */
-.bg-twinkle {
-  --mark: rgb(110 110 110 / 0.55);
+.bg-scene:is([data-scene="stars"], [data-scene="sky"]) {
+  --star: rgb(110 110 110 / 0.42);
+  --bright: rgb(110 110 110 / 0.6);
+}
+.dark .bg-scene:is([data-scene="stars"], [data-scene="sky"]) {
+  --star: rgb(240 240 228 / 0.55);
+  --bright: rgb(255 250 232 / 0.9);
+}
+.bg-starfield {
   inset: 0;
-  background: var(--mark);
+  background: var(--star);
+  mask-image: url("/textures/stars-a.svg"), url("/textures/stars-b.svg"), url("/textures/stars-c.svg");
+  mask-size:
+    383px 383px,
+    541px 541px,
+    769px 769px;
   mask-repeat: repeat;
-  opacity: 0.2;
-  animation: bg-twinkle 4s ease-in-out infinite;
 }
-.dark .bg-twinkle {
-  --mark: rgb(255 250 232 / 0.9);
+.bg-twinkle,
+.bg-glint {
+  width: var(--size);
+  height: var(--size);
+  margin: calc(var(--size) / -2) 0 0 calc(var(--size) / -2);
+  opacity: var(--o);
 }
-.bg-twinkle-0 {
-  mask-image: url("/textures/twinkle-0.svg");
-  mask-size: 310px 310px;
-  animation-duration: 3.4s;
+.bg-twinkle {
+  border-radius: 50%;
+  background: radial-gradient(closest-side, var(--bright) 45%, transparent);
 }
-.bg-twinkle-1 {
-  mask-image: url("/textures/twinkle-1.svg");
-  mask-size: 430px 430px;
-  animation-duration: 5.1s;
-  animation-delay: -2s;
+.bg-glint {
+  background: var(--bright);
+  mask: url("/textures/glint.svg") center / contain no-repeat;
 }
-.bg-twinkle-2 {
-  mask-image: url("/textures/twinkle-2.svg");
-  mask-size: 550px 550px;
-  animation-duration: 6.7s;
-  animation-delay: -5s;
-}
-.bg-twinkle-3 {
-  mask-image: url("/textures/twinkle-3.svg");
-  mask-size: 690px 690px;
-  animation-duration: 8.9s;
-  animation-delay: -1s;
-}
-@keyframes bg-twinkle {
-  50% {
-    opacity: 1;
-  }
+/* A shooting star: a bright head, and a tail fading out behind it along
+   the way it came. Its left and top are where the head starts, and it
+   grows from the head. Each waits out most of its loop unseen. */
+.bg-meteors {
+  inset: 0;
 }
 .bg-meteor {
   display: none;
-  width: 140px;
+  width: 150px;
   height: 1px;
-  background: linear-gradient(to right, rgb(255 250 235 / 0.95), rgb(255 250 235 / 0) 85%);
+  margin: -0.5px 0 0 -150px;
+  background: linear-gradient(to right, rgb(255 250 235 / 0), rgb(255 250 235 / 0.95));
   opacity: 0;
-  transform-origin: left center;
-  animation: bg-meteor 31s ease-in infinite;
+  transform-origin: right center;
 }
-.dark .bg-meteor {
-  display: block;
+.bg-meteor::after {
+  content: "";
+  position: absolute;
+  top: -1px;
+  right: -1px;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: rgb(255 250 235);
+  box-shadow: 0 0 4px 1px rgb(255 250 235 / 0.5);
 }
 .bg-meteor-1 {
   --angle: 152deg;
   top: 14%;
   left: 76%;
-  animation-delay: -24s;
+  --d: -24s;
 }
 .bg-meteor-2 {
   --angle: 160deg;
   top: 8%;
   left: 38%;
-  animation-duration: 47s;
-  animation-delay: -9s;
+  --t: 47s;
+  --d: -9s;
 }
 .bg-meteor-3 {
   --angle: 146deg;
   top: 30%;
   left: 92%;
-  animation-duration: 59s;
-  animation-delay: -40s;
+  --t: 59s;
+  --d: -40s;
+}
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-motion="off"], [data-background-motion="still"]) .bg-twinkle {
+    animation: bg-twinkle var(--t) ease-in-out calc(var(--p) * var(--t) * -1) infinite;
+  }
+  html:not([data-motion="off"], [data-background-motion="still"]) .bg-glint {
+    animation: bg-glint calc(var(--t) * 1.6) ease-in-out calc(var(--p) * var(--t) * -1.6) infinite;
+  }
+  html.dark:not([data-motion="off"], [data-background-motion="still"]) .bg-meteor {
+    display: block;
+    animation: bg-meteor var(--t, 31s) ease-in var(--d, 0s) infinite;
+  }
+}
+@keyframes bg-twinkle {
+  0%,
+  100% {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+@keyframes bg-glint {
+  0%,
+  100% {
+    opacity: 0.55;
+    scale: 0.8;
+  }
+  50% {
+    opacity: 1;
+    scale: 1;
+  }
 }
 /* A streak about a second long, then nothing for the rest of the loop. */
 @keyframes bg-meteor {
   0%,
-  96.4% {
+  96% {
     opacity: 0;
-    transform: rotate(var(--angle)) translateX(0);
+    transform: rotate(var(--angle)) translateX(0) scaleX(0.2);
   }
   97% {
     opacity: 1;
   }
   100% {
     opacity: 0;
-    transform: rotate(var(--angle)) translateX(320px);
+    transform: rotate(var(--angle)) translateX(300px) scaleX(1);
   }
 }
 
@@ -1526,30 +1652,6 @@ html.dark[data-background="snow"] body,
 .bg-sky-night {
   inset: 0;
   opacity: var(--sky-stars);
-}
-.bg-sky-stars {
-  --mark: rgb(110 110 110 / 0.4);
-  inset: 0;
-  background: var(--mark);
-  mask-image: url("/textures/starfield.svg");
-  mask-size: 260px 260px;
-  mask-repeat: repeat;
-}
-.dark .bg-sky-stars {
-  --mark: rgb(255 250 232 / 0.6);
-}
-/* Twinkling and shooting stars only while things may move. */
-.bg-scene[data-scene="sky"] .bg-twinkle,
-.bg-scene[data-scene="sky"] .bg-meteor {
-  display: none;
-}
-@media (prefers-reduced-motion: no-preference) {
-  html:not([data-motion="off"], [data-background-motion="still"]) .bg-scene[data-scene="sky"] .bg-twinkle {
-    display: block;
-  }
-  html.dark:not([data-motion="off"], [data-background-motion="still"]) .bg-scene[data-scene="sky"] .bg-meteor {
-    display: block;
-  }
 }
 
 /* ── Drawn covers ──────────────────────────────────────────────────────────

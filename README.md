@@ -111,8 +111,8 @@ server.
   into its place in the library when you close it, bars fill up,
   finishing a book or reaching your goal sets off confetti, and the
   reading room's fire flickers. On the Rain, Snow, Starry night, Aurora and
-  Ripples backgrounds, rain falls, snow drifts, stars twinkle, the light
-  shifts and drops ripple the pond.
+  Ripples backgrounds, rain falls, snow drifts, stars twinkle and the odd
+  one shoots across the night, the light shifts and drops ripple the pond.
   Animations can be turned off (or only the backgrounds kept still), and
   stay off when your device asks for reduced motion.
 - Install it on your phone's home screen like an app.
