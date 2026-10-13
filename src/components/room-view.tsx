@@ -5,8 +5,9 @@ import { Check, Move, Paintbrush, RotateCcw } from "lucide-react";
 import { AvatarMaker } from "@/components/avatar-maker";
 import { Group, Swatches } from "@/components/decorate-controls";
 import type { AvatarLook } from "@/lib/avatar";
+import { RoomSwitch } from "@/components/room-switch";
 import { savePreferences } from "@/lib/actions/preferences";
-import type { Preferences } from "@/lib/preferences";
+import type { HideableNav, Preferences } from "@/lib/preferences";
 import {
   FURNITURE_LABELS,
   MILESTONES,
@@ -68,6 +69,7 @@ export function RoomView({
   away,
   avatar: savedAvatar,
   avatarShown: savedShown,
+  hiddenNav,
   summary,
 }: {
   books: RoomBook[];
@@ -76,6 +78,8 @@ export function RoomView({
   away: Stowable[];
   avatar: AvatarLook;
   avatarShown: boolean;
+  /** For the switch that turns the whole room off. */
+  hiddenNav: HideableNav[];
   /** "198 books on 5 bookcases", beside the title. */
   summary: string | null;
 }) {
@@ -342,6 +346,7 @@ export function RoomView({
           )}
 
           <div className="flex flex-wrap justify-end gap-2 border-t pt-4">
+            <RoomSwitch hiddenNav={hiddenNav} on={false} className="mr-auto text-muted-foreground" />
             {tab === "house" && !sameDecor(decor, PLAIN_DECOR) && (
               <Button size="sm" variant="ghost" onClick={() => change(PLAIN_DECOR)}>
                 <RotateCcw aria-hidden="true" />

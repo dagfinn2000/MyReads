@@ -106,6 +106,9 @@ server.
   and stop by the fire, and while you're reading a book they sit in the
   armchair reading it (the cat moves to the rug). With animations off they
   stand still by the fire.
+- Not for you? Turn the reading room off in Preferences, or from Decorate,
+  and the Room tab goes away. You can also keep the house and leave the
+  avatar out.
 
 **Everything else**
 
