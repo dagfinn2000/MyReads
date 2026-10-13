@@ -97,8 +97,9 @@ export function shelve(widths: readonly number[]): number[][] {
 }
 
 /** Rooms the reader can add to the house (Decorate › Rooms), each a floor
- *  of its own over the library, with its own furniture. */
-export const ROOMS = ["kitchen", "bedroom", "music", "conservatory", "games", "studio"] as const;
+ *  of its own over the library, with its own furniture; the spare room
+ *  comes empty, for whatever the reader puts in it. */
+export const ROOMS = ["kitchen", "bedroom", "music", "conservatory", "games", "studio", "spare"] as const;
 export type RoomKind = (typeof ROOMS)[number];
 
 /** Each room's furniture, left to right. */
@@ -109,6 +110,7 @@ export const ROOM_PIECES = {
   conservatory: ["palm", "wicker", "birdcage", "ferns"],
   games: ["darts", "billiards", "chess"],
   studio: ["easel", "paints", "bust"],
+  spare: [],
 } as const satisfies Record<RoomKind, readonly string[]>;
 export type RoomPiece = (typeof ROOM_PIECES)[RoomKind][number];
 const ROOM_PIECE_LIST = Object.values(ROOM_PIECES).flat() as RoomPiece[];
@@ -120,13 +122,42 @@ export const ROOM_LABELS: Record<RoomKind, { name: string; blurb: string }> = {
   conservatory: { name: "Conservatory", blurb: "A palm, ferns, a wicker chair and a songbird." },
   games: { name: "Games room", blurb: "A billiard table, a game of chess and a dartboard." },
   studio: { name: "Studio", blurb: "An easel, a table of paints and a marble bust." },
+  spare: { name: "Spare room", blurb: "An empty floor, for whatever furniture you like." },
 };
+
+/** Furniture the reader can add from Decorate's catalogue. Each goes
+ *  wherever there is room for it, and can be moved like the rest. */
+export const EXTRAS = [
+  "sofa",
+  "rocker",
+  "aquarium",
+  "dog",
+  "armour",
+  "chest",
+  "coatstand",
+  "telescope",
+  "horse",
+  "curios",
+  "spinning",
+] as const;
+export type Extra = (typeof EXTRAS)[number];
+export const isExtra = (kind: string): kind is Extra => (EXTRAS as readonly string[]).includes(kind);
 
 /** The room a room's piece of furniture comes with. */
 export const roomOf = (kind: PieceKind): RoomKind | null =>
   ROOMS.find((r) => (ROOM_PIECES[r] as readonly string[]).includes(kind)) ?? null;
 
-export type PieceKind = "hearth" | "case" | "ladder" | "plant" | "clock" | "seat" | "study" | "gramophone" | RoomPiece;
+export type PieceKind =
+  | "hearth"
+  | "case"
+  | "ladder"
+  | "plant"
+  | "clock"
+  | "seat"
+  | "study"
+  | "gramophone"
+  | RoomPiece
+  | Extra;
 
 /** How wide each piece of furniture stands. The hearth is the fireplace,
  *  armchair, side table and lamp together. The ladder leans on the end of
@@ -159,6 +190,17 @@ export const PIECE_WIDTH: Record<PieceKind, number> = {
   easel: 26,
   paints: 24,
   bust: 14,
+  sofa: 46,
+  rocker: 22,
+  aquarium: 30,
+  dog: 24,
+  armour: 20,
+  chest: 26,
+  coatstand: 14,
+  telescope: 24,
+  horse: 30,
+  curios: 26,
+  spinning: 26,
 };
 
 /** How many books it takes for each piece of furniture (and the cat) to
@@ -180,10 +222,10 @@ const FILLERS = ["plant", "clock"] as const;
 
 /** Furniture the reader can move about (Decorate › Arrange). Bookcases
  *  keep to the order of the books, and the ladder to the bookcases. */
-export const MOVABLE = ["hearth", "seat", "study", "gramophone", "plant", "clock", ...ROOM_PIECE_LIST] as const;
+export const MOVABLE = ["hearth", "seat", "study", "gramophone", "plant", "clock", ...ROOM_PIECE_LIST, ...EXTRAS] as const;
 export type Movable = (typeof MOVABLE)[number];
 /** Furniture that can be put away. The hearth stays: it is where the
- *  reading happens. */
+ *  reading happens. The catalogue's pieces are taken out instead. */
 export const STOWABLE = ["seat", "study", "gramophone", "plant", "clock", "ladder", ...ROOM_PIECE_LIST] as const;
 export type Stowable = (typeof STOWABLE)[number];
 
@@ -215,6 +257,17 @@ export const FURNITURE_LABELS: Record<Movable | Stowable, string> = {
   easel: "Easel",
   paints: "Paint table",
   bust: "Marble bust",
+  sofa: "Sofa",
+  rocker: "Rocking chair",
+  aquarium: "Aquarium",
+  dog: "Dog in a basket",
+  armour: "Suit of armour",
+  chest: "Chest",
+  coatstand: "Coat stand",
+  telescope: "Telescope",
+  horse: "Rocking horse",
+  curios: "Curio cabinet",
+  spinning: "Spinning wheel",
 };
 
 /** Where the reader has put a piece: on which floor, counting up from the
@@ -234,9 +287,11 @@ export interface Arrangement {
   away: readonly Stowable[];
   /** Rooms added over the library, from the bottom up. */
   rooms?: readonly RoomKind[];
+  /** Furniture added from the catalogue. */
+  extras?: readonly Extra[];
 }
 
-export const NO_ARRANGEMENT: Arrangement = { places: [], away: [], rooms: [] };
+export const NO_ARRANGEMENT: Arrangement = { places: [], away: [], rooms: [], extras: [] };
 
 export interface Piece {
   kind: PieceKind;
@@ -325,10 +380,16 @@ export function planHouse(
   const away = new Set<string>(arrangement.away);
   const rooms = [...new Set(arrangement.rooms ?? [])];
   const inRooms = new Set<string>(rooms.flatMap((r) => ROOM_PIECES[r]));
-  /** Whether a piece is in the house: earned by the library, or come with
-   *  a room, and not put away. */
-  const has = (k: keyof typeof MILESTONES | RoomPiece) =>
-    !away.has(k) && (k in MILESTONES ? bookCount >= MILESTONES[k as keyof typeof MILESTONES] : inRooms.has(k));
+  const added = new Set<string>(arrangement.extras ?? []);
+  /** Whether a piece is in the house: earned by the library, come with a
+   *  room or added from the catalogue, and not put away. */
+  const has = (k: keyof typeof MILESTONES | RoomPiece | Extra) =>
+    !away.has(k) &&
+    (k in MILESTONES
+      ? bookCount >= MILESTONES[k as keyof typeof MILESTONES]
+      : isExtra(k)
+        ? added.has(k)
+        : inRooms.has(k));
   const fits = (kinds: PieceKind[]) => rowWidth(kinds) <= maxInner;
 
   // Moved pieces, by floor (or room) and in slot order; one place per
@@ -356,6 +417,7 @@ export function planHouse(
   const isStarter = (k: PieceKind) => (FLOOR_STARTERS as readonly PieceKind[]).includes(k);
   const starters: PieceKind[] = FLOOR_STARTERS.filter((k) => has(k) && !pinned.has(k));
   const fillers: PieceKind[] = FILLERS.filter((k) => has(k) && !pinned.has(k));
+  const extras: PieceKind[] = EXTRAS.filter((k) => has(k) && !pinned.has(k));
   /** Moved pieces that couldn't keep their place, and go where they would
    *  have gone by themselves. */
   const homeless: PieceKind[] = [];
@@ -434,7 +496,7 @@ export function planHouse(
   const topFirst = (from: number, to: number) => Array.from({ length: to - from }, (_, i) => to - 1 - i);
   const libraryRows = topFirst(0, libraryFloors);
   const roomRows = topFirst(libraryFloors, rows.length);
-  for (const kind of [...homeless.filter(big), ...starters, ...fillers, ...homeless.filter((k) => !big(k))]) {
+  for (const kind of [...homeless.filter(big), ...starters, ...fillers, ...homeless.filter((k) => !big(k)), ...extras]) {
     let placed = false;
     for (const i of roomOf(kind) ? [...roomRows, ...libraryRows] : [...libraryRows, ...roomRows]) {
       const next = big(kind) ? [kind, ...rows[i]] : withFiller(rows[i], kind);
@@ -590,10 +652,27 @@ export const addRoom = (a: Arrangement, room: RoomKind): Arrangement => ({
 export function removeRoom(a: Arrangement, room: RoomKind): Arrangement {
   const pieces: readonly string[] = ROOM_PIECES[room];
   return {
+    ...a,
     places: a.places.filter((p) => p.room !== room && !pieces.includes(p.kind)),
     away: a.away.filter((k) => !pieces.includes(k)),
     rooms: (a.rooms ?? []).filter((r) => r !== room),
   };
+}
+
+/** `kind` added from the catalogue, wherever it goes by itself. */
+export const addExtra = (a: Arrangement, kind: Extra): Arrangement => ({
+  ...a,
+  extras: [...(a.extras ?? []).filter((k) => k !== kind), kind],
+});
+
+/** `kind` taken out of the house again. Whatever stood to its right on its
+ *  floor moves up a place, so the rest stay where they were. */
+export function removeExtra(a: Arrangement, kind: Extra): Arrangement {
+  const was = a.places.find((p) => p.kind === kind);
+  const places = a.places
+    .filter((p) => p.kind !== kind)
+    .map((p) => (was && p.floor === was.floor && p.slot > was.slot ? { ...p, slot: p.slot - 1 } : p));
+  return { ...a, places, extras: (a.extras ?? []).filter((k) => k !== kind) };
 }
 
 /** How many bookcases a list of shelves fills. */

@@ -924,7 +924,7 @@ export function RoomPreview({ pieces, scale = 1 }: { pieces: readonly RoomPiece[
   const gap = 4;
   const h = 100;
   const starts = pieces.map((_, i) => pieces.slice(0, i).reduce((x, k) => x + ART[k].w + gap, 0));
-  const w = pieces.reduce((x, k) => x + ART[k].w, 0) + gap * (pieces.length - 1);
+  const w = Math.max(0, pieces.reduce((x, k) => x + ART[k].w, 0) + gap * (pieces.length - 1));
   return (
     <div className="relative shrink-0" style={{ width: w * scale, height: h * scale }}>
       {pieces.map((kind, i) => (
