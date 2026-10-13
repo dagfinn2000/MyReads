@@ -87,8 +87,9 @@ src/
 │                      library check, cover upload and serving,
 │                      backup export and import
 ├─ components/         UI components (shadcn/ui primitives in components/ui);
-│                      reading-room.tsx and room-art.tsx draw the reading
-│                      room, with its colours in reading-room.css
+│                      reading-room.tsx, room-art.tsx and room-shells.ts
+│                      draw the reading room, with its colours in
+│                      reading-room.css; room-view.tsx is its Decorate panel
 ├─ lib/
 │  ├─ actions/         server actions for every change, each checking that
 │  │                   the data belongs to the signed-in user
@@ -109,6 +110,8 @@ src/
 │  │                   catalogue lookups and cover uploads
 │  ├─ room.ts          the reading room's layout: spine sizes, shelves,
 │  │                   and where bookcases and furniture go as it grows
+│  │                   or as the reader moves it
+│  ├─ room-styles.ts   the reading room's house styles and colours
 │  ├─ sky.ts           the Sky background: how high the sun is where
 │  │                   the reader's time zone is, as colours
 │  ├─ spine-colour.ts  a spine's colour, picked from its cover
@@ -168,7 +171,15 @@ src/
   palette for light themes and a night one for dark themes. Spine colours
   are read from the covers in the browser as each floor scrolls into view,
   and kept in localStorage by cover address, which changes whenever the
-  image does. Nothing about the room is stored on the server.
+  image does. The house's shell (roof, walls, floors, garden) is drawn per
+  style in [room-shells.ts](../src/components/room-shells.ts); the cottage
+  keeps a hand-picked palette, and every other style gives a few base
+  colours per part (`--s-*`) that the shades and the night version are
+  worked out from, so a Decorate colour pick repaints any style. The
+  decoration and where the furniture stands are Preferences
+  (`roomStyle`, `roomLayout` and the rest); placements name a floor and a
+  place among the pieces there, so they survive a different screen width,
+  falling back to where a piece would go by itself when it doesn't fit.
 - **Typed dates and moments are read differently.** A date typed into a date
   field is stored as midnight UTC and means that day everywhere. Anything
   else, like "finished today" or a reading-log entry, is a moment, and

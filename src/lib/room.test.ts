@@ -6,10 +6,15 @@ import {
   PAD,
   PIECE_WIDTH,
   SHELF_WIDTH,
+  bringOut,
   caseCount,
   dressShelf,
   isOnShelf,
+  moveTo,
+  nudge,
+  placementsOf,
   planHouse,
+  putAway,
   shelve,
   spineFor,
   type HousePlan,
@@ -149,6 +154,109 @@ describe("planHouse", () => {
     const floor = kinds(plan)[0];
     const at = floor.indexOf("ladder");
     expect(floor.slice(at - 2, at)).toEqual(["case", "case"]);
+  });
+});
+
+describe("arranging the furniture", () => {
+  const BOOKS = MILESTONES.gramophone;
+
+  it("puts a plan back exactly as it was from its own placements", () => {
+    for (const width of [200, 335, 600]) {
+      const plan = planHouse(14, BOOKS, width);
+      const again = planHouse(14, BOOKS, width, { places: placementsOf(plan), away: [] });
+      expect(kinds(again)).toEqual(kinds(plan));
+    }
+  });
+
+  it("moves a piece along its floor, and keeps it there", () => {
+    const plan = planHouse(3, MILESTONES.clock, 600);
+    expect(kinds(plan)[0][0]).toBe("hearth");
+    const places = moveTo(plan, "hearth", 0, 99)!;
+    const moved = planHouse(3, MILESTONES.clock, 600, { places, away: [] });
+    const ground = kinds(moved)[0];
+    expect(ground[ground.length - 1]).toBe("hearth");
+    expect(ground.filter((k) => k === "case")).toHaveLength(3);
+  });
+
+  it("moves the hearth upstairs, and the cases make room", () => {
+    const plan = planHouse(10, BOOKS, 335);
+    const top = plan.floors.length - 1;
+    const places = moveTo(plan, "hearth", top, 0)!;
+    const moved = planHouse(10, BOOKS, 335, { places, away: [] });
+    expect(kinds(moved)[0][0]).toBe("hearth");
+    expect(moved.floors).toHaveLength(plan.floors.length);
+    expect(all(moved).filter((k) => k === "case")).toHaveLength(10);
+    expect(all(moved).filter((k) => k === "hearth")).toHaveLength(1);
+    // Nothing that was in the house has been squeezed out.
+    expect([...all(moved)].sort()).toEqual([...all(plan)].sort());
+  });
+
+  it("lets a moved piece go where it would have gone when it doesn't fit", () => {
+    // Put the study on the ground floor of a wide house, then look at it on
+    // a phone, where the ground floor has no room for it beside the hearth.
+    const wide = planHouse(6, BOOKS, 700);
+    const places = moveTo(wide, "study", 0, 1)!;
+    const narrow = planHouse(6, BOOKS, 170, { places, away: [] });
+    expect(all(narrow)).toContain("study");
+    for (const floor of narrow.floors) {
+      const end = floor[floor.length - 1];
+      expect(end.x + PIECE_WIDTH[end.kind]).toBeLessThanOrEqual(narrow.inner);
+    }
+  });
+
+  it("never adds a floor just for furniture", () => {
+    const plan = planHouse(2, MILESTONES.clock, 600);
+    const places = [{ kind: "clock" as const, floor: 4, slot: 0 }];
+    const moved = planHouse(2, MILESTONES.clock, 600, { places, away: [] });
+    expect(moved.floors).toHaveLength(plan.floors.length);
+    expect(all(moved)).toContain("clock");
+  });
+
+  it("ignores places for furniture the library hasn't earned", () => {
+    const plan = planHouse(1, 0, 400, { places: [{ kind: "clock", floor: 0, slot: 0 }], away: [] });
+    expect(all(plan)).not.toContain("clock");
+  });
+
+  it("puts furniture away, but never the hearth", () => {
+    const away = planHouse(3, BOOKS, 600, { places: [], away: ["plant", "ladder", "clock"] });
+    expect(all(away)).not.toContain("plant");
+    expect(all(away)).not.toContain("ladder");
+    expect(all(away)).not.toContain("clock");
+    expect(all(away)).toContain("hearth");
+  });
+
+  it("nudges a piece one step, and stops at the ends", () => {
+    const plan = planHouse(3, MILESTONES.plant, 600);
+    const plant = placementsOf(plan).find((p) => p.kind === "plant")!;
+    expect(nudge(plan, "plant", "left")).toEqual({ floor: 0, slot: plant.slot - 1 });
+    expect(nudge(plan, "plant", "right")).toBeNull();
+    expect(nudge(plan, "hearth", "left")).toBeNull();
+    expect(nudge(plan, "plant", "up")).toBeNull();
+    expect(nudge(plan, "plant", "down")).toBeNull();
+  });
+
+  it("keeps the rest in place when a moved piece is put away, and brings it back", () => {
+    const places = [
+      { kind: "plant" as const, floor: 0, slot: 0 },
+      { kind: "hearth" as const, floor: 0, slot: 1 },
+      { kind: "clock" as const, floor: 1, slot: 2 },
+    ];
+    const away = putAway({ places, away: [] }, "plant");
+    expect(away.away).toEqual(["plant"]);
+    expect(away.places).toEqual([
+      { kind: "hearth", floor: 0, slot: 0 },
+      { kind: "clock", floor: 1, slot: 2 },
+    ]);
+    const plan = planHouse(3, BOOKS, 600, away);
+    expect(kinds(plan)[plan.floors.length - 1][0]).toBe("hearth");
+    expect(bringOut(away, "plant")).toEqual({ places: away.places, away: [] });
+  });
+
+  it("nudges a piece to about the same place on the floor above", () => {
+    const plan = planHouse(10, MILESTONES.plant, 335);
+    expect(plan.floors.length).toBeGreaterThan(1);
+    // The hearth's middle is over the gap after the first bookcase above.
+    expect(nudge(plan, "hearth", "up")).toEqual({ floor: 1, slot: 1 });
   });
 });
 

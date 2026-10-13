@@ -77,6 +77,30 @@ const KEY: Record<string, Paint> = {
   $: "art-sun",
   "3": "spine-a",
   "4": "spine-b",
+  // For the house styles (room-shells.ts) and the tapestries.
+  N: "curtain-hi",
+  R: "curtain",
+  Z: "curtain-lo",
+  "5": "rug",
+  "6": "rug-2",
+  "7": "rug-3",
+  "8": "rug-fringe",
+  I: "light",
+  J: "trim",
+  M: "metal",
+  "+": "metal-hi",
+  "=": "metal-lo",
+  Q: "outer",
+  "&": "outer-hi",
+  "#": "outer-lo",
+  "9": "copper",
+  "!": "copper-hi",
+  "?": "copper-lo",
+  "*": "cap",
+  "<": "bark",
+  ">": "bark-lo",
+  "{": "pine",
+  "}": "pine-lo",
 };
 
 /** A text grid as rectangles: each run of one character on a row becomes
@@ -97,7 +121,7 @@ export function grid(rows: readonly string[], ox = 0, oy = 0): Rect[] {
   return out;
 }
 
-function art(rows: readonly string[]): Art {
+export function art(rows: readonly string[]): Art {
   return { w: Math.max(...rows.map((r) => r.length)), h: rows.length, rects: grid(rows) };
 }
 
@@ -283,6 +307,130 @@ export function paintingArt(scene: "hills" | "sea"): Art {
   }
   R.push([2, 2, 26, 1, "brass-lo"], [2, 19, 26, 1, "brass-hi"]);
   return { w: 30, h: 22, rects: R };
+}
+
+/** What hangs over the fireplace (Decorate › Over the fireplace) that isn't
+ *  the painting: a tapestry, 32 × 44, woven in the room's fabric colours on
+ *  a rod with brass finials, with a fringe at the foot. */
+export function tapestryArt(design: "tree" | "stag" | "stars" | "waves" | "kilim"): Art {
+  const R: Rect[] = [];
+  // The cloth, a gold border inside a dark edge, and the fringe.
+  R.push([2, 2, 28, 38, "chair-deep"], [3, 3, 26, 36, "rug-2"], [4, 4, 24, 34, "chair"]);
+  for (let x = 3; x < 29; x += 2) R.push([x, 40, 1, 3, "rug-fringe"]);
+  // Rod and finials, tabs over it.
+  R.push([1, 1, 30, 1, "wood"], [1, 2, 30, 1, "wood-lo"], [0, 0, 2, 3, "brass"], [30, 0, 2, 3, "brass"]);
+  for (let x = 5; x < 28; x += 5) R.push([x, 0, 2, 2, "chair-lo"]);
+  const dot = (x: number, y: number, paint: string) => R.push([x, y, 1, 1, paint]);
+  const diamond = (cx: number, cy: number, r: number, paint: string) => {
+    for (let dy = -r; dy <= r; dy++) {
+      const w = r - Math.abs(dy);
+      R.push([cx - w, cy + dy, 2 * w + 1, 1, paint]);
+    }
+  };
+  switch (design) {
+    case "tree": {
+      // A tree of life: a trunk, branches each ending in a leaf, golden
+      // fruit, two birds, and roots spreading at the foot.
+      R.push([15, 17, 2, 18, "chair-deep"]);
+      R.push([11, 35, 10, 1, "chair-deep"], [9, 36, 3, 1, "chair-deep"], [20, 36, 3, 1, "chair-deep"]);
+      for (const [y0, len] of [[30, 7], [25, 8], [20, 8], [15, 6]] as const) {
+        for (let k = 1; k <= len; k++) {
+          dot(15 - k, y0 - (k >> 1), "chair-deep");
+          dot(16 + k, y0 - (k >> 1), "chair-deep");
+        }
+        for (const lx of [15 - len, 16 + len]) {
+          diamond(lx, y0 - (len >> 1) - 1, 2, "leaf");
+          dot(lx, y0 - (len >> 1) - 1, "leaf-hi");
+        }
+        dot(12, y0 - 3, "rug-2");
+        dot(19, y0 - 3, "rug-2");
+      }
+      diamond(15, 10, 4, "leaf");
+      diamond(16, 10, 4, "leaf");
+      R.push([15, 8, 2, 4, "leaf-hi"]);
+      R.push(...grid(["6.6", ".66", "..6"], 6, 6), ...grid(["6.6", "66.", "6.."], 23, 6));
+      return { w: 32, h: 44, rects: R };
+    }
+    case "stag":
+      // A stag among trees under the stars.
+      R.push(
+        ...grid(
+          [
+            "..y..y......y..y",
+            ".yy.yy.....yy.yy",
+            "..yyy.......yyy.",
+            "...yy.y...y.yy..",
+            "....yyy...yyy...",
+            "......yy.yy.....",
+            ".......yyy......",
+            "......yyyy......",
+            ".....yyyyy......",
+            ".....yyyy.......",
+            "......yyy.......",
+            "......yyyyyyyyy.",
+            "......yyyyyyyyyy",
+            ".......yyyyyyyyy",
+            ".......yy....yy.",
+            ".......y.y...y.y",
+            ".......y.y...y.y",
+            ".......y.y...y.y",
+          ],
+          6,
+          13,
+        ),
+      );
+      for (const tx of [6, 25]) {
+        for (let k = 0; k < 4; k++) R.push([tx - k, 22 + k * 3, 2 * k + 1, 3, "leaf"]);
+        R.push([tx, 34, 1, 3, "chair-deep"]);
+      }
+      R.push([4, 37, 24, 1, "leaf-lo"]);
+      for (const [x, y] of [[8, 7], [14, 5], [21, 8], [26, 6], [11, 10], [24, 11]] as const) dot(x, y, "rug-2");
+      return { w: 32, h: 44, rects: R };
+    case "stars":
+      // The sun and the moon, with stars between and the sea beneath.
+      diamond(10, 11, 4, "rug-2");
+      R.push([7, 9, 7, 5, "rug-2"]);
+      for (const [x, y] of [[10, 5], [10, 17], [4, 11], [16, 11], [6, 7], [14, 7], [6, 15], [14, 15]] as const) dot(x, y, "rug-2");
+      R.push(...grid([".yyy", "yy..", "y...", "y...", "yy..", ".yyy"], 20, 8));
+      for (const [x, y] of [[7, 22], [16, 20], [24, 18], [12, 26], [21, 25], [26, 23], [5, 28], [17, 29]] as const) {
+        R.push([x - 1, y, 3, 1, "paper"], [x, y - 1, 1, 3, "paper"]);
+      }
+      for (let x = 4; x < 28; x++) {
+        const y = 33 + Math.round(Math.sin(x / 1.6));
+        R.push([x, y, 1, 1, "cushion"], [x, y + 1, 1, 37 - y, "chair-lo"]);
+      }
+      return { w: 32, h: 44, rects: R };
+    case "waves": {
+      // Rows of breaking waves, crests picked out in foam.
+      const cell = ["..yyyy..", ".y....y.", "y..UU..y", "..U..U..", ".U....U.", "U......U"];
+      for (let row = 0; row < 6; row++) {
+        const off = row % 2 ? 4 : 0;
+        for (let col = -1; col < 4; col++) {
+          grid(cell, 4 + col * 8 + off, 5 + row * 6).forEach((r) => {
+            const x0 = Math.max(r[0], 4);
+            const x1 = Math.min(r[0] + r[2], 28);
+            if (x1 > x0) R.push([x0, r[1], x1 - x0, r[3], r[4]]);
+          });
+        }
+      }
+      return { w: 32, h: 44, rects: R };
+    }
+    case "kilim":
+      // Diamonds within diamonds down the middle, zigzags at the ends.
+      for (const cy of [12, 21, 30]) {
+        diamond(16, cy, 5, "rug-2");
+        diamond(16, cy, 3, "chair-deep");
+        diamond(16, cy, 1, "paper");
+      }
+      for (let x = 4; x < 28; x++) {
+        const z = Math.abs(((x - 4) % 4) - 2);
+        R.push([x, 5 + z, 1, 1, "rug-2"], [x, 36 - z, 1, 1, "rug-2"]);
+      }
+      for (const [x, y] of [[7, 16], [25, 16], [7, 26], [25, 26]] as const) {
+        R.push([x - 1, y, 3, 1, "paper"], [x, y - 1, 1, 3, "paper"]);
+      }
+      return { w: 32, h: 44, rects: R };
+  }
 }
 
 /** A tufted wingback armchair, 29 × 31. */
@@ -631,20 +779,7 @@ export const ORNAMENT_ART = {
 
 export const BOOKEND = art(["Bn.", "Bn.", "Bn.", "Bn.", "Bn.", "Bn.", "Bn.", "Bn.", "Bn.", "bBn"]);
 
-// ── The house ────────────────────────────────────────────────────────────
-
-/** A shrub for the garden, 14 × 9. */
-export const SHRUB = art([
-  "....gGGg......",
-  "..gGGGGGGg.g..",
-  ".gGGjGGGGGgGg.",
-  "gGGGGGjGGGGGGg",
-  "GGjGGGGGGjGGGG",
-  "GGGGjGGGiGGjGG",
-  "jGGGGGGGGGGGjj",
-  ".jjGGjjGGjjjj.",
-  "..jjjjjjjjjj..",
-]);
+// ── The house (drawn in room-shells.ts) ──────────────────────────────────
 
 /** Where the house stands in the scene, in dots. */
 export interface HouseGeometry {
@@ -663,138 +798,4 @@ export interface HouseGeometry {
   ground: number;
   /** Left edge of the chimney stack. */
   chimneyX: number;
-}
-
-/** Overhang of the roof past the walls. */
-const EAVES = 4;
-
-/** The top of the roof's slope at scene column `x`: 2 across for 1 up. */
-export function roofSurface(g: HouseGeometry, x: number): number {
-  const left = g.houseX - EAVES;
-  const right = g.houseX + g.houseW + EAVES;
-  const fromEdge = Math.min(x - left, right - 1 - x);
-  return g.roofTop + Math.max(0, g.roofH - 1 - Math.floor(fromEdge / 2));
-}
-
-/** A run of bricks: mortar every third row, joints staggered. */
-function bricks(R: Rect[], x: number, y: number, w: number, h: number) {
-  R.push([x, y, w, h, "brick"]);
-  for (let row = 0; row * 3 < h; row++) {
-    const ry = y + row * 3 + 2;
-    if (ry < y + h) R.push([x, ry, w, 1, "brick-lo"]);
-    for (let bx = x + (row % 2 ? 1 : 4); bx < x + w; bx += 6) {
-      R.push([bx, y + row * 3, 1, Math.min(2, y + h - (y + row * 3)), "brick-lo"]);
-    }
-  }
-}
-
-/**
- * The house itself: chimney, roof, storeys with papered walls and panelled
- * wainscot, the floors between them, the outside walls, the foundations and
- * a strip of garden. Bookcases and furniture are drawn over it.
- */
-export function houseArt(g: HouseGeometry): Rect[] {
-  const R: Rect[] = [];
-  const { houseX: hx, houseW: hw, wall } = g;
-  const inner = hw - 2 * wall;
-
-  // Chimney, behind the roof, standing above it by its cap.
-  const cw = 10;
-  // The stack, cap and pot stand 16 dots over the roof.
-  const cTop = roofSurface(g, g.chimneyX + cw) - 11;
-  bricks(R, g.chimneyX, cTop, cw, g.floorsTop - cTop);
-  R.push([g.chimneyX - 1, cTop - 2, cw + 2, 1, "stone-hi"], [g.chimneyX - 1, cTop - 1, cw + 2, 1, "stone-lo"]);
-  R.push([g.chimneyX + 3, cTop - 5, 4, 3, "pot"], [g.chimneyX + 3, cTop - 5, 1, 3, "pot-hi"], [g.chimneyX + 2, cTop - 5, 6, 1, "pot-lo"]);
-
-  // Roof: courses of shingles, three rows each, with darker verges.
-  const left = hx - EAVES;
-  const right = hx + hw + EAVES;
-  for (let r = 0; r < g.roofH; r++) {
-    const inset = (g.roofH - 1 - r) * 2;
-    const x0 = left + inset;
-    const x1 = right - inset;
-    const y = g.roofTop + r;
-    const course = Math.floor(r / 3);
-    const row = r % 3;
-    R.push([x0, y, x1 - x0, 1, row === 0 ? "roof-hi" : row === 2 ? "roof-lo" : "roof"]);
-    if (row === 1) {
-      const offset = course % 2 ? 3 : 0;
-      for (let x = x0 + ((((offset - x0) % 6) + 6) % 6); x < x1; x += 6) R.push([x, y, 1, 1, "roof-lo"]);
-    }
-    R.push([x0, y, 2, 1, "roof-deep"], [x1 - 2, y, 2, 1, "roof-deep"]);
-  }
-  const ridge = left + (g.roofH - 1) * 2;
-  R.push([ridge, g.roofTop, right - (g.roofH - 1) * 2 - ridge, 1, "roof-deep"]);
-  R.push([left, g.floorsTop - 1, right - left, 1, "roof-deep"]);
-
-  // A round attic window in a tall enough roof.
-  if (g.roofH >= 20) {
-    const ax = hx + Math.floor(hw / 2) - 6;
-    const ay = g.roofTop + g.roofH - 17;
-    R.push(...grid([
-      "....DDDD....",
-      "..DDwwwwDD..",
-      ".DwwAAAAwwD.",
-      ".DwAAAWAAwD.",
-      "DwAAAAWAAAwD",
-      "DwWWWWWWWWwD",
-      "DwAAAAWAAAwD",
-      ".DwAAAWAAwD.",
-      ".DwwAAAAwwD.",
-      "..DDwwwwDD..",
-      "....DDDD....",
-    ], ax, ay).map((r): Rect => (r[4] === "glass" ? [r[0], r[1], r[2], r[3], "attic"] : r)));
-  }
-
-  for (let f = 0; f < g.floorCount; f++) {
-    const beam = g.floorsTop + f * g.storey;
-    const top = beam + g.beam;
-    const floorLine = top + g.roomH;
-    // The beam over this storey: under the roof it is the wall plate, else
-    // it is the floor of the storey above.
-    if (f === 0) {
-      R.push([hx, beam, hw, g.beam, "wood-deep"], [hx, beam + 1, hw, 2, "wood-lo"]);
-    } else {
-      floorboards(R, hx, beam, hw, g.beam);
-    }
-    // Papered wall with a stripe, a cornice, and panelled wainscot.
-    R.push([hx + wall, top, inner, g.roomH, "wall"]);
-    for (let x = hx + wall + 5; x < hx + wall + inner; x += 10) {
-      R.push([x, top + 3, 1, g.roomH - 31, "wall-2"], [x + 2, top + 3, 1, g.roomH - 31, "wall-2"]);
-    }
-    for (let x = hx + wall + 10; x < hx + wall + inner; x += 10) {
-      for (let y = top + 8; y < floorLine - 34; y += 12) R.push([x, y, 1, 1, "wall-2"]);
-    }
-    R.push([hx + wall, top, inner, 1, "wood-lo"], [hx + wall, top + 1, inner, 2, "wall-shadow"]);
-    const rail = floorLine - 28;
-    R.push([hx + wall, rail, inner, 25, "wainscot"]);
-    R.push([hx + wall, rail, inner, 1, "wood-hi"], [hx + wall, rail + 1, inner, 1, "wood"], [hx + wall, rail + 2, inner, 1, "wood-lo"]);
-    for (let x = hx + wall + 4; x + 16 <= hx + wall + inner - 2; x += 20) {
-      R.push([x, rail + 6, 16, 1, "wainscot-lo"], [x, rail + 6, 1, 15, "wainscot-lo"]);
-      R.push([x + 1, rail + 20, 15, 1, "wainscot-hi"], [x + 15, rail + 7, 1, 13, "wainscot-hi"]);
-    }
-    R.push([hx + wall, floorLine - 3, inner, 2, "wood"], [hx + wall, floorLine - 3, inner, 1, "wood-hi"], [hx + wall, floorLine - 1, inner, 1, "wood-deep"]);
-    // Outside walls.
-    bricks(R, hx, top, wall, g.roomH);
-    bricks(R, hx + hw - wall, top, wall, g.roomH);
-    R.push([hx, top, 1, g.roomH, "brick-lo"], [hx + hw - 1, top, 1, g.roomH, "brick-lo"]);
-  }
-
-  // Ground floor's floor, foundations and the garden.
-  const bottom = g.floorsTop + g.floorCount * g.storey;
-  floorboards(R, hx, bottom, hw, g.beam);
-  const base = bottom + g.beam;
-  R.push([hx - 2, base, hw + 4, g.foundation, "stone"]);
-  R.push([hx - 2, base, hw + 4, 1, "stone-hi"], [hx - 2, base + g.foundation - 1, hw + 4, 1, "stone-lo"]);
-  for (let x = hx + 4; x < hx + hw; x += 9) R.push([x, base + 1, 1, g.foundation - 2, "stone-lo"]);
-  const earth = base + g.foundation;
-  R.push([0, earth, g.sceneW, 1, "grass-hi"], [0, earth + 1, g.sceneW, 1, "grass"], [0, earth + 2, g.sceneW, g.ground - 2, "soil"]);
-  for (let x = 1; x < g.sceneW; x += 5) R.push([x, earth - 1, 1, 1, "grass"], [x + 2, earth + 3, 1, 1, "soil-lo"]);
-  return R;
-}
-
-/** The boards of a floor seen from the front, over a joist. */
-function floorboards(R: Rect[], x: number, y: number, w: number, h: number) {
-  R.push([x, y, w, 1, "floor-hi"], [x, y + 1, w, h - 3, "floor"], [x, y + h - 2, w, 2, "wood-deep"]);
-  for (let bx = x + 7; bx < x + w; bx += 14) R.push([bx, y + 1, 1, h - 3, "floor-lo"]);
 }

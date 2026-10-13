@@ -92,6 +92,14 @@ server.
 - A ribbon marks the books you're reading, and books on your wishlist, lent
   out or given away keep their place as an outline. Light themes show it by
   day; dark themes by lamplight, with the fire going.
+- Decorate it: ten house styles (a cottage, a castle, a wizard's house, an
+  elven hall, a cave in a hill, a space station, a modern house, a log
+  cabin, a tea house and a workshop), each with its own roof, walls and
+  garden, and things that move, from a banner on the battlements to a gear
+  on the workshop's gable and fireflies among the birches. Pick the colour
+  of the walls, the wood and the fabrics, hang a painting or one of five
+  tapestries over the fireplace, put furniture away, and drag the furniture
+  to wherever you like it (or move it with the arrow keys).
 
 **Everything else**
 

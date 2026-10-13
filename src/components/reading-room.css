@@ -11,7 +11,8 @@
    scene. Spines are drawn in CSS in multiples of it.
 
    Motion: the fire flickers, smoke rises, the clock ticks, the cat's tail
-   twitches, and books settle onto their shelves as the room opens. All of
+   twitches, banners ripple, gears turn, beacons blink, fireflies drift at
+   night, and books settle onto their shelves as the room opens. All of
    it is CSS animation, which globals.css stops when Animations are off or
    the device asks for reduced motion; every animation's resting state is
    the still picture. */
@@ -110,6 +111,29 @@
   --room-spine-b: #2c4f66;
   --room-clock-glass: #2f241e;
   --room-focus: #ffd75e;
+  /* For the other house styles (room-shells.ts). */
+  --room-outer-hi: #c97a5f;
+  --room-outer: #b5654b;
+  --room-outer-lo: #d2b698;
+  --room-wall-hi: color-mix(in oklab, var(--room-wall), #fff 40%);
+  --room-trim: #4e2c16;
+  --room-light: #fff2b0;
+  --room-metal-hi: #c9cfd6;
+  --room-metal: #8b939c;
+  --room-metal-lo: #5a6169;
+  --room-copper-hi: #e8a26a;
+  --room-copper: #b86b3a;
+  --room-copper-lo: #7c3f1f;
+  --room-patina: #5fa38c;
+  --room-bark: #f1eee6;
+  --room-bark-lo: #3e3a34;
+  --room-cap: #c8423a;
+  --room-pine: #3f6b45;
+  --room-pine-lo: #2a4a33;
+  --night: 0;
+  /* What everything fades towards at night in the styles whose colours
+     are worked out from a few base colours (below). */
+  --dusk: #18131f;
 
   position: relative;
   margin-inline: auto;
@@ -199,6 +223,24 @@
   --room-soil-lo: #36251a;
   --room-spine-a: #345d77;
   --room-spine-b: #243f52;
+  --room-outer-hi: #94523f;
+  --room-outer: #7e4636;
+  --room-outer-lo: #8f7562;
+  --room-trim: #2e1b10;
+  --room-light: #ffe08a;
+  --room-metal-hi: #8d949c;
+  --room-metal: #5f666e;
+  --room-metal-lo: #3c4248;
+  --room-copper-hi: #b97a4c;
+  --room-copper: #8a4e2a;
+  --room-copper-lo: #5a2f16;
+  --room-patina: #3f7465;
+  --room-bark: #b9b5aa;
+  --room-bark-lo: #2a2723;
+  --room-cap: #93342f;
+  --room-pine: #2a4a33;
+  --room-pine-lo: #1b3224;
+  --night: 1;
 }
 
 /* One rule per paint. */
@@ -293,8 +335,339 @@
 .rp-spine-a { fill: var(--room-spine-a); }
 .rp-spine-b { fill: var(--room-spine-b); }
 .rp-clock-glass { fill: var(--room-clock-glass); }
+.rp-outer-hi { fill: var(--room-outer-hi); }
+.rp-outer { fill: var(--room-outer); }
+.rp-outer-lo { fill: var(--room-outer-lo); }
+.rp-wall-hi { fill: var(--room-wall-hi); }
+.rp-trim { fill: var(--room-trim); }
+.rp-light { fill: var(--room-light); }
+.rp-metal-hi { fill: var(--room-metal-hi); }
+.rp-metal { fill: var(--room-metal); }
+.rp-metal-lo { fill: var(--room-metal-lo); }
+.rp-copper-hi { fill: var(--room-copper-hi); }
+.rp-copper { fill: var(--room-copper); }
+.rp-copper-lo { fill: var(--room-copper-lo); }
+.rp-patina { fill: var(--room-patina); }
+.rp-bark { fill: var(--room-bark); }
+.rp-bark-lo { fill: var(--room-bark-lo); }
+.rp-cap { fill: var(--room-cap); }
+.rp-pine { fill: var(--room-pine); }
+.rp-pine-lo { fill: var(--room-pine-lo); }
 .rp-book { fill: var(--spine); }
 .rp-book-lo { fill: color-mix(in oklab, var(--spine), #000 35%); }
+
+/* ── House styles and colours ─────────────────────────────────────────────
+   The cottage keeps the hand-picked palette above. Every other style
+   (data-derive) gives a few base colours, --s-*, for each part of the
+   house, and the shades come from them: lighter and darker for the
+   highlights and shadows, and at night each faded towards --dusk by its
+   own amount, walls the most, fabrics the least. The Decorate colours
+   (data-walls, data-wood, data-fabric) replace a part's base colours in
+   any style, the cottage included. */
+
+.room-scene[data-style="medieval"] {
+  --s-wall: #d6cdbd;
+  --s-wall-2: #b3a894;
+  --s-wainscot: #8a7258;
+  --s-wood: #8a5a34;
+  --s-floor: #8f877a;
+  --s-stone: #9d968b;
+  --s-outer: #a8a296;
+  --s-roof: #6f685e;
+  --s-grass: #6f9a4a;
+  --s-soil: #6e5236;
+  --s-trim: #4a3a2c;
+  --s-light: #ffd27a;
+  --s-chair: #8e2f36;
+  --s-curtain: #2f4f7a;
+  --s-cushion: #6f86a8;
+  --s-rug: #6b2a2a;
+  --s-rug-2: #d4a94e;
+}
+.room-scene[data-style="fantasy"] {
+  --s-wall: #3e3b6e;
+  --s-wall-2: #e0c46e;
+  --s-wainscot: #6a4a78;
+  --s-wood: #7a4f3a;
+  --s-floor: #8a5c3c;
+  --s-stone: #8f8ca3;
+  --s-outer: #efe6d2;
+  --s-roof: #574d8c;
+  --s-grass: #6aa34f;
+  --s-soil: #6b4e34;
+  --s-trim: #4a3326;
+  --s-light: #ffe08a;
+  --s-chair: #6d3b6e;
+  --s-curtain: #2f6f6a;
+  --s-cushion: #b98fd0;
+  --s-rug: #3a2e66;
+  --s-rug-2: #e0b867;
+}
+.room-scene[data-style="elven"] {
+  --s-wall: #edf0dc;
+  --s-wall-2: #b8c99c;
+  --s-wainscot: #e0d0ab;
+  --s-wood: #c9a77a;
+  --s-floor: #d6bb8c;
+  --s-stone: #c9c7b6;
+  --s-outer: #ece8db;
+  --s-roof: #5e8f48;
+  --s-grass: #79b356;
+  --s-soil: #6f5a3c;
+  --s-trim: #8a7350;
+  --s-light: #eaffb0;
+  --s-chair: #3f6e45;
+  --s-curtain: #b9cc98;
+  --s-cushion: #e5d59f;
+  --s-rug: #5d7f4e;
+  --s-rug-2: #e8dca0;
+  --room-leaf-hi: color-mix(in oklab, #a8d47c, var(--dusk) calc(var(--night) * 45%));
+  --room-leaf: color-mix(in oklab, #6fae52, var(--dusk) calc(var(--night) * 45%));
+  --room-leaf-lo: color-mix(in oklab, #3f7a3e, var(--dusk) calc(var(--night) * 45%));
+}
+.room-scene[data-style="cave"] {
+  --s-wall: #8c8274;
+  --s-wall-2: #685e53;
+  --s-wainscot: #6e6458;
+  --s-wood: #8a5a30;
+  --s-floor: #7d7468;
+  --s-stone: #918779;
+  --s-outer: #7d7468;
+  --s-roof: #6aa043;
+  --s-grass: #6aa043;
+  --s-soil: #694a31;
+  --s-trim: #4f3a26;
+  --s-light: #ffc067;
+  --s-chair: #a0522d;
+  --s-curtain: #7a6a3a;
+  --s-cushion: #c08f5a;
+  --s-rug: #6b3f2a;
+  --s-rug-2: #c9a25a;
+}
+.room-scene[data-style="scifi"] {
+  --s-wall: #c8d1db;
+  --s-wall-2: #98a5b4;
+  --s-wainscot: #4f5a69;
+  --s-wood: #6c7889;
+  --s-floor: #5c6774;
+  --s-stone: #7c8798;
+  --s-outer: #aeb8c4;
+  --s-roof: #b6c0cc;
+  --s-grass: #b4b2ac;
+  --s-soil: #8d8b85;
+  --s-trim: #3c4652;
+  --s-light: #6ee8f8;
+  --s-light-night: #8ff6ff;
+  --s-chair: #34507e;
+  --s-curtain: #3a4a63;
+  --s-cushion: #7f9cc0;
+  --s-rug: #2b3a55;
+  --s-rug-2: #6ee8f8;
+  /* Chrome for brass, and a plasma fire. */
+  --room-brass-hi: #eef3f7;
+  --room-brass: #b9c3cd;
+  --room-brass-lo: #7c8794;
+  --room-flame-1: #eaffff;
+  --room-flame-2: #78e4ff;
+  --room-flame-3: #6a6cff;
+  --room-ember: #1f2a5c;
+  --room-soot: #0e1328;
+  --room-shade-hi: #f5fbff;
+  --room-shade: #c9e6f5;
+  --room-shade-lo: #8fb4c8;
+  --room-attic: var(--room-light);
+}
+.room-scene[data-style="modern"] {
+  --s-wall: #f3f2ee;
+  --s-wall-2: #dedbd3;
+  --s-wainscot: #e6e3dc;
+  --s-wood: #c9a26e;
+  --s-floor: #d3ae79;
+  --s-stone: #b8b5ad;
+  --s-outer: #ecebe6;
+  --s-roof: #3d4045;
+  --s-grass: #79ad5a;
+  --s-soil: #6e5a44;
+  --s-trim: #2d3035;
+  --s-light: #fff1c9;
+  --s-chair: #6b6f78;
+  --s-curtain: #e2ddd2;
+  --s-cushion: #c08f2c;
+  --s-rug: #8d8a85;
+  --s-rug-2: #e7e3da;
+  --room-brass-hi: #e3e5e8;
+  --room-brass: #a9adb3;
+  --room-brass-lo: #6d7177;
+}
+.room-scene[data-style="cabin"] {
+  --s-wall: #c38c54;
+  --s-wall-2: #8a5a30;
+  --s-wainscot: #9a6334;
+  --s-wood: #9a6334;
+  --s-floor: #a8733f;
+  --s-stone: #9a9084;
+  --s-outer: #a87443;
+  --s-roof: #6b5642;
+  --s-grass: #6fa64c;
+  --s-soil: #6e5034;
+  --s-trim: #5a3a20;
+  --s-light: #ffd27a;
+  --s-chair: #7a2f2a;
+  --s-curtain: #2f5d3f;
+  --s-cushion: #b8463b;
+  --s-rug: #3f5e3c;
+  --s-rug-2: #d9b46a;
+}
+.room-scene[data-style="japanese"] {
+  --s-wall: #f6f1e3;
+  --s-wall-2: #e6dcc6;
+  --s-wainscot: #6b4a33;
+  --s-wood: #7a5236;
+  --s-floor: #cfc089;
+  --s-stone: #a6a294;
+  --s-outer: #ece5d3;
+  --s-roof: #4f5864;
+  --s-grass: #6f9b4e;
+  --s-soil: #5f5240;
+  --s-trim: #45322a;
+  --s-light: #fbe7b5;
+  --s-light-night: #ffd47a;
+  --s-chair: #2f4a6b;
+  --s-curtain: #34507e;
+  --s-cushion: #8b2f3a;
+  --s-rug: #b8a878;
+  --s-rug-2: #8b2f3a;
+  --room-shade-hi: #fffaf0;
+  --room-shade: #f6ead0;
+  --room-shade-lo: #d8c49c;
+}
+.room-scene[data-style="steampunk"] {
+  --s-wall: #3d5a4e;
+  --s-wall-2: #5d7a62;
+  --s-wainscot: #6b4a33;
+  --s-wood: #6e4128;
+  --s-floor: #6a4428;
+  --s-stone: #6f665c;
+  --s-outer: #8e4a36;
+  --s-roof: #a35a2e;
+  --s-grass: #5f7f46;
+  --s-soil: #5a4232;
+  --s-trim: #3a2a20;
+  --s-light: #ffcf73;
+  --s-chair: #6e3a2e;
+  --s-curtain: #7a2f36;
+  --s-cushion: #c08f2c;
+  --s-rug: #4a2a2a;
+  --s-rug-2: #c9a25a;
+}
+
+/* The colours chosen in Decorate. */
+.room-scene[data-walls="cream"] { --s-wall: #f1e5cd; }
+.room-scene[data-walls="sage"] { --s-wall: #cfdcc4; }
+.room-scene[data-walls="sky"] { --s-wall: #c9dcec; }
+.room-scene[data-walls="rose"] { --s-wall: #efd2d0; }
+.room-scene[data-walls="lavender"] { --s-wall: #dcd3ea; }
+.room-scene[data-walls="ochre"] { --s-wall: #e6cc8f; }
+.room-scene[data-walls="slate"] { --s-wall: #8c99a6; }
+.room-scene[data-walls="charcoal"] { --s-wall: #4a4a50; }
+.room-scene[data-walls]:not([data-style="fantasy"]) {
+  --s-wall-2: color-mix(in oklab, color-mix(in oklab, var(--s-wall), #000 11%) 90%, var(--primary));
+}
+.room-scene[data-wood="birch"] { --s-wood: #d9bf91; }
+.room-scene[data-wood="oak"] { --s-wood: #b98547; }
+.room-scene[data-wood="walnut"] { --s-wood: #7d5233; }
+.room-scene[data-wood="mahogany"] { --s-wood: #8a3b2a; }
+.room-scene[data-wood="ebony"] { --s-wood: #3a2c26; }
+.room-scene[data-wood="grey"] { --s-wood: #8d8a85; }
+/* Wooden floors follow the wood; stone, metal and straw ones don't. */
+.room-scene[data-wood]:not([data-style="medieval"], [data-style="cave"], [data-style="scifi"], [data-style="japanese"]) {
+  --s-floor: color-mix(in oklab, var(--s-wood), #fff 5%);
+}
+.room-scene[data-fabric="crimson"] { --s-fabric: #9b3a43; }
+.room-scene[data-fabric="forest"] { --s-fabric: #3f6e45; }
+.room-scene[data-fabric="navy"] { --s-fabric: #34507e; }
+.room-scene[data-fabric="mustard"] { --s-fabric: #c08f2c; }
+.room-scene[data-fabric="plum"] { --s-fabric: #6d3b6e; }
+.room-scene[data-fabric="teal"] { --s-fabric: #2f7a78; }
+.room-scene[data-fabric="rose"] { --s-fabric: #c06a7c; }
+.room-scene[data-fabric="grey"] { --s-fabric: #6b6f78; }
+.room-scene[data-fabric] {
+  --s-chair: var(--s-fabric);
+  --s-curtain: color-mix(in oklab, var(--s-fabric), #000 14%);
+  --s-cushion: color-mix(in oklab, var(--s-fabric), #fff 24%);
+  --s-rug: color-mix(in oklab, var(--s-fabric), #000 22%);
+}
+
+/* The shades, worked out from the base colours. */
+.room-scene:is([data-derive], [data-walls]) {
+  --n-wall: color-mix(in oklab, var(--s-wall), var(--dusk) calc(var(--night) * 64%));
+  --room-wall: var(--n-wall);
+  --room-wall-hi: color-mix(in oklab, var(--n-wall), #fff 28%);
+  --room-wall-2: color-mix(in oklab, var(--s-wall-2), var(--dusk) calc(var(--night) * 60%));
+}
+.room-scene:is([data-derive], [data-wood]) {
+  --n-wood: color-mix(in oklab, var(--s-wood), var(--dusk) calc(var(--night) * 42%));
+  --room-wood-hi: color-mix(in oklab, var(--n-wood), #fff 24%);
+  --room-wood: var(--n-wood);
+  --room-wood-lo: color-mix(in oklab, var(--n-wood), #000 28%);
+  --room-wood-deep: color-mix(in oklab, var(--n-wood), #000 56%);
+  --room-case-back: color-mix(in oklab, var(--n-wood), #000 46%);
+  --room-case-seam: color-mix(in oklab, var(--n-wood), #000 56%);
+  --n-floor: color-mix(in oklab, var(--s-floor), var(--dusk) calc(var(--night) * 45%));
+  --room-floor-hi: color-mix(in oklab, var(--n-floor), #fff 22%);
+  --room-floor: var(--n-floor);
+  --room-floor-lo: color-mix(in oklab, var(--n-floor), #000 28%);
+}
+.room-scene:is([data-derive], [data-fabric]) {
+  --n-chair: color-mix(in oklab, var(--s-chair), var(--dusk) calc(var(--night) * 25%));
+  --room-chair-hi: color-mix(in oklab, var(--n-chair), #fff 20%);
+  --room-chair: var(--n-chair);
+  --room-chair-lo: color-mix(in oklab, var(--n-chair), #000 26%);
+  --room-chair-deep: color-mix(in oklab, var(--n-chair), #000 52%);
+  --n-curtain: color-mix(in oklab, var(--s-curtain), var(--dusk) calc(var(--night) * 30%));
+  --room-curtain-hi: color-mix(in oklab, var(--n-curtain), #fff 22%);
+  --room-curtain: var(--n-curtain);
+  --room-curtain-lo: color-mix(in oklab, var(--n-curtain), #000 28%);
+  --n-cushion: color-mix(in oklab, var(--s-cushion), var(--dusk) calc(var(--night) * 30%));
+  --room-cushion-hi: color-mix(in oklab, var(--n-cushion), #fff 24%);
+  --room-cushion: var(--n-cushion);
+  --room-cushion-lo: color-mix(in oklab, var(--n-cushion), #000 26%);
+  --n-rug: color-mix(in oklab, var(--s-rug), var(--dusk) calc(var(--night) * 25%));
+  --room-rug: var(--n-rug);
+  --room-rug-3: color-mix(in oklab, var(--n-rug), #000 35%);
+  --room-rug-fringe: color-mix(in oklab, var(--n-rug), #fff 62%);
+}
+.room-scene[data-derive] {
+  --room-rug-2: color-mix(in oklab, var(--s-rug-2), var(--dusk) calc(var(--night) * 30%));
+  --n-wainscot: color-mix(in oklab, var(--s-wainscot), var(--dusk) calc(var(--night) * 62%));
+  --room-wainscot-hi: color-mix(in oklab, var(--n-wainscot), #fff 18%);
+  --room-wainscot: var(--n-wainscot);
+  --room-wainscot-lo: color-mix(in oklab, var(--n-wainscot), #000 22%);
+  --n-stone: color-mix(in oklab, var(--s-stone), var(--dusk) calc(var(--night) * 45%));
+  --room-stone-hi: color-mix(in oklab, var(--n-stone), #fff 26%);
+  --room-stone: var(--n-stone);
+  --room-stone-lo: color-mix(in oklab, var(--n-stone), #000 22%);
+  --room-stone-deep: color-mix(in oklab, var(--n-stone), #000 45%);
+  --n-outer: color-mix(in oklab, var(--s-outer), var(--dusk) calc(var(--night) * 45%));
+  --room-outer-hi: color-mix(in oklab, var(--n-outer), #fff 22%);
+  --room-outer: var(--n-outer);
+  --room-outer-lo: color-mix(in oklab, var(--n-outer), #000 30%);
+  --room-brick: var(--room-outer);
+  --room-brick-lo: var(--room-outer-lo);
+  --n-roof: color-mix(in oklab, var(--s-roof), var(--dusk) calc(var(--night) * 48%));
+  --room-roof-hi: color-mix(in oklab, var(--n-roof), #fff 18%);
+  --room-roof: var(--n-roof);
+  --room-roof-lo: color-mix(in oklab, var(--n-roof), #000 22%);
+  --room-roof-deep: color-mix(in oklab, var(--n-roof), #000 50%);
+  --n-grass: color-mix(in oklab, var(--s-grass), var(--dusk) calc(var(--night) * 55%));
+  --room-grass-hi: color-mix(in oklab, var(--n-grass), #fff 18%);
+  --room-grass: var(--n-grass);
+  --n-soil: color-mix(in oklab, var(--s-soil), var(--dusk) calc(var(--night) * 45%));
+  --room-soil: var(--n-soil);
+  --room-soil-lo: color-mix(in oklab, var(--n-soil), #000 25%);
+  --room-trim: color-mix(in oklab, var(--s-trim), var(--dusk) calc(var(--night) * 40%));
+  --room-light: color-mix(in oklab, var(--s-light), var(--s-light-night, var(--s-light)) calc(var(--night) * 100%));
+}
 
 .room-abs {
   position: absolute;
@@ -635,4 +1008,167 @@
     opacity: 0;
     transform: translateY(calc(var(--u) * -6));
   }
+}
+
+/* A steam stack's puffs are whiter and quicker than chimney smoke. */
+.room-smoke-steam span {
+  background: rgb(205 212 220 / 0.85);
+  animation-duration: 3.2s;
+}
+:where(.dark) .room-smoke-steam span {
+  background: rgb(235 238 242 / 0.6);
+}
+
+/* The house's moving parts reuse the fire's two frames, more slowly: a
+   banner ripples, a gear turns. A beacon blinks off now and then. */
+.room-wave .room-frame-a,
+.room-wave .room-frame-b {
+  animation-duration: 1.2s;
+}
+.room-turn .room-frame-a,
+.room-turn .room-frame-b {
+  animation-duration: 0.8s;
+}
+.room-blinker {
+  animation: room-blink 2.8s steps(1, end) infinite;
+}
+@keyframes room-blink {
+  70% {
+    opacity: 0.15;
+  }
+  85% {
+    opacity: 1;
+  }
+}
+
+/* Fireflies over the garden at night. Still, they glow where they are. */
+.room-fireflies {
+  position: absolute;
+  display: none;
+  pointer-events: none;
+}
+:where(.dark) .room-fireflies {
+  display: block;
+}
+.room-fireflies span {
+  position: absolute;
+  width: var(--u);
+  height: var(--u);
+  background: #f6f8b0;
+  box-shadow: 0 0 calc(var(--u) * 2) calc(var(--u) * 0.6) rgb(226 238 110 / 0.65);
+  opacity: 0.8;
+  animation: room-firefly var(--t) ease-in-out var(--p) infinite;
+}
+@keyframes room-firefly {
+  0%,
+  100% {
+    opacity: 0.15;
+    transform: translate(0, 0);
+  }
+  30% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.9;
+    transform: translate(calc(var(--u) * 3), calc(var(--u) * -2));
+  }
+  75% {
+    opacity: 0.3;
+    transform: translate(calc(var(--u) * 1), calc(var(--u) * -4));
+  }
+}
+
+/* ── Moving furniture ────────────────────────────────────────────────────
+   A handle over each piece while arranging, a line where a dragged one
+   would go, and a note when it can't. The books stay put meanwhile. */
+[data-arranging] .room-spine,
+[data-arranging] .room-open-book {
+  pointer-events: none;
+}
+.room-handle {
+  position: absolute;
+  z-index: 3;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: calc(var(--u) * 3);
+  border: 2px dashed color-mix(in oklab, var(--primary) 70%, transparent);
+  border-radius: calc(var(--u) * 2);
+  background: color-mix(in oklab, var(--primary) 6%, transparent);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  outline: none;
+}
+.room-handle:hover {
+  border-style: solid;
+  background: color-mix(in oklab, var(--primary) 12%, transparent);
+}
+.room-handle:focus-visible {
+  border-style: solid;
+  background: color-mix(in oklab, var(--primary) 12%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring) 70%, transparent);
+}
+.room-handle[data-dragging] {
+  z-index: 4;
+  cursor: grabbing;
+  border-style: solid;
+  background: color-mix(in oklab, var(--primary) 16%, transparent);
+  box-shadow: 0 10px 28px rgb(0 0 0 / 0.28);
+}
+.room-handle-name {
+  padding: 0.125rem 0.5rem;
+  border-radius: 999px;
+  background: var(--popover);
+  color: var(--popover-foreground);
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.22);
+  font-size: 0.6875rem;
+  line-height: 1.4;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.room-drop {
+  position: absolute;
+  z-index: 3;
+  border-radius: 999px;
+  background: var(--primary);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--primary) 30%, transparent);
+  pointer-events: none;
+}
+.room-note {
+  position: absolute;
+  z-index: 6;
+  top: 0.75rem;
+  left: 50%;
+  translate: -50% 0;
+  width: max-content;
+  max-width: calc(100% - 2rem);
+  padding: 0.375rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--popover);
+  color: var(--popover-foreground);
+  box-shadow: 0 4px 14px rgb(0 0 0 / 0.18);
+  font-size: 0.8125rem;
+  pointer-events: none;
+}
+
+/* ── Decorate's previews ─────────────────────────────────────────────── */
+.room-thumb {
+  display: block;
+  overflow: hidden;
+  aspect-ratio: 1;
+  padding: 0.25rem 0.25rem 0;
+  background: linear-gradient(#d7e7f2, #f3eee2);
+}
+:where(.dark) .room-thumb {
+  background: linear-gradient(#141a2b, #2a2338);
+}
+.room-preview {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.room-wall-tile {
+  background: var(--room-wall);
 }
