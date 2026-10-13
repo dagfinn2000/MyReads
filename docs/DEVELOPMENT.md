@@ -89,7 +89,10 @@ src/
 ├─ components/         UI components (shadcn/ui primitives in components/ui);
 │                      reading-room.tsx, room-art.tsx and room-shells.ts
 │                      draw the reading room, with its colours in
-│                      reading-room.css; room-view.tsx is its Decorate panel
+│                      reading-room.css; room-view.tsx is its Decorate panel;
+│                      avatar-art.ts draws the reader's avatar,
+│                      room-avatar.tsx walks it about and avatar-maker.tsx
+│                      is its maker
 ├─ lib/
 │  ├─ actions/         server actions for every change, each checking that
 │  │                   the data belongs to the signed-in user
@@ -103,6 +106,7 @@ src/
 │  ├─ library-return.ts
 │  │                   where a book page's X goes back to: the library
 │  │                   page it was opened from, and how far down it was
+│  ├─ avatar.ts        the avatar's choices and their colours
 │  ├─ motion.ts        whether animations may run right now
 │  ├─ net-guard.ts     blocks cover downloads from private addresses
 │  ├─ preferences.ts   the Preferences settings and their defaults
@@ -180,6 +184,13 @@ src/
   (`roomStyle`, `roomLayout` and the rest); placements name a floor and a
   place among the pieces there, so they survive a different screen width,
   falling back to where a piece would go by itself when it doesn't fit.
+  The avatar is painted dot by dot and outlined in code
+  ([avatar-art.ts](../src/components/avatar-art.ts)), coloured from four
+  `--av-*` colours; its look is one Preferences value (`avatar`), checked
+  by `parseAvatar` in [avatar.ts](../src/lib/avatar.ts). Its walk is the
+  one piece of the room moved by script rather than CSS, so it checks
+  [motion.ts](../src/lib/motion.ts) and stands still when animations are
+  off.
 - **Typed dates and moments are read differently.** A date typed into a date
   field is stored as midnight UTC and means that day everywhere. Anything
   else, like "finished today" or a reading-log entry, is a moment, and

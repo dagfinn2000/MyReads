@@ -15,7 +15,8 @@
    night, and books settle onto their shelves as the room opens. All of
    it is CSS animation, which globals.css stops when Animations are off or
    the device asks for reduced motion; every animation's resting state is
-   the still picture. */
+   the still picture. The avatar is walked about by script, which checks
+   the same two rules (lib/motion.ts). */
 
 .room-scene {
   /* Day. */
@@ -355,6 +356,42 @@
 .rp-pine-lo { fill: var(--room-pine-lo); }
 .rp-book { fill: var(--spine); }
 .rp-book-lo { fill: color-mix(in oklab, var(--spine), #000 35%); }
+
+/* The avatar (avatar-art.ts): its element sets --av-skin, --av-hair,
+   --av-top and --av-legs from the reader's choices; the shades come from
+   them. */
+.rp-av-line { fill: #231815; }
+.rp-av-eye { fill: #251a17; }
+.rp-av-skin { fill: var(--av-skin); }
+.rp-av-skin-hi { fill: color-mix(in oklab, var(--av-skin), #fff 35%); }
+.rp-av-skin-lo { fill: color-mix(in oklab, var(--av-skin), #4a1e10 24%); }
+.rp-av-blush { fill: color-mix(in oklab, var(--av-skin), #e2506a 28%); }
+.rp-av-freckle { fill: color-mix(in oklab, var(--av-skin), #6b3418 42%); }
+.rp-av-mouth { fill: color-mix(in oklab, var(--av-skin), #6e2228 42%); }
+.rp-av-frame { fill: #8a6448; }
+.rp-av-lens { fill: #dfe9ee; }
+.rp-av-hair { fill: var(--av-hair); }
+.rp-av-hair-hi { fill: color-mix(in oklab, var(--av-hair), #fff 28%); }
+.rp-av-hair-lo { fill: color-mix(in oklab, var(--av-hair), #000 28%); }
+.rp-av-top { fill: var(--av-top); }
+.rp-av-top-hi { fill: color-mix(in oklab, var(--av-top), #fff 22%); }
+.rp-av-top-lo { fill: color-mix(in oklab, var(--av-top), #000 26%); }
+.rp-av-tie { fill: var(--av-top); }
+.rp-av-legs { fill: var(--av-legs); }
+.rp-av-legs-hi { fill: color-mix(in oklab, var(--av-legs), #fff 18%); }
+.rp-av-legs-lo { fill: color-mix(in oklab, var(--av-legs), #000 28%); }
+.rp-av-shoe { fill: #4b3427; }
+.rp-av-shoe-lo { fill: #2e1f18; }
+.rp-av-pom { fill: #f1ebdf; }
+.rp-av-cap { fill: #7b6750; }
+.rp-av-cap-hi { fill: #9a8569; }
+.rp-av-cap-lo { fill: #574837; }
+.rp-av-wizard { fill: #4f4192; }
+.rp-av-wizard-hi { fill: #6d5fb8; }
+.rp-av-wizard-lo { fill: #362c6a; }
+.rp-av-wizard-band { fill: var(--room-brass); }
+.rp-av-gem { fill: #d23a4e; }
+.rp-av-gem-blue { fill: #3a7bd0; }
 
 /* ── House styles and colours ─────────────────────────────────────────────
    The cottage keeps the hand-picked palette above. Every other style
@@ -1041,6 +1078,45 @@
   }
 }
 
+/* The avatar (room-avatar.tsx). Walking, its legs swap between standing
+   and mid-stride; script moves it along. Still, it stands. It faces right
+   as drawn and is mirrored to face left. */
+.room-avatar {
+  pointer-events: none;
+}
+.room-walker {
+  z-index: 2;
+  will-change: transform;
+}
+.room-avatar[data-facing="left"] svg {
+  scale: -1 1;
+}
+.room-walk-stride {
+  opacity: 0;
+}
+.room-avatar[data-walking] .room-walk-stride {
+  animation: room-show 0.38s steps(1, end) infinite;
+}
+.room-avatar[data-walking] .room-walk-stand {
+  animation: room-hide 0.38s steps(1, end) infinite;
+}
+/* By lamplight it's a little darker, like the furniture. */
+:where(.dark) .room-scene .room-avatar {
+  filter: brightness(0.9) saturate(0.95);
+}
+/* The book in its hands is a link, like the one on the side table. */
+.room-held-book {
+  outline: none;
+}
+.room-held-book:focus-visible {
+  box-shadow: 0 0 0 var(--u) var(--room-focus);
+  outline: var(--u) solid var(--room-ink);
+  outline-offset: var(--u);
+}
+[data-arranging] .room-held-book {
+  pointer-events: none;
+}
+
 /* Fireflies over the garden at night. Still, they glow where they are. */
 .room-fireflies {
   position: absolute;
@@ -1171,4 +1247,13 @@
 }
 .room-wall-tile {
   background: var(--room-wall);
+}
+/* The avatar maker's picture: a bit of wall and floor in the room's own
+   colours, and the tiles for its options. */
+.room-avatar-stage {
+  background: linear-gradient(transparent calc(100% - var(--u) * 4), var(--room-wood-lo) 0) var(--room-wall);
+  margin-inline: 0;
+}
+.room-avatar-tile {
+  background: color-mix(in oklab, var(--room-wall), var(--card) 40%);
 }

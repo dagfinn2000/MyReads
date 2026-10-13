@@ -12,6 +12,7 @@ import {
   type RoomWalls,
   type RoomWood,
 } from "@/lib/room-styles";
+import { DEFAULT_AVATAR, parseAvatar, type AvatarLook } from "@/lib/avatar";
 
 /**
  * Per-account preferences — everything on the Account page's Preferences
@@ -397,6 +398,11 @@ export type Preferences = {
   roomLayout: Placement[];
   /** Furniture put away. */
   roomAway: Stowable[];
+  // The reader's avatar in the room (lib/avatar.ts)
+  /** Whether the avatar is in the room at all. */
+  avatarShown: boolean;
+  /** How it looks; saved whole. */
+  avatar: AvatarLook;
 };
 
 export const DEFAULT_PREFERENCES: Preferences = {
@@ -464,6 +470,8 @@ export const DEFAULT_PREFERENCES: Preferences = {
   roomHanging: "painting",
   roomLayout: [],
   roomAway: [],
+  avatarShown: true,
+  avatar: DEFAULT_AVATAR,
 };
 
 /** True for a time zone this runtime knows ("Europe/Oslo", "UTC"). */
@@ -719,6 +727,8 @@ export function parsePreferences(raw: unknown): Preferences {
     roomHanging: pick(ROOM_HANGINGS, obj.roomHanging, d.roomHanging),
     roomLayout: parseRoomLayout(obj.roomLayout),
     roomAway: pickList(STOWABLE, obj.roomAway),
+    avatarShown: bool(obj.avatarShown, d.avatarShown),
+    avatar: parseAvatar(obj.avatar),
   };
 }
 

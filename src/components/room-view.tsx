@@ -2,6 +2,9 @@
 
 import { useRef, useState } from "react";
 import { Check, Move, Paintbrush, RotateCcw } from "lucide-react";
+import { AvatarMaker } from "@/components/avatar-maker";
+import { Group, Swatches } from "@/components/decorate-controls";
+import type { AvatarLook } from "@/lib/avatar";
 import { savePreferences } from "@/lib/actions/preferences";
 import type { Preferences } from "@/lib/preferences";
 import {
@@ -54,26 +57,37 @@ const sameDecor = (a: RoomDecor, b: RoomDecor) =>
 /**
  * The reading room with its Decorate panel: the house style, the colours of
  * the walls, wood and fabrics, what hangs over the fireplace, which
- * furniture is out, and a mode for moving the furniture about. Every
- * change shows at once and is saved on the account.
+ * furniture is out, and a mode for moving the furniture about; and, on its
+ * Avatar tab, the reader's own little self. Every change shows at once and
+ * is saved on the account.
  */
 export function RoomView({
   books,
   decor: savedDecor,
   layout,
   away,
+  avatar: savedAvatar,
+  avatarShown: savedShown,
   summary,
 }: {
   books: RoomBook[];
   decor: RoomDecor;
   layout: Placement[];
   away: Stowable[];
+  avatar: AvatarLook;
+  avatarShown: boolean;
   /** "198 books on 5 bookcases", beside the title. */
   summary: string | null;
 }) {
   const [decor, setDecor] = useState(savedDecor);
-  const [arrangement, setArrangement] = useState<Arrangement>(() => ({ places: layout, away }));
+  const [arrangement, setArrangement] = useState<Arrangement>(() => ({
+    places: layout,
+    away,
+  }));
+  const [avatar, setAvatar] = useState(savedAvatar);
+  const [avatarShown, setAvatarShown] = useState(savedShown);
   const [panel, setPanel] = useState(false);
+  const [tab, setTab] = useState<"house" | "avatar">("house");
   const [arranging, setArranging] = useState(false);
   const moveButton = useRef<HTMLButtonElement>(null);
 
@@ -87,7 +101,20 @@ export function RoomView({
 
   const arrange = (next: Arrangement) => {
     setArrangement(next);
-    savePreferences({ roomLayout: [...next.places], roomAway: [...next.away] }).catch(() => {});
+    savePreferences({
+      roomLayout: [...next.places],
+      roomAway: [...next.away],
+    }).catch(() => {});
+  };
+
+  const changeAvatar = (look: AvatarLook) => {
+    setAvatar(look);
+    savePreferences({ avatar: look }).catch(() => {});
+  };
+
+  const showAvatar = (shown: boolean) => {
+    setAvatarShown(shown);
+    savePreferences({ avatarShown: shown }).catch(() => {});
   };
 
   const stopArranging = () => {
@@ -139,139 +166,183 @@ export function RoomView({
           aria-label="Decorate"
           className="grid gap-5 rounded-xl border bg-card p-4 text-card-foreground shadow-sm sm:p-5"
         >
-          <Group title="House">
-            <div
-              role="radiogroup"
-              aria-label="House style"
-              className="grid grid-cols-3 gap-2 sm:grid-cols-5"
-            >
-              {ROOM_STYLES.map((style) => (
-                <button
-                  key={style}
-                  type="button"
-                  role="radio"
-                  aria-checked={decor.style === style}
-                  title={ROOM_STYLE_LABELS[style].blurb}
-                  onClick={() => change({ style })}
-                  className="group grid gap-1 rounded-lg p-1 text-center text-xs text-muted-foreground outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
-                >
-                  <span
-                    className={cn(
-                      "room-scene room-thumb rounded-md border ring-offset-2 ring-offset-card transition-shadow group-hover:border-ring/60",
-                      decor.style === style && "ring-2 ring-foreground",
-                    )}
-                    {...decorData({ ...decor, style })}
-                  >
-                    <HousePreview style={style} hanging={decor.hanging} />
-                  </span>
-                  <span className={cn("leading-tight", decor.style === style && "font-medium text-foreground")}>
-                    {ROOM_STYLE_LABELS[style].name}
-                  </span>
-                </button>
-              ))}
-            </div>
-            <p className="text-xs text-muted-foreground">{ROOM_STYLE_LABELS[decor.style].blurb}</p>
-          </Group>
-
-          <Group title="Colours">
-            <Swatches
-              label="Walls"
-              value={decor.walls}
-              options={ROOM_WALLS}
-              swatches={WALL_SWATCHES}
-              onChange={(walls) => change({ walls })}
-            />
-            <Swatches
-              label="Wood"
-              value={decor.wood}
-              options={ROOM_WOODS}
-              swatches={WOOD_SWATCHES}
-              onChange={(wood) => change({ wood })}
-            />
-            <Swatches
-              label="Fabrics"
-              hint="Chairs, curtains, rugs and tapestries."
-              value={decor.fabric}
-              options={ROOM_FABRICS}
-              swatches={FABRIC_SWATCHES}
-              onChange={(fabric) => change({ fabric })}
-            />
-          </Group>
-
-          <Group title="Over the fireplace">
-            <div role="radiogroup" aria-label="Over the fireplace" className="flex flex-wrap gap-2">
-              {ROOM_HANGINGS.map((hanging) => (
-                <button
-                  key={hanging}
-                  type="button"
-                  role="radio"
-                  aria-checked={decor.hanging === hanging}
-                  aria-label={ROOM_HANGING_LABELS[hanging]}
-                  title={ROOM_HANGING_LABELS[hanging]}
-                  onClick={() => change({ hanging })}
-                  className="group rounded-lg outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
-                >
-                  <span
-                    className={cn(
-                      "room-scene room-wall-tile grid h-[6.5rem] w-[4.75rem] place-items-center rounded-md border ring-offset-2 ring-offset-card transition-shadow group-hover:border-ring/60",
-                      decor.hanging === hanging && "ring-2 ring-foreground",
-                    )}
-                    {...decorData(decor)}
-                  >
-                    {hanging === "none" ? (
-                      <span className="text-[11px] text-muted-foreground">Nothing</span>
-                    ) : (
-                      <HangingPreview hanging={hanging} />
-                    )}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </Group>
-
-          <Group title="Furniture">
-            {earned.length > 0 ? (
-              <div className="flex flex-wrap gap-x-5 gap-y-2">
-                {earned.map((kind) => (
-                  <label key={kind} className="flex items-center gap-2 text-sm">
-                    <input
-                      type="checkbox"
-                      className="size-4 accent-primary"
-                      checked={!arrangement.away.includes(kind)}
-                      onChange={(e) => arrange(e.target.checked ? bringOut(arrangement, kind) : putAway(arrangement, kind))}
-                    />
-                    {FURNITURE_LABELS[kind]}
-                  </label>
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                More furniture moves in as your library grows: a plant at 10 books, a clock at 50.
-              </p>
-            )}
-            <div className="flex flex-wrap gap-2">
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => {
-                  setPanel(false);
-                  setArranging(true);
+          <div role="tablist" aria-label="Decorate" className="flex gap-1 border-b">
+            {(["house", "avatar"] as const).map((t) => (
+              <button
+                key={t}
+                type="button"
+                role="tab"
+                id={`decorate-tab-${t}`}
+                aria-selected={tab === t}
+                aria-controls={`decorate-${t}`}
+                tabIndex={tab === t ? 0 : -1}
+                onClick={() => setTab(t)}
+                onKeyDown={(e) => {
+                  if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+                  const next = t === "house" ? "avatar" : "house";
+                  setTab(next);
+                  document.getElementById(`decorate-tab-${next}`)?.focus();
                 }}
+                className={cn(
+                  "-mb-px border-b-2 px-3 pb-2 text-sm font-medium outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
+                  tab === t
+                    ? "border-foreground text-foreground"
+                    : "border-transparent text-muted-foreground hover:text-foreground",
+                )}
               >
-                <Move aria-hidden="true" />
-                Move furniture
-              </Button>
-              {moved && (
-                <Button size="sm" variant="ghost" onClick={() => arrange(NO_ARRANGEMENT)}>
-                  <RotateCcw aria-hidden="true" />
-                  Put it all back
-                </Button>
-              )}
+                {t === "house" ? "House" : "Avatar"}
+              </button>
+            ))}
+          </div>
+
+          {tab === "avatar" ? (
+            <div id="decorate-avatar" role="tabpanel" aria-labelledby="decorate-tab-avatar">
+              <AvatarMaker
+                look={avatar}
+                shown={avatarShown}
+                onChange={changeAvatar}
+                onShown={showAvatar}
+                scene={decorData(decor)}
+              />
             </div>
-          </Group>
+          ) : (
+            <div id="decorate-house" role="tabpanel" aria-labelledby="decorate-tab-house" className="grid gap-5">
+              <Group title="House">
+                <div role="radiogroup" aria-label="House style" className="grid grid-cols-3 gap-2 sm:grid-cols-5">
+                  {ROOM_STYLES.map((style) => (
+                    <button
+                      key={style}
+                      type="button"
+                      role="radio"
+                      aria-checked={decor.style === style}
+                      title={ROOM_STYLE_LABELS[style].blurb}
+                      onClick={() => change({ style })}
+                      className="group grid gap-1 rounded-lg p-1 text-center text-xs text-muted-foreground outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+                    >
+                      <span
+                        className={cn(
+                          "room-scene room-thumb rounded-md border ring-offset-2 ring-offset-card transition-shadow group-hover:border-ring/60",
+                          decor.style === style && "ring-2 ring-foreground",
+                        )}
+                        {...decorData({ ...decor, style })}
+                      >
+                        <HousePreview style={style} hanging={decor.hanging} />
+                      </span>
+                      <span className={cn("leading-tight", decor.style === style && "font-medium text-foreground")}>
+                        {ROOM_STYLE_LABELS[style].name}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+                <p className="text-xs text-muted-foreground">{ROOM_STYLE_LABELS[decor.style].blurb}</p>
+              </Group>
+
+              <Group title="Colours">
+                <Swatches
+                  label="Walls"
+                  value={decor.walls}
+                  options={ROOM_WALLS}
+                  swatches={WALL_SWATCHES}
+                  labels={COLOUR_LABELS}
+                  onChange={(walls) => change({ walls })}
+                />
+                <Swatches
+                  label="Wood"
+                  value={decor.wood}
+                  options={ROOM_WOODS}
+                  swatches={WOOD_SWATCHES}
+                  labels={COLOUR_LABELS}
+                  onChange={(wood) => change({ wood })}
+                />
+                <Swatches
+                  label="Fabrics"
+                  hint="Chairs, curtains, rugs and tapestries."
+                  value={decor.fabric}
+                  options={ROOM_FABRICS}
+                  swatches={FABRIC_SWATCHES}
+                  labels={COLOUR_LABELS}
+                  onChange={(fabric) => change({ fabric })}
+                />
+              </Group>
+
+              <Group title="Over the fireplace">
+                <div role="radiogroup" aria-label="Over the fireplace" className="flex flex-wrap gap-2">
+                  {ROOM_HANGINGS.map((hanging) => (
+                    <button
+                      key={hanging}
+                      type="button"
+                      role="radio"
+                      aria-checked={decor.hanging === hanging}
+                      aria-label={ROOM_HANGING_LABELS[hanging]}
+                      title={ROOM_HANGING_LABELS[hanging]}
+                      onClick={() => change({ hanging })}
+                      className="group rounded-lg outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+                    >
+                      <span
+                        className={cn(
+                          "room-scene room-wall-tile grid h-[6.5rem] w-[4.75rem] place-items-center rounded-md border ring-offset-2 ring-offset-card transition-shadow group-hover:border-ring/60",
+                          decor.hanging === hanging && "ring-2 ring-foreground",
+                        )}
+                        {...decorData(decor)}
+                      >
+                        {hanging === "none" ? (
+                          <span className="text-[11px] text-muted-foreground">Nothing</span>
+                        ) : (
+                          <HangingPreview hanging={hanging} />
+                        )}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </Group>
+
+              <Group title="Furniture">
+                {earned.length > 0 ? (
+                  <div className="flex flex-wrap gap-x-5 gap-y-2">
+                    {earned.map((kind) => (
+                      <label key={kind} className="flex items-center gap-2 text-sm">
+                        <input
+                          type="checkbox"
+                          className="size-4 accent-primary"
+                          checked={!arrangement.away.includes(kind)}
+                          onChange={(e) =>
+                            arrange(e.target.checked ? bringOut(arrangement, kind) : putAway(arrangement, kind))
+                          }
+                        />
+                        {FURNITURE_LABELS[kind]}
+                      </label>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    More furniture moves in as your library grows: a plant at 10 books, a clock at 50.
+                  </p>
+                )}
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      setPanel(false);
+                      setArranging(true);
+                    }}
+                  >
+                    <Move aria-hidden="true" />
+                    Move furniture
+                  </Button>
+                  {moved && (
+                    <Button size="sm" variant="ghost" onClick={() => arrange(NO_ARRANGEMENT)}>
+                      <RotateCcw aria-hidden="true" />
+                      Put it all back
+                    </Button>
+                  )}
+                </div>
+              </Group>
+            </div>
+          )}
 
           <div className="flex flex-wrap justify-end gap-2 border-t pt-4">
-            {!sameDecor(decor, PLAIN_DECOR) && (
+            {tab === "house" && !sameDecor(decor, PLAIN_DECOR) && (
               <Button size="sm" variant="ghost" onClick={() => change(PLAIN_DECOR)}>
                 <RotateCcw aria-hidden="true" />
                 Back to the cottage
@@ -310,63 +381,8 @@ export function RoomView({
         arranging={arranging}
         onArrange={arrange}
         onDone={stopArranging}
+        avatar={avatarShown ? avatar : null}
       />
     </>
-  );
-}
-
-function Group({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <div className="grid gap-3">
-      <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">{title}</h2>
-      {children}
-    </div>
-  );
-}
-
-/** A row of round colour buttons, the first keeping the style's own. */
-function Swatches<T extends string>({
-  label,
-  hint,
-  value,
-  options,
-  swatches,
-  onChange,
-}: {
-  label: string;
-  hint?: string;
-  value: T;
-  options: readonly T[];
-  swatches: Record<string, string>;
-  onChange: (value: T) => void;
-}) {
-  return (
-    <div className="grid gap-1.5 sm:grid-cols-[10rem_1fr] sm:items-center sm:gap-4">
-      <div>
-        <p className="text-sm font-medium">{label}</p>
-        {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
-      </div>
-      <div role="radiogroup" aria-label={label} className="flex flex-wrap items-center gap-1.5">
-        {options.map((o) => (
-          <button
-            key={o}
-            type="button"
-            role="radio"
-            aria-checked={value === o}
-            aria-label={COLOUR_LABELS[o] ?? o}
-            title={COLOUR_LABELS[o] ?? o}
-            onClick={() => onChange(o)}
-            className={cn(
-              "h-7 rounded-full border-2 border-background ring-1 ring-border transition-shadow outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
-              o === "style" ? "bg-muted px-2.5 text-xs" : "w-7",
-              value === o && "ring-2 ring-foreground",
-            )}
-            style={o === "style" ? undefined : { background: swatches[o] }}
-          >
-            {o === "style" ? "Style's own" : null}
-          </button>
-        ))}
-      </div>
-    </div>
   );
 }
