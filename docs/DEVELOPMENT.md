@@ -46,8 +46,8 @@ password matches `POSTGRES_PASSWORD`. Every setting is described in
   order, the sorting rules and alphabets, saved library views, reading
   goals, reading preferences and themes, the colours of drawn covers,
   lending, the rate limiter, the
-  guard that stops cover downloads from reaching private addresses, and
-  image type detection.
+  guard that stops cover downloads from reaching private addresses, image
+  type detection, and the size limits on uploads and backup files.
 - **`npm run test:db:docker`** starts a `postgres:16-alpine` container, runs
   the database tests, and removes it. They cover backup and restore (the
   round trip, merging, duplicates, and settings), re-read counts, the book

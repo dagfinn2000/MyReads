@@ -175,7 +175,9 @@ automatically.
   camera and installing the app on HTTPS or `localhost`, so on a plain
   `http://192.168.x.x` address they won't work. Put MyReads behind a reverse
   proxy with HTTPS (for example Caddy, nginx or Traefik). Barcode scanning
-  works in Chrome and Edge, including Chrome on Android.
+  works in Chrome and Edge, including Chrome on Android. With nginx, add
+  `client_max_body_size 200m;` too: nginx turns away uploads over 1 MB by
+  default, which stops most backups from being restored.
 - **Make backups.** On the Account page, **Download backup** saves
   everything as a zip. **Restore backup** on the same page loads one into any
   MyReads server. Books you already have are skipped, so restoring twice is

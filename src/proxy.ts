@@ -21,9 +21,15 @@ export default NextAuth(authConfig).auth;
 export const config = {
   // Protect everything except:
   //  - Auth.js's own endpoints and the registration endpoint
+  //  - restoring a backup and uploading a cover, which check the session
+  //    themselves (and against the database, so a revoked one is refused).
+  //    A request the proxy sees has its body copied into memory first, and
+  //    cut off at 10 MB: a bigger backup reached the restore as a broken zip.
+  //    Only the upload address itself is left out, not the cover files whose
+  //    names begin "upload-", which still need a session.
   //  - Next.js internals and static assets
   //  - the PWA manifest and app icons (fetched without credentials on install)
   matcher: [
-    "/((?!api/auth|api/register|_next/static|_next/image|favicon.ico|icon.svg|manifest.webmanifest|apple-icon.png|icons/).*)",
+    "/((?!api/auth|api/register|api/import$|api/covers/upload$|_next/static|_next/image|favicon.ico|icon.svg|manifest.webmanifest|apple-icon.png|icons/).*)",
   ],
 };

@@ -9,6 +9,7 @@ import { STATUS_LABELS, toDateInputValue } from "@/lib/display";
 import { usePreferences } from "@/components/preferences-provider";
 import { currentPassEntries } from "@/lib/progress";
 import { progressFigure, unitFor } from "@/lib/progress-units";
+import { submitKeepingInput } from "@/lib/submit-form";
 import { ProgressChart, ProgressLog } from "@/components/progress-log";
 import { FinishedDateField } from "@/components/finished-date-field";
 import { CurrentPageField } from "@/components/progress-input";
@@ -66,14 +67,14 @@ export function ReadingCard({
     if (state.finished) celebrate(saveButton.current);
   }, [state]);
 
-  // Remount the form whenever the server-side reading data changes. React
-  // resets uncontrolled fields after a successful action, and the Radix
-  // Select's hidden native select reverts to its *mount-time* value behind
-  // React's back (a controlled value prop doesn't help — React never sees
-  // the DOM change), so a second save without a remount would silently
-  // submit the stale status. A fresh mount re-reads every default from the
-  // just-saved book; when nothing changed the key is stable and the form
-  // stays put. A quick log changes the page of a book being read without
+  // Remount the form whenever the server-side reading data changes. A save
+  // leaves the fields as they were sent (submitKeepingInput), so a failed
+  // one keeps the review being typed; but the server may have saved
+  // something else (Read fills in today's finish date), and a fresh mount
+  // re-reads every default from the just-saved book. It also keeps the
+  // Radix Select honest: its hidden native select reverts to its
+  // *mount-time* value whenever the form is reset, behind React's back. When
+  // nothing changed the key is stable and the form stays put. A quick log changes the page of a book being read without
   // touching the form, so then the page is left out: logging must not
   // remount the form and throw away a review being typed.
   const formKey = [
@@ -118,7 +119,12 @@ export function ReadingCard({
           </div>
         )}
 
-        <form key={formKey} action={formAction} className="grid gap-4">
+        <form
+          key={formKey}
+          action={formAction}
+          onSubmit={submitKeepingInput(formAction)}
+          className="grid gap-4"
+        >
           <div className="flex flex-wrap items-end gap-4">
             <div className="grid gap-2">
               <Label htmlFor="status">Status</Label>

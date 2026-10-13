@@ -1,6 +1,7 @@
 import JSZip from "jszip";
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
+import { readBodyCapped, readZipEntryCapped } from "@/lib/capped-read";
 import { importLibrary, type CoverFileReader } from "@/lib/import";
 
 // A library backup with a thousand bundled cover images lands comfortably
@@ -10,6 +11,9 @@ import { importLibrary, type CoverFileReader } from "@/lib/import";
 // self-hosted boxes can spare. Raising it means giving the container more
 // memory to match.
 const MAX_BYTES = 200 * 1024 * 1024;
+
+/** A bundled cover is at most what an upload may be (downloads are less). */
+const MAX_COVER_BYTES = 10 * 1024 * 1024;
 
 /** Zip local-file-header magic: "PK\x03\x04". */
 function isZip(bytes: Uint8Array): boolean {
@@ -34,16 +38,10 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // Declared size first, so an oversized upload is refused before its body is
-  // read into memory rather than after.
-  const length = parseInt(req.headers.get("content-length") ?? "0", 10);
-  if (length > MAX_BYTES) {
-    return NextResponse.json({ error: "File too large (max 200 MB)" }, { status: 413 });
-  }
-
-  const bytes = new Uint8Array(await req.arrayBuffer());
-  // Second check catches a body that lied about (or omitted) its length.
-  if (bytes.length > MAX_BYTES) {
+  // Refused at the declared size, or as soon as the body passes it, rather
+  // than after reading all of it into memory.
+  const bytes = await readBodyCapped(req, MAX_BYTES);
+  if (!bytes) {
     return NextResponse.json({ error: "File too large (max 200 MB)" }, { status: 413 });
   }
 
@@ -64,14 +62,29 @@ export async function POST(req: Request) {
         { status: 400 },
       );
     }
+    // Unpacked with a ceiling: the sizes a zip declares can lie, and a
+    // tiny zip can unpack to gigabytes. library.json may be as big as an
+    // unzipped backup could have been sent; a cover as big as an upload.
+    let text: Buffer | null;
     try {
-      payload = JSON.parse(await library.async("text"));
+      text = await readZipEntryCapped(library, MAX_BYTES);
+    } catch {
+      return NextResponse.json({ error: "Not a readable zip file" }, { status: 400 });
+    }
+    if (!text) {
+      return NextResponse.json(
+        { error: "library.json is too large (max 200 MB unpacked)" },
+        { status: 413 },
+      );
+    }
+    try {
+      payload = JSON.parse(text.toString("utf8"));
     } catch {
       return NextResponse.json({ error: "library.json is not valid JSON" }, { status: 400 });
     }
     getCoverFile = async (filename) => {
       const entry = zip.file(`covers/${filename}`);
-      return entry ? await entry.async("uint8array") : null;
+      return entry ? await readZipEntryCapped(entry, MAX_COVER_BYTES) : null;
     };
   } else {
     try {

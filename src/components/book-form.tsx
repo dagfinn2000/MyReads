@@ -9,6 +9,7 @@ import type { CatalogueDiffRow, CatalogueValues } from "@/lib/catalogue-values";
 import { FORMAT_LABELS, OWNERSHIP_LABELS, STATUS_LABELS, toDateInputValue } from "@/lib/display";
 import type { AfterAdd } from "@/lib/preferences";
 import type { TagImportSettings } from "@/lib/tag-rules";
+import { submitKeepingInput } from "@/lib/submit-form";
 import { AudiobookLengthField } from "@/components/audiobook-length-field";
 import { CoverPicker } from "@/components/cover-picker";
 import { FinishedDateField } from "@/components/finished-date-field";
@@ -92,10 +93,10 @@ export function BookForm({
   const [coverUrl, setCoverUrl] = useState(initial.coverUrl ?? "");
   // Format, ownership and shelf are controlled, each with a plain hidden
   // input carrying it: the Radix Select's own hidden select reverts to its
-  // mount-time value when React resets the form after a save (see
-  // reading-card.tsx), failed saves included, while the trigger keeps
-  // showing the reader's choice. Format also decides whether the audiobook
-  // length shows (and is sent), and the shelf which reading fields show.
+  // mount-time value whenever the form is reset (see reading-card.tsx),
+  // while the trigger keeps showing the reader's choice. Format also
+  // decides whether the audiobook length shows (and is sent), and the shelf
+  // which reading fields show.
   const [format, setFormat] = useState<BookFormat>(
     initial.format ?? BookFormat.PHYSICAL,
   );
@@ -152,7 +153,12 @@ export function BookForm({
   }
 
   return (
-    <form ref={formRef} action={formAction} className="grid gap-6 md:grid-cols-[200px_1fr]">
+    <form
+      ref={formRef}
+      action={formAction}
+      onSubmit={submitKeepingInput(formAction)}
+      className="grid gap-6 md:grid-cols-[200px_1fr]"
+    >
       {/* Cover preview + URL + picker */}
       <div className="grid content-start gap-2">
         {/* Capped below md so the stacked mobile layout doesn't blow the

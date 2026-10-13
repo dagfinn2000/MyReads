@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { coverFilePath, coversDir } from "@/lib/covers";
 import { sniffImageKind } from "@/lib/image-type";
 import { buildSearchText, foldForSearch } from "@/lib/utils";
-import { isAllowedCoverUrl } from "@/lib/validation";
+import { isAllowedCoverUrl, shelfNameSchema } from "@/lib/validation";
 import { cleanLibraryViewPatch } from "@/lib/library-view";
 import { cleanPreferencesPatch } from "@/lib/preferences";
 import {
@@ -33,6 +33,25 @@ import { parseThemeSetting, serializeThemeSetting } from "@/lib/themes";
  * the old setup back, and one onto a live account never undoes choices
  * made since. Saved views merge by name like shelves.
  */
+
+/**
+ * Shelf names, taken the way the shelf form takes them (trimmed, 1 to 50
+ * characters) one by one, so a name that won't do is dropped on its own
+ * rather than taking the book's other shelves with it.
+ */
+const shelfNames = z
+  .array(z.unknown())
+  .catch([])
+  .transform((names) =>
+    names.flatMap((name) => {
+      const parsed = shelfNameSchema.safeParse(name);
+      return parsed.success ? [parsed.data] : [];
+    }),
+  );
+
+/** Shelves are matched by name in any case, as the shelf form matches them:
+ *  a backup's "favourites" is the "Favourites" shelf already here. */
+const shelfKey = (name: string) => name.toLowerCase();
 
 const dateField = z
   .string()
@@ -110,7 +129,7 @@ const importedBookSchema = z.object({
   dateFinished: dateField,
   timesRead: z.number().int().min(0).max(1000).catch(0),
   currentPage: z.number().int().min(0).max(100000).nullable().optional().catch(null),
-  shelves: z.array(z.string().trim().min(1).max(50)).catch([]),
+  shelves: shelfNames,
   quotes: z.array(importedQuoteSchema).catch([]),
   reads: z.array(importedReadSchema).catch([]),
   progress: z.array(importedProgressSchema).catch([]),
@@ -131,7 +150,10 @@ const nameList = z.array(z.string().max(100)).max(500).optional().catch([]);
 const exportPayloadSchema = z.object({
   format: z.literal("myreads-export"),
   version: z.literal(1),
-  shelves: z.array(z.object({ name: z.string().trim().min(1).max(50) })).catch([]),
+  shelves: z
+    .array(z.unknown())
+    .catch([])
+    .transform((list) => shelfNames.parse(list.map((s) => (s as { name?: unknown } | null)?.name))),
   /** Goals counted in books. */
   readingGoals: z.array(goalSchema).catch([]),
   /** Goals counted in pages. Additive, and kept apart so an older MyReads
@@ -317,17 +339,24 @@ export async function importLibrary(
     where: { userId },
     select: { id: true, name: true },
   });
-  const shelfIdByName = new Map(existingShelves.map((s) => [s.name, s.id]));
-  const wantedShelves = new Set<string>(data.shelves.map((s) => s.name));
+  // Keyed by shelfKey; where names differ only in case, the first wins.
+  const shelfIdByName = new Map<string, string>();
+  for (const s of existingShelves) {
+    if (!shelfIdByName.has(shelfKey(s.name))) shelfIdByName.set(shelfKey(s.name), s.id);
+  }
+  const wantedShelves = new Map<string, string>();
+  const want = (name: string) => {
+    if (!wantedShelves.has(shelfKey(name))) wantedShelves.set(shelfKey(name), name);
+  };
+  data.shelves.forEach(want);
   for (const raw of data.books) {
-    const shelves = (raw as { shelves?: unknown })?.shelves;
-    if (Array.isArray(shelves)) {
-      for (const name of shelves) if (typeof name === "string") wantedShelves.add(name);
-    }
+    shelfNames.parse((raw as { shelves?: unknown } | null)?.shelves).forEach(want);
   }
   // Missing shelves in one statement, then read back to learn their ids —
   // two round-trips instead of one per shelf.
-  const missingShelves = [...wantedShelves].filter((n) => !shelfIdByName.has(n));
+  const missingShelves = [...wantedShelves]
+    .filter(([key]) => !shelfIdByName.has(key))
+    .map(([, name]) => name);
   let shelvesCreated = 0;
   if (missingShelves.length > 0) {
     const created = await prisma.shelf.createMany({
@@ -339,7 +368,7 @@ export async function importLibrary(
       where: { userId, name: { in: missingShelves } },
       select: { id: true, name: true },
     });
-    for (const s of refreshed) shelfIdByName.set(s.name, s.id);
+    for (const s of refreshed) shelfIdByName.set(shelfKey(s.name), s.id);
   }
 
   // Reading goals: upsert per year, concurrently — they're independent.
@@ -373,7 +402,7 @@ export async function importLibrary(
     const oldId = params.get("shelfId");
     if (oldId) {
       const id = view.shelfName
-        ? shelfIdByName.get(view.shelfName)
+        ? shelfIdByName.get(shelfKey(view.shelfName))
         : ownShelfIds.has(oldId)
           ? oldId
           : undefined;
@@ -499,10 +528,13 @@ export async function importLibrary(
         // Preserve "date added" ordering from the original library.
         ...(b.createdAt && { createdAt: b.createdAt }),
         shelves: {
-          connect: b.shelves
-            .map((name) => shelfIdByName.get(name))
-            .filter((id): id is string => !!id)
-            .map((id) => ({ id })),
+          connect: [
+            ...new Set(
+              b.shelves
+                .map((name) => shelfIdByName.get(shelfKey(name)))
+                .filter((id): id is string => !!id),
+            ),
+          ].map((id) => ({ id })),
         },
         quotes: {
           create: b.quotes.map((q) => ({
@@ -643,13 +675,16 @@ async function restoreSettings(
     prisma.shelf.findMany({ where: { userId }, select: { id: true, name: true } }),
     prisma.savedView.findMany({ where: { userId }, select: { id: true, name: true } }),
   ]);
-  const shelfIds = new Map(shelves.map((s) => [s.name, s.id]));
+  const shelfIds = new Map(shelves.map((s) => [shelfKey(s.name), s.id]));
   const viewIds = new Map(views.map((v) => [v.name, v.id]));
-  const idsOf = (names: string[] | undefined, ids: Map<string, string>) =>
-    (names ?? []).flatMap((name) => ids.get(name) ?? []);
+  const idsOf = (
+    names: string[] | undefined,
+    ids: Map<string, string>,
+    key: (name: string) => string = (name) => name,
+  ) => (names ?? []).flatMap((name) => ids.get(key(name)) ?? []);
   const byName: [string, string[]][] = [
-    ["shelfOrder", idsOf(settings.shelfOrderNames, shelfIds)],
-    ["hiddenShelves", idsOf(settings.hiddenShelfNames, shelfIds)],
+    ["shelfOrder", idsOf(settings.shelfOrderNames, shelfIds, shelfKey)],
+    ["hiddenShelves", idsOf(settings.hiddenShelfNames, shelfIds, shelfKey)],
     ["savedViewOrder", idsOf(settings.savedViewOrderNames, viewIds)],
   ];
   for (const [key, ids] of byName) {

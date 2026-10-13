@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import crypto from "node:crypto";
 import fs from "node:fs/promises";
 import { auth } from "@/auth";
+import { readBodyCapped } from "@/lib/capped-read";
 import { coverFilePath, coversDir } from "@/lib/covers";
 import { sniffImageKind } from "@/lib/image-type";
 import { uploadLimiter } from "@/lib/rate-limit";
@@ -29,7 +30,17 @@ export async function POST(req: Request) {
   }
   uploadLimiter.hit(key);
 
-  const form = await req.formData().catch(() => null);
+  // The image plus a little room for the multipart wrapping around it, read
+  // with a ceiling rather than all of whatever was sent.
+  const body = await readBodyCapped(req, MAX_BYTES + 64 * 1024);
+  if (!body) {
+    return NextResponse.json({ error: "Image too large (max 10 MB)" }, { status: 413 });
+  }
+  const form = await new Response(new Uint8Array(body), {
+    headers: { "Content-Type": req.headers.get("content-type") ?? "" },
+  })
+    .formData()
+    .catch(() => null);
   const file = form?.get("file");
   if (!(file instanceof File)) {
     return NextResponse.json({ error: "No file provided" }, { status: 400 });

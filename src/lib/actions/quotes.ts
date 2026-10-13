@@ -6,6 +6,14 @@ import { quoteSchema } from "@/lib/validation";
 import { requireUserId } from "@/lib/actions/helpers";
 import type { ActionState } from "@/lib/actions/helpers";
 
+/** Same rule as the reading card: a page past the end is a typo, and the
+ *  quote would sort after every other. */
+function pastTheEnd(page: number | null | undefined, pageCount: number | null): string | null {
+  return page && pageCount != null && page > pageCount
+    ? `Page ${page} is past the end of the book (${pageCount} pages)`
+    : null;
+}
+
 /** Add a quote/highlight to a book (the form carries the bookId). */
 export async function addQuote(
   _prev: ActionState,
@@ -17,7 +25,7 @@ export async function addQuote(
   if (typeof bookId !== "string" || !bookId) return { error: "Book not found" };
   const book = await prisma.book.findFirst({
     where: { id: bookId, userId },
-    select: { id: true },
+    select: { id: true, pageCount: true },
   });
   if (!book) return { error: "Book not found" };
 
@@ -26,6 +34,8 @@ export async function addQuote(
     return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
   }
   const data = parsed.data;
+  const pageError = pastTheEnd(data.page, book.pageCount);
+  if (pageError) return { error: pageError };
 
   await prisma.quote.create({
     data: {
@@ -51,7 +61,7 @@ export async function updateQuote(
 
   const existing = await prisma.quote.findFirst({
     where: { id: quoteId, book: { userId } },
-    select: { bookId: true },
+    select: { bookId: true, book: { select: { pageCount: true } } },
   });
   if (!existing) return { error: "Quote not found" };
 
@@ -60,6 +70,8 @@ export async function updateQuote(
     return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
   }
   const data = parsed.data;
+  const pageError = pastTheEnd(data.page, existing.book.pageCount);
+  if (pageError) return { error: pageError };
 
   await prisma.quote.update({
     where: { id: quoteId },

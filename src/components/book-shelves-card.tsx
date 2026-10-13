@@ -2,6 +2,8 @@
 
 import { useActionState, useOptimistic, useRef, useState, useTransition } from "react";
 import { createShelf, toggleBookShelf } from "@/lib/actions/shelves";
+import type { ActionState } from "@/lib/actions/helpers";
+import { submitKeepingInput } from "@/lib/submit-form";
 import { usePreferences } from "@/components/preferences-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -47,7 +49,17 @@ export function BookShelvesCard({
         : ids.filter((id) => id !== toggle.shelfId),
   );
   const [, startTransition] = useTransition();
-  const [createState, createAction, creating] = useActionState(createShelf, {});
+  const createForm = useRef<HTMLFormElement>(null);
+  // A new shelf empties the box for the next one; a refused name stays, to
+  // be fixed (submitKeepingInput).
+  const [createState, createAction, creating] = useActionState(
+    async (prev: ActionState, formData: FormData): Promise<ActionState> => {
+      const result = await createShelf(prev, formData);
+      if (result.success) createForm.current?.reset();
+      return result;
+    },
+    {},
+  );
   const [kept, setKept] = useState(() => new Set(memberIds));
   const [announcement, setAnnouncement] = useState("");
   const boxes = useRef(new Map<string, HTMLInputElement>());
@@ -145,7 +157,12 @@ export function BookShelvesCard({
           </p>
         )}
 
-        <form action={createAction} className="flex gap-2">
+        <form
+          ref={createForm}
+          action={createAction}
+          onSubmit={submitKeepingInput(createAction)}
+          className="flex gap-2"
+        >
           <input type="hidden" name="bookId" value={bookId} />
           <Input
             name="name"

@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useId, useState, useTransition } from "react";
+import { useActionState, useEffect, useId, useRef, useState, useTransition } from "react";
 import type { Book, Read } from "@prisma/client";
 import { ReadingStatus } from "@prisma/client";
 import { Pencil, Repeat, Trash2, X } from "lucide-react";
@@ -11,6 +11,7 @@ import {
   updatePastRead,
 } from "@/lib/actions/reads";
 import { formatDate, toDateInputValue, type FormatPrefs } from "@/lib/display";
+import { submitKeepingInput } from "@/lib/submit-form";
 import { usePreferences } from "@/components/preferences-provider";
 import { Stars } from "@/components/stars";
 import { StarRatingInput } from "@/components/star-rating-input";
@@ -150,14 +151,23 @@ function PastReadForm({
   const finishId = useId();
   const noteId = useId();
 
-  // Editing: close the form once the save lands. (The add form instead
-  // relies on React resetting an uncontrolled form after its action.)
+  const formRef = useRef<HTMLFormElement>(null);
+
+  // Once a save lands, editing closes the form and adding empties it for
+  // the next read. A failed save leaves what was typed (submitKeepingInput).
   useEffect(() => {
-    if (state.success) onDone?.();
-  }, [state, onDone]);
+    if (!state.success) return;
+    if (read) onDone?.();
+    else formRef.current?.reset();
+  }, [state, read, onDone]);
 
   return (
-    <form action={formAction} className="grid gap-2">
+    <form
+      ref={formRef}
+      action={formAction}
+      onSubmit={submitKeepingInput(formAction)}
+      className="grid gap-2"
+    >
       {!read && bookId && <input type="hidden" name="bookId" value={bookId} />}
       <div className="flex flex-wrap items-end gap-3">
         <div className="grid gap-1">

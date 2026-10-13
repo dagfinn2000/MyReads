@@ -4,6 +4,7 @@ import { useActionState, useEffect, useRef, useState, useTransition } from "reac
 import type { Quote } from "@prisma/client";
 import { Pencil, Trash2, X } from "lucide-react";
 import { addQuote, deleteQuote, updateQuote } from "@/lib/actions/quotes";
+import { submitKeepingInput } from "@/lib/submit-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -115,16 +116,21 @@ export function QuoteForm({
 }) {
   const action = quote ? updateQuote.bind(null, quote.id) : addQuote;
   const [state, formAction, pending] = useActionState(action, {});
+  const formRef = useRef<HTMLFormElement>(null);
 
-  // Editing: close the form once the save lands. (The add form instead
-  // relies on React resetting an uncontrolled form after its action.)
+  // Once a save lands, editing closes the form and adding empties it for
+  // the next quote. A failed save leaves what was typed (submitKeepingInput).
   useEffect(() => {
-    if (state.success) onDone?.();
-  }, [state, onDone]);
+    if (!state.success) return;
+    if (quote) onDone?.();
+    else formRef.current?.reset();
+  }, [state, quote, onDone]);
 
   return (
     <form
+      ref={formRef}
       action={formAction}
+      onSubmit={submitKeepingInput(formAction)}
       className="grid gap-2"
       onKeyDown={
         quote
