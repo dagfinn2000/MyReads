@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { Check, Move, Paintbrush, Plus, RotateCcw } from "lucide-react";
 import { AvatarMaker } from "@/components/avatar-maker";
 import { Group, Swatches } from "@/components/decorate-controls";
@@ -9,22 +9,28 @@ import { RoomSwitch } from "@/components/room-switch";
 import { savePreferences } from "@/lib/actions/preferences";
 import type { HideableNav, Preferences } from "@/lib/preferences";
 import {
+  EXTRAS,
   FURNITURE_LABELS,
   MILESTONES,
   ROOMS,
   ROOM_LABELS,
   ROOM_PIECES,
   STOWABLE,
+  addExtra,
   addRoom,
   bringOut,
   putAway,
+  removeExtra,
   removeRoom,
   type Arrangement,
+  type Extra,
+  type HousePlan,
   type Placement,
   type RoomBook,
   type RoomKind,
   type Stowable,
 } from "@/lib/room";
+import { ExtraPreview } from "@/components/room-extras";
 import { RoomPreview } from "@/components/room-rooms";
 import {
   COLOUR_LABELS,
@@ -71,8 +77,9 @@ type Tab = (typeof TABS)[number]["value"];
 /**
  * The reading room with its Decorate panel: the house style, the colours of
  * the walls, wood and fabrics and what hangs over the fireplace; the rooms
- * added over the library, which furniture is out, and a mode for moving it
- * about; and, on its Avatar tab, the reader's own little self. Every change
+ * added over the library, furniture added from a catalogue, which is out,
+ * and a mode for moving it about; and, on its Avatar tab, the reader's own
+ * little self. Every change
  * shows at once and is saved on the account.
  */
 export function RoomView({
@@ -81,6 +88,7 @@ export function RoomView({
   layout,
   away,
   rooms,
+  extras,
   avatar: savedAvatar,
   avatarShown: savedShown,
   hiddenNav,
@@ -91,6 +99,7 @@ export function RoomView({
   layout: Placement[];
   away: Stowable[];
   rooms: RoomKind[];
+  extras: Extra[];
   avatar: AvatarLook;
   avatarShown: boolean;
   /** For the switch that turns the whole room off. */
@@ -103,6 +112,7 @@ export function RoomView({
     places: layout,
     away,
     rooms,
+    extras,
   }));
   const [avatar, setAvatar] = useState(savedAvatar);
   const [avatarShown, setAvatarShown] = useState(savedShown);
@@ -110,6 +120,10 @@ export function RoomView({
   const [tab, setTab] = useState<Tab>("house");
   const [arranging, setArranging] = useState(false);
   const moveButton = useRef<HTMLButtonElement>(null);
+  // What the house has room for at this width, to say when something
+  // added from the catalogue hasn't found a place.
+  const [inHouse, setInHouse] = useState<ReadonlySet<string> | null>(null);
+  const onPlan = useCallback((plan: HousePlan) => setInHouse(new Set(plan.floors.flat().map((p) => p.kind))), []);
 
   const change = (patch: Partial<RoomDecor>) => {
     setDecor((d) => ({ ...d, ...patch }));
@@ -125,6 +139,7 @@ export function RoomView({
       roomLayout: [...next.places],
       roomAway: [...next.away],
       roomRooms: [...(next.rooms ?? [])],
+      roomExtras: [...(next.extras ?? [])],
     }).catch(() => {});
   };
 
@@ -145,6 +160,8 @@ export function RoomView({
 
   const moved = arrangement.places.length > 0 || arrangement.away.length > 0;
   const added = arrangement.rooms ?? [];
+  const addedExtras = arrangement.extras ?? [];
+  const homeless = inHouse ? addedExtras.filter((k) => !inHouse.has(k)) : [];
   // Only the furniture the library has earned so far.
   const earned = STOWABLE.filter((k) => k in MILESTONES && books.length >= MILESTONES[k as keyof typeof MILESTONES]);
   const furnitureBox = (kind: Stowable) => (
@@ -255,7 +272,11 @@ export function RoomView({
                           )}
                           {...decorData(decor)}
                         >
-                          <RoomPreview pieces={ROOM_PIECES[room]} />
+                          {ROOM_PIECES[room].length > 0 ? (
+                            <RoomPreview pieces={ROOM_PIECES[room]} />
+                          ) : (
+                            <span className="absolute inset-x-3 top-3 bottom-3 rounded-sm border border-dashed border-foreground/25" />
+                          )}
                           <span
                             className={cn(
                               "absolute top-1.5 right-1.5 grid size-5 place-items-center rounded-full border bg-background/90 text-foreground shadow-sm",
@@ -282,6 +303,61 @@ export function RoomView({
                 </div>
               </Group>
 
+              <Group title="Add furniture">
+                <div className="grid grid-cols-[repeat(auto-fill,minmax(6rem,1fr))] gap-3">
+                  {EXTRAS.map((kind) => {
+                    const on = addedExtras.includes(kind);
+                    const lost = homeless.includes(kind);
+                    return (
+                      <button
+                        key={kind}
+                        type="button"
+                        role="checkbox"
+                        aria-checked={on}
+                        aria-describedby={lost ? `extra-lost-${kind}` : undefined}
+                        onClick={() => arrange(on ? removeExtra(arrangement, kind) : addExtra(arrangement, kind))}
+                        className="group grid content-start gap-1.5 rounded-lg text-left outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+                      >
+                        <span
+                          className={cn(
+                            "room-scene room-room-thumb relative flex h-34 items-end justify-center overflow-hidden rounded-md border pb-1.5 ring-offset-2 ring-offset-card transition-shadow group-hover:border-ring/60",
+                            on && "ring-2 ring-foreground",
+                          )}
+                          {...decorData(decor)}
+                          style={{ "--u": "2px" } as React.CSSProperties}
+                        >
+                          <ExtraPreview kind={kind} scale={2} />
+                          <span
+                            className={cn(
+                              "absolute top-1.5 right-1.5 grid size-5 place-items-center rounded-full border bg-background/90 text-foreground shadow-sm",
+                              !on && "opacity-0 transition-opacity group-hover:opacity-100",
+                            )}
+                            aria-hidden="true"
+                          >
+                            {on ? <Check className="size-3.5" /> : <Plus className="size-3.5" />}
+                          </span>
+                        </span>
+                        <span className={cn("text-sm leading-tight", on && "font-medium")}>
+                          {FURNITURE_LABELS[kind]}
+                        </span>
+                        {lost && (
+                          <span id={`extra-lost-${kind}`} className="text-xs leading-snug text-muted-foreground">
+                            No space for it on this screen
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+                {homeless.length > 0 && (
+                  <p className="text-xs text-muted-foreground">
+                    {added.includes("spare")
+                      ? "Take something out, or put something away, to make space for the rest."
+                      : "Add a spare room, or put something away, to make space for the rest."}
+                  </p>
+                )}
+              </Group>
+
               <Group title="Furniture">
                 <div
                   role="group"
@@ -301,14 +377,16 @@ export function RoomView({
                     </p>
                   )}
                 </div>
-                {added.map((room) => (
-                  <div key={room} role="group" aria-labelledby={`furniture-${room}`} className="grid gap-1.5">
-                    <p id={`furniture-${room}`} className="text-sm font-medium">
-                      {ROOM_LABELS[room].name}
-                    </p>
-                    <div className="flex flex-wrap gap-x-5 gap-y-2">{ROOM_PIECES[room].map(furnitureBox)}</div>
-                  </div>
-                ))}
+                {added
+                  .filter((room) => ROOM_PIECES[room].length > 0)
+                  .map((room) => (
+                    <div key={room} role="group" aria-labelledby={`furniture-${room}`} className="grid gap-1.5">
+                      <p id={`furniture-${room}`} className="text-sm font-medium">
+                        {ROOM_LABELS[room].name}
+                      </p>
+                      <div className="flex flex-wrap gap-x-5 gap-y-2">{ROOM_PIECES[room].map(furnitureBox)}</div>
+                    </div>
+                  ))}
                 <div className="flex flex-wrap gap-2">
                   <Button
                     size="sm"
@@ -478,6 +556,7 @@ export function RoomView({
         arranging={arranging}
         onArrange={arrange}
         onDone={stopArranging}
+        onPlan={onPlan}
         avatar={avatarShown ? avatar : null}
       />
     </>

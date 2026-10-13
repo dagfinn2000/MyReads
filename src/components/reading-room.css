@@ -151,6 +151,11 @@
   --room-bird-lo: color-mix(in oklab, #d49a1c, var(--dusk) calc(var(--night) * 30%));
   --room-tile: color-mix(in oklab, #f4f1e8, var(--dusk) calc(var(--night) * 55%));
   --room-tile-lo: color-mix(in oklab, #cfc7b6, var(--dusk) calc(var(--night) * 55%));
+  /* For the catalogue's furniture (room-extras.tsx): the spaniel. */
+  --room-dog-hi: color-mix(in oklab, #d29a62, var(--dusk) calc(var(--night) * 45%));
+  --room-dog: color-mix(in oklab, #a8693a, var(--dusk) calc(var(--night) * 45%));
+  --room-dog-lo: color-mix(in oklab, #7a4826, var(--dusk) calc(var(--night) * 45%));
+  --room-dog-deep: color-mix(in oklab, #5a3218, var(--dusk) calc(var(--night) * 45%));
   --night: 0;
   /* What everything fades towards at night in the styles whose colours
      are worked out from a few base colours (below). */
@@ -385,6 +390,10 @@
 .rp-wicker-lo { fill: var(--room-wicker-lo); }
 .rp-bird { fill: var(--room-bird); }
 .rp-bird-lo { fill: var(--room-bird-lo); }
+.rp-dog-hi { fill: var(--room-dog-hi); }
+.rp-dog { fill: var(--room-dog); }
+.rp-dog-lo { fill: var(--room-dog-lo); }
+.rp-dog-deep { fill: var(--room-dog-deep); }
 .rp-tile { fill: var(--room-tile); }
 .rp-tile-lo { fill: var(--room-tile-lo); }
 .rp-book { fill: var(--spine); }
@@ -1144,7 +1153,83 @@
   }
 }
 
-/* A strip of wall and floor for showing an added room in Decorate. */
+/* The dog's ear pricks up for a moment now and then; down is the still
+   picture. */
+.room-twitch-b {
+  opacity: 0;
+  animation: room-show-brief 7s steps(1, end) infinite;
+}
+.room-twitch-a {
+  animation: room-hide-brief 7s steps(1, end) infinite;
+}
+@keyframes room-show-brief {
+  80% {
+    opacity: 1;
+  }
+  86% {
+    opacity: 0;
+  }
+}
+@keyframes room-hide-brief {
+  80% {
+    opacity: 0;
+  }
+  86% {
+    opacity: 1;
+  }
+}
+
+/* The fish swim to the end of the tank, turn and swim back, a dot at a
+   time; bubbles rise from the castle. Each starts from the still picture. */
+.room-swim {
+  transform-origin: center;
+  animation: room-swim 15s infinite;
+}
+.room-swim-late {
+  animation-duration: 19s;
+  animation-delay: -7s;
+}
+@keyframes room-swim {
+  0% {
+    transform: translateX(0) scaleX(1);
+    animation-timing-function: steps(16, end);
+  }
+  45% {
+    transform: translateX(calc(var(--u) * 16)) scaleX(1);
+    animation-timing-function: steps(1, end);
+  }
+  50% {
+    transform: translateX(calc(var(--u) * 16)) scaleX(-1);
+    animation-timing-function: steps(16, end);
+  }
+  95% {
+    transform: translateX(0) scaleX(-1);
+    animation-timing-function: steps(1, end);
+  }
+  100% {
+    transform: translateX(0) scaleX(1);
+  }
+}
+.room-bubble {
+  animation: room-bubble 3s steps(8, end) infinite;
+}
+.room-bubble-1 {
+  animation-delay: -1s;
+}
+.room-bubble-2 {
+  animation-delay: -2s;
+}
+@keyframes room-bubble {
+  to {
+    transform: translateY(calc(var(--u) * -8));
+    opacity: 0;
+  }
+}
+/* The aquarium's light at night. */
+.room-glow-sea {
+  background: radial-gradient(closest-side, rgb(120 200 255 / 0.28), rgb(90 170 240 / 0.1) 55%, transparent);
+}
+
 /* A room in the Decorate panel: its furniture on a bit of wall and floor. */
 .room-room-thumb {
   --u: 1px;

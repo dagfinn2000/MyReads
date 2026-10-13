@@ -46,6 +46,7 @@ import {
 } from "@/components/room-art";
 import { HELD_BOOK, SEAT_OFFSET } from "@/components/avatar-art";
 import { SeatedAvatar, Walker, useAvatar, type Avatar } from "@/components/room-avatar";
+import { ExtraView } from "@/components/room-extras";
 import { RoomPieceView } from "@/components/room-rooms";
 import type { AvatarLook } from "@/lib/avatar";
 import { chimneyFoot, chimneyRise, roofCrown, roofHeight, shellArt, type Moving, type Shell } from "@/components/room-shells";
@@ -70,6 +71,7 @@ import {
   WALL,
   caseCount,
   dressShelf,
+  isExtra,
   isMovable,
   isOnShelf,
   moveTo,
@@ -405,6 +407,7 @@ export function ReadingRoom({
   arranging = false,
   onArrange,
   onDone,
+  onPlan,
   avatar = null,
 }: {
   books: RoomBook[];
@@ -415,6 +418,8 @@ export function ReadingRoom({
   onArrange?: (next: Arrangement) => void;
   /** Escape while arranging. */
   onDone?: () => void;
+  /** The house as it is laid out at this width, whenever that changes. */
+  onPlan?: (plan: HousePlan) => void;
 }) {
   const wrap = useRef<HTMLDivElement>(null);
   const scene = useRef<HTMLDivElement>(null);
@@ -441,6 +446,9 @@ export function ReadingRoom({
     [books, width, style, arrangement],
   );
   const shell = useMemo(() => (layout ? shellArt(layout.geo, style) : null), [layout, style]);
+  useEffect(() => {
+    if (layout) onPlan?.(layout.plan);
+  }, [layout, onPlan]);
   const reading = books.findIndex((b) => b.status === ReadingStatus.READING && isOnShelf(b));
   const figure = useAvatar(avatar);
 
@@ -1258,7 +1266,11 @@ function Furniture({
       return null;
     default:
       // The furniture of an added room.
-      return <RoomPieceView kind={kind} x={x} floorLine={floorLine} ceiling={ceiling} scale={s} />;
+      return isExtra(kind) ? (
+        <ExtraView kind={kind} x={x} floorLine={floorLine} scale={s} />
+      ) : (
+        <RoomPieceView kind={kind} x={x} floorLine={floorLine} ceiling={ceiling} scale={s} />
+      );
   }
 }
 

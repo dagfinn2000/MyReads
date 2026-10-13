@@ -1,5 +1,14 @@
 import { BookFormat, BookOwnership, ReadingStatus } from "@prisma/client";
-import { MOVABLE, ROOMS, STOWABLE, type Placement, type RoomKind, type Stowable } from "@/lib/room";
+import {
+  EXTRAS,
+  MOVABLE,
+  ROOMS,
+  STOWABLE,
+  type Extra,
+  type Placement,
+  type RoomKind,
+  type Stowable,
+} from "@/lib/room";
 import {
   ROOM_FABRICS,
   ROOM_HANGINGS,
@@ -400,6 +409,8 @@ export type Preferences = {
   roomAway: Stowable[];
   /** Rooms added over the library (lib/room.ts), from the bottom up. */
   roomRooms: RoomKind[];
+  /** Furniture added from the catalogue (lib/room.ts). */
+  roomExtras: Extra[];
   // The reader's avatar in the room (lib/avatar.ts)
   /** Whether the avatar is in the room at all. */
   avatarShown: boolean;
@@ -473,6 +484,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
   roomLayout: [],
   roomAway: [],
   roomRooms: [],
+  roomExtras: [],
   avatarShown: true,
   avatar: DEFAULT_AVATAR,
 };
@@ -733,6 +745,7 @@ export function parsePreferences(raw: unknown): Preferences {
     roomLayout: parseRoomLayout(obj.roomLayout),
     roomAway: pickList(STOWABLE, obj.roomAway),
     roomRooms: pickList(ROOMS, obj.roomRooms),
+    roomExtras: pickList(EXTRAS, obj.roomExtras),
     avatarShown: bool(obj.avatarShown, d.avatarShown),
     avatar: parseAvatar(obj.avatar),
   };

@@ -102,6 +102,7 @@ export default async function ReadingRoomPage() {
         hiddenNav={prefs.hiddenNav}
         away={prefs.roomAway}
         rooms={prefs.roomRooms}
+        extras={prefs.roomExtras}
         summary={
           books.length > 0
             ? `${books.length === 1 ? "1 book" : `${formatNumber(books.length, prefs)} books`} on ${
@@ -123,8 +124,8 @@ export default async function ReadingRoomPage() {
           Books are filed by author. An outline keeps the place of a book that isn&apos;t on the
           shelf right now: wished for, lent out or given away. A red ribbon marks a book
           you&apos;re reading. The room gets more furniture as your library grows, and
-          Decorate changes its style and colours, adds rooms over the library, moves the
-          furniture about, and makes the little you who lives there.
+          Decorate changes its style and colours, adds rooms and furniture, moves it
+          about, and makes the little you who lives there.
         </p>
       )}
     </div>

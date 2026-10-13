@@ -103,8 +103,13 @@ server.
 - Add rooms over the library, each a floor of its own: a kitchen with the
   kettle on the range, a bedroom under a patchwork quilt, a music room, a
   conservatory with a songbird, a games room with a billiard table and a
-  studio with an easel. Their furniture can be moved anywhere in the house
-  or put away like the rest.
+  studio with an easel, or a spare room to fill yourself. Their furniture
+  can be moved anywhere in the house or put away like the rest.
+- Add furniture from a catalogue: a Chesterfield sofa, a rocking chair, an
+  aquarium with fish swimming in it, a spaniel asleep in its basket, a suit
+  of armour, a sea chest, a coat stand, a telescope, a rocking horse, a
+  curio cabinet and a spinning wheel. Each goes wherever there's space,
+  and you can move it from there.
 - Make a little you who lives there, from a wardrobe: ten skin tones (an
   elf or a spaceman too), eyes, a mouth, blush or freckles, a beard, 17
   hairstyles in 14 colours, jumpers, shirts, hoodies, a coat, a dress or a

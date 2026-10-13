@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { BookOwnership } from "@prisma/client";
 import {
   CASE_WIDTH,
+  EXTRAS,
   MILESTONES,
   NO_ARRANGEMENT,
   ROOMS,
@@ -9,6 +10,7 @@ import {
   PAD,
   PIECE_WIDTH,
   SHELF_WIDTH,
+  addExtra,
   addRoom,
   bringOut,
   caseCount,
@@ -19,6 +21,7 @@ import {
   placementsOf,
   planHouse,
   putAway,
+  removeExtra,
   removeRoom,
   shelve,
   spineFor,
@@ -294,7 +297,7 @@ describe("rooms", () => {
     for (const room of ROOMS) {
       const plan = planHouse(1, 0, 141, withRooms(room));
       expect(kinds(plan)[0]).toEqual([...ROOM_PIECES[room]]);
-      for (const floor of plan.floors) {
+      for (const floor of plan.floors.filter((f) => f.length)) {
         const end = floor[floor.length - 1];
         expect(end.x + PIECE_WIDTH[end.kind]).toBeLessThanOrEqual(plan.inner);
       }
@@ -368,6 +371,57 @@ describe("rooms", () => {
   it("only has room furniture for the rooms added", () => {
     const plan = planHouse(3, BOOKS, 600, { places: [{ kind: "piano", floor: 0, slot: 0 }], away: [] });
     expect(all(plan)).not.toContain("piano");
+  });
+});
+
+describe("furniture from the catalogue", () => {
+  const widest = (plan: HousePlan) =>
+    Math.max(...plan.floors.map((floor) => Math.max(...floor.map((p) => p.x + PIECE_WIDTH[p.kind]))));
+
+  it("is only in the house once added, and goes wherever there is room", () => {
+    expect(all(planHouse(2, 0, 600)).filter((k) => (EXTRAS as readonly string[]).includes(k))).toEqual([]);
+    const a = addExtra(addExtra(NO_ARRANGEMENT, "sofa"), "dog");
+    const plan = planHouse(2, 0, 600, a);
+    expect(all(plan)).toEqual(expect.arrayContaining(["sofa", "dog"]));
+    expect(plan.floors).toHaveLength(planHouse(2, 0, 600).floors.length);
+  });
+
+  it("adds no floor of its own, but finds space in a spare room", () => {
+    const every = { places: [], away: [], extras: [...EXTRAS] };
+    const narrow = planHouse(1, 0, 141, every);
+    expect(narrow.floors).toHaveLength(planHouse(1, 0, 141).floors.length);
+    expect(widest(narrow)).toBeLessThanOrEqual(narrow.inner);
+    const placed = all(narrow).filter((k) => (EXTRAS as readonly string[]).includes(k)).length;
+    expect(placed).toBeLessThan(EXTRAS.length);
+
+    const spare = planHouse(1, 0, 141, { ...every, rooms: ["spare"] });
+    expect(spare.rooms[0]).toBe("spare");
+    expect(all(spare).filter((k) => (EXTRAS as readonly string[]).includes(k)).length).toBeGreaterThan(placed);
+    expect(widest(spare)).toBeLessThanOrEqual(141);
+  });
+
+  it("stays where it was moved in the spare room as the library grows", () => {
+    const a = { places: [], away: [], rooms: ["spare" as const], extras: ["armour" as const, "chest" as const] };
+    const plan = planHouse(1, 0, 600, a);
+    const places = moveTo(plan, "armour", plan.floors.length - 1, 0)!;
+    expect(places.find((p) => p.kind === "armour")?.room).toBe("spare");
+    const grown = planHouse(6, 0, 300, { ...a, places });
+    expect(grown.rooms[0]).toBe("spare");
+    expect(kinds(grown)[0][0]).toBe("armour");
+  });
+
+  it("comes out again with its place, leaving the rest where they stood", () => {
+    const a = { places: [], away: [], extras: ["sofa" as const, "dog" as const, "chest" as const] };
+    const plan = planHouse(2, 0, 600, a);
+    const places = placementsOf(plan);
+    const out = removeExtra({ ...a, places }, "sofa");
+    expect(out.extras).toEqual(["dog", "chest"]);
+    expect(out.places.some((p) => p.kind === "sofa")).toBe(false);
+    const after = planHouse(2, 0, 600, out);
+    expect(all(after)).not.toContain("sofa");
+    expect(kinds(after).map((f) => f.filter((k) => k !== "sofa"))).toEqual(
+      kinds(plan).map((f) => f.filter((k) => k !== "sofa")),
+    );
   });
 });
 

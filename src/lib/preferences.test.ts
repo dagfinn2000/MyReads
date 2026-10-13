@@ -360,6 +360,16 @@ describe("parsePreferences: the reading room", () => {
     expect(prefs.roomAway).toEqual(["harp"]);
     expect(parsePreferences({}).roomRooms).toEqual([]);
   });
+
+  it("keeps the furniture added from the catalogue, and where it was moved", () => {
+    const prefs = parsePreferences({
+      roomExtras: ["dog", "unicorn", "sofa", "dog"],
+      roomLayout: [{ kind: "sofa", floor: 0, slot: 1, room: "spare" }],
+    });
+    expect(prefs.roomExtras).toEqual(["dog", "sofa"]);
+    expect(prefs.roomLayout).toEqual([{ kind: "sofa", floor: 0, slot: 1, room: "spare" }]);
+    expect(parsePreferences({}).roomExtras).toEqual([]);
+  });
 });
 
 describe("parsePreferences: the avatar", () => {
