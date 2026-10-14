@@ -22,6 +22,7 @@ import {
   type RoomWood,
 } from "@/lib/room-styles";
 import { DEFAULT_AVATAR, parseAvatar, parseSavedLooks, type AvatarLook } from "@/lib/avatar";
+import { parseCatCoat, parseDogCoat, parsePet, type CatCoat, type DogCoat, type Pet } from "@/lib/pets";
 
 /**
  * Per-account preferences — everything on the Account page's Preferences
@@ -403,6 +404,10 @@ export type Preferences = {
   roomWood: RoomWood;
   roomFabric: RoomFabric;
   roomHanging: RoomHanging;
+  /** The coat of every cat in the house, and of the dog in its basket
+   *  (lib/pets.ts). */
+  roomCat: CatCoat;
+  roomDog: DogCoat;
   /** Where furniture has been moved to. Empty = where it goes by itself. */
   roomLayout: Placement[];
   /** Furniture put away. */
@@ -418,6 +423,8 @@ export type Preferences = {
   avatar: AvatarLook;
   /** Looks kept to switch between (Decorate › Avatar › Saved looks). */
   avatarLooks: AvatarLook[];
+  /** The animal that follows the avatar about (lib/pets.ts). */
+  avatarPet: Pet;
 };
 
 export const DEFAULT_PREFERENCES: Preferences = {
@@ -483,6 +490,8 @@ export const DEFAULT_PREFERENCES: Preferences = {
   roomWood: "style",
   roomFabric: "style",
   roomHanging: "painting",
+  roomCat: "ginger",
+  roomDog: "brown",
   roomLayout: [],
   roomAway: [],
   roomRooms: [],
@@ -490,6 +499,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
   avatarShown: true,
   avatar: DEFAULT_AVATAR,
   avatarLooks: [],
+  avatarPet: "none",
 };
 
 /** True for a time zone this runtime knows ("Europe/Oslo", "UTC"). */
@@ -745,6 +755,8 @@ export function parsePreferences(raw: unknown): Preferences {
     roomWood: pick(ROOM_WOODS, obj.roomWood, d.roomWood),
     roomFabric: pick(ROOM_FABRICS, obj.roomFabric, d.roomFabric),
     roomHanging: pick(ROOM_HANGINGS, obj.roomHanging, d.roomHanging),
+    roomCat: parseCatCoat(obj.roomCat),
+    roomDog: parseDogCoat(obj.roomDog),
     roomLayout: parseRoomLayout(obj.roomLayout),
     roomAway: pickList(STOWABLE, obj.roomAway),
     roomRooms: pickList(ROOMS, obj.roomRooms),
@@ -752,6 +764,7 @@ export function parsePreferences(raw: unknown): Preferences {
     avatarShown: bool(obj.avatarShown, d.avatarShown),
     avatar: parseAvatar(obj.avatar),
     avatarLooks: parseSavedLooks(obj.avatarLooks),
+    avatarPet: parsePet(obj.avatarPet),
   };
 }
 

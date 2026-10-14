@@ -60,6 +60,11 @@
   --room-cat-lo: #b0622a;
   --room-cat-deep: #5b3115;
   --room-cat-white: #fbf1e1;
+  --room-cat-stripe: #c97530;
+  --room-cat-patch: #e08a3a;
+  --room-cat-patch2: #e08a3a;
+  --room-cat-point: #b0622a;
+  --room-cat-eye: #241a16;
   --room-shade-hi: #fff2c4;
   --room-shade: #f0cb78;
   --room-shade-lo: #c4943f;
@@ -156,6 +161,35 @@
   --room-dog: color-mix(in oklab, #a8693a, var(--dusk) calc(var(--night) * 45%));
   --room-dog-lo: color-mix(in oklab, #7a4826, var(--dusk) calc(var(--night) * 45%));
   --room-dog-deep: color-mix(in oklab, #5a3218, var(--dusk) calc(var(--night) * 45%));
+  --room-dog-white: color-mix(in oklab, #fbf1e1, var(--dusk) calc(var(--night) * 30%));
+  /* The pets (pet-art.ts): a rabbit, a hedgehog, a fox, a little dragon. */
+  --room-pet-eye: #1e1714;
+  --room-pet-nose: color-mix(in oklab, #e79a9a, var(--dusk) calc(var(--night) * 30%));
+  --room-bun-hi: color-mix(in oklab, #d8c8b0, var(--dusk) calc(var(--night) * 40%));
+  --room-bun: color-mix(in oklab, #b8a48c, var(--dusk) calc(var(--night) * 40%));
+  --room-bun-lo: color-mix(in oklab, #8c7a64, var(--dusk) calc(var(--night) * 40%));
+  --room-bun-deep: color-mix(in oklab, #4e4236, var(--dusk) calc(var(--night) * 40%));
+  --room-bun-white: color-mix(in oklab, #f6f0e6, var(--dusk) calc(var(--night) * 30%));
+  --room-hog-hi: color-mix(in oklab, #c9a47a, var(--dusk) calc(var(--night) * 40%));
+  --room-hog: color-mix(in oklab, #8a6a4a, var(--dusk) calc(var(--night) * 40%));
+  --room-hog-lo: color-mix(in oklab, #4e3a28, var(--dusk) calc(var(--night) * 40%));
+  --room-hog-deep: color-mix(in oklab, #2e2219, var(--dusk) calc(var(--night) * 40%));
+  --room-hog-face: color-mix(in oklab, #ecd6b4, var(--dusk) calc(var(--night) * 35%));
+  --room-fox-hi: color-mix(in oklab, #f39a52, var(--dusk) calc(var(--night) * 40%));
+  --room-fox: color-mix(in oklab, #d9692a, var(--dusk) calc(var(--night) * 40%));
+  --room-fox-lo: color-mix(in oklab, #a84a1c, var(--dusk) calc(var(--night) * 40%));
+  --room-fox-deep: color-mix(in oklab, #4a2210, var(--dusk) calc(var(--night) * 40%));
+  --room-fox-white: color-mix(in oklab, #fbf1e1, var(--dusk) calc(var(--night) * 30%));
+  --room-fox-sock: color-mix(in oklab, #3a2a22, var(--dusk) calc(var(--night) * 40%));
+  --room-drg-hi: color-mix(in oklab, #8cc97e, var(--dusk) calc(var(--night) * 35%));
+  --room-drg: color-mix(in oklab, #4f9a5a, var(--dusk) calc(var(--night) * 35%));
+  --room-drg-lo: color-mix(in oklab, #2f6e42, var(--dusk) calc(var(--night) * 35%));
+  --room-drg-deep: color-mix(in oklab, #1d3a25, var(--dusk) calc(var(--night) * 35%));
+  --room-drg-belly: color-mix(in oklab, #ecdc94, var(--dusk) calc(var(--night) * 35%));
+  --room-drg-wing: color-mix(in oklab, #8ec6d4, var(--dusk) calc(var(--night) * 35%));
+  --room-drg-wing-lo: color-mix(in oklab, #5390a6, var(--dusk) calc(var(--night) * 35%));
+  --room-drg-spike: color-mix(in oklab, #d4544a, var(--dusk) calc(var(--night) * 35%));
+  --room-drg-horn: color-mix(in oklab, #f1d27a, var(--dusk) calc(var(--night) * 35%));
   --night: 0;
   /* What everything fades towards at night in the styles whose colours
      are worked out from a few base colours (below). */
@@ -196,6 +230,10 @@
   --room-cat-lo: #8e5222;
   --room-cat-deep: #3f200e;
   --room-cat-white: #e6dac8;
+  --room-cat-stripe: #ab6429;
+  --room-cat-patch: #c27531;
+  --room-cat-patch2: #c27531;
+  --room-cat-point: #8e5222;
   --room-shade-hi: #fff4c6;
   --room-shade: #ffd479;
   --room-shade-lo: #d69c3a;
@@ -304,6 +342,11 @@
 .rp-cat-lo { fill: var(--room-cat-lo); }
 .rp-cat-deep { fill: var(--room-cat-deep); }
 .rp-cat-white { fill: var(--room-cat-white); }
+.rp-cat-stripe { fill: var(--room-cat-stripe); }
+.rp-cat-patch { fill: var(--room-cat-patch); }
+.rp-cat-patch2 { fill: var(--room-cat-patch2); }
+.rp-cat-point { fill: var(--room-cat-point); }
+.rp-cat-eye { fill: var(--room-cat-eye); }
 .rp-shade-hi { fill: var(--room-shade-hi); }
 .rp-shade { fill: var(--room-shade); }
 .rp-shade-lo { fill: var(--room-shade-lo); }
@@ -394,6 +437,184 @@
 .rp-dog { fill: var(--room-dog); }
 .rp-dog-lo { fill: var(--room-dog-lo); }
 .rp-dog-deep { fill: var(--room-dog-deep); }
+.rp-dog-white { fill: var(--room-dog-white); }
+.rp-pet-eye { fill: var(--room-pet-eye); }
+.rp-pet-nose { fill: var(--room-pet-nose); }
+.rp-bun-hi { fill: var(--room-bun-hi); }
+.rp-bun { fill: var(--room-bun); }
+.rp-bun-lo { fill: var(--room-bun-lo); }
+.rp-bun-deep { fill: var(--room-bun-deep); }
+.rp-bun-white { fill: var(--room-bun-white); }
+.rp-hog-hi { fill: var(--room-hog-hi); }
+.rp-hog { fill: var(--room-hog); }
+.rp-hog-lo { fill: var(--room-hog-lo); }
+.rp-hog-deep { fill: var(--room-hog-deep); }
+.rp-hog-face { fill: var(--room-hog-face); }
+.rp-fox-hi { fill: var(--room-fox-hi); }
+.rp-fox { fill: var(--room-fox); }
+.rp-fox-lo { fill: var(--room-fox-lo); }
+.rp-fox-deep { fill: var(--room-fox-deep); }
+.rp-fox-white { fill: var(--room-fox-white); }
+.rp-fox-sock { fill: var(--room-fox-sock); }
+.rp-drg-hi { fill: var(--room-drg-hi); }
+.rp-drg { fill: var(--room-drg); }
+.rp-drg-lo { fill: var(--room-drg-lo); }
+.rp-drg-deep { fill: var(--room-drg-deep); }
+.rp-drg-belly { fill: var(--room-drg-belly); }
+.rp-drg-wing { fill: var(--room-drg-wing); }
+.rp-drg-wing-lo { fill: var(--room-drg-wing-lo); }
+.rp-drg-spike { fill: var(--room-drg-spike); }
+.rp-drg-horn { fill: var(--room-drg-horn); }
+
+/* Coats (lib/pets.ts): every cat in the house wears the cat's, and the dog
+   in its basket the dog's. Without a coat chosen, the cat is the ginger
+   of the palette above; a chosen coat (and each coat's own picture in
+   Decorate) fades towards dusk at night like the rest of the house. */
+[data-cat] {
+  --room-cat-hi: color-mix(in oklab, var(--cat-hi), var(--dusk) calc(var(--night) * 35%));
+  --room-cat: color-mix(in oklab, var(--cat), var(--dusk) calc(var(--night) * 35%));
+  --room-cat-lo: color-mix(in oklab, var(--cat-lo), var(--dusk) calc(var(--night) * 35%));
+  --room-cat-deep: color-mix(in oklab, var(--cat-deep), var(--dusk) calc(var(--night) * 35%));
+  --room-cat-white: color-mix(in oklab, var(--cat-white), var(--dusk) calc(var(--night) * 30%));
+  --room-cat-stripe: color-mix(in oklab, var(--cat-stripe), var(--dusk) calc(var(--night) * 35%));
+  --room-cat-patch: color-mix(in oklab, var(--cat-patch), var(--dusk) calc(var(--night) * 35%));
+  --room-cat-patch2: color-mix(in oklab, var(--cat-patch2), var(--dusk) calc(var(--night) * 35%));
+  --room-cat-point: color-mix(in oklab, var(--cat-point), var(--dusk) calc(var(--night) * 35%));
+  --room-cat-eye: var(--cat-eye);
+}
+[data-cat="ginger"] {
+  --cat-hi: #f6b56b;
+  --cat: #e08a3a;
+  --cat-lo: #b0622a;
+  --cat-deep: #5b3115;
+  --cat-white: #fbf1e1;
+  --cat-stripe: #c97530;
+  --cat-patch: #e08a3a;
+  --cat-patch2: #e08a3a;
+  --cat-point: #b0622a;
+  --cat-eye: #241a16;
+}
+[data-cat="tabby"] {
+  --cat-hi: #b8a68a;
+  --cat: #8f7d64;
+  --cat-lo: #6b5b47;
+  --cat-deep: #33291f;
+  --cat-white: #ece3d2;
+  --cat-stripe: #4e4236;
+  --cat-patch: #8f7d64;
+  --cat-patch2: #8f7d64;
+  --cat-point: #4e4236;
+  --cat-eye: #241a16;
+}
+[data-cat="black"] {
+  --cat-hi: #4c4652;
+  --cat: #302b35;
+  --cat-lo: #231f28;
+  --cat-deep: #120f15;
+  --cat-white: #302b35;
+  --cat-stripe: #302b35;
+  --cat-patch: #302b35;
+  --cat-patch2: #302b35;
+  --cat-point: #231f28;
+  --cat-eye: #e8c24a;
+}
+[data-cat="white"] {
+  --cat-hi: #ffffff;
+  --cat: #f1ede6;
+  --cat-lo: #d5cdc1;
+  --cat-deep: #6b625a;
+  --cat-white: #ffffff;
+  --cat-stripe: #f1ede6;
+  --cat-patch: #f1ede6;
+  --cat-patch2: #f1ede6;
+  --cat-point: #d5cdc1;
+  --cat-eye: #5b8fd6;
+}
+[data-cat="grey"] {
+  --cat-hi: #b4b9c1;
+  --cat: #8e949d;
+  --cat-lo: #6b717a;
+  --cat-deep: #30333a;
+  --cat-white: #eef0f2;
+  --cat-stripe: #7c828b;
+  --cat-patch: #8e949d;
+  --cat-patch2: #8e949d;
+  --cat-point: #6b717a;
+  --cat-eye: #4f7a3a;
+}
+[data-cat="calico"] {
+  --cat-hi: #ffffff;
+  --cat: #f3ebdf;
+  --cat-lo: #d8cbb8;
+  --cat-deep: #44362b;
+  --cat-white: #ffffff;
+  --cat-stripe: #f3ebdf;
+  --cat-patch: #e08a3a;
+  --cat-patch2: #3a322e;
+  --cat-point: #3a322e;
+  --cat-eye: #241a16;
+}
+[data-cat="siamese"] {
+  --cat-hi: #fbf3e2;
+  --cat: #eadcc0;
+  --cat-lo: #cdb995;
+  --cat-deep: #3e2c22;
+  --cat-white: #f6ecd8;
+  --cat-stripe: #eadcc0;
+  --cat-patch: #eadcc0;
+  --cat-patch2: #eadcc0;
+  --cat-point: #5a4030;
+  --cat-eye: #4f86d4;
+}
+[data-dog] {
+  --room-dog-hi: color-mix(in oklab, var(--dog-hi), var(--dusk) calc(var(--night) * 45%));
+  --room-dog: color-mix(in oklab, var(--dog), var(--dusk) calc(var(--night) * 45%));
+  --room-dog-lo: color-mix(in oklab, var(--dog-lo), var(--dusk) calc(var(--night) * 45%));
+  --room-dog-deep: color-mix(in oklab, var(--dog-deep), var(--dusk) calc(var(--night) * 45%));
+  --room-dog-white: color-mix(in oklab, var(--dog-white), var(--dusk) calc(var(--night) * 30%));
+}
+[data-dog="brown"] {
+  --dog-hi: #d29a62;
+  --dog: #a8693a;
+  --dog-lo: #7a4826;
+  --dog-deep: #5a3218;
+  --dog-white: #fbf1e1;
+}
+[data-dog="golden"] {
+  --dog-hi: #f0c878;
+  --dog: #d9a24e;
+  --dog-lo: #a8763a;
+  --dog-deep: #6a4520;
+  --dog-white: #fbf1e1;
+}
+[data-dog="black"] {
+  --dog-hi: #4c4652;
+  --dog: #2e2a33;
+  --dog-lo: #1f1c24;
+  --dog-deep: #0f0d12;
+  --dog-white: #f1ebe0;
+}
+[data-dog="grey"] {
+  --dog-hi: #bcc0c8;
+  --dog: #8f949d;
+  --dog-lo: #6b717a;
+  --dog-deep: #33363c;
+  --dog-white: #f5f5f3;
+}
+[data-dog="cream"] {
+  --dog-hi: #fbf2e0;
+  --dog: #ecdcbc;
+  --dog-lo: #cdb994;
+  --dog-deep: #6e5a3e;
+  --dog-white: #fffaf0;
+}
+[data-dog="red"] {
+  --dog-hi: #e48e5c;
+  --dog: #b8552e;
+  --dog-lo: #8a3c1e;
+  --dog-deep: #4e200e;
+  --dog-white: #fbf1e1;
+}
 .rp-tile { fill: var(--room-tile); }
 .rp-tile-lo { fill: var(--room-tile-lo); }
 .rp-book { fill: var(--spine); }
@@ -1309,7 +1530,8 @@
   z-index: 2;
   will-change: transform;
 }
-.room-avatar[data-facing="left"] svg {
+.room-avatar[data-facing="left"] svg,
+.room-pet[data-facing="left"] svg {
   scale: -1 1;
 }
 .room-walk-stride {
@@ -1320,6 +1542,21 @@
 }
 .room-avatar[data-walking] .room-walk-stand {
   animation: room-hide 0.38s steps(1, end) infinite;
+}
+/* The pet (pet-art.ts) at its heels, its smaller legs going faster; in
+   front of the avatar's legs as it passes them. */
+.room-pet {
+  pointer-events: none;
+}
+.room-pet-walker {
+  z-index: 3;
+  will-change: transform;
+}
+.room-pet[data-walking] .room-walk-stride {
+  animation: room-show 0.26s steps(1, end) infinite;
+}
+.room-pet[data-walking] .room-walk-stand {
+  animation: room-hide 0.26s steps(1, end) infinite;
 }
 /* By lamplight it's a little darker, like the furniture. */
 :where(.dark) .room-scene .room-avatar {

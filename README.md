@@ -125,6 +125,10 @@ server.
   and stop by the fire, and while you're reading a book they sit in the
   armchair reading it (the cat moves to the rug). With animations off they
   stand still by the fire.
+- Bring a pet: a cat, a dog, a rabbit, a hedgehog, a fox or a little
+  dragon trots at your avatar's heels and curls up at its feet while it
+  reads. Choose the coat of every cat in the house (ginger, tabby, black,
+  white, grey, calico or Siamese) and of the dog.
 - Not for you? Turn the reading room off in Preferences, or from Decorate,
   and the Room tab goes away. You can also keep the house and leave the
   avatar out.

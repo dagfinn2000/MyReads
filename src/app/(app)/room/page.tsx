@@ -95,11 +95,14 @@ export default async function ReadingRoomPage() {
           wood: prefs.roomWood,
           fabric: prefs.roomFabric,
           hanging: prefs.roomHanging,
+          cat: prefs.roomCat,
+          dog: prefs.roomDog,
         }}
         layout={prefs.roomLayout}
         avatar={prefs.avatar}
         avatarShown={prefs.avatarShown}
         avatarLooks={prefs.avatarLooks}
+        pet={prefs.avatarPet}
         hiddenNav={prefs.hiddenNav}
         away={prefs.roomAway}
         rooms={prefs.roomRooms}

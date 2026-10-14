@@ -5,6 +5,7 @@ import { Check, Move, Paintbrush, Plus, RotateCcw } from "lucide-react";
 import { AvatarMaker } from "@/components/avatar-maker";
 import { Group, Swatches } from "@/components/decorate-controls";
 import type { AvatarLook } from "@/lib/avatar";
+import type { Pet } from "@/lib/pets";
 import { RoomSwitch } from "@/components/room-switch";
 import { savePreferences } from "@/lib/actions/preferences";
 import type { HideableNav, Preferences } from "@/lib/preferences";
@@ -62,10 +63,14 @@ const PREFERENCE: Record<keyof RoomDecor, keyof Preferences> = {
   wood: "roomWood",
   fabric: "roomFabric",
   hanging: "roomHanging",
+  cat: "roomCat",
+  dog: "roomDog",
 };
 
-const sameDecor = (a: RoomDecor, b: RoomDecor) =>
-  (Object.keys(PREFERENCE) as (keyof RoomDecor)[]).every((k) => a[k] === b[k]);
+/** The house's own decor, which "Back to the cottage" puts back; the
+ *  animals keep their coats. */
+const HOUSE: (keyof RoomDecor)[] = ["style", "walls", "wood", "fabric", "hanging"];
+const sameHouse = (a: RoomDecor, b: RoomDecor) => HOUSE.every((k) => a[k] === b[k]);
 
 const TABS = [
   { value: "house", label: "House" },
@@ -92,6 +97,7 @@ export function RoomView({
   avatar: savedAvatar,
   avatarShown: savedShown,
   avatarLooks: savedLooks,
+  pet: savedPet,
   hiddenNav,
   summary,
 }: {
@@ -104,6 +110,7 @@ export function RoomView({
   avatar: AvatarLook;
   avatarShown: boolean;
   avatarLooks: AvatarLook[];
+  pet: Pet;
   /** For the switch that turns the whole room off. */
   hiddenNav: HideableNav[];
   /** "198 books on 5 bookcases", beside the title. */
@@ -119,6 +126,7 @@ export function RoomView({
   const [avatar, setAvatar] = useState(savedAvatar);
   const [avatarShown, setAvatarShown] = useState(savedShown);
   const [avatarLooks, setAvatarLooks] = useState(savedLooks);
+  const [pet, setPet] = useState(savedPet);
   const [panel, setPanel] = useState(false);
   const [tab, setTab] = useState<Tab>("house");
   const [arranging, setArranging] = useState(false);
@@ -154,6 +162,11 @@ export function RoomView({
   const keepLooks = (looks: AvatarLook[]) => {
     setAvatarLooks(looks);
     savePreferences({ avatarLooks: looks }).catch(() => {});
+  };
+
+  const choosePet = (next: Pet) => {
+    setPet(next);
+    savePreferences({ avatarPet: next }).catch(() => {});
   };
 
   const showAvatar = (shown: boolean) => {
@@ -424,9 +437,13 @@ export function RoomView({
                 look={avatar}
                 shown={avatarShown}
                 looks={avatarLooks}
+                pet={pet}
+                coats={{ cat: decor.cat, dog: decor.dog }}
                 onChange={changeAvatar}
                 onShown={showAvatar}
                 onLooks={keepLooks}
+                onPet={choosePet}
+                onCoats={change}
                 scene={decorData(decor)}
               />
             </div>
@@ -527,8 +544,8 @@ export function RoomView({
 
           <div className="flex flex-wrap justify-end gap-2 border-t pt-4">
             <RoomSwitch hiddenNav={hiddenNav} on={false} className="mr-auto text-muted-foreground" />
-            {tab === "house" && !sameDecor(decor, PLAIN_DECOR) && (
-              <Button size="sm" variant="ghost" onClick={() => change(PLAIN_DECOR)}>
+            {tab === "house" && !sameHouse(decor, PLAIN_DECOR) && (
+              <Button size="sm" variant="ghost" onClick={() => change({ ...PLAIN_DECOR, cat: decor.cat, dog: decor.dog })}>
                 <RotateCcw aria-hidden="true" />
                 Back to the cottage
               </Button>
@@ -568,6 +585,7 @@ export function RoomView({
         onDone={stopArranging}
         onPlan={onPlan}
         avatar={avatarShown ? avatar : null}
+        pet={pet}
       />
     </>
   );

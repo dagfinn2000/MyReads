@@ -2,18 +2,25 @@
 
 import { useEffect, useMemo, useRef, useSyncExternalStore } from "react";
 import { AVATAR_W, avatarArt, type AvatarArt } from "@/components/avatar-art";
-import { Rects, Sprite } from "@/components/room-art";
+import { petArt, type PetArt } from "@/components/pet-art";
+import { Rects, Sprite, type Art } from "@/components/room-art";
 import { ACCENT_SWATCHES, CLOTH_SWATCHES, EYE_SWATCHES, HAIR_SWATCHES, SKIN_SWATCHES, type AvatarLook } from "@/lib/avatar";
 import { motionAllowed, subscribeMotion } from "@/lib/motion";
+import type { Pet } from "@/lib/pets";
 
-/** The avatar's art and the colours it's painted in, drawn once per look. */
+/** The avatar's art and the colours it's painted in, drawn once per look,
+ *  and the pet who follows it about, if it has one. */
 export interface Avatar {
   art: AvatarArt;
   colours: React.CSSProperties;
+  pet: PetArt | null;
 }
 
-export function useAvatar(look: AvatarLook | null): Avatar | null {
-  return useMemo(() => (look ? { art: avatarArt(look), colours: avatarColours(look) } : null), [look]);
+export function useAvatar(look: AvatarLook | null, pet: Pet = "none"): Avatar | null {
+  return useMemo(
+    () => (look ? { art: avatarArt(look), colours: avatarColours(look), pet: petArt(pet) } : null),
+    [look, pet],
+  );
 }
 
 export function avatarColours(look: AvatarLook): React.CSSProperties {
@@ -31,15 +38,35 @@ const useMotion = () => useSyncExternalStore(subscribeMotion, motionAllowed, () 
 
 /** Dots a second. */
 const SPEED = 14;
+/** The pet trots a little faster, to keep up. */
+const PET_SPEED = 19;
 /** How long it stands about between walks, in ms. */
 const REST = [2500, 6500];
+
+/** A walking sprite: its two frames swap while it walks (reading-room.css). */
+function Strider({ stand, stride }: { stand: Art; stride: Art }) {
+  return (
+    <svg
+      width={stand.w}
+      height={stand.h}
+      viewBox={`0 0 ${stand.w} ${stand.h}`}
+      shapeRendering="crispEdges"
+      className="block size-full"
+      focusable="false"
+    >
+      <Rects className="room-walk-stand" rects={stand.rects} />
+      <Rects className="room-walk-stride" rects={stride.rects} />
+    </svg>
+  );
+}
 
 /**
  * The avatar pottering about a floor of the house while no book is being
  * read: it walks somewhere, stands a while, looks about, and now and then
- * comes back to stand by the fire. It moves a whole dot at a time, like
- * the rest of the room. With Animations off, or reduced motion, it just
- * stands by the fire.
+ * comes back to stand by the fire. Its pet, if it has one, trots after it
+ * and keeps at its heels, going round to the other side when it turns. It
+ * moves a whole dot at a time, like the rest of the room. With Animations
+ * off, or reduced motion, they just stand by the fire.
  *
  * `home` and `width` are in dots from the floor's left; `floorLine` is
  * where its feet go.
@@ -58,11 +85,14 @@ export function Walker({
   scale: number;
 }) {
   const el = useRef<HTMLDivElement>(null);
+  const petEl = useRef<HTMLDivElement>(null);
   const moving = useMotion();
   const { stand, stride } = avatar.art;
+  const pet = avatar.pet;
 
   useEffect(() => {
     const node = el.current;
+    const petNode = petEl.current;
     if (!node) return;
     const min = 2;
     const max = Math.max(min, width - AVATAR_W - 2);
@@ -70,6 +100,26 @@ export function Walker({
     let x = start;
     let drawn = NaN;
     let facing: "left" | "right" = "left";
+
+    // Where the pet goes: at the avatar's heels, behind whichever way it
+    // faces, overlapping it a little.
+    const petW = pet?.stand.w ?? 0;
+    const heel = () =>
+      Math.min(Math.max(facing === "right" ? x - petW + 3 : x + AVATAR_W - 3, 0), Math.max(0, width - petW));
+    let px = heel();
+    let petDrawn = NaN;
+    let petFacing: "left" | "right" = facing;
+    const drawPet = (walking: boolean) => {
+      if (!petNode) return;
+      const dot = Math.round(px);
+      if (dot !== petDrawn) {
+        petNode.style.transform = `translateX(${dot * s}px)`;
+        petDrawn = dot;
+      }
+      petNode.dataset.facing = petFacing;
+      petNode.toggleAttribute("data-walking", walking);
+    };
+
     const draw = (walking: boolean) => {
       const dot = Math.round(x);
       if (dot !== drawn) {
@@ -80,6 +130,7 @@ export function Walker({
       node.toggleAttribute("data-walking", walking);
     };
     draw(false);
+    drawPet(false);
     if (!moving) return;
 
     const between = (lo: number, hi: number) => lo + Math.random() * (hi - lo);
@@ -88,6 +139,23 @@ export function Walker({
     let turnAt: number | null = null;
     let last = performance.now();
     let frame = 0;
+    const followPet = (dt: number) => {
+      if (!petNode) return;
+      const goal = heel();
+      const gap = goal - px;
+      if (Math.abs(gap) < 1) {
+        // There: it faces the way the avatar does.
+        if (petFacing !== facing || petNode.hasAttribute("data-walking")) {
+          petFacing = facing;
+          drawPet(false);
+        }
+        return;
+      }
+      const step = PET_SPEED * dt * Math.sign(gap);
+      px = Math.abs(gap) <= Math.abs(step) ? goal : px + step;
+      petFacing = gap > 0 ? "right" : "left";
+      drawPet(true);
+    };
     const tick = (now: number) => {
       // A tab in the background gets no frames; don't leap on return.
       const dt = Math.min(now - last, 100) / 1000;
@@ -124,32 +192,59 @@ export function Walker({
           draw(true);
         }
       }
+      followPet(dt);
       frame = requestAnimationFrame(tick);
     };
     frame = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frame);
-  }, [moving, width, home, s]);
+  }, [moving, width, home, s, pet]);
 
   return (
-    <div
-      ref={el}
-      className="room-abs room-avatar room-walker"
-      aria-hidden="true"
-      data-facing="left"
-      style={{ left: 0, top: (floorLine - stand.h) * s, ...avatar.colours }}
-    >
-      <svg
-        width={stand.w * s}
-        height={stand.h * s}
-        viewBox={`0 0 ${stand.w} ${stand.h}`}
-        shapeRendering="crispEdges"
-        className="block"
-        focusable="false"
+    <>
+      {pet && (
+        <div
+          ref={petEl}
+          className="room-abs room-pet room-pet-walker"
+          aria-hidden="true"
+          data-facing="left"
+          style={{ left: 0, top: (floorLine - pet.stand.h) * s, width: pet.stand.w * s, height: pet.stand.h * s }}
+        >
+          <Strider stand={pet.stand} stride={pet.stride} />
+        </div>
+      )}
+      <div
+        ref={el}
+        className="room-abs room-avatar room-walker"
+        aria-hidden="true"
+        data-facing="left"
+        style={{ left: 0, top: (floorLine - stand.h) * s, width: stand.w * s, height: stand.h * s, ...avatar.colours }}
       >
-        <Rects className="room-walk-stand" rects={stand.rects} />
-        <Rects className="room-walk-stride" rects={stride.rects} />
-      </svg>
-    </div>
+        <Strider stand={stand} stride={stride} />
+      </div>
+    </>
+  );
+}
+
+/** The pet curled up asleep, its right edge at `right` (in dots) on the
+ *  floor at `floorLine`. */
+export function SleepingPet({
+  pet,
+  right,
+  floorLine,
+  scale: s,
+}: {
+  pet: PetArt;
+  right: number;
+  floorLine: number;
+  scale: number;
+}) {
+  return (
+    <Sprite
+      art={pet.curl}
+      scale={s}
+      className="room-abs room-pet"
+      style={{ left: (right - pet.curl.w) * s, top: (floorLine - pet.curl.h) * s }}
+    />
   );
 }
 
@@ -193,31 +288,44 @@ export function AvatarPortrait({
 }) {
   const moving = useMotion() && walking;
   const a = pose === "sit" ? avatar.art.sit : avatar.art.stand;
+  const pet = pose === "stand" ? avatar.pet : null;
   return (
-    <div
-      className="room-avatar"
-      data-facing="right"
-      data-walking={moving ? "" : undefined}
-      style={{ ...avatar.colours, "--spine": "#7a3b4a" } as React.CSSProperties}
-    >
-      <svg
-        width={a.w * scale}
-        height={a.h * scale}
-        viewBox={`0 0 ${a.w} ${a.h}`}
-        shapeRendering="crispEdges"
-        className="block"
-        aria-hidden="true"
-        focusable="false"
+    <div className="flex items-end">
+      {pet && (
+        <div
+          className="room-pet"
+          data-facing="right"
+          data-walking={moving ? "" : undefined}
+          style={{ width: pet.stand.w * scale, height: pet.stand.h * scale, marginRight: -3 * scale }}
+        >
+          <Strider stand={pet.stand} stride={pet.stride} />
+        </div>
+      )}
+      <div
+        className="room-avatar"
+        data-facing="right"
+        data-walking={moving ? "" : undefined}
+        style={{ ...avatar.colours, "--spine": "#7a3b4a" } as React.CSSProperties}
       >
-        {pose === "sit" ? (
-          <Rects rects={a.rects} />
-        ) : (
-          <>
-            <Rects className="room-walk-stand" rects={avatar.art.stand.rects} />
-            <Rects className="room-walk-stride" rects={avatar.art.stride.rects} />
-          </>
-        )}
-      </svg>
+        <svg
+          width={a.w * scale}
+          height={a.h * scale}
+          viewBox={`0 0 ${a.w} ${a.h}`}
+          shapeRendering="crispEdges"
+          className="block"
+          aria-hidden="true"
+          focusable="false"
+        >
+          {pose === "sit" ? (
+            <Rects rects={a.rects} />
+          ) : (
+            <>
+              <Rects className="room-walk-stand" rects={avatar.art.stand.rects} />
+              <Rects className="room-walk-stride" rects={avatar.art.stride.rects} />
+            </>
+          )}
+        </svg>
+      </div>
     </div>
   );
 }

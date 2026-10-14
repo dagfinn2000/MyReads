@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { Dices, Plus, RotateCcw, X } from "lucide-react";
 import { FIGURE_ORIGIN, SEAT_OFFSET, avatarPose, seatedTop, type AvatarPose } from "@/components/avatar-art";
+import { PET_ART } from "@/components/pet-art";
 import { Rects, Sprite, armchairArt } from "@/components/room-art";
 import { AvatarPortrait, avatarColours, useAvatar } from "@/components/room-avatar";
 import { SubTabs, Swatches, Tiles } from "@/components/decorate-controls";
@@ -45,6 +46,7 @@ import {
   type AvatarHat,
   type AvatarLook,
 } from "@/lib/avatar";
+import { CAT_COATS, DOG_COATS, PETS, PET_LABELS, type CatCoat, type DogCoat, type Pet } from "@/lib/pets";
 
 const ARMCHAIR = armchairArt();
 
@@ -54,6 +56,7 @@ const SECTIONS = [
   { value: "body", label: "Body" },
   { value: "clothes", label: "Clothes" },
   { value: "extras", label: "Hats & extras" },
+  { value: "pet", label: "Pet" },
 ] as const;
 type Section = (typeof SECTIONS)[number]["value"];
 
@@ -80,21 +83,30 @@ export function AvatarMaker({
   look,
   shown,
   looks,
+  pet,
+  coats,
   onChange,
   onShown,
   onLooks,
+  onPet,
+  onCoats,
   scene,
 }: {
   look: AvatarLook;
   shown: boolean;
   /** Looks kept to switch between. */
   looks: AvatarLook[];
+  pet: Pet;
+  /** The coats of the house's cats and dog. */
+  coats: { cat: CatCoat; dog: DogCoat };
   /** The room's decor as data attributes (decorData), so the picture is
    *  in the room's own colours. */
   scene: Record<string, string | undefined>;
   onChange: (look: AvatarLook) => void;
   onShown: (shown: boolean) => void;
   onLooks: (looks: AvatarLook[]) => void;
+  onPet: (pet: Pet) => void;
+  onCoats: (coats: Partial<{ cat: CatCoat; dog: DogCoat }>) => void;
 }) {
   const [section, setSection] = useState<Section>("face");
   const set = (patch: Partial<AvatarLook>) => onChange({ ...look, ...patch });
@@ -116,7 +128,7 @@ export function AvatarMaker({
   return (
     <div className="grid gap-5 md:grid-cols-[auto_1fr] md:items-start">
       <div className="grid justify-items-center gap-3 md:sticky md:top-16">
-        <Stage look={look} scene={scene} />
+        <Stage look={look} pet={pet} scene={scene} />
         <div className="flex flex-wrap justify-center gap-2">
           <Button size="sm" variant="outline" onClick={() => onChange(randomLook(Math.random, look.mobility))}>
             <Dices aria-hidden="true" />
@@ -420,6 +432,41 @@ export function AvatarMaker({
               />
             </>
           )}
+
+          {section === "pet" && (
+            <>
+              <Tiles
+                label="Your pet"
+                hint="Follows you about the house, and sleeps at your feet while you read."
+                options={PETS}
+                labels={PET_LABELS}
+                chosen={(p) => pet === p}
+                onPick={onPet}
+              >
+                {(p) => (p === "none" ? <span className="self-center text-lg text-muted-foreground">–</span> : <PetPicture pet={p} coats={coats} />)}
+              </Tiles>
+              <Tiles
+                label="The cats' coat"
+                hint="Every cat in the house: yours, and the one in the armchair."
+                options={CAT_COATS}
+                labels={PET_LABELS}
+                chosen={(cat) => coats.cat === cat}
+                onPick={(cat) => onCoats({ cat })}
+              >
+                {(cat) => <PetPicture pet="cat" coats={{ ...coats, cat }} />}
+              </Tiles>
+              <Tiles
+                label="The dog's coat"
+                hint="Yours, and the one asleep in its basket."
+                options={DOG_COATS}
+                labels={PET_LABELS}
+                chosen={(dog) => coats.dog === dog}
+                onPick={(dog) => onCoats({ dog })}
+              >
+                {(dog) => <PetPicture pet="dog" coats={{ ...coats, dog }} />}
+              </Tiles>
+            </>
+          )}
         </div>
       </div>
     </div>
@@ -428,8 +475,8 @@ export function AvatarMaker({
 
 /** The avatar against a bit of wall: on its feet, and in the armchair with
  *  a book. */
-function Stage({ look, scene }: { look: AvatarLook; scene: Record<string, string | undefined> }) {
-  const avatar = useAvatar(look)!;
+function Stage({ look, pet, scene }: { look: AvatarLook; pet: Pet; scene: Record<string, string | undefined> }) {
+  const avatar = useAvatar(look, pet)!;
   const s = 3;
   return (
     <div
@@ -470,6 +517,27 @@ const PARTS = {
 
 /** Hats too tall for a close up. */
 const TALL_HATS: readonly AvatarHat[] = ["tophat", "wizard", "witch", "bunnyears", "chef", "headwrap", "turban"];
+
+/** A pet standing, in the coats chosen for cats and dogs. */
+function PetPicture({ pet, coats }: { pet: Exclude<Pet, "none">; coats: { cat: CatCoat; dog: DogCoat } }) {
+  const { stand } = PET_ART[pet];
+  const s = 2;
+  return (
+    <span data-cat={coats.cat} data-dog={coats.dog} className="mb-1.5">
+      <svg
+        width={stand.w * s}
+        height={stand.h * s}
+        viewBox={`0 0 ${stand.w} ${stand.h}`}
+        shapeRendering="crispEdges"
+        className="block"
+        aria-hidden="true"
+        focusable="false"
+      >
+        <Rects rects={stand.rects} />
+      </svg>
+    </span>
+  );
+}
 
 /** A whole figure, head to toe and at its own height, standing on the
  *  bottom of its tile. */

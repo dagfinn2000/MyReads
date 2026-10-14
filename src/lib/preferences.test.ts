@@ -386,6 +386,13 @@ describe("parsePreferences: the avatar", () => {
     expect(prefs.avatarLooks).toEqual([]);
   });
 
+  it("keeps the pet and the coats, defaulting anything unknown", () => {
+    const prefs = parsePreferences({ avatarPet: "dragon", roomCat: "calico", roomDog: "golden" });
+    expect([prefs.avatarPet, prefs.roomCat, prefs.roomDog]).toEqual(["dragon", "calico", "golden"]);
+    const odd = parsePreferences({ avatarPet: "unicorn", roomCat: "plaid", roomDog: 3 });
+    expect([odd.avatarPet, odd.roomCat, odd.roomDog]).toEqual(["none", "ginger", "brown"]);
+  });
+
   it("keeps saved looks, made whole", () => {
     const prefs = parsePreferences({ avatarLooks: [{ hair: "mullet", mobility: "wheelchair" }, 7] });
     expect(prefs.avatarLooks).toEqual([{ ...parsePreferences({}).avatar, hair: "mullet", mobility: "wheelchair" }]);

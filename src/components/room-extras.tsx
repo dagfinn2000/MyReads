@@ -173,11 +173,11 @@ function dogArt(): Art {
   // Curled up: the back with a white patch, the tail round the front.
   ellipse(R, 8.5, 6.5, 8, 4.5, "dog");
   R.push([4, 2, 9, 1, "dog-hi"], [2, 3, 3, 1, "dog-hi"], [12, 3, 3, 1, "dog-hi"]);
-  R.push([6, 3, 4, 2, "cat-white"], [7, 5, 2, 1, "cat-white"]);
-  R.push([2, 8, 6, 2, "dog-lo"], [3, 7, 3, 1, "dog-lo"], [8, 9, 2, 1, "cat-white"]);
+  R.push([6, 3, 4, 2, "dog-white"], [7, 5, 2, 1, "dog-white"]);
+  R.push([2, 8, 6, 2, "dog-lo"], [3, 7, 3, 1, "dog-lo"], [8, 9, 2, 1, "dog-white"]);
   // The head, facing out, and a paw beside it; then the right ear.
   R.push(...g([".åøøøøå.", "åøøøøøøå", "øøøuuøøø", "øøKuuKøø", "øøuuuuøø", ".øuKKuø.", "..uuuu.."], 15, 3));
-  R.push([11, 9, 3, 1, "cat-white"], [11, 9, 1, 1, "dog-lo"]);
+  R.push([11, 9, 3, 1, "dog-white"], [11, 9, 1, 1, "dog-lo"]);
   R.push(...g(["ÆÆ.", "ÆÆÆ", "ÆÆÆ", "ÆÆÆ", ".ÆÆ", ".ÆÆ"], 21, 4));
   // Blanket, rim and the woven front.
   R.push([2, 9, 9, 1, "rug"], [4, 9, 2, 1, "rug-2"]);
