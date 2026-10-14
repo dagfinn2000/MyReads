@@ -119,8 +119,12 @@ export default async function NowReadingPage() {
           <ul className="relative flex gap-3 overflow-x-auto pb-1">
             {next.map((b) => (
               <li key={b.id} className="shrink-0">
-                <BookLink bookId={b.id} className="lift-cover block w-14 sm:w-16" title={b.title}>
+                <BookLink bookId={b.id} className="lift-cover block w-16 sm:w-20" title={b.title}>
                   <BookCover book={b} className="cover-shadow aspect-[2/3] w-full" />
+                  {/* A cover this small has no room for its own title. */}
+                  <span aria-hidden="true" className="mt-1.5 line-clamp-2 text-[11px] leading-tight text-muted-foreground">
+                    {b.title}
+                  </span>
                   {/* A cover image is named by its alt text; a drawn one isn't. */}
                   {!b.coverUrl && <span className="sr-only">{b.title}</span>}
                 </BookLink>

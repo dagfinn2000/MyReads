@@ -125,6 +125,24 @@ describe("importLibrary", () => {
     expect(await prisma.book.count({ where: { userId } })).toBe(1);
   });
 
+  it("keeps two editions of one book from the same file", async () => {
+    const res = await importLibrary(
+      userId,
+      payload([
+        book(),
+        book({ isbn: "9780765350381", format: "EBOOK" }),
+        book({ isbn: null, format: "AUDIOBOOK" }),
+        book({ isbn: null, format: "AUDIOBOOK" }),
+      ]),
+    );
+    expect(res).toMatchObject({ booksCreated: 3, booksSkipped: 1 });
+    expect(await prisma.book.count({ where: { userId } })).toBe(3);
+
+    // And a second restore of that file still adds nothing.
+    const again = await importLibrary(userId, payload([book(), book({ isbn: "9780765350381", format: "EBOOK" })]));
+    expect(again).toMatchObject({ booksCreated: 0, booksSkipped: 2 });
+  });
+
   it("is safe to re-run: a second restore of the same file adds nothing", async () => {
     const file = payload([book(), book({ title: "Mistborn 2", isbn: "9780765316882" })]);
     const first = await importLibrary(userId, file);

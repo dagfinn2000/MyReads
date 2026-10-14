@@ -436,11 +436,15 @@ export async function importLibrary(
   let booksSkipped = 0;
   let booksInvalid = 0;
 
-  // Pass 1 — decide, sequentially. Duplicate detection folds each accepted
-  // book back into the lookup sets, so a payload containing the same book
-  // twice keeps skipping the second copy. That ordering dependency is why
-  // the decisions stay serial; only the slow database work below is
-  // parallelised.
+  // Pass 1 — decide, sequentially. A book already in the library (same
+  // ISBN, or same title and first author) is skipped, so a restore can be
+  // re-run. Within the file itself only a true repeat is skipped: the same
+  // ISBN, or with no ISBN the same title, author and format. Two editions
+  // of one book (a hardback and its audiobook) both come back, as the
+  // library had them. Each accepted book is folded into `seen` as the file
+  // is walked; that ordering dependency is why the decisions stay serial;
+  // only the slow database work below is parallelised.
+  const seen = new Set<string>();
   const accepted: { b: z.infer<typeof importedBookSchema>; isbn: string | null }[] = [];
   for (const raw of data.books) {
     const parsedBook = importedBookSchema.safeParse(raw);
@@ -451,12 +455,12 @@ export async function importLibrary(
     const b = parsedBook.data;
     const isbn = b.isbn?.replace(/[\s-]/g, "") || null;
     const key = `${b.title.toLowerCase()}|${(b.authors[0] ?? "").toLowerCase()}`;
-    if ((isbn && existingIsbns.has(isbn)) || existingTitleAuthor.has(key)) {
+    const repeat = isbn ? `isbn|${isbn}` : `${key}|${b.format}`;
+    if ((isbn && existingIsbns.has(isbn)) || existingTitleAuthor.has(key) || seen.has(repeat)) {
       booksSkipped++;
       continue;
     }
-    if (isbn) existingIsbns.add(isbn);
-    existingTitleAuthor.add(key);
+    seen.add(repeat);
     accepted.push({ b, isbn });
   }
 

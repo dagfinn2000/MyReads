@@ -199,7 +199,7 @@ export default async function StatsPage({
       </div>
 
       <div className="grid gap-3">
-        <div className={`grid grid-cols-2 gap-4 ${ratings ? "lg:grid-cols-5" : "lg:grid-cols-4"}`}>
+        <div className={`grid grid-cols-2 gap-4 max-lg:[&>:last-child:nth-child(odd)]:col-span-2 ${ratings ? "lg:grid-cols-5" : "lg:grid-cols-4"}`}>
           <StatCard label="Books in library" icon={LibraryBig}>{fmt(books.length)}</StatCard>
           <StatCard label={`${booksLabel} · ${words}`} icon={BookCheck} note={notes.books.join(" · ")}>
             {fmt(period === "all" ? readAllTime.books : totals.books)}
