@@ -370,6 +370,31 @@ describe("parsePreferences: the reading room", () => {
     expect(prefs.roomLayout).toEqual([{ kind: "sofa", floor: 0, slot: 1, room: "spare" }]);
     expect(parsePreferences({}).roomExtras).toEqual([]);
   });
+
+  it("keeps the wallpaper, floor and ceiling, and each added room's own", () => {
+    const prefs = parsePreferences({
+      roomPaper: "damask",
+      roomFloor: "lino", // not a value
+      roomCeiling: "fairylights",
+      roomOwn: {
+        bedroom: { walls: "rose", paper: "flowers", floor: "carpet" },
+        music: { walls: "puce", paper: "trellis" }, // a colour that isn't one, and no floor
+        kitchen: { walls: "style", paper: "style", floor: "style" }, // just like the house
+        dungeon: { walls: "charcoal" }, // not a room
+        studio: "sage",
+      },
+    });
+    expect(prefs.roomPaper).toBe("damask");
+    expect(prefs.roomFloor).toBe("style");
+    expect(prefs.roomCeiling).toBe("fairylights");
+    expect(prefs.roomOwn).toEqual({
+      bedroom: { walls: "rose", paper: "flowers", floor: "carpet" },
+      music: { walls: "style", paper: "trellis", floor: "style" },
+    });
+    expect(parsePreferences({ roomOwn: ["bedroom"] }).roomOwn).toEqual({});
+    const plain = parsePreferences({});
+    expect([plain.roomPaper, plain.roomFloor, plain.roomCeiling, plain.roomOwn]).toEqual(["style", "style", "none", {}]);
+  });
 });
 
 describe("parsePreferences: the avatar", () => {

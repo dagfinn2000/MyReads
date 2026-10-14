@@ -33,6 +33,7 @@ import {
 } from "@/lib/room";
 import { ExtraPreview } from "@/components/room-extras";
 import { RoomPreview } from "@/components/room-rooms";
+import { InteriorControls, RoomOwnControls } from "@/components/room-interior";
 import {
   COLOUR_LABELS,
   FABRIC_SWATCHES,
@@ -63,13 +64,17 @@ const PREFERENCE: Record<keyof RoomDecor, keyof Preferences> = {
   wood: "roomWood",
   fabric: "roomFabric",
   hanging: "roomHanging",
+  paper: "roomPaper",
+  floor: "roomFloor",
+  ceiling: "roomCeiling",
+  own: "roomOwn",
   cat: "roomCat",
   dog: "roomDog",
 };
 
 /** The house's own decor, which "Back to the cottage" puts back; the
- *  animals keep their coats. */
-const HOUSE: (keyof RoomDecor)[] = ["style", "walls", "wood", "fabric", "hanging"];
+ *  added rooms keep their walls and floors, and the animals their coats. */
+const HOUSE: (keyof RoomDecor)[] = ["style", "walls", "wood", "fabric", "hanging", "paper", "floor", "ceiling"];
 const sameHouse = (a: RoomDecor, b: RoomDecor) => HOUSE.every((k) => a[k] === b[k]);
 
 const TABS = [
@@ -324,6 +329,12 @@ export function RoomView({
                 </div>
               </Group>
 
+              {added.length > 0 && (
+                <Group title="Each room's walls and floor">
+                  <RoomOwnControls rooms={added} decor={decor} onChange={change} />
+                </Group>
+              )}
+
               <Group title="Add furniture">
                 <div className="grid grid-cols-[repeat(auto-fill,minmax(6rem,1fr))] gap-3">
                   {EXTRAS.map((kind) => {
@@ -509,6 +520,10 @@ export function RoomView({
                 />
               </Group>
 
+              <Group title="Walls and floors">
+                <InteriorControls decor={decor} onChange={change} />
+              </Group>
+
               <Group title="Over the fireplace">
                 <div role="radiogroup" aria-label="Over the fireplace" className="flex flex-wrap gap-2">
                   {ROOM_HANGINGS.map((hanging) => (
@@ -545,7 +560,7 @@ export function RoomView({
           <div className="flex flex-wrap justify-end gap-2 border-t pt-4">
             <RoomSwitch hiddenNav={hiddenNav} on={false} className="mr-auto text-muted-foreground" />
             {tab === "house" && !sameHouse(decor, PLAIN_DECOR) && (
-              <Button size="sm" variant="ghost" onClick={() => change({ ...PLAIN_DECOR, cat: decor.cat, dog: decor.dog })}>
+              <Button size="sm" variant="ghost" onClick={() => change({ ...PLAIN_DECOR, own: decor.own, cat: decor.cat, dog: decor.dog })}>
                 <RotateCcw aria-hidden="true" />
                 Back to the cottage
               </Button>

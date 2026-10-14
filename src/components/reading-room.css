@@ -164,6 +164,12 @@
   --room-dog-white: color-mix(in oklab, #fbf1e1, var(--dusk) calc(var(--night) * 30%));
   /* The pets (pet-art.ts): a rabbit, a hedgehog, a fox, a little dragon. */
   --room-pet-eye: #1e1714;
+  /* Fairy lights (room-shells.ts): coloured glass by day, lit at night. */
+  --room-bulb-wire: #4a3b30;
+  --room-bulb-1: #d9625a;
+  --room-bulb-2: #e8bf4f;
+  --room-bulb-3: #62a861;
+  --room-bulb-4: #5a8bcb;
   --room-pet-nose: color-mix(in oklab, #e79a9a, var(--dusk) calc(var(--night) * 30%));
   --room-bun-hi: color-mix(in oklab, #d8c8b0, var(--dusk) calc(var(--night) * 40%));
   --room-bun: color-mix(in oklab, #b8a48c, var(--dusk) calc(var(--night) * 40%));
@@ -234,6 +240,11 @@
   --room-cat-patch: #c27531;
   --room-cat-patch2: #c27531;
   --room-cat-point: #8e5222;
+  --room-bulb-wire: #2a2026;
+  --room-bulb-1: #ff8f7c;
+  --room-bulb-2: #ffe484;
+  --room-bulb-3: #a6f08c;
+  --room-bulb-4: #93c8ff;
   --room-shade-hi: #fff4c6;
   --room-shade: #ffd479;
   --room-shade-lo: #d69c3a;
@@ -439,6 +450,11 @@
 .rp-dog-deep { fill: var(--room-dog-deep); }
 .rp-dog-white { fill: var(--room-dog-white); }
 .rp-pet-eye { fill: var(--room-pet-eye); }
+.rp-bulb-wire { fill: var(--room-bulb-wire); }
+.rp-bulb-1 { fill: var(--room-bulb-1); }
+.rp-bulb-2 { fill: var(--room-bulb-2); }
+.rp-bulb-3 { fill: var(--room-bulb-3); }
+.rp-bulb-4 { fill: var(--room-bulb-4); }
 .rp-pet-nose { fill: var(--room-pet-nose); }
 .rp-bun-hi { fill: var(--room-bun-hi); }
 .rp-bun { fill: var(--room-bun); }
@@ -938,6 +954,25 @@
 .room-scene[data-walls]:not([data-style="fantasy"]) {
   --s-wall-2: color-mix(in oklab, color-mix(in oklab, var(--s-wall), #000 11%) 90%, var(--primary));
 }
+/* An added room painted a colour of its own (room-shells.ts), worked out
+   like the house's walls below. */
+[data-room-walls] {
+  --room-wall: color-mix(in oklab, var(--r-wall), var(--dusk) calc(var(--night) * 64%));
+  --room-wall-hi: color-mix(in oklab, var(--room-wall), #fff 28%);
+  --room-wall-2: color-mix(
+    in oklab,
+    color-mix(in oklab, color-mix(in oklab, var(--r-wall), #000 11%) 90%, var(--primary)),
+    var(--dusk) calc(var(--night) * 60%)
+  );
+}
+[data-room-walls="cream"] { --r-wall: #f1e5cd; }
+[data-room-walls="sage"] { --r-wall: #cfdcc4; }
+[data-room-walls="sky"] { --r-wall: #c9dcec; }
+[data-room-walls="rose"] { --r-wall: #efd2d0; }
+[data-room-walls="lavender"] { --r-wall: #dcd3ea; }
+[data-room-walls="ochre"] { --r-wall: #e6cc8f; }
+[data-room-walls="slate"] { --r-wall: #8c99a6; }
+[data-room-walls="charcoal"] { --r-wall: #4a4a50; }
 .room-scene[data-wood="birch"] { --s-wood: #d9bf91; }
 .room-scene[data-wood="oak"] { --s-wood: #b98547; }
 .room-scene[data-wood="walnut"] { --s-wood: #7d5233; }
@@ -1510,6 +1545,25 @@
 }
 .room-blinker {
   animation: room-blink 2.8s steps(1, end) infinite;
+}
+/* Fairy lights: at night they glow, and three sets of bulbs dim in turn. */
+:where(.dark) .room-twinkle {
+  filter: drop-shadow(0 0 0.6px rgb(255 236 180 / 0.9));
+  animation: room-twinkle 3.6s steps(1, end) infinite;
+}
+:where(.dark) .room-twinkle-1 {
+  animation-delay: -1.2s;
+}
+:where(.dark) .room-twinkle-2 {
+  animation-delay: -2.4s;
+}
+@keyframes room-twinkle {
+  62% {
+    opacity: 0.4;
+  }
+  78% {
+    opacity: 1;
+  }
 }
 @keyframes room-blink {
   70% {

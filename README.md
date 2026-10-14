@@ -105,6 +105,12 @@ server.
   conservatory with a songbird, a games room with a billiard table and a
   studio with an easel, or a spare room to fill yourself. Their furniture
   can be moved anywhere in the house or put away like the rest.
+- Paper the walls (stripes, damask, flowers, trellis, stars, stone, tiles,
+  paper screens and more) and lay the floor (boards, parquet, flagstones,
+  chequered tiles, carpet, tatami or a metal grate), for the whole house
+  and for each added room on its own, which can have walls of its own
+  colour too. String fairy lights, bunting, paper lanterns or ivy along
+  the ceilings; at night the fairy lights twinkle.
 - Add furniture from a catalogue: a Chesterfield sofa, a rocking chair, an
   aquarium with fish swimming in it, a spaniel asleep in its basket, a suit
   of armour, a sea chest, a coat stand, a telescope, a rocking horse, a

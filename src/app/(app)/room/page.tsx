@@ -95,6 +95,10 @@ export default async function ReadingRoomPage() {
           wood: prefs.roomWood,
           fabric: prefs.roomFabric,
           hanging: prefs.roomHanging,
+          paper: prefs.roomPaper,
+          floor: prefs.roomFloor,
+          ceiling: prefs.roomCeiling,
+          own: prefs.roomOwn,
           cat: prefs.roomCat,
           dog: prefs.roomDog,
         }}
