@@ -39,6 +39,7 @@ import {
   FABRIC_SWATCHES,
   ROOM_FABRICS,
   ROOM_HANGINGS,
+  ROOM_FITTED,
   ROOM_HANGING_LABELS,
   ROOM_STYLES,
   ROOM_STYLE_LABELS,
@@ -288,7 +289,11 @@ export function RoomView({
                         role="checkbox"
                         aria-checked={on}
                         aria-describedby={`room-blurb-${room}`}
-                        onClick={() => arrange(on ? removeRoom(arrangement, room) : addRoom(arrangement, room))}
+                        onClick={() => {
+                          arrange(on ? removeRoom(arrangement, room) : addRoom(arrangement, room));
+                          const fitted = ROOM_FITTED[room];
+                          if (!on && fitted && !decor.own[room]) change({ own: { ...decor.own, [room]: fitted } });
+                        }}
                         className="group grid content-start gap-1.5 rounded-lg text-left outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
                       >
                         <span

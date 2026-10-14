@@ -7,7 +7,7 @@
  * at `x`. The fish swim, bubbles rise and the dog's ear twitches now and
  * then; at night the aquarium glows.
  */
-import { Glow, Rects, Sprite, Stand, grid, type Art, type Paint, type Rect } from "@/components/room-art";
+import { Glow, Rects, STEAM, Sprite, Stand, grid, type Art, type Paint, type Rect } from "@/components/room-art";
 import { PIECE_WIDTH, type Extra } from "@/lib/room";
 
 /** Paints the catalogue adds to room-art's text-grid key. */
@@ -65,6 +65,42 @@ function ellipse(R: Rect[], cx: number, cy: number, rx: number, ry: number, pain
     if (b > a) R.push([a, y, b - a, 1, paint]);
   }
 }
+
+/** A drawing made dot by dot, each dot over the one before, then joined
+ *  into rectangles a row at a time: for shapes worked out by sum. */
+function sheet(w: number, h: number) {
+  const dots: (Paint | null)[][] = Array.from({ length: h }, () => new Array<Paint | null>(w).fill(null));
+  const on = (x: number, y: number) => x >= 0 && x < w && y >= 0 && y < h;
+  const set = (x: number, y: number, paint: Paint | null) => {
+    if (on(x, y)) dots[y][x] = paint;
+  };
+  return {
+    w,
+    h,
+    get: (x: number, y: number) => (on(x, y) ? dots[y][x] : null),
+    set,
+    /** Rectangles drawn by the helpers above, dot by dot. */
+    put(rects: readonly Rect[]) {
+      for (const [x, y, rw, rh, paint] of rects) {
+        for (let j = 0; j < rh; j++) for (let i = 0; i < rw; i++) set(x + i, y + j, paint);
+      }
+    },
+    art(): Art {
+      const rects: Rect[] = [];
+      dots.forEach((row, y) => {
+        for (let x = 0; x < w; ) {
+          let end = x + 1;
+          while (end < w && row[end] === row[x]) end++;
+          const paint = row[x];
+          if (paint) rects.push([x, y, end - x, 1, paint]);
+          x = end;
+        }
+      });
+      return { w, h, rects };
+    },
+  };
+}
+type Sheet = ReturnType<typeof sheet>;
 
 /** A Chesterfield, 46 × 25: a deep-buttoned back, rolled arms, three seat
  *  cushions and a scatter cushion in the corner. In the room's fabric. */
@@ -521,6 +557,446 @@ function spinningArt(): Art {
   return { w: 26, h: 36, rects: R };
 }
 
+/** A slouchy bean bag in the room's fabric, 22 × 17, still dented where
+ *  someone last sat in it. */
+function beanbagArt(): Art {
+  const R = g([
+    "..............XXXX....",
+    "............XXcccCXX..",
+    "...........XccCCCCCxX.",
+    "..........XcCCCCCCCCxX",
+    ".....XXXXXcCCCCCCCCCxX",
+    "...XXcccccxxCCCCCCCCxX",
+    "..XccCCCCCxxxCCCCCCCxX",
+    ".XcCCCCCCCCxxCCCCCCxxX",
+    ".XcCCCCCCCCCxxCCCCCxxX",
+    "XcCCCCCCCCCCCxCCCCCxxX",
+    "XcCCCCCCCCCCCCCCCCCxxX",
+    "XcCCCCCCCCCCCCCCCCCxxX",
+    "XcCCCCCCCCCCCCCCCCxxxX",
+    "XxCCCCCCCCCCCCCCCCxxxX",
+    "XxxCCCCCCCCCCCCCCxxxxX",
+    ".XxxxxxxxxxxxxxxxxxxX.",
+    "..XXXXXXXXXXXXXXXXXX..",
+  ]);
+  // Creases where it slumps on the floor, a seam over the back, a sheen.
+  R.push([4, 13, 1, 1, "chair-lo"], [5, 12, 1, 1, "chair-lo"], [9, 14, 2, 1, "chair-lo"], [11, 13, 1, 1, "chair-lo"]);
+  R.push([15, 13, 1, 1, "chair-lo"], [16, 12, 1, 1, "chair-lo"]);
+  R.push([17, 2, 1, 2, "chair-lo"], [18, 4, 1, 3, "chair-lo"]);
+  R.push([14, 2, 2, 1, "chair-hi"], [13, 3, 2, 1, "chair-hi"], [3, 7, 1, 2, "chair-hi"]);
+  return { w: 22, h: 17, rects: R };
+}
+
+/** Paints for the macaw: red, its yellow and blue wings. */
+const MACAW_KEY: Record<string, Paint> = {
+  ...KEY,
+  "[": "marble",
+  "]": "marble-lo",
+  "|": "paper-lo",
+  é: "parrot-hi",
+  è: "parrot",
+  ê: "parrot-lo",
+  ",": "bird",
+  "'": "bird-lo",
+  â: "parrot-blue",
+  à: "parrot-blue-lo",
+};
+/** The macaw, facing left: its head, its body and folded wings, its long
+ *  tail and its feet. */
+const MACAW_HEAD = [
+  "....èèèè..",
+  "..éèèèèèê.",
+  ".[[yyyèèèê",
+  "[]]yKyèèèê",
+  "[]]]yyèèèê",
+  "]]]KKèèèèê",
+  "]]|KKéèèèê",
+  ".]|.éèèèèê",
+  "..|.éèèèèê",
+];
+const MACAW_BODY = [
+  "...éèèèè,ê",
+  "...éèèè,,ê",
+  "..éèèè,,'ê",
+  "..éèè,,',ê",
+  "..éèè,',ââ",
+  "..èèè'ââàâ",
+  "..èèââââàâ",
+  "...èâââàà.",
+  "...êâàâàà.",
+  "...êêàâà..",
+];
+const MACAW_TAIL = [
+  ".....èâàà.",
+  ".....èèâà.",
+  ".....èèâà.",
+  "......èèâ.",
+  "......èâà.",
+  "......èèâ.",
+  "......èèâ.",
+  ".......èâ.",
+  ".......èâ.",
+  ".......èà.",
+  ".......ââ.",
+  ".......â..",
+];
+const MACAW_FEET = ["..=..=....", "..=..=...."];
+
+/** The macaw at `ox` along its perch, its head ducked by (`dx`, `dy`); the
+ *  bit of perch in front of its tail comes with it. */
+function macaw(ox: number, dx: number, dy: number): Rect[] {
+  const m = (rows: readonly string[], x: number, y: number) => grid(rows, x, y, MACAW_KEY);
+  return [
+    ...m(MACAW_TAIL, ox, 19),
+    ...g(["wwwww", "ddddd"], ox + 5, 19),
+    ...m(MACAW_BODY, ox, 8),
+    ...m(MACAW_HEAD, ox + dx, dy),
+    ...m(MACAW_FEET, ox, 18),
+  ];
+}
+/** Up on its perch; sidled along to its seed cup to peer in. */
+const MACAW = [macaw(6, 0, 0), macaw(3, -1, 2)];
+
+/** A macaw's T-perch, 16 × 64: a turned pole on a weighted foot, a seed
+ *  cup at one end of the bar. The macaw itself is MACAW. */
+function parrotArt(): Art {
+  const R: Rect[] = [];
+  // The pole with brass collars, on a turned foot.
+  R.push([7, 21, 2, 35, "wood"], [7, 21, 1, 35, "wood-hi"], [8, 21, 1, 35, "wood-lo"]);
+  R.push([6, 21, 4, 1, "brass-hi"], [6, 22, 4, 1, "brass-lo"], [6, 38, 4, 1, "brass-hi"], [6, 39, 4, 1, "brass-lo"]);
+  R.push(
+    ...g(
+      [
+        "......bBBn......",
+        "......wWWd......",
+        ".....wWWWWd.....",
+        "...wwWWWWWWdd...",
+        ".wwWWWWWWWWWWdd.",
+        "wWWWWWWWWWWWWWWd",
+        "DddddddddddddddD",
+        ".DDDDDDDDDDDDDD.",
+      ],
+      0,
+      56,
+    ),
+  );
+  // The bar, knobbed at the ends.
+  R.push([1, 19, 14, 1, "wood-hi"], [1, 20, 14, 1, "wood-lo"]);
+  R.push(...g([".w", "wW", "dD", ".D"], 0, 18), ...g(["w.", "Wd", "DD", "D."], 14, 18));
+  // The seed cup.
+  R.push(...g(["..:/:..", ".:/:;:.", "bBBBBBn", ".BBBBn.", "..nnn.."], 0, 14));
+  return { w: 16, h: 64, rects: R };
+}
+
+/** One monstera leaf, from its stalk at (bx, by), pointing `angle` degrees
+ *  (0 is right, -90 up), `len` long and `wide` either side of its rib.
+ *  `cuts` are where slits run in from each side (0 to 1, base to tip) and
+ *  `holes` where there are windows by the rib, [along, side]. Behind
+ *  (`back`), it's in shadow. */
+function monsteraLeaf(
+  S: Sheet,
+  [bx, by, angle, len, wide, cuts, holes, back]: MonsteraLeaf,
+) {
+  const c = Math.cos((angle * Math.PI) / 180);
+  const s = Math.sin((angle * Math.PI) / 180);
+  // The side of the rib that faces up, to the light.
+  const litSide = c > 0 ? 0 : 1;
+  const shape = new Set<number>();
+  const paints = new Map<number, Paint>();
+  for (let y = 0; y < S.h; y++) {
+    for (let x = 0; x < S.w; x++) {
+      const px = x + 0.5 - bx;
+      const py = y + 0.5 - by;
+      const u = px * c + py * s;
+      const v = -px * s + py * c;
+      const t = u / len;
+      if (t < -0.1 || t > 1) continue;
+      const av = Math.abs(v);
+      // Heart-shaped: two lobes either side of the stalk at its base.
+      const hw = t < 0 ? (av < 1.2 ? 0 : wide * 0.55) : wide * Math.pow(Math.sin((Math.PI * (t + 0.14)) / 1.14), 0.6);
+      if (av > hw) continue;
+      const key = y * 1000 + x;
+      shape.add(key);
+      const side = v < 0 ? 0 : 1;
+      // Slits follow the veins: out from the rib and on towards the tip.
+      const vein = (u - 0.5 * av) / len;
+      if (av > 0.38 * hw && cuts[side].some((k) => Math.abs(vein - k) * len < 0.5)) continue;
+      if (holes.some(([k, sd]) => sd === side && Math.abs(t - k) * len < 0.7 && Math.abs(av - 0.3 * hw) < 0.7)) continue;
+      const lit = side === litSide;
+      paints.set(key, av < 0.55 ? (back ? "leaf" : "leaf-hi") : lit ? (back ? "leaf-lo" : "leaf") : back ? "pine" : "leaf-lo");
+    }
+  }
+  // Outlined round its edge (not along the slits).
+  for (const [key, paint] of paints) {
+    const x = key % 1000;
+    const y = (key - x) / 1000;
+    const edge = !shape.has(key + 1000) || !shape.has(key + 1) || !shape.has(key - 1000) || !shape.has(key - 1);
+    S.set(x, y, edge ? "pine-lo" : paint);
+  }
+}
+type MonsteraLeaf = [
+  bx: number,
+  by: number,
+  angle: number,
+  len: number,
+  wide: number,
+  cuts: readonly [readonly number[], readonly number[]],
+  holes: readonly (readonly [number, number])[],
+  back?: boolean,
+];
+
+/** A monstera in a woven basket, 24 × 54: big leaves, each its own size
+ *  and turn, slit and holed like the real thing. */
+function monsteraArt(): Art {
+  const S = sheet(24, 54);
+  const leaves: MonsteraLeaf[] = [
+    [13, 18, -80, 16, 7, [[0.3, 0.48, 0.66, 0.82], [0.28, 0.46, 0.64, 0.8]], [[0.4, 0], [0.55, 1]], true],
+    [8, 36, 152, 9, 4.5, [[0.4, 0.7], [0.35, 0.65]], [], true],
+    [10, 26, -146, 12.5, 6, [[0.3, 0.5, 0.7, 0.86], [0.34, 0.56, 0.78]], [[0.42, 1], [0.6, 0]]],
+    [15, 24, -32, 11, 5.5, [[0.34, 0.56, 0.78], [0.3, 0.52, 0.76]], [[0.48, 0]]],
+    [15, 35, 36, 10, 5, [[0.36, 0.62, 0.84], [0.42, 0.72]], [[0.5, 1]]],
+    [12, 36, -100, 11, 5.5, [[0.3, 0.52, 0.74], [0.36, 0.58, 0.8]], [[0.46, 0], [0.52, 1]]],
+  ];
+  // Stalks from the basket to each leaf, behind them.
+  const stalks: Rect[] = [];
+  for (const [bx, by] of leaves) {
+    const sx = Math.round(12 + (bx - 12) * 0.3);
+    const mx = Math.round((sx + bx) / 2 + (bx - 12) * 0.2);
+    const my = Math.round((41 + by) / 2);
+    line(stalks, sx, 41, mx, my, "leaf-lo");
+    line(stalks, mx, my, Math.round(bx), Math.round(by), "leaf-lo");
+  }
+  S.put(stalks);
+  for (const leaf of leaves) monsteraLeaf(S, leaf);
+  // The basket.
+  S.put([
+    [3, 41, 18, 1, "wicker-hi"],
+    [3, 42, 18, 1, "wicker-lo"],
+  ]);
+  for (let y = 43; y < 53; y++) {
+    const inset = 4 + Math.floor((y - 43) / 4);
+    S.put([[inset, y, 24 - 2 * inset, 1, "wicker"]]);
+    for (let x = inset + ((y >> 1) % 2) * 2; x < 24 - inset; x += 4) S.put([[x, y, 2, 1, "wicker-lo"]]);
+    S.put([
+      [inset, y, 1, 1, "wicker-hi"],
+      [23 - inset, y, 1, 1, "wicker-lo"],
+    ]);
+  }
+  S.put([[6, 53, 12, 1, "wicker-lo"]]);
+  return S.art();
+}
+
+/** A cheval glass, 18 × 62: an oval looking glass that tilts between two
+ *  turned posts, on splayed feet. */
+function mirrorArt(): Art {
+  const S = sheet(18, 62);
+  const cx = 9;
+  const cy = 28;
+  // Posts, finials and feet.
+  S.put([[1, 8, 2, 50, "wood"], [1, 8, 1, 50, "wood-hi"], [15, 8, 2, 50, "wood"], [16, 8, 1, 50, "wood-lo"]]);
+  S.put(g([".bn.", "bBBn", ".nn."], 0, 5));
+  S.put(g([".bn.", "bBBn", ".nn."], 14, 5));
+  S.put([[0, 8, 4, 1, "wood-deep"], [14, 8, 4, 1, "wood-deep"]]);
+  S.put([[3, 50, 12, 1, "wood-hi"], [3, 51, 12, 1, "wood-lo"]]);
+  S.put(g(["..wWd...", ".wWWWd..", "wWd.dWd.", "DD...DD."], -2, 57));
+  S.put(g(["..wWd...", ".wWWWd..", "wWd.dWd.", "DD...DD."], 12, 57));
+  // The oval: a moulded frame round the glass.
+  const rx = 6.5;
+  const ry = 17;
+  for (let y = 0; y < S.h; y++) {
+    for (let x = 0; x < S.w; x++) {
+      const nx = (x + 0.5 - cx) / rx;
+      const ny = (y + 0.5 - cy) / ry;
+      const e = nx * nx + ny * ny;
+      if (e > 1) continue;
+      const gx = (x + 0.5 - cx) / (rx - 1.7);
+      const gy = (y + 0.5 - cy) / (ry - 1.7);
+      const light = -(nx + ny * 0.6);
+      if (gx * gx + gy * gy > 1) {
+        S.set(x, y, e > 0.86 ? "wood-deep" : light > 0.3 ? "wood-hi" : light < -0.3 ? "wood-lo" : "wood");
+      } else {
+        const d = gx + gy * 0.5;
+        S.set(x, y, d < -0.55 ? "glass-hi" : d > 0.6 ? "glass-lo" : "glass");
+      }
+    }
+  }
+  // A shine across the glass, and the floor it catches at its foot.
+  const shine: Rect[] = [];
+  line(shine, 5, 22, 9, 15, "glass-shine");
+  line(shine, 6, 26, 11, 17, "glass-shine");
+  line(shine, 9, 38, 12, 33, "glass-shine");
+  S.put(shine);
+  // Pivots and a little carved crest.
+  S.put([[3, 27, 1, 2, "brass"], [14, 27, 1, 2, "brass"], [2, 28, 2, 1, "brass-lo"], [14, 28, 2, 1, "brass-lo"]]);
+  S.put(g(["..bn..", ".wWWd.", "wW.dWd"], 6, 9));
+  return S.art();
+}
+
+/** A cast-iron wood stove, 22 × 84: a fire behind its window (STOVE_FIRE),
+ *  an ash door with a spinner vent, a copper kettle on the hob, and its
+ *  pipe up the wall into a collar; a basket of birch logs beside it. */
+function stoveArt(): Art {
+  const R: Rect[] = [];
+  // The pipe, banded at its joints and with a damper, into its wall collar.
+  R.push(...g(["...+MM=...", ".+MMMMMM=.", "+MM====MM=", "+M======M=", "+M======M=", "+MM====MM=", ".=MMMMMM=.", "...====..."], 3, 1));
+  R.push([5, 4, 6, 3, "metal-lo"], [6, 3, 4, 1, "metal"]);
+  R.push([6, 8, 4, 48, "metal-lo"], [6, 8, 1, 48, "metal"], [9, 8, 1, 48, "soot"]);
+  for (const y of [18, 32, 46]) R.push([5, y, 6, 1, "metal"], [5, y + 1, 6, 1, "soot"]);
+  R.push([3, 39, 3, 1, "brass"], [3, 38, 1, 3, "brass-lo"]);
+  // Collar, top plate with corner knobs.
+  R.push([5, 55, 6, 2, "metal"], [5, 55, 6, 1, "metal-hi"]);
+  R.push([0, 57, 16, 1, "metal-hi"], [0, 58, 16, 2, "metal"], [0, 60, 16, 1, "soot"]);
+  R.push([0, 56, 1, 1, "brass"], [15, 56, 1, 1, "brass"]);
+  // The kettle on the hob.
+  R.push(...g(["..nn...", ".9!99..", "!9999?9", "!999?.9", ".????.."], 10, 51));
+  // The body: the fire door with its window, the ash door below.
+  R.push([1, 61, 14, 17, "metal-lo"], [1, 61, 1, 17, "metal"], [14, 61, 1, 17, "soot"]);
+  R.push([3, 62, 10, 11, "soot"], [4, 63, 8, 9, "metal-lo"]);
+  R.push([5, 64, 6, 6, "ember"], [6, 64, 4, 1, "soot"]);
+  R.push([4, 63, 1, 1, "metal"], [4, 71, 1, 1, "metal"], [12, 66, 2, 1, "brass"], [13, 67, 1, 2, "brass-lo"]);
+  R.push([3, 74, 10, 3, "soot"], [4, 75, 8, 1, "metal-lo"], ...g(["nbn"], 7, 75));
+  // Plinth and cabriole legs.
+  R.push([0, 77, 16, 1, "metal"], [0, 78, 16, 1, "soot"]);
+  R.push(...g(["MM=", ".M=", ".M.", "MM."], 1, 79), ...g(["+M=", "+M.", ".M.", ".MM"], 12, 79));
+  // A wicker basket of birch logs.
+  R.push(...g(["<>..<.", "<<.<<>", "><<>><", ".<><<."], 16, 70));
+  R.push([16, 74, 6, 1, "wicker-hi"]);
+  for (let y = 75; y < 83; y++) {
+    R.push([16, y, 6, 1, "wicker"]);
+    for (let x = 16 + ((y >> 1) % 2) * 2; x < 22; x += 4) R.push([x, y, 2, 1, "wicker-lo"]);
+  }
+  R.push([16, 83, 6, 1, "wicker-lo"], [15, 74, 1, 3, "wicker-lo"], [21, 72, 1, 3, "wicker-lo"]);
+  return { w: 22, h: 84, rects: R };
+}
+/** The fire in the stove's window, in two flickers, over its logs. */
+const STOVE_FIRE = [
+  g(["..r...", ".rf.r.", ".fFrf.", "rfFFfr", "dWWWWd"], 5, 65),
+  g(["....r.", ".r.rf.", ".rfFf.", "rfFFFr", "dWWWWd"], 5, 65),
+];
+
+/** An old valve radio, 18 × 41: a cathedral cabinet with a fretwork
+ *  grille, its dial lit at night, on a little table with two books on its
+ *  shelf. */
+function radioArt(): Art {
+  const R: Rect[] = [];
+  R.push(
+    ...g(
+      [
+        "....wwwwww....",
+        "..wwWWWWWWdd..",
+        ".wWWddddddWWd.",
+        ".wWd:;::;:dWd.",
+        "wWd:/:;;:/:dWd",
+        "wWd::;WW;::dWd",
+        "wWd:;W::W;:dWd",
+        "wWd:/W/;W/:dWd",
+        "wWd::W::W::dWd",
+        "wWd:;W;:W;:dWd",
+        "wWd::W::W::dWd",
+        "wWdddddddddDWd",
+        "wWWWWWWWWWWWWd",
+        "wWnlLLLLLLlnWd",
+        "wWnLKLLLLLLnWd",
+        "wWWWWWWWWWWWWd",
+        "wBnWWWWWWWWBnd",
+        "DDDDDDDDDDDDDD",
+      ],
+      2,
+      0,
+    ),
+  );
+  // The table: a top, a drawer, a shelf with books, turned legs.
+  R.push([0, 18, 18, 1, "wood-hi"], [0, 19, 18, 1, "wood"], [0, 20, 18, 1, "wood-deep"]);
+  R.push([1, 21, 16, 4, "wood-lo"], [2, 22, 14, 2, "wood"], [8, 22, 2, 1, "brass"]);
+  R.push([1, 21, 2, 20, "wood"], [1, 21, 1, 20, "wood-hi"], [15, 21, 2, 20, "wood"], [16, 21, 1, 20, "wood-lo"]);
+  R.push(...g(["33333333.", "444444444", "yyyyyyyY."], 4, 31));
+  R.push([3, 34, 12, 1, "wood-hi"], [3, 35, 12, 1, "wood-lo"]);
+  R.push([0, 39, 4, 2, "wood-deep"], [14, 39, 4, 2, "wood-deep"]);
+  return { w: 18, h: 41, rects: R };
+}
+/** A note, rising from the radio. */
+const NOTE = g([".bn", ".b.", ".b.", "bB.", "BB."]);
+
+/** A brass and walnut tea trolley, 26 × 38: a china teapot and two cups
+ *  on top, a cake stand on the shelf below. */
+function trolleyArt(): Art {
+  const R: Rect[] = [];
+  // The teapot, then the cups and saucers.
+  R.push(
+    ...g(
+      [
+        "......nBn.....",
+        ".....yyyyy....",
+        "....YYYYYYY...",
+        "y..yyyyyyyyy..",
+        "yy.yyiyyyiyyyy",
+        ".yyyiiiyiiiy.y",
+        "..yyyiyyyiyyyy",
+        "...yyyyyyyyyY.",
+        "....YyyyyyYY..",
+        ".....YYYYYY...",
+      ],
+      1,
+      5,
+    ),
+  );
+  for (const x of [15, 20]) R.push(...g(["yyyy.", "yiyyY", "Yyyy.", "YYYYY"], x, 11));
+  // Trays and the brass frame, a handle at the right.
+  R.push([0, 15, 26, 1, "wood-hi"], [0, 16, 26, 1, "wood"], [0, 17, 26, 1, "wood-deep"]);
+  R.push([0, 29, 26, 1, "wood-hi"], [0, 30, 26, 1, "wood"], [0, 31, 26, 1, "wood-deep"]);
+  R.push([1, 18, 1, 15, "brass"], [24, 18, 1, 15, "brass-lo"], [1, 14, 1, 1, "brass-hi"]);
+  R.push(...g(["..bBn", ".b..n", ".B..n", ".B..n", ".B..n", ".n..n"], 21, 8));
+  // The cake stand.
+  R.push(...g([".i.", "yiy"], 10, 18), [11, 20, 1, 8, "brass"], ...g(["..i.y..", "yyyyyyy", ".nnnnn."], 8, 21));
+  R.push(...g(["..i..y.i.", ".iyi.yyiy", "YYYYYYYYY", ".nnnnnnn."], 7, 25));
+  // Castors.
+  for (const x of [0, 22]) R.push(...g(["..n.", ".KK.", "KMMK", ".KK."], x, 32));
+  return { w: 26, h: 36, rects: R };
+}
+
+/** A dollhouse on a low table, 30 × 50: a little gabled house in the
+ *  house's own brick and roof, its front open on four rooms and an attic,
+ *  their windows lit at night. */
+function dollhouseArt(): Art {
+  const R: Rect[] = [];
+  // Chimney, roof.
+  R.push([21, 3, 3, 8, "outer"], [21, 3, 1, 8, "outer-hi"], [20, 2, 5, 1, "outer-lo"]);
+  for (let y = 5; y < 16; y++) {
+    const half = Math.min(15, Math.round((y - 4) * 1.32) + 1);
+    R.push([15 - half, y, 2 * half, 1, y % 2 ? "roof" : "roof-lo"]);
+    R.push([15 - half, y, 2, 1, "roof-hi"], [13 + half, y, 2, 1, "roof-deep"]);
+  }
+  // The attic, under the roof: a round window.
+  for (let y = 9; y < 16; y++) {
+    const half = Math.round((y - 4) * 1.32) - 2;
+    if (half > 0) R.push([15 - half, y, 2 * half, 1, "wall-2"]);
+  }
+  R.push(...g([".JJ.", "J..J", "J..J", ".JJ."], 13, 10), [14, 11, 2, 2, "attic"]);
+  // The house: walls of brick round four rooms, a floor between them.
+  R.push([2, 16, 26, 22, "outer"], [2, 16, 1, 22, "outer-hi"], [27, 16, 1, 22, "outer-lo"]);
+  R.push([1, 15, 28, 1, "roof-deep"]);
+  const room = (x: number, y: number, paper: Paint) => {
+    R.push([x, y, 11, 9, paper], [x, y, 11, 1, "wall-shadow"]);
+    R.push([x, y + 9, 11, 1, "wood-hi"]);
+    R.push([x + 4, y + 2, 3, 3, "trim"], [x + 5, y + 3, 1, 1, "attic"]);
+  };
+  room(4, 17, "wall");
+  room(15, 17, "wall-2");
+  room(4, 27, "tile");
+  room(15, 27, "wall");
+  // Bedroom: a bed. Nursery: a bookcase. Kitchen: a range. Parlour: a fire and a chair.
+  R.push(...g(["w......", "wyUUUUU", "wUUUUUU", "d.....d"], 5, 22));
+  R.push(...g(["DDD", "343", "DDD", "434", "DDD"], 23, 21));
+  R.push(...g(["kkkk", "kekk", "kkkk"], 5, 33));
+  R.push(...g(["SSSS", "SkkS", "SekS"], 16, 33), ...g(["Cc.", "CCc", "x.x"], 22, 33));
+  R.push([2, 37, 26, 1, "outer-lo"]);
+  // The low table.
+  R.push([0, 38, 30, 1, "wood-hi"], [0, 39, 30, 1, "wood"], [0, 40, 30, 1, "wood-deep"]);
+  R.push([1, 41, 28, 3, "wood-lo"], [2, 41, 26, 1, "wood-deep"]);
+  R.push([1, 41, 3, 9, "wood"], [1, 41, 1, 9, "wood-hi"], [26, 41, 3, 9, "wood"], [28, 41, 1, 9, "wood-lo"]);
+  return { w: 30, h: 50, rects: R };
+}
+
 const ART = {
   sofa: sofaArt(),
   rocker: rockerArt(),
@@ -533,6 +1009,14 @@ const ART = {
   horse: HORSE,
   curios: curiosArt(),
   spinning: spinningArt(),
+  beanbag: beanbagArt(),
+  parrot: parrotArt(),
+  monstera: monsteraArt(),
+  mirror: mirrorArt(),
+  stove: stoveArt(),
+  radio: radioArt(),
+  trolley: trolleyArt(),
+  dollhouse: dollhouseArt(),
 } satisfies Record<Extra, Art>;
 
 export const EXTRA_ART: Readonly<Record<Extra, Art>> = ART;
@@ -586,6 +1070,70 @@ export function ExtraView({
           <Rects className="room-twitch-a" rects={EARS[0]} />
           <Rects className="room-twitch-b" rects={EARS[1]} />
         </Stand>
+      );
+    case "parrot":
+      return (
+        <Stand art={a} x={x} floorLine={floorLine} scale={s}>
+          <Rects className="room-hop-a" rects={MACAW[0]} />
+          <Rects className="room-hop-b" rects={MACAW[1]} />
+        </Stand>
+      );
+    case "stove":
+      return (
+        <>
+          <Stand art={a} x={x} floorLine={floorLine} scale={s}>
+            <Rects className="room-frame-a" rects={STOVE_FIRE[0]} />
+            <Rects className="room-frame-b" rects={STOVE_FIRE[1]} />
+          </Stand>
+          <Sprite
+            art={{ w: 2, h: 3, rects: STEAM[1] }}
+            scale={s}
+            className="room-abs room-steam"
+            style={{ left: (x + 16) * s, top: (top + 47) * s }}
+          />
+          <Glow x={x + 8} y={top + 67} r={20} scale={s} className="room-glow-fire" />
+        </>
+      );
+    case "radio":
+      return (
+        <>
+          <Stand art={a} x={x} floorLine={floorLine} scale={s} />
+          {[0, 1].map((i) => (
+            <Sprite
+              key={i}
+              art={{ w: 3, h: 5, rects: NOTE }}
+              scale={s}
+              className={`room-abs room-steam ${i ? "room-steam-late" : ""}`}
+              style={{ left: (x + 13 + 3 * i) * s, top: (top - 3 - 2 * i) * s }}
+            />
+          ))}
+          <Glow x={x + 9} y={top + 14} r={9} scale={s} />
+        </>
+      );
+    case "trolley":
+      return (
+        <>
+          <Stand art={a} x={x} floorLine={floorLine} scale={s} />
+          <Sprite
+            art={{ w: 2, h: 3, rects: STEAM[0] }}
+            scale={s}
+            className="room-abs room-steam"
+            style={{ left: (x + 1) * s, top: (top + 4) * s }}
+          />
+          <Sprite
+            art={{ w: 2, h: 3, rects: STEAM[1] }}
+            scale={s}
+            className="room-abs room-steam room-steam-late"
+            style={{ left: (x + 16) * s, top: (top + 7) * s }}
+          />
+        </>
+      );
+    case "dollhouse":
+      return (
+        <>
+          <Stand art={a} x={x} floorLine={floorLine} scale={s} />
+          <Glow x={x + 15} y={top + 26} r={18} scale={s} />
+        </>
       );
     default:
       return <Stand art={a} x={x} floorLine={floorLine} scale={s} />;

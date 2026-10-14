@@ -161,6 +161,13 @@ export interface RoomOwn {
 
 export const SAME_AS_HOUSE: RoomOwn = { walls: "style", paper: "style", floor: "style" };
 
+/** How a room is done up when it's added, if not like the house: a
+ *  bathroom is tiled and a sauna lined with wood. Changed like any other. */
+export const ROOM_FITTED: Partial<Record<string, RoomOwn>> = {
+  bathroom: { walls: "style", paper: "tiles", floor: "tiles" },
+  sauna: { walls: "style", paper: "logs", floor: "planks" },
+};
+
 /** Swatch colours for the pickers. The room itself takes its colours from
  *  reading-room.css, which has a day and a night shade of each. */
 export const WALL_SWATCHES: Record<Exclude<RoomWalls, "style">, string> = {

@@ -99,7 +99,20 @@ export function shelve(widths: readonly number[]): number[][] {
 /** Rooms the reader can add to the house (Decorate › Rooms), each a floor
  *  of its own over the library, with its own furniture; the spare room
  *  comes empty, for whatever the reader puts in it. */
-export const ROOMS = ["kitchen", "bedroom", "music", "conservatory", "games", "studio", "spare"] as const;
+export const ROOMS = [
+  "kitchen",
+  "bedroom",
+  "music",
+  "conservatory",
+  "games",
+  "studio",
+  "bathroom",
+  "dining",
+  "nursery",
+  "workshop",
+  "sauna",
+  "spare",
+] as const;
 export type RoomKind = (typeof ROOMS)[number];
 
 /** Each room's furniture, left to right. */
@@ -110,6 +123,11 @@ export const ROOM_PIECES = {
   conservatory: ["palm", "wicker", "birdcage", "ferns"],
   games: ["darts", "billiards", "chess"],
   studio: ["easel", "paints", "bust"],
+  bathroom: ["bath", "washstand", "towels"],
+  dining: ["sideboard", "dining", "cabinet"],
+  nursery: ["cot", "toybox", "blocks"],
+  workshop: ["workbench", "sawhorse", "toolchest"],
+  sauna: ["benches", "heater", "bucket"],
   spare: [],
 } as const satisfies Record<RoomKind, readonly string[]>;
 export type RoomPiece = (typeof ROOM_PIECES)[RoomKind][number];
@@ -122,6 +140,11 @@ export const ROOM_LABELS: Record<RoomKind, { name: string; blurb: string }> = {
   conservatory: { name: "Conservatory", blurb: "A palm, ferns, a wicker chair and a songbird." },
   games: { name: "Games room", blurb: "A billiard table, a game of chess and a dartboard." },
   studio: { name: "Studio", blurb: "An easel, a table of paints and a marble bust." },
+  bathroom: { name: "Bathroom", blurb: "A claw-foot bath full of bubbles, a washstand and a towel rail." },
+  dining: { name: "Dining room", blurb: "A table laid for dinner under a chandelier, a sideboard and a china cabinet." },
+  nursery: { name: "Nursery", blurb: "A cot with a mobile turning over it, a toy box and building blocks." },
+  workshop: { name: "Woodshop", blurb: "A workbench under a wall of tools, a sawhorse and a tool chest." },
+  sauna: { name: "Sauna", blurb: "Wooden benches, a stove with steam rising off its stones, and a bucket and ladle." },
   spare: { name: "Spare room", blurb: "An empty floor, for whatever furniture you like." },
 };
 
@@ -139,6 +162,14 @@ export const EXTRAS = [
   "horse",
   "curios",
   "spinning",
+  "beanbag",
+  "parrot",
+  "monstera",
+  "mirror",
+  "stove",
+  "radio",
+  "trolley",
+  "dollhouse",
 ] as const;
 export type Extra = (typeof EXTRAS)[number];
 export const isExtra = (kind: string): kind is Extra => (EXTRAS as readonly string[]).includes(kind);
@@ -190,6 +221,21 @@ export const PIECE_WIDTH: Record<PieceKind, number> = {
   easel: 26,
   paints: 24,
   bust: 14,
+  bath: 50,
+  washstand: 22,
+  towels: 14,
+  sideboard: 34,
+  dining: 50,
+  cabinet: 22,
+  cot: 40,
+  toybox: 22,
+  blocks: 16,
+  workbench: 46,
+  sawhorse: 30,
+  toolchest: 16,
+  benches: 52,
+  heater: 22,
+  bucket: 12,
   sofa: 46,
   rocker: 22,
   aquarium: 30,
@@ -201,6 +247,14 @@ export const PIECE_WIDTH: Record<PieceKind, number> = {
   horse: 30,
   curios: 26,
   spinning: 26,
+  beanbag: 22,
+  parrot: 16,
+  monstera: 24,
+  mirror: 18,
+  stove: 22,
+  radio: 18,
+  trolley: 26,
+  dollhouse: 30,
 };
 
 /** How many books it takes for each piece of furniture (and the cat) to
@@ -257,6 +311,21 @@ export const FURNITURE_LABELS: Record<Movable | Stowable, string> = {
   easel: "Easel",
   paints: "Paint table",
   bust: "Marble bust",
+  bath: "Bath",
+  washstand: "Washstand",
+  towels: "Towel rail",
+  sideboard: "Sideboard",
+  dining: "Dining table",
+  cabinet: "China cabinet",
+  cot: "Cot",
+  toybox: "Toy box",
+  blocks: "Building blocks",
+  workbench: "Workbench",
+  sawhorse: "Sawhorse",
+  toolchest: "Tool chest",
+  benches: "Sauna benches",
+  heater: "Sauna stove",
+  bucket: "Bucket and ladle",
   sofa: "Sofa",
   rocker: "Rocking chair",
   aquarium: "Aquarium",
@@ -268,6 +337,14 @@ export const FURNITURE_LABELS: Record<Movable | Stowable, string> = {
   horse: "Rocking horse",
   curios: "Curio cabinet",
   spinning: "Spinning wheel",
+  beanbag: "Bean bag",
+  parrot: "Parrot on a perch",
+  monstera: "Monstera",
+  mirror: "Standing mirror",
+  stove: "Wood stove",
+  radio: "Old radio",
+  trolley: "Tea trolley",
+  dollhouse: "Dollhouse",
 };
 
 /** Where the reader has put a piece: on which floor, counting up from the
