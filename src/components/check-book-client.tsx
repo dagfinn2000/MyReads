@@ -4,7 +4,6 @@ import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { BookOwnership } from "@prisma/client";
 import {
-  BookOpen,
   CircleCheck,
   CircleHelp,
   Heart,
@@ -19,6 +18,7 @@ import { setOwnership } from "@/lib/actions/ownership";
 import { checkVerdict, type CheckVerdict, type VerdictTone } from "@/lib/check-verdict";
 import { OWNERSHIP_BADGE_LABELS, STATUS_BADGE_CLASS, STATUS_LABELS } from "@/lib/display";
 import { BarcodeScanner } from "@/components/barcode-scanner";
+import { BookCover } from "@/components/book-card";
 import { Stars } from "@/components/stars";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -307,22 +307,7 @@ function MatchedBook({
       href={`/books/${book.id}`}
       className="flex items-center gap-3 rounded-lg border bg-card p-3 transition-colors hover:border-ring/60"
     >
-      <div className="h-20 w-14 shrink-0 overflow-hidden rounded bg-muted">
-        {book.coverUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={book.coverUrl}
-            alt=""
-            loading="lazy"
-            decoding="async"
-            className="h-full w-full object-cover"
-          />
-        ) : (
-          <div className="flex h-full items-center justify-center">
-            <BookOpen className="size-5 text-muted-foreground/40" />
-          </div>
-        )}
-      </div>
+      <BookCover book={book} className="h-20 w-14 shrink-0 rounded" />
       <div className="grid min-w-0 gap-1">
         <p className="truncate text-sm font-medium">{book.title}</p>
         <p className="truncate text-xs text-muted-foreground">

@@ -275,12 +275,13 @@ export default async function BookDetailPage({
                   {book.seriesName}
                 </Link>
               </h2>
-              <div className="flex flex-wrap gap-3">
+              {/* One row that scrolls, so a long series doesn't push the rest down. */}
+              <div className="flex gap-3 overflow-x-auto pb-1">
                 {seriesBooks.map((b) => (
                   <BookLink
                     key={b.id}
                     bookId={b.id}
-                    className="group w-20"
+                    className="group w-20 shrink-0"
                     title={`${b.title}${b.seriesNumber != null ? ` (#${b.seriesNumber})` : ""}`}
                   >
                     <BookCover book={b} className="aspect-[2/3] w-20" />

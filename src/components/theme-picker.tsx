@@ -214,7 +214,7 @@ export function ThemePicker() {
                   style={{ backgroundColor: t.swatch[1] }}
                 />
               </span>
-              <span className="min-w-0 flex-1 truncate">{t.name}</span>
+              <span className="line-clamp-2 min-w-0 flex-1 leading-tight">{t.name}</span>
               {isSelected(t) && <Check className="size-3.5 shrink-0" />}
             </button>
           ))}

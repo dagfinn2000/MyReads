@@ -30,20 +30,20 @@ export function RestoreBackup() {
         setMessage(data.error ?? "Restore failed.");
         return;
       }
+      // "1 cover", "2 covers"; "1 past read", "2 past reads".
+      const n = (count: number, one: string, many = `${one}s`) => `${count} ${count === 1 ? one : many}`;
       const parts = [
-        `${data.booksCreated} book${data.booksCreated === 1 ? "" : "s"} restored`,
+        `${n(data.booksCreated, "book")} restored`,
         data.booksSkipped > 0 ? `${data.booksSkipped} already present` : null,
         data.booksInvalid > 0 ? `${data.booksInvalid} invalid` : null,
-        data.coversRestored > 0 ? `${data.coversRestored} covers restored` : null,
-        data.quotesRestored > 0 ? `${data.quotesRestored} quotes restored` : null,
-        data.readsRestored > 0 ? `${data.readsRestored} past reads restored` : null,
-        data.progressRestored > 0
-          ? `${data.progressRestored} progress entries restored`
-          : null,
-        data.loansRestored > 0 ? `${data.loansRestored} loans restored` : null,
-        data.shelvesCreated > 0 ? `${data.shelvesCreated} shelves created` : null,
-        data.goalsRestored > 0 ? `${data.goalsRestored} goals restored` : null,
-        data.savedViewsRestored > 0 ? `${data.savedViewsRestored} saved views restored` : null,
+        data.coversRestored > 0 ? `${n(data.coversRestored, "cover")} restored` : null,
+        data.quotesRestored > 0 ? `${n(data.quotesRestored, "quote")} restored` : null,
+        data.readsRestored > 0 ? `${n(data.readsRestored, "past read")} restored` : null,
+        data.progressRestored > 0 ? `${n(data.progressRestored, "progress entry", "progress entries")} restored` : null,
+        data.loansRestored > 0 ? `${n(data.loansRestored, "loan")} restored` : null,
+        data.shelvesCreated > 0 ? `${n(data.shelvesCreated, "shelf", "shelves")} created` : null,
+        data.goalsRestored > 0 ? `${n(data.goalsRestored, "goal")} restored` : null,
+        data.savedViewsRestored > 0 ? `${n(data.savedViewsRestored, "saved view")} restored` : null,
         data.settingsRestored ? "settings restored" : null,
       ].filter(Boolean);
       // A restore that stopped early must not read as a clean success — say

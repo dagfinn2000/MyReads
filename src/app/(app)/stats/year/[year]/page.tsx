@@ -288,7 +288,7 @@ export default async function YearInReviewPage({
     <div className="grid gap-6">
       {header}
 
-      <div className={`grid grid-cols-2 gap-4 ${ratings ? "lg:grid-cols-4" : "lg:grid-cols-3"}`}>
+      <div className={`grid grid-cols-2 gap-4 max-lg:[&>:last-child:nth-child(odd)]:col-span-2 ${ratings ? "lg:grid-cols-4" : "lg:grid-cols-3"}`}>
         <StatCard
           label={prefs.statsStoppedBooks === "book" ? "Books read" : "Books finished"}
           icon={BookCheck}

@@ -118,8 +118,9 @@ export function ReadingHeatmap({
         {longest > 1 && ` · longest ${longest}`}
       </p>
 
-      <div className="overflow-x-auto pb-1">
-        <div className="flex w-max gap-[3px]">
+      {/* Right to left so a narrow screen opens on the latest weeks. */}
+      <div dir="rtl" className="overflow-x-auto pb-1">
+        <div dir="ltr" className="flex w-max min-w-full gap-[3px]">
           <div className="mr-1 flex flex-col gap-[3px] pt-[17px] text-[10px] leading-3 text-muted-foreground">
             {DAY_LABELS[prefs.weekStart].map((d, i) => (
               <span key={i} className="h-3">
