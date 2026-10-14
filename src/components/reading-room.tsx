@@ -45,10 +45,11 @@ import {
   type Rect,
 } from "@/components/room-art";
 import { HELD_BOOK, SEAT_OFFSET, seatedTop } from "@/components/avatar-art";
-import { SeatedAvatar, Walker, useAvatar, type Avatar } from "@/components/room-avatar";
+import { SeatedAvatar, SleepingPet, Walker, useAvatar, type Avatar } from "@/components/room-avatar";
 import { ExtraView } from "@/components/room-extras";
 import { RoomPieceView } from "@/components/room-rooms";
 import type { AvatarLook } from "@/lib/avatar";
+import type { CatCoat, DogCoat, Pet } from "@/lib/pets";
 import { chimneyFoot, chimneyRise, roofCrown, roofHeight, shellArt, type Moving, type Shell } from "@/components/room-shells";
 import { isClosingBook } from "@/lib/cover-flight";
 import { OWNERSHIP_LABELS, STATUS_LABELS } from "@/lib/display";
@@ -364,6 +365,9 @@ export interface RoomDecor {
   wood: RoomWood;
   fabric: RoomFabric;
   hanging: RoomHanging;
+  /** The coat of every cat in the house, and of the dog in its basket. */
+  cat: CatCoat;
+  dog: DogCoat;
 }
 
 export const PLAIN_DECOR: RoomDecor = {
@@ -372,6 +376,8 @@ export const PLAIN_DECOR: RoomDecor = {
   wood: "style",
   fabric: "style",
   hanging: "painting",
+  cat: "ginger",
+  dog: "brown",
 };
 
 const FLOOR_NAMES = ["ground floor", "first floor", "second floor", "third floor", "fourth floor", "fifth floor"];
@@ -394,8 +400,9 @@ const floorName = (fromGround: number) => FLOOR_NAMES[fromGround] ?? `floor ${fr
  * While `arranging`, the furniture has handles to drag it about, or move
  * it with the arrow keys; `onArrange` gets where it now stands.
  *
- * The reader's `avatar` wanders the floor with the fireplace, and sits in
- * the armchair with the book they're reading, if there is one.
+ * The reader's `avatar` wanders the floor with the fireplace, its `pet`
+ * at its heels, and sits in the armchair with the book they're reading,
+ * if there is one, the pet asleep at its feet.
  *
  * It is drawn in the browser only: how many bookcases fit side by side
  * depends on the width it has.
@@ -409,10 +416,13 @@ export function ReadingRoom({
   onDone,
   onPlan,
   avatar = null,
+  pet = "none",
 }: {
   books: RoomBook[];
   decor?: RoomDecor;
   avatar?: AvatarLook | null;
+  /** The animal at the avatar's heels. */
+  pet?: Pet;
   arrangement?: Arrangement;
   arranging?: boolean;
   onArrange?: (next: Arrangement) => void;
@@ -450,7 +460,7 @@ export function ReadingRoom({
     if (layout) onPlan?.(layout.plan);
   }, [layout, onPlan]);
   const reading = books.findIndex((b) => b.status === ReadingStatus.READING && isOnShelf(b));
-  const figure = useAvatar(avatar);
+  const figure = useAvatar(avatar, pet);
 
   // Which floors have come near the screen: their covers get read.
   useEffect(() => {
@@ -1173,6 +1183,8 @@ function Furniture({
               scale={s}
             />
           )}
+          {/* Their pet sleeps at their feet while they read. */}
+          {seated && avatar.pet && <SleepingPet pet={avatar.pet} right={x + 69} floorLine={floorLine} scale={s} />}
           {/* The cat has the armchair, unless someone's reading in it; then
               it curls up on the rug at their feet. */}
           {cat &&
@@ -1286,6 +1298,8 @@ export function decorData(decor: RoomDecor): Record<string, string | undefined> 
     "data-walls": pick(decor.walls),
     "data-wood": pick(decor.wood),
     "data-fabric": pick(decor.fabric),
+    "data-cat": decor.cat === "ginger" ? undefined : decor.cat,
+    "data-dog": decor.dog === "brown" ? undefined : decor.dog,
   };
 }
 

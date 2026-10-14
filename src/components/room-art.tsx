@@ -502,17 +502,31 @@ export function armchairArt(): Art {
   return { w: 29, h: 31, rects: R };
 }
 
+/** Where a cat's coat (lib/pets.ts) puts a tabby's stripes, a calico's
+ *  two colours of patch and a Siamese's dark ears and tail; plainer coats
+ *  paint them over in their own colours. */
+export const CAT_MARKS: Record<string, Paint> = { s: "cat-stripe", a: "cat-patch", b: "cat-patch2", n: "cat-point" };
+
 /** The cat, asleep in a curl, 13 × 7. Its tail tip flicks (CAT_TAIL). */
-export const CAT = art([
-  ".H.H.........",
-  "HoHoH..HHHH..",
-  "HOOOHHHOOOOH.",
-  "HOHOOOoOOOOOH",
-  "HuOOOOOOOOhOH",
-  ".HuuOhhhhhhOH",
-  "..HHHHHHHHHH.",
-]);
-export const CAT_TAIL = grid(["..HH", ".HhH", "HhH.", "HH.."], 11, 1);
+export const CAT: Art = {
+  w: 13,
+  h: 7,
+  rects: grid(
+    [
+      ".H.H.........",
+      "HnHnH..HHHH..",
+      "HOOOHHHOsOsH.",
+      "HOHOObbOOsOOH",
+      "HuOOObbaaOhOH",
+      ".HuuOhhaahhOH",
+      "..HHHHHHHHHH.",
+    ],
+    0,
+    0,
+    CAT_MARKS,
+  ),
+};
+export const CAT_TAIL = grid(["..HH", ".HnH", "HnH.", "HH.."], 11, 1, CAT_MARKS);
 
 /** Round side table, 12 × 18. */
 export const SIDE_TABLE = art([
