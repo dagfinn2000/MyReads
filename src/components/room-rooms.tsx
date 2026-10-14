@@ -1,10 +1,14 @@
 /**
  * The furniture of the rooms the reader can add to the house (lib/room.ts:
- * ROOMS): a kitchen, a bedroom, a music room, a conservatory, a games room
- * and a studio. Drawn like the rest of the room (room-art.tsx), each piece
- * stands on the floor with its left edge at `x`, and some bring something
- * for the wall above them: tiles and pans over the range, a window behind
- * the conservatory's chair, a lamp over the billiard table.
+ * ROOMS): a kitchen, a bedroom, a music room, a conservatory, a games room,
+ * a studio, a bathroom, a dining room, a nursery, a woodshop and a sauna.
+ * Drawn like the rest of the room (room-art.tsx), each piece stands on the
+ * floor with its left edge at `x`, and some bring something for the wall
+ * or the ceiling above them: tiles and pans over the range, a window
+ * behind the conservatory's chair, a lamp over the billiard table, a
+ * looking glass over the washstand, a chandelier over the dining table, a
+ * mobile over the cot, a rack of tools over the workbench, and the sauna
+ * stove's flue.
  */
 import {
   CANDLESTICK,
@@ -38,6 +42,26 @@ const KEY: Record<string, Paint> = {
   "`": "tile-lo",
 };
 const g = (rows: readonly string[], ox = 0, oy = 0) => grid(rows, ox, oy, KEY);
+/** A text grid with some characters standing for other paints. */
+const gk = (key: Record<string, Paint>, rows: readonly string[], ox = 0, oy = 0) =>
+  grid(rows, ox, oy, { ...KEY, ...key });
+
+/** A filled circle of dots. */
+function disc(R: Rect[], cx: number, cy: number, r: number, paint: Paint) {
+  for (let y = Math.ceil(cy - r); y <= Math.floor(cy + r); y++) {
+    const half = Math.sqrt(Math.max(0, r * r - (y - cy) * (y - cy)));
+    const x0 = Math.ceil(cx - half - 0.001);
+    const x1 = Math.floor(cx + half + 0.001);
+    if (x1 >= x0) R.push([x0, y, x1 - x0 + 1, 1, paint]);
+  }
+}
+
+/** A steady little hash, for scattering knots and stones without a
+ *  pattern that repeats. */
+const scatter = (a: number, b: number) => {
+  const h = Math.sin(a * 127.1 + b * 311.7) * 43758.5453;
+  return h - Math.floor(h);
+};
 
 /** A line of dots from one point to another, `thick` dots across. */
 function line(R: Rect[], x0: number, y0: number, x1: number, y1: number, paint: Paint, thick = 1) {
@@ -774,6 +798,677 @@ const BUST: Art = (() => {
   return { w: 14, h: 54, rects: R };
 })();
 
+// ── Bathroom ─────────────────────────────────────────────────────────────
+
+const flip = (rows: readonly string[]) => rows.map((r) => [...r].reverse().join(""));
+
+/** A roll-top bath on brass claw feet, heaped with bubbles with a rubber
+ *  duck afloat on them, and a standpipe mixer at its foot, 50 × 34. More
+ *  bubbles rise off it (BATH_BUBBLES). */
+function bathArt(): Art {
+  const R: Rect[] = [];
+  // Claw feet under the curve of the tub.
+  const foot = ["......bn", ".....bBn", "....bBn.", "...bBBn.", ".bBbBbBn", "nnnnnnn."];
+  R.push(...g(foot, 4, 28), ...g(flip(foot), 34, 28));
+  // The tub, painted outside, curving under to its foot.
+  for (let t = 0; t <= 14; t++) {
+    const y = 14 + t;
+    const inset = Math.floor(t / 3) + [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 4, 7][t];
+    const x0 = 1 + inset;
+    const x1 = 44 - inset;
+    const fill = t === 0 || t === 14 ? "chair-deep" : t < 4 ? "chair-hi" : t < 11 ? "chair" : "chair-lo";
+    R.push([x0, y, x1 - x0 + 1, 1, fill]);
+    if (t > 0 && t < 14) R.push([x0, y, 1, 1, t < 11 ? "chair-hi" : "chair"], [x1, y, 1, 1, "chair-deep"]);
+  }
+  // A gilt line round it under the rim.
+  R.push([2, 16, 42, 1, "brass"], [2, 16, 1, 1, "brass-hi"], [43, 16, 1, 1, "brass-lo"]);
+  // The rolled rim, white enamel.
+  R.push([1, 11, 44, 1, "marble-hi"], [0, 12, 46, 1, "marble"], [1, 13, 44, 1, "marble-lo"]);
+  R.push([0, 12, 1, 1, "marble-hi"], [45, 12, 1, 1, "marble-lo"]);
+  // The bubbles: a heap of round suds, the ones at the back first, each
+  // lit from the top left; a few spill over the rim.
+  R.push([2, 9, 42, 2, "glass"]);
+  const suds: [number, number, number][] = [
+    [19.4, 1.8, 1.9],
+    [14.2, 2.6, 1.8],
+    [28.2, 2.8, 1.6],
+    [21.2, 3.8, 3.3],
+    [35.2, 4.2, 1.6],
+    [16.8, 4.8, 3],
+    [25.8, 5, 3],
+    [12.3, 5.8, 3.1],
+    [29.8, 6, 2.8],
+    [33.6, 6.8, 2.9],
+    [8.2, 7.3, 2.8],
+    [37.6, 7.8, 2.6],
+    [4.6, 8.7, 2.2],
+    [41.3, 8.9, 2],
+    [23.5, 7.8, 2.2],
+    [18.5, 8.2, 2],
+    [9.6, 11.4, 1.4],
+    [31.2, 11.5, 1.2],
+  ];
+  for (const [cx, cy, r] of suds) {
+    for (let y = Math.max(0, Math.ceil(cy - r)); y <= cy + r; y++) {
+      for (let x = Math.ceil(cx - r); x <= cx + r; x++) {
+        const d = Math.hypot(x - cx, y - cy);
+        if (d > r) continue;
+        const lean = (x - cx + y - cy) / r;
+        R.push([x, y, 1, 1, lean > 0.75 && d > r * 0.5 ? "glass" : "glass-hi"]);
+        if (lean < -0.85 && r > 1.7) R.push([x, y, 1, 1, "glass-shine"]);
+      }
+    }
+  }
+  // A rubber duck afloat.
+  R.push(...g(["..,,....", "!,K,....", "..,,..,.", ".,,,,,,'", "..,,,,''"], 22, 0));
+  R.push([23, 5, 5, 1, "glass-hi"], [22, 4, 2, 1, "glass-hi"], [27, 5, 3, 1, "glass"]);
+  // The mixer: a standpipe from the floor with a crosshead tap, and a
+  // spout over the rim.
+  R.push(...g([".bbbbbn..", "bBBBBBBn.", "nn...bBn.", "n....bBn."], 41, 3));
+  R.push([46, 7, 1, 24, "brass-hi"], [47, 7, 1, 24, "brass"], [48, 7, 1, 24, "brass-lo"]);
+  R.push(...g(["..b..", "bBBBn", "..n..", ".bBn.", ".nBn."], 45, 13));
+  R.push(...g([".bBn.", "bBBBn", "nnnnn"], 45, 31));
+  return { w: 50, h: 34, rects: R };
+}
+/** Soap bubbles rising off the bath: a ring with a glint, and a speck. */
+const BATH_BUBBLES = [g([".a.", "A.v", ".v."]), g(["av", "vA"])];
+
+/** A marble-topped washstand: a jug standing in its basin, the soap, and
+ *  towels folded on the shelf beneath, 22 × 44. */
+function washstandArt(): Art {
+  const R: Rect[] = [];
+  // A marble splashback, shaped at the top, with a vein or two.
+  R.push(...g(["....[[[[[[[[[[....", "..[[]]]]]]]]]]]]..", ".[]]]]]]]]]]]]]]].", "[]]]]]]]]]]]]]]]]|"], 2, 8));
+  R.push([2, 12, 18, 6, "marble"], [2, 12, 1, 6, "marble-hi"], [19, 12, 1, 6, "marble-lo"]);
+  line(R, 5, 10, 9, 14, "marble-lo");
+  line(R, 14, 9, 17, 13, "marble-lo");
+  // The basin and the jug in it, white china banded in blue.
+  R.push(
+    ...g(
+      [
+        "yyyyyy...",
+        ".yyyyYY.y",
+        "..yyY..yY",
+        "..yyY...Y",
+        ".yyyyY..Y",
+        "y~~~~~Y.Y",
+        "y~y~y~YYY",
+        "yyyyyyY..",
+        "yyyyyyY..",
+        ".yyyyY...",
+      ],
+      6,
+      3,
+    ),
+  );
+  R.push(...g(["yyyyyyyyyyyyyy", ".~~~~~~~~~~~~.", "..yyyyyyyyyY..", "...YYYYYYYY..."], 3, 14));
+  R.push(...g(["....", ".ii.", "YyyY"], 17, 15));
+  // The marble top.
+  R.push([0, 18, 22, 1, "marble-hi"], [0, 19, 22, 1, "marble"], [0, 20, 22, 1, "marble-lo"]);
+  // A frieze with a drawer, on turned legs.
+  R.push([1, 21, 20, 5, "wood"], [1, 21, 20, 1, "wood-deep"], [1, 25, 20, 1, "wood-deep"]);
+  R.push([3, 22, 16, 3, "wood-lo"], [4, 23, 14, 1, "wood"], [10, 23, 2, 1, "brass"]);
+  for (const x of [1, 18]) {
+    R.push([x, 26, 3, 14, "wood"], [x, 26, 1, 14, "wood-hi"], [x + 2, 26, 1, 14, "wood-lo"]);
+    R.push([x, 28, 3, 2, "wood-lo"], [x - (x === 1 ? 0 : 0), 31, 3, 1, "wood-hi"], [x, 37, 3, 1, "wood-lo"]);
+    R.push([x, 40, 3, 2, "wood-deep"]);
+  }
+  // The shelf: folded towels and a jar of bath salts.
+  R.push(...g(["VUUUUUUV", "UUUUUUUU", "VVVVVVVV", "UUUUUUUU", "VVVVVVVV"], 4, 29));
+  R.push([5, 30, 6, 1, "cushion-hi"], [5, 32, 6, 1, "cushion-hi"]);
+  R.push(...g([".nn.", "aAAv", "aiAv", "AAiv", "vvvv"], 14, 29));
+  R.push([1, 34, 20, 1, "wood-hi"], [1, 35, 20, 1, "wood-deep"]);
+  return { w: 22, h: 44, rects: R };
+}
+/** An oval looking glass in a gilt frame, hung over the washstand on a
+ *  cord, 16 × 26. */
+const MIRROR: Art = (() => {
+  const R: Rect[] = [];
+  line(R, 8, 0, 3, 7, "brass-lo");
+  line(R, 8, 0, 13, 7, "brass-lo");
+  const cx = 7.5;
+  const cy = 16;
+  const rx = 7.5;
+  const ry = 9.5;
+  for (let y = 6; y < 26; y++) {
+    for (let x = 0; x < 16; x++) {
+      const d = ((x - cx) / rx) ** 2 + ((y - cy) / ry) ** 2;
+      if (d > 1) continue;
+      const inner = ((x - cx) / (rx - 1.7)) ** 2 + ((y - cy) / (ry - 1.7)) ** 2;
+      const lean = x - cx + (y - cy) * 0.8;
+      if (inner > 1) R.push([x, y, 1, 1, lean < -4 ? "brass-hi" : lean > 4 ? "brass-lo" : "brass"]);
+      else R.push([x, y, 1, 1, lean < -3 ? "glass-hi" : lean > 4 ? "glass-lo" : "glass"]);
+    }
+  }
+  // A shell at the crown of the frame; the glass's shine.
+  R.push(...g([".bBn.", "bBnBn", ".nBn."], 5, 5));
+  line(R, 4, 16, 7, 12, "glass-shine");
+  line(R, 5, 19, 9, 14, "glass-shine");
+  line(R, 9, 22, 11, 19, "glass-shine");
+  return { w: 16, h: 26, rects: R };
+})();
+
+/** A towel horse with a striped bath towel over the top rail and a hand
+ *  towel over the lower one, 14 × 46. */
+function towelsArt(): Art {
+  const R: Rect[] = [];
+  // The uprights, with knobs on top and splayed feet.
+  for (const x of [0, 12]) {
+    R.push(...g([".ww.", "wWWd", ".dd."], x - 1, 0).filter(([rx]) => rx >= 0 && rx < 14));
+    R.push([x, 3, 2, 39, "wood"], [x, 3, 1, 39, x ? "wood" : "wood-hi"], [x + 1, 3, 1, 39, x ? "wood-deep" : "wood-lo"]);
+  }
+  R.push(...g(["wWd.......wWd.", "WWWd....wWWWd", "DDDD....DDDDDD"], 0, 42).filter(([rx, , w]) => rx + w <= 14));
+  R.push([2, 38, 10, 1, "wood-lo"], [2, 7, 10, 2, "wood"], [2, 26, 10, 2, "wood"]);
+  // The bath towel: folded over the rail, front and back, striped near
+  // its fringed ends.
+  R.push([2, 21, 10, 2, "chair-lo"], [3, 23, 8, 1, "chair-deep"]);
+  R.push([3, 6, 8, 1, "chair-hi"], [2, 7, 10, 14, "chair"], [2, 7, 1, 14, "chair-hi"], [11, 7, 1, 14, "chair-lo"]);
+  R.push([5, 8, 1, 12, "chair-lo"], [8, 9, 1, 11, "chair-lo"], [7, 8, 1, 12, "chair-hi"]);
+  R.push([2, 15, 10, 1, "paper"], [2, 17, 10, 1, "paper"], [2, 16, 10, 1, "chair-deep"]);
+  for (let x = 2; x < 12; x += 2) R.push([x, 21, 1, 1, "chair-hi"]);
+  // The hand towel on the lower rail.
+  R.push([4, 25, 6, 1, "cushion-hi"], [3, 26, 8, 11, "cushion"], [3, 26, 1, 11, "cushion-hi"], [10, 26, 1, 11, "cushion-lo"]);
+  R.push([6, 27, 1, 9, "cushion-lo"], [3, 33, 8, 1, "paper"], [3, 36, 8, 1, "cushion-lo"]);
+  return { w: 14, h: 46, rects: R };
+}
+
+// ── Dining room ──────────────────────────────────────────────────────────
+
+/** A sideboard with a decanter, a tazza of fruit and a candlestick on it,
+ *  34 × 40. */
+function sideboardArt(): Art {
+  const R: Rect[] = [];
+  // A low gallery at the back.
+  R.push([3, 10, 28, 4, "wood"], [3, 10, 28, 1, "wood-hi"], [3, 10, 1, 4, "wood-hi"], [30, 10, 1, 4, "wood-deep"]);
+  // A decanter of sherry and a glass.
+  R.push(...g(["..a..", ".aAv.", "..A..", "..A..", ".aAv.", "aA??v", "a!??v", "a???v", "a???v", ".vvv."], 3, 3));
+  R.push(...g(["av", "?v", ".v", "vv"], 9, 10));
+  // The tazza: apple, orange, pear and grapes heaped in a gilt dish.
+  disc(R, 14.5, 6.5, 2.3, "cap");
+  R.push([13, 5, 1, 1, "flower"]);
+  disc(R, 20, 6.7, 2.3, "copper");
+  R.push([19, 5, 1, 1, "copper-hi"], [21, 8, 1, 1, "copper-lo"]);
+  R.push(...g(["..d..", ".gg..", ".gGj.", "gGGGj", "gGGjj"], 15, 1));
+  R.push(...g(["~~-.", "~-~-", ".~~-", "..-."], 20, 8));
+  R.push(...g(["bbbbbbbbbbbb", ".nBBBBBBBBn.", "...nBBBBn...", ".....Bn.....", "...nnBBnn..."], 11, 9));
+  // A silver candlestick, lit.
+  R.push(...g([".F.", ".f.", ".y.", ".y.", ".y.", ".Y.", "+M=", ".M.", ".M=", "+M="], 26, 4));
+  // The top, three drawers and three doors, on short legs.
+  R.push([0, 14, 34, 1, "wood-hi"], [0, 15, 34, 1, "wood"], [0, 16, 34, 1, "wood-deep"]);
+  R.push([1, 17, 32, 18, "wood"], [1, 17, 1, 18, "wood-hi"], [32, 17, 1, 18, "wood-deep"]);
+  for (const x of [3, 13, 23]) {
+    R.push([x, 18, 8, 4, "wood-lo"], [x + 1, 19, 6, 2, "wood"], [x + 3, 20, 2, 1, "brass"]);
+    R.push([x, 23, 8, 11, "wood-lo"], [x + 1, 24, 6, 9, "wood"], [x + 1, 24, 6, 1, "wood-hi"], [x + 1, 24, 1, 9, "wood-hi"]);
+  }
+  R.push(...g(["..ww..", ".w..w.", "w....d", ".d..d.", "..dd.."], 14, 26));
+  R.push([11, 28, 1, 2, "brass"], [22, 28, 1, 2, "brass"]);
+  R.push([0, 34, 34, 1, "wood-deep"], [0, 35, 34, 1, "wood"], [1, 36, 32, 1, "wood-deep"]);
+  for (const x of [1, 30]) R.push([x, 37, 3, 1, "wood"], [x + 1, 37, 1, 3, "wood-lo"], [x, 37, 1, 2, "wood-hi"]);
+  return { w: 34, h: 40, rects: R };
+}
+
+/** A dining chair seen from the side, upholstered in the room's fabric,
+ *  facing right (or left), 9 × 34. */
+function diningChair(R: Rect[], x: number, facing: 1 | -1) {
+  const at = (dx: number, w = 1) => (facing === 1 ? x + dx : x + 8 - dx - w + 1);
+  // The back: a post with a finial and a padded back on its inner side.
+  R.push([at(0, 2), 1, 2, 33, "wood"], [at(0), 1, 1, 33, facing === 1 ? "wood-hi" : "wood-lo"], [at(0, 2), 0, 2, 1, "wood-hi"]);
+  R.push([at(2), 3, 1, 12, "chair"], [at(2), 3, 1, 1, "chair-hi"], [at(2), 14, 1, 1, "chair-lo"], [at(3), 4, 1, 10, "chair-lo"]);
+  // The seat, its rail, and the turned front leg.
+  R.push([at(1, 8), 17, 8, 1, "chair-hi"], [at(1, 8), 18, 8, 2, "chair"], [at(1, 8), 19, 8, 1, "chair-lo"]);
+  R.push([at(0, 9), 20, 9, 1, "wood-hi"], [at(0, 9), 21, 9, 1, "wood-deep"]);
+  R.push([at(7, 2), 22, 2, 12, "wood"], [at(7), 22, 1, 12, facing === 1 ? "wood-hi" : "wood-lo"]);
+  R.push([at(6, 3), 25, 3, 2, "wood"], [at(6, 3), 25, 3, 1, "wood-hi"], [at(2, 5), 29, 5, 1, "wood-lo"]);
+}
+
+/** The dining table under a long cloth, laid for two with plates,
+ *  glasses, a roast and candles, a chair at each end, 50 × 34. The
+ *  chandelier hangs over it. */
+function diningArt(): Art {
+  const R: Rect[] = [];
+  diningChair(R, 0, 1);
+  diningChair(R, 41, -1);
+  // The legs, under the cloth.
+  for (const x of [12, 36]) {
+    R.push([x, 21, 2, 13, "wood"], [x, 21, 1, 13, "wood-hi"], [x - 1, 26, 4, 2, "wood"], [x - 1, 26, 4, 1, "wood-hi"]);
+    R.push([x - 1, 32, 4, 2, "wood-deep"]);
+  }
+  // The cloth, hanging in folds to a scalloped hem.
+  R.push([9, 13, 32, 1, "paper"], [9, 14, 32, 6, "paper"], [9, 14, 32, 1, "paper-lo"]);
+  for (const x of [13, 18, 24, 30, 35]) R.push([x, 15, 1, 5, "paper-lo"]);
+  for (let x = 9; x < 41; x++) R.push([x, 20, 1, 1, x % 3 === 1 ? "paper-lo" : "paper"]);
+  for (let x = 10; x < 40; x += 3) R.push([x, 21, 1, 1, "paper-lo"]);
+  R.push([9, 21, 1, 1, "paper"], [40, 21, 1, 1, "paper"]);
+  // Plates and glasses at each place.
+  for (const x of [11, 34]) R.push(...g([".~~~~.", "yyyyyY"], x, 11));
+  for (const x of [17, 31]) R.push(...g(["aAv", "a0v", ".v.", ".A.", "vAv"], x, 8));
+  // A roast fowl on a platter between two candlesticks.
+  R.push(...g(["..!!!..", ".!999?.", "y!9999?", ".??????", "yYYYYYY"], 22, 8));
+  R.push([23, 12, 6, 1, "paper"], [21, 12, 1, 1, "paper"], [29, 12, 1, 1, "paper-lo"]);
+  for (const x of [19, 29]) R.push(...g([".F.", ".f.", ".y.", ".y.", ".Y.", ".B.", "bBn"], x, 6));
+  return { w: 50, h: 34, rects: R };
+}
+
+/** A crystal chandelier of six candles on a chain `drop` long, 23 wide. */
+const chandeliers = new Map<number, Art>();
+function chandelierArt(drop: number): Art {
+  const known = chandeliers.get(drop);
+  if (known) return known;
+  const body = [
+    "..........nBn..........",
+    "......f...bBn...f......",
+    "......F....B....F......",
+    "......y...bBn...y......",
+    ".f....y..bBBBn..y....f.",
+    ".F...bBn.nBBn..bBn...F.",
+    ".y...nBBBBBBBBBBBn...y.",
+    ".y......a.nBn.a......y.",
+    "bBn.....A.bBn.A.....bBn",
+    "nBBn.......B.......nBBn",
+    "..nBBBBBBBbBnBBBBBBBn..",
+    "...a...a..nBBn..a...a..",
+    "...A...a...Bn...a...A..",
+    "...a...A..bBn...A...a..",
+    "...........n...........",
+    "..........aAv..........",
+    "...........v...........",
+  ];
+  const top = drop - body.length;
+  const R: Rect[] = [];
+  for (let y = 0; y < top; y++) R.push([11, y, 1, 1, y % 2 ? "brass" : "brass-lo"]);
+  R.push(...g(body, 0, top));
+  const a: Art = { w: 23, h: drop, rects: R };
+  chandeliers.set(drop, a);
+  return a;
+}
+
+/** A glazed china cabinet: plates, a teapot and cups, a tureen and glasses
+ *  behind the glass, drawers and a cupboard below, 22 × 80. */
+function cabinetArt(): Art {
+  const R: Rect[] = [];
+  // Cornice with a little crest.
+  R.push(...g(["......wwwwwwwwww......", "....wwWWWWWWWWWWdd....", "..wWWWWWWWWWWWWWWWWd.."], 0, 0));
+  R.push([0, 3, 22, 1, "wood-deep"], [0, 4, 22, 1, "wood-hi"], [0, 5, 22, 1, "wood"], [1, 6, 20, 1, "wood-deep"]);
+  for (let x = 1; x < 21; x += 2) R.push([x, 5, 1, 1, "wood-lo"]);
+  // The case, and the glazed door with an arched top.
+  R.push([1, 7, 20, 44, "wood"], [1, 7, 1, 44, "wood-hi"], [20, 7, 1, 44, "wood-deep"]);
+  R.push([3, 9, 16, 40, "wood-deep"], [4, 10, 14, 38, "case-back"]);
+  R.push([4, 10, 3, 1, "wood-deep"], [4, 11, 1, 1, "wood-deep"], [15, 10, 3, 1, "wood-deep"], [17, 11, 1, 1, "wood-deep"]);
+  for (const y of [22, 34]) R.push([4, y, 14, 1, "wood-hi"], [4, y + 1, 14, 1, "wood-lo"]);
+  // China: two plates on the top shelf, rose-patterned with gilt rims.
+  const plate = (x: number, y: number) =>
+    R.push(...g(["..bbb..", ".byyyb.", "byiyyyn", "byyGyyn", "byyyiyn", ".nyyyn.", "..nnn.."], x, y));
+  plate(4, 14);
+  plate(11, 14);
+  R.push([4, 21, 14, 1, "case-shadow"]);
+  // A teapot and two cups on saucers.
+  R.push(...g(["...nb...", ".yyyyy..", "yyiyyyyy", "yiiiyyY.", "yyyyyyY.", ".YYYYY.."], 4, 27));
+  R.push(...g(["yyyb", "yiyb", ".YY.", "YYYY"], 12, 29), ...g(["yyyb", "yyib", ".YY.", "YYYY"], 15, 29).filter(([rx]) => rx < 18));
+  // A tureen and a pair of glasses.
+  R.push(...g(["..nb..", ".yyyy.", "byyyyb", "yyiiyY", ".yyyY.", "..YY..", ".YYYY."], 4, 41));
+  R.push(...g(["aAv", "aAv", ".A.", ".A.", "vAv"], 11, 42), ...g(["aAv", "aAv", ".A.", ".A.", "vAv"], 14, 42));
+  // The glass, catching the light.
+  line(R, 5, 17, 9, 12, "glass-shine");
+  line(R, 6, 20, 11, 15, "glass-shine");
+  line(R, 12, 45, 16, 40, "glass-shine");
+  line(R, 13, 47, 17, 42, "glass-shine");
+  R.push([3, 49, 16, 1, "wood-hi"], [17, 29, 1, 3, "brass"]);
+  // A moulding, two drawers and a cupboard, on bun feet.
+  R.push([0, 51, 22, 1, "wood-hi"], [0, 52, 22, 1, "wood"], [0, 53, 22, 1, "wood-deep"]);
+  R.push([1, 54, 20, 22, "wood"], [1, 54, 1, 22, "wood-hi"], [20, 54, 1, 22, "wood-deep"]);
+  for (const x of [3, 12]) R.push([x, 55, 7, 5, "wood-lo"], [x + 1, 56, 5, 3, "wood"], [x + 2, 57, 3, 1, "brass"]);
+  for (const x of [3, 11]) {
+    R.push([x, 61, 8, 13, "wood-lo"], [x + 1, 62, 6, 11, "wood"], [x + 2, 63, 4, 9, "wood-lo"], [x + 3, 64, 2, 7, "wood"]);
+  }
+  R.push([10, 66, 1, 2, "brass"], [11, 66, 1, 2, "brass"]);
+  R.push([0, 75, 22, 1, "wood-deep"], [0, 76, 22, 1, "wood"], [0, 77, 22, 1, "wood-deep"]);
+  R.push(...g(["wWWd............wWWd", ".DD..............DD."], 1, 78));
+  return { w: 22, h: 80, rects: R };
+}
+
+// ── Nursery ──────────────────────────────────────────────────────────────
+
+/** A cot with turned spindles, a quilt and a pillow, and a drawer under
+ *  it, 40 × 42. A mobile turns over it (mobileArt). */
+function cotArt(): Art {
+  const R: Rect[] = [];
+  // Behind the bars: the mattress, the pillow and the quilt.
+  R.push([3, 25, 34, 6, "paper"], [3, 30, 34, 1, "paper-lo"]);
+  R.push(...g(["..yyyyyyy.", ".yyyyyyyyY", "yyyyyyyyYY", ".YYYYYYYY."], 26, 19));
+  R.push([3, 20, 23, 7, "cushion"], [3, 20, 23, 1, "cushion-hi"], [3, 26, 23, 1, "cushion-lo"], [23, 19, 4, 2, "paper"]);
+  for (const [x, y] of [
+    [5, 22],
+    [11, 24],
+    [16, 22],
+    [21, 24],
+    [8, 25],
+  ])
+    R.push([x - 1, y, 3, 1, "paper"], [x, y - 1, 1, 3, "paper"]);
+  // The posts with their finials, the rails and the spindles.
+  for (const x of [0, 37]) {
+    R.push(...g([".w.", "wWd", "WWd", ".D."], x, 1));
+    R.push([x, 5, 3, 34, "wood"], [x, 5, 1, 34, "wood-hi"], [x + 2, 5, 1, 34, "wood-deep"]);
+    R.push([x, 8, 3, 1, "wood-lo"], [x, 35, 3, 1, "wood-lo"]);
+  }
+  R.push([3, 10, 34, 1, "wood-hi"], [3, 11, 34, 1, "wood"], [3, 12, 34, 1, "wood-deep"]);
+  for (let x = 5; x < 36; x += 3) {
+    R.push([x, 13, 1, 18, "wood"], [x, 16, 1, 1, "wood-hi"], [x, 27, 1, 1, "wood-hi"]);
+  }
+  R.push([3, 31, 34, 1, "wood-hi"], [3, 32, 34, 1, "wood"], [3, 33, 34, 1, "wood-deep"]);
+  // A drawer for blankets underneath, and the feet.
+  R.push([4, 34, 32, 5, "wood-lo"], [5, 35, 30, 3, "wood"], [5, 35, 30, 1, "wood-hi"], [19, 36, 2, 1, "brass"]);
+  R.push([0, 39, 3, 3, "wood-deep"], [37, 39, 3, 3, "wood-deep"], [1, 41, 1, 1, "brass"], [38, 41, 1, 1, "brass"]);
+  return { w: 40, h: 42, rects: R };
+}
+
+/** The mobile over the cot, on a cord `drop` long, 25 wide: a star and a
+ *  moon on the upper arm, a heart and a cloud on the lower one, in three
+ *  positions as it twists one way and back (room-swing). */
+const mobiles = new Map<number, { art: Art; frames: Rect[][] }>();
+function mobileArt(drop: number) {
+  const known = mobiles.get(drop);
+  if (known) return known;
+  const cx = 12;
+  const arm1 = drop - 21;
+  const arm2 = drop - 11;
+  const R: Rect[] = [];
+  for (let y = 0; y < arm1 - 1; y++) R.push([cx, y, 1, 1, "wood-lo"]);
+  R.push(...g(["wW", "Wd"], cx, arm1 - 2).map(([x, y, w, h, p]) => [x - 0.5 > 0 ? x : x, y, w, h, p] as Rect));
+  const star = [".,.", ",,,", "',,", "'.'"].map((r) => r);
+  const shapes = {
+    star: ["..,..", ",,,,,", ".,,'.", ".'.'."],
+    moon: [".yy", "yY.", "yY.", "yY.", ".yy"],
+    heart: [".i.i.", "iiiii", ".iii.", "..i.."],
+    cloud: [".aa..", "aaaaa", "AAAAv"],
+  } as const;
+  void star;
+  const hang = (frame: Rect[], x: number, y: number, shape: readonly string[]) => {
+    const w = shape[0].length;
+    frame.push([x, y + 1, 1, 2, "wood-lo"]);
+    frame.push(...g(shape, x - Math.floor(w / 2), y + 3));
+  };
+  const frames = [20, 45, 70].map((deg) => {
+    const F: Rect[] = [];
+    const t = (deg * Math.PI) / 180;
+    const o1 = Math.round(10 * Math.cos(t));
+    const o2 = Math.round(8 * Math.sin(t));
+    F.push([cx - o1, arm1, 2 * o1 + 1, 1, "wood"], [cx, arm1 + 1, 1, arm2 - arm1 - 1, "wood-lo"]);
+    F.push([cx - o2, arm2, 2 * o2 + 1, 1, "wood"]);
+    hang(F, cx - o1, arm1, shapes.moon);
+    hang(F, cx + o1, arm1, shapes.star);
+    hang(F, cx + o2, arm2, shapes.heart);
+    hang(F, cx - o2, arm2, shapes.cloud);
+    return F;
+  });
+  const m = { art: { w: 25, h: drop, rects: R }, frames };
+  mobiles.set(drop, m);
+  return m;
+}
+
+/** A painted toy box, its lid open and a teddy peeping out, with a ball
+ *  and a toy boat's sail beside him, 22 × 30. */
+function toyboxArt(): Art {
+  const R: Rect[] = [];
+  const BEAR = { o: "wicker-hi", O: "wicker", h: "wicker-lo" };
+  // The lid, open against the wall.
+  R.push([1, 3, 20, 11, "wood-deep"], [2, 4, 18, 10, "wood-lo"], [2, 4, 18, 1, "wood"], [3, 6, 16, 1, "wood-deep"]);
+  // A sail and a pennant, a ball, and the teddy.
+  R.push([16, 2, 1, 12, "wood-lo"], ...gk({ r: "red" }, ["r..", "rr.", "rrr"], 17, 2), ...g(["y.", "yy", "yyy", "yyyy", "yYYY"].map((r) => r.padEnd(4, ".")), 17, 6));
+  disc(R, 3.5, 11.5, 2.5, "sea");
+  R.push([2, 11, 4, 1, "paper"], [2, 10, 1, 1, "paper"], [5, 13, 1, 1, "sea-lo"], [4, 14, 2, 1, "sea-lo"]);
+  R.push(
+    ...gk(BEAR, [".oO....oO.", "oOhOOOOhOh", ".OOOOOOOO.", "OOKOOOOKOh", "OOOooooOOh", "OOooKKooOh", ".OOoooOOh.", "..ii.ii...", ".OOiiiOO.."], 5, 6),
+  );
+  R.push(...gk(BEAR, ["oOh", "OOh"], 4, 14));
+  // The box: a rim, two panels painted with a star and a heart, a plinth.
+  R.push([0, 15, 22, 1, "wood-hi"], [0, 16, 22, 1, "wood"], [0, 17, 22, 1, "wood-deep"]);
+  R.push([1, 18, 20, 9, "wood"], [1, 18, 1, 9, "wood-hi"], [20, 18, 1, 9, "wood-deep"]);
+  R.push(...gk(BEAR, ["oOh", "OOh"], 4, 14));
+  for (const x of [3, 12]) R.push([x, 19, 7, 7, "wood-lo"], [x + 1, 20, 5, 5, "wood-hi"], [x + 1, 20, 5, 1, "paper"]);
+  R.push(...g(["..,..", ",,,,,", ".,,,.", ".,.,."], 4, 20));
+  R.push(...gk({ r: "red", R: "red-lo" }, [".r.r.", "rrrrR", ".rrR.", "..R.."], 13, 21));
+  R.push([0, 27, 22, 1, "wood-deep"], [0, 28, 3, 2, "wood-deep"], [19, 28, 3, 2, "wood-deep"]);
+  return { w: 22, h: 30, rects: R };
+}
+
+/** Building blocks stacked three high, a letter on each, 16 × 24. */
+function blocksArt(): Art {
+  const R: Rect[] = [];
+  const LETTERS = {
+    A: [".x.", "x.x", "xxx", "x.x", "x.x"],
+    B: ["xx.", "x.x", "xx.", "x.x", "xx."],
+    C: [".xx", "x..", "x..", "x..", ".xx"],
+  };
+  const block = (x: number, y: number, hi: Paint, mid: Paint, lo: Paint, letter: keyof typeof LETTERS) => {
+    R.push([x + 1, y, 7, 1, hi], [x, y + 1, 7, 1, hi], [x + 7, y + 1, 1, 7, lo], [x, y + 2, 7, 6, mid]);
+    R.push([x, y + 2, 7, 1, lo], [x, y + 7, 7, 1, lo], [x, y + 2, 1, 6, lo], [x + 6, y + 2, 1, 6, lo]);
+    R.push(...gk({ x: "paper" }, LETTERS[letter], x + 2, y + 2));
+  };
+  block(0, 16, "red-hi", "red", "red-lo", "A");
+  block(8, 16, "sea", "sea", "sea-lo", "B");
+  block(4, 8, "bird", "bird", "bird-lo", "C");
+  // A ball balanced on top.
+  disc(R, 8, 4, 3.5, "leaf");
+  R.push([6, 2, 2, 1, "leaf-hi"], [5, 3, 1, 2, "leaf-hi"], [5, 4, 7, 1, "paper"], [10, 6, 2, 1, "leaf-lo"], [9, 7, 2, 1, "leaf-lo"]);
+  return { w: 16, h: 24, rects: R };
+}
+
+// ── Woodshop ─────────────────────────────────────────────────────────────
+
+/** A joiner's bench: a leg vice, a plank being planed with its shavings
+ *  curling off, a mallet, timber on the shelf beneath, 46 × 36. */
+function workbenchArt(): Art {
+  const R: Rect[] = [];
+  // On top: a plank, the plane on it, shavings, the mallet, a bench dog.
+  R.push([10, 10, 22, 1, "wood-hi"], [10, 11, 22, 1, "wood"]);
+  R.push(...g(["......ww..", "...wWWdd..", ".nMMMMMMn.", "+MMMMMMMM=", "=========="], 22, 5));
+  R.push(...g(["ww..", "w.w.", ".ww.", "..w.", ".ww."], 17, 5), ...g([".w", "w.", "ww"], 14, 7));
+  R.push(...g(["DDDD.", "DdDd.", "DDDD.", ".w...", ".w...", ".w..."], 36, 5).map(([x, y, w, h, p]) => [x, y + 0, w, h, p] as Rect));
+  R.push([40, 10, 2, 2, "wood-lo"]);
+  // The top, thick, its end grain showing at each end.
+  R.push([0, 12, 46, 1, "wood-hi"], [0, 13, 46, 3, "wood"], [0, 16, 46, 1, "wood-deep"]);
+  for (let x = 3; x < 44; x += 5 + (x % 3)) R.push([x, 14, 2, 1, "wood-lo"]);
+  R.push([0, 13, 1, 3, "wood-lo"], [45, 13, 1, 3, "wood-lo"]);
+  // The legs, a stretcher and the shelf of timber.
+  for (const x of [3, 39]) R.push([x, 17, 4, 17, "wood"], [x, 17, 1, 17, "wood-hi"], [x + 3, 17, 1, 17, "wood-deep"]);
+  R.push([7, 17, 32, 2, "wood-lo"], [7, 19, 32, 1, "wood-deep"]);
+  R.push([7, 26, 32, 1, "wood-hi"], [7, 27, 32, 2, "wood"], [7, 29, 32, 1, "wood-deep"]);
+  R.push([9, 23, 26, 1, "wood-hi"], [9, 24, 26, 2, "wood-lo"], [12, 21, 20, 1, "wood-hi"], [12, 22, 20, 1, "wood"]);
+  R.push([34, 21, 1, 2, "wood-deep"], [35, 23, 1, 3, "wood-deep"]);
+  R.push([2, 34, 6, 2, "wood-deep"], [38, 34, 6, 2, "wood-deep"]);
+  // The leg vice: a wooden chop with a steel screw and a tommy bar.
+  R.push([0, 12, 3, 20, "wood"], [0, 12, 1, 20, "wood-hi"], [2, 12, 1, 20, "wood-lo"], [0, 31, 3, 1, "wood-deep"]);
+  R.push([0, 18, 4, 2, "metal-lo"], [0, 18, 3, 1, "metal"], [1, 15, 1, 8, "metal-hi"], [1, 15, 1, 1, "metal"], [1, 22, 1, 1, "metal"]);
+  // Shavings on the floor.
+  R.push(...g([".ww......w.", "w..w...w.w", ".ww.....ww"], 14, 33), ...g(["w.w", ".w."], 30, 34));
+  return { w: 46, h: 36, rects: R };
+}
+
+/** The wall of tools over the bench: a saw, a hammer, a rack of chisels,
+ *  a square, a brace and a coil of cord on a board of pegs, 40 × 30. */
+const TOOLS: Art = (() => {
+  const R: Rect[] = [];
+  R.push([0, 0, 40, 30, "wood-deep"], [1, 1, 38, 28, "wood-lo"]);
+  for (const y of [8, 16, 23]) R.push([1, y, 38, 1, "case-seam"]);
+  for (let i = 0; i < 9; i++) R.push([2 + Math.floor(scatter(i, 3) * 35), 2 + Math.floor(scatter(i, 7) * 25), 1, 1, "wood-deep"]);
+  // A handsaw.
+  R.push(...g(["++++++++++wW.", "+MMMMMMMMMwWd", "+MMMMMMMMMw.W", ".=MMMMMMMMwWW", "..=MMMMMMMWd.", "...=======.."], 2, 3));
+  for (let x = 3; x < 12; x += 2) R.push([x + 1, 8, 1, 1, "metal-lo"]);
+  // A claw hammer.
+  R.push(...g(["=+MM", "=.MM"], 17, 2), [19, 4, 1, 10, "wood-hi"], [20, 4, 1, 10, "wood"], [19, 13, 2, 1, "wood-lo"]);
+  // Chisels on a rack.
+  R.push([23, 6, 13, 2, "wood"], [23, 6, 13, 1, "wood-hi"]);
+  for (const [i, x] of [24, 27, 30, 33].entries()) {
+    R.push([x, 2, 2, 4, "wood-hi"], [x + 1, 2, 1, 4, "wood"], [x, 8, 2, 1, "brass"], [x, 9, 1, 4 + i, "metal-hi"], [x + 1, 9, 1, 4 + i, "metal"]);
+  }
+  // A square, a brace and a coil of cord.
+  R.push([3, 12, 2, 13, "wood"], [3, 12, 1, 13, "wood-hi"], [5, 22, 9, 2, "metal-hi"], [5, 23, 9, 1, "metal"]);
+  R.push(...g(["..wWW..", "...M...", "...M...", "MMMM...", "M..M...", "M..MMMM", "M.....M", "M.....M", "MMMM..M", "...M...", "...=..."], 17, 15));
+  R.push(...gk({ c: "rug-fringe", C: "rug-2" }, [".cCCc.", "cC..Cc", "C....C", "cC..Cc", ".cCCc.", "...C..", "...c.."], 30, 16));
+  for (const [x, y] of [
+    [9, 2],
+    [19, 1],
+    [4, 11],
+    [20, 14],
+    [33, 15],
+  ])
+    R.push([x, y, 1, 1, "brass"]);
+  return { w: 40, h: 30, rects: R };
+})();
+
+/** A sawhorse with a board being sawn across it, sawdust falling, 30 × 26. */
+function sawhorseArt(): Art {
+  const R: Rect[] = [];
+  // The far legs, then the near ones, splayed under the beam.
+  line(R, 6, 12, 2, 25, "wood-lo", 2);
+  line(R, 23, 12, 27, 25, "wood-lo", 2);
+  line(R, 8, 12, 5, 25, "wood", 2);
+  line(R, 21, 12, 24, 25, "wood", 2);
+  R.push([4, 19, 4, 1, "wood-deep"], [22, 19, 4, 1, "wood-deep"]);
+  R.push([2, 9, 26, 1, "wood-hi"], [2, 10, 26, 2, "wood"], [2, 12, 26, 1, "wood-deep"]);
+  // The board, sawn part way through near its end.
+  R.push([0, 6, 30, 1, "wood-hi"], [0, 7, 30, 1, "wood"], [0, 8, 30, 1, "wood-lo"]);
+  R.push([0, 6, 1, 3, "wood-lo"], [29, 6, 1, 3, "wood-lo"], [11, 7, 3, 1, "wood-lo"]);
+  // The saw in the cut.
+  R.push(...g([".....wWW", "....wW.W", "...MwWWd", "..MMM...", ".MMM....", "MMM....."], 22, 0));
+  R.push([21, 6, 2, 1, "metal-lo"], [21, 7, 1, 2, "ink"]);
+  // Sawdust falling, and a heap of it on the floor.
+  for (const [x, y] of [
+    [22, 10],
+    [21, 13],
+    [22, 16],
+    [21, 19],
+    [23, 21],
+  ])
+    R.push([x, y, 1, 1, "wood-hi"]);
+  R.push(...g(["...ww...", ".wwWWww.", "wWWWWWWd"], 18, 23));
+  return { w: 30, h: 26, rects: R };
+}
+
+/** A red tool chest on castors, an oilcan on top, 16 × 32. */
+function toolchestArt(): Art {
+  const R: Rect[] = [];
+  const RED = { r: "red-hi", R: "red", Z: "red-lo" };
+  R.push(...g(["......9.", ".....!9?", "..!!99?.", "..!999?.", ".!9999?."], 2, 0));
+  R.push([5, 0, 1, 1, "brass"]);
+  R.push(...gk(RED, [".rrrrrrrrrrrrr.", "rRRRRRRRRRRRRRZ", "ZZZZZZZZZZZZZZZ"], 0, 5));
+  R.push([6, 4, 4, 1, "metal-lo"]);
+  R.push([1, 8, 14, 20, "red"], [1, 8, 1, 20, "red-hi"], [14, 8, 1, 20, "red-lo"]);
+  for (const [y, h] of [
+    [9, 3],
+    [13, 3],
+    [17, 4],
+    [22, 5],
+  ]) {
+    R.push([2, y, 12, h, "red"], [2, y + h - 1, 12, 1, "red-lo"], [2, y, 12, 1, "red-hi"]);
+    R.push([5, y + 1, 6, 1, "metal-hi"], [5, y + 1 + (h > 3 ? 1 : 0), 6, 1, h > 3 ? "metal" : "metal-hi"]);
+  }
+  R.push([15, 9, 1, 6, "metal-lo"], [14, 9, 1, 1, "metal"], [14, 14, 1, 1, "metal"]);
+  R.push([1, 27, 14, 1, "red-lo"], [1, 28, 14, 1, "metal-lo"]);
+  for (const x of [2, 11]) R.push([x, 29, 3, 1, "metal"], ...g([".K.", "KMK", ".K."], x, 29).slice(1));
+  return { w: 16, h: 32, rects: R };
+}
+
+// ── Sauna ────────────────────────────────────────────────────────────────
+
+/** Two tiers of slatted benches with a backrest on the wall, a towel on
+ *  the upper one and a birch whisk on the lower, 52 × 44. */
+function benchesArt(): Art {
+  const R: Rect[] = [];
+  // The backrest: two rails on brackets.
+  for (const x of [3, 25, 47]) R.push([x, 2, 2, 15, "wood-lo"], [x, 2, 1, 15, "wood"]);
+  for (const y of [3, 8]) R.push([0, y, 52, 1, "wood-hi"], [0, y + 1, 52, 2, "wood"], [0, y + 3, 52, 1, "wood-deep"]);
+  // The upper bench: its slats seen from above, its edge, and the boards
+  // under it down to the lower bench.
+  R.push([0, 17, 52, 1, "wood-lo"], [0, 18, 52, 1, "wood-hi"], [0, 19, 52, 1, "wood-deep"], [0, 20, 52, 1, "wood-hi"]);
+  R.push([0, 21, 52, 2, "wood"], [0, 23, 52, 1, "wood-deep"]);
+  for (let x = 0, i = 0; x < 52; i++) {
+    const w = 5 + Math.floor(scatter(i, 1) * 3);
+    R.push([x, 24, 1, 8, "wood-deep"], [x + 1, 24, w - 1, 8, i % 2 ? "wood" : "wood-lo"]);
+    if (scatter(i, 2) > 0.45) R.push([x + 2 + Math.floor(scatter(i, 3) * (w - 3)), 25 + Math.floor(scatter(i, 4) * 5), 1, 1, "wood-deep"]);
+    x += w;
+  }
+  // The lower bench, on legs.
+  R.push([0, 31, 52, 1, "wood-hi"], [0, 32, 52, 1, "wood-deep"], [0, 33, 52, 1, "wood-hi"], [0, 34, 52, 2, "wood"]);
+  R.push([0, 36, 52, 1, "wood-deep"]);
+  R.push([0, 37, 52, 7, "case-shadow"]);
+  for (const x of [2, 24, 46]) R.push([x, 37, 4, 7, "wood"], [x, 37, 1, 7, "wood-hi"], [x + 3, 37, 1, 7, "wood-deep"]);
+  // A towel folded on the upper bench.
+  R.push([6, 13, 11, 1, "chair-hi"], [5, 14, 13, 3, "chair"], [5, 14, 1, 3, "chair-hi"], [17, 14, 1, 3, "chair-lo"]);
+  R.push([5, 15, 13, 1, "paper"], [5, 17, 13, 1, "chair-lo"], [6, 18, 1, 4, "chair"], [6, 21, 1, 1, "chair-lo"]);
+  // A whisk of birch twigs on the lower bench.
+  R.push(...g(["....gGg.g....", "..gGjGGjGg...", ".gGjGjGGjGgdd", "gjGGjjGjGdddd", ".jj.jGj.dd..."], 34, 27));
+  R.push([46, 30, 2, 1, "rug-2"]);
+  return { w: 52, h: 44, rects: R };
+}
+
+/** The sauna stove: stones heaped in a cage over a firebox with a little
+ *  window, 22 × 42. The fire flickers (STOVE_FLAMES) and steam rises off
+ *  the stones. */
+function heaterArt(): Art {
+  const R: Rect[] = [];
+  // The stones, heaped; each a pebble lit from the top left.
+  const stones: [number, number, number][] = [];
+  for (let i = 0; i < 18; i++) {
+    const row = Math.floor(i / 6);
+    stones.push([2.4 + (i % 6) * 3 + (row % 2) * 1.4 + scatter(i, 5) * 0.6, 4 + row * 3 + scatter(i, 6), 1.8 + scatter(i, 7) * 0.5]);
+  }
+  for (const [i, [cx, cy, r]] of stones.entries()) {
+    const shade = ["stone", "stone-lo", "stone", "stone-hi"][Math.floor(scatter(i, 8) * 4)];
+    disc(R, cx, cy, r, shade === "stone-hi" ? "stone" : shade);
+    R.push([Math.round(cx - r / 2), Math.round(cy - r / 2), 1, 1, "stone-hi"]);
+    R.push([Math.round(cx + r / 2), Math.round(cy + r / 2), 1, 1, "stone-deep"]);
+  }
+  // The cage round them.
+  for (let x = 1; x < 22; x += 4) R.push([x, 6, 1, 8, "metal-lo"]);
+  R.push([0, 13, 22, 1, "metal-hi"], [0, 14, 22, 1, "metal"], [0, 15, 22, 1, "soot"]);
+  // The firebox: a door with a window onto the fire, an ash drawer.
+  R.push([1, 16, 20, 21, "metal-lo"], [1, 16, 1, 21, "metal"], [20, 16, 1, 21, "soot"]);
+  R.push([4, 18, 14, 13, "soot"], [5, 19, 12, 11, "metal-lo"], [5, 19, 12, 1, "metal"]);
+  R.push([7, 21, 8, 6, "soot"], [7, 25, 8, 2, "ember"]);
+  R.push([16, 23, 3, 2, "metal-hi"], [18, 22, 1, 4, "wood"]);
+  R.push([4, 32, 14, 4, "soot"], [5, 33, 12, 2, "metal-lo"], [9, 33, 4, 1, "metal-hi"]);
+  R.push([0, 37, 22, 1, "metal"], [0, 38, 22, 1, "soot"]);
+  R.push([2, 39, 3, 3, "soot"], [17, 39, 3, 3, "soot"], [2, 39, 1, 3, "metal-lo"], [17, 39, 1, 3, "metal-lo"]);
+  return { w: 22, h: 42, rects: R };
+}
+/** The fire behind the stove's window, in two flickers. */
+const STOVE_FLAMES = [g(["..r..r..", ".rf.rFr.", "rfFfFFfr", "fFFFFFFf"], 7, 21), g(["r....r..", "fr.rfr.r", "fFrfFfrf", "FFFfFFFF"], 7, 21)];
+/** The stove's flue, from its top to the ceiling, `h` long, 4 wide. */
+function flueArt(h: number): Art {
+  return {
+    w: 4,
+    h,
+    rects: [
+      [0, 0, 4, h, "metal-lo"],
+      [1, 0, 1, h, "metal"],
+      [3, 0, 1, h, "soot"],
+      [0, 0, 4, 2, "metal"],
+      [0, Math.round(h * 0.45), 4, 2, "metal"],
+      [0, Math.round(h * 0.45) + 2, 4, 1, "soot"],
+    ],
+  };
+}
+
+/** A wooden bucket with brass hoops and a ladle in it, 12 × 22. */
+function bucketArt(): Art {
+  const R: Rect[] = [];
+  line(R, 11, 0, 6, 11, "wood-hi");
+  line(R, 11, 1, 7, 10, "wood-lo");
+  R.push([10, 0, 2, 1, "wood-deep"]);
+  R.push([0, 11, 12, 1, "wood-hi"], [1, 12, 10, 1, "sea"], [2, 12, 3, 1, "sea-lo"], [6, 12, 1, 1, "wood-lo"]);
+  for (let y = 12; y < 22; y++) {
+    const inset = y > 18 ? 1 : 0;
+    R.push([inset, y, 12 - 2 * inset, 1, "wood"]);
+    for (let x = 2; x < 11; x += 3) R.push([x, y, 1, 1, "wood-lo"]);
+    R.push([inset, y, 1, 1, "wood-hi"], [11 - inset, y, 1, 1, "wood-deep"]);
+  }
+  R.push([1, 12, 10, 1, "sea"], [2, 12, 3, 1, "sea-lo"], [7, 12, 1, 1, "wood-lo"]);
+  for (const y of [14, 19]) R.push([0, y, 12, 1, "brass"], [0, y, 3, 1, "brass-hi"], [10, y, 2, 1, "brass-lo"]);
+  R.push([1, 21, 10, 1, "wood-deep"]);
+  return { w: 12, h: 22, rects: R };
+}
+
 // ── Drawn in the room ────────────────────────────────────────────────────
 
 const ART = {
@@ -796,6 +1491,21 @@ const ART = {
   easel: easelArt(),
   paints: paintsArt(),
   bust: BUST,
+  bath: bathArt(),
+  washstand: washstandArt(),
+  towels: towelsArt(),
+  sideboard: sideboardArt(),
+  dining: diningArt(),
+  cabinet: cabinetArt(),
+  cot: cotArt(),
+  toybox: toyboxArt(),
+  blocks: blocksArt(),
+  workbench: workbenchArt(),
+  sawhorse: sawhorseArt(),
+  toolchest: toolchestArt(),
+  benches: benchesArt(),
+  heater: heaterArt(),
+  bucket: bucketArt(),
 } satisfies Record<RoomPiece, Art>;
 const WINDOW_24 = archWindow(24);
 const WINDOW_18 = archWindow(18);
@@ -910,6 +1620,89 @@ export function RoomPieceView({
           />
           <Glow x={x + 20} y={floorLine - a.h - 18} r={22} scale={s} />
           <Glow x={x + 40} y={floorLine - a.h - 18} r={22} scale={s} />
+        </>
+      );
+    case "bath":
+      return (
+        <>
+          {stand()}
+          {[
+            [13, 1],
+            [24, -2],
+            [36, 2],
+          ].map(([dx, dy], i) => (
+            <Sprite
+              key={i}
+              art={{ w: 3, h: 3, rects: BATH_BUBBLES[i % 2] }}
+              scale={s}
+              className={`room-abs room-bubble room-bubble-${i}`}
+              style={at(dx, -a.h + dy - 3)}
+            />
+          ))}
+        </>
+      );
+    case "washstand":
+      return (
+        <>
+          <Sprite art={MIRROR} scale={s} className="room-abs" style={at(3, -a.h - 34)} />
+          {stand()}
+        </>
+      );
+    case "dining": {
+      // Hung so its drops are a hand's breadth over the candles.
+      const lamp = chandelierArt(floorLine - a.h - 12 - ceiling);
+      return (
+        <>
+          {stand()}
+          <Sprite art={lamp} scale={s} className="room-abs" style={{ left: (x + 14) * s, top: ceiling * s }} />
+          <Glow x={x + 25} y={ceiling + lamp.h - 10} r={30} scale={s} />
+        </>
+      );
+    }
+    case "cot": {
+      const m = mobileArt(floorLine - a.h - 8 - ceiling);
+      return (
+        <>
+          {stand()}
+          <Sprite art={m.art} scale={s} className="room-abs room-mobile" style={{ left: (x + 8) * s, top: ceiling * s }}>
+            {m.frames.map((f, i) => (
+              <Rects key={i} className={`room-swing-${i}`} rects={f} />
+            ))}
+          </Sprite>
+        </>
+      );
+    }
+    case "workbench":
+      return (
+        <>
+          <Sprite art={TOOLS} scale={s} className="room-abs" style={at(3, -a.h - 40)} />
+          {stand()}
+        </>
+      );
+    case "heater":
+      return (
+        <>
+          <Sprite
+            art={flueArt(floorLine - a.h + 8 - ceiling)}
+            scale={s}
+            className="room-abs"
+            style={{ left: (x + 9) * s, top: ceiling * s }}
+          />
+          {stand(STOVE_FLAMES.map((f, i) => <Rects key={i} className={`room-frame-${i ? "b" : "a"}`} rects={f} />))}
+          <Glow x={x + 11} y={floorLine - 18} r={20} scale={s} className="room-glow-fire" />
+          {[
+            [4, 2, ""],
+            [10, 0, " room-steam-late"],
+            [16, 3, ""],
+          ].map(([dx, dy, late], i) => (
+            <Sprite
+              key={i}
+              art={{ w: 2, h: 3, rects: STEAM[i % 2] }}
+              scale={s}
+              className={`room-abs room-steam${late}`}
+              style={at(Number(dx), -a.h + Number(dy) - 2)}
+            />
+          ))}
         </>
       );
     default:

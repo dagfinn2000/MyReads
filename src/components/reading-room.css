@@ -156,12 +156,22 @@
   --room-bird-lo: color-mix(in oklab, #d49a1c, var(--dusk) calc(var(--night) * 30%));
   --room-tile: color-mix(in oklab, #f4f1e8, var(--dusk) calc(var(--night) * 55%));
   --room-tile-lo: color-mix(in oklab, #cfc7b6, var(--dusk) calc(var(--night) * 55%));
+  /* Painted red: the tool chest, a building block, the toy box's heart. */
+  --room-red-hi: color-mix(in oklab, #e0675a, var(--dusk) calc(var(--night) * 40%));
+  --room-red: color-mix(in oklab, #c0403a, var(--dusk) calc(var(--night) * 40%));
+  --room-red-lo: color-mix(in oklab, #862a27, var(--dusk) calc(var(--night) * 40%));
   /* For the catalogue's furniture (room-extras.tsx): the spaniel. */
   --room-dog-hi: color-mix(in oklab, #d29a62, var(--dusk) calc(var(--night) * 45%));
   --room-dog: color-mix(in oklab, #a8693a, var(--dusk) calc(var(--night) * 45%));
   --room-dog-lo: color-mix(in oklab, #7a4826, var(--dusk) calc(var(--night) * 45%));
   --room-dog-deep: color-mix(in oklab, #5a3218, var(--dusk) calc(var(--night) * 45%));
   --room-dog-white: color-mix(in oklab, #fbf1e1, var(--dusk) calc(var(--night) * 30%));
+  /* The macaw on its perch. */
+  --room-parrot-hi: color-mix(in oklab, #f2654c, var(--dusk) calc(var(--night) * 30%));
+  --room-parrot: color-mix(in oklab, #d4312c, var(--dusk) calc(var(--night) * 30%));
+  --room-parrot-lo: color-mix(in oklab, #9c1f25, var(--dusk) calc(var(--night) * 30%));
+  --room-parrot-blue: color-mix(in oklab, #2f78d4, var(--dusk) calc(var(--night) * 30%));
+  --room-parrot-blue-lo: color-mix(in oklab, #1e4d9c, var(--dusk) calc(var(--night) * 30%));
   /* The pets (pet-art.ts): a rabbit, a hedgehog, a fox, a little dragon. */
   --room-pet-eye: #1e1714;
   /* Fairy lights (room-shells.ts): coloured glass by day, lit at night. */
@@ -449,6 +459,11 @@
 .rp-dog-lo { fill: var(--room-dog-lo); }
 .rp-dog-deep { fill: var(--room-dog-deep); }
 .rp-dog-white { fill: var(--room-dog-white); }
+.rp-parrot-hi { fill: var(--room-parrot-hi); }
+.rp-parrot { fill: var(--room-parrot); }
+.rp-parrot-lo { fill: var(--room-parrot-lo); }
+.rp-parrot-blue { fill: var(--room-parrot-blue); }
+.rp-parrot-blue-lo { fill: var(--room-parrot-blue-lo); }
 .rp-pet-eye { fill: var(--room-pet-eye); }
 .rp-bulb-wire { fill: var(--room-bulb-wire); }
 .rp-bulb-1 { fill: var(--room-bulb-1); }
@@ -633,6 +648,9 @@
 }
 .rp-tile { fill: var(--room-tile); }
 .rp-tile-lo { fill: var(--room-tile-lo); }
+.rp-red-hi { fill: var(--room-red-hi); }
+.rp-red { fill: var(--room-red); }
+.rp-red-lo { fill: var(--room-red-lo); }
 .rp-book { fill: var(--spine); }
 .rp-book-lo { fill: color-mix(in oklab, var(--spine), #000 35%); }
 
@@ -1359,6 +1377,12 @@
   75% {
     opacity: 0;
   }
+}
+/* The nursery's mobile twists on its cord the same way, slowly. */
+.room-mobile .room-swing-0,
+.room-mobile .room-swing-1,
+.room-mobile .room-swing-2 {
+  animation-duration: 6s;
 }
 
 /* Smoke from the chimney and steam from the cup: little squares that
