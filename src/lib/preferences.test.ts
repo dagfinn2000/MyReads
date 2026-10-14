@@ -383,6 +383,15 @@ describe("parsePreferences: the avatar", () => {
     const prefs = parsePreferences({ avatar: "junk" });
     expect(prefs.avatarShown).toBe(true);
     expect(prefs.avatar).toEqual(parsePreferences({}).avatar);
+    expect(prefs.avatarLooks).toEqual([]);
+  });
+
+  it("keeps saved looks, made whole", () => {
+    const prefs = parsePreferences({ avatarLooks: [{ hair: "mullet", mobility: "wheelchair" }, 7] });
+    expect(prefs.avatarLooks).toEqual([{ ...parsePreferences({}).avatar, hair: "mullet", mobility: "wheelchair" }]);
+    expect(cleanPreferencesPatch({ avatarLooks: [{ held: "wand" }] }).avatarLooks).toEqual([
+      { ...parsePreferences({}).avatar, held: "wand" },
+    ]);
   });
 });
 

@@ -1,14 +1,19 @@
 import { describe, expect, it } from "vitest";
-import { AVATAR_W, HELD_BOOK, SEAT_OFFSET, avatarArt } from "@/components/avatar-art";
+import { AVATAR_W, HELD_BOOK, SEAT_OFFSET, avatarArt, seatedTop } from "@/components/avatar-art";
+import { armchairArt } from "@/components/room-art";
 import type { Art } from "@/components/room-art";
 import {
   AVATAR_ACCESSORIES,
   AVATAR_BOTTOMS,
   AVATAR_CHEEKS,
+  AVATAR_EARS,
   AVATAR_EYES,
   AVATAR_FACIAL_HAIR,
   AVATAR_HAIRS,
   AVATAR_HATS,
+  AVATAR_HEIGHTS,
+  AVATAR_HELD,
+  AVATAR_MOBILITY,
   AVATAR_MOUTHS,
   AVATAR_SHOES,
   AVATAR_TOPS,
@@ -21,8 +26,9 @@ const all = [...AVATAR_ACCESSORIES];
 
 /** Looks that between them draw every part with every other part it
  *  could meet: each hair with each hat, with and without everything else
- *  worn; each top with each bottom and pair of shoes; and each face.
- *  Colours are CSS only. */
+ *  worn; each top with each bottom and pair of shoes; each face; and
+ *  each way of getting about, at each height, with each thing carried
+ *  and each set of clothes. Colours are CSS only. */
 const LOOKS: AvatarLook[] = [
   ...AVATAR_HAIRS.flatMap((hair) =>
     AVATAR_HATS.flatMap((hat) => [
@@ -34,6 +40,17 @@ const LOOKS: AvatarLook[] = [
     AVATAR_BOTTOMS.flatMap((bottom) =>
       AVATAR_SHOES.map((shoes) => ({ ...DEFAULT_AVATAR, hair: "long" as const, top, bottom, shoes, accessories: all })),
     ),
+  ),
+  ...AVATAR_HATS.map((hat) => ({ ...DEFAULT_AVATAR, hair: "long" as const, hat, ears: "pointy" as const, accessories: all })),
+  ...AVATAR_MOBILITY.flatMap((mobility) =>
+    AVATAR_HEIGHTS.flatMap((height) => [
+      ...AVATAR_HELD.flatMap((held) =>
+        AVATAR_TOPS.map((top) => ({ ...DEFAULT_AVATAR, hair: "ringlets" as const, mobility, height, held, top, accessories: all })),
+      ),
+      ...AVATAR_BOTTOMS.flatMap((bottom) =>
+        AVATAR_SHOES.map((shoes) => ({ ...DEFAULT_AVATAR, mobility, height, bottom, shoes, held: "teddy" as const })),
+      ),
+    ]),
   ),
   ...AVATAR_EYES.flatMap((eyes) =>
     AVATAR_MOUTHS.flatMap((mouth) =>
@@ -49,7 +66,7 @@ const LOOKS: AvatarLook[] = [
 ];
 
 const name = (l: AvatarLook) =>
-  `${l.hair}/${l.hat}/${l.top}/${l.bottom}/${l.shoes}/${l.eyes}/${l.mouth}/${l.facialHair}`;
+  `${l.hair}/${l.hat}/${l.top}/${l.bottom}/${l.shoes}/${l.eyes}/${l.mouth}/${l.facialHair}/${l.ears}/${l.mobility}/${l.height}/${l.held}`;
 
 const cells = (a: Art) => {
   const seen = new Map<string, string>();
@@ -130,8 +147,9 @@ describe("avatarArt", () => {
     // The armchair (room-art.tsx) is 29 × 31, its arms 7 dots wide.
     const wrong: string[] = [];
     for (const [look, { sit }] of drawn) {
-      if (SEAT_OFFSET.y + sit.h !== 31) wrong.push(`${name(look)} height`);
-      const xs = sit.rects.filter(([, y]) => y >= -SEAT_OFFSET.y + 12).flatMap(([x, , w]) => [x, x + w]);
+      if (seatedTop(sit) + sit.h !== armchairArt().h) wrong.push(`${name(look)} height`);
+      // Below the top of the arms, 12 dots down the chair.
+      const xs = sit.rects.filter(([, y]) => y >= -seatedTop(sit) + 12).flatMap(([x, , w]) => [x, x + w]);
       if (SEAT_OFFSET.x + Math.min(...xs) < 7 || SEAT_OFFSET.x + Math.max(...xs) > 22) wrong.push(name(look));
     }
     expect(wrong).toEqual([]);
@@ -151,6 +169,32 @@ describe("avatarArt", () => {
     expect(differ(AVATAR_SHOES, (shoes) => ({ shoes }))).toBe(AVATAR_SHOES.length);
     expect(differ(AVATAR_HATS, (hat) => ({ hat }))).toBe(AVATAR_HATS.length);
     expect(differ(AVATAR_ACCESSORIES, (a) => ({ accessories: [a] }))).toBe(AVATAR_ACCESSORIES.length);
+    expect(differ(AVATAR_EARS, (ears) => ({ ears }))).toBe(AVATAR_EARS.length);
+    expect(differ(AVATAR_HEIGHTS, (height) => ({ height }))).toBe(AVATAR_HEIGHTS.length);
+    expect(differ(AVATAR_MOBILITY, (mobility) => ({ mobility }))).toBe(AVATAR_MOBILITY.length);
+    expect(differ(AVATAR_HELD, (held) => ({ held }))).toBe(AVATAR_HELD.length);
+  });
+
+  it("grows and shrinks with its height, on its feet and in the armchair", () => {
+    const h = (height: AvatarLook["height"], mobility: AvatarLook["mobility"] = "walk") =>
+      avatarArt({ ...DEFAULT_AVATAR, height, mobility });
+    for (const mobility of AVATAR_MOBILITY) {
+      expect(h("short", mobility).stand.h).toBeLessThan(h("medium", mobility).stand.h);
+      expect(h("tall", mobility).stand.h).toBeGreaterThan(h("medium", mobility).stand.h);
+    }
+    expect(h("short").sit.h).toBeLessThan(h("tall").sit.h);
+  });
+
+  it("puts down what it carries to read", () => {
+    const sit = (held: AvatarLook["held"]) => JSON.stringify(avatarArt({ ...DEFAULT_AVATAR, held }).sit);
+    expect(new Set(AVATAR_HELD.map(sit)).size).toBe(1);
+  });
+
+  it("hides the hair under a headscarf, a turban or a head wrap", () => {
+    for (const hat of ["headscarf", "turban", "headwrap"] as const) {
+      const looks = AVATAR_HAIRS.map((hair) => JSON.stringify(avatarArt({ ...DEFAULT_AVATAR, hat, hair })));
+      expect(new Set(looks).size).toBe(1);
+    }
   });
 
   it("hides the bottoms under a dress or a robe", () => {

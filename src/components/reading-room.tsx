@@ -44,7 +44,7 @@ import {
   type HouseGeometry,
   type Rect,
 } from "@/components/room-art";
-import { HELD_BOOK, SEAT_OFFSET } from "@/components/avatar-art";
+import { HELD_BOOK, SEAT_OFFSET, seatedTop } from "@/components/avatar-art";
 import { SeatedAvatar, Walker, useAvatar, type Avatar } from "@/components/room-avatar";
 import { ExtraView } from "@/components/room-extras";
 import { RoomPieceView } from "@/components/room-rooms";
@@ -1168,7 +1168,7 @@ function Furniture({
             <SeatedAvatar
               avatar={avatar}
               x={x + 50 + SEAT_OFFSET.x}
-              y={chairTop + SEAT_OFFSET.y}
+              y={chairTop + seatedTop(avatar.art.sit)}
               spine={openBook.colour}
               scale={s}
             />
@@ -1199,7 +1199,7 @@ function Furniture({
               aria-label={`Reading in the armchair: ${spineLabel(openBook.book)}`}
               style={{
                 left: (x + 50 + SEAT_OFFSET.x + HELD_BOOK.x) * s,
-                top: (chairTop + SEAT_OFFSET.y + HELD_BOOK.y) * s,
+                top: (chairTop + seatedTop(avatar.art.sit) + HELD_BOOK.y) * s,
                 width: HELD_BOOK.w * s,
                 height: HELD_BOOK.h * s,
               }}

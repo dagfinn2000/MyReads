@@ -403,7 +403,7 @@
    --av-top, --av-bottom and --av-accent from the reader's choices; the
    shades come from them. The rest are fixed: shoes, gold, glass. */
 .rp-av-line { fill: #231815; }
-.rp-av-eye { fill: #251a17; }
+.rp-av-eye { fill: var(--av-eye, #251a17); }
 .rp-av-eye-hi { fill: #fff; }
 .rp-av-skin { fill: var(--av-skin); }
 .rp-av-skin-hi { fill: color-mix(in oklab, var(--av-skin), #fff 35%); }
@@ -468,6 +468,37 @@
 .rp-av-halo-lo { fill: #d1ab3c; }
 .rp-av-halo-hi { fill: #fbeaa6; }
 .rp-av-phones { fill: #3a3a42; }
+.rp-av-patch { fill: #201c20; }
+.rp-av-straw { fill: #dcbc72; }
+.rp-av-straw-hi { fill: #f0d99c; }
+.rp-av-straw-lo { fill: #b08c48; }
+.rp-av-chef { fill: #f6f3ec; }
+.rp-av-chef-hi { fill: #ffffff; }
+.rp-av-chef-lo { fill: #d5cec0; }
+/* Fairy wings, tinted with the trimmings. */
+.rp-av-wing { fill: color-mix(in oklab, var(--av-accent), #e4f1fa 58%); }
+.rp-av-wing-hi { fill: color-mix(in oklab, var(--av-accent), #fff 80%); }
+.rp-av-wing-lo { fill: color-mix(in oklab, var(--av-accent), #5d7b94 45%); }
+/* Carried things. */
+.rp-av-iron { fill: #3a3430; }
+.rp-av-lamp { fill: #ffc24d; }
+.rp-av-lamp-hi { fill: #fff1b8; }
+.rp-av-wand { fill: #3a2a22; }
+.rp-av-spark { fill: #ffe27a; }
+.rp-av-spark-lo { fill: #f7c8ff; }
+.rp-av-teddy { fill: #b27a45; }
+.rp-av-teddy-hi { fill: #d9a56c; }
+.rp-av-teddy-lo { fill: #835430; }
+.rp-av-petal { fill: #f2c230; }
+.rp-av-seed { fill: #6a4220; }
+/* A walking stick, and a wheelchair. */
+.rp-av-stick { fill: #6e4a2c; }
+.rp-av-stick-lo { fill: #2e2420; }
+.rp-av-tyre { fill: #2b2a2e; }
+.rp-av-rim { fill: #a9b1ba; }
+.rp-av-rim-hi { fill: #dfe4ea; }
+.rp-av-rim-lo { fill: #737c86; }
+.rp-av-seat { fill: #36404c; }
 
 /* ── House styles and colours ─────────────────────────────────────────────
    The cottage keeps the hand-picked palette above. Every other style
