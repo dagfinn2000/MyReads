@@ -1,8 +1,9 @@
 /**
  * How the reading room can be decorated (the Decorate panel on the Room
  * page): the style of the house, the colours of its walls, wood and
- * fabrics, and what hangs over the fireplace. Kept free of React so
- * Preferences can validate the choices.
+ * fabrics, its wallpaper and floors, what hangs over the fireplace and
+ * along the ceilings, and the walls and floor of each added room. Kept
+ * free of React so Preferences can validate the choices.
  *
  * A style changes the shell of the house (its roof, outside walls, inside
  * walls, garden and lamps, drawn in components/room-shells.ts) and its
@@ -82,6 +83,83 @@ export const ROOM_HANGING_LABELS: Record<RoomHanging, string> = {
   kilim: "Tapestry: kilim pattern",
   none: "Nothing",
 };
+
+/** Wallpaper: the style's own, or any of the styles' patterns, or one of
+ *  four more. Printed in the wall colour, a shade darker. */
+export const ROOM_PAPERS = [
+  "style",
+  "stripes",
+  "damask",
+  "flowers",
+  "trellis",
+  "stars",
+  "vines",
+  "stones",
+  "rock",
+  "logs",
+  "panels",
+  "tiles",
+  "shoji",
+  "pipes",
+  "plain",
+] as const;
+export type RoomPaper = (typeof ROOM_PAPERS)[number];
+
+export const ROOM_PAPER_LABELS: Record<RoomPaper, string> = {
+  style: "The style's own",
+  stripes: "Stripes",
+  damask: "Damask",
+  flowers: "Flowers",
+  trellis: "Trellis",
+  stars: "Stars",
+  vines: "Vines",
+  stones: "Stone",
+  rock: "Rock",
+  logs: "Logs",
+  panels: "Panels",
+  tiles: "Tiles",
+  shoji: "Paper screens",
+  pipes: "Rivets",
+  plain: "Plain",
+};
+
+/** Floors: the style's own, or boards of either width, parquet, flagstones,
+ *  chequered tiles, carpet in the fabric colour, tatami or a metal grate. */
+export const ROOM_FLOORS = ["style", "boards", "planks", "parquet", "flags", "tiles", "carpet", "tatami", "grate"] as const;
+export type RoomFloor = (typeof ROOM_FLOORS)[number];
+
+export const ROOM_FLOOR_LABELS: Record<RoomFloor, string> = {
+  style: "The style's own",
+  boards: "Boards",
+  planks: "Wide planks",
+  parquet: "Parquet",
+  flags: "Flagstones",
+  tiles: "Chequered tiles",
+  carpet: "Carpet",
+  tatami: "Tatami",
+  grate: "Metal grate",
+};
+
+/** Strung along the top of every room's walls, over the furniture. */
+export const ROOM_CEILINGS = ["none", "fairylights", "bunting", "lanterns", "ivy"] as const;
+export type RoomCeiling = (typeof ROOM_CEILINGS)[number];
+
+export const ROOM_CEILING_LABELS: Record<RoomCeiling, string> = {
+  none: "Nothing",
+  fairylights: "Fairy lights",
+  bunting: "Bunting",
+  lanterns: "Paper lanterns",
+  ivy: "Ivy",
+};
+
+/** An added room's own walls and floor; "style" in each is the house's. */
+export interface RoomOwn {
+  walls: RoomWalls;
+  paper: RoomPaper;
+  floor: RoomFloor;
+}
+
+export const SAME_AS_HOUSE: RoomOwn = { walls: "style", paper: "style", floor: "style" };
 
 /** Swatch colours for the pickers. The room itself takes its colours from
  *  reading-room.css, which has a day and a night shade of each. */

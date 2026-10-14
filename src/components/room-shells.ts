@@ -12,7 +12,8 @@
  * looks the same on every visit.
  */
 import { art, grid, type Art, type HouseGeometry, type Rect } from "@/components/room-art";
-import type { RoomStyle } from "@/lib/room-styles";
+import type { RoomKind } from "@/lib/room";
+import type { RoomCeiling, RoomFloor, RoomOwn, RoomPaper, RoomStyle, RoomWalls } from "@/lib/room-styles";
 
 /** Something on the house that moves: frames shown in turn (or one that
  *  blinks), `x`, `y` its top left. The first frame is the still picture. */
@@ -32,6 +33,11 @@ export interface Light {
 
 export interface Shell {
   rects: Rect[];
+  /** Each storey's walls, floor and ceiling, top first; drawn over
+   *  `rects`, in the walls colour of their own if the room has one. */
+  storeys: { rects: Rect[]; walls: RoomWalls }[];
+  /** Fairy-light bulbs in three sets, which twinkle in turn at night. */
+  twinkle: Rect[][];
   /** Drawn over the storeys, under the furniture: vines hanging from the
    *  eaves, say. */
   over: Rect[];
@@ -680,7 +686,7 @@ function flag(): { art: Art; frames: Rect[][] } {
 
 // ── Walls and floors ─────────────────────────────────────────────────────
 
-type Pattern = "stripes" | "stones" | "stars" | "vines" | "rock" | "panels" | "plain" | "logs" | "shoji" | "pipes";
+type Pattern = Exclude<RoomPaper, "style">;
 const PATTERNS: Record<RoomStyle, Pattern> = {
   cottage: "stripes",
   medieval: "stones",
@@ -710,7 +716,7 @@ const OUTSIDE: Record<RoomStyle, Outside> = {
   steampunk: "brick",
 };
 
-type Boards = "boards" | "planks" | "flags" | "grate" | "tatami";
+type Boards = Exclude<RoomFloor, "style">;
 const FLOORS: Record<RoomStyle, Boards> = {
   cottage: "boards",
   medieval: "flags",
@@ -724,32 +730,132 @@ const FLOORS: Record<RoomStyle, Boards> = {
   steampunk: "boards",
 };
 
-/** The floor seen from the front, over a joist. */
-function floor(R: Rect[], style: RoomStyle, x: number, y: number, w: number, h: number) {
-  const kind = FLOORS[style];
-  R.push([x, y, w, 1, "floor-hi"], [x, y + 1, w, h - 3, "floor"], [x, y + h - 2, w, 2, "wood-deep"]);
+/** The floor seen from the front, over a joist. The style's own floor is
+ *  in the style's floor colour; a floor chosen for itself is in its own
+ *  stuff: stone flags, tiles, carpet in the fabric colour, straw tatami,
+ *  a metal grate, or boards in the wood. */
+function floor(R: Rect[], kind: Boards, own: boolean, x: number, y: number, w: number, h: number) {
+  const from = R.length;
+  drawFloor(R, kind, own, x, y, w, h);
+  clip(R, from, x, y, x + w, y + h);
+}
+
+function drawFloor(R: Rect[], kind: Boards, own: boolean, x: number, y: number, w: number, h: number) {
+  const [hi, mid, lo] = own
+    ? (
+        {
+          boards: ["floor-hi", "floor", "floor-lo"],
+          planks: ["floor-hi", "floor", "floor-lo"],
+          parquet: ["floor-hi", "floor", "floor-lo"],
+          flags: ["stone-hi", "stone", "stone-lo"],
+          tiles: ["tile", "tile", "tile-lo"],
+          carpet: ["rug", "rug", "rug-3"],
+          tatami: ["wicker-hi", "wicker", "wicker-lo"],
+          grate: ["metal-hi", "metal", "metal-lo"],
+        } as const
+      )[kind]
+    : (["floor-hi", "floor", "floor-lo"] as const);
+  R.push([x, y, w, 1, hi], [x, y + 1, w, h - 3, mid], [x, y + h - 2, w, 2, "wood-deep"]);
   switch (kind) {
     case "boards":
     case "planks":
-      for (let bx = x + 7; bx < x + w; bx += kind === "boards" ? 14 : 22) R.push([bx, y + 1, 1, h - 3, "floor-lo"]);
+      for (let bx = x + 7; bx < x + w; bx += kind === "boards" ? 14 : 22) R.push([bx, y + 1, 1, h - 3, lo]);
+      return;
+    case "parquet":
+      // Herringbone, end on: short blocks that step up and down.
+      for (let bx = x + 1; bx < x + w - 2; bx += 6) R.push([bx, y + 1, 3, 1, lo], [bx + 3, y + 2, 3, 1, lo]);
       return;
     case "flags":
-      for (let bx = x + 5; bx < x + w; bx += 11 + Math.floor(noise(bx, y) * 6)) R.push([bx, y, 1, h - 2, "floor-lo"]);
+      for (let bx = x + 5; bx < x + w; bx += 11 + Math.floor(noise(bx, y) * 6)) R.push([bx, y, 1, h - 2, lo]);
+      return;
+    case "tiles":
+      // Chequered, two rows of squares.
+      for (let bx = x, i = 0; bx < x + w; bx += 4, i++) {
+        const tw = Math.min(4, x + w - bx);
+        R.push([bx, y + (i % 2 ? 1 : 2), tw, 1, lo]);
+        if (i % 2 === 0) R.push([bx, y, tw, 1, lo]);
+      }
+      return;
+    case "carpet":
+      for (let bx = x + 3; bx < x + w - 1; bx += 6) R.push([bx, y + 1, 2, 1, "rug-2"]);
+      R.push([x, y, w, 1, "rug-fringe"]);
       return;
     case "grate":
-      for (let bx = x + 1; bx < x + w; bx += 2) R.push([bx, y + 1, 1, h - 3, "floor-lo"]);
+      for (let bx = x + 1; bx < x + w; bx += 2) R.push([bx, y + 1, 1, h - 3, lo]);
       return;
     case "tatami":
-      for (let bx = x + 12; bx < x + w; bx += 30) R.push([bx, y, 2, h - 2, "floor-lo"]);
+      for (let bx = x + 12; bx < x + w; bx += 30) R.push([bx, y, 2, h - 2, lo]);
       return;
   }
 }
 
+/** Trims the rects pushed onto `R` since `from` to the box from `x0`,`y0`
+ *  to `x1`,`y1`, so a pattern never spills over what's beside it. */
+function clip(R: Rect[], from: number, x0: number, y0: number, x1: number, y1: number) {
+  const kept = R.splice(from).flatMap(([x, y, w, h, paint]): Rect[] => {
+    const cx = Math.max(x, x0);
+    const cy = Math.max(y, y0);
+    const cw = Math.min(x + w, x1) - cx;
+    const ch = Math.min(y + h, y1) - cy;
+    return cw > 0 && ch > 0 ? [[cx, cy, cw, ch, paint]] : [];
+  });
+  R.push(...kept);
+}
+
 /** The pattern on the inside walls, between `y0` and `y1`. */
-function wallPattern(R: Rect[], style: RoomStyle, x0: number, w: number, y0: number, y1: number) {
+function wallPattern(R: Rect[], pattern: Pattern, x0: number, w: number, y0: number, y1: number) {
+  const from = R.length;
+  drawPattern(R, pattern, x0, w, y0, y1);
+  clip(R, from, x0, y0, x0 + w, y1);
+}
+
+function drawPattern(R: Rect[], pattern: Pattern, x0: number, w: number, y0: number, y1: number) {
   const x1 = x0 + w;
   const h = y1 - y0;
-  switch (PATTERNS[style]) {
+  switch (pattern) {
+    case "damask":
+      // Lozenges, tone on tone, in a half-drop.
+      for (let row = 0, y = y0 + 3; y < y1 - 6; row++, y += 11) {
+        for (let x = x0 + 4 + (row % 2) * 7; x < x1 - 5; x += 14) {
+          R.push(
+            ...grid(["..K..", ".K.K.", "K.K.K", ".K.K.", "..K.."], x, y).map((r): Rect => [r[0], r[1], r[2], r[3], "wall-2"]),
+          );
+          R.push([x + 2, y + 2, 1, 1, "wall-hi"]);
+        }
+      }
+      return;
+    case "flowers":
+      // Sprigs scattered over the wall: four petals round a bright eye.
+      for (let row = 0, y = y0 + 4; y < y1 - 4; row++, y += 10) {
+        for (let x = x0 + 4 + (row % 2) * 6; x < x1 - 4; x += 12) {
+          const fx = x + Math.floor(noise(x, y, 91) * 3) - 1;
+          const fy = y + Math.floor(noise(y, x, 92) * 3) - 1;
+          R.push([fx, fy - 1, 1, 1, "wall-2"], [fx - 1, fy, 1, 1, "wall-2"], [fx + 1, fy, 1, 1, "wall-2"], [fx, fy + 1, 1, 1, "wall-2"]);
+          R.push([fx, fy, 1, 1, "flower"]);
+          if (noise(fx, fy, 93) < 0.6) R.push([fx + 1, fy + 2, 1, 1, "leaf-lo"], [fx + 2, fy + 3, 1, 1, "leaf-lo"]);
+        }
+      }
+      return;
+    case "trellis":
+      // A diamond lattice, with a dot where the laths cross.
+      for (let y = y0; y < y1; y++) {
+        for (let x = x0; x < x1; x++) {
+          const a = (((x - x0 + y - y0) % 12) + 12) % 12;
+          const b = (((x - x0 - (y - y0)) % 12) + 12) % 12;
+          if (a === 0 && b === 0) R.push([x, y, 1, 1, "wall-hi"]);
+          else if (a === 0 || b === 0) R.push([x, y, 1, 1, "wall-2"]);
+        }
+      }
+      return;
+    case "tiles":
+      // Brick-laid tiles, each lit along its top.
+      for (let row = 0, y = y0; y < y1; row++, y += 6) {
+        const th = Math.min(6, y1 - y);
+        R.push([x0, y, w, 1, "wall-2"]);
+        if (th > 2) R.push([x0, y + 1, w, 1, "wall-hi"]);
+        for (let x = x0 + (row % 2 ? 6 : 0); x < x1; x += 12) R.push([x, y + 1, 1, th - 1, "wall-2"]);
+      }
+      return;
     case "stripes":
       for (let x = x0 + 5; x < x1; x += 10) R.push([x, y0, 1, h, "wall-2"], [x + 2, y0, 1, h, "wall-2"]);
       for (let x = x0 + 10; x < x1; x += 10) for (let y = y0 + 5; y < y1 - 3; y += 12) R.push([x, y, 1, 1, "wall-2"]);
@@ -894,8 +1000,50 @@ function outside(R: Rect[], style: RoomStyle, x: number, top: number, w: number,
   }
 }
 
-/** One storey's walls, floor and ceiling. */
-function storey(R: Rect[], g: HouseGeometry, style: RoomStyle, f: number) {
+/** How one storey is done up inside: its wallpaper, its floor (the
+ *  boards it stands on), its walls colour, and what hangs along the top.
+ *  `own` marks a floor chosen for itself rather than the style's. */
+export interface StoreyLook {
+  paper: Pattern;
+  floor: Boards;
+  ownFloor: boolean;
+  walls: RoomWalls;
+  ceiling: RoomCeiling;
+}
+
+/** How the inside of the house is done up (Decorate): wallpaper and floor
+ *  for the house, what hangs along the ceilings, and each added room's
+ *  own, by floor (`rooms`, top first, as in HousePlan). */
+export interface Interior {
+  paper: RoomPaper;
+  floor: RoomFloor;
+  ceiling: RoomCeiling;
+  rooms: readonly (RoomKind | null)[];
+  own: Partial<Record<RoomKind, RoomOwn>>;
+}
+
+export const PLAIN_INTERIOR: Interior = { paper: "style", floor: "style", ceiling: "none", rooms: [], own: {} };
+
+/** Each storey's look, top first. */
+export function storeyLooks(style: RoomStyle, interior: Interior, count: number): StoreyLook[] {
+  return Array.from({ length: count }, (_, f) => {
+    const room = interior.rooms[f];
+    const own = room ? interior.own[room] : undefined;
+    const paper = own && own.paper !== "style" ? own.paper : interior.paper;
+    const floorKind = own && own.floor !== "style" ? own.floor : interior.floor;
+    return {
+      paper: paper === "style" ? PATTERNS[style] : paper,
+      floor: floorKind === "style" ? FLOORS[style] : floorKind,
+      ownFloor: floorKind !== "style",
+      walls: own?.walls ?? "style",
+      ceiling: interior.ceiling,
+    };
+  });
+}
+
+/** One storey's walls, its ceiling and what hangs from it; the beam over
+ *  it is the floor of the storey above, `above`. */
+function storey(R: Rect[], g: HouseGeometry, style: RoomStyle, f: number, look: StoreyLook, above: StoreyLook | null, twinkle: Rect[][]) {
   const { houseX: hx, houseW: hw, wall } = g;
   const inner = hw - 2 * wall;
   const beam = g.floorsTop + f * g.storey;
@@ -903,15 +1051,15 @@ function storey(R: Rect[], g: HouseGeometry, style: RoomStyle, f: number) {
   const floorLine = top + g.roomH;
   // The beam over this storey: under the roof it is the wall plate, else
   // it is the floor of the storey above.
-  if (f === 0) R.push([hx, beam, hw, g.beam, "wood-deep"], [hx, beam + 1, hw, 2, "wood-lo"]);
-  else floor(R, style, hx, beam, hw, g.beam);
+  if (!above) R.push([hx, beam, hw, g.beam, "wood-deep"], [hx, beam + 1, hw, 2, "wood-lo"]);
+  else floor(R, above.floor, above.ownFloor, hx, beam, hw, g.beam);
 
   const x0 = hx + wall;
   R.push([x0, top, inner, g.roomH, "wall"]);
   const dado = WAINSCOT.has(style);
   const kick = style === "japanese" ? 9 : 3;
   const patternEnd = dado ? floorLine - 28 : floorLine - kick;
-  wallPattern(R, style, x0, inner, top + 3, patternEnd);
+  wallPattern(R, look.paper, x0, inner, top + 3, patternEnd);
   R.push([x0, top, inner, 1, "wood-lo"], [x0, top + 1, inner, 2, "wall-shadow"]);
 
   if (dado) {
@@ -929,9 +1077,110 @@ function storey(R: Rect[], g: HouseGeometry, style: RoomStyle, f: number) {
     R.push([x0, floorLine - 6, inner, 3, "wainscot"], [x0, floorLine - 6, inner, 1, "light"]);
   }
   R.push([x0, floorLine - 3, inner, 2, "wood"], [x0, floorLine - 3, inner, 1, "wood-hi"], [x0, floorLine - 1, inner, 1, "wood-deep"]);
+  ceiling(R, look.ceiling, x0, inner, top + 3, twinkle);
 
   outside(R, style, hx, top, wall, g.roomH, true);
   outside(R, style, hx + hw - wall, top, wall, g.roomH, false);
+}
+
+/** How far a string hung between two hooks `span` apart sags at `t` dots
+ *  along it. */
+const sag = (t: number, span: number, depth: number) => Math.round(depth * (1 - ((2 * t) / span - 1) ** 2));
+
+/** What hangs along the top of a room's walls, from just under the
+ *  ceiling at `y`: never lower than the tops of the bookcases. */
+function ceiling(R: Rect[], kind: RoomCeiling, x0: number, w: number, y: number, twinkle: Rect[][]) {
+  const x1 = x0 + w;
+  switch (kind) {
+    case "none":
+      return;
+    case "fairylights": {
+      // Loops of wire between hooks, a bulb every few dots, in four
+      // colours; at night they light up and twinkle in three sets.
+      const span = 34;
+      for (let hook = x0 + 1; hook < x1 - 2; hook += span) {
+        const end = Math.min(hook + span, x1 - 1);
+        for (let x = hook; x < end; x++) {
+          const t = x - hook;
+          const wy = y + sag(t, end - hook, 4);
+          R.push([x, wy, 1, 1, "bulb-wire"]);
+          if (t % 4 === 2) {
+            const n = (x - x0) >> 2;
+            twinkle[n % 3].push([x, wy + 1, 1, 2, `bulb-${(n % 4) + 1}`]);
+          }
+        }
+        R.push([hook, y - 1, 1, 1, "brass"]);
+      }
+      return;
+    }
+    case "bunting": {
+      const span = 46;
+      const colours = ["chair", "cushion", "paper", "curtain-hi"] as const;
+      for (let hook = x0 + 1; hook < x1 - 2; hook += span) {
+        const end = Math.min(hook + span, x1 - 1);
+        for (let x = hook; x < end; x++) R.push([x, y + sag(x - hook, end - hook, 5), 1, 1, "bulb-wire"]);
+        for (let x = hook + 3, i = 0; x + 5 < end; x += 7, i++) {
+          const fy = y + 1 + sag(x + 2 - hook, end - hook, 5);
+          const paint = colours[(i + Math.floor((hook - x0) / span)) % colours.length];
+          R.push([x, fy, 5, 1, paint], [x, fy + 1, 5, 1, paint], [x + 1, fy + 2, 3, 1, paint], [x + 1, fy + 3, 3, 1, paint], [x + 2, fy + 4, 1, 1, paint]);
+          R.push([x, fy, 5, 1, "bulb-wire"]);
+        }
+      }
+      return;
+    }
+    case "lanterns": {
+      // Round paper lanterns on short cords; at night they glow like the
+      // lampshades.
+      const lantern = grid(["..n..", ".nBn.", "lLLLl", "LmLmL", "LmLmL", "lLLLl", ".nBn."]);
+      for (let x = x0 + 14, i = 0; x < x1 - 8; x += 38, i++) {
+        const drop = i % 2 ? 1 : 3;
+        R.push([x + 2, y, 1, drop, "bulb-wire"]);
+        R.push(...lantern.map((r): Rect => [r[0] + x, r[1] + y + drop, r[2], r[3], r[4]]));
+      }
+      return;
+    }
+    case "ivy":
+      // A garland along the ceiling, with sprays hanging down here and there.
+      for (let x = x0; x < x1; x++) {
+        const vy = y + Math.round(1 + Math.sin((x - x0) / 4.5));
+        R.push([x, vy, 1, 1, "leaf-lo"]);
+        const n = noise(x, y, 95);
+        if ((x - x0) % 3 === 0) R.push([x, vy + (n < 0.5 ? -1 : 1), 2, 1, n < 0.3 ? "leaf-hi" : "leaf"]);
+        if (n > 0.93) {
+          const fall = 3 + Math.floor(noise(y, x, 96) * 5);
+          for (let d = 1; d <= fall; d++) R.push([x + (d % 3 === 0 ? 1 : 0), vy + d, 1, 1, d % 2 ? "leaf" : "leaf-lo"]);
+        }
+      }
+      return;
+  }
+}
+
+/** The wallpaper and floor a house style comes with. */
+export const stylePaper = (style: RoomStyle): Pattern => PATTERNS[style];
+export const styleFloor = (style: RoomStyle): Boards => FLOORS[style];
+
+/** A piece of wall `w` × `h` with `paper` on it, for the wallpaper choices. */
+export function wallSample(paper: Pattern, w: number, h: number): Art {
+  const R: Rect[] = [[0, 0, w, h, "wall"]];
+  wallPattern(R, paper, 0, w, 1, h - 1);
+  return { w, h, rects: R };
+}
+
+/** A length of floor, for the floor choices: the boards as they meet the
+ *  wall, over the joist. `own` paints it in its material rather than in
+ *  the style's floor colour. */
+export function floorSample(kind: Boards, w: number, own = true): Art {
+  const R: Rect[] = [[0, 0, w, 3, "wall"], [0, 3, w, 2, "wood"], [0, 3, w, 1, "wood-hi"], [0, 5, w, 1, "wood-deep"]];
+  floor(R, kind, own, 0, 6, w, 5);
+  return { w, h: 11, rects: R };
+}
+
+/** The hanging decorations along a stretch of wall `w` wide. */
+export function ceilingSample(kind: RoomCeiling, w: number, h: number): Art {
+  const twinkle: Rect[][] = [[], [], []];
+  const R: Rect[] = [[0, 0, w, h, "wall"], [0, 0, w, 1, "wood-lo"], [0, 1, w, 2, "wall-shadow"]];
+  ceiling(R, kind, 0, w, 3, twinkle);
+  return { w, h, rects: [...R, ...twinkle.flat()] };
 }
 
 // ── The garden ───────────────────────────────────────────────────────────
@@ -1257,17 +1506,24 @@ function yard(style: RoomStyle, g: HouseGeometry, earth: number, shell: Shell) {
  * floor, foundations and the garden. Bookcases and furniture are drawn
  * over it.
  */
-export function shellArt(g: HouseGeometry, style: RoomStyle): Shell {
+export function shellArt(g: HouseGeometry, style: RoomStyle, interior: Interior = PLAIN_INTERIOR): Shell {
   const R: Rect[] = [];
   const over: Rect[] = [];
-  const shell: Shell = { rects: R, over, moving: [], lights: [], smoke: null, yard: [], fireflies: [] };
+  const twinkle: Rect[][] = [[], [], []];
+  const shell: Shell = { rects: R, storeys: [], twinkle, over, moving: [], lights: [], smoke: null, yard: [], fireflies: [] };
   shell.smoke = chimney(R, g, style);
   roof(R, over, g, style, shell);
-  for (let f = 0; f < g.floorCount; f++) storey(R, g, style, f);
+  const looks = storeyLooks(style, interior, g.floorCount);
+  for (let f = 0; f < g.floorCount; f++) {
+    const rects: Rect[] = [];
+    storey(rects, g, style, f, looks[f], f > 0 ? looks[f - 1] : null, twinkle);
+    shell.storeys.push({ rects, walls: looks[f].walls });
+  }
 
   const { houseX: hx, houseW: hw } = g;
   const bottom = g.floorsTop + g.floorCount * g.storey;
-  floor(R, style, hx, bottom, hw, g.beam);
+  const ground = looks[g.floorCount - 1] ?? storeyLooks(style, interior, 1)[0];
+  floor(R, ground.floor, ground.ownFloor, hx, bottom, hw, g.beam);
   const base = bottom + g.beam;
   R.push([hx - 2, base, hw + 4, g.foundation, "stone"]);
   R.push([hx - 2, base, hw + 4, 1, "stone-hi"], [hx - 2, base + g.foundation - 1, hw + 4, 1, "stone-lo"]);

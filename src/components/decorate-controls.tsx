@@ -28,7 +28,8 @@ export function Row({ label, hint, children }: { label: string; hint?: string; c
 }
 
 /** A row of round colour buttons, smaller when there are lots. An option
- *  called "style" keeps the house style's own colour. */
+ *  called "style" keeps the house style's own colour, or whatever
+ *  `styleText` says it keeps. */
 export function Swatches<T extends string>({
   label,
   hint,
@@ -36,6 +37,7 @@ export function Swatches<T extends string>({
   options,
   swatches,
   labels,
+  styleText = "Style's own",
   onChange,
 }: {
   label: string;
@@ -44,6 +46,7 @@ export function Swatches<T extends string>({
   options: readonly T[];
   swatches: Record<string, string>;
   labels: Record<string, string>;
+  styleText?: string;
   onChange: (value: T) => void;
 }) {
   const small = options.length > 15;
@@ -67,7 +70,7 @@ export function Swatches<T extends string>({
             )}
             style={o === "style" ? undefined : { background: swatches[o] }}
           >
-            {o === "style" ? "Style's own" : null}
+            {o === "style" ? styleText : null}
           </button>
         ))}
       </div>

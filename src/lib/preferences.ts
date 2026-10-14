@@ -10,13 +10,20 @@ import {
   type Stowable,
 } from "@/lib/room";
 import {
+  ROOM_CEILINGS,
   ROOM_FABRICS,
+  ROOM_FLOORS,
   ROOM_HANGINGS,
+  ROOM_PAPERS,
   ROOM_STYLES,
   ROOM_WALLS,
   ROOM_WOODS,
+  type RoomCeiling,
   type RoomFabric,
+  type RoomFloor,
   type RoomHanging,
+  type RoomOwn,
+  type RoomPaper,
   type RoomStyle,
   type RoomWalls,
   type RoomWood,
@@ -404,6 +411,13 @@ export type Preferences = {
   roomWood: RoomWood;
   roomFabric: RoomFabric;
   roomHanging: RoomHanging;
+  roomPaper: RoomPaper;
+  roomFloor: RoomFloor;
+  /** Fairy lights, bunting and the like along the top of every room. */
+  roomCeiling: RoomCeiling;
+  /** Added rooms' own walls and floors, by room; a room not here is like
+   *  the rest of the house. */
+  roomOwn: Partial<Record<RoomKind, RoomOwn>>;
   /** The coat of every cat in the house, and of the dog in its basket
    *  (lib/pets.ts). */
   roomCat: CatCoat;
@@ -490,6 +504,10 @@ export const DEFAULT_PREFERENCES: Preferences = {
   roomWood: "style",
   roomFabric: "style",
   roomHanging: "painting",
+  roomPaper: "style",
+  roomFloor: "style",
+  roomCeiling: "none",
+  roomOwn: {},
   roomCat: "ginger",
   roomDog: "brown",
   roomLayout: [],
@@ -650,6 +668,24 @@ function parseRoomLayout(value: unknown): Placement[] {
   return out;
 }
 
+/** Added rooms' own walls and floors: known rooms only, each choice
+ *  checked, and rooms just like the house left out. */
+function parseRoomOwn(value: unknown): Partial<Record<RoomKind, RoomOwn>> {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+  const out: Partial<Record<RoomKind, RoomOwn>> = {};
+  for (const [room, own] of Object.entries(value)) {
+    if (!(ROOMS as readonly string[]).includes(room) || !own || typeof own !== "object") continue;
+    const o = own as Record<string, unknown>;
+    const parsed: RoomOwn = {
+      walls: pick(ROOM_WALLS, o.walls, "style"),
+      paper: pick(ROOM_PAPERS, o.paper, "style"),
+      floor: pick(ROOM_FLOORS, o.floor, "style"),
+    };
+    if (parsed.walls !== "style" || parsed.paper !== "style" || parsed.floor !== "style") out[room as RoomKind] = parsed;
+  }
+  return out;
+}
+
 /** Every book-page card once: the stored order first, then any card it
  *  leaves out (a card added in a later version, say) in default order. */
 function parseBookPageCards(value: unknown): BookPageCard[] {
@@ -755,6 +791,10 @@ export function parsePreferences(raw: unknown): Preferences {
     roomWood: pick(ROOM_WOODS, obj.roomWood, d.roomWood),
     roomFabric: pick(ROOM_FABRICS, obj.roomFabric, d.roomFabric),
     roomHanging: pick(ROOM_HANGINGS, obj.roomHanging, d.roomHanging),
+    roomPaper: pick(ROOM_PAPERS, obj.roomPaper, d.roomPaper),
+    roomFloor: pick(ROOM_FLOORS, obj.roomFloor, d.roomFloor),
+    roomCeiling: pick(ROOM_CEILINGS, obj.roomCeiling, d.roomCeiling),
+    roomOwn: parseRoomOwn(obj.roomOwn),
     roomCat: parseCatCoat(obj.roomCat),
     roomDog: parseDogCoat(obj.roomDog),
     roomLayout: parseRoomLayout(obj.roomLayout),

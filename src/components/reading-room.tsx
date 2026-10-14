@@ -2,7 +2,17 @@
 
 import "./reading-room.css";
 import { memo, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
-import type { RoomFabric, RoomHanging, RoomStyle, RoomWalls, RoomWood } from "@/lib/room-styles";
+import type {
+  RoomCeiling,
+  RoomFabric,
+  RoomFloor,
+  RoomHanging,
+  RoomOwn,
+  RoomPaper,
+  RoomStyle,
+  RoomWalls,
+  RoomWood,
+} from "@/lib/room-styles";
 import { ReadingStatus } from "@prisma/client";
 import { BookLink } from "@/components/book-link";
 import {
@@ -86,6 +96,7 @@ import {
   type Movable,
   type Piece,
   type RoomBook,
+  type RoomKind,
 } from "@/lib/room";
 import { drawnSpineColour, spineColour } from "@/lib/spine-colour";
 
@@ -365,6 +376,11 @@ export interface RoomDecor {
   wood: RoomWood;
   fabric: RoomFabric;
   hanging: RoomHanging;
+  paper: RoomPaper;
+  floor: RoomFloor;
+  ceiling: RoomCeiling;
+  /** Added rooms' own walls and floors. */
+  own: Partial<Record<RoomKind, RoomOwn>>;
   /** The coat of every cat in the house, and of the dog in its basket. */
   cat: CatCoat;
   dog: DogCoat;
@@ -376,6 +392,10 @@ export const PLAIN_DECOR: RoomDecor = {
   wood: "style",
   fabric: "style",
   hanging: "painting",
+  paper: "style",
+  floor: "style",
+  ceiling: "none",
+  own: {},
   cat: "ginger",
   dog: "brown",
 };
@@ -455,7 +475,11 @@ export function ReadingRoom({
     () => (width ? layoutRoom(books, width, style, arrangement) : null),
     [books, width, style, arrangement],
   );
-  const shell = useMemo(() => (layout ? shellArt(layout.geo, style) : null), [layout, style]);
+  const { paper, floor, ceiling, own } = decor;
+  const shell = useMemo(
+    () => (layout ? shellArt(layout.geo, style, { paper, floor, ceiling, own, rooms: layout.plan.rooms }) : null),
+    [layout, style, paper, floor, ceiling, own],
+  );
   useEffect(() => {
     if (layout) onPlan?.(layout.plan);
   }, [layout, onPlan]);
@@ -623,6 +647,19 @@ export function ReadingRoom({
           focusable="false"
         >
           <Rects rects={shell.rects} />
+          {shell.storeys.map((st, i) =>
+            st.walls === "style" ? (
+              <Rects key={i} rects={st.rects} />
+            ) : (
+              // A room painted a colour of its own.
+              <g key={i} data-room-walls={st.walls}>
+                <Rects rects={st.rects} />
+              </g>
+            ),
+          )}
+          {shell.twinkle.map((t, i) => (
+            <Rects key={`twinkle-${i}`} className={`room-twinkle room-twinkle-${i}`} rects={t} />
+          ))}
           <Rects rects={shell.over} />
         </svg>
         {shell.smoke && <Smoke x={shell.smoke.x} y={shell.smoke.y} steam={shell.smoke.steam} scale={s} />}
@@ -1328,7 +1365,7 @@ function previewArt(style: RoomStyle, hanging: RoomHanging): { w: number; h: num
   const inner = 2 * PAD + PIECE_WIDTH.hearth + GAP + PIECE_WIDTH.case;
   const geo = houseGeometry(style, yardFor(3), inner + 2 * WALL, 1, PAD);
   const shell = shellArt(geo, style);
-  const R: Rect[] = [...shell.rects, ...shell.over];
+  const R: Rect[] = [...shell.rects, ...shell.storeys.flatMap((st) => st.rects), ...shell.twinkle.flat(), ...shell.over];
   for (const y of shell.yard) R.push(...shift(y.art.rects, y.x, y.y));
   for (const m of shell.moving) R.push(...shift(m.frames[0], m.x, m.y));
   const fx = geo.houseX + WALL + PAD;
