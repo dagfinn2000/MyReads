@@ -21,7 +21,7 @@ import {
   type RoomWalls,
   type RoomWood,
 } from "@/lib/room-styles";
-import { DEFAULT_AVATAR, parseAvatar, type AvatarLook } from "@/lib/avatar";
+import { DEFAULT_AVATAR, parseAvatar, parseSavedLooks, type AvatarLook } from "@/lib/avatar";
 
 /**
  * Per-account preferences — everything on the Account page's Preferences
@@ -416,6 +416,8 @@ export type Preferences = {
   avatarShown: boolean;
   /** How it looks; saved whole. */
   avatar: AvatarLook;
+  /** Looks kept to switch between (Decorate › Avatar › Saved looks). */
+  avatarLooks: AvatarLook[];
 };
 
 export const DEFAULT_PREFERENCES: Preferences = {
@@ -487,6 +489,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
   roomExtras: [],
   avatarShown: true,
   avatar: DEFAULT_AVATAR,
+  avatarLooks: [],
 };
 
 /** True for a time zone this runtime knows ("Europe/Oslo", "UTC"). */
@@ -748,6 +751,7 @@ export function parsePreferences(raw: unknown): Preferences {
     roomExtras: pickList(EXTRAS, obj.roomExtras),
     avatarShown: bool(obj.avatarShown, d.avatarShown),
     avatar: parseAvatar(obj.avatar),
+    avatarLooks: parseSavedLooks(obj.avatarLooks),
   };
 }
 

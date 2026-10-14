@@ -91,6 +91,7 @@ export function RoomView({
   extras,
   avatar: savedAvatar,
   avatarShown: savedShown,
+  avatarLooks: savedLooks,
   hiddenNav,
   summary,
 }: {
@@ -102,6 +103,7 @@ export function RoomView({
   extras: Extra[];
   avatar: AvatarLook;
   avatarShown: boolean;
+  avatarLooks: AvatarLook[];
   /** For the switch that turns the whole room off. */
   hiddenNav: HideableNav[];
   /** "198 books on 5 bookcases", beside the title. */
@@ -116,6 +118,7 @@ export function RoomView({
   }));
   const [avatar, setAvatar] = useState(savedAvatar);
   const [avatarShown, setAvatarShown] = useState(savedShown);
+  const [avatarLooks, setAvatarLooks] = useState(savedLooks);
   const [panel, setPanel] = useState(false);
   const [tab, setTab] = useState<Tab>("house");
   const [arranging, setArranging] = useState(false);
@@ -146,6 +149,11 @@ export function RoomView({
   const changeAvatar = (look: AvatarLook) => {
     setAvatar(look);
     savePreferences({ avatar: look }).catch(() => {});
+  };
+
+  const keepLooks = (looks: AvatarLook[]) => {
+    setAvatarLooks(looks);
+    savePreferences({ avatarLooks: looks }).catch(() => {});
   };
 
   const showAvatar = (shown: boolean) => {
@@ -415,8 +423,10 @@ export function RoomView({
               <AvatarMaker
                 look={avatar}
                 shown={avatarShown}
+                looks={avatarLooks}
                 onChange={changeAvatar}
                 onShown={showAvatar}
+                onLooks={keepLooks}
                 scene={decorData(decor)}
               />
             </div>

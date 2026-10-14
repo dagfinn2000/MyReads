@@ -99,6 +99,7 @@ export default async function ReadingRoomPage() {
         layout={prefs.roomLayout}
         avatar={prefs.avatar}
         avatarShown={prefs.avatarShown}
+        avatarLooks={prefs.avatarLooks}
         hiddenNav={prefs.hiddenNav}
         away={prefs.roomAway}
         rooms={prefs.roomRooms}

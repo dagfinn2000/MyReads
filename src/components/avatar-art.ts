@@ -15,7 +15,7 @@
  * reach above it into the headroom.
  */
 import type { Art, Paint, Rect } from "@/components/room-art";
-import { LONG_TOPS, type AvatarLook } from "@/lib/avatar";
+import { HAIR_HIDING_HATS, LONG_TOPS, type AvatarAccessory, type AvatarLook } from "@/lib/avatar";
 
 /** Rows over the head for a hat, and a dot each side for the outline. */
 const HEADROOM = 14;
@@ -27,18 +27,29 @@ type View = "side" | "front";
 type Pose = "stand" | "stride" | "sit";
 
 class Canvas {
-  private readonly cells: (Paint | null)[][];
-  readonly h: number;
+  private cells: (Paint | null)[][];
+  /** How far down the figure is drawn: in a wheelchair, the upper body
+   *  sits lower than it stands. */
+  dy = 0;
   constructor(rows: number) {
-    this.h = HEADROOM + rows;
-    this.cells = Array.from({ length: this.h }, () => Array<Paint | null>(AVATAR_W).fill(null));
+    this.cells = Array.from({ length: HEADROOM + rows }, () => Array<Paint | null>(AVATAR_W).fill(null));
+  }
+  get h() {
+    return this.cells.length;
   }
   set(x: number, y: number, paint: Paint | null) {
-    const row = this.cells[y + HEADROOM];
+    const row = this.cells[y + this.dy + HEADROOM];
     if (row && x + PAD >= 0 && x + PAD < AVATAR_W) row[x + PAD] = paint;
   }
   get(x: number, y: number): Paint | null {
-    return this.cells[y + HEADROOM]?.[x + PAD] ?? null;
+    return this.cells[y + this.dy + HEADROOM]?.[x + PAD] ?? null;
+  }
+  /** Makes the figure taller by drawing each of `rows` twice, or shorter
+   *  by leaving them out: rows of legs or body that look the same a dot
+   *  further down. */
+  resize(rows: readonly number[], taller: boolean) {
+    const at = new Set(rows.map((y) => y + HEADROOM));
+    this.cells = this.cells.flatMap((row, i) => (!at.has(i) ? [row] : taller ? [row, [...row]] : []));
   }
   /** A row of dots from x0 to x1, either way round. */
   run(x0: number, x1: number, y: number, paint: Paint | null) {
@@ -95,8 +106,44 @@ function both(c: Canvas, x0: number, x1: number, y0: number, y1: number, paint: 
 
 // ── Behind: a cape, a backpack ────────────────────────────────────────────
 
+/** Paints a little grid of characters from `key`, its top left at x, y;
+ *  `flip` mirrors it left to right. */
+function paintGrid(
+  c: Canvas,
+  rows: readonly string[],
+  x: number,
+  y: number,
+  key: Record<string, Paint>,
+  flip = false,
+) {
+  rows.forEach((row, dy) =>
+    [...row].forEach((ch, dx) => {
+      if (key[ch]) c.set(flip ? x + row.length - 1 - dx : x + dx, y + dy, key[ch]);
+    }),
+  );
+}
+
+const WING_KEY: Record<string, Paint> = { h: "av-wing-hi", w: "av-wing", l: "av-wing-lo" };
+
+/** Fairy wings: from the side, an upper and a lower wing behind the back,
+ *  flapping a little as they walk; from the front, peeping out either side
+ *  over the armchair. */
+function wings(c: Canvas, pose: Pose) {
+  if (pose === "sit") {
+    // Narrowing to the shoulders, so they stay clear of the chair's arms.
+    const rows = ["h..", "wh.", "wwh", "lww", ".lw", "..l"];
+    paintGrid(c, rows, 0, 8, WING_KEY);
+    paintGrid(c, rows, 11, 8, WING_KEY, true);
+    return;
+  }
+  const up = pose === "stride" ? -1 : 0;
+  paintGrid(c, ["h..", "wh.", "wwh", "wwh", "lww", "lww", ".lw", "..w"], 0, 5 + up, WING_KEY);
+  paintGrid(c, ["..w", ".lw", "lww", "lw.", "h.."], 0, 14 - up, WING_KEY);
+}
+
 function behind(c: Canvas, look: AvatarLook, pose: Pose) {
   const sit = pose === "sit";
+  if (look.accessories.includes("wings")) wings(c, pose);
   if (look.accessories.includes("cape")) {
     if (sit) {
       // Over the shoulders and down behind the arms.
@@ -459,20 +506,23 @@ function sleeves(look: AvatarLook): { paint: Paint; lo: Paint; to: number; wide:
   }
 }
 
-function standingArms(c: Canvas, look: AvatarLook, stride: boolean) {
+/** The arms, the far one in shadow. Walking, they swing, unless `steady`
+ *  says which hand is carrying something. */
+function standingArms(c: Canvas, look: AvatarLook, stride: boolean, steady: "near" | "far" | null = null) {
   const sl = sleeves(look);
-  // Each arm as dots from the shoulder to the hand: the far arm in shadow.
-  const far = stride ? [2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1] : [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2];
-  const near = stride ? [11, 11, 11, 11, 11, 11, 11, 12, 12, 12, 12] : [11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11];
-  const rows = stride ? 10 : 11; // a swinging arm looks shorter
-  for (const [xs, lit] of [
-    [far, false],
-    [near, true],
+  const still = { far: [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2], near: [11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11] };
+  const swing = { far: [2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1], near: [11, 11, 11, 11, 11, 11, 11, 12, 12, 12, 12] };
+  for (const [arm, lit] of [
+    ["far", false],
+    ["near", true],
   ] as const) {
+    const swinging = stride && steady !== arm;
+    const xs = (swinging ? swing : still)[arm];
+    const rows = swinging ? 10 : 11; // a swinging arm looks shorter
     for (let i = 0; i < rows; i++) {
       const y = 12 + i;
       const x = xs[i];
-      const hand = y >= 21 || (stride && y >= 20);
+      const hand = y >= 21 || (swinging && y >= 20);
       const sleeve = !hand && y <= sl.to;
       const paint = hand || !sleeve ? (lit ? "av-skin" : "av-skin-lo") : lit ? sl.paint : sl.lo;
       c.set(x, y, paint);
@@ -945,6 +995,43 @@ function hairBack(c: Canvas, look: AvatarLook, view: View) {
       }
       break;
     }
+    case "curtains":
+      curtain(8);
+      break;
+    case "mullet":
+      // Short on top, long at the back: down the neck from the side, and
+      // either side of it from the front.
+      if (side) {
+        c.block(1, 3, 3, 13, h);
+        c.block(1, 1, 4, 12, hi);
+        c.run(1, 3, 13, lo);
+        c.set(3, 13, null);
+      } else {
+        for (const x of [2, 11]) c.block(x, x, 5, 11, x === 2 ? hi : lo);
+        c.block(3, 3, 10, 11, h);
+        c.block(10, 10, 10, 11, h);
+      }
+      break;
+    case "ringlets": {
+      // Long spiral curls: each one a column of dots, light and dark in
+      // turn, ending at its own length.
+      const [x0, x1] = side ? [0, 8] : [1, 12];
+      for (let x = x0; x <= x1; x++) {
+        const end = 15 + (x % 2) + (x % 3 === 0 ? 1 : 0);
+        for (let y = 0; y <= end; y++) c.set(x, y, (y + 2 * x) % 4 === 0 ? lo : (y + 2 * x) % 4 === 1 ? hi : h);
+      }
+      break;
+    }
+    case "cornrows":
+      // The rows end in plaits down the back.
+      if (side) {
+        for (let y = 4; y <= 13; y++) {
+          c.run(1, 2, y, h);
+          c.set(1 + (y % 2), y, lo);
+        }
+        c.run(1, 2, 14, "av-accent");
+      }
+      break;
     case "ponytail":
       if (side) {
         c.block(0, 1, 3, 10, h);
@@ -1193,6 +1280,167 @@ function hairFront(c: Canvas, look: AvatarLook, view: View) {
     case "pigtails":
       cap();
       fringe(4);
+      return;
+    case "pixie":
+      // Cropped close, with a fringe swept across.
+      cap();
+      if (side) {
+        c.run(2, 9, 3, h);
+        c.set(2, 4, lo);
+        c.set(9, 4, h);
+        c.set(10, 3, hi);
+      } else {
+        c.run(2, 8, 3, h);
+        c.run(2, 4, 4, h);
+        c.set(2, 5, lo);
+        c.set(11, 3, lo);
+        c.run(5, 7, 3, hi);
+      }
+      return;
+    case "curtains":
+      // Parted in the middle, falling away either side.
+      cap();
+      c.dots(
+        side
+          ? [
+              [6, -1],
+              [6, 0],
+            ]
+          : [
+              [6, -1],
+              [6, 0],
+              [7, 0],
+            ],
+        lo,
+      );
+      if (side) {
+        c.run(2, 8, 3, h);
+        c.block(2, 3, 4, 7, h);
+        c.set(9, 3, lo);
+      } else {
+        for (const [a, b] of [
+          [2, 5],
+          [8, 11],
+        ] as const) {
+          c.run(a, b, 3, h);
+        }
+        c.run(2, 4, 4, h);
+        c.run(9, 11, 4, lo);
+        c.block(2, 2, 5, 8, h);
+        c.block(11, 11, 5, 8, lo);
+      }
+      return;
+    case "undercut": {
+      // Shaved at the sides, the top grown long and swept over.
+      const b = "av-buzz";
+      if (side) {
+        c.block(3, 10, 1, 2, b);
+        c.dots(
+          [
+            [3, 3],
+            [3, 4],
+          ],
+          b,
+        );
+        c.run(5, 10, -3, h);
+        c.run(3, 11, -2, h);
+        c.run(3, 11, -1, h);
+        c.run(4, 11, 0, h);
+        c.set(11, 1, h);
+        c.set(12, 1, lo);
+        c.run(5, 9, -2, hi);
+      } else {
+        c.block(3, 10, 1, 2, b);
+        c.dots(
+          [
+            [3, 3],
+            [10, 3],
+          ],
+          b,
+        );
+        c.run(4, 9, -2, h);
+        c.run(3, 10, -1, h);
+        c.run(3, 10, 0, h);
+        c.run(2, 6, 1, h);
+        c.run(2, 4, 2, h);
+        c.set(2, 3, lo);
+        c.run(5, 8, -2, hi);
+        c.run(6, 9, 0, lo);
+      }
+      return;
+    }
+    case "mullet":
+      cap();
+      if (side) {
+        c.run(2, 9, 3, h);
+        c.block(2, 3, 4, 5, h);
+      } else {
+        c.run(2, 4, 3, h);
+        c.run(9, 11, 3, h);
+        c.set(5, 3, h);
+        c.set(2, 4, h);
+        c.set(11, 4, lo);
+      }
+      return;
+    case "ringlets":
+      cap();
+      fringe(4);
+      c.dots(
+        [
+          [4, 0],
+          [7, -1],
+          [9, 0],
+          [5, 1],
+          [10, 2],
+        ],
+        lo,
+      );
+      if (!side)
+        c.dots(
+          [
+            [3, 4],
+            [10, 4],
+          ],
+          h,
+        );
+      return;
+    case "cornrows":
+      // Close to the head, in rows from the hairline back.
+      c.run(4, 9, 0, h);
+      c.block(3, 10, 1, 2, h);
+      if (side) {
+        c.dots(
+          [
+            [3, 3],
+            [3, 4],
+          ],
+          h,
+        );
+        c.run(4, 10, 1, lo);
+        c.run(5, 9, -1, h);
+        c.set(10, 0, lo);
+      } else {
+        c.dots(
+          [
+            [3, 3],
+            [10, 3],
+          ],
+          h,
+        );
+        // Three plaits, braided down their length.
+        c.run(5, 8, -1, h);
+        for (const x of [5, 8]) c.block(x, x, -1, 2, lo);
+        c.dots(
+          [
+            [4, 1],
+            [6, 0],
+            [7, 1],
+            [6, 2],
+            [9, 1],
+          ],
+          hi,
+        );
+      }
       return;
     case "braids": {
       cap();
@@ -1512,6 +1760,254 @@ function hat(c: Canvas, look: AvatarLook, view: View) {
       c.run(3, 10, -7, "av-halo-lo");
       c.run(5, 8, -8, "av-halo-hi");
       return;
+    case "headscarf": {
+      // Over the head and ears, close round the face, and down over the
+      // shoulders.
+      const [a, b, hi, lo] = ["av-accent", "av-accent", "av-accent-hi", "av-accent-lo"];
+      c.run(4, 9, -2, a);
+      c.run(3, 10, -1, a);
+      c.block(2, 11, 0, 2, a);
+      c.run(4, 6, -1, hi);
+      c.run(3, 4, 0, hi);
+      if (side) {
+        c.block(2, 5, 3, 9, a);
+        c.set(6, 3, a);
+        c.block(2, 2, 3, 9, hi);
+        c.run(4, 10, 10, a);
+        c.block(2, 9, 11, 13, b);
+        c.run(2, 3, 10, a);
+        c.block(2, 2, 10, 13, hi);
+        c.run(3, 9, 14, lo);
+        c.block(5, 5, 4, 9, lo);
+        c.set(11, 2, lo);
+      } else {
+        c.block(2, 2, 3, 9, hi);
+        c.block(11, 11, 3, 9, lo);
+        c.dots(
+          [
+            [3, 3],
+            [10, 3],
+          ],
+          a,
+        );
+        c.run(2, 11, 10, a);
+        c.block(1, 12, 11, 13, b);
+        c.block(1, 1, 11, 13, hi);
+        c.block(12, 12, 11, 13, lo);
+        c.run(2, 11, 14, lo);
+        c.dots(
+          [
+            [3, 10],
+            [10, 10],
+            [4, 12],
+            [4, 13],
+            [9, 12],
+            [9, 13],
+          ],
+          lo,
+        );
+      }
+      return;
+    }
+    case "turban": {
+      // Wound round and round: folds slanting across it.
+      const a = "av-accent";
+      const rows: [number, number][] = side
+        ? [
+            [4, 7],
+            [3, 9],
+            [2, 10],
+            [2, 11],
+            [2, 11],
+            [2, 11],
+            [2, 10],
+          ]
+        : [
+            [5, 8],
+            [4, 9],
+            [3, 10],
+            [2, 11],
+            [2, 11],
+            [2, 11],
+            [3, 10],
+          ];
+      rows.forEach(([x0, x1], i) => c.run(x0, x1, -5 + i, a));
+      for (let k = 0; k < 4; k++) {
+        const x = (side ? 3 : 2) + 3 * k;
+        c.dots(
+          [
+            [x, 1],
+            [x + 1, 0],
+            [x + 2, -1],
+            [x + 3, -2],
+          ].filter(([fx, fy]) => c.get(fx, fy) === a) as [number, number][],
+          "av-accent-lo",
+        );
+      }
+      c.run(side ? 4 : 5, side ? 6 : 8, -4, "av-accent-hi");
+      c.set(rows[3][0], -2, "av-accent-hi");
+      if (side) c.block(2, 3, 2, 3, a);
+      return;
+    }
+    case "headwrap": {
+      // Tall and full, tied at the front, in a print of dots.
+      const a = "av-accent";
+      const lean = side ? -1 : 0;
+      c.block(2, side ? 10 : 11, 0, 2, a);
+      c.run(3, side ? 9 : 10, -1, a);
+      for (let y = -6; y <= -2; y++) c.run(2 + lean, (side ? 10 : 11) + lean, y, a);
+      c.run(4 + lean, 9 + lean, -7, a);
+      for (let y = -7; y <= 2; y++) {
+        for (let x = 1; x <= 12; x++) if (c.get(x, y) === a && (x + 2 * y) % 4 === 0) c.set(x, y, "av-accent-hi");
+      }
+      c.run(2 + lean, (side ? 10 : 11) + lean, -1, "av-accent-lo");
+      c.run(2, side ? 10 : 11, 2, "av-accent-lo");
+      // The knot.
+      const k = side ? 8 : 6;
+      c.run(k - 1, k + 2, -8, "av-accent-lo");
+      c.run(k, k + 1, -9, "av-accent");
+      c.run(k, k + 1, -8, "av-accent");
+      return;
+    }
+    case "kippah": {
+      // A small round cap on the crown, over whatever hair is there.
+      const cx = side ? 4 : 5;
+      // From the top of the head (row 1) up through the hair.
+      let top = 1;
+      while (top > -HEADROOM && (c.get(cx + 1, top - 1) || c.get(cx + 2, top - 1))) top--;
+      c.run(cx + 1, cx + 2, top - 1, "av-accent");
+      c.run(cx, cx + 3, top, "av-accent");
+      c.set(cx + 1, top - 1, "av-accent-hi");
+      return;
+    }
+    case "sunhat":
+      tuck(-1);
+      c.run(4, 9, -4, "av-straw");
+      c.block(3, 10, -3, -2, "av-straw");
+      c.run(4, 6, -4, "av-straw-hi");
+      c.run(3, 10, -1, "av-accent");
+      c.run(1, 12, 0, "av-straw-hi");
+      c.run(0, 13, 1, "av-straw");
+      c.dots(
+        [
+          [0, 2],
+          [13, 2],
+        ],
+        "av-straw-lo",
+      );
+      c.run(2, 11, 1, "av-straw-lo");
+      if (!side) c.set(9, -1, "av-accent-hi");
+      return;
+    case "pirate":
+      // A tricorn, its brim turned up and edged in gold.
+      tuck(-1);
+      c.block(4, 9, -5, -2, "av-tophat");
+      c.run(5, 8, -6, "av-tophat");
+      c.run(0, 13, -1, "av-tophat");
+      c.run(1, 12, 0, "brass");
+      for (const [x0, x1] of [
+        [0, 2],
+        [11, 13],
+      ] as const)
+        c.run(x0, x1, -2, "av-tophat");
+      c.dots(
+        [
+          [0, -3],
+          [13, -3],
+        ],
+        "brass",
+      );
+      c.dots(
+        [
+          [0, -2],
+          [13, -2],
+          [1, -2],
+          [12, -2],
+        ],
+        "av-tophat-hi",
+      );
+      c.dots(
+        [
+          [6, -4],
+          [7, -4],
+          [6, -3],
+        ],
+        "av-pom",
+      );
+      c.set(7, -3, "av-pom");
+      c.set(4, -5, "av-tophat-hi");
+      return;
+    case "viking": {
+      // A round iron cap with a nose guard, and horns.
+      tuck(-1);
+      const m = "av-silver";
+      c.run(5, 8, -3, m);
+      c.run(4, 9, -2, m);
+      c.run(3, 10, -1, m);
+      c.block(2, 11, 0, 1, m);
+      c.run(4, 6, -2, "av-silver-hi");
+      c.run(3, 4, -1, "av-silver-hi");
+      c.run(2, 11, 2, "brass");
+      for (const x of [3, 6, 9]) c.set(x, 2, "brass-hi");
+      if (side) {
+        c.block(10, 10, 3, 4, m);
+        c.dots(
+          [
+            [2, 0],
+            [1, -1],
+            [1, -2],
+            [0, -3],
+            [0, -4],
+            [11, 0],
+            [12, -1],
+            [12, -2],
+            [13, -3],
+            [13, -4],
+          ],
+          "av-horn",
+        );
+        c.dots(
+          [
+            [2, -1],
+            [1, -3],
+            [11, -1],
+            [12, -3],
+          ],
+          "av-horn-lo",
+        );
+      } else {
+        c.block(6, 7, 3, 4, m);
+        for (const [x, d] of [
+          [1, -1],
+          [12, 1],
+        ] as const) {
+          c.dots(
+            [
+              [x, 0],
+              [x, -1],
+              [x + d, -1],
+              [x + d, -2],
+              [x + d, -3],
+              [x, -4],
+            ],
+            "av-horn",
+          );
+          c.set(x + d, -1, "av-horn-lo");
+        }
+      }
+      return;
+    }
+    case "chef":
+      tuck(-2);
+      c.run(4, 9, -9, "av-chef");
+      c.block(2, 11, -8, -4, "av-chef");
+      c.run(3, 10, -3, "av-chef");
+      for (const x of [5, 8]) c.block(x, x, -7, -3, "av-chef-lo");
+      c.block(2, 2, -8, -4, "av-chef-hi");
+      c.run(3, 10, -2, "av-chef");
+      c.block(3, 10, -1, 0, "av-chef");
+      c.run(3, 10, 1, "av-chef-lo");
+      return;
   }
 }
 
@@ -1561,6 +2057,126 @@ function headphones(c: Canvas, look: AvatarLook, view: View) {
   }
 }
 
+/** Pointed ears, an elf's, poking out through the hair. */
+function ears(c: Canvas, look: AvatarLook, view: View) {
+  if (look.ears !== "pointy" || look.hat === "headscarf") return;
+  if (view === "side") {
+    c.dots(
+      [
+        [4, 4],
+        [3, 4],
+        [3, 5],
+      ],
+      "av-skin",
+    );
+    c.dots(
+      [
+        [2, 3],
+        [4, 5],
+        [4, 6],
+      ],
+      "av-skin-lo",
+    );
+  } else {
+    c.dots(
+      [
+        [2, 4],
+        [2, 5],
+        [2, 6],
+        [1, 3],
+      ],
+      "av-skin",
+    );
+    c.dots(
+      [
+        [11, 4],
+        [11, 5],
+        [11, 6],
+        [12, 3],
+      ],
+      "av-skin-lo",
+    );
+  }
+}
+
+/** An eye patch, a monocle, hearing aids. */
+function faceExtras(c: Canvas, look: AvatarLook, view: View) {
+  const side = view === "side";
+  const has = (a: AvatarAccessory) => look.accessories.includes(a);
+  if (has("eyepatch")) {
+    // Over the near eye (the viewer's right from the front), its strap
+    // slanting up round the head.
+    const x = side ? 7 : 8;
+    c.block(x - 1, x + 1, 5, 6, "av-patch");
+    c.set(x, 4, "av-patch");
+    c.dots(
+      side
+        ? [
+            [5, 4],
+            [4, 3],
+            [3, 3],
+          ]
+        : [
+            [10, 4],
+            [11, 3],
+            [6, 4],
+            [5, 3],
+            [4, 3],
+            [3, 2],
+          ],
+      "av-patch",
+    );
+  }
+  if (has("monocle")) {
+    const x = side ? 10 : 5;
+    // A round ring of brass about the eye, and its chain.
+    const ring: [number, number][] = [
+      [x, 4],
+      [x - 1, 5],
+      [x - 1, 6],
+      [x + 1, 5],
+      [x + 1, 6],
+      [x, 7],
+    ];
+    c.dots(
+      ring.filter(([rx]) => rx <= (side ? 11 : 10)),
+      "brass",
+    );
+    c.dots(
+      side
+        ? [
+            [9, 8],
+            [9, 9],
+            [9, 10],
+          ]
+        : [
+            [4, 8],
+            [4, 9],
+            [4, 10],
+          ],
+      "brass-lo",
+    );
+  }
+  if (has("hearingaids")) {
+    c.dots(
+      side
+        ? [
+            [3, 5],
+            [3, 6],
+            [4, 4],
+          ]
+        : [
+            [2, 4],
+            [2, 5],
+            [11, 4],
+            [11, 5],
+          ],
+      "av-accent",
+    );
+    c.set(side ? 3 : 2, side ? 4 : 3, "av-accent-hi");
+  }
+}
+
 function earrings(c: Canvas, look: AvatarLook, view: View) {
   if (!look.accessories.includes("earrings")) return;
   if (view === "side") c.set(4, 8, "brass-hi");
@@ -1592,6 +2208,284 @@ function heldBook(c: Canvas) {
  *  book is laid over it. */
 export const HELD_BOOK = { x: 1 + PAD, y: 15 + HEADROOM, w: 11, h: 3 };
 
+// ── Carried things, a walking stick, a wheelchair ───────────────────────
+
+/**
+ * What they carry, held in the hand whose lowest dot is `hx`, `hy`, out
+ * the way `dir` points (1 to the right, -1 to the left).
+ */
+function held(c: Canvas, look: AvatarLook, hx: number, hy: number, dir: 1 | -1) {
+  const at = (dx: number) => hx + dir * dx;
+  const put = (pts: readonly (readonly [number, number])[], paint: Paint) =>
+    c.dots(
+      pts.map(([dx, dy]) => [at(dx), hy + dy] as const),
+      paint,
+    );
+  switch (look.held) {
+    case "mug":
+      put(
+        [
+          [1, -1],
+          [2, -1],
+          [1, 0],
+          [2, 0],
+        ],
+        "av-accent",
+      );
+      put(
+        [
+          [1, -2],
+          [2, -2],
+        ],
+        "av-accent-hi",
+      );
+      put([[2, 0]], "av-accent-lo");
+      return;
+    case "book":
+      // Carried by its top edge, hanging at the side.
+      put(
+        [
+          [0, 1],
+          [1, 1],
+          [0, 2],
+          [0, 3],
+          [0, 4],
+          [1, 4],
+        ],
+        "av-accent",
+      );
+      put(
+        [
+          [1, 2],
+          [1, 3],
+        ],
+        "paper",
+      );
+      return;
+    case "lantern":
+      put([[1, 1]], "av-iron");
+      put(
+        [
+          [0, 2],
+          [1, 2],
+          [2, 2],
+          [0, 3],
+          [2, 3],
+          [0, 4],
+          [2, 4],
+          [0, 5],
+          [1, 5],
+          [2, 5],
+        ],
+        "av-iron",
+      );
+      put([[1, 3]], "av-lamp-hi");
+      put([[1, 4]], "av-lamp");
+      return;
+    case "wand":
+      put(
+        [
+          [1, -1],
+          [1, -2],
+        ],
+        "av-wand",
+      );
+      put([[2, -3]], "av-wand");
+      put([[2, -4]], "av-spark");
+      put(
+        [
+          [1, -4],
+          [2, -5],
+        ],
+        "av-spark-lo",
+      );
+      return;
+    case "teddy":
+      // Held by a paw, dangling.
+      put(
+        [
+          [0, 1],
+          [1, 1],
+          [-1, 2],
+          [0, 2],
+          [1, 2],
+          [2, 2],
+          [0, 3],
+          [1, 3],
+          [-1, 4],
+          [0, 4],
+          [1, 4],
+          [2, 4],
+          [-1, 5],
+          [2, 5],
+        ],
+        "av-teddy",
+      );
+      put(
+        [
+          [-1, 1],
+          [2, 1],
+          [0, 5],
+          [1, 5],
+        ],
+        "av-teddy-lo",
+      );
+      put([[0, 2]], "av-line");
+      put([[1, 3]], "av-teddy-hi");
+      return;
+    case "sunflower":
+      put(
+        [
+          [1, -1],
+          [1, -2],
+          [1, -3],
+        ],
+        "leaf",
+      );
+      put([[2, -2]], "leaf-hi");
+      put(
+        [
+          [1, -6],
+          [0, -5],
+          [2, -5],
+          [1, -4],
+          [0, -6],
+          [2, -4],
+        ],
+        "av-petal",
+      );
+      put([[1, -5]], "av-seed");
+      return;
+  }
+}
+
+/** A walking stick in the near hand, its crook under the hand. */
+function walkingStick(c: Canvas, stride: boolean) {
+  if (stride) {
+    c.dots(
+      [
+        [12, 19],
+        [13, 19],
+      ],
+      "av-stick",
+    );
+    c.block(13, 13, 20, 36, "av-stick");
+    c.set(13, 36, "av-stick-lo");
+  } else {
+    c.dots(
+      [
+        [11, 20],
+        [12, 20],
+      ],
+      "av-stick",
+    );
+    c.block(12, 12, 21, 36, "av-stick");
+    c.set(12, 36, "av-stick-lo");
+  }
+}
+
+/** How far down the upper body sits in a wheelchair. */
+const CHAIR_DROP = 7;
+
+/**
+ * Seated in a wheelchair, seen from the side: the chair's back behind
+ * them, their lap and shins, the big wheel in front with a hand on its
+ * rim, and a little wheel at the front. `rolling` is the second frame,
+ * the spokes turned and the hand pushing on.
+ */
+function wheelchair(c: Canvas, look: AvatarLook, rolling: boolean) {
+  const long = LONG_TOPS.includes(look.top);
+  const b = look.bottom;
+  // The back and handles, behind them.
+  c.block(1, 1, 17, 30, "av-rim-lo");
+  c.dots(
+    [
+      [0, 17],
+      [1, 17],
+    ],
+    "av-tyre",
+  );
+  c.block(2, 2, 19, 29, "av-seat");
+
+  c.dy = CHAIR_DROP;
+  behind(c, { ...look, accessories: look.accessories.filter((a) => a === "wings") }, "stand");
+  if (look.accessories.includes("cape")) {
+    c.block(2, 3, 11, 19, "av-accent");
+    c.block(2, 2, 11, 19, "av-accent-lo");
+  }
+  if (!HAIR_HIDING_HATS.includes(look.hat)) hairBack(c, look, "side");
+  top(c, look, "side", "sit");
+  bib(c, look, "side", "sit");
+  // The lap, from the hips forward, then the shins down to the footrest.
+  const lap = long ? "av-top" : "av-bottom";
+  c.block(4, 11, 20, 22, lap);
+  c.run(4, 11, 20, `${lap}-hi`);
+  c.run(4, 11, 22, `${lap}-lo`);
+  const covered = look.top === "robe" ? "av-top" : !long && b === "longskirt" ? "av-bottom" : null;
+  const trousers = !long && (b === "trousers" || b === "jeans" || b === "dungarees");
+  if (covered) {
+    c.block(9, 12, 23, 25, covered);
+    c.block(12, 12, 23, 25, `${covered}-lo`);
+    c.run(9, 12, 25, `${covered}-lo`);
+  } else {
+    c.block(10, 11, 23, 25, trousers ? "av-bottom" : "av-skin");
+    c.block(11, 11, 23, 25, trousers ? "av-bottom-lo" : "av-skin-lo");
+    if (look.top === "dress" || (!long && b === "skirt")) c.run(9, 12, 23, long ? "av-top-lo" : "av-bottom-lo");
+  }
+  // Shoes on the footrest.
+  const shoe: Record<string, [Paint, Paint]> = {
+    boots: ["av-boot", "av-shoe-lo"],
+    wellies: ["av-welly", "av-welly-lo"],
+    trainers: ["av-accent", "av-sole"],
+    slippers: ["av-slipper", "av-slipper-lo"],
+    sandals: ["av-skin", "av-strap"],
+  };
+  const [upper, sole] = shoe[look.shoes] ?? ["av-shoe", "av-shoe-lo"];
+  c.run(10, 13, 26, upper);
+  c.run(10, 13, 27, sole);
+  c.dy = 0;
+
+  // The seat's edge, the footrest and the little front wheel.
+  c.run(3, 11, 30, "av-rim-lo");
+  c.block(9, 9, 31, 34, "av-rim-lo");
+  c.run(9, 13, 35, "av-rim");
+  c.run(11, 12, 36, "av-tyre");
+  // The big wheel: tyre, rim, spokes and hub.
+  const cx = 5;
+  const cy = 31;
+  for (let y = cy - 6; y <= cy + 6; y++) {
+    for (let x = cx - 6; x <= cx + 6; x++) {
+      const d = Math.hypot(x - cx, y - cy);
+      if (d > 4.6 && d <= 5.7) c.set(x, y, "av-tyre");
+      else if (d > 3.7 && d <= 4.6) c.set(x, y, y < cy ? "av-rim-hi" : "av-rim");
+    }
+  }
+  const turn = rolling ? Math.PI / 8 : 0;
+  for (let k = 0; k < 4; k++) {
+    const a = turn + (k * Math.PI) / 4;
+    for (let r = -3; r <= 3; r++) {
+      if (r === 0) continue;
+      c.set(Math.round(cx + r * Math.cos(a)), Math.round(cy + r * Math.sin(a)), "av-rim-lo");
+    }
+  }
+  c.set(cx, cy, "av-rim-hi");
+
+  // The near arm, its hand on the rim: pushing, it reaches further on.
+  c.dy = CHAIR_DROP;
+  const sl = sleeves(look);
+  const reach = rolling ? 1 : 0;
+  for (let y = 12; y <= 19; y++) {
+    const x = y < 16 ? 6 : 7 + (y >= 18 ? reach : 0);
+    const sleeve = y <= Math.min(sl.to - 2, 17);
+    c.set(x, y, sleeve ? sl.paint : "av-skin");
+    if (y < 16 && sleeve) c.set(x + 1, y, sl.lo);
+  }
+  c.set(7 + reach, 19, "av-skin-lo");
+  if (look.top === "stripes") c.recolour(6, 8, 13, 13, ["av-top", "av-top-lo"], "av-stripe");
+  // Anything carried rests on the lap.
+  held(c, look, 8, 19, 1);
+}
+
 // ── Poses ────────────────────────────────────────────────────────────────
 
 export interface AvatarArt {
@@ -1605,43 +2499,76 @@ export interface AvatarArt {
 
 export type AvatarPose = Pose;
 
-/** The seated figure's top left, from the armchair's top left: in the
- *  seat, between the arms, its feet on the floor. */
-export const SEAT_OFFSET = { x: 8 - PAD, y: -2 - HEADROOM };
+/** How far in from the armchair's left the seated figure's sprite starts:
+ *  in the seat, between the arms. seatedTop says how far down. */
+export const SEAT_OFFSET = { x: 8 - PAD };
 
 /** Where figure dot 0, 0 (the top left of the head) is in the sprite, for
  *  showing just part of the figure. */
 export const FIGURE_ORIGIN = { x: PAD, y: HEADROOM };
 
+/** The rows drawn twice for a tall figure, or left out for a short one:
+ *  hips and shins standing, shins in the armchair, the middle of the body
+ *  in a wheelchair. */
+const HEIGHT_ROWS = { stand: [26, 32], sit: [25, 27], wheel: [20, 22] } as const;
+
 export function avatarPose(look: AvatarLook, pose: Pose): Art {
   const sit = pose === "sit";
+  const stride = pose === "stride";
+  const wheel = !sit && look.mobility === "wheelchair";
   const view: View = sit ? "front" : "side";
+  const hairless = HAIR_HIDING_HATS.includes(look.hat);
   const c = new Canvas(sit ? 33 : 38);
-  behind(c, look, pose);
-  hairBack(c, look, view);
-  if (sit) {
-    seatedLegs(c, look);
-    top(c, look, view, pose);
-    bib(c, look, view, pose);
-    seatedArms(c, look);
+  if (wheel) {
+    wheelchair(c, look, stride);
   } else {
-    standingLegs(c, look, pose === "stride");
-    standingShoes(c, look, pose === "stride");
-    top(c, look, view, pose);
-    bib(c, look, view, pose);
-    standingArms(c, look, pose === "stride");
+    behind(c, look, pose);
+    if (!hairless) hairBack(c, look, view);
+    if (sit) {
+      seatedLegs(c, look);
+      top(c, look, view, pose);
+      bib(c, look, view, pose);
+      seatedArms(c, look);
+    } else {
+      standingLegs(c, look, stride);
+      standingShoes(c, look, stride);
+      top(c, look, view, pose);
+      bib(c, look, view, pose);
+      const stick = look.mobility === "stick";
+      const carrying = look.held !== "nothing";
+      // With a stick in the near hand, the far one carries things.
+      standingArms(c, look, stride, carrying ? (stick ? "far" : "near") : null);
+      if (stick) walkingStick(c, stride);
+      if (stick) held(c, look, 2, 22, -1);
+      else held(c, look, 11, 22, 1);
+    }
   }
-  neck(c, look, view, pose);
+  neck(c, look, view, wheel ? "stand" : pose);
   face(c, look, view, sit);
+  ears(c, look, view);
   facialHair(c, look, view, pose);
-  hairFront(c, look, view);
+  if (!hairless) hairFront(c, look, view);
   glasses(c, look, view, sit);
+  faceExtras(c, look, view);
   earrings(c, look, view);
   if (sit) heldBook(c);
   hat(c, look, view);
   headphones(c, look, view);
+  c.dy = 0;
+  if (look.height !== "medium") {
+    c.resize(HEIGHT_ROWS[sit ? "sit" : wheel ? "wheel" : "stand"], look.height === "tall");
+  }
   return c.toArt();
 }
+
+/** The armchair's height (room-art.tsx), which the seated figure's feet
+ *  reach the bottom of. */
+const ARMCHAIR_H = 31;
+
+/** How far below the armchair's top the seated figure's sprite starts
+ *  (above it, so negative): its feet are on the floor whatever its
+ *  height. */
+export const seatedTop = (sit: Art) => ARMCHAIR_H - sit.h;
 
 export function avatarArt(look: AvatarLook): AvatarArt {
   return { stand: avatarPose(look, "stand"), stride: avatarPose(look, "stride"), sit: avatarPose(look, "sit") };

@@ -111,11 +111,16 @@ server.
   curio cabinet and a spinning wheel. Each goes wherever there's space,
   and you can move it from there.
 - Make a little you who lives there, from a wardrobe: ten skin tones (an
-  elf or a spaceman too), eyes, a mouth, blush or freckles, a beard, 17
-  hairstyles in 14 colours, jumpers, shirts, hoodies, a coat, a dress or a
-  robe, trousers, jeans, shorts, skirts or dungarees, six kinds of shoes,
-  16 hats from a beanie to a halo, and glasses, earrings, a scarf,
-  headphones, a backpack or a cape, all in colours of your choosing. Or
+  elf or a spaceman too), eyes in seven colours, round or pointed ears, a
+  mouth, blush or freckles, a beard, 23 hairstyles in 14 colours, three
+  heights, jumpers, shirts, hoodies, a coat, a dress or a robe, trousers,
+  jeans, shorts, skirts or dungarees, six kinds of shoes, 24 hats from a
+  beanie to a halo (a headscarf, a turban, a head wrap and a kippah
+  among them), and glasses, a monocle, an eye patch, hearing aids,
+  earrings, a scarf, headphones, a backpack, a cape or fairy wings, all in
+  colours of your choosing. Get about on foot, with a walking stick or in
+  a wheelchair, and carry a mug of tea, a book, a lantern, a magic wand, a
+  teddy bear or a sunflower. Keep up to six looks to switch between, or
   let Surprise me pick. They potter about the house
   and stop by the fire, and while you're reading a book they sit in the
   armchair reading it (the cat moves to the rug). With animations off they

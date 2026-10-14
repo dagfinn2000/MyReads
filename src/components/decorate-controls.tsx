@@ -84,6 +84,7 @@ export function Tiles<T extends string>({
   labels,
   chosen,
   multiple = false,
+  tall = false,
   onPick,
   children,
 }: {
@@ -93,6 +94,8 @@ export function Tiles<T extends string>({
   labels: Record<string, string>;
   chosen: (o: T) => boolean;
   multiple?: boolean;
+  /** Twice as tall, for a whole figure. */
+  tall?: boolean;
   onPick: (o: T) => void;
   /** The picture on each tile. */
   children: (o: T) => React.ReactNode;
@@ -118,7 +121,8 @@ export function Tiles<T extends string>({
             >
               <span
                 className={cn(
-                  "room-scene room-avatar-tile grid size-14 place-items-center items-end overflow-hidden rounded-md border ring-offset-2 ring-offset-card transition-shadow group-hover:border-ring/60",
+                  "room-scene room-avatar-tile grid w-14 place-items-center items-end overflow-hidden rounded-md border ring-offset-2 ring-offset-card transition-shadow group-hover:border-ring/60",
+                  tall ? "h-24" : "h-14",
                   on && "ring-2 ring-foreground",
                 )}
               >

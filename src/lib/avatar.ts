@@ -24,6 +24,21 @@ export type AvatarSkin = (typeof AVATAR_SKINS)[number];
 export const AVATAR_EYES = ["round", "happy", "sleepy", "sparkly", "lashes", "wink"] as const;
 export type AvatarEyes = (typeof AVATAR_EYES)[number];
 
+export const AVATAR_EYE_COLOURS = ["dark", "brown", "hazel", "green", "blue", "grey", "violet"] as const;
+export type AvatarEyeColour = (typeof AVATAR_EYE_COLOURS)[number];
+
+/** Round, or pointed like an elf's. */
+export const AVATAR_EARS = ["round", "pointy"] as const;
+export type AvatarEars = (typeof AVATAR_EARS)[number];
+
+export const AVATAR_HEIGHTS = ["short", "medium", "tall"] as const;
+export type AvatarHeight = (typeof AVATAR_HEIGHTS)[number];
+
+/** How they get about the house: on foot, with a walking stick, or in a
+ *  wheelchair. In the armchair, reading, everyone sits the same. */
+export const AVATAR_MOBILITY = ["walk", "stick", "wheelchair"] as const;
+export type AvatarMobility = (typeof AVATAR_MOBILITY)[number];
+
 export const AVATAR_MOUTHS = ["smile", "grin", "small", "open", "tongue"] as const;
 export type AvatarMouth = (typeof AVATAR_MOUTHS)[number];
 
@@ -50,6 +65,12 @@ export const AVATAR_HAIRS = [
   "bun",
   "spacebuns",
   "locs",
+  "pixie",
+  "curtains",
+  "undercut",
+  "mullet",
+  "ringlets",
+  "cornrows",
   "bald",
 ] as const;
 export type AvatarHair = (typeof AVATAR_HAIRS)[number];
@@ -112,8 +133,18 @@ export const AVATAR_HATS = [
   "bunnyears",
   "horns",
   "halo",
+  "headscarf",
+  "turban",
+  "headwrap",
+  "kippah",
+  "sunhat",
+  "pirate",
+  "viking",
+  "chef",
 ] as const;
 export type AvatarHat = (typeof AVATAR_HATS)[number];
+/** Headwear that covers all the hair, so none of it is drawn. */
+export const HAIR_HIDING_HATS: readonly AvatarHat[] = ["headscarf", "turban", "headwrap"];
 
 export const AVATAR_ACCESSORIES = [
   "glasses",
@@ -125,8 +156,17 @@ export const AVATAR_ACCESSORIES = [
   "headphones",
   "backpack",
   "cape",
+  "eyepatch",
+  "monocle",
+  "hearingaids",
+  "wings",
 ] as const;
 export type AvatarAccessory = (typeof AVATAR_ACCESSORIES)[number];
+
+/** Something carried about the house (not while reading: then the book's
+ *  in their hands). */
+export const AVATAR_HELD = ["nothing", "mug", "book", "lantern", "wand", "teddy", "sunflower"] as const;
+export type AvatarHeld = (typeof AVATAR_HELD)[number];
 
 /** Clothes colours: tops, and what's worn below. */
 export const AVATAR_CLOTH_COLOURS = [
@@ -171,7 +211,11 @@ export type AvatarAccent = (typeof AVATAR_ACCENTS)[number];
 
 export interface AvatarLook {
   skin: AvatarSkin;
+  height: AvatarHeight;
+  mobility: AvatarMobility;
   eyes: AvatarEyes;
+  eyeColour: AvatarEyeColour;
+  ears: AvatarEars;
   mouth: AvatarMouth;
   cheeks: AvatarCheek[];
   facialHair: AvatarFacialHair;
@@ -184,12 +228,17 @@ export interface AvatarLook {
   shoes: AvatarShoes;
   hat: AvatarHat;
   accessories: AvatarAccessory[];
+  held: AvatarHeld;
   accent: AvatarAccent;
 }
 
 export const DEFAULT_AVATAR: AvatarLook = {
   skin: "light",
+  height: "medium",
+  mobility: "walk",
   eyes: "round",
+  eyeColour: "dark",
+  ears: "round",
   mouth: "smile",
   cheeks: ["blush"],
   facialHair: "none",
@@ -202,8 +251,12 @@ export const DEFAULT_AVATAR: AvatarLook = {
   shoes: "shoes",
   hat: "none",
   accessories: [],
+  held: "nothing",
   accent: "red",
 };
+
+/** How many looks can be kept to switch between. */
+export const MAX_SAVED_LOOKS = 6;
 
 const pick = <T extends readonly string[]>(allowed: T, value: unknown, fallback: T[number]): T[number] =>
   typeof value === "string" && (allowed as readonly string[]).includes(value) ? (value as T[number]) : fallback;
@@ -226,7 +279,11 @@ export function parseAvatar(value: unknown): AvatarLook {
   if (extras) cheeks = extras.includes("freckles") ? ["freckles"] : ["blush"];
   return {
     skin: pick(AVATAR_SKINS, o.skin, d.skin),
+    height: pick(AVATAR_HEIGHTS, o.height, d.height),
+    mobility: pick(AVATAR_MOBILITY, o.mobility, d.mobility),
     eyes: pick(AVATAR_EYES, o.eyes, d.eyes),
+    eyeColour: pick(AVATAR_EYE_COLOURS, o.eyeColour, d.eyeColour),
+    ears: pick(AVATAR_EARS, o.ears, d.ears),
     mouth: pick(AVATAR_MOUTHS, o.mouth, d.mouth),
     cheeks,
     facialHair: extras?.includes("beard") ? "beard" : pick(AVATAR_FACIAL_HAIR, o.facialHair, d.facialHair),
@@ -239,19 +296,46 @@ export function parseAvatar(value: unknown): AvatarLook {
     shoes: pick(AVATAR_SHOES, o.shoes, d.shoes),
     hat: pick(AVATAR_HATS, o.hat, d.hat),
     accessories: extras ? (extras.includes("glasses") ? ["glasses"] : []) : pickList(AVATAR_ACCESSORIES, o.accessories),
+    held: pick(AVATAR_HELD, o.held, d.held),
     accent: pick(AVATAR_ACCENTS, o.accent, d.accent),
   };
 }
 
-/** A look picked at random, for "Surprise me". `random` returns [0, 1). */
-export function randomLook(random: () => number = Math.random): AvatarLook {
+/** Saved looks, each as parseAvatar makes it; anything that isn't a look
+ *  is dropped, and so are the ones past the limit. */
+export function parseSavedLooks(value: unknown): AvatarLook[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .filter((v) => v && typeof v === "object" && !Array.isArray(v))
+    .slice(0, MAX_SAVED_LOOKS)
+    .map(parseAvatar);
+}
+
+/** Whether two looks are the same in every part, whatever order the
+ *  extras were put on in. */
+export function sameLook(a: AvatarLook, b: AvatarLook): boolean {
+  const key = (l: AvatarLook) => {
+    const p = parseAvatar(l);
+    return JSON.stringify({ ...p, cheeks: [...p.cheeks].sort(), accessories: [...p.accessories].sort() });
+  };
+  return key(a) === key(b);
+}
+
+/** A look picked at random, for "Surprise me". `random` returns [0, 1).
+ *  How they get about isn't a matter of looks, so it's `mobility`'s. */
+export function randomLook(random: () => number = Math.random, mobility: AvatarMobility = "walk"): AvatarLook {
   const any = <T>(list: readonly T[]): T => list[Math.floor(random() * list.length)];
   const some = <T>(list: readonly T[], chance: number, most: number): T[] =>
     list.filter(() => random() < chance).slice(0, most);
+  // Mostly everyday skin tones; now and then an elf or a spaceman.
+  const fairy = random() < 0.12;
   return {
-    // Mostly everyday skin tones; now and then an elf or a spaceman.
-    skin: random() < 0.12 ? any(AVATAR_SKINS.slice(7)) : any(AVATAR_SKINS.slice(0, 7)),
+    skin: fairy ? any(AVATAR_SKINS.slice(7)) : any(AVATAR_SKINS.slice(0, 7)),
+    height: random() < 0.5 ? "medium" : any(AVATAR_HEIGHTS),
+    mobility,
     eyes: random() < 0.5 ? "round" : any(AVATAR_EYES),
+    eyeColour: random() < 0.4 ? "dark" : any(AVATAR_EYE_COLOURS.slice(0, fairy ? 7 : 6)),
+    ears: fairy && random() < 0.7 ? "pointy" : "round",
     mouth: random() < 0.5 ? "smile" : any(AVATAR_MOUTHS),
     cheeks: some(AVATAR_CHEEKS, 0.35, 2),
     facialHair: random() < 0.75 ? "none" : any(AVATAR_FACIAL_HAIR),
@@ -263,7 +347,8 @@ export function randomLook(random: () => number = Math.random): AvatarLook {
     bottomColour: any(AVATAR_CLOTH_COLOURS),
     shoes: any(AVATAR_SHOES),
     hat: random() < 0.55 ? "none" : any(AVATAR_HATS.slice(1)),
-    accessories: some(AVATAR_ACCESSORIES, 0.18, 3),
+    accessories: some(AVATAR_ACCESSORIES, 0.14, 3),
+    held: random() < 0.6 ? "nothing" : any(AVATAR_HELD.slice(1)),
     accent: any(AVATAR_ACCENTS),
   };
 }
@@ -320,6 +405,16 @@ export const CLOTH_SWATCHES: Record<AvatarClothColour, string> = {
   white: "#f2f0ea",
 };
 
+export const EYE_SWATCHES: Record<AvatarEyeColour, string> = {
+  dark: "#251a17",
+  brown: "#5a3420",
+  hazel: "#6e5a26",
+  green: "#2f6e42",
+  blue: "#2f5f9e",
+  grey: "#5c6874",
+  violet: "#6a3fa0",
+};
+
 export const ACCENT_SWATCHES: Record<AvatarAccent, string> = {
   red: "#c8343f",
   orange: "#e0802e",
@@ -345,6 +440,13 @@ export const AVATAR_LABELS: Record<string, string> = {
   deep: "Deep brown",
   mint: "Elf green",
   lilac: "Lilac",
+  // Height, getting about, ears ("short" is the hairstyle's too)
+  medium: "Medium",
+  tall: "Tall",
+  walk: "On foot",
+  stick: "Walking stick",
+  wheelchair: "Wheelchair",
+  pointy: "Pointed",
   // Eyes, mouth, cheeks, facial hair
   round: "Round",
   happy: "Happy",
@@ -382,8 +484,17 @@ export const AVATAR_LABELS: Record<string, string> = {
   bun: "Bun",
   spacebuns: "Space buns",
   locs: "Locs",
+  pixie: "Pixie cut",
+  curtains: "Curtains",
+  undercut: "Undercut",
+  mullet: "Mullet",
+  ringlets: "Ringlets",
+  cornrows: "Cornrows",
   bald: "Bald",
   // Colours
+  dark: "Dark",
+  hazel: "Hazel",
+  violet: "Violet",
   black: "Black",
   brown: "Brown",
   chestnut: "Chestnut",
@@ -453,6 +564,14 @@ export const AVATAR_LABELS: Record<string, string> = {
   bunnyears: "Bunny ears",
   horns: "Horns",
   halo: "Halo",
+  headscarf: "Headscarf",
+  turban: "Turban",
+  headwrap: "Head wrap",
+  kippah: "Kippah",
+  sunhat: "Sun hat",
+  pirate: "Pirate hat",
+  viking: "Viking helmet",
+  chef: "Chef's hat",
   // Accessories
   glasses: "Glasses",
   sunglasses: "Sunglasses",
@@ -463,4 +582,16 @@ export const AVATAR_LABELS: Record<string, string> = {
   headphones: "Headphones",
   backpack: "Backpack",
   cape: "Cape",
+  eyepatch: "Eye patch",
+  monocle: "Monocle",
+  hearingaids: "Hearing aids",
+  wings: "Fairy wings",
+  // In your hand
+  nothing: "Nothing",
+  mug: "A mug of tea",
+  book: "A book",
+  lantern: "A lantern",
+  wand: "A magic wand",
+  teddy: "A teddy bear",
+  sunflower: "A sunflower",
 };

@@ -1,6 +1,15 @@
 import { describe, expect, it } from "vitest";
 import * as avatar from "@/lib/avatar";
-import { AVATAR_LABELS, DEFAULT_AVATAR, parseAvatar, randomLook } from "@/lib/avatar";
+import {
+  AVATAR_LABELS,
+  AVATAR_MOBILITY,
+  DEFAULT_AVATAR,
+  MAX_SAVED_LOOKS,
+  parseAvatar,
+  parseSavedLooks,
+  randomLook,
+  sameLook,
+} from "@/lib/avatar";
 
 describe("parseAvatar", () => {
   it("keeps a chosen look, defaulting anything unknown", () => {
@@ -12,7 +21,7 @@ describe("parseAvatar", () => {
         cheeks: ["spot", "dimples", "blush"],
         hair: "spacebuns",
         hat: "tophat",
-        accessories: ["cape", "monocle", "glasses"],
+        accessories: ["cape", "cravat", "glasses"],
         top: "robe",
         topColour: "plum",
       }),
@@ -74,6 +83,41 @@ describe("randomLook", () => {
       const look = randomLook(random);
       expect(parseAvatar(look)).toEqual(look);
     }
+  });
+});
+
+describe("randomLook and mobility", () => {
+  it("keeps the way they get about", () => {
+    for (const mobility of AVATAR_MOBILITY) {
+      for (let i = 0; i < 20; i++) expect(randomLook(Math.random, mobility).mobility).toBe(mobility);
+    }
+  });
+});
+
+describe("parseSavedLooks", () => {
+  it("keeps up to six looks, each made whole", () => {
+    const looks = parseSavedLooks([{ hair: "afro" }, "junk", ...Array.from({ length: 8 }, () => ({ hat: "chef" }))]);
+    expect(looks).toHaveLength(MAX_SAVED_LOOKS);
+    expect(looks[0]).toEqual({ ...DEFAULT_AVATAR, hair: "afro" });
+    expect(looks[1]).toEqual({ ...DEFAULT_AVATAR, hat: "chef" });
+  });
+
+  it("starts empty for anything that isn't a list", () => {
+    expect(parseSavedLooks(undefined)).toEqual([]);
+    expect(parseSavedLooks({ hair: "afro" })).toEqual([]);
+  });
+});
+
+describe("sameLook", () => {
+  it("compares every choice, whatever order the extras were put on in", () => {
+    expect(sameLook(DEFAULT_AVATAR, { ...DEFAULT_AVATAR })).toBe(true);
+    expect(sameLook(DEFAULT_AVATAR, { ...DEFAULT_AVATAR, held: "mug" })).toBe(false);
+    expect(
+      sameLook(
+        { ...DEFAULT_AVATAR, accessories: ["glasses", "cape"] },
+        { ...DEFAULT_AVATAR, accessories: ["cape", "glasses"] },
+      ),
+    ).toBe(true);
   });
 });
 
