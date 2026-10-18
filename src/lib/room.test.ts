@@ -13,6 +13,8 @@ import {
   HIGH_PART,
   PIECE_WIDTH,
   SHELF_WIDTH,
+  BOOKEND_WIDTH,
+  ORNAMENT_WIDTH,
   addExtra,
   addRoom,
   bringOut,
@@ -454,6 +456,33 @@ describe("dressShelf", () => {
       }
     }
     expect(dressShelf(7, 0)).toEqual(dressShelf(7, 0));
+  });
+
+  it("puts more ornaments on shelves with plenty, spaced apart, and none on shelves of just books", () => {
+    for (let n = 0; n < 50; n++) {
+      for (const used of [0, 12, 25, 31]) {
+        const some = dressShelf(n, used);
+        const plenty = dressShelf(n, used, "plenty");
+        expect(dressShelf(n, used, "none")).toEqual({ bookend: some.bookend, ornaments: [] });
+        expect(plenty.bookend).toBe(some.bookend);
+        expect(plenty.ornaments.length).toBeGreaterThanOrEqual(Math.min(1, some.ornaments.length));
+        if (used <= 12) expect(plenty.ornaments.length).toBeGreaterThan(some.ornaments.length);
+        const start = used + (plenty.bookend ? BOOKEND_WIDTH : 0);
+        let edge = start;
+        for (const o of plenty.ornaments) {
+          expect(o.x).toBeGreaterThanOrEqual(edge + 2);
+          edge = o.x + ORNAMENT_WIDTH[o.kind];
+        }
+        expect(edge).toBeLessThanOrEqual(SHELF_WIDTH - 2);
+        expect(new Set(plenty.ornaments.map((o) => o.kind)).size).toBe(plenty.ornaments.length);
+      }
+    }
+  });
+
+  it("dresses shelves with a few ornaments as it always has", () => {
+    expect([0, 1, 2, 3].map((n) => dressShelf(n, 12))).toEqual([0, 1, 2, 3].map((n) => dressShelf(n, 12, "some")));
+    const kinds = new Set(Array.from({ length: 200 }, (_, n) => dressShelf(n, 0).ornaments.map((o) => o.kind)).flat());
+    expect([...kinds].sort()).toEqual(["candle", "frame", "globe", "hourglass", "plant", "teapot", "vase"]);
   });
 });
 

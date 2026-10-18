@@ -106,6 +106,8 @@ export default async function ReadingRoomPage() {
           chair: prefs.roomChair,
           rug: prefs.roomRug,
           lamp: prefs.roomLamp,
+          bookcase: prefs.roomBookcase,
+          ornaments: prefs.roomOrnaments,
           own: prefs.roomOwn,
           windows: prefs.roomWindows,
           climber: prefs.roomClimber,

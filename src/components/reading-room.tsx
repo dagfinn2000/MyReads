@@ -3,11 +3,13 @@
 import "./reading-room.css";
 import { memo, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import type {
+  RoomBookcase,
   RoomCeiling,
   RoomChair,
   RoomClimber,
   RoomFireplace,
   RoomLamp,
+  RoomOrnaments,
   RoomRug,
   RoomFabric,
   RoomFloor,
@@ -46,7 +48,6 @@ import {
   TEACUP,
   tapestryArt,
   benchArt,
-  bookcaseArt,
   clockArt,
   deskArt,
   gramophoneArt,
@@ -60,6 +61,7 @@ import {
 import { HELD_BOOK, SEAT_OFFSET, seatedTop } from "@/components/avatar-art";
 import { SeatedAvatar, SleepingPet, Walker, useAvatar, type Avatar } from "@/components/room-avatar";
 import { ExtraView } from "@/components/room-extras";
+import { BOOKCASES, sampleSpines } from "@/components/room-bookcases";
 import { CHAIRS, FIREPLACES, LAMPS, rugFor } from "@/components/room-fireside";
 import { RoomPieceView } from "@/components/room-rooms";
 import type { AvatarLook } from "@/lib/avatar";
@@ -125,7 +127,6 @@ function scaleFor(width: number): number {
 const yardFor = (scale: number) => (scale === 3 ? 24 : 14);
 
 // Drawn once: the art never changes, only where it goes.
-const BOOKCASE = bookcaseArt();
 const HANGINGS: Record<Exclude<RoomHanging, "none">, Art> = {
   painting: paintingArt("hills"),
   tree: tapestryArt("tree"),
@@ -388,6 +389,9 @@ export interface RoomDecor {
   chair: RoomChair;
   rug: RoomRug;
   lamp: RoomLamp;
+  /** The bookcases' design (room-bookcases.ts) and their ornaments. */
+  bookcase: RoomBookcase;
+  ornaments: RoomOrnaments;
   /** Added rooms' own walls and floors. */
   own: Partial<Record<RoomKind, RoomOwn>>;
   windows: RoomWindow;
@@ -411,6 +415,8 @@ export const PLAIN_DECOR: RoomDecor = {
   chair: "wingback",
   rug: "fringed",
   lamp: "standard",
+  bookcase: "classic",
+  ornaments: "some",
   own: {},
   windows: "none",
   climber: "none",
@@ -421,6 +427,8 @@ export const PLAIN_DECOR: RoomDecor = {
 
 /** The fireside's pieces, which only the hearth needs. */
 type Fireside = Pick<RoomDecor, "fireplace" | "chair" | "rug" | "lamp">;
+/** What the house's preview shows of the furniture. */
+type Furnishings = Fireside & Pick<RoomDecor, "bookcase">;
 
 const FLOOR_NAMES = ["ground floor", "first floor", "second floor", "third floor", "fourth floor", "fifth floor"];
 const floorName = (fromGround: number) => FLOOR_NAMES[fromGround] ?? `floor ${fromGround}`;
@@ -751,6 +759,8 @@ export function ReadingRoom({
             openBook={openBook}
             hanging={decor.hanging}
             fireside={fireside}
+            bookcase={decor.bookcase}
+            ornaments={decor.ornaments}
             arranging={arranging}
             avatar={figure}
             doors={doors[f]}
@@ -977,6 +987,8 @@ const Floor = memo(function Floor({
   openBook,
   hanging,
   fireside,
+  bookcase,
+  ornaments,
   arranging,
   avatar,
   doors,
@@ -996,6 +1008,8 @@ const Floor = memo(function Floor({
   openBook: OpenBook | null;
   hanging: RoomHanging;
   fireside: Fireside;
+  bookcase: RoomBookcase;
+  ornaments: RoomOrnaments;
   /** While the furniture is being moved, the books stay put. */
   arranging: boolean;
   avatar: Avatar | null;
@@ -1026,6 +1040,8 @@ const Floor = memo(function Floor({
               x={x}
               y={floorLine - CASE_HEIGHT}
               scale={s}
+              design={bookcase}
+              ornaments={ornaments}
               known={known}
               current={all.length ? within(current, [all[0], all[all.length - 1]]) : -1}
               onCurrent={onCurrent}
@@ -1072,6 +1088,8 @@ const Bookcase = memo(function Bookcase({
   x,
   y,
   scale: s,
+  design,
+  ornaments,
   known,
   current,
   onCurrent,
@@ -1082,17 +1100,21 @@ const Bookcase = memo(function Bookcase({
   x: number;
   y: number;
   scale: number;
+  design: RoomBookcase;
+  ornaments: RoomOrnaments;
   known: Record<string, string>;
   /** The book that takes Tab focus, if it is in this bookcase; else -1. */
   current: number;
   onCurrent: (index: number) => void;
 }) {
+  const { art, rise, front } = BOOKCASES[design];
   return (
     <div className="room-abs" style={{ left: x * s, top: y * s }}>
-      <Sprite art={BOOKCASE} scale={s} className="block" />
+      {/* A pediment or pinnacles rise over the case's top. */}
+      <Sprite art={art} scale={s} className="block" style={rise ? { marginTop: -rise * s } : undefined} />
       {shelves.map((shelf, j) => {
         const used = shelf.reduce((sum, i) => sum + spineFor(books[i]).width, 0);
-        const dressing = dressShelf(index * SHELVES_PER_CASE + j, used);
+        const dressing = dressShelf(index * SHELVES_PER_CASE + j, used, ornaments);
         const slotTop = CASE_CROWN + j * (SHELF_SLOT + SHELF_BOARD);
         return (
           <ul
@@ -1149,6 +1171,7 @@ const Bookcase = memo(function Bookcase({
           </ul>
         );
       })}
+      {front && <Sprite art={front} scale={s} className="room-abs room-case-front" style={{ left: 0, top: 0 }} />}
     </div>
   );
 });
@@ -1431,25 +1454,11 @@ export function decorData(decor: RoomDecor): Record<string, string | undefined> 
 const shift = (rects: readonly Rect[], dx: number, dy: number): Rect[] =>
   rects.map(([x, y, w, h, p]): Rect => [x + dx, y + dy, w, h, p]);
 
-const PREVIEW_SPINES: Rect[] = (() => {
-  const paints = ["spine-a", "chair", "rug-2", "spine-b", "curtain", "wood-lo", "chair-lo"] as const;
-  const out: Rect[] = [];
-  let n = 0;
-  for (let j = 0; j < SHELVES_PER_CASE; j++) {
-    const bottom = CASE_CROWN + j * (SHELF_SLOT + SHELF_BOARD) + SHELF_SLOT;
-    for (let x = 3; x < 3 + SHELF_WIDTH - 6; n++) {
-      const w = 3 + ((n * 7) % 3);
-      const h = 13 + ((n * 5) % 6);
-      out.push([x, bottom - h, w, h, paints[(n * 3 + j) % paints.length]]);
-      x += w;
-    }
-  }
-  return out;
-})();
+const PREVIEW_SPINES = sampleSpines(Array(SHELVES_PER_CASE).fill(SHELF_WIDTH - 6)).rects;
 
 /** A small picture of one floor of the house in a style: the fireplace,
  *  armchair and lamp, and a bookcase of books. */
-function previewArt(style: RoomStyle, hanging: RoomHanging, fireside: Fireside): { w: number; h: number; rects: Rect[] } {
+function previewArt(style: RoomStyle, hanging: RoomHanging, fireside: Furnishings): { w: number; h: number; rects: Rect[] } {
   const inner = 2 * PAD + PIECE_WIDTH.hearth + GAP + PIECE_WIDTH.case;
   const geo = houseGeometry(style, yardFor(3), inner + 2 * WALL, 1, PAD);
   const shell = shellArt(geo, style);
@@ -1485,7 +1494,9 @@ function previewArt(style: RoomStyle, hanging: RoomHanging, fireside: Fireside):
   stand(lamp.art, 93 + lamp.dx);
   if (lamp.flames) R.push(...shift(lamp.flames[0], fx + 93 + lamp.dx, line - lamp.art.h));
   const bx = fx + PIECE_WIDTH.hearth + GAP;
-  R.push(...shift(BOOKCASE.rects, bx, line - CASE_HEIGHT), ...shift(PREVIEW_SPINES, bx, line - CASE_HEIGHT));
+  const { art: bookcase, rise, front } = BOOKCASES[fireside.bookcase];
+  R.push(...shift(bookcase.rects, bx, line - CASE_HEIGHT - rise), ...shift(PREVIEW_SPINES, bx, line - CASE_HEIGHT));
+  if (front) R.push(...shift(front.rects, bx, line - CASE_HEIGHT));
   return { w: geo.sceneW, h: sceneHeight(geo), rects: R };
 }
 
@@ -1494,16 +1505,16 @@ function previewArt(style: RoomStyle, hanging: RoomHanging, fireside: Fireside):
 export const HousePreview = memo(function HousePreview({
   style,
   hanging,
-  fireside = PLAIN_DECOR,
+  furnishings = PLAIN_DECOR,
 }: {
   style: RoomStyle;
   hanging: RoomHanging;
-  fireside?: Fireside;
+  furnishings?: Furnishings;
 }) {
-  const { fireplace, chair, rug, lamp } = fireside;
+  const { fireplace, chair, rug, lamp, bookcase } = furnishings;
   const a = useMemo(
-    () => previewArt(style, hanging, { fireplace, chair, rug, lamp }),
-    [style, hanging, fireplace, chair, rug, lamp],
+    () => previewArt(style, hanging, { fireplace, chair, rug, lamp, bookcase }),
+    [style, hanging, fireplace, chair, rug, lamp, bookcase],
   );
   return (
     <svg
