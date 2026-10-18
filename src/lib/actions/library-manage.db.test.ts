@@ -2,7 +2,8 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import { BookFormat, BookOwnership, PrismaClient, ReadingStatus } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
+import { BookFormat, BookOwnership, ReadingStatus } from "@/lib/enums";
 
 /**
  * Library housekeeping against a real database: renaming and merging

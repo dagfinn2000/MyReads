@@ -1,6 +1,6 @@
 "use server";
 
-import type { BookFormat, BookOwnership } from "@prisma/client";
+import type { BookFormat, BookOwnership } from "@/lib/enums";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/actions/helpers";

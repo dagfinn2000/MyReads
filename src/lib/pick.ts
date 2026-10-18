@@ -1,4 +1,4 @@
-import { BookOwnership, ReadingStatus } from "@prisma/client";
+import { BookOwnership, ReadingStatus } from "@/lib/enums";
 import { STATUS_LABELS } from "@/lib/display";
 import { isNextInSeries, seriesKey, type SeriesMember } from "@/lib/series";
 

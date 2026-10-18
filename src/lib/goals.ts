@@ -1,4 +1,4 @@
-import type { GoalUnit } from "@prisma/client";
+import type { GoalUnit } from "@/lib/enums";
 import { keyToUtcDate } from "@/lib/dates";
 
 /**

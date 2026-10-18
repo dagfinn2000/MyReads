@@ -1,4 +1,4 @@
-import { BookFormat, BookOwnership } from "@prisma/client";
+import { BookFormat, BookOwnership } from "@/lib/enums";
 
 /**
  * What "Do I own this?" says about a match, kept out of the page so every

@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { BookOwnership, PrismaClient, ReadingStatus, type Prisma } from "@prisma/client";
+import { PrismaClient, type Prisma } from "@prisma/client";
+import { BookOwnership, ReadingStatus } from "@/lib/enums";
 import { parseFilters } from "@/lib/library-filters";
 import { resolveBookWhere } from "@/lib/library-where";
 import type { Preferences } from "@/lib/preferences";

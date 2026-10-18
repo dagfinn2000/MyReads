@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { BookOwnership } from "@prisma/client";
+import { BookOwnership } from "@/lib/enums";
 import { prisma } from "@/lib/prisma";
 import { loanSchema } from "@/lib/validation";
 import { requireUserId } from "@/lib/actions/helpers";

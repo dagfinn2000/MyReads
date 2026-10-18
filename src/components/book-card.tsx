@@ -1,5 +1,5 @@
 import type { Book } from "@prisma/client";
-import { BookOwnership, ReadingStatus } from "@prisma/client";
+import { BookOwnership, ReadingStatus } from "@/lib/enums";
 import {
   ArrowLeftRight,
   BookOpen,

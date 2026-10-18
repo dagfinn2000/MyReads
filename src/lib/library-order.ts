@@ -1,4 +1,4 @@
-import { ReadingStatus } from "@prisma/client";
+import { ReadingStatus } from "@/lib/enums";
 
 /**
  * The reader's own order for shelf chips and saved views, kept in

@@ -1,5 +1,5 @@
 import type { Prisma } from "@prisma/client";
-import { BookFormat, BookOwnership, ReadingStatus } from "@prisma/client";
+import { BookFormat, BookOwnership, ReadingStatus } from "@/lib/enums";
 import { isbnVariants, looksLikeIsbn, normalizeIsbn } from "@/lib/isbn";
 import type { SearchField } from "@/lib/preferences";
 import { searchTerms } from "@/lib/utils";

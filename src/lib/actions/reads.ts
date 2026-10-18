@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import type { Prisma } from "@prisma/client";
-import { ReadingStatus } from "@prisma/client";
+import { ReadingStatus } from "@/lib/enums";
 import { prisma } from "@/lib/prisma";
 import { pastReadSchema } from "@/lib/validation";
 import { requireUserId } from "@/lib/actions/helpers";

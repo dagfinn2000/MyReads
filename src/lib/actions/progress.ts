@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { ReadingStatus } from "@prisma/client";
+import { ReadingStatus } from "@/lib/enums";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/actions/helpers";
 import { calendarDay, dayKey } from "@/lib/dates";
@@ -12,22 +12,24 @@ import { formatPosition, pastTheEnd, unitFor } from "@/lib/progress-units";
 import {
   anchorMoment,
   describeDay,
-  editEntrySchema,
-  idSchema,
   lastLogged,
   loggedWhen,
-  logPageSchema,
-  moveTargetSchema,
   passAround,
   placeInLog,
   positionTexts,
   resolveLogDay,
-  undoMoveSchema,
   type EntryEditResult,
   type LogPageResult,
   type MoveResult,
-  type UndoMove,
 } from "@/lib/reading-log";
+import {
+  editEntrySchema,
+  idSchema,
+  logPageSchema,
+  moveTargetSchema,
+  undoMoveSchema,
+  type UndoMove,
+} from "@/lib/reading-log-input";
 import { settleReadingState } from "@/lib/reading-state";
 
 /**

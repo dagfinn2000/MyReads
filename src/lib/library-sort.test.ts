@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { BookFormat, BookOwnership, ReadingStatus } from "@prisma/client";
+import { BookFormat, BookOwnership, ReadingStatus } from "@/lib/enums";
 import {
   authorSortKey,
   groupBooks,

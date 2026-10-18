@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { BookFormat, ReadingStatus } from "@prisma/client";
+import { BookFormat, ReadingStatus } from "@/lib/enums";
 import {
   DAY_MS,
   chartPaceText,

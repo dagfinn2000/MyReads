@@ -1,13 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { BookFormat } from "@prisma/client";
+import { BookFormat } from "@/lib/enums";
 import { dayKey, zonedDayStart } from "@/lib/dates";
 import { unitFor } from "@/lib/progress-units";
 import {
   anchorMoment,
   describeDay,
-  editEntrySchema,
   lastLogged,
-  logPageSchema,
   loggedWhen,
   passAround,
   placeInLog,
@@ -15,8 +13,8 @@ import {
   recentDays,
   resolveLogDay,
   subjectDay,
-  undoMoveSchema,
 } from "@/lib/reading-log";
+import { editEntrySchema, logPageSchema, undoMoveSchema } from "@/lib/reading-log-input";
 
 const OSLO = "Europe/Oslo";
 

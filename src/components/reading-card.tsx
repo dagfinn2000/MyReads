@@ -2,7 +2,7 @@
 
 import { useActionState, useEffect, useRef } from "react";
 import type { Book, ProgressEntry } from "@prisma/client";
-import { ReadingStatus } from "@prisma/client";
+import { ReadingStatus } from "@/lib/enums";
 import { updateReading } from "@/lib/actions/books";
 import { celebrate } from "@/lib/confetti";
 import { STATUS_LABELS, toDateInputValue } from "@/lib/display";

@@ -1,7 +1,8 @@
 "use client";
 
 import { useActionState, useState, useTransition } from "react";
-import type { BookOwnership, Loan } from "@prisma/client";
+import type { Loan } from "@prisma/client";
+import type { BookOwnership } from "@/lib/enums";
 import { HandHeart, Trash2, Undo2 } from "lucide-react";
 import { deleteLoan, lendBook, returnLoan } from "@/lib/actions/loans";
 import type { ActionState } from "@/lib/actions/helpers";

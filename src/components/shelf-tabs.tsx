@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { ReadingStatus } from "@prisma/client";
+import type { ReadingStatus } from "@/lib/enums";
 import { STATUS_LABELS } from "@/lib/display";
 import { statusTabsToShow } from "@/lib/library-order";
 import { cn } from "@/lib/utils";

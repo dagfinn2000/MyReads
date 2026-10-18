@@ -16,7 +16,7 @@ import type {
   RoomWindow,
   RoomWood,
 } from "@/lib/room-styles";
-import { ReadingStatus } from "@prisma/client";
+import { ReadingStatus } from "@/lib/enums";
 import { BookLink } from "@/components/book-link";
 import {
   BOOKEND,

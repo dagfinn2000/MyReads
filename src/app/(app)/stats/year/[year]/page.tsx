@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { GoalUnit } from "@prisma/client";
+import { GoalUnit } from "@/lib/enums";
 import {
   ArrowLeft,
   BookCheck,

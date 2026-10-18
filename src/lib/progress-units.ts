@@ -1,4 +1,4 @@
-import { BookFormat } from "@prisma/client";
+import { BookFormat } from "@/lib/enums";
 import type { AudiobookUnit, EbookUnit, QuickLogSteps } from "@/lib/preferences";
 
 /**

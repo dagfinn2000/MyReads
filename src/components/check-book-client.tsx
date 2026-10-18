@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import Link from "next/link";
-import { BookOwnership } from "@prisma/client";
+import { BookOwnership } from "@/lib/enums";
 import {
   CircleCheck,
   CircleHelp,

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ReadingStatus } from "@prisma/client";
+import { ReadingStatus } from "@/lib/enums";
 import { settleReadingState } from "@/lib/reading-state";
 
 const now = new Date("2026-10-11T12:00:00.000Z");

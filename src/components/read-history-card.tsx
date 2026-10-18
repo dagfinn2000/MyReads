@@ -2,7 +2,7 @@
 
 import { useActionState, useEffect, useId, useRef, useState, useTransition } from "react";
 import type { Book, Read } from "@prisma/client";
-import { ReadingStatus } from "@prisma/client";
+import { ReadingStatus } from "@/lib/enums";
 import { Pencil, Repeat, Trash2, X } from "lucide-react";
 import {
   addPastRead,

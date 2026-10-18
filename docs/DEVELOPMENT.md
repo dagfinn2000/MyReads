@@ -105,6 +105,8 @@ src/
 │  │                   library when the page is closed
 │  ├─ covers.ts        downloading and caching cover images
 │  ├─ dates.ts         which calendar day a date falls on, by time zone
+│  ├─ enums.ts         the database's enums (status, format, ownership,
+│  │                   goal unit), safe to import in the browser
 │  ├─ library-return.ts
 │  │                   where a book page's X goes back to: the library
 │  │                   page it was opened from, and how far down it was
@@ -224,6 +226,15 @@ src/
   only where the browser has to call the server itself: sign-in and
   registration, metadata search, the "Do I own this?" check, cover upload
   and serving, and backup download and restore.
+- **The browser only downloads what it runs.** Three habits keep pages
+  light. Enum values come from [enums.ts](../src/lib/enums.ts), not
+  `@prisma/client`, whose browser build is 40 KB of code nothing here uses;
+  `npm run lint` refuses the Prisma import, and a test checks the two lists
+  still match. Zod schemas stay in files only the server imports
+  (`validation.ts`, `reading-log-input.ts`), never next to helpers that
+  client components use. And `package.json` says only CSS files have side
+  effects (`"sideEffects": ["*.css"]`), so the bundler can leave out a
+  module a page imports but never calls.
 - **Migrations run when the container starts** (`prisma migrate deploy` in
   [docker-entrypoint.sh](../docker-entrypoint.sh)). The first start creates
   the tables, later starts apply anything new, and an up-to-date database is

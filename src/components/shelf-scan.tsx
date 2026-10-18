@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useSyncExternalStore } from "react";
-import { BookOwnership, type BookFormat } from "@prisma/client";
+import { BookOwnership, type BookFormat } from "@/lib/enums";
 import { Loader2 } from "lucide-react";
 import { setOwnership } from "@/lib/actions/ownership";
 import { removeScannedBook, scanAddBook, type ScanAnswer } from "@/lib/actions/shelf-scan";

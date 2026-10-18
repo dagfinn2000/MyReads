@@ -1,4 +1,4 @@
-import { ReadingStatus } from "@prisma/client";
+import { ReadingStatus } from "@/lib/enums";
 import { isDoneInSeries, nextInSeries, seriesKey, type SeriesMember } from "@/lib/series";
 
 export interface UpNextBook extends SeriesMember {

@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { BookOwnership, PrismaClient } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
+import { BookOwnership } from "@/lib/enums";
 
 /**
  * setOwnership ("I bought it" on the Do I own this? page) against a real

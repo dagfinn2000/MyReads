@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ReadingStatus } from "@prisma/client";
+import { ReadingStatus } from "@/lib/enums";
 import { BookOpenText } from "lucide-react";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";

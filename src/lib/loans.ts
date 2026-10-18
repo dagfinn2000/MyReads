@@ -1,4 +1,4 @@
-import { BookOwnership } from "@prisma/client";
+import { BookOwnership } from "@/lib/enums";
 
 /**
  * Pure lending helpers, kept out of the card component so they're testable —

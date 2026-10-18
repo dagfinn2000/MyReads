@@ -1,7 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { BookFormat, Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client";
+import { BookFormat } from "@/lib/enums";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import {

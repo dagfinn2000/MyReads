@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ReadingStatus, type Prisma } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
+import { ReadingStatus } from "@/lib/enums";
 import { LibraryBig, Plus } from "lucide-react";
 import { auth } from "@/auth";
 import { BULK_MAX_IDS } from "@/lib/bulk";

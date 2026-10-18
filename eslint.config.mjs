@@ -34,6 +34,23 @@ const config = [
         },
       ],
 
+      // Enum values come from lib/enums.ts: importing one from
+      // "@prisma/client" in anything the browser runs ships Prisma's whole
+      // browser build. Types are erased, so those may still come from Prisma.
+      "@typescript-eslint/no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            {
+              name: "@prisma/client",
+              importNames: ["ReadingStatus", "BookFormat", "BookOwnership", "GoalUnit", "$Enums"],
+              message: 'Import enum values from "@/lib/enums" instead.',
+              allowTypeImports: true,
+            },
+          ],
+        },
+      ],
+
       // Left at its default (error). The five components that tripped it —
       // theme-picker, shelf-chips, add-book-client, barcode-scanner,
       // import-search — have been reworked to read external state properly,

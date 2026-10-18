@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { BookFormat, BookOwnership, ReadingStatus } from "@prisma/client";
+import { BookFormat, BookOwnership, ReadingStatus } from "@/lib/enums";
 
 /**
  * What a stored cover URL may be: a local path ("/api/covers/…") or an

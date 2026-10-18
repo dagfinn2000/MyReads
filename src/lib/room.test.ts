@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { BookOwnership } from "@prisma/client";
+import { BookOwnership } from "@/lib/enums";
 import {
   CASE_WIDTH,
   EXTRAS,

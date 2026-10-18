@@ -2,6 +2,9 @@
   "name": "myreads",
   "version": "2.0.0",
   "private": true,
+  "sideEffects": [
+    "*.css"
+  ],
   "description": "Personal self-hosted library and reading tracker",
   "scripts": {
     "dev": "next dev",

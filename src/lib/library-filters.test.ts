@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ReadingStatus } from "@prisma/client";
+import { ReadingStatus } from "@/lib/enums";
 import {
   activeFilterChips,
   buildBookWhere,
