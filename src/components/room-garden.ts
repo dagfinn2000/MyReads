@@ -11,9 +11,14 @@
  * covering an earlier one, so leaves can overlap the way they grow: the
  * ones behind first, in darker greens, then the stems, then the leaves in
  * front, lit from the upper left. The sheet comes out as rectangles.
+ *
+ * Everything grows as the season has it (room-seasons.ts): blossom and
+ * bulbs in spring, the summer garden, leaves turning and berries in
+ * autumn, bare boughs in winter, when the shell lays snow over it all.
  */
 import type { Art, HouseGeometry, Paint, Rect } from "@/components/room-art";
-import type { RoomClimber, RoomGarden } from "@/lib/room-styles";
+import { snowCaps, snowGround } from "@/components/room-seasons";
+import type { RoomClimber, RoomGarden, RoomSeason, Season } from "@/lib/room-styles";
 
 /** A steady pseudo-random number in [0, 1) for a place (as room-shells.ts). */
 function noise(x: number, y: number, seed = 0): number {
@@ -79,6 +84,16 @@ class Dots {
         if (k >= 0 && k < tones.length) this.dot(x + i, y + j, tones[k]);
       }
     });
+  }
+
+  /** Repaints each dot `to` says to, or clears it where it says null. */
+  recolour(to: (paint: Paint, x: number, y: number) => Paint | null) {
+    const W = this.x1 - this.x0;
+    for (const [k, paint] of this.dots) {
+      const next = to(paint, (k % W) + this.x0, Math.floor(k / W) + this.y0);
+      if (next === null) this.dots.delete(k);
+      else this.dots.set(k, next);
+    }
   }
 
   /** The sheet as rectangles: each row's runs of one paint, and a run
@@ -202,8 +217,9 @@ const centred = (x: number, y: number, shape: readonly string[], tones: readonly
 /** Ivy: a deep, dark, glossy mat of overlapping leaves at the foot of the
  *  wall, its top edge ragged, breaking up as it climbs into a few stems
  *  that feel their way up to the eaves, with paler new leaves near their
- *  tips and odd shoots reaching out over the garden. */
-function ivy(d: Dots, w: Wall, top: number, earth: number) {
+ *  tips and odd shoots reaching out over the garden. In spring there are
+ *  more new leaves; in autumn it turns (`turn`); it is green all winter. */
+function ivy(d: Dots, w: Wall, top: number, earth: number, season: Season = "summer") {
   const L = earth - top;
   const s = w.seed;
   const back: Mark[] = [];
@@ -251,7 +267,8 @@ function ivy(d: Dots, w: Wall, top: number, earth: number) {
       const shape = t < 0.35 && !young ? pick(IVY_BIG, n) : t < 0.7 && !young ? pick(IVY_MID, n) : pick(IVY_SMALL, n);
       // Leaves reach out over the garden more than in towards the room.
       const du = side < 0 ? -1 - (n < 0.5 ? 1 : 0) : 1;
-      const fresh = (young && noise(i, k, s + 13) < 0.65) || noise(k, i, s + 14) < 0.05;
+      const spring = season === "spring";
+      const fresh = (young && noise(i, k, s + 13) < (spring ? 0.95 : 0.65)) || noise(k, i, s + 14) < (spring ? 0.3 : 0.05);
       front.push(centred(w.X(u + du), y, shape, fresh ? IVY_NEW : IVY));
       // Now and then a shoot strays out over the garden, a leaf or two on it.
       if (t > 0.3 && noise(k, i, s + 15) < 0.12) {
@@ -285,10 +302,17 @@ const BUD: readonly string[] = ["1", "2"];
 const PINK: readonly Paint[] = ["rose-pale", "rose-hi", "rose", "rose-lo"];
 const RED: readonly Paint[] = ["rose-hi", "rose", "rose-lo", "rose-deep"];
 
+/** A rose hip, ripe in autumn where a rose was. */
+const HIP: readonly string[] = ["12", "23"];
+const HIP_TONES: readonly Paint[] = ["apple-hi", "apple", "rose-lo"];
+
 /** Climbing roses: thorny canes up the wall, old and brown at the foot and
  *  green higher up, leafy low down, with roses pink and red in twos and
- *  threes all the way up and buds on the youngest shoots. */
-function roses(d: Dots, w: Wall, top: number, earth: number) {
+ *  threes all the way up and buds on the youngest shoots. In spring only
+ *  buds, and the odd first rose; in autumn hips where the roses were; in
+ *  winter bare canes and the last of the hips. */
+function roses(d: Dots, w: Wall, top: number, earth: number, season: Season = "summer") {
+  const bare = season === "winter";
   const L = earth - top;
   const s = w.seed + 3;
   const leaves: Mark[] = [];
@@ -305,7 +329,7 @@ function roses(d: Dots, w: Wall, top: number, earth: number) {
         // An old cane is thick at the foot, lit on its left.
         d.dot(Math.min(x, w.X(u + 1)), y, "trunk-hi");
         d.dot(Math.max(x, w.X(u + 1)), y, "trunk-lo");
-      } else d.dot(x, y, t < 0.3 + k * 0.03 ? (noise(i, k, s) < 0.3 ? "trunk" : "trunk-lo") : "leaf-lo");
+      } else d.dot(x, y, t < 0.3 + k * 0.03 || bare ? (noise(i, k, s) < 0.3 ? "trunk" : "trunk-lo") : "leaf-lo");
       // Thorns, now one side, now the other.
       if (noise(i, k, s + 2) < 0.2) d.dot(x + (noise(k, i, s + 2) < 0.5 ? -1 : 1), y, t < 0.3 ? "trunk-lo" : "ivy-lo");
     });
@@ -316,7 +340,7 @@ function roses(d: Dots, w: Wall, top: number, earth: number) {
       const y = earth - 1 - i;
       const t = i / L;
       const young = path.length - i < 12;
-      if (i >= next) {
+      if (i >= next && !bare) {
         next = i + 3 + Math.floor(t * 3 + noise(i, k, s + 6) * 3);
         side = -side;
         const n = noise(i, k, s + 7);
@@ -331,7 +355,14 @@ function roses(d: Dots, w: Wall, top: number, earth: number) {
       const n = noise(k, i, s + 11);
       const tones = n < 0.55 ? PINK : RED;
       const bx = w.X(u + (noise(i, k, s + 12) < 0.6 ? -1 : 1));
-      if (young) {
+      if (season === "autumn" || bare) {
+        // Hips in twos and threes, fewer of them left in winter.
+        if (bare && noise(i, k, s + 16) < 0.45) return;
+        blooms.push(centred(bx, y, HIP, HIP_TONES));
+        if (noise(i, k, s + 14) < 0.6) blooms.push(centred(bx + (noise(i, k, s + 13) < 0.5 ? -2 : 2), y + 2, HIP, HIP_TONES));
+        return;
+      }
+      if (young || (season === "spring" && noise(i, k, s + 17) < 0.8)) {
         blooms.push({ x: bx, y: y - 1, shape: BUD, tones: [tones[2], "leaf-lo"] });
         return;
       }
@@ -377,12 +408,19 @@ function raceme(d: Dots, x: number, y: number, len: number, seed: number) {
   }
 }
 
+/** Wisteria leaves turned yellow in autumn. */
+const YELLOW: readonly Paint[] = ["autumn-gold", "petal-gold", "petal-gold-lo"];
+
 /** Wisteria: an old trunk, thick and gnarled at the foot, its wood twisted
  *  in a spiral, parting about halfway up into two stems that twine round
  *  each other to the eaves. From the upper third, branches hung with
  *  racemes of lilac flowers among fresh leaves, and a row of them along
- *  the eaves. */
-function wisteria(d: Dots, w: Wall, top: number, earth: number) {
+ *  the eaves. It flowers in spring and summer; in autumn its leaves are
+ *  yellow, and in winter it is bare wood. */
+function wisteria(d: Dots, w: Wall, top: number, earth: number, season: Season = "summer") {
+  const leafy = season !== "winter";
+  const flowering = season === "spring" || season === "summer";
+  const green = season === "autumn" ? YELLOW : FRESH;
   const L = earth - top;
   const s = w.seed + 7;
   const phase = noise(s, 1) * 6;
@@ -434,7 +472,7 @@ function wisteria(d: Dots, w: Wall, top: number, earth: number) {
   // A few leaves along the lower trunk.
   for (let i = Math.floor(L * 0.2); i < fork + 10; i += 9 + Math.floor(noise(i, s, 5) * 10)) {
     const out = noise(s, i, 6) < 0.6;
-    leaves.push(centred(w.X(mid(i) + (out ? -3 : 3)), earth - 1 - i, pick(WISTERIA_LEAVES, noise(i, s, 7)), FRESH));
+    leaves.push(centred(w.X(mid(i) + (out ? -3 : 3)), earth - 1 - i, pick(WISTERIA_LEAVES, noise(i, s, 7)), green));
   }
   // Branches from the upper third, each hung with racemes.
   for (let i = Math.max(fork + 6, Math.floor(L * 0.6)); i < L - 12; i += 7 + Math.floor(noise(i, s, 8) * 7)) {
@@ -449,25 +487,46 @@ function wisteria(d: Dots, w: Wall, top: number, earth: number) {
       d.dot(w.X(u), y, "trunk");
       if (k >= 2 && (k === len || noise(k, i, s + 12) < 0.45)) hang.push([w.X(u), y + 1, 5 + Math.floor(noise(u, i, s + 13) * 5)]);
     }
-    leaves.push(centred(w.X(u), y - 2, pick(WISTERIA_LEAVES, noise(i, u, s + 14)), FRESH));
-    leaves.push(centred(w.X(from - out), y - 1, pick(WISTERIA_LEAVES, noise(u, i, s + 15)), FRESH));
+    leaves.push(centred(w.X(u), y - 2, pick(WISTERIA_LEAVES, noise(i, u, s + 14)), green));
+    leaves.push(centred(w.X(from - out), y - 1, pick(WISTERIA_LEAVES, noise(u, i, s + 15)), green));
   }
   // Along the eaves: a branch under the wall plate, hung all along.
   const ey = top + 3;
   for (let u = -5; u <= 4; u++) d.dot(w.X(u), ey + (noise(u, s, 16) < 0.3 ? 1 : 0), u === mid(L) ? "trunk-lo" : "trunk");
   for (let u = -5 + Math.floor(noise(s, 17) * 2); u <= 3; u += 2 + Math.floor(noise(u, s, 18) * 2)) {
     hang.push([w.X(u), ey + 2, 5 + Math.floor(noise(s, u, 19) * 5)]);
-    leaves.push(centred(w.X(u + 1), ey - 1, pick(WISTERIA_LEAVES, noise(u, s, 20)), FRESH));
+    leaves.push(centred(w.X(u + 1), ey - 1, pick(WISTERIA_LEAVES, noise(u, s, 20)), green));
   }
-  shingle(d, leaves);
+  if (leafy) shingle(d, leaves);
+  if (!flowering) return;
   // The racemes, the ones behind first.
   hang.sort((p, q) => p[1] - q[1] || p[0] - q[0]);
   for (const [x, y, len] of hang) raceme(d, x, y, len, s);
 }
 
+/** Ivy's colours in autumn, turning red from the top down, a few leaves
+ *  still green here and there: where in the turn a place is goes by
+ *  `smooth` noise and its height, so the colours come in patches. */
+const IVY_TURNED: Partial<Record<Paint, Paint>> = {
+  "ivy-new": "autumn-gold",
+  "ivy-hi": "autumn-hi",
+  ivy: "autumn",
+  "ivy-lo": "autumn-lo",
+  "ivy-deep": "autumn-deep",
+};
+function turn(d: Dots, top: number, earth: number, seed: number) {
+  d.recolour((paint, x, y) => {
+    const to = IVY_TURNED[paint];
+    if (!to) return paint;
+    const up = (earth - y) / Math.max(1, earth - top);
+    return smooth(x, y, 8, seed) * 0.8 + up * 0.5 > 0.42 ? to : paint;
+  });
+}
+
 /** The climber up both outside walls, from the ground (`earth`) to the
- *  eaves (g.floorsTop). Drawn over the walls, under the furniture. */
-export function climberArt(kind: Exclude<RoomClimber, "none">, g: HouseGeometry, earth: number): Rect[] {
+ *  eaves (g.floorsTop), in its season. Drawn over the walls, under the
+ *  furniture. */
+export function climberArt(kind: Exclude<RoomClimber, "none">, g: HouseGeometry, earth: number, season: Season = "summer"): Rect[] {
   const d = new Dots(0, 0, g.sceneW, earth + g.ground);
   const top = g.floorsTop;
   for (const w of wallsOf(g.houseX, g.houseW)) {
@@ -477,11 +536,12 @@ export function climberArt(kind: Exclude<RoomClimber, "none">, g: HouseGeometry,
       const u = w.U(x);
       return y >= top && y < earth && u <= g.wall && u >= -SPILL;
     };
-    if (kind === "ivy") ivy(d, w, top, earth);
-    else if (kind === "roses") roses(d, w, top, earth);
-    else wisteria(d, w, top, earth);
+    if (kind === "ivy") ivy(d, w, top, earth, season);
+    else if (kind === "roses") roses(d, w, top, earth, season);
+    else wisteria(d, w, top, earth, season);
   }
   d.keep = null;
+  if (kind === "ivy" && season === "autumn") turn(d, top, earth, 7);
   return d.rects();
 }
 
@@ -507,6 +567,25 @@ function plotsOf(g: HouseGeometry): Plot[] {
 
 const HEDGE: readonly Paint[] = ["leaf-hi", "leaf", "leaf-lo", "ivy-lo", "ivy-deep"];
 const BLOSSOM: readonly Paint[] = ["blossom-hi", "blossom", "blossom-lo", "blossom-deep", "blossom-deep"];
+/** Apple blossom, white flushed pink where the light catches the crown,
+ *  over its fresh new leaves. */
+const APPLE_BLOSSOM: readonly Paint[] = ["blossom-hi", "blossom", "leaf-hi", "leaf", "leaf-lo"];
+/** The apple's leaves going gold in autumn, still green underneath; the
+ *  cherry's going red. */
+const APPLE_AUTUMN: readonly Paint[] = ["autumn-gold", "autumn-hi", "petal-gold-lo", "leaf-lo", "ivy-lo"];
+const CHERRY_AUTUMN: readonly Paint[] = ["autumn-hi", "autumn", "autumn-lo", "autumn-deep", "autumn-deep"];
+/** Leaves fallen on the grass. */
+const FALLEN: readonly Paint[] = ["autumn-gold", "autumn-hi", "autumn", "autumn-lo"];
+
+/** Fallen leaves on the grass from x0 to x1, about `density` of the way. */
+function fallen(d: Dots, x0: number, x1: number, earth: number, density: number, seed: number) {
+  for (let x = x0; x < x1; x++) {
+    if (noise(x, seed, 30) >= density) continue;
+    const y = earth + (noise(seed, x, 31) < 0.55 ? 0 : 1);
+    d.dot(x, y, pick(FALLEN, noise(x, y, seed + 32)));
+    if (noise(x, seed, 33) < 0.3) d.dot(x + 1, y, pick(FALLEN, noise(y, x, seed + 34)));
+  }
+}
 
 /** Clumps of leaves (or blossom) filling the ellipse at (cx, cy), `rx` ×
  *  `ry`: each clump lit on its upper left and darker round its lower rim,
@@ -566,6 +645,34 @@ function shadow(d: Dots, x: number, w: number, earth: number) {
   }
 }
 
+/** A line of `paint` from (x0, y0) to (x1, y1). */
+function line(d: Dots, x0: number, y0: number, x1: number, y1: number, paint: Paint) {
+  const n = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0), 1);
+  for (let k = 0; k <= n; k++) d.dot(Math.round(x0 + ((x1 - x0) * k) / n), Math.round(y0 + ((y1 - y0) * k) / n), paint);
+}
+
+/** A crown's bare branches in winter: a fan of them from where its bough
+ *  comes in, out to the edge of where its leaves would be, each one
+ *  forking into twigs, darker towards their tips. */
+function bare(d: Dots, c: { x: number; y: number; rx: number; ry: number }, bx: number, by: number, seed: number) {
+  const n = 5 + Math.floor(noise(c.x, c.y, seed) * 3);
+  for (let k = 0; k < n; k++) {
+    // Up and out, from the left round to the right.
+    const a = Math.PI * (1.06 + (0.88 * (k + 0.5)) / n) + (noise(k, c.x, seed + 1) - 0.5) * 0.3;
+    const r = 0.78 + noise(c.x, k, seed + 2) * 0.27;
+    const ex = Math.round(c.x + Math.cos(a) * c.rx * r);
+    const ey = Math.round(c.y + Math.sin(a) * c.ry * r);
+    line(d, bx, by, ex, ey, "trunk");
+    // Twigs: one off it about halfway, one either side of its tip.
+    for (const [at, turn, len] of [[0.5, noise(k, seed, 3) < 0.5 ? -0.7 : 0.7, 0.4], [1, -0.5, 0.22], [1, 0.5, 0.22]] as const) {
+      const mx = Math.round(bx + (ex - bx) * at);
+      const my = Math.round(by + (ey - by) * at);
+      const ta = a + turn;
+      line(d, mx, my, Math.round(mx + Math.cos(ta) * c.rx * len), Math.round(my + Math.sin(ta) * c.ry * len), "trunk-lo");
+    }
+  }
+}
+
 /** A line of bough from (x0, y0) up to (x1, y1), `th` thick, lit on its
  *  left. */
 function bough(d: Dots, x0: number, y0: number, x1: number, y1: number, th: number) {
@@ -604,8 +711,11 @@ const CHERRY: readonly Crown[] = [
  *  apples ripening; a cherry in blossom on the right, wider and lower, its
  *  petals falling. Each stands mid-garden, its crown above the ground
  *  floor's windows, out to the edge of the scene and over the house wall
- *  (the rooms are drawn over it, so it stands behind the house). */
-function tree(d: Dots, p: Plot, earth: number) {
+ *  (the rooms are drawn over it, so it stands behind the house). In
+ *  spring both are in blossom; in autumn the apple goes gold, its apples
+ *  ripe, and the cherry red, their leaves falling; in winter they're
+ *  bare. */
+function tree(d: Dots, p: Plot, earth: number, season: Season = "summer") {
   const Y = p.width;
   const s = p.seed + 20;
   const wide = Y / 24;
@@ -636,7 +746,13 @@ function tree(d: Dots, p: Plot, earth: number) {
     return { x: p.X(v), y: earth - Math.round(c.up * tall), rx, ry: Math.max(5, Math.round(c.ry * tall)) };
   });
   for (const c of parts) bough(d, tx - 1, fork, c.x, c.y + Math.round(c.ry * 0.3), 2);
-  const tones = cherry ? BLOSSOM : HEDGE;
+  if (season === "winter") {
+    parts.forEach((c, k) => bare(d, c, c.x, c.y + Math.round(c.ry * 0.3), s + k * 10));
+    shadow(d, tx - 6, 13, earth);
+    return;
+  }
+  const tones =
+    season === "autumn" ? (cherry ? CHERRY_AUTUMN : APPLE_AUTUMN) : cherry ? BLOSSOM : season === "spring" ? APPLE_BLOSSOM : HEDGE;
   const clumps = parts.flatMap((c, k) => foliage(d, c.x, c.y, c.rx, c.ry, tones, s + k * 10, 0.55, Y > 18 ? 4 : 3));
   // The boughs show here and there where they go up into the leaves.
   for (const c of parts) {
@@ -647,12 +763,24 @@ function tree(d: Dots, p: Plot, earth: number) {
       if (noise(x, y, s + 3) < 0.55) d.dot(x, y, "trunk-lo");
     }
   }
-  if (cherry) {
+  const reach = parts.reduce((m, c) => Math.max(m, Math.abs(c.x - tx) + c.rx), 0);
+  if (season === "autumn") fallen(d, tx - reach, tx + reach + 1, earth, 0.3, s);
+  if (cherry && season !== "autumn") {
     // A few fresh leaves among the blossom, and petals on the grass.
     for (const c of clumps) if (noise(c.x, c.y, s + 4) < 0.16) d.dot(c.x + 1, c.y + 1, "leaf");
-    const reach = parts.reduce((m, c) => Math.max(m, Math.abs(c.x - tx) + c.rx), 0);
-    for (let x = tx - reach; x <= tx + reach; x++) if (noise(x, s, 5) < 0.14) d.dot(x, earth + (noise(s, x, 6) < 0.5 ? 0 : 1), "blossom");
-  } else {
+    const petals = season === "spring" ? 0.26 : 0.14;
+    for (let x = tx - reach; x <= tx + reach; x++) if (noise(x, s, 5) < petals) d.dot(x, earth + (noise(s, x, 6) < 0.5 ? 0 : 1), "blossom");
+  } else if (season === "spring") {
+    // Clusters of blossom all over, and white petals on the grass.
+    for (const c of clumps) {
+      if (noise(c.x, c.y, s + 1) > 0.45) continue;
+      const bx = c.x + Math.round(noise(c.y, c.x, s + 2) * 2 - 1);
+      d.dot(bx, c.y, "petal-white");
+      d.dot(bx + 1, c.y, "blossom");
+      d.dot(bx, c.y + 1, "blossom-lo");
+    }
+    for (let x = tx - reach; x <= tx + reach; x++) if (noise(x, s, 5) < 0.12) d.dot(x, earth + (noise(s, x, 6) < 0.5 ? 0 : 1), "petal-white");
+  } else if (!cherry) {
     // Apples where the light catches the lower clumps.
     for (const c of clumps) {
       if (noise(c.x, c.y, s + 1) > 0.2) continue;
@@ -707,8 +835,10 @@ function fence(d: Dots, p: Plot, earth: number) {
 }
 
 /** A rounded, clipped bush `w` wide standing at x (its left edge), dark
- *  underneath, with a few berries or flowers. */
-function bush(d: Dots, x: number, w: number, earth: number, seed: number) {
+ *  underneath, with a few berries or flowers: flowers in spring, berries
+ *  in autumn and winter, when it's evergreen. In autumn a few of its
+ *  leaves turn. */
+function bush(d: Dots, x: number, w: number, earth: number, seed: number, season: Season = "summer") {
   const rx = w / 2;
   const ry = Math.round(w * 0.38);
   const cx = x + Math.floor(rx);
@@ -717,7 +847,12 @@ function bush(d: Dots, x: number, w: number, earth: number, seed: number) {
   const clumps = foliage(d, cx, cy, Math.floor(rx), ry, HEDGE, seed, 0.15, w > 12 ? 3 : 2);
   // Clipped flat at the foot, in its own shadow.
   for (let i = 1; i < w - 1; i++) if (d.at(x + i, earth - 1)) d.dot(x + i, earth - 1, "ivy-deep");
-  const berry = noise(seed, w) < 0.5;
+  const berry = season === "spring" ? false : season === "summer" ? noise(seed, w) < 0.5 : true;
+  if (season === "autumn") {
+    d.recolour((paint, px, py) =>
+      px >= x - 1 && px <= x + w && paint === "leaf-hi" && noise(px, py, seed + 10) < 0.45 ? "autumn-gold" : paint,
+    );
+  }
   for (const c of clumps) {
     if (c.y > earth - 3 || noise(c.x, c.y, seed + 9) > 0.22) continue;
     if (berry) d.dot(c.x, c.y, "rose-lo");
@@ -730,23 +865,39 @@ function bush(d: Dots, x: number, w: number, earth: number, seed: number) {
 
 /** Bushes at the two corners of the house, over the foot of its walls, and
  *  where the garden is wide enough a smaller one further out. */
-function bushes(d: Dots, g: HouseGeometry, p: Plot, earth: number) {
+function bushes(d: Dots, g: HouseGeometry, p: Plot, earth: number, season: Season) {
   const w = clamp(Math.round(p.width * 0.5), 10, 13);
   // Over the outside wall as far as its inside face, and out over the grass.
   const x = p.left ? g.houseX + g.wall - w : g.houseX + g.houseW - g.wall;
-  bush(d, x, w, earth, p.seed + 30);
+  bush(d, x, w, earth, p.seed + 30, season);
   if (p.width >= 30) {
     const sw = 7 + Math.floor(noise(p.seed, 3) * 2);
-    bush(d, Math.min(p.X(p.width - 3), p.X(p.width - 2 - sw)), sw, earth, p.seed + 31);
+    bush(d, Math.min(p.X(p.width - 3), p.X(p.width - 2 - sw)), sw, earth, p.seed + 31, season);
   }
 }
 
-type Flower = "tulip" | "daisy" | "lavender";
+type Flower = "tulip" | "daisy" | "lavender" | "daffodil" | "mum" | "aster" | "snowdrop";
 const TULIPS: readonly (readonly Paint[])[] = [
   ["apple-hi", "apple", "rose-lo"],
   ["petal-white", "petal-gold", "petal-gold-lo"],
   ["rose-pale", "rose-hi", "rose"],
 ];
+
+/** Chrysanthemums' colours: gold, rust and wine. */
+const MUMS: readonly (readonly Paint[])[] = [
+  ["autumn-gold", "petal-gold", "petal-gold-lo"],
+  ["autumn-hi", "autumn", "autumn-lo"],
+  ["rose-hi", "rose-lo", "rose-deep"],
+];
+
+/** Which flowers a bed has in each season: a clump is the first whose
+ *  number is over its noise, or past them all a gap of just leaves. */
+const BEDS: Record<Season, [Flower, number][]> = {
+  spring: [["tulip", 0.4], ["daffodil", 0.72], ["daisy", 0.9]],
+  summer: [["tulip", 0.36], ["daisy", 0.62], ["lavender", 0.9]],
+  autumn: [["mum", 0.55], ["aster", 0.9]],
+  winter: [["snowdrop", 0.65]],
+};
 
 /** One flower `h` tall, its stem at x. */
 function flower(d: Dots, kind: Flower, x: number, earth: number, h: number, tones: readonly Paint[]) {
@@ -773,27 +924,67 @@ function flower(d: Dots, kind: Flower, x: number, earth: number, h: number, tone
       for (let y = head; y < head + 3; y++) d.dot(x, y, (y - head) % 2 ? "wis-deep" : "wis-lo");
       d.dot(x, head - 1, "wis");
       return;
+    case "daffodil":
+      // Its trumpet out to the side, under a ruff of petals.
+      d.dot(x - 1, head, "petal-white");
+      d.dot(x, head, "petal-gold");
+      d.dot(x, head + 1, "petal-gold");
+      d.dot(x + 1, head + 1, "petal-gold-lo");
+      d.dot(x - 1, earth - 3, "leaf");
+      d.dot(x + 1, earth - 4, "leaf-lo");
+      return;
+    case "mum":
+      // A round head of petals.
+      d.dot(x, head - 1, tones[0]);
+      d.dot(x - 1, head, tones[0]);
+      d.dot(x, head, tones[1]);
+      d.dot(x + 1, head, tones[1]);
+      d.dot(x - 1, head + 1, tones[1]);
+      d.dot(x, head + 1, tones[2]);
+      d.dot(x + 1, head + 1, tones[2]);
+      return;
+    case "snowdrop":
+      // A white bell hanging from its bent stem, which sheds the snow.
+      for (let y = head + 2; y < earth - 1; y++) d.dot(x, y, "stem");
+      d.dot(x + 1, head, "stem");
+      d.dot(x + 1, head + 1, "petal-white");
+      d.dot(x + 1, head + 2, "petal-white");
+      d.dot(x, head + 1, "stem");
+      return;
+    case "aster":
+      d.dot(x, head, "wis");
+      d.dot(x - 1, head + 1, "wis-hi");
+      d.dot(x, head + 1, "petal-gold");
+      d.dot(x + 1, head + 1, "wis-lo");
+      d.dot(x, head + 2, "wis-lo");
+      return;
   }
 }
 
 /** A bed of flowers from x0 to x1 (exclusive), none taller than `tall`:
  *  clumps of tulips (one colour to a clump), daisies and lavender over low
- *  leaves, at uneven spacings. */
-function bed(d: Dots, x0: number, x1: number, earth: number, tall: number, seed: number) {
+ *  leaves, at uneven spacings. In spring tulips, daffodils and daisies;
+ *  in autumn chrysanthemums and asters; in winter just the low leaves,
+ *  dark under the snow. */
+function bed(d: Dots, x0: number, x1: number, earth: number, tall: number, seed: number, season: Season = "summer") {
   for (let x = x0 + Math.floor(noise(x0, seed) * 3); x < x1; ) {
     const n = noise(x, seed, 1);
-    const kind: Flower | null = n < 0.36 ? "tulip" : n < 0.62 ? "daisy" : n < 0.9 ? "lavender" : null;
+    const kind = BEDS[season].find(([, upTo]) => n < upTo)?.[0] ?? null;
     const w = 3 + Math.floor(noise(x, seed, 2) * 6);
-    const tones = TULIPS[Math.floor(noise(seed, x, 3) * TULIPS.length)];
+    const tones = kind === "mum" ? MUMS[Math.floor(noise(seed, x, 3) * MUMS.length)] : TULIPS[Math.floor(noise(seed, x, 3) * TULIPS.length)];
     for (let i = 0; i < w && x + i < x1; i++) {
+      if (season === "winter") {
+        if (noise(x + i, seed, 4) < 0.7) d.dot(x + i, earth - 1, noise(x + i, seed, 5) < 0.5 ? "ivy-lo" : "ivy-deep");
+        continue;
+      }
       d.dot(x + i, earth - 1, noise(x + i, seed, 4) < 0.6 ? "leaf-lo" : "leaf");
       if (noise(x + i, seed, 5) < 0.5) d.dot(x + i, earth - 2, noise(seed, x + i, 6) < 0.5 ? "leaf" : "leaf-hi");
     }
     if (kind) {
-      const gap = kind === "tulip" ? 3 : kind === "daisy" ? 3 : 2;
+      const gap = kind === "lavender" ? 2 : 3;
       for (let i = 1; i < w - 1 && x + i < x1 - 1; i += gap + (noise(x + i, seed, 7) < 0.3 ? 1 : 0)) {
         const h = tall - Math.floor(noise(seed, x + i, 8) * 2);
-        flower(d, kind, x + i, earth, h, tones);
+        flower(d, kind, x + i, earth, kind === "snowdrop" ? Math.min(h, 6) : h, tones);
       }
     }
     x += w + Math.floor(noise(x, seed, 9) * 4);
@@ -803,44 +994,55 @@ function bed(d: Dots, x0: number, x1: number, earth: number, tall: number, seed:
 /** The garden things chosen, either side of the house and along its
  *  front, standing on the grass at `earth`. Drawn behind the style's own
  *  garden pieces (a shrub, a lantern), in front of the foundations. */
-export function gardenArt(items: readonly RoomGarden[], g: HouseGeometry, earth: number): Rect[] {
+export function gardenArt(items: readonly RoomGarden[], g: HouseGeometry, earth: number, season: Season = "summer"): Rect[] {
   const d = new Dots(0, 0, g.sceneW, earth + g.ground);
   const plots = plotsOf(g);
   // From the back to the front.
-  if (items.includes("trees")) for (const p of plots) tree(d, p, earth);
+  if (items.includes("trees")) for (const p of plots) tree(d, p, earth, season);
   if (items.includes("fence")) for (const p of plots) fence(d, p, earth);
   if (items.includes("flowers")) {
     // Along the front of the foundations, no higher than they are, and in
     // the garden either side.
-    bed(d, g.houseX - 2, g.houseX + g.houseW + 2, earth, g.foundation, 1);
-    for (const p of plots) bed(d, Math.min(p.X(1), p.X(p.width - 1)), Math.max(p.X(1), p.X(p.width - 1)) + 1, earth, 7, p.seed + 2);
+    bed(d, g.houseX - 2, g.houseX + g.houseW + 2, earth, g.foundation, 1, season);
+    for (const p of plots) bed(d, Math.min(p.X(1), p.X(p.width - 1)), Math.max(p.X(1), p.X(p.width - 1)) + 1, earth, 7, p.seed + 2, season);
   }
-  if (items.includes("bushes")) for (const p of plots) bushes(d, g, p, earth);
+  if (items.includes("bushes")) for (const p of plots) bushes(d, g, p, earth, season);
   return d.rects();
 }
 
+/** A tile's picture's ground, `w` wide from `earth` (three dots deep):
+ *  grass, or snow in winter, with `art` on it, snow on that too. */
+function onGround(art: Rect[], w: number, earth: number, season: Season): Rect[] {
+  if (season !== "winter") return [[0, earth, w, 3, "grass"], ...art];
+  return [...art, ...snowGround(0, w, earth, 2), ...snowCaps(art, w, earth + 3, { deep: (p) => (/^(leaf|ivy)/.test(p) ? 1 : 0), seed: w })];
+}
+
 /** A tile's picture for Decorate, `w` × `h`: the corner of a house, its
- *  wall on the right, with the climber grown up it from the grass. "none"
- *  is the bare wall. */
-export function climberSample(kind: RoomClimber, w: number, h: number): Art {
+ *  wall on the right, with the climber grown up it from the grass, in its
+ *  season. "none" is the bare wall. */
+export function climberSample(kind: RoomClimber, w: number, h: number, season: Season = "summer"): Art {
   const face = Math.round(w * 0.42);
   const earth = h - 3;
   const R: Rect[] = [
     [face, 0, w - face, earth, "outer"],
     [face, 0, 1, earth, "outer-hi"],
-    [0, earth, w, 3, "grass"],
+    ...(season === "winter" ? snowGround(0, w, earth, 2) : [[0, earth, w, 3, "grass"] as Rect]),
   ];
   if (kind === "none") return { w, h, rects: R };
   const d = new Dots(0, 0, w, earth);
   const wall: Wall = { X: (u) => face + u, U: (x) => x - face, seed: 0, left: true };
   d.keep = (x) => x - face >= -SPILL;
-  (kind === "ivy" ? ivy : kind === "roses" ? roses : wisteria)(d, wall, 0, earth);
-  return { w, h, rects: [...R, ...d.rects()] };
+  (kind === "ivy" ? ivy : kind === "roses" ? roses : wisteria)(d, wall, 0, earth, season);
+  d.keep = null;
+  if (kind === "ivy" && season === "autumn") turn(d, 0, earth, 7);
+  const climber = d.rects();
+  const snow = season === "winter" ? snowCaps(climber, w, h, { deep: (p) => (p.startsWith("ivy") ? 1 : 0), heap: 1, seed: 2 }) : [];
+  return { w, h, rects: [...R, ...climber, ...snow] };
 }
 
 /** A small apple tree for the garden's Decorate tile, which has no room for
- *  a whole one. */
-function sapling(d: Dots, x: number, earth: number, w: number) {
+ *  a whole one, in its season. */
+function sapling(d: Dots, x: number, earth: number, w: number, season: Season = "summer") {
   const fork = earth - Math.round(w * 0.3);
   for (let y = earth - 1; y >= fork; y--) {
     d.dot(x - 1, y, "trunk-hi");
@@ -851,22 +1053,36 @@ function sapling(d: Dots, x: number, earth: number, w: number) {
   d.dot(x + 2, earth - 1, "trunk-lo");
   const rx = Math.floor(w / 2) - 2;
   const ry = Math.round((fork - 2) / 2);
-  const clumps = foliage(d, x, ry + 1, rx, ry, HEDGE, 3, 0.4, 3);
+  if (season === "winter") {
+    bare(d, { x, y: ry + 1, rx, ry }, x, fork, 3);
+    shadow(d, x - 5, 11, earth);
+    return;
+  }
+  const tones = season === "spring" ? APPLE_BLOSSOM : season === "autumn" ? APPLE_AUTUMN : HEDGE;
+  const clumps = foliage(d, x, ry + 1, rx, ry, tones, 3, 0.4, 3);
   for (const c of clumps) {
-    if (noise(c.x, c.y, 21) > 0.3) continue;
+    if (noise(c.x, c.y, 21) > (season === "spring" ? 0.5 : 0.3)) continue;
+    if (season === "spring") {
+      d.dot(c.x, c.y, "petal-white");
+      d.dot(c.x + 1, c.y, "blossom");
+      d.dot(c.x, c.y + 1, "blossom-lo");
+      continue;
+    }
     d.dot(c.x, c.y + 1, "apple-hi");
     d.dot(c.x + 1, c.y + 1, "apple");
     d.dot(c.x, c.y + 2, "apple");
   }
+  if (season === "autumn") fallen(d, 0, w, earth, 0.3, 4);
   shadow(d, x - 5, 11, earth);
 }
 
 /** A tile's picture for Decorate, `w` × `h`: the garden thing on a strip of
- *  grass. */
-export function gardenSample(item: RoomGarden, w: number, h: number): Art {
+ *  grass, in its season. */
+export function gardenSample(item: RoomGarden, w: number, h: number, season: Season = "summer"): Art {
   const earth = h - 3;
   const d = new Dots(0, 0, w, h);
-  if (item === "flowers") {
+  if (item === "flowers" && season !== "summer") bed(d, 0, w, earth, 10, 5, season);
+  else if (item === "flowers") {
     // A clump of each, the way a bed has them, over low leaves.
     for (let x = 0; x < w; x++) {
       d.dot(x, earth - 1, noise(x, 7) < 0.6 ? "leaf-lo" : "leaf");
@@ -885,9 +1101,29 @@ export function gardenSample(item: RoomGarden, w: number, h: number): Art {
     for (const [kind, x, tall, tones] of clumps) flower(d, kind, Math.round((x * w) / 27), earth, tall, tones);
   }
   else if (item === "bushes") {
-    bush(d, 1, 14, earth, 30);
-    bush(d, 16, 9, earth, 31);
-  } else if (item === "trees") sapling(d, Math.floor(w / 2), earth, w);
+    bush(d, 1, 14, earth, 30, season);
+    bush(d, 16, 9, earth, 31, season);
+  } else if (item === "trees") sapling(d, Math.floor(w / 2), earth, w, season);
   else fence(d, { X: (v) => v, width: w, seed: 0, left: false }, earth);
-  return { w, h, rects: [[0, earth, w, 3, "grass"], ...d.rects()] };
+  return { w, h, rects: onGround(d.rects(), w, earth, season) };
+}
+
+const QUARTERS: readonly Season[] = ["spring", "summer", "autumn", "winter"];
+
+/** A tile's picture of the season for Decorate, `w` × `h`: the little
+ *  apple tree in it. Following the calendar, it's all four, a quarter of
+ *  the tree in each, spring to winter from the left. */
+export function seasonSample(season: RoomSeason, w: number, h: number): Art {
+  const one = (s: Season) => gardenSample("trees", w, h, s).rects;
+  if (season !== "calendar") return { w, h, rects: one(season) };
+  const rects = QUARTERS.flatMap((s, k) => {
+    const a = Math.round((k * w) / 4);
+    const b = Math.round(((k + 1) * w) / 4);
+    return one(s).flatMap(([x, y, rw, rh, p]): Rect[] => {
+      const x0 = Math.max(a, x);
+      const x1 = Math.min(b, x + rw);
+      return x1 > x0 ? [[x0, y, x1 - x0, rh, p]] : [];
+    });
+  });
+  return { w, h, rects };
 }

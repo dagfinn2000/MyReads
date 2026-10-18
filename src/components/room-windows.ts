@@ -4,7 +4,8 @@
  * stretch of wall that furniture leaves clear (lib/room.ts: windowSpots),
  * the same distance down from every ceiling. Through the glass is the sky:
  * blue by day, dark with stars at night, in the paints the window seat's
- * window uses (reading-room.css), with a cloud, a bough or far hills.
+ * window uses (reading-room.css), with a cloud, a bough or far hills, as
+ * they are in the season outside (room-seasons.ts).
  *
  * Each is drawn dot by dot on a little canvas and then gathered into
  * rectangles. Light comes from the upper left, as everywhere in the house:
@@ -12,7 +13,7 @@
  * shade, and cast a faint shadow down and to the right.
  */
 import type { Art, Paint, Rect } from "@/components/room-art";
-import type { RoomWindow } from "@/lib/room-styles";
+import type { RoomWindow, Season } from "@/lib/room-styles";
 
 /** Every window, frame, sill, curtains or shutters and all, fits a box
  *  this size, with its top this far under the room's ceiling: below what
@@ -149,16 +150,33 @@ const SKY = new Set<Paint>(["sky", "sky-hi"]);
 const CLOUD = ["....%%%....", "..%%%%%%.%.", ".%%%%%%%%%%", "%%%%%%%%%%c", ".ccccccccc."];
 const WISP = ["..%%%%..", "%%%%%%cc", ".cccc..."];
 
+/** The bough's leaves in each season, lit, mid and shaded: blossom in
+ *  spring, turned in autumn and in winter snow on its bare twig. */
+const LEAVES: Record<Season, readonly [Paint, Paint, Paint]> = {
+  spring: ["blossom-hi", "blossom", "blossom-lo"],
+  summer: ["leaf-hi", "leaf", "leaf-lo"],
+  autumn: ["autumn-gold", "autumn-hi", "autumn"],
+  winter: ["snow-hi", "snow", "snow-lo"],
+};
+
 /** Leaves in a clump round (cx, cy), rx × ry, ragged at the edge and lit
  *  from the upper left, as the birches in the garden (room-shells.ts). */
-function clump(put: (x: number, y: number, paint: Paint) => void, cx: number, cy: number, rx: number, ry: number, seed: number) {
+function clump(
+  put: (x: number, y: number, paint: Paint) => void,
+  cx: number,
+  cy: number,
+  rx: number,
+  ry: number,
+  seed: number,
+  [hi, mid, lo]: readonly [Paint, Paint, Paint] = LEAVES.summer,
+) {
   for (let y = Math.floor(cy - ry); y <= Math.ceil(cy + ry); y++) {
     for (let x = Math.floor(cx - rx); x <= Math.ceil(cx + rx); x++) {
       const d = ((x - cx) / rx) ** 2 + ((y - cy) / ry) ** 2;
       const n = noise(x, y, seed);
       if (d > 1 - n * 0.35) continue;
       const rim = d > 0.45 && x - cx + (y - cy) > 0.5;
-      put(x, y, x - cx + (y - cy) < -1.2 && n < 0.55 ? "leaf-hi" : n > 0.8 || (rim && n > 0.35) ? "leaf-lo" : "leaf");
+      put(x, y, x - cx + (y - cy) < -1.2 && n < 0.55 ? hi : n > 0.8 || (rim && n > 0.35) ? lo : mid);
     }
   }
 }
@@ -166,8 +184,9 @@ function clump(put: (x: number, y: number, paint: Paint) => void, cx: number, cy
 /** The sky through the glass with view `view`: a cloud drifting by, a
  *  bough of the tree outside, or far hills under the sun (the moon at
  *  night), which only this view shows, so a row of windows doesn't have a
- *  moon apiece. */
-function sky(c: Canvas, g: Glass, view: number) {
+ *  moon apiece. In winter, snow falling past the cloud, on the bough and
+ *  over the hills. */
+function sky(c: Canvas, g: Glass, view: number, season: Season) {
   const { x0, y0, x1, y1 } = g;
   const gw = x1 - x0 + 1;
   const gh = y1 - y0 + 1;
@@ -183,21 +202,32 @@ function sky(c: Canvas, g: Glass, view: number) {
   if (view === 0) {
     sprite(CLOUD, x0 + Math.round(gw * 0.3), y0 + Math.round(gh * 0.12), { "%": "cloud", c: "cloud-lo" });
     sprite(WISP, x0 - 2, y0 + Math.round(gh * 0.6), { "%": "cloud", c: "cloud-lo" });
+    if (season === "winter") {
+      for (let y = y0; y <= y1; y++) {
+        for (let x = x0; x <= x1; x++) if (SKY.has(c.at(x, y) ?? "") && noise(x, y, 70) < 0.045) put(x, y, "snow-hi");
+      }
+    }
   } else if (view === 1) {
     // A bough reaching in from the top right: a twig, and clumps of
     // leaves along it.
     const [bx, by] = g.bough ?? [x1, y0];
     for (let i = 0; i <= 10; i++) put(bx + 1 - i, by + 3 - Math.round(i * 0.25), "bark-lo");
     for (let i = 0; i <= 3; i++) put(bx - 1, by + 4 + i, "bark-lo");
-    clump(put, bx - 6.5, by + 0.5, 2.6, 2.2, 61);
-    clump(put, bx - 0.5, by + 1, 4.2, 3, 62);
-    clump(put, bx - 0.5, by + 7, 2.6, 2.3, 63);
+    if (season === "winter") {
+      // Snow along the top of the bare twig.
+      for (let i = 0; i <= 10; i++) put(bx + 1 - i, by + 2 - Math.round(i * 0.25), i % 4 === 3 ? "snow" : "snow-hi");
+    } else {
+      clump(put, bx - 6.5, by + 0.5, 2.6, 2.2, 61, LEAVES[season]);
+      clump(put, bx - 0.5, by + 1, 4.2, 3, 62, LEAVES[season]);
+      clump(put, bx - 0.5, by + 7, 2.6, 2.3, 63, LEAVES[season]);
+    }
   } else {
     // Far hills, a nearer ridge with a tree or two, the sun high up.
     const far = (x: number) => y1 + 1 - Math.round(gh * 0.2 + 1.1 * Math.sin(x * 0.42 + 4));
     const near = (x: number) => y1 + 1 - Math.round(gh * 0.1 + 0.8 * Math.sin(x * 0.7 + 1) + 0.5 * Math.sin(x * 1.3));
+    const [hill, hillFar] = season === "winter" ? ["snow-hi", "snow-lo"] : ["hill", "hill-far"];
     for (let x = x0; x <= x1; x++) {
-      for (let y = far(x); y <= y1; y++) put(x, y, y >= near(x) ? "hill" : "hill-far");
+      for (let y = far(x); y <= y1; y++) put(x, y, y >= near(x) ? hill : hillFar);
     }
     for (const t of [0.22, 0.7]) {
       const tx = x0 + Math.round(gw * t);
@@ -233,7 +263,7 @@ function finish(c: Canvas, g: Glass, view: number, glints: [number, number, numb
 /** A white-painted sash window, two panes over two, on a deep sill,
  *  between curtains hung from a brass rod and caught back with tasselled
  *  cords. */
-function sashWindow(c: Canvas, view: number) {
+function sashWindow(c: Canvas, view: number, season: Season) {
   const g: Glass = { x0: 4, y0: 6, x1: 16, y1: 26, has: () => true, split: 17, sun: [12, 8], bough: [15, 6] };
   // The box, lit on its top and left, outlined.
   c.fill(2, 4, 17, 26, "sash-deep");
@@ -241,7 +271,7 @@ function sashWindow(c: Canvas, view: number) {
   c.fill(3, 5, 15, 1, "sash-hi");
   c.fill(3, 5, 1, 24, "sash-hi");
   c.fill(17, 6, 1, 23, "sash-lo");
-  sky(c, g, view);
+  sky(c, g, view, season);
   // The meeting rail with its catch, the glazing bars, the lower sash's
   // deeper bottom rail.
   c.fill(4, 16, 13, 1, "sash-hi");
@@ -313,7 +343,7 @@ function curtains(c: Canvas, top: number, tie: number, bottom: number) {
 
 /** A tall round-headed window in a moulded stone surround with a
  *  keystone: a fanlight of radiating bars in the arch over six panes. */
-function archedWindow(c: Canvas, view: number) {
+function archedWindow(c: Canvas, view: number, season: Season) {
   const spring = 11;
   const r = 6.5;
   const dist = (x: number, y: number) => (y >= spring ? Math.abs(x - MID) : Math.hypot(x - MID, y - spring));
@@ -336,7 +366,7 @@ function archedWindow(c: Canvas, view: number) {
       else c.dot(x, y, face > 0.25 ? "stone" : "stone-lo");
     }
   }
-  sky(c, g, view);
+  sky(c, g, view, season);
   // Fanlight: a transom along the springing, and three bars fanning out
   // from a little half-round hub.
   c.fill(4, spring, 13, 1, "wood");
@@ -365,7 +395,7 @@ function archedWindow(c: Canvas, view: number) {
 
 /** A round window, smaller than the rest, in a moulded ring, with a cross
  *  of glazing bars. */
-function roundWindow(c: Canvas, view: number) {
+function roundWindow(c: Canvas, view: number, season: Season) {
   const cy = 17;
   const r = 5.6;
   const d = (x: number, y: number) => Math.hypot(x - MID, y - cy);
@@ -381,7 +411,7 @@ function roundWindow(c: Canvas, view: number) {
       else c.dot(x, y, lit < -0.3 ? "wood-lo" : lit > 0.5 ? "wood-hi" : "wood-deep");
     }
   }
-  sky(c, g, view);
+  sky(c, g, view, season);
   c.fill(MID, cy - 5, 1, 11, "wood");
   c.fill(MID - 5, cy, 11, 1, "wood");
   c.dot(MID, cy, "wood-hi");
@@ -396,14 +426,14 @@ function roundWindow(c: Canvas, view: number) {
 
 /** A casement window between open louvred shutters, painted in the
  *  fabric colour, with a box of flowers on the sill. */
-function shuttersWindow(c: Canvas, view: number) {
+function shuttersWindow(c: Canvas, view: number, season: Season) {
   const g: Glass = { x0: 6, y0: 5, x1: 14, y1: 28, has: () => true, split: 11, sun: [11, 6] };
   c.fill(4, 3, 13, 28, "sash-deep");
   c.fill(5, 4, 11, 26, "sash");
   c.fill(5, 4, 11, 1, "sash-hi");
   c.fill(5, 4, 1, 26, "sash-hi");
   c.fill(15, 5, 1, 25, "sash-lo");
-  sky(c, g, view);
+  sky(c, g, view, season);
   c.fill(6, 11, 9, 1, "sash");
   c.fill(MID, 12, 1, 17, "sash");
   for (let y = 5; y <= 28; y++) if (y !== 11) c.tint(6, y, "wall-shadow");
@@ -460,7 +490,7 @@ function shuttersWindow(c: Canvas, view: number) {
 /** A cottage casement of diamond leaded panes, the top diamond in each
  *  light stained amber with a ruby heart, in a stone surround under a
  *  hood mould, on a stone sill. */
-function leadedWindow(c: Canvas, view: number) {
+function leadedWindow(c: Canvas, view: number, season: Season) {
   const light = (x: number) => (x >= 3 && x <= 8) || (x >= 12 && x <= 17);
   const g: Glass = { x0: 3, y0: 7, x1: 17, y1: 29, has: light, split: 18, sun: [4, 13] };
   // Hood mould, with its label stops.
@@ -478,7 +508,7 @@ function leadedWindow(c: Canvas, view: number) {
   c.fill(2, 6, 17, 1, "stone-lo");
   c.fill(MID - 1, 7, 1, 23, "stone-hi");
   c.fill(MID + 1, 7, 1, 23, "stone-lo");
-  sky(c, g, view);
+  sky(c, g, view, season);
   // Lead lattice.
   for (let y = 7; y <= 29; y++) {
     for (let x = 3; x <= 17; x++) {
@@ -505,7 +535,7 @@ function leadedWindow(c: Canvas, view: number) {
   castShadow(c);
 }
 
-const DRAW: Record<Kind, (c: Canvas, view: number) => void> = {
+const DRAW: Record<Kind, (c: Canvas, view: number, season: Season) => void> = {
   sash: sashWindow,
   arched: archedWindow,
   round: roundWindow,
@@ -514,29 +544,30 @@ const DRAW: Record<Kind, (c: Canvas, view: number) => void> = {
 };
 
 /** A window, WINDOW_W × WINDOW_H, with view `view` (0 to WINDOW_VIEWS - 1)
- *  through it. */
-export function windowArt(kind: Kind, view: number): Art {
+ *  through it, in the season outside. */
+export function windowArt(kind: Kind, view: number, season: Season = "summer"): Art {
   const c = new Canvas();
-  DRAW[kind](c, ((view % WINDOW_VIEWS) + WINDOW_VIEWS) % WINDOW_VIEWS);
+  DRAW[kind](c, ((view % WINDOW_VIEWS) + WINDOW_VIEWS) % WINDOW_VIEWS, season);
   return { w: WINDOW_W, h: WINDOW_H, rects: c.rects() };
 }
 
 const WINDOWS = new Map<string, Art>();
-/** The window drawn once per kind and view. */
-export function windowFor(kind: Kind, view = 0): Art {
-  const key = `${kind}-${view % WINDOW_VIEWS}`;
-  if (!WINDOWS.has(key)) WINDOWS.set(key, windowArt(kind, view % WINDOW_VIEWS));
+/** The window drawn once per kind, view and season. */
+export function windowFor(kind: Kind, view = 0, season: Season = "summer"): Art {
+  const key = `${kind}-${view % WINDOW_VIEWS}-${season}`;
+  if (!WINDOWS.has(key)) WINDOWS.set(key, windowArt(kind, view % WINDOW_VIEWS, season));
   return WINDOWS.get(key)!;
 }
 
 /** A tile's picture for Decorate: the window on a piece of wall, `w` × `h`
- *  (at least WINDOW_W + 4 × WINDOW_H + 4). "none" is the bare wall. */
-export function windowSample(kind: RoomWindow, w: number, h: number): Art {
+ *  (at least WINDOW_W + 4 × WINDOW_H + 4), the season outside. "none" is
+ *  the bare wall. */
+export function windowSample(kind: RoomWindow, w: number, h: number, season: Season = "summer"): Art {
   const R: Rect[] = [[0, 0, w, h, "wall"]];
   if (kind !== "none") {
     const ox = Math.floor((w - WINDOW_W) / 2);
     const oy = Math.floor((h - WINDOW_H) / 2);
-    R.push(...windowFor(kind).rects.map(([x, y, rw, rh, p]): Rect => [x + ox, y + oy, rw, rh, p]));
+    R.push(...windowFor(kind, 0, season).rects.map(([x, y, rw, rh, p]): Rect => [x + ox, y + oy, rw, rh, p]));
   }
   return { w, h, rects: R };
 }

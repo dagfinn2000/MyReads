@@ -276,6 +276,28 @@ export const ROOM_GARDEN_LABELS: Record<RoomGarden, string> = {
   fence: "Picket fence",
 };
 
+/** The time of year round the house (components/room-seasons.ts): what's
+ *  in flower, the leaves turning or gone, snow. "calendar" follows the
+ *  months, as in the northern half of the world. */
+export const ROOM_SEASONS = ["spring", "summer", "autumn", "winter", "calendar"] as const;
+export type RoomSeason = (typeof ROOM_SEASONS)[number];
+export type Season = Exclude<RoomSeason, "calendar">;
+
+export const ROOM_SEASON_LABELS: Record<RoomSeason, string> = {
+  spring: "Spring",
+  summer: "Summer",
+  autumn: "Autumn",
+  winter: "Winter",
+  calendar: "Follow the calendar",
+};
+
+/** The season on `date` by the month: winter from December, spring from
+ *  March, summer from June and autumn from September. */
+export function seasonOn(date: Date): Season {
+  const m = date.getMonth();
+  return m < 2 || m === 11 ? "winter" : m < 5 ? "spring" : m < 8 ? "summer" : "autumn";
+}
+
 /** An added room's own walls and floor; "style" in each is the house's. */
 export interface RoomOwn {
   walls: RoomWalls;

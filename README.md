@@ -137,6 +137,11 @@ server.
   day and the moon and stars at night. Grow ivy, climbing roses or
   wisteria up the outside walls, and plant flower beds, bushes and trees
   round the house behind a picket fence.
+- Pick the time of year, or follow the calendar: blossom, tulips and
+  daffodils in spring; gold and red leaves falling in autumn, with
+  chrysanthemums in the beds and red ivy; in winter bare trees, snowdrops,
+  snow on the roof and in the garden, icicles under the eaves and snow
+  falling. The view from the windows changes with it.
 - Add furniture from a catalogue: a Chesterfield sofa, a rocking chair, an
   aquarium with fish swimming in it, a spaniel asleep in its basket, a suit
   of armour, a sea chest, a coat stand, a telescope, a rocking horse, a

@@ -346,6 +346,13 @@ describe("parsePreferences: the reading room", () => {
     expect(parsePreferences({ roomPictures: "posters" }).roomPictures).toBe("none");
   });
 
+  it("keeps the season outside, and summer for anything unknown", () => {
+    expect(parsePreferences({ roomSeason: "winter" }).roomSeason).toBe("winter");
+    expect(parsePreferences({ roomSeason: "calendar" }).roomSeason).toBe("calendar");
+    expect(parsePreferences({ roomSeason: "monsoon" }).roomSeason).toBe("summer");
+    expect(parsePreferences({}).roomSeason).toBe("summer");
+  });
+
   it("keeps one sound place for each piece of furniture", () => {
     const prefs = parsePreferences({
       roomLayout: [

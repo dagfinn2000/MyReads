@@ -13,7 +13,7 @@ import { FLAMES_A, LOGS, Rects, type Art, type Rect } from "@/components/room-ar
 import { bookcaseSample } from "@/components/room-bookcases";
 import { CHAIRS, FIREPLACES, LAMPS, rugFor } from "@/components/room-fireside";
 import { ceilingSample, floorSample, styleFloor, stylePaper, wallSample } from "@/components/room-shells";
-import { climberSample, gardenSample } from "@/components/room-garden";
+import { climberSample, gardenSample, seasonSample } from "@/components/room-garden";
 import { windowSample } from "@/components/room-windows";
 import { pictureSample } from "@/components/room-pictures";
 import { Row, Swatches, Tiles } from "@/components/decorate-controls";
@@ -45,6 +45,8 @@ import {
   ROOM_CLIMBER_LABELS,
   ROOM_GARDEN,
   ROOM_GARDEN_LABELS,
+  ROOM_SEASONS,
+  ROOM_SEASON_LABELS,
   ROOM_WINDOWS,
   ROOM_WINDOW_LABELS,
   ROOM_FLOORS,
@@ -54,6 +56,7 @@ import {
   ROOM_WALLS,
   SAME_AS_HOUSE,
   WALL_SWATCHES,
+  seasonOn,
   type RoomOwn,
 } from "@/lib/room-styles";
 
@@ -273,9 +276,12 @@ export function BookcaseControls({ decor, onChange }: { decor: RoomDecor; onChan
 /** Windows, and what grows up the walls and round the house (Decorate ›
  *  House). */
 export function OutsideControls({ decor, onChange }: { decor: RoomDecor; onChange: (patch: Partial<RoomDecor>) => void }) {
-  const windows = useMemo(() => new Map(ROOM_WINDOWS.map((w) => [w, windowSample(w, 27, 44)])), []);
-  const climbers = useMemo(() => new Map(ROOM_CLIMBERS.map((c) => [c, climberSample(c, 27, 44)])), []);
-  const garden = useMemo(() => new Map(ROOM_GARDEN.map((g) => [g, gardenSample(g, 27, 27)])), []);
+  // What grows is shown in the season it is outside.
+  const season = decor.season === "calendar" ? seasonOn(new Date()) : decor.season;
+  const windows = useMemo(() => new Map(ROOM_WINDOWS.map((w) => [w, windowSample(w, 27, 44, season)])), [season]);
+  const climbers = useMemo(() => new Map(ROOM_CLIMBERS.map((c) => [c, climberSample(c, 27, 44, season)])), [season]);
+  const garden = useMemo(() => new Map(ROOM_GARDEN.map((g) => [g, gardenSample(g, 27, 27, season)])), [season]);
+  const seasons = useMemo(() => new Map(ROOM_SEASONS.map((s) => [s, seasonSample(s, 27, 27)])), []);
   const cave = decor.style === "cave";
   return (
     <>
@@ -317,6 +323,16 @@ export function OutsideControls({ decor, onChange }: { decor: RoomDecor; onChang
         }
       >
         {(g) => <Sample art={garden.get(g)!} decor={decor} />}
+      </Tiles>
+      <Tiles
+        label="Time of year"
+        hint="Blossom in spring, turning leaves in autumn, snow in winter. Following the calendar, it changes with the months."
+        options={ROOM_SEASONS}
+        labels={ROOM_SEASON_LABELS}
+        chosen={(s) => decor.season === s}
+        onPick={(s) => onChange({ season: s })}
+      >
+        {(s) => <Sample art={seasons.get(s)!} decor={decor} />}
       </Tiles>
     </>
   );
