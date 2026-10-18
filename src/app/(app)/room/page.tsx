@@ -99,6 +99,9 @@ export default async function ReadingRoomPage() {
           floor: prefs.roomFloor,
           ceiling: prefs.roomCeiling,
           own: prefs.roomOwn,
+          windows: prefs.roomWindows,
+          climber: prefs.roomClimber,
+          garden: prefs.roomGarden,
           cat: prefs.roomCat,
           dog: prefs.roomDog,
         }}
@@ -110,6 +113,7 @@ export default async function ReadingRoomPage() {
         hiddenNav={prefs.hiddenNav}
         away={prefs.roomAway}
         rooms={prefs.roomRooms}
+        beside={prefs.roomBeside}
         extras={prefs.roomExtras}
         summary={
           books.length > 0

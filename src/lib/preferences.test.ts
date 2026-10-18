@@ -395,6 +395,21 @@ describe("parsePreferences: the reading room", () => {
     const plain = parsePreferences({});
     expect([plain.roomPaper, plain.roomFloor, plain.roomCeiling, plain.roomOwn]).toEqual(["style", "style", "none", {}]);
   });
+
+  it("keeps which rooms go next to the one before, the windows and the garden", () => {
+    const prefs = parsePreferences({
+      roomBeside: ["kitchen", "attic", "kitchen", "music"],
+      roomWindows: "leaded",
+      roomClimber: "kudzu", // not a value
+      roomGarden: ["trees", "pond", "flowers", "trees"],
+    });
+    expect(prefs.roomBeside).toEqual(["kitchen", "music"]);
+    expect(prefs.roomWindows).toBe("leaded");
+    expect(prefs.roomClimber).toBe("none");
+    expect(prefs.roomGarden).toEqual(["trees", "flowers"]);
+    const plain = parsePreferences({});
+    expect([plain.roomBeside, plain.roomWindows, plain.roomClimber, plain.roomGarden]).toEqual([[], "none", "none", []]);
+  });
 });
 
 describe("parsePreferences: the avatar", () => {

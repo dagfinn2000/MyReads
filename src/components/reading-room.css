@@ -172,6 +172,50 @@
   --room-parrot-lo: color-mix(in oklab, #9c1f25, var(--dusk) calc(var(--night) * 30%));
   --room-parrot-blue: color-mix(in oklab, #2f78d4, var(--dusk) calc(var(--night) * 30%));
   --room-parrot-blue-lo: color-mix(in oklab, #1e4d9c, var(--dusk) calc(var(--night) * 30%));
+  /* Windows (room-windows.ts). */
+  --room-sash-hi: color-mix(in oklab, #fdfbf6, var(--dusk) calc(var(--night) * 60%));
+  --room-sash: color-mix(in oklab, #eee8dc, var(--dusk) calc(var(--night) * 60%));
+  --room-sash-lo: color-mix(in oklab, #cdc3b2, var(--dusk) calc(var(--night) * 60%));
+  --room-sash-deep: color-mix(in oklab, #8a7e6e, var(--dusk) calc(var(--night) * 55%));
+  --room-lead: color-mix(in oklab, #3d4049, var(--dusk) calc(var(--night) * 50%));
+  --room-pane-ruby: color-mix(in oklab, #c23b4a, var(--dusk) calc(var(--night) * 55%));
+  --room-pane-amber: color-mix(in oklab, #e9b347, var(--dusk) calc(var(--night) * 55%));
+  --room-daisy: color-mix(in oklab, #fbf4e4, var(--dusk) calc(var(--night) * 45%));
+  /* Worked out from the sky's own paints, so right by day and by night. */
+  --room-cloud-lo: color-mix(in oklab, var(--room-cloud), var(--room-sky) 40%);
+  --room-hill-far: color-mix(in oklab, var(--room-hill), var(--room-sky) 55%);
+  /* The garden round the house (room-garden.ts). */
+  --room-ivy-new: color-mix(in oklab, #a8cc68, var(--dusk) calc(var(--night) * 50%));
+  --room-ivy-hi: color-mix(in oklab, #67a04e, var(--dusk) calc(var(--night) * 50%));
+  --room-ivy: color-mix(in oklab, #3d7a3d, var(--dusk) calc(var(--night) * 50%));
+  --room-ivy-lo: color-mix(in oklab, #2a5a32, var(--dusk) calc(var(--night) * 50%));
+  --room-ivy-deep: color-mix(in oklab, #193a25, var(--dusk) calc(var(--night) * 50%));
+  --room-trunk-hi: color-mix(in oklab, #a08870, var(--dusk) calc(var(--night) * 45%));
+  --room-trunk: color-mix(in oklab, #77614c, var(--dusk) calc(var(--night) * 45%));
+  --room-trunk-lo: color-mix(in oklab, #4f3e31, var(--dusk) calc(var(--night) * 45%));
+  --room-rose-pale: color-mix(in oklab, #ffd6de, var(--dusk) calc(var(--night) * 35%));
+  --room-rose-hi: color-mix(in oklab, #f58aa5, var(--dusk) calc(var(--night) * 35%));
+  --room-rose: color-mix(in oklab, #d93d65, var(--dusk) calc(var(--night) * 35%));
+  --room-rose-lo: color-mix(in oklab, #a01f43, var(--dusk) calc(var(--night) * 35%));
+  --room-rose-deep: color-mix(in oklab, #64122b, var(--dusk) calc(var(--night) * 35%));
+  --room-wis-hi: color-mix(in oklab, #e4d6f6, var(--dusk) calc(var(--night) * 35%));
+  --room-wis: color-mix(in oklab, #bb9ee6, var(--dusk) calc(var(--night) * 35%));
+  --room-wis-lo: color-mix(in oklab, #8d6fc8, var(--dusk) calc(var(--night) * 35%));
+  --room-wis-deep: color-mix(in oklab, #5e4796, var(--dusk) calc(var(--night) * 35%));
+  --room-apple-hi: color-mix(in oklab, #ff9f6e, var(--dusk) calc(var(--night) * 35%));
+  --room-apple: color-mix(in oklab, #d8432c, var(--dusk) calc(var(--night) * 35%));
+  --room-blossom-hi: color-mix(in oklab, #fff3f6, var(--dusk) calc(var(--night) * 40%));
+  --room-blossom: color-mix(in oklab, #fbd0dc, var(--dusk) calc(var(--night) * 40%));
+  --room-blossom-lo: color-mix(in oklab, #eda2bb, var(--dusk) calc(var(--night) * 40%));
+  --room-blossom-deep: color-mix(in oklab, #c97696, var(--dusk) calc(var(--night) * 40%));
+  --room-petal-white: color-mix(in oklab, #fbf7ec, var(--dusk) calc(var(--night) * 35%));
+  --room-petal-gold: color-mix(in oklab, #f5c842, var(--dusk) calc(var(--night) * 35%));
+  --room-petal-gold-lo: color-mix(in oklab, #c99320, var(--dusk) calc(var(--night) * 35%));
+  --room-picket-hi: color-mix(in oklab, #ffffff, var(--dusk) calc(var(--night) * 50%));
+  --room-picket: color-mix(in oklab, #ebe6da, var(--dusk) calc(var(--night) * 50%));
+  --room-picket-lo: color-mix(in oklab, #c3baa9, var(--dusk) calc(var(--night) * 50%));
+  --room-picket-deep: color-mix(in oklab, #8b8274, var(--dusk) calc(var(--night) * 50%));
+  --room-garden-shadow: rgb(0 0 0 / calc(0.16 + var(--night) * 0.12));
   /* The pets (pet-art.ts): a rabbit, a hedgehog, a fox, a little dragon. */
   --room-pet-eye: #1e1714;
   /* Fairy lights (room-shells.ts): coloured glass by day, lit at night. */
@@ -464,6 +508,49 @@
 .rp-parrot-lo { fill: var(--room-parrot-lo); }
 .rp-parrot-blue { fill: var(--room-parrot-blue); }
 .rp-parrot-blue-lo { fill: var(--room-parrot-blue-lo); }
+/* Windows (room-windows.ts). */
+.rp-sash-hi { fill: var(--room-sash-hi); }
+.rp-sash { fill: var(--room-sash); }
+.rp-sash-lo { fill: var(--room-sash-lo); }
+.rp-sash-deep { fill: var(--room-sash-deep); }
+.rp-lead { fill: var(--room-lead); }
+.rp-pane-ruby { fill: var(--room-pane-ruby); }
+.rp-pane-amber { fill: var(--room-pane-amber); }
+.rp-daisy { fill: var(--room-daisy); }
+.rp-cloud-lo { fill: var(--room-cloud-lo); }
+.rp-hill-far { fill: var(--room-hill-far); }
+/* The garden round the house (room-garden.ts). */
+.rp-ivy-new { fill: var(--room-ivy-new); }
+.rp-ivy-hi { fill: var(--room-ivy-hi); }
+.rp-ivy { fill: var(--room-ivy); }
+.rp-ivy-lo { fill: var(--room-ivy-lo); }
+.rp-ivy-deep { fill: var(--room-ivy-deep); }
+.rp-trunk-hi { fill: var(--room-trunk-hi); }
+.rp-trunk { fill: var(--room-trunk); }
+.rp-trunk-lo { fill: var(--room-trunk-lo); }
+.rp-rose-pale { fill: var(--room-rose-pale); }
+.rp-rose-hi { fill: var(--room-rose-hi); }
+.rp-rose { fill: var(--room-rose); }
+.rp-rose-lo { fill: var(--room-rose-lo); }
+.rp-rose-deep { fill: var(--room-rose-deep); }
+.rp-wis-hi { fill: var(--room-wis-hi); }
+.rp-wis { fill: var(--room-wis); }
+.rp-wis-lo { fill: var(--room-wis-lo); }
+.rp-wis-deep { fill: var(--room-wis-deep); }
+.rp-apple-hi { fill: var(--room-apple-hi); }
+.rp-apple { fill: var(--room-apple); }
+.rp-blossom-hi { fill: var(--room-blossom-hi); }
+.rp-blossom { fill: var(--room-blossom); }
+.rp-blossom-lo { fill: var(--room-blossom-lo); }
+.rp-blossom-deep { fill: var(--room-blossom-deep); }
+.rp-petal-white { fill: var(--room-petal-white); }
+.rp-petal-gold { fill: var(--room-petal-gold); }
+.rp-petal-gold-lo { fill: var(--room-petal-gold-lo); }
+.rp-picket-hi { fill: var(--room-picket-hi); }
+.rp-picket { fill: var(--room-picket); }
+.rp-picket-lo { fill: var(--room-picket-lo); }
+.rp-picket-deep { fill: var(--room-picket-deep); }
+.rp-garden-shadow { fill: var(--room-garden-shadow); }
 .rp-pet-eye { fill: var(--room-pet-eye); }
 .rp-bulb-wire { fill: var(--room-bulb-wire); }
 .rp-bulb-1 { fill: var(--room-bulb-1); }
@@ -1569,6 +1656,12 @@
 }
 .room-blinker {
   animation: room-blink 2.8s steps(1, end) infinite;
+}
+/* The doors between rooms side by side: shut, or open while the avatar
+   walks through (room-avatar.tsx: Walker). */
+[data-door][data-open] .room-door-shut,
+[data-door]:not([data-open]) .room-door-open {
+  display: none;
 }
 /* Fairy lights: at night they glow, and three sets of bulbs dim in turn. */
 :where(.dark) .room-twinkle {

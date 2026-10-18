@@ -152,6 +152,42 @@ export const ROOM_CEILING_LABELS: Record<RoomCeiling, string> = {
   ivy: "Ivy",
 };
 
+/** Windows in the back wall of every room, wherever the wall is clear of
+ *  furniture: the sky outside by day, the moon and stars at night. */
+export const ROOM_WINDOWS = ["none", "sash", "arched", "round", "shutters", "leaded"] as const;
+export type RoomWindow = (typeof ROOM_WINDOWS)[number];
+
+export const ROOM_WINDOW_LABELS: Record<RoomWindow, string> = {
+  none: "No windows",
+  sash: "Sash windows",
+  arched: "Arched",
+  round: "Round",
+  shutters: "With shutters",
+  leaded: "Leaded panes",
+};
+
+/** What grows up the outside walls of the house. */
+export const ROOM_CLIMBERS = ["none", "ivy", "roses", "wisteria"] as const;
+export type RoomClimber = (typeof ROOM_CLIMBERS)[number];
+
+export const ROOM_CLIMBER_LABELS: Record<RoomClimber, string> = {
+  none: "Bare walls",
+  ivy: "Ivy",
+  roses: "Climbing roses",
+  wisteria: "Wisteria",
+};
+
+/** What grows (or stands) in the garden round the house; any of them. */
+export const ROOM_GARDEN = ["flowers", "bushes", "trees", "fence"] as const;
+export type RoomGarden = (typeof ROOM_GARDEN)[number];
+
+export const ROOM_GARDEN_LABELS: Record<RoomGarden, string> = {
+  flowers: "Flower beds",
+  bushes: "Bushes",
+  trees: "Trees",
+  fence: "Picket fence",
+};
+
 /** An added room's own walls and floor; "style" in each is the house's. */
 export interface RoomOwn {
   walls: RoomWalls;

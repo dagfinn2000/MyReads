@@ -7,6 +7,7 @@ import { Rects, Sprite, type Art } from "@/components/room-art";
 import { ACCENT_SWATCHES, CLOTH_SWATCHES, EYE_SWATCHES, HAIR_SWATCHES, SKIN_SWATCHES, type AvatarLook } from "@/lib/avatar";
 import { motionAllowed, subscribeMotion } from "@/lib/motion";
 import type { Pet } from "@/lib/pets";
+import { PARTITION } from "@/lib/room";
 
 /** The avatar's art and the colours it's painted in, drawn once per look,
  *  and the pet who follows it about, if it has one. */
@@ -65,21 +66,27 @@ function Strider({ stand, stride }: { stand: Art; stride: Art }) {
  * read: it walks somewhere, stands a while, looks about, and now and then
  * comes back to stand by the fire. Its pet, if it has one, trots after it
  * and keeps at its heels, going round to the other side when it turns. It
- * moves a whole dot at a time, like the rest of the room. With Animations
- * off, or reduced motion, they just stand by the fire.
+ * moves a whole dot at a time, like the rest of the room, and wanders
+ * from room to room through the doors between them, which open as it
+ * comes. With Animations off, or reduced motion, they just stand by the
+ * fire.
  *
- * `home` and `width` are in dots from the floor's left; `floorLine` is
- * where its feet go.
+ * `home`, `width` and the `doors` (the house's, room-shells.ts) are in
+ * dots from the floor's left; `floorLine` is where its feet go.
  */
 export function Walker({
   avatar,
   width,
+  floor,
+  doors,
   home,
   floorLine,
   scale: s,
 }: {
   avatar: Avatar;
   width: number;
+  floor: number;
+  doors: readonly number[];
   home: number;
   floorLine: number;
   scale: number;
@@ -132,6 +139,19 @@ export function Walker({
     draw(false);
     drawPet(false);
     if (!moving) return;
+
+    // A door is open while either of them is in it, or nearly.
+    const scene = node.closest(".room-scene");
+    const doorways = doors.flatMap((d) => {
+      const door = scene?.querySelector(`[data-door="${floor}:${d}"]`);
+      return door ? [{ from: d - 3, to: d + PARTITION + 3, door }] : [];
+    });
+    const openDoors = () => {
+      for (const { from, to, door } of doorways) {
+        const open = (x < to && x + AVATAR_W > from) || (!!petNode && px < to && px + petW > from);
+        if (open !== door.hasAttribute("data-open")) door.toggleAttribute("data-open", open);
+      }
+    };
 
     const between = (lo: number, hi: number) => lo + Math.random() * (hi - lo);
     let target: number | null = null;
@@ -193,11 +213,15 @@ export function Walker({
         }
       }
       followPet(dt);
+      openDoors();
       frame = requestAnimationFrame(tick);
     };
     frame = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(frame);
-  }, [moving, width, home, s, pet]);
+    return () => {
+      cancelAnimationFrame(frame);
+      for (const { door } of doorways) door.removeAttribute("data-open");
+    };
+  }, [moving, width, floor, doors, home, s, pet]);
 
   return (
     <>

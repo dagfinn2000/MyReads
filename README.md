@@ -100,20 +100,28 @@ server.
   of the walls, the wood and the fabrics, hang a painting or one of five
   tapestries over the fireplace, put furniture away, and drag the furniture
   to wherever you like it (or move it with the arrow keys).
-- Add rooms over the library, each a floor of its own: a kitchen with the
-  kettle on the range, a bedroom under a patchwork quilt, a music room, a
-  conservatory with a songbird, a games room with a billiard table, a
-  studio with an easel, a bathroom with a bubble bath, a dining room under
-  a chandelier, a nursery with a mobile over the cot, a woodshop, a sauna
-  with steam rising off the stove, or a spare room to fill yourself. The
-  bathroom comes tiled and the sauna panelled in logs. Their furniture
-  can be moved anywhere in the house or put away like the rest.
+- Add rooms, each upstairs on a floor of its own or next to the library
+  (or the room before it), so the house grows wider instead of taller
+  where the screen has space, with a door in the wall between that opens
+  as your little you wanders through: a kitchen with the kettle on the
+  range, a bedroom under a patchwork quilt, a music room, a conservatory
+  with a songbird, a games room with a billiard table, a studio with an
+  easel, a bathroom with a bubble bath, a dining room under a chandelier,
+  a nursery with a mobile over the cot, a woodshop, a sauna with steam
+  rising off the stove, or a spare room to fill yourself. The bathroom
+  comes tiled and the sauna panelled in logs. Their furniture can be moved
+  anywhere in the house or put away like the rest.
 - Paper the walls (stripes, damask, flowers, trellis, stars, stone, tiles,
   paper screens and more) and lay the floor (boards, parquet, flagstones,
   chequered tiles, carpet, tatami or a metal grate), for the whole house
   and for each added room on its own, which can have walls of its own
   colour too. String fairy lights, bunting, paper lanterns or ivy along
   the ceilings; at night the fairy lights twinkle.
+- Put windows in the rooms (sash, arched, round, shuttered or leaded),
+  wherever the wall above the furniture is clear, with the sky outside by
+  day and the moon and stars at night. Grow ivy, climbing roses or
+  wisteria up the outside walls, and plant flower beds, bushes and trees
+  round the house behind a picket fence.
 - Add furniture from a catalogue: a Chesterfield sofa, a rocking chair, an
   aquarium with fish swimming in it, a spaniel asleep in its basket, a suit
   of armour, a sea chest, a coat stand, a telescope, a rocking horse, a

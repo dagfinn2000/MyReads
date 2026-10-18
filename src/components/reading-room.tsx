@@ -4,13 +4,16 @@ import "./reading-room.css";
 import { memo, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import type {
   RoomCeiling,
+  RoomClimber,
   RoomFabric,
   RoomFloor,
+  RoomGarden,
   RoomHanging,
   RoomOwn,
   RoomPaper,
   RoomStyle,
   RoomWalls,
+  RoomWindow,
   RoomWood,
 } from "@/lib/room-styles";
 import { ReadingStatus } from "@prisma/client";
@@ -61,6 +64,7 @@ import { RoomPieceView } from "@/components/room-rooms";
 import type { AvatarLook } from "@/lib/avatar";
 import type { CatCoat, DogCoat, Pet } from "@/lib/pets";
 import { chimneyFoot, chimneyRise, roofCrown, roofHeight, shellArt, type Moving, type Shell } from "@/components/room-shells";
+import { WINDOW_W } from "@/components/room-windows";
 import { isClosingBook } from "@/lib/cover-flight";
 import { OWNERSHIP_LABELS, STATUS_LABELS } from "@/lib/display";
 import {
@@ -87,10 +91,12 @@ import {
   isOnShelf,
   moveTo,
   nudge,
+  placeAt,
   placementsOf,
   planHouse,
   shelve,
   spineFor,
+  windowSpots,
   type Arrangement,
   type HousePlan,
   type Movable,
@@ -381,6 +387,9 @@ export interface RoomDecor {
   ceiling: RoomCeiling;
   /** Added rooms' own walls and floors. */
   own: Partial<Record<RoomKind, RoomOwn>>;
+  windows: RoomWindow;
+  climber: RoomClimber;
+  garden: RoomGarden[];
   /** The coat of every cat in the house, and of the dog in its basket. */
   cat: CatCoat;
   dog: DogCoat;
@@ -396,6 +405,9 @@ export const PLAIN_DECOR: RoomDecor = {
   floor: "style",
   ceiling: "none",
   own: {},
+  windows: "none",
+  climber: "none",
+  garden: [],
   cat: "ginger",
   dog: "brown",
 };
@@ -475,11 +487,28 @@ export function ReadingRoom({
     () => (width ? layoutRoom(books, width, style, arrangement) : null),
     [books, width, style, arrangement],
   );
-  const { paper, floor, ceiling, own } = decor;
+  const { paper, floor, ceiling, own, windows, climber, garden } = decor;
   const shell = useMemo(
-    () => (layout ? shellArt(layout.geo, style, { paper, floor, ceiling, own, rooms: layout.plan.rooms }) : null),
-    [layout, style, paper, floor, ceiling, own],
+    () =>
+      layout
+        ? shellArt(layout.geo, style, {
+            paper,
+            floor,
+            ceiling,
+            own,
+            rooms: layout.plan.rooms,
+            spans: layout.plan.spans,
+            windows,
+            windowSpots: windows === "none" ? undefined : windowSpots(layout.plan, WINDOW_W),
+            climber,
+            garden,
+          })
+        : null,
+    [layout, style, paper, floor, ceiling, own, windows, climber, garden],
   );
+  // The doors between rooms side by side, floor by floor (as the shell
+  // draws them, after each room but the last).
+  const doors = useMemo(() => layout?.plan.spans.map((spans) => spans.slice(0, -1).map((sp) => sp.x + sp.w)) ?? [], [layout]);
   useEffect(() => {
     if (layout) onPlan?.(layout.plan);
   }, [layout, onPlan]);
@@ -531,21 +560,23 @@ export function ReadingRoom({
   }, [note]);
 
   /** Moves a piece of furniture, if it fits there: `floor` counts up from
-   *  the ground floor. */
-  const move = (kind: Movable, floor: number, slot: number): boolean => {
+   *  the ground floor, `span` is which of its rooms from the left. */
+  const move = (kind: Movable, floor: number, slot: number, span = 0): boolean => {
     if (!layout || !onArrange) return false;
-    const places = moveTo(layout.plan, kind, floor, slot);
+    const places = moveTo(layout.plan, kind, floor, slot, span);
     const wanted = places?.find((p) => p.kind === kind);
     if (!places || !wanted) return false;
     const next: Arrangement = { ...arrangement, places };
     const plan = planHouse(layout.caseTotal, books.length, layout.maxInner, next);
     const landed = placementsOf(plan).find((p) => p.kind === kind);
     const name = FURNITURE_LABELS[kind];
-    if (!landed || landed.floor !== wanted.floor || landed.slot !== wanted.slot) {
+    if (!landed || landed.floor !== wanted.floor || landed.slot !== wanted.slot || landed.room !== wanted.room) {
       setNote({ text: `There isn't room for the ${name.toLowerCase()} there.`, shown: true });
       return false;
     }
-    const row = plan.floors[plan.floors.length - 1 - landed.floor].filter((p) => p.kind !== "ladder");
+    const f = plan.floors.length - 1 - landed.floor;
+    const sp = plan.spans[f].find((p) => p.room === (landed.room ?? null))!;
+    const row = plan.floors[f].slice(sp.from, sp.to).filter((p) => p.kind !== "ladder");
     setNote({
       text: `${name}: ${landed.room ? `the ${ROOM_LABELS[landed.room].name.toLowerCase()}` : floorName(landed.floor)}, ${landed.slot + 1} of ${row.length} from the left.`,
       shown: false,
@@ -657,6 +688,18 @@ export function ReadingRoom({
               </g>
             ),
           )}
+          {shell.doors.map((d) => (
+            // Opened by the avatar as it walks through (Walker).
+            <g
+              key={`door-${d.floor}-${d.x}`}
+              data-door={`${d.floor}:${d.x}`}
+              data-room-walls={d.walls === "style" ? undefined : d.walls}
+            >
+              <Rects className="room-door-shut" rects={d.shut} />
+              <Rects className="room-door-open" rects={d.open} />
+              <Rects rects={d.frame} />
+            </g>
+          ))}
           {shell.twinkle.map((t, i) => (
             <Rects key={`twinkle-${i}`} className={`room-twinkle room-twinkle-${i}`} rects={t} />
           ))}
@@ -695,6 +738,7 @@ export function ReadingRoom({
             hanging={decor.hanging}
             arranging={arranging}
             avatar={figure}
+            doors={doors[f]}
           />
         ))}
 
@@ -770,7 +814,7 @@ function ArrangeHandles({
 }: {
   layout: Layout;
   scene: React.RefObject<HTMLDivElement | null>;
-  onMove: (kind: Movable, floor: number, slot: number) => boolean;
+  onMove: (kind: Movable, floor: number, slot: number, span: number) => boolean;
   /** A piece can't go any further that way. */
   onEdge: (text: string) => void;
   onDone?: () => void;
@@ -789,19 +833,21 @@ function ArrangeHandles({
     if (kind) handles.current.get(kind)?.scrollIntoView({ block: "nearest" });
   }, [layout]);
 
-  /** Where a dragged piece would land: the floor (top first), the place
-   *  among the pieces there, and the line between them, in scene dots. */
+  /** Where a dragged piece would land: the floor (top first), the room
+   *  there and the place among its pieces, and the line between them, in
+   *  scene dots. */
   const target = (d: Drag) => {
     const f = Math.max(0, Math.min(floors.length - 1, Math.floor((d.y - geo.floorsTop) / STOREY)));
-    const others = floors[f].filter((p) => p.kind !== d.kind);
-    const row = others.filter((p) => p.kind !== "ladder");
     const middle = d.x - d.grab + PIECE_WIDTH[d.kind] / 2 - left;
-    const slot = row.filter((p) => p.x + PIECE_WIDTH[p.kind] / 2 < middle).length;
+    const { span, slot } = placeAt(layout.plan, floors.length - 1 - f, middle, d.kind);
+    const sp = layout.plan.spans[f][span];
+    const others = floors[f].slice(sp.from, sp.to).filter((p) => p.kind !== d.kind);
+    const row = others.filter((p) => p.kind !== "ladder");
     const next = row[slot];
     const ends = others.filter((p) => !next || p.x < next.x).map((p) => p.x + PIECE_WIDTH[p.kind]);
-    const end = ends.length ? Math.max(...ends) : 0;
-    const line = next ? (end + next.x) / 2 : Math.min(end + GAP / 2, geo.houseW - 2 * WALL - 1);
-    return { f, slot, line: left + line };
+    const end = ends.length ? Math.max(...ends) : sp.x;
+    const line = next ? (end + next.x) / 2 : Math.min(end + GAP / 2, sp.x + sp.w - 1);
+    return { f, span, slot, line: left + line };
   };
 
   const scenePoint = (e: React.PointerEvent) => {
@@ -861,7 +907,7 @@ function ArrangeHandles({
               setDrag(null);
               if (!drag.moved) return;
               const t = target(drag);
-              onMove(kind, floors.length - 1 - t.f, t.slot);
+              onMove(kind, floors.length - 1 - t.f, t.slot, t.span);
             }}
             onPointerCancel={() => setDrag(null)}
             onKeyDown={(e) => {
@@ -884,7 +930,7 @@ function ArrangeHandles({
                       ? `${it} is on the ground floor.`
                       : `${it} is at the ${direction} wall.`,
                 );
-              } else if (onMove(kind, to.floor, to.slot) && (direction === "up" || direction === "down")) {
+              } else if (onMove(kind, to.floor, to.slot, to.span) && (direction === "up" || direction === "down")) {
                 following.current = kind;
               }
             }}
@@ -917,6 +963,7 @@ const Floor = memo(function Floor({
   hanging,
   arranging,
   avatar,
+  doors,
 }: {
   index: number;
   pieces: Piece[];
@@ -935,6 +982,8 @@ const Floor = memo(function Floor({
   /** While the furniture is being moved, the books stay put. */
   arranging: boolean;
   avatar: Avatar | null;
+  /** The doors through the walls between its rooms, from its left. */
+  doors: readonly number[];
 }) {
   const floorLine = STOREY;
   const hearth = pieces.find((p) => p.kind === "hearth");
@@ -984,7 +1033,15 @@ const Floor = memo(function Floor({
       {/* Up and about while no book is being read; out of the way while
           the furniture moves. */}
       {avatar && hearth && !openBook && !arranging && (
-        <Walker avatar={avatar} width={width} home={hearth.x + 40} floorLine={floorLine} scale={s} />
+        <Walker
+          avatar={avatar}
+          width={width}
+          floor={index}
+          doors={doors}
+          home={hearth.x + 40}
+          floorLine={floorLine}
+          scale={s}
+        />
       )}
     </div>
   );
@@ -1365,7 +1422,13 @@ function previewArt(style: RoomStyle, hanging: RoomHanging): { w: number; h: num
   const inner = 2 * PAD + PIECE_WIDTH.hearth + GAP + PIECE_WIDTH.case;
   const geo = houseGeometry(style, yardFor(3), inner + 2 * WALL, 1, PAD);
   const shell = shellArt(geo, style);
-  const R: Rect[] = [...shell.rects, ...shell.storeys.flatMap((st) => st.rects), ...shell.twinkle.flat(), ...shell.over];
+  const R: Rect[] = [
+    ...shell.rects,
+    ...shell.storeys.flatMap((st) => st.rects),
+    ...shell.doors.flatMap((d) => [...d.shut, ...d.frame]),
+    ...shell.twinkle.flat(),
+    ...shell.over,
+  ];
   for (const y of shell.yard) R.push(...shift(y.art.rects, y.x, y.y));
   for (const m of shell.moving) R.push(...shift(m.frames[0], m.x, m.y));
   const fx = geo.houseX + WALL + PAD;

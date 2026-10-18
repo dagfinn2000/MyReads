@@ -12,8 +12,21 @@
  * looks the same on every visit.
  */
 import { art, grid, type Art, type HouseGeometry, type Rect } from "@/components/room-art";
-import type { RoomKind } from "@/lib/room";
-import type { RoomCeiling, RoomFloor, RoomOwn, RoomPaper, RoomStyle, RoomWalls } from "@/lib/room-styles";
+import { DOOR_H, doorFor } from "@/components/room-doors";
+import { climberArt, gardenArt } from "@/components/room-garden";
+import { WINDOW_DROP, WINDOW_W, windowFor } from "@/components/room-windows";
+import { PARTITION, type RoomKind } from "@/lib/room";
+import type {
+  RoomCeiling,
+  RoomClimber,
+  RoomFloor,
+  RoomGarden,
+  RoomOwn,
+  RoomPaper,
+  RoomStyle,
+  RoomWalls,
+  RoomWindow,
+} from "@/lib/room-styles";
 
 /** Something on the house that moves: frames shown in turn (or one that
  *  blinks), `x`, `y` its top left. The first frame is the still picture. */
@@ -33,9 +46,15 @@ export interface Light {
 
 export interface Shell {
   rects: Rect[];
-  /** Each storey's walls, floor and ceiling, top first; drawn over
-   *  `rects`, in the walls colour of their own if the room has one. */
+  /** Each room's walls, windows and what hangs from its ceiling, storey by
+   *  storey from the top and left to right; drawn over `rects`, in the
+   *  walls colour of their own if the room has one. */
   storeys: { rects: Rect[]; walls: RoomWalls }[];
+  /** The door through each wall between rooms side by side, over the
+   *  storeys: `floor` is its storey from the top and `x` its left, from
+   *  the inside of the house's left wall. Through an open door shows the
+   *  walls of the room to its left. */
+  doors: { floor: number; x: number; walls: RoomWalls; shut: Rect[]; open: Rect[]; frame: Rect[] }[];
   /** Fairy-light bulbs in three sets, which twinkle in turn at night. */
   twinkle: Rect[][];
   /** Drawn over the storeys, under the furniture: vines hanging from the
@@ -60,6 +79,8 @@ function noise(x: number, y: number, seed = 0): number {
 }
 
 const clamp = (n: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, n));
+const shift = (rects: readonly Rect[], dx: number, dy: number): Rect[] =>
+  rects.map(([x, y, w, h, p]): Rect => [x + dx, y + dy, w, h, p]);
 
 // ── Roofs ────────────────────────────────────────────────────────────────
 
@@ -1000,6 +1021,67 @@ function outside(R: Rect[], style: RoomStyle, x: number, top: number, w: number,
   }
 }
 
+/** The wall between two rooms side by side, `h` tall from `top` down to
+ *  the door in it: built like the house's outside walls, cut through. */
+function partition(R: Rect[], style: RoomStyle, x: number, top: number, h: number) {
+  const w = PARTITION;
+  const edges = (paint: string) => R.push([x, top, 1, h, paint], [x + w - 1, top, 1, h, paint]);
+  switch (OUTSIDE[style]) {
+    case "brick":
+      bricks(R, x, top, w, h);
+      edges("outer-lo");
+      return;
+    case "ashlar":
+      R.push([x, top, w, h, "outer"]);
+      for (let row = 0, y = top; y < top + h; row++, y += 5) {
+        R.push([x, y, w, 1, "outer-hi"], [x, Math.min(y + 4, top + h - 1), w, 1, "outer-lo"]);
+        R.push([x + (row % 2 ? 4 : 9), y, 1, Math.min(5, top + h - y), "outer-lo"]);
+      }
+      edges("outer-lo");
+      return;
+    case "timber":
+    case "posts": {
+      // Plaster between posts, with a rail across now and then.
+      R.push([x, top, w, h, "outer"], [x, top, 2, h, "trim"], [x + w - 2, top, 2, h, "trim"]);
+      const step = OUTSIDE[style] === "timber" ? 30 : 34;
+      for (let y = top + step - 4; y < top + h - 6; y += step) R.push([x + 2, y, w - 4, 2, "trim"]);
+      R.push([x + 2, top, 1, h, "outer-hi"]);
+      return;
+    }
+    case "birch":
+      R.push([x, top, w, h, "bark"]);
+      for (let y = top + 2; y < top + h; y += 3) {
+        if (noise(x, y, 71) < 0.55) R.push([x + 1 + Math.floor(noise(y, x, 72) * (w - 4)), y, 2, 1, "bark-lo"]);
+      }
+      edges("bark-lo");
+      return;
+    case "rock":
+      R.push([x, top, w, h, "outer"]);
+      for (let y = top; y < top + h; y += 3) {
+        const n = noise(x, y, 81);
+        if (n < 0.5) R.push([x + 1 + Math.floor(n * 2 * (w - 5)), y, 3, 1, "outer-lo"]);
+        else R.push([x + 1 + Math.floor((n - 0.5) * 2 * (w - 4)), y + 1, 2, 2, "outer-hi"]);
+      }
+      edges("outer-lo");
+      return;
+    case "hull":
+      R.push([x, top, w, h, "outer"], [x + 1, top, 1, h, "outer-hi"]);
+      for (let y = top + 10; y < top + h; y += 20) R.push([x, y, w, 1, "outer-lo"], [x + 3, y + 3, 1, 1, "outer-hi"], [x + w - 4, y + 3, 1, 1, "outer-hi"]);
+      R.push([x + w / 2 - 1, top + 4, 2, h - 8, "light"]);
+      edges("outer-lo");
+      return;
+    case "render":
+      R.push([x, top, w, h, "outer"], [x + 1, top, 1, h, "outer-hi"]);
+      edges("outer-lo");
+      return;
+    case "logs":
+      R.push([x, top, w, h, "outer"]);
+      for (let y = top; y < top + h; y += 6) R.push([x, y, w, 1, "outer-hi"], [x, y + 4, w, 2, "outer-lo"]);
+      edges("outer-lo");
+      return;
+  }
+}
+
 /** How one storey is done up inside: its wallpaper, its floor (the
  *  boards it stands on), its walls colour, and what hangs along the top.
  *  `own` marks a floor chosen for itself rather than the style's. */
@@ -1013,74 +1095,171 @@ export interface StoreyLook {
 
 /** How the inside of the house is done up (Decorate): wallpaper and floor
  *  for the house, what hangs along the ceilings, and each added room's
- *  own, by floor (`rooms`, top first, as in HousePlan). */
+ *  own, by floor (`rooms`, top first, as in HousePlan). `spans` splits a
+ *  floor into rooms side by side (HousePlan.spans); without it each floor
+ *  is one room. Windows go at `windowSpots` (x in from the left wall, top
+ *  floor first, as lib/room.ts: windowSpots finds them). */
 export interface Interior {
   paper: RoomPaper;
   floor: RoomFloor;
   ceiling: RoomCeiling;
   rooms: readonly (RoomKind | null)[];
   own: Partial<Record<RoomKind, RoomOwn>>;
+  spans?: readonly (readonly { room: RoomKind | null; x: number; w: number }[])[];
+  windows?: RoomWindow;
+  windowSpots?: readonly (readonly number[])[];
+  /** What grows up the outside walls, and in the garden. */
+  climber?: RoomClimber;
+  garden?: readonly RoomGarden[];
 }
 
 export const PLAIN_INTERIOR: Interior = { paper: "style", floor: "style", ceiling: "none", rooms: [], own: {} };
 
-/** Each storey's look, top first. */
+/** How one room is done up: an added room its own way where it has one,
+ *  the rest like the house. */
+function lookOf(style: RoomStyle, interior: Interior, room: RoomKind | null | undefined): StoreyLook {
+  const own = room ? interior.own[room] : undefined;
+  const paper = own && own.paper !== "style" ? own.paper : interior.paper;
+  const floorKind = own && own.floor !== "style" ? own.floor : interior.floor;
+  return {
+    paper: paper === "style" ? PATTERNS[style] : paper,
+    floor: floorKind === "style" ? FLOORS[style] : floorKind,
+    ownFloor: floorKind !== "style",
+    walls: own?.walls ?? "style",
+    ceiling: interior.ceiling,
+  };
+}
+
+/** Each storey's look, top first (on a storey of rooms side by side, the
+ *  one on the left). */
 export function storeyLooks(style: RoomStyle, interior: Interior, count: number): StoreyLook[] {
-  return Array.from({ length: count }, (_, f) => {
-    const room = interior.rooms[f];
-    const own = room ? interior.own[room] : undefined;
-    const paper = own && own.paper !== "style" ? own.paper : interior.paper;
-    const floorKind = own && own.floor !== "style" ? own.floor : interior.floor;
-    return {
-      paper: paper === "style" ? PATTERNS[style] : paper,
-      floor: floorKind === "style" ? FLOORS[style] : floorKind,
-      ownFloor: floorKind !== "style",
-      walls: own?.walls ?? "style",
-      ceiling: interior.ceiling,
-    };
+  return Array.from({ length: count }, (_, f) => lookOf(style, interior, interior.spans?.[f]?.[0]?.room ?? interior.rooms[f]));
+}
+
+/** A room of a storey: how it is done up, and where it is across the house
+ *  (x in from the left wall). */
+interface Part {
+  look: StoreyLook;
+  x: number;
+  w: number;
+}
+
+/** Each storey's rooms, top first, left to right. */
+function storeyParts(style: RoomStyle, interior: Interior, g: HouseGeometry): Part[][] {
+  const inner = g.houseW - 2 * g.wall;
+  return Array.from({ length: g.floorCount }, (_, f) => {
+    const spans = interior.spans?.[f];
+    if (!spans?.length) return [{ look: lookOf(style, interior, interior.rooms[f]), x: 0, w: inner }];
+    return spans.map((sp) => ({ look: lookOf(style, interior, sp.room), x: sp.x, w: sp.w }));
   });
 }
 
-/** One storey's walls, its ceiling and what hangs from it; the beam over
- *  it is the floor of the storey above, `above`. */
-function storey(R: Rect[], g: HouseGeometry, style: RoomStyle, f: number, look: StoreyLook, above: StoreyLook | null, twinkle: Rect[][]) {
+/** A floor (or the beam over a storey) under rooms side by side, each
+ *  room's own, `y` its top. Each reaches across the partition to its right,
+ *  and the outer ones across the outside walls. */
+function floors(R: Rect[], g: HouseGeometry, parts: readonly Part[], y: number) {
   const { houseX: hx, houseW: hw, wall } = g;
-  const inner = hw - 2 * wall;
+  parts.forEach(({ look, x, w }, j) => {
+    const x0 = j === 0 ? hx : hx + wall + x;
+    const x1 = j === parts.length - 1 ? hx + hw : hx + wall + x + w + PARTITION;
+    floor(R, look.floor, look.ownFloor, x0, y, x1 - x0, g.beam);
+  });
+}
+
+/** One storey: the beam over it (the floor of the storey above, `above`,
+ *  or under the roof the wall plate), its outside walls and the partitions
+ *  between its rooms, into `frame`; each room's walls, windows and
+ *  ceiling, into `rooms`; and the doors between them, into `doors`. */
+function storey(
+  frame: Rect[],
+  rooms: Shell["storeys"],
+  g: HouseGeometry,
+  style: RoomStyle,
+  f: number,
+  parts: readonly Part[],
+  above: readonly Part[] | null,
+  twinkle: Rect[][],
+  windows: { kind: RoomWindow; spots: readonly number[] },
+  doors: Shell["doors"],
+) {
+  const { houseX: hx, houseW: hw, wall } = g;
   const beam = g.floorsTop + f * g.storey;
   const top = beam + g.beam;
   const floorLine = top + g.roomH;
-  // The beam over this storey: under the roof it is the wall plate, else
-  // it is the floor of the storey above.
-  if (!above) R.push([hx, beam, hw, g.beam, "wood-deep"], [hx, beam + 1, hw, 2, "wood-lo"]);
-  else floor(R, above.floor, above.ownFloor, hx, beam, hw, g.beam);
+  if (!above) frame.push([hx, beam, hw, g.beam, "wood-deep"], [hx, beam + 1, hw, 2, "wood-lo"]);
+  else floors(frame, g, above, beam);
 
-  const x0 = hx + wall;
-  R.push([x0, top, inner, g.roomH, "wall"]);
-  const dado = WAINSCOT.has(style);
-  const kick = style === "japanese" ? 9 : 3;
-  const patternEnd = dado ? floorLine - 28 : floorLine - kick;
-  wallPattern(R, look.paper, x0, inner, top + 3, patternEnd);
-  R.push([x0, top, inner, 1, "wood-lo"], [x0, top + 1, inner, 2, "wall-shadow"]);
+  const doorTop = floorLine - DOOR_H;
+  for (const [j, { look, x, w }] of parts.entries()) {
+    const R: Rect[] = [];
+    const x0 = hx + wall + x;
+    R.push([x0, top, w, g.roomH, "wall"]);
+    const dado = WAINSCOT.has(style);
+    const kick = style === "japanese" ? 9 : 3;
+    const patternEnd = dado ? floorLine - 28 : floorLine - kick;
+    wallPattern(R, look.paper, x0, w, top + 3, patternEnd);
+    R.push([x0, top, w, 1, "wood-lo"], [x0, top + 1, w, 2, "wall-shadow"]);
+    skirting(R, style, x0, w, floorLine);
+    if (windows.kind !== "none") {
+      for (const [n, wx] of windows.spots.entries()) {
+        if (wx < x || wx + WINDOW_W > x + w) continue;
+        // A different view out of each window along the house.
+        const pane = windowFor(windows.kind, f * 2 + n);
+        R.push(...pane.rects.map(([rx, ry, rw, rh, p]): Rect => [hx + wall + wx + rx, top + WINDOW_DROP + ry, rw, rh, p]));
+      }
+    }
+    ceiling(R, look.ceiling, x0, w, top + 3, twinkle);
+    rooms.push({ rects: R, walls: look.walls });
 
-  if (dado) {
+    // The wall to its right, cut through, with a door in it: through the
+    // doorway, while the door is open, the back wall in its shade.
+    if (j < parts.length - 1) {
+      const px = x0 + w;
+      partition(frame, style, px, top, g.roomH);
+      const door = doorFor(style);
+      const hole = shift(door.hole, px, doorTop);
+      const beyond: Rect[] = [...hole];
+      const [from, to] = [Math.min(...hole.map((r) => r[0])), Math.max(...hole.map((r) => r[0] + r[2]))];
+      const low = beyond.length;
+      skirting(beyond, style, from, to - from, floorLine);
+      clip(beyond, low, from, doorTop, to, floorLine);
+      const lintel = Math.min(...hole.map((r) => r[1]));
+      beyond.push(...hole.map(([hx0, y, hw, h]): Rect => [hx0, y, hw, h, "wall-shadow"]));
+      beyond.push(...hole.filter((r) => r[1] < lintel + 4).map(([hx0, y, hw, h]): Rect => [hx0, y, hw, h, "wall-shadow"]));
+      beyond.push(...hole.flatMap(([hx0, y, hw, h]): Rect[] => [[hx0, y, 1, h, "wall-shadow"], [hx0 + hw - 1, y, 1, h, "wall-shadow"]]));
+      doors.push({
+        floor: f,
+        x: x + w,
+        walls: look.walls,
+        shut: shift(door.shut, px, doorTop),
+        open: [...beyond, ...shift(door.open, px, doorTop)],
+        frame: shift(door.frame, px, doorTop),
+      });
+    }
+  }
+
+  outside(frame, style, hx, top, wall, g.roomH, true);
+  outside(frame, style, hx + hw - wall, top, wall, g.roomH, false);
+}
+
+/** The bottom of a room's walls, `w` wide from `x0`: the style's dado or
+ *  band, if it has one, and the skirting board. */
+function skirting(R: Rect[], style: RoomStyle, x0: number, w: number, floorLine: number) {
+  if (WAINSCOT.has(style)) {
     const rail = floorLine - 28;
-    R.push([x0, rail, inner, 25, "wainscot"]);
-    R.push([x0, rail, inner, 1, "wood-hi"], [x0, rail + 1, inner, 1, "wood"], [x0, rail + 2, inner, 1, "wood-lo"]);
-    for (let x = x0 + 4; x + 16 <= x0 + inner - 2; x += 20) {
-      R.push([x, rail + 6, 16, 1, "wainscot-lo"], [x, rail + 6, 1, 15, "wainscot-lo"]);
-      R.push([x + 1, rail + 20, 15, 1, "wainscot-hi"], [x + 15, rail + 7, 1, 13, "wainscot-hi"]);
-      if (style === "steampunk") R.push([x + 2, rail + 8, 1, 1, "brass"], [x + 13, rail + 8, 1, 1, "brass"], [x + 2, rail + 18, 1, 1, "brass"], [x + 13, rail + 18, 1, 1, "brass"]);
+    R.push([x0, rail, w, 25, "wainscot"]);
+    R.push([x0, rail, w, 1, "wood-hi"], [x0, rail + 1, w, 1, "wood"], [x0, rail + 2, w, 1, "wood-lo"]);
+    for (let px = x0 + 4; px + 16 <= x0 + w - 2; px += 20) {
+      R.push([px, rail + 6, 16, 1, "wainscot-lo"], [px, rail + 6, 1, 15, "wainscot-lo"]);
+      R.push([px + 1, rail + 20, 15, 1, "wainscot-hi"], [px + 15, rail + 7, 1, 13, "wainscot-hi"]);
+      if (style === "steampunk") R.push([px + 2, rail + 8, 1, 1, "brass"], [px + 13, rail + 8, 1, 1, "brass"], [px + 2, rail + 18, 1, 1, "brass"], [px + 13, rail + 18, 1, 1, "brass"]);
     }
   } else if (style === "japanese") {
-    R.push([x0, floorLine - 9, inner, 6, "wainscot"], [x0, floorLine - 9, inner, 1, "trim"]);
+    R.push([x0, floorLine - 9, w, 6, "wainscot"], [x0, floorLine - 9, w, 1, "trim"]);
   } else if (style === "scifi") {
-    R.push([x0, floorLine - 6, inner, 3, "wainscot"], [x0, floorLine - 6, inner, 1, "light"]);
+    R.push([x0, floorLine - 6, w, 3, "wainscot"], [x0, floorLine - 6, w, 1, "light"]);
   }
-  R.push([x0, floorLine - 3, inner, 2, "wood"], [x0, floorLine - 3, inner, 1, "wood-hi"], [x0, floorLine - 1, inner, 1, "wood-deep"]);
-  ceiling(R, look.ceiling, x0, inner, top + 3, twinkle);
-
-  outside(R, style, hx, top, wall, g.roomH, true);
-  outside(R, style, hx + hw - wall, top, wall, g.roomH, false);
+  R.push([x0, floorLine - 3, w, 2, "wood"], [x0, floorLine - 3, w, 1, "wood-hi"], [x0, floorLine - 1, w, 1, "wood-deep"]);
 }
 
 /** How far a string hung between two hooks `span` apart sags at `t` dots
@@ -1510,20 +1689,18 @@ export function shellArt(g: HouseGeometry, style: RoomStyle, interior: Interior 
   const R: Rect[] = [];
   const over: Rect[] = [];
   const twinkle: Rect[][] = [[], [], []];
-  const shell: Shell = { rects: R, storeys: [], twinkle, over, moving: [], lights: [], smoke: null, yard: [], fireflies: [] };
+  const shell: Shell = { rects: R, storeys: [], doors: [], twinkle, over, moving: [], lights: [], smoke: null, yard: [], fireflies: [] };
   shell.smoke = chimney(R, g, style);
   roof(R, over, g, style, shell);
-  const looks = storeyLooks(style, interior, g.floorCount);
+  const parts = storeyParts(style, interior, g);
   for (let f = 0; f < g.floorCount; f++) {
-    const rects: Rect[] = [];
-    storey(rects, g, style, f, looks[f], f > 0 ? looks[f - 1] : null, twinkle);
-    shell.storeys.push({ rects, walls: looks[f].walls });
+    const windows = { kind: interior.windows ?? "none", spots: interior.windowSpots?.[f] ?? [] };
+    storey(R, shell.storeys, g, style, f, parts[f], f > 0 ? parts[f - 1] : null, twinkle, windows, shell.doors);
   }
 
   const { houseX: hx, houseW: hw } = g;
   const bottom = g.floorsTop + g.floorCount * g.storey;
-  const ground = looks[g.floorCount - 1] ?? storeyLooks(style, interior, 1)[0];
-  floor(R, ground.floor, ground.ownFloor, hx, bottom, hw, g.beam);
+  floors(R, g, parts[g.floorCount - 1] ?? storeyParts(style, interior, { ...g, floorCount: 1 })[0], bottom);
   const base = bottom + g.beam;
   R.push([hx - 2, base, hw + 4, g.foundation, "stone"]);
   R.push([hx - 2, base, hw + 4, 1, "stone-hi"], [hx - 2, base + g.foundation - 1, hw + 4, 1, "stone-lo"]);
@@ -1535,6 +1712,10 @@ export function shellArt(g: HouseGeometry, style: RoomStyle, interior: Interior 
     R.push([hx - 2, earth, hw + 4, 2, "soil"]);
   } else {
     for (let x = 1; x < g.sceneW; x += 5) R.push([x, earth - 1, 1, 1, "grass"], [x + 2, earth + 3, 1, 1, "soil-lo"]);
+    // The garden round the house, and what climbs its walls. A cave has
+    // neither: it is dug into its hill.
+    if (interior.garden?.length) R.push(...gardenArt(interior.garden, g, earth));
+    if (interior.climber && interior.climber !== "none") over.push(...climberArt(interior.climber, g, earth));
   }
   yard(style, g, earth, shell);
   return shell;

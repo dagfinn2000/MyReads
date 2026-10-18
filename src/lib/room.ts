@@ -34,6 +34,10 @@ export const WALL = 5;
  *  Bookcases next to each other touch, as they would along a real wall. */
 export const GAP = 4;
 export const PAD = 4;
+/** The wall between two rooms side by side on one storey, and the least
+ *  room either of them gets there. */
+export const PARTITION = 14;
+export const MIN_SPAN = 60;
 
 /** The fields the room needs from a book. */
 export interface RoomBook {
@@ -257,6 +261,76 @@ export const PIECE_WIDTH: Record<PieceKind, number> = {
   dollhouse: 30,
 };
 
+/** The part of each piece, if any, that reaches up the wall as high as the
+ *  windows (components/room-windows.ts: WINDOW_DROP under the ceiling,
+ *  WINDOW_H tall), as [from, to] in from its left: the picture over the
+ *  fireplace, a tall cupboard, the lamp hung over a table. The rest stays
+ *  low enough for a window above it. Measured from the art. */
+export const HIGH_PART: Record<PieceKind, readonly [number, number] | null> = {
+  hearth: [6, 38],
+  case: [0, CASE_WIDTH],
+  ladder: [0, 8],
+  plant: null,
+  clock: null,
+  seat: [3, 49],
+  study: [2, 32],
+  gramophone: null,
+  range: [0, 34],
+  dresser: [0, 36],
+  table: null,
+  wardrobe: [0, 30],
+  bed: null,
+  nightstand: null,
+  piano: null,
+  harp: null,
+  cello: null,
+  palm: [0, 22],
+  wicker: [0, 24],
+  birdcage: null,
+  ferns: [0, 18],
+  darts: [0, 14],
+  billiards: [10, 50],
+  chess: null,
+  easel: null,
+  paints: null,
+  bust: null,
+  bath: null,
+  washstand: [3, 19],
+  towels: null,
+  sideboard: null,
+  dining: [14, 37],
+  cabinet: [0, 22],
+  cot: [8, 33],
+  toybox: null,
+  blocks: null,
+  workbench: [3, 43],
+  sawhorse: null,
+  toolchest: null,
+  benches: null,
+  heater: [9, 13],
+  bucket: null,
+  sofa: null,
+  rocker: null,
+  aquarium: null,
+  dog: null,
+  armour: null,
+  chest: null,
+  coatstand: null,
+  telescope: null,
+  horse: null,
+  curios: null,
+  spinning: null,
+  beanbag: null,
+  parrot: null,
+  monstera: null,
+  mirror: null,
+  stove: [0, 22],
+  radio: null,
+  trolley: null,
+  dollhouse: null,
+};
+
+
 /** How many books it takes for each piece of furniture (and the cat) to
  *  move in. The hearth and the first bookcase are always there. */
 export const MILESTONES = {
@@ -364,6 +438,9 @@ export interface Arrangement {
   away: readonly Stowable[];
   /** Rooms added over the library, from the bottom up. */
   rooms?: readonly RoomKind[];
+  /** Rooms set beside the one before them (or the library's top floor)
+   *  rather than on a floor of their own. */
+  beside?: readonly RoomKind[];
   /** Furniture added from the catalogue. */
   extras?: readonly Extra[];
 }
@@ -379,14 +456,30 @@ export interface Piece {
   caseIndex?: number;
 }
 
+/** One room of a storey: the library, or an added room. A storey with
+ *  rooms side by side has a partition (PARTITION wide) between each. */
+export interface Span {
+  room: RoomKind | null;
+  /** Its pieces, as indexes into the storey's row: `from` up to `to`. */
+  from: number;
+  to: number;
+  /** Its inside, from the inside of the house's left wall, and how wide. */
+  x: number;
+  w: number;
+}
+
 export interface HousePlan {
   /** Inside width of the house, wall to wall. */
   inner: number;
-  /** Top floor first, so the page reads top to bottom. */
+  /** Top floor first, so the page reads top to bottom. Each is one row of
+   *  pieces, left to right, whichever room they are in. */
   floors: Piece[][];
   /** Which added room each floor is, in the same order; null for the
-   *  library's own floors. */
+   *  library's own floors. On a floor with rooms side by side, the one on
+   *  the left. */
   rooms: (RoomKind | null)[];
+  /** The rooms on each floor, left to right. */
+  spans: Span[][];
   /** The cat asleep on the armchair. */
   cat: boolean;
 }
@@ -456,6 +549,7 @@ export function planHouse(
 ): HousePlan {
   const away = new Set<string>(arrangement.away);
   const rooms = [...new Set(arrangement.rooms ?? [])];
+  const beside = new Set<string>(arrangement.beside ?? []);
   const inRooms = new Set<string>(rooms.flatMap((r) => ROOM_PIECES[r]));
   const added = new Set<string>(arrangement.extras ?? []);
   /** Whether a piece is in the house: earned by the library, come with a
@@ -510,9 +604,11 @@ export function planHouse(
     // up with furniture alone; on a ground floor too narrow for the hearth
     // and a bookcase, they have to leave room for the hearth. The hearth
     // moved along the ground floor stays on it.
-    const roomy = (kinds: PieceKind[]) =>
-      fits([...kinds, ...row, "case"]) || (f === 0 && !fits(["hearth", "case"]) && fits([...kinds, ...row]));
-    while (!roomy(pins.map((p) => p.kind))) {
+    // Measured with the moved pieces in their places, which may split the
+    // bookcases apart.
+    const roomy = (ps: typeof pins) =>
+      fits(withPins([...row, "case"], ps)) || (f === 0 && !fits(["hearth", "case"]) && fits(withPins(row, ps)));
+    while (!roomy(pins)) {
       let i = pins.length - 1;
       while (i >= 0 && f === 0 && pins[i].kind === "hearth") i--;
       if (i < 0) break;
@@ -527,7 +623,7 @@ export function planHouse(
     }
     // A floor always takes at least one bookcase unless it already holds
     // something, so a house narrower than a bookcase still ends.
-    while (left > 0 && (fits([...fixed, ...row, "case"]) || fixed.length + row.length === 0)) {
+    while (left > 0 && (fits(withPins([...row, "case"], pins)) || fixed.length + row.length === 0)) {
       row.push("case");
       left--;
     }
@@ -550,18 +646,33 @@ export function planHouse(
     }
   }
 
-  // Then the added rooms, each a floor of its own with its furniture,
-  // as much of it as fits.
+  // Then the added rooms, each a floor of its own with its furniture, as
+  // much of it as fits; or, set beside the one before it, on the same
+  // floor, if all of it fits there.
   const libraryFloors = rows.length;
   const rowRooms: (RoomKind | null)[] = rows.map(() => null);
+  /** The storey each row stands on, from the ground. */
+  const storeyOf: number[] = rows.map((_, i) => i);
+  /** A storey's width, with `kinds` in row `i` if that is on it. Rooms
+   *  side by side each get at least MIN_SPAN. */
+  const storeyWidth = (storey: number, i = -1, kinds: readonly PieceKind[] = []) => {
+    const on = rows.flatMap((row, j) => (storeyOf[j] === storey ? [j === i ? kinds : withPins(row, rowPins[j])] : []));
+    if (on.length === 1) return rowWidth(on[0]);
+    return on.reduce((w, row) => w + Math.max(rowWidth(row), MIN_SPAN), (on.length - 1) * PARTITION);
+  };
+  const fitsAt = (i: number, kinds: readonly PieceKind[]) => storeyWidth(storeyOf[i], i, kinds) <= maxInner;
   for (const room of rooms) {
     const pins = [...(pinsByRoom.get(room) ?? [])];
-    while (pins.length && !fits(pins.map((p) => p.kind))) homeless.push(pins.pop()!.kind);
     const row: PieceKind[] = ROOM_PIECES[room].filter((k) => has(k) && !pinned.has(k));
-    while (row.length && !fits(withPins(row, pins))) homeless.push(row.pop()!);
+    const top = storeyOf[storeyOf.length - 1];
     rows.push(row);
     rowPins.push(pins);
     rowRooms.push(room);
+    storeyOf.push(top);
+    if (beside.has(room) && fitsAt(rows.length - 1, withPins(row, pins))) continue;
+    storeyOf[rows.length - 1] = top + 1;
+    while (pins.length && !fits(pins.map((p) => p.kind))) homeless.push(pins.pop()!.kind);
+    while (row.length && !fits(withPins(row, pins))) homeless.push(row.pop()!);
   }
 
   // Furniture still waiting goes wherever it fits, top floor first: that
@@ -577,7 +688,7 @@ export function planHouse(
     let placed = false;
     for (const i of roomOf(kind) ? [...roomRows, ...libraryRows] : [...libraryRows, ...roomRows]) {
       const next = big(kind) ? [kind, ...rows[i]] : withFiller(rows[i], kind);
-      if (fits(withPins(next, rowPins[i]))) {
+      if (fitsAt(i, withPins(next, rowPins[i]))) {
         rows[i] = next;
         placed = true;
         break;
@@ -592,7 +703,10 @@ export function planHouse(
       });
     }
   }
-  for (let i = 0; i < rows.length; i++) rows[i] = withPins(rows[i], rowPins[i]);
+  for (let i = 0; i < rows.length; i++) {
+    rows[i] = withPins(rows[i], rowPins[i]);
+    rowPins[i] = [];
+  }
 
   // The ladder leans on the end of the highest row of two or more
   // bookcases that has room for it.
@@ -601,30 +715,29 @@ export function planHouse(
       const last = rows[i].lastIndexOf("case");
       if (last < 1 || rows[i][last - 1] !== "case") continue;
       const next = [...rows[i].slice(0, last + 1), "ladder" as const, ...rows[i].slice(last + 1)];
-      if (fits(next)) {
+      if (fitsAt(i, next)) {
         rows[i] = next;
         break;
       }
     }
   }
 
-  const inner = Math.max(...rows.map(rowWidth));
-  rows.reverse();
-  rowRooms.reverse();
+  const storeys = Math.max(...storeyOf) + 1;
+  const widths = Array.from({ length: storeys }, (_, st) => storeyWidth(st));
+  const inner = Math.max(...widths);
 
   let caseIndex = 0;
-  const floors = rows.map((kinds) => {
-    // Spread the spare width evenly over the walls and the gaps between
-    // pieces; bookcases stay together.
+  /** A row of pieces laid out from `x0`, with `spare` width spread evenly
+   *  over the walls and the gaps between pieces; bookcases stay together. */
+  const lay = (kinds: readonly PieceKind[], spare: number, x0: number): Piece[] => {
     const flexible = 2 + kinds.filter((_, i) => i > 0 && !touches(kinds, i)).length;
-    const spare = inner - rowWidth(kinds);
     let slot = 0;
     const share = () => {
       const s = Math.floor((spare * (slot + 1)) / flexible) - Math.floor((spare * slot) / flexible);
       slot++;
       return s;
     };
-    let x = PAD + share();
+    let x = x0 + PAD + share();
     return kinds.map((kind, i): Piece => {
       if (i > 0 && !touches(kinds, i)) x += GAP + share();
       const piece: Piece = { kind, x };
@@ -632,74 +745,165 @@ export function planHouse(
       x += PIECE_WIDTH[kind];
       return piece;
     });
-  });
+  };
+  const floors: Piece[][] = [];
+  const spans: Span[][] = [];
+  const floorRooms: (RoomKind | null)[] = [];
+  for (let st = storeys - 1; st >= 0; st--) {
+    const on = rows.flatMap((_, i) => (storeyOf[i] === st ? [i] : []));
+    const own = on.map((i) => (on.length > 1 ? Math.max(rowWidth(rows[i]), MIN_SPAN) : rowWidth(rows[i])));
+    const total = own.reduce((a, b) => a + b, 0);
+    // A narrower storey's spare width goes to its rooms by their size.
+    const spare = inner - widths[st];
+    const floor: Piece[] = [];
+    const parts: Span[] = [];
+    let x = 0;
+    let before = 0;
+    on.forEach((i, j) => {
+      const w = own[j] + Math.floor((spare * (before + own[j])) / total) - Math.floor((spare * before) / total);
+      before += own[j];
+      const from = floor.length;
+      floor.push(...lay(rows[i], w - rowWidth(rows[i]), x));
+      parts.push({ room: rowRooms[i], from, to: floor.length, x, w });
+      x += w + PARTITION;
+    });
+    floors.push(floor);
+    spans.push(parts);
+    floorRooms.push(parts[0].room);
+  }
 
-  return { inner, floors, rooms: rowRooms, cat: has("cat") };
+  return { inner, floors, rooms: floorRooms, spans, cat: has("cat") };
+}
+
+/** A storey's movable rows, one for each of its rooms; `floor` counts up
+ *  from the ground. The ladder goes with its bookcase, so isn't in them. */
+function spanRows(plan: HousePlan, floor: number): PieceKind[][] {
+  const f = plan.floors.length - 1 - floor;
+  return plan.spans[f].map((sp) =>
+    plan.floors[f]
+      .slice(sp.from, sp.to)
+      .filter((p) => p.kind !== "ladder")
+      .map((p) => p.kind),
+  );
 }
 
 export const isMovable = (k: PieceKind): k is Movable => (MOVABLE as readonly string[]).includes(k);
 
-/** A placement on a floor of a plan, naming the room when it is one. */
-function placement(plan: HousePlan, kind: Movable, floor: number, slot: number): Placement {
-  const room = plan.rooms[plan.floors.length - 1 - floor];
+/** A placement in one of a floor's rooms (`span`), naming the room when it
+ *  is an added one. */
+function placement(plan: HousePlan, kind: Movable, floor: number, span: number, slot: number): Placement {
+  const room = plan.spans[plan.floors.length - 1 - floor][span]?.room;
   return room ? { kind, floor, slot, room } : { kind, floor, slot };
 }
 
 /** Where every movable piece stands in a plan, as placements that would
  *  put it back exactly there. */
 export function placementsOf(plan: HousePlan): Placement[] {
-  const out: Placement[] = [];
-  plan.floors.forEach((floor, f) => {
+  return plan.floors.flatMap((_, f) => {
     const fromGround = plan.floors.length - 1 - f;
-    floor
-      .filter((p) => p.kind !== "ladder")
-      .forEach((p, slot) => {
-        if (isMovable(p.kind)) out.push(placement(plan, p.kind, fromGround, slot));
-      });
+    return spanRows(plan, fromGround).flatMap((row, span) =>
+      row.flatMap((kind, slot) => (isMovable(kind) ? [placement(plan, kind, fromGround, span, slot)] : [])),
+    );
   });
-  return out;
 }
 
 /**
  * Every movable piece where it stands now, with `kind` moved to `floor`
- * (from the ground) and `slot` there. Pinning them all, not just the one
- * that moved, keeps the rest from rearranging themselves around it.
- * Null when the house has no such floor or the piece isn't in it.
+ * (from the ground), into the room `span` places from the left there (the
+ * library, or an added room beside it) at `slot`. Pinning them all, not
+ * just the one that moved, keeps the rest from rearranging themselves
+ * around it. Null when the house has no such floor or room, or the piece
+ * isn't in it.
  */
-export function moveTo(plan: HousePlan, kind: Movable, floor: number, slot: number): Placement[] | null {
+export function moveTo(plan: HousePlan, kind: Movable, floor: number, slot: number, span = 0): Placement[] | null {
   if (floor < 0 || floor >= plan.floors.length) return null;
-  const rows = plan.floors.map((f) => f.filter((p) => p.kind !== "ladder").map((p) => p.kind)).reverse();
-  const from = rows.findIndex((r) => r.includes(kind));
-  if (from < 0) return null;
-  rows[from].splice(rows[from].indexOf(kind), 1);
-  rows[floor].splice(Math.max(0, Math.min(slot, rows[floor].length)), 0, kind);
-  return rows.flatMap((row, f) => row.flatMap((k, s) => (isMovable(k) ? [placement(plan, k, f, s)] : [])));
+  const rows = plan.floors.map((_, f) => spanRows(plan, f));
+  const from = rows.flat().find((r) => r.includes(kind));
+  const to = rows[floor][span];
+  if (!from || !to) return null;
+  from.splice(from.indexOf(kind), 1);
+  to.splice(Math.max(0, Math.min(slot, to.length)), 0, kind);
+  return rows.flatMap((spans, f) =>
+    spans.flatMap((row, j) => row.flatMap((k, s) => (isMovable(k) ? [placement(plan, k, f, j, s)] : []))),
+  );
 }
 
-/** Where a piece goes when nudged one step: along its floor, or to the
- *  floor above or below at about the same place across. Null when it is
- *  already at that end, edge or floor. */
+/** Where a piece goes when nudged one step: along its room, through the
+ *  partition into the room beside it, or to the floor above or below at
+ *  about the same place across. Null when it is already at that end,
+ *  edge or floor. */
 export function nudge(
   plan: HousePlan,
   kind: Movable,
   direction: "left" | "right" | "up" | "down",
-): { floor: number; slot: number } | null {
-  const here = placementsOf(plan).find((p) => p.kind === kind);
+): { floor: number; span: number; slot: number } | null {
+  const floors = plan.floors.length;
+  const here = plan.floors.flatMap((_, f) => {
+    const floor = floors - 1 - f;
+    return spanRows(plan, floor).flatMap((row, span) => (row.includes(kind) ? [{ floor, span, slot: row.indexOf(kind), row }] : []));
+  })[0];
   if (!here) return null;
-  const rowOf = (fromGround: number) =>
-    plan.floors[plan.floors.length - 1 - fromGround].filter((p) => p.kind !== "ladder");
-  const row = rowOf(here.floor);
-  if (direction === "left") return here.slot > 0 ? { floor: here.floor, slot: here.slot - 1 } : null;
-  if (direction === "right") {
-    return here.slot < row.length - 1 ? { floor: here.floor, slot: here.slot + 1 } : null;
+  const { floor, span, slot, row } = here;
+  if (direction === "left") {
+    if (slot > 0) return { floor, span, slot: slot - 1 };
+    return span > 0 ? { floor, span: span - 1, slot: spanRows(plan, floor)[span - 1].length } : null;
   }
-  const floor = here.floor + (direction === "up" ? 1 : -1);
-  if (floor < 0 || floor >= plan.floors.length) return null;
-  // The slot on the new floor nearest the piece's middle across the room.
-  const middle = row[here.slot].x + PIECE_WIDTH[kind] / 2;
-  const target = rowOf(floor);
-  const slot = target.filter((p) => p.x + PIECE_WIDTH[p.kind] / 2 < middle).length;
-  return { floor, slot };
+  if (direction === "right") {
+    if (slot < row.length - 1) return { floor, span, slot: slot + 1 };
+    return span < spanRows(plan, floor).length - 1 ? { floor, span: span + 1, slot: 0 } : null;
+  }
+  const to = floor + (direction === "up" ? 1 : -1);
+  if (to < 0 || to >= floors) return null;
+  // The room and place on the new floor nearest the piece's middle across
+  // the house.
+  const piece = plan.floors[floors - 1 - floor].find((p) => p.kind === kind)!;
+  const middle = piece.x + PIECE_WIDTH[kind] / 2;
+  return { floor: to, ...placeAt(plan, to, middle) };
+}
+
+/** The room (`span`) and place among its pieces nearest `middle` dots in
+ *  from the left wall, on `floor` (from the ground). `except` is left out,
+ *  as a piece being dragged is. */
+export function placeAt(plan: HousePlan, floor: number, middle: number, except?: PieceKind): { span: number; slot: number } {
+  const f = plan.floors.length - 1 - floor;
+  const spans = plan.spans[f];
+  let span = spans.findIndex((sp) => middle < sp.x + sp.w + PARTITION / 2);
+  if (span < 0) span = spans.length - 1;
+  const sp = spans[span];
+  const row = plan.floors[f].slice(sp.from, sp.to).filter((p) => p.kind !== "ladder" && p.kind !== except);
+  return { span, slot: row.filter((p) => p.x + PIECE_WIDTH[p.kind] / 2 < middle).length };
+}
+
+/** Where windows go on each floor (top first): x, in from the left wall,
+ *  of each window `width` wide, in the stretches of wall that the
+ *  furniture in each room leaves clear up there (HIGH_PART), with room
+ *  either side. */
+export function windowSpots(plan: HousePlan, width: number): number[][] {
+  const margin = 4;
+  return plan.floors.map((floor, f) =>
+    plan.spans[f].flatMap((sp) => {
+      const taken: [number, number][] = [];
+      for (const p of floor.slice(sp.from, sp.to)) {
+        const high = HIGH_PART[p.kind];
+        if (!high) continue;
+        const [a, b] = [p.x + high[0], p.x + high[1]];
+        const last = taken.at(-1);
+        if (last && a <= last[1]) last[1] = Math.max(last[1], b);
+        else taken.push([a, b]);
+      }
+      const edges = [sp.x, ...taken.flat(), sp.x + sp.w];
+      const spots: number[] = [];
+      for (let i = 0; i < edges.length; i += 2) {
+        const [a, b] = [edges[i], edges[i + 1]];
+        const free = b - a - 2 * margin;
+        if (free < width) continue;
+        // A long stretch gets two or three, evenly spaced.
+        const n = Math.max(1, Math.min(3, Math.floor((free + 40) / (width + 60))));
+        for (let k = 0; k < n; k++) spots.push(Math.round(a + margin + ((free - width) * (2 * k + 1)) / (2 * n)));
+      }
+      return spots;
+    }),
+  );
 }
 
 /** `kind` put away. Whatever stood to its right on its floor moves up a
@@ -724,6 +928,13 @@ export const addRoom = (a: Arrangement, room: RoomKind): Arrangement => ({
   rooms: [...(a.rooms ?? []).filter((r) => r !== room), room],
 });
 
+/** `room` set beside the one before it, or (`on` false) on a floor of its
+ *  own again. */
+export const setBeside = (a: Arrangement, room: RoomKind, on: boolean): Arrangement => ({
+  ...a,
+  beside: [...(a.beside ?? []).filter((r) => r !== room), ...(on ? [room] : [])],
+});
+
 /** `room` taken off the house with its furniture. Anything else moved
  *  into it goes back where it would go by itself. */
 export function removeRoom(a: Arrangement, room: RoomKind): Arrangement {
@@ -733,6 +944,7 @@ export function removeRoom(a: Arrangement, room: RoomKind): Arrangement {
     places: a.places.filter((p) => p.room !== room && !pieces.includes(p.kind)),
     away: a.away.filter((k) => !pieces.includes(k)),
     rooms: (a.rooms ?? []).filter((r) => r !== room),
+    beside: (a.beside ?? []).filter((r) => r !== room),
   };
 }
 

@@ -14,6 +14,9 @@ import {
   wallSample,
   type Interior,
 } from "@/components/room-shells";
+import { DOOR_H, DOOR_REACH } from "@/components/room-doors";
+import { WINDOW_DROP, WINDOW_H, WINDOW_W } from "@/components/room-windows";
+import { PARTITION } from "@/lib/room";
 import { ROOM_CEILINGS, ROOM_FLOORS, ROOM_PAPERS, ROOM_STYLES, type RoomStyle } from "@/lib/room-styles";
 
 const STOREY = 144;
@@ -177,6 +180,70 @@ describe("shellArt", () => {
     ]);
     const shell = shellArt(house("medieval", 345, 3), "medieval", interior);
     expect(shell.storeys.map((s) => s.walls)).toEqual(["rose", "sky", "style"]);
+  });
+
+  it("splits a storey into rooms side by side, each done up its own way, with a door between", () => {
+    const g = house("cottage", 345, 2);
+    const inner = g.houseW - 2 * g.wall;
+    const interior: Interior = {
+      paper: "style",
+      floor: "style",
+      ceiling: "fairylights",
+      rooms: ["bedroom", null],
+      own: { music: { walls: "sky", paper: "flowers", floor: "carpet" } },
+      spans: [
+        [
+          { room: "bedroom", x: 0, w: 150 },
+          { room: "music", x: 150 + PARTITION, w: inner - 150 - PARTITION },
+        ],
+        [{ room: null, x: 0, w: inner }],
+      ],
+    };
+    const shell = shellArt(g, "cottage", interior);
+    expect(shell.storeys.map((s) => s.walls)).toEqual(["style", "sky", "style"]);
+    // Each room's walls stay inside it.
+    const [bedroom, music] = shell.storeys;
+    const left = g.houseX + g.wall;
+    expect(bedroom.rects.every(([x, , w]) => x >= left && x + w <= left + 150)).toBe(true);
+    expect(music.rects.every(([x, , w]) => x >= left + 150 + PARTITION && x + w <= left + inner)).toBe(true);
+    // The wall between them stands from the ceiling to the floor, the door
+    // drawn over its foot.
+    const top = g.floorsTop + g.beam;
+    const floorLine = top + g.roomH;
+    const wall = shell.rects.filter(([x, y, w]) => x >= left + 150 && x + w <= left + 150 + PARTITION && y >= top && y < floorLine);
+    expect(wall.length).toBeGreaterThan(0);
+    const mid = left + 150 + PARTITION / 2;
+    for (let y = top; y < floorLine; y++) expect(wall.some(([x, ry, w, h]) => x <= mid && mid < x + w && ry <= y && y < ry + h)).toBe(true);
+    // And the door stands on the floor under it, opening into the bedroom's colours.
+    expect(shell.doors).toHaveLength(1);
+    const [door] = shell.doors;
+    expect([door.floor, door.x, door.walls]).toEqual([0, 150, "style"]);
+    for (const rects of [door.frame, door.shut, door.open]) {
+      expect(rects.length).toBeGreaterThan(0);
+      for (const [x, y, w, h] of rects) {
+        expect(x >= left + 150 - DOOR_REACH && x + w <= left + 150 + PARTITION + DOOR_REACH).toBe(true);
+        expect(y >= floorLine - DOOR_H && y + h <= floorLine).toBe(true);
+      }
+    }
+    // A storey with one room has no door.
+    expect(shellArt(g, "cottage", { ...interior, spans: undefined }).doors).toHaveLength(0);
+  });
+
+  it("puts windows where it is told, on the floor it is told", () => {
+    const g = house("cottage", 345, 2);
+    const plain: Interior = { paper: "style", floor: "style", ceiling: "none", rooms: [], own: {} };
+    const before = new Set(shellArt(g, "cottage", plain).storeys.flatMap((s) => s.rects).map(String));
+    const shell = shellArt(g, "cottage", { ...plain, windows: "sash", windowSpots: [[10, 200], []] });
+    const added = shell.storeys.flatMap((s) => s.rects).filter((r) => !before.has(String(r)));
+    expect(added.length).toBeGreaterThan(0);
+    const left = g.houseX + g.wall;
+    const top = g.floorsTop + g.beam;
+    for (const [x, y, w, h] of added) {
+      // In the top storey, in one of the two boxes.
+      expect(y).toBeGreaterThanOrEqual(top + WINDOW_DROP);
+      expect(y + h).toBeLessThanOrEqual(top + WINDOW_DROP + WINDOW_H);
+      expect([10, 200].some((at) => x >= left + at && x + w <= left + at + WINDOW_W)).toBe(true);
+    }
   });
 
   it("draws a sample of every wallpaper, floor and ceiling inside its picture", () => {

@@ -7,7 +7,10 @@ import {
   NO_ARRANGEMENT,
   ROOMS,
   ROOM_PIECES,
+  MIN_SPAN,
   PAD,
+  PARTITION,
+  HIGH_PART,
   PIECE_WIDTH,
   SHELF_WIDTH,
   addExtra,
@@ -18,13 +21,16 @@ import {
   isOnShelf,
   moveTo,
   nudge,
+  placeAt,
   placementsOf,
   planHouse,
   putAway,
   removeExtra,
   removeRoom,
+  setBeside,
   shelve,
   spineFor,
+  windowSpots,
   type HousePlan,
   type PieceKind,
 } from "@/lib/room";
@@ -236,7 +242,7 @@ describe("arranging the furniture", () => {
   it("nudges a piece one step, and stops at the ends", () => {
     const plan = planHouse(3, MILESTONES.plant, 600);
     const plant = placementsOf(plan).find((p) => p.kind === "plant")!;
-    expect(nudge(plan, "plant", "left")).toEqual({ floor: 0, slot: plant.slot - 1 });
+    expect(nudge(plan, "plant", "left")).toEqual({ floor: 0, span: 0, slot: plant.slot - 1 });
     expect(nudge(plan, "plant", "right")).toBeNull();
     expect(nudge(plan, "hearth", "left")).toBeNull();
     expect(nudge(plan, "plant", "up")).toBeNull();
@@ -264,7 +270,7 @@ describe("arranging the furniture", () => {
     const plan = planHouse(10, MILESTONES.plant, 335);
     expect(plan.floors.length).toBeGreaterThan(1);
     // The hearth's middle is over the gap after the first bookcase above.
-    expect(nudge(plan, "hearth", "up")).toEqual({ floor: 1, slot: 1 });
+    expect(nudge(plan, "hearth", "up")).toEqual({ floor: 1, span: 0, slot: 1 });
   });
 });
 
@@ -448,5 +454,156 @@ describe("dressShelf", () => {
       }
     }
     expect(dressShelf(7, 0)).toEqual(dressShelf(7, 0));
+  });
+});
+
+describe("rooms side by side", () => {
+  const BOOKS = MILESTONES.gramophone;
+  const a = (rooms: (typeof ROOMS)[number][], beside: (typeof ROOMS)[number][]) => ({ places: [], away: [], rooms, beside });
+  const piecesIn = (plan: HousePlan, f: number) =>
+    plan.spans[f].map((sp) => plan.floors[f].slice(sp.from, sp.to).map((p) => p.kind));
+
+  it("sets a room beside the library's top floor, so the house grows wider instead of taller", () => {
+    const library = planHouse(1, 0, 600);
+    const plan = planHouse(1, 0, 600, a(["kitchen"], ["kitchen"]));
+    expect(plan.floors).toHaveLength(library.floors.length);
+    expect(plan.inner).toBeGreaterThan(library.inner);
+    expect(plan.spans[0].map((sp) => sp.room)).toEqual([null, "kitchen"]);
+    expect(piecesIn(plan, 0)).toEqual([kinds(library)[0], [...ROOM_PIECES.kitchen]]);
+    // Wall to wall: the rooms and the partition between them.
+    const [lib, kitchen] = plan.spans[0];
+    expect(lib.x).toBe(0);
+    expect(kitchen.x).toBe(lib.w + PARTITION);
+    expect(kitchen.x + kitchen.w).toBe(plan.inner);
+  });
+
+  it("puts the next room beside it too, or on a floor of its own", () => {
+    const plan = planHouse(1, 0, 600, a(["kitchen", "bedroom", "music"], ["kitchen", "music"]));
+    expect(plan.floors).toHaveLength(2);
+    expect(plan.spans.map((f) => f.map((sp) => sp.room))).toEqual([["bedroom", "music"], [null, "kitchen"]]);
+    expect(plan.rooms).toEqual(["bedroom", null]);
+  });
+
+  it("keeps every room's pieces inside it, clear of the partitions", () => {
+    const plan = planHouse(2, BOOKS, 600, a(["kitchen", "bedroom", "spare"], ["kitchen", "bedroom", "spare"]));
+    for (const [f, floor] of plan.floors.entries()) {
+      for (const sp of plan.spans[f]) {
+        expect(sp.w).toBeGreaterThanOrEqual(plan.spans[f].length > 1 ? MIN_SPAN : 0);
+        for (const p of floor.slice(sp.from, sp.to)) {
+          expect(p.x).toBeGreaterThanOrEqual(sp.x + PAD);
+          expect(p.x + PIECE_WIDTH[p.kind]).toBeLessThanOrEqual(sp.x + sp.w - PAD);
+        }
+      }
+      const last = plan.spans[f][plan.spans[f].length - 1];
+      expect(last.x + last.w).toBe(plan.inner);
+    }
+  });
+
+  it("goes up a floor when there is no room beside, as on a phone", () => {
+    const plan = planHouse(1, 0, 141, a(["kitchen", "bedroom"], ["kitchen", "bedroom"]));
+    expect(plan.spans.every((f) => f.length === 1)).toBe(true);
+    expect(plan.rooms).toEqual(["bedroom", "kitchen", ...planHouse(1, 0, 141).rooms]);
+    expect(plan.inner).toBeLessThanOrEqual(141);
+  });
+
+  it("moves furniture into the room beside and back, and puts the plan back from its placements", () => {
+    const arrangement = { ...a(["kitchen"], ["kitchen"]), extras: ["sofa" as const] };
+    const plan = planHouse(1, 0, 600, arrangement);
+    const into = moveTo(plan, "sofa", 0, 1, 1)!;
+    expect(into.find((p) => p.kind === "sofa")).toEqual({ kind: "sofa", floor: 0, slot: 1, room: "kitchen" });
+    const moved = planHouse(1, 0, 600, { ...arrangement, places: into });
+    expect(piecesIn(moved, 0)[1]).toEqual(["range", "sofa", "dresser", "table"]);
+    expect(planHouse(1, 0, 600, { ...arrangement, places: placementsOf(moved) })).toEqual(moved);
+    // The arrow keys go through the partition.
+    const hearth = nudge(moved, "range", "left");
+    expect(hearth).toEqual({ floor: 0, span: 0, slot: piecesIn(moved, 0)[0].length });
+    // A drop over the kitchen lands in it.
+    const kitchen = moved.spans[0][1];
+    expect(placeAt(moved, 0, kitchen.x + 2).span).toBe(1);
+    expect(placeAt(moved, 0, 1).span).toBe(0);
+  });
+
+  it("keeps a wide house of rooms side by side whole on a narrow screen", () => {
+    const arrangement = { ...a(["kitchen", "bedroom", "music"], ["kitchen", "music"]), extras: ["radio" as const] };
+    const wide = planHouse(3, BOOKS, 600, arrangement);
+    const places = placementsOf(wide);
+    for (const max of [112, 141, 200, 315]) {
+      const plan = planHouse(3, BOOKS, max, { ...arrangement, places });
+      expect(plan.inner).toBeLessThanOrEqual(max);
+      expect(all(plan).filter((k) => k === "case")).toHaveLength(3);
+      expect(all(plan).filter((k) => k === "hearth")).toHaveLength(1);
+      expect(plan.spans.flat().filter((sp) => sp.room).map((sp) => sp.room).sort()).toEqual(["bedroom", "kitchen", "music"]);
+    }
+  });
+
+  it("lays out any mix of rooms side by side and moved furniture inside the screen", () => {
+    let seed = 7;
+    const rand = () => ((seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0) / 4294967296);
+    const some = <T,>(list: readonly T[]) => list.filter(() => rand() < 0.4);
+    for (let run = 0; run < 150; run++) {
+      const rooms = some(ROOMS);
+      const arrangement = { places: [], away: [], rooms, beside: some(rooms), extras: some(EXTRAS) };
+      const max = [141, 200, 315, 450][run % 4];
+      const cases = 1 + Math.floor(rand() * 8);
+      const books = Math.floor(rand() * 500);
+      const plan = planHouse(cases, books, max, arrangement);
+      // And again with everything pinned where it stood on a wider screen.
+      const pinned = planHouse(cases, books, max, { ...arrangement, places: placementsOf(planHouse(cases, books, 600, arrangement)) });
+      for (const p of [plan, pinned]) {
+        expect(p.inner).toBeLessThanOrEqual(max);
+        expect(all(p).filter((k) => k === "case")).toHaveLength(cases);
+        for (const [f, floor] of p.floors.entries()) {
+          const spans = p.spans[f];
+          expect(spans[0].x).toBe(0);
+          expect(spans[spans.length - 1].x + spans[spans.length - 1].w).toBe(p.inner);
+          for (const sp of spans) {
+            for (const piece of floor.slice(sp.from, sp.to)) {
+              expect(piece.x).toBeGreaterThanOrEqual(sp.x);
+              expect(piece.x + PIECE_WIDTH[piece.kind]).toBeLessThanOrEqual(sp.x + sp.w);
+            }
+          }
+        }
+      }
+    }
+  });
+
+  it("forgets a room was beside when it is taken off", () => {
+    const on = setBeside(a(["kitchen"], []), "kitchen", true);
+    expect(on.beside).toEqual(["kitchen"]);
+    expect(setBeside(on, "kitchen", false).beside).toEqual([]);
+    expect(removeRoom(on, "kitchen").beside).toEqual([]);
+  });
+
+  it("finds clear wall for windows, never behind tall furniture", () => {
+    const plan = planHouse(1, 0, 600, a(["spare", "kitchen", "music"], ["kitchen"]));
+    const spots = windowSpots(plan, 22);
+    expect(spots).toHaveLength(plan.floors.length);
+    expect(spots.flat().length).toBeGreaterThan(0);
+    for (const [f, xs] of spots.entries()) {
+      for (const x of xs) {
+        expect(x).toBeGreaterThanOrEqual(0);
+        expect(x + 22).toBeLessThanOrEqual(plan.inner);
+        for (const p of plan.floors[f]) {
+          const high = HIGH_PART[p.kind];
+          if (high) expect(x + 22 <= p.x + high[0] || x >= p.x + high[1]).toBe(true);
+        }
+        // Not across a partition either.
+        expect(plan.spans[f].some((sp) => x >= sp.x && x + 22 <= sp.x + sp.w)).toBe(true);
+      }
+    }
+    // Over the low piano, harp and cello of the music room.
+    const music = plan.floors.findIndex((floor) => floor.some((p) => p.kind === "piano"));
+    const piano = plan.floors[music].find((p) => p.kind === "piano")!;
+    expect(spots[music].some((x) => x < piano.x + PIECE_WIDTH.piano && x + 22 > piano.x)).toBe(true);
+    // A packed library floor has none.
+    expect(windowSpots(planHouse(12, 0, 300), 22).some((xs) => xs.length === 0)).toBe(true);
+  });
+
+  it("knows what reaches up the wall for every piece", () => {
+    for (const kind of Object.keys(PIECE_WIDTH) as (keyof typeof PIECE_WIDTH)[]) {
+      const high = HIGH_PART[kind];
+      if (high) expect(0 <= high[0] && high[0] < high[1] && high[1] <= PIECE_WIDTH[kind]).toBe(true);
+    }
+    expect(HIGH_PART.case).toEqual([0, PIECE_WIDTH.case]);
   });
 });
