@@ -1,4 +1,4 @@
-import { BookFormat, BookOwnership, ReadingStatus } from "@prisma/client";
+import { BookFormat, BookOwnership, ReadingStatus } from "@/lib/enums";
 import { calendarDay, dayKey, keyToUtcDate } from "@/lib/dates";
 import type { DateFormat, NumberFormat } from "@/lib/preferences";
 

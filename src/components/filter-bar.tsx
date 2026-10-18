@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { BookFormat } from "@prisma/client";
+import { BookFormat } from "@/lib/enums";
 import {
   ArrowDownAZ,
   ArrowDownWideNarrow,

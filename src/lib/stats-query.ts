@@ -1,4 +1,5 @@
-import { ReadingStatus, type Prisma } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
+import { ReadingStatus } from "@/lib/enums";
 import { prisma } from "@/lib/prisma";
 import type { BookDayPages, StatsInputs } from "@/lib/stats-count";
 

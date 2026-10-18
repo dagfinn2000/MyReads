@@ -2,7 +2,7 @@
 
 import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { BookFormat, BookOwnership, ReadingStatus } from "@prisma/client";
+import { BookFormat, BookOwnership, ReadingStatus } from "@/lib/enums";
 import { ArrowDown, ArrowUp, Pencil, Trash2 } from "lucide-react";
 import { savePreferences } from "@/lib/actions/preferences";
 import { deleteView, renameView } from "@/lib/actions/saved-views";

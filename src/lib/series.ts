@@ -1,4 +1,4 @@
-import { ReadingStatus } from "@prisma/client";
+import { ReadingStatus } from "@/lib/enums";
 
 /**
  * Which book of a series comes next. Shared by the library's series

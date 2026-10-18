@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { BookFormat, BookOwnership } from "@prisma/client";
+import { BookFormat, BookOwnership } from "@/lib/enums";
 import { checkVerdict, duplicateNotice, ownershipParam, scanMatchLabel } from "@/lib/check-verdict";
 
 const { OWNED, WISHLIST, BORROWED, GIVEN_AWAY } = BookOwnership;

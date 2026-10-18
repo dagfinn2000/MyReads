@@ -1,9 +1,8 @@
 import { Fragment } from "react";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { ReadingStatus } from "@prisma/client";
+import { BookFormat, ReadingStatus } from "@/lib/enums";
 import { Library, Pencil, Repeat } from "lucide-react";
-import { BookFormat } from "@prisma/client";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { getPreferences } from "@/lib/current-user";

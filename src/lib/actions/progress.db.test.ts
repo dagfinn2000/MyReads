@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { BookFormat, type Prisma, PrismaClient, ReadingStatus } from "@prisma/client";
+import { type Prisma, PrismaClient } from "@prisma/client";
+import { BookFormat, ReadingStatus } from "@/lib/enums";
 import { dailyPageTotals } from "@/lib/progress";
 import type { MoveResult, UndoMove } from "@/lib/reading-log";
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ReadingStatus } from "@prisma/client";
+import { ReadingStatus } from "@/lib/enums";
 import { isNextInSeries, nextInSeries, seriesKey } from "@/lib/series";
 
 const { WANT_TO_READ, READING, READ, DNF } = ReadingStatus;

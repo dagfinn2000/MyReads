@@ -3,7 +3,7 @@
 import { useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { BookFormat, BookOwnership, ReadingStatus } from "@prisma/client";
+import { BookFormat, BookOwnership, ReadingStatus } from "@/lib/enums";
 import { Check, Dices, SquareCheckBig, X } from "lucide-react";
 import { bulkDeleteBooks, bulkUpdateBooks } from "@/lib/actions/bulk";
 import { pickRandomBook } from "@/lib/actions/pick";

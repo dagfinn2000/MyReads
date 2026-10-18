@@ -4,7 +4,7 @@
  * surname sorting, series blocks — are unit-testable.
  */
 
-import { BookFormat, BookOwnership, ReadingStatus } from "@prisma/client";
+import { BookFormat, BookOwnership, ReadingStatus } from "@/lib/enums";
 import { calendarDay } from "@/lib/dates";
 import { FORMAT_LABELS, OWNERSHIP_LABELS, STATUS_LABELS } from "@/lib/display";
 import type { RatingStyle } from "@/lib/preferences";

@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import JSZip from "jszip";
-import { BookOwnership, PrismaClient, ReadingStatus } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
+import { BookOwnership, ReadingStatus } from "@/lib/enums";
 
 /**
  * Export a library, restore it into an empty account, and check that what

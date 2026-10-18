@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import type { Prisma } from "@prisma/client";
-import { BookFormat, ReadingStatus } from "@prisma/client";
+import { BookFormat, ReadingStatus } from "@/lib/enums";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { bookSchema, readingSchema } from "@/lib/validation";

@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { BookOwnership, PrismaClient, ReadingStatus } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
+import { BookOwnership, ReadingStatus } from "@/lib/enums";
 
 /**
  * Pick for me against a real database. The rule itself is unit-tested in

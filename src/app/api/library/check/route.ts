@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import type { BookFormat, BookOwnership, ReadingStatus } from "@prisma/client";
+import type { BookFormat, BookOwnership, ReadingStatus } from "@/lib/enums";
 import { auth } from "@/auth";
 import { spendMetadataBudget } from "@/lib/api-guard";
 import { getPreferences } from "@/lib/current-user";

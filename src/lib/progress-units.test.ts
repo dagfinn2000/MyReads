@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { BookFormat } from "@prisma/client";
+import { BookFormat } from "@/lib/enums";
 import {
   addStep,
   fallbackHint,

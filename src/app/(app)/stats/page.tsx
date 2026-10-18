@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { BookCheck, BookOpenText, FileText, LibraryBig, Star } from "lucide-react";
 import { redirect } from "next/navigation";
-import { ReadingStatus } from "@prisma/client";
+import { ReadingStatus } from "@/lib/enums";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { getPreferences } from "@/lib/current-user";

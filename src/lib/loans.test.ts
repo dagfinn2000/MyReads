@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { BookOwnership } from "@prisma/client";
+import { BookOwnership } from "@/lib/enums";
 import { LENDING_NOTE, lendingMode, outFor, showsLendingCard } from "@/lib/loans";
 
 const at = (iso: string) => new Date(iso);

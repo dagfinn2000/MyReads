@@ -2,7 +2,8 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import { BookFormat, BookOwnership, PrismaClient, ReadingStatus, type Prisma } from "@prisma/client";
+import { PrismaClient, type Prisma } from "@prisma/client";
+import { BookFormat, BookOwnership, ReadingStatus } from "@/lib/enums";
 import type { BookDetails, BookMetadata } from "@/lib/metadata/types";
 
 /**

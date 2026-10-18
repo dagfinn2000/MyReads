@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
-import type { GoalUnit } from "@prisma/client";
+import type { GoalUnit } from "@/lib/enums";
 import { setReadingGoal, type GoalFormState } from "@/lib/actions/goals";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

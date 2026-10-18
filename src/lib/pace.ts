@@ -1,4 +1,4 @@
-import { ReadingStatus } from "@prisma/client";
+import { ReadingStatus } from "@/lib/enums";
 import { calendarDay, dayKey, keyToUtcDate, shiftDayKey } from "@/lib/dates";
 import { formatDate, type FormatPrefs } from "@/lib/display";
 import type { PaceFrom } from "@/lib/preferences";

@@ -1,5 +1,5 @@
-import { z } from "zod";
-import { calendarDay, dayKey, endOfZonedDay, keyToUtcDate, shiftDayKey } from "@/lib/dates";
+import { calendarDay, dayKey, endOfZonedDay, shiftDayKey } from "@/lib/dates";
+import type { UndoMove } from "@/lib/reading-log-input";
 import { formatDayKey, formatShortDay } from "@/lib/display";
 import type { DateFormat } from "@/lib/preferences";
 import { formatPosition, formatUnitValue, unitToPage, type UnitInfo } from "@/lib/progress-units";
@@ -8,7 +8,8 @@ import { formatPosition, formatUnitValue, unitToPage, type UnitInfo } from "@/li
  * The rules for logging a page on any day and fixing a log entry, shared by
  * the progress actions (lib/actions/progress.ts) and the quick-log row.
  * Pure on purpose: client components import it, so nothing here may touch
- * the database.
+ * the database. The input schemas the actions check against live in
+ * reading-log-input.ts, so zod stays out of the browser.
  *
  * The log's rules, in brief. A reading pass starts at a page-0 anchor and
  * its positions only go up, because stats credit each increase to the day
@@ -20,60 +21,7 @@ import { formatPosition, formatUnitValue, unitToPage, type UnitInfo } from "@/li
  * logs that already contain a downward correction take new entries.
  */
 
-export const MAX_PAGE = 100_000;
-
-/** A record id from the client. Anything else is "not found", never a
- *  database error. */
-export const idSchema = z.string().min(1).max(64);
-
-/** "2026-10-09", and a real date: 2026-02-30 isn't. */
-export const dayKeySchema = z
-  .string()
-  .refine(
-    (k) => /^\d{4}-\d{2}-\d{2}$/.test(k) && keyToUtcDate(k).toISOString().slice(0, 10) === k,
-    "Pick a day",
-  );
-
-export const dayChoiceSchema = z.union([z.literal("today"), z.literal("yesterday"), dayKeySchema]);
-
-const pageField = z.coerce
-  .number()
-  .int("Log a whole page")
-  .min(1, "Log at least page 1")
-  .max(MAX_PAGE, "That page is too high");
-
-/** The position as typed, in the book's unit, so messages can say it back
- *  as typed. Only ever shown; anything odd is dropped, never refused. */
-const typedValue = z.number().int().min(0).max(1_000_000).optional().catch(undefined);
-
-export const logPageSchema = z.object({
-  page: pageField,
-  day: dayChoiceSchema.default("today"),
-  value: typedValue,
-});
-
-export const editEntrySchema = z.object({
-  page: pageField,
-  day: dayKeySchema,
-  value: typedValue,
-});
-
-export const moveTargetSchema = z.enum(["READ", "DNF"]);
-
-/**
- * What the client hands back to undo Finished or Stopped. It only names the
- * move; the server works out the rest from the book. `finishedAt` is the
- * finish moment the move wrote, so an undo can't land on a book finished
- * again since. `page` restores the page of a book with no reading log,
- * which a finish clears and nothing else remembers.
- */
-export const undoMoveSchema = z.object({
-  from: moveTargetSchema,
-  finishedAt: z.string().datetime().nullable(),
-  page: z.number().int().min(1).max(MAX_PAGE).nullable(),
-});
-
-export type UndoMove = z.infer<typeof undoMoveSchema>;
+export type { UndoMove } from "@/lib/reading-log-input";
 
 export type LogPageResult =
   | { error: string }

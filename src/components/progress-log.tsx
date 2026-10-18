@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useId, useRef, useState, useTransition } from "react";
-import type { BookFormat, ProgressEntry } from "@prisma/client";
-import { ReadingStatus } from "@prisma/client";
+import type { ProgressEntry } from "@prisma/client";
+import { ReadingStatus, type BookFormat } from "@/lib/enums";
 import { Pencil, Trash2, X } from "lucide-react";
 import { deleteProgressEntry, updateProgressEntry } from "@/lib/actions/progress";
 import { calendarDay, dayKey } from "@/lib/dates";

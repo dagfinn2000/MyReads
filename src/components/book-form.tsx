@@ -2,7 +2,7 @@
 
 import { useActionState, useEffect, useEffectEvent, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
-import { BookFormat, BookOwnership, ReadingStatus } from "@prisma/client";
+import { BookFormat, BookOwnership, ReadingStatus } from "@/lib/enums";
 import { BookOpen } from "lucide-react";
 import type { ActionState } from "@/lib/actions/helpers";
 import type { CatalogueDiffRow, CatalogueValues } from "@/lib/catalogue-values";

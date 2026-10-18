@@ -1,6 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { BookFormat, BookOwnership, GoalUnit, Prisma, ReadingStatus } from "@prisma/client";
+import { Prisma } from "@prisma/client";
+import { BookFormat, BookOwnership, GoalUnit, ReadingStatus } from "@/lib/enums";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { coverFilePath, coversDir } from "@/lib/covers";

@@ -2,7 +2,8 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import { PrismaClient, ReadingStatus } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
+import { ReadingStatus } from "@/lib/enums";
 
 /**
  * The book form actions against a real database: createBook, updateBook,

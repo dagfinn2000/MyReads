@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { PrismaClient, ReadingStatus } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
+import { ReadingStatus } from "@/lib/enums";
 import { importLibrary } from "@/lib/import";
 
 /**

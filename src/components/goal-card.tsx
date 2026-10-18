@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { GoalUnit } from "@prisma/client";
+import type { GoalUnit } from "@/lib/enums";
 import { formatDayKey, formatNumber } from "@/lib/display";
 import { describePace, unitWord, type GoalPace, type YearClock } from "@/lib/goals";
 import type { DateFormat, NumberFormat } from "@/lib/preferences";

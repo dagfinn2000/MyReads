@@ -1,4 +1,4 @@
-import { ReadingStatus } from "@prisma/client";
+import { ReadingStatus } from "@/lib/enums";
 
 /**
  * What changing a book's reading status implies for the rest of its reading

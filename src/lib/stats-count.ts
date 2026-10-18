@@ -1,4 +1,4 @@
-import type { BookFormat, ReadingStatus } from "@prisma/client";
+import type { BookFormat, ReadingStatus } from "@/lib/enums";
 import { calendarDay, dayKey } from "@/lib/dates";
 import { markRereads } from "@/lib/goals";
 import type { Preferences } from "@/lib/preferences";
