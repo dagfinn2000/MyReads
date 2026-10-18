@@ -88,7 +88,9 @@ src/
 │                      backup export and import
 ├─ components/         UI components (shadcn/ui primitives in components/ui);
 │                      reading-room.tsx, room-art.tsx, room-shells.ts,
-│                      room-rooms.tsx (the added rooms' furniture) and
+│                      room-rooms.tsx (the added rooms' furniture),
+│                      room-fireside.ts (the fireplaces, armchairs, rugs
+│                      and lamps to choose from) and
 │                      room-extras.tsx (the furniture catalogue) draw the
 │                      reading room, with its colours in
 │                      reading-room.css; room-view.tsx is its Decorate panel;

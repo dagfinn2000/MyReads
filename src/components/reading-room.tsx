@@ -4,7 +4,11 @@ import "./reading-room.css";
 import { memo, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import type {
   RoomCeiling,
+  RoomChair,
   RoomClimber,
+  RoomFireplace,
+  RoomLamp,
+  RoomRug,
   RoomFabric,
   RoomFloor,
   RoomGarden,
@@ -41,17 +45,13 @@ import {
   Stand,
   TEACUP,
   tapestryArt,
-  armchairArt,
   benchArt,
   bookcaseArt,
   clockArt,
   deskArt,
-  fireplaceArt,
-  floorLampArt,
   gramophoneArt,
   ladderArt,
   paintingArt,
-  rugArt,
   windowArt,
   type Art,
   type HouseGeometry,
@@ -60,6 +60,7 @@ import {
 import { HELD_BOOK, SEAT_OFFSET, seatedTop } from "@/components/avatar-art";
 import { SeatedAvatar, SleepingPet, Walker, useAvatar, type Avatar } from "@/components/room-avatar";
 import { ExtraView } from "@/components/room-extras";
+import { CHAIRS, FIREPLACES, LAMPS, rugFor } from "@/components/room-fireside";
 import { RoomPieceView } from "@/components/room-rooms";
 import type { AvatarLook } from "@/lib/avatar";
 import type { CatCoat, DogCoat, Pet } from "@/lib/pets";
@@ -125,7 +126,6 @@ const yardFor = (scale: number) => (scale === 3 ? 24 : 14);
 
 // Drawn once: the art never changes, only where it goes.
 const BOOKCASE = bookcaseArt();
-const FIREPLACE = fireplaceArt();
 const HANGINGS: Record<Exclude<RoomHanging, "none">, Art> = {
   painting: paintingArt("hills"),
   tree: tapestryArt("tree"),
@@ -135,8 +135,6 @@ const HANGINGS: Record<Exclude<RoomHanging, "none">, Art> = {
   kilim: tapestryArt("kilim"),
 };
 const SEASCAPE = paintingArt("sea");
-const ARMCHAIR = armchairArt();
-const LAMP = floorLampArt();
 const WINDOW = windowArt();
 const BENCH = benchArt();
 const CLOCK = clockArt();
@@ -385,6 +383,11 @@ export interface RoomDecor {
   paper: RoomPaper;
   floor: RoomFloor;
   ceiling: RoomCeiling;
+  /** The fireside's pieces (room-fireside.ts). */
+  fireplace: RoomFireplace;
+  chair: RoomChair;
+  rug: RoomRug;
+  lamp: RoomLamp;
   /** Added rooms' own walls and floors. */
   own: Partial<Record<RoomKind, RoomOwn>>;
   windows: RoomWindow;
@@ -404,6 +407,10 @@ export const PLAIN_DECOR: RoomDecor = {
   paper: "style",
   floor: "style",
   ceiling: "none",
+  fireplace: "stone",
+  chair: "wingback",
+  rug: "fringed",
+  lamp: "standard",
   own: {},
   windows: "none",
   climber: "none",
@@ -411,6 +418,9 @@ export const PLAIN_DECOR: RoomDecor = {
   cat: "ginger",
   dog: "brown",
 };
+
+/** The fireside's pieces, which only the hearth needs. */
+type Fireside = Pick<RoomDecor, "fireplace" | "chair" | "rug" | "lamp">;
 
 const FLOOR_NAMES = ["ground floor", "first floor", "second floor", "third floor", "fourth floor", "fifth floor"];
 const floorName = (fromGround: number) => FLOOR_NAMES[fromGround] ?? `floor ${fromGround}`;
@@ -488,6 +498,10 @@ export function ReadingRoom({
     [books, width, style, arrangement],
   );
   const { paper, floor, ceiling, own, windows, climber, garden } = decor;
+  const fireside = useMemo<Fireside>(
+    () => ({ fireplace: decor.fireplace, chair: decor.chair, rug: decor.rug, lamp: decor.lamp }),
+    [decor.fireplace, decor.chair, decor.rug, decor.lamp],
+  );
   const shell = useMemo(
     () =>
       layout
@@ -736,6 +750,7 @@ export function ReadingRoom({
             cat={layout.cat}
             openBook={openBook}
             hanging={decor.hanging}
+            fireside={fireside}
             arranging={arranging}
             avatar={figure}
             doors={doors[f]}
@@ -961,6 +976,7 @@ const Floor = memo(function Floor({
   cat,
   openBook,
   hanging,
+  fireside,
   arranging,
   avatar,
   doors,
@@ -979,6 +995,7 @@ const Floor = memo(function Floor({
   cat: boolean;
   openBook: OpenBook | null;
   hanging: RoomHanging;
+  fireside: Fireside;
   /** While the furniture is being moved, the books stay put. */
   arranging: boolean;
   avatar: Avatar | null;
@@ -1026,6 +1043,7 @@ const Floor = memo(function Floor({
             cat={cat}
             openBook={openBook}
             hanging={hanging}
+            fireside={fireside}
             avatar={avatar}
           />
         );
@@ -1211,6 +1229,7 @@ function Furniture({
   cat,
   openBook,
   hanging,
+  fireside,
   avatar,
 }: {
   kind: Piece["kind"];
@@ -1221,6 +1240,7 @@ function Furniture({
   cat: boolean;
   openBook: OpenBook | null;
   hanging: RoomHanging;
+  fireside: Fireside;
   avatar: Avatar | null;
 }) {
   const stand = (a: Art, dx: number, extra?: { className?: string; children?: React.ReactNode; lift?: number }) => (
@@ -1238,13 +1258,17 @@ function Furniture({
 
   switch (kind) {
     case "hearth": {
-      const fireTop = floorLine - FIREPLACE.h;
-      const chairTop = floorLine - ARMCHAIR.h;
+      const place = FIREPLACES[fireside.fireplace];
+      const chair = CHAIRS[fireside.chair];
+      const rug = rugFor(fireside.rug, 56);
+      const lamp = LAMPS[fireside.lamp];
+      const fireTop = floorLine - place.art.h;
+      const chairTop = floorLine - chair.h;
       const seated = avatar && openBook;
       const hung = hanging === "none" ? null : HANGINGS[hanging];
       return (
         <>
-          {stand(rugArt(56), 46)}
+          {rug && stand(rug, 46)}
           {hung && (
             // Centred over the fireplace; a tapestry hangs from higher up.
             <Sprite
@@ -1254,20 +1278,20 @@ function Furniture({
               style={{ left: (x + 22 - hung.w / 2) * s, top: (floorLine - (hanging === "painting" ? 92 : 106)) * s }}
             />
           )}
-          {stand(FIREPLACE, 0, {
-            children: (
-              <>
-                <Rects rects={LOGS.map(([rx, ry, w, h, p]) => [rx + 15, ry + 37, w, h, p] as const)} />
-                <Rects className="room-frame-a" rects={FLAMES_A.map(([rx, ry, w, h, p]) => [rx + 15, ry + 28, w, h, p] as const)} />
-                <Rects className="room-frame-b" rects={FLAMES_B.map(([rx, ry, w, h, p]) => [rx + 15, ry + 28, w, h, p] as const)} />
-              </>
-            ),
+          {stand(place.art, 0, {
+            children: place.fires.map((fire) => (
+              <g key={fire.x}>
+                {place.logs && <Rects rects={shift(LOGS, fire.x, fire.y + 9)} />}
+                <Rects className="room-frame-a" rects={shift(FLAMES_A, fire.x, fire.y)} />
+                <Rects className="room-frame-b" rects={shift(FLAMES_B, fire.x, fire.y)} />
+              </g>
+            )),
           })}
-          <Glow x={x + 22} y={fireTop + 36} r={44} scale={s} className="room-glow-fire" />
-          {stand(CANDLESTICK, 4, { lift: FIREPLACE.h })}
-          {stand(CANDLESTICK, 37, { lift: FIREPLACE.h })}
-          {stand(MANTEL_CLOCK, 18, { lift: FIREPLACE.h })}
-          {stand(ARMCHAIR, 50)}
+          <Glow x={x + place.glow.x} y={fireTop + place.glow.y} r={44} scale={s} className="room-glow-fire" />
+          {stand(CANDLESTICK, 4, { lift: place.art.h })}
+          {stand(CANDLESTICK, 37, { lift: place.art.h })}
+          {stand(MANTEL_CLOCK, 18, { lift: place.art.h })}
+          {stand(chair, 50)}
           {seated && (
             <SeatedAvatar
               avatar={avatar}
@@ -1323,8 +1347,15 @@ function Furniture({
               <Sprite art={OPEN_BOOK} scale={s} className="block" />
             </BookLink>
           )}
-          {stand(LAMP, 93)}
-          <Glow x={x + 99} y={floorLine - 54} r={30} scale={s} />
+          {stand(lamp.art, 93 + lamp.dx, {
+            children: lamp.flames && (
+              <>
+                <Rects className="room-frame-a" rects={lamp.flames[0]} />
+                <Rects className="room-frame-b" rects={lamp.flames[1]} />
+              </>
+            ),
+          })}
+          <Glow x={x + 93 + lamp.dx + lamp.glow.x} y={floorLine - lamp.art.h + lamp.glow.y} r={lamp.glow.r} scale={s} />
         </>
       );
     }
@@ -1418,7 +1449,7 @@ const PREVIEW_SPINES: Rect[] = (() => {
 
 /** A small picture of one floor of the house in a style: the fireplace,
  *  armchair and lamp, and a bookcase of books. */
-function previewArt(style: RoomStyle, hanging: RoomHanging): { w: number; h: number; rects: Rect[] } {
+function previewArt(style: RoomStyle, hanging: RoomHanging, fireside: Fireside): { w: number; h: number; rects: Rect[] } {
   const inner = 2 * PAD + PIECE_WIDTH.hearth + GAP + PIECE_WIDTH.case;
   const geo = houseGeometry(style, yardFor(3), inner + 2 * WALL, 1, PAD);
   const shell = shellArt(geo, style);
@@ -1434,18 +1465,25 @@ function previewArt(style: RoomStyle, hanging: RoomHanging): { w: number; h: num
   const fx = geo.houseX + WALL + PAD;
   const line = geo.floorsTop + STOREY;
   const stand = (a: Art, dx: number, lift = 0) => R.push(...shift(a.rects, fx + dx, line - lift - a.h));
-  stand(rugArt(56), 46);
+  const rug = rugFor(fireside.rug, 56);
+  if (rug) stand(rug, 46);
   const hung = hanging === "none" ? null : HANGINGS[hanging];
   if (hung) R.push(...shift(hung.rects, fx + 22 - hung.w / 2, line - (hanging === "painting" ? 92 : 106)));
-  stand(FIREPLACE, 0);
-  R.push(...shift(LOGS, fx + 15, line - FIREPLACE.h + 37), ...shift(FLAMES_A, fx + 15, line - FIREPLACE.h + 28));
-  stand(CANDLESTICK, 4, FIREPLACE.h);
-  stand(CANDLESTICK, 37, FIREPLACE.h);
-  stand(MANTEL_CLOCK, 18, FIREPLACE.h);
-  stand(ARMCHAIR, 50);
+  const place = FIREPLACES[fireside.fireplace];
+  stand(place.art, 0);
+  for (const fire of place.fires) {
+    if (place.logs) R.push(...shift(LOGS, fx + fire.x, line - place.art.h + fire.y + 9));
+    R.push(...shift(FLAMES_A, fx + fire.x, line - place.art.h + fire.y));
+  }
+  stand(CANDLESTICK, 4, place.art.h);
+  stand(CANDLESTICK, 37, place.art.h);
+  stand(MANTEL_CLOCK, 18, place.art.h);
+  stand(CHAIRS[fireside.chair], 50);
   stand(SIDE_TABLE, 81);
   stand(TEACUP, 88, SIDE_TABLE.h);
-  stand(LAMP, 93);
+  const lamp = LAMPS[fireside.lamp];
+  stand(lamp.art, 93 + lamp.dx);
+  if (lamp.flames) R.push(...shift(lamp.flames[0], fx + 93 + lamp.dx, line - lamp.art.h));
   const bx = fx + PIECE_WIDTH.hearth + GAP;
   R.push(...shift(BOOKCASE.rects, bx, line - CASE_HEIGHT), ...shift(PREVIEW_SPINES, bx, line - CASE_HEIGHT));
   return { w: geo.sceneW, h: sceneHeight(geo), rects: R };
@@ -1453,8 +1491,20 @@ function previewArt(style: RoomStyle, hanging: RoomHanging): { w: number; h: num
 
 /** A house style in miniature, coloured by the scene (or element with
  *  decorData) around it. */
-export const HousePreview = memo(function HousePreview({ style, hanging }: { style: RoomStyle; hanging: RoomHanging }) {
-  const a = useMemo(() => previewArt(style, hanging), [style, hanging]);
+export const HousePreview = memo(function HousePreview({
+  style,
+  hanging,
+  fireside = PLAIN_DECOR,
+}: {
+  style: RoomStyle;
+  hanging: RoomHanging;
+  fireside?: Fireside;
+}) {
+  const { fireplace, chair, rug, lamp } = fireside;
+  const a = useMemo(
+    () => previewArt(style, hanging, { fireplace, chair, rug, lamp }),
+    [style, hanging, fireplace, chair, rug, lamp],
+  );
   return (
     <svg
       className="room-preview"

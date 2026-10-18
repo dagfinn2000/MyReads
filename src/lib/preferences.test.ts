@@ -322,6 +322,18 @@ describe("parsePreferences: the reading room", () => {
     expect(parsePreferences({ roomStyle: "igloo" }).roomStyle).toBe("cottage");
   });
 
+  it("keeps the fireside's pieces, and the old ones for anything unknown", () => {
+    const prefs = parsePreferences({ roomFireplace: "marble", roomChair: "throne", roomRug: "none", roomLamp: "arc" });
+    expect([prefs.roomFireplace, prefs.roomChair, prefs.roomRug, prefs.roomLamp]).toEqual(["marble", "throne", "none", "arc"]);
+    const plain = parsePreferences({ roomFireplace: "volcano", roomChair: 3 });
+    expect([plain.roomFireplace, plain.roomChair, plain.roomRug, plain.roomLamp]).toEqual([
+      "stone",
+      "wingback",
+      "fringed",
+      "standard",
+    ]);
+  });
+
   it("keeps one sound place for each piece of furniture", () => {
     const prefs = parsePreferences({
       roomLayout: [

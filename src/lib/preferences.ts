@@ -11,7 +11,11 @@ import {
 } from "@/lib/room";
 import {
   ROOM_CEILINGS,
+  ROOM_CHAIRS,
   ROOM_CLIMBERS,
+  ROOM_FIREPLACES,
+  ROOM_LAMPS,
+  ROOM_RUGS,
   ROOM_GARDEN,
   ROOM_WINDOWS,
   ROOM_FABRICS,
@@ -22,7 +26,11 @@ import {
   ROOM_WALLS,
   ROOM_WOODS,
   type RoomCeiling,
+  type RoomChair,
   type RoomClimber,
+  type RoomFireplace,
+  type RoomLamp,
+  type RoomRug,
   type RoomGarden,
   type RoomWindow,
   type RoomFabric,
@@ -421,6 +429,11 @@ export type Preferences = {
   roomFloor: RoomFloor;
   /** Fairy lights, bunting and the like along the top of every room. */
   roomCeiling: RoomCeiling;
+  /** The fireside: the fireplace, the armchair, the rug and the lamp. */
+  roomFireplace: RoomFireplace;
+  roomChair: RoomChair;
+  roomRug: RoomRug;
+  roomLamp: RoomLamp;
   /** Added rooms' own walls and floors, by room; a room not here is like
    *  the rest of the house. */
   roomOwn: Partial<Record<RoomKind, RoomOwn>>;
@@ -522,6 +535,10 @@ export const DEFAULT_PREFERENCES: Preferences = {
   roomPaper: "style",
   roomFloor: "style",
   roomCeiling: "none",
+  roomFireplace: "stone",
+  roomChair: "wingback",
+  roomRug: "fringed",
+  roomLamp: "standard",
   roomOwn: {},
   roomWindows: "none",
   roomClimber: "none",
@@ -813,6 +830,10 @@ export function parsePreferences(raw: unknown): Preferences {
     roomPaper: pick(ROOM_PAPERS, obj.roomPaper, d.roomPaper),
     roomFloor: pick(ROOM_FLOORS, obj.roomFloor, d.roomFloor),
     roomCeiling: pick(ROOM_CEILINGS, obj.roomCeiling, d.roomCeiling),
+    roomFireplace: pick(ROOM_FIREPLACES, obj.roomFireplace, d.roomFireplace),
+    roomChair: pick(ROOM_CHAIRS, obj.roomChair, d.roomChair),
+    roomRug: pick(ROOM_RUGS, obj.roomRug, d.roomRug),
+    roomLamp: pick(ROOM_LAMPS, obj.roomLamp, d.roomLamp),
     roomOwn: parseRoomOwn(obj.roomOwn),
     roomWindows: pick(ROOM_WINDOWS, obj.roomWindows, d.roomWindows),
     roomClimber: pick(ROOM_CLIMBERS, obj.roomClimber, d.roomClimber),

@@ -88,6 +88,7 @@ export function Tiles<T extends string>({
   chosen,
   multiple = false,
   tall = false,
+  box,
   onPick,
   children,
 }: {
@@ -99,6 +100,9 @@ export function Tiles<T extends string>({
   multiple?: boolean;
   /** Twice as tall, for a whole figure. */
   tall?: boolean;
+  /** A tile of another size, for bigger pictures: its width and height
+   *  in rem. */
+  box?: { w: number; h: number };
   onPick: (o: T) => void;
   /** The picture on each tile. */
   children: (o: T) => React.ReactNode;
@@ -108,7 +112,8 @@ export function Tiles<T extends string>({
       <div
         role={multiple ? "group" : "radiogroup"}
         aria-label={label}
-        className="grid grid-cols-[repeat(auto-fill,minmax(3.5rem,1fr))] items-start gap-1.5"
+        className="grid grid-cols-[repeat(auto-fill,minmax(var(--tile),1fr))] items-start gap-1.5"
+        style={{ "--tile": `${box?.w ?? 3.5}rem` } as React.CSSProperties}
       >
         {options.map((o) => {
           const on = chosen(o);
@@ -124,10 +129,11 @@ export function Tiles<T extends string>({
             >
               <span
                 className={cn(
-                  "room-scene room-avatar-tile grid w-14 place-items-center items-end overflow-hidden rounded-md border ring-offset-2 ring-offset-card transition-shadow group-hover:border-ring/60",
-                  tall ? "h-24" : "h-14",
+                  "room-scene room-avatar-tile grid place-items-center items-end overflow-hidden rounded-md border ring-offset-2 ring-offset-card transition-shadow group-hover:border-ring/60",
+                  !box && (tall ? "h-24 w-14" : "h-14 w-14"),
                   on && "ring-2 ring-foreground",
                 )}
+                style={box && { width: `${box.w}rem`, height: `${box.h}rem` }}
               >
                 {children(o)}
               </span>

@@ -4,7 +4,8 @@ import { useMemo, useState } from "react";
 import { Dices, Plus, RotateCcw, X } from "lucide-react";
 import { FIGURE_ORIGIN, SEAT_OFFSET, avatarPose, seatedTop, type AvatarPose } from "@/components/avatar-art";
 import { PET_ART } from "@/components/pet-art";
-import { Rects, Sprite, armchairArt } from "@/components/room-art";
+import { Rects, Sprite } from "@/components/room-art";
+import { CHAIRS } from "@/components/room-fireside";
 import { AvatarPortrait, avatarColours, useAvatar } from "@/components/room-avatar";
 import { SubTabs, Swatches, Tiles } from "@/components/decorate-controls";
 import { Button } from "@/components/ui/button";
@@ -47,8 +48,7 @@ import {
   type AvatarLook,
 } from "@/lib/avatar";
 import { CAT_COATS, DOG_COATS, PETS, PET_LABELS, type CatCoat, type DogCoat, type Pet } from "@/lib/pets";
-
-const ARMCHAIR = armchairArt();
+import type { RoomChair } from "@/lib/room-styles";
 
 const SECTIONS = [
   { value: "face", label: "Face" },
@@ -91,6 +91,7 @@ export function AvatarMaker({
   onPet,
   onCoats,
   scene,
+  chair = "wingback",
 }: {
   look: AvatarLook;
   shown: boolean;
@@ -102,6 +103,8 @@ export function AvatarMaker({
   /** The room's decor as data attributes (decorData), so the picture is
    *  in the room's own colours. */
   scene: Record<string, string | undefined>;
+  /** The armchair by the fire, which the picture shows them sitting in. */
+  chair?: RoomChair;
   onChange: (look: AvatarLook) => void;
   onShown: (shown: boolean) => void;
   onLooks: (looks: AvatarLook[]) => void;
@@ -128,7 +131,7 @@ export function AvatarMaker({
   return (
     <div className="grid gap-5 md:grid-cols-[auto_1fr] md:items-start">
       <div className="grid justify-items-center gap-3 md:sticky md:top-16">
-        <Stage look={look} pet={pet} scene={scene} />
+        <Stage look={look} pet={pet} scene={scene} chair={chair} />
         <div className="flex flex-wrap justify-center gap-2">
           <Button size="sm" variant="outline" onClick={() => onChange(randomLook(Math.random, look.mobility))}>
             <Dices aria-hidden="true" />
@@ -475,8 +478,19 @@ export function AvatarMaker({
 
 /** The avatar against a bit of wall: on its feet, and in the armchair with
  *  a book. */
-function Stage({ look, pet, scene }: { look: AvatarLook; pet: Pet; scene: Record<string, string | undefined> }) {
+function Stage({
+  look,
+  pet,
+  scene,
+  chair,
+}: {
+  look: AvatarLook;
+  pet: Pet;
+  scene: Record<string, string | undefined>;
+  chair: RoomChair;
+}) {
   const avatar = useAvatar(look, pet)!;
+  const armchair = CHAIRS[chair];
   const s = 3;
   return (
     <div
@@ -486,8 +500,8 @@ function Stage({ look, pet, scene }: { look: AvatarLook; pet: Pet; scene: Record
       style={{ "--u": `${s}px` } as React.CSSProperties}
     >
       <AvatarPortrait avatar={avatar} pose="stand" scale={s} walking />
-      <div className="relative" style={{ width: ARMCHAIR.w * s, height: (ARMCHAIR.h - seatedTop(avatar.art.sit)) * s }}>
-        <Sprite art={ARMCHAIR} scale={s} className="room-abs" style={{ left: 0, bottom: 0 }} />
+      <div className="relative" style={{ width: armchair.w * s, height: (armchair.h - seatedTop(avatar.art.sit)) * s }}>
+        <Sprite art={armchair} scale={s} className="room-abs" style={{ left: 0, bottom: 0 }} />
         <div className="room-abs" style={{ left: SEAT_OFFSET.x * s, top: 0 }}>
           <AvatarPortrait avatar={avatar} pose="sit" scale={s} />
         </div>
