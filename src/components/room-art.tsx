@@ -831,6 +831,12 @@ export const ORNAMENT_ART = {
   globe: art([".nnnn..", "n~GG~n.", "n~~GG-n", "nG~~--n", ".n~-nn.", "..nn...", "..Bn...", ".nBBn.."]),
   hourglass: art(["nBBBn", ".yyy.", "..y..", "..a..", ".aya.", ".yyy.", "nBBBn"]),
   teapot: art(["...nB...", ".yyyyy..", "yyyyyyyy", "y.yyyyY.", ".YYYYY.."]),
+  // Only on shelves with plenty: books lying flat, a cactus in flower, a
+  // china bird and an inkwell with its quill.
+  stack: art(["..GGGGG..", "..jbbjj..", ".3333333.", ".444bb44.", "CCCCCCCCC", "xbbxxxxxx"]),
+  cactus: art(["..i..", ".gGg.", "gGjGj", "gGjGj", ".GjG.", "pPPPq", ".PPq."]),
+  bird: art(["..~~...", ".~K~~..", "b~~~~~-", "..~~~--", "...---.", "..nnnn."]),
+  inkwell: art(["....yy", "...yY.", "..yY..", "..Y...", ".nYn..", "vKKKa.", "KKKKv.", ".vvv.."]),
 } as const;
 
 export const BOOKEND = art(["Bn.", "Bn.", "Bn.", "Bn.", "Bn.", "Bn.", "Bn.", "Bn.", "Bn.", "bBn"]);

@@ -1,5 +1,6 @@
 import { BookOwnership, ReadingStatus } from "@/lib/enums";
 import { hash } from "@/lib/cover-art";
+import type { RoomOrnaments } from "@/lib/room-styles";
 
 /**
  * The reading room (components/reading-room.tsx): the library drawn as a
@@ -969,8 +970,21 @@ export function caseCount(shelfCount: number): number {
   return Math.max(1, Math.ceil(shelfCount / SHELVES_PER_CASE));
 }
 
-/** Little things that stand on a shelf's spare space. */
-export type Ornament = "plant" | "candle" | "vase" | "frame" | "globe" | "hourglass" | "teapot";
+/** Little things that stand on a shelf's spare space: the first seven on
+ *  any shelf, the rest only when the shelves have plenty
+ *  (RoomOrnaments). */
+export type Ornament =
+  | "plant"
+  | "candle"
+  | "vase"
+  | "frame"
+  | "globe"
+  | "hourglass"
+  | "teapot"
+  | "stack"
+  | "cactus"
+  | "bird"
+  | "inkwell";
 export const ORNAMENT_WIDTH: Record<Ornament, number> = {
   plant: 6,
   candle: 3,
@@ -979,9 +993,17 @@ export const ORNAMENT_WIDTH: Record<Ornament, number> = {
   globe: 7,
   hourglass: 5,
   teapot: 8,
+  stack: 9,
+  cactus: 5,
+  bird: 7,
+  inkwell: 6,
 };
-const ORNAMENTS = Object.keys(ORNAMENT_WIDTH) as Ornament[];
+const ORNAMENTS: readonly Ornament[] = ["plant", "candle", "vase", "frame", "globe", "hourglass", "teapot"];
+const ALL_ORNAMENTS = Object.keys(ORNAMENT_WIDTH) as Ornament[];
 export const BOOKEND_WIDTH = 3;
+/** On a shelf with plenty: the most, and the space kept between them. */
+const PLENTY = 4;
+const SPACING = 2;
 
 export interface ShelfDressing {
   /** A bookend after the last book, on a shelf that isn't full. */
@@ -992,19 +1014,40 @@ export interface ShelfDressing {
 
 /**
  * What stands on a shelf beside its books (`used` dots of them): a bookend
- * when there is room for one, then an ornament or two on space a book
- * would leave bare. Shelf `n` (counting from the first) always gets the
- * same ones.
+ * when there is room for one, then on space a book would leave bare an
+ * ornament or two ("some"), as many as fit ("plenty"), or none. Shelf `n`
+ * (counting from the first) always gets the same ones.
  */
-export function dressShelf(n: number, used: number): ShelfDressing {
+export function dressShelf(n: number, used: number, how: RoomOrnaments = "some"): ShelfDressing {
   const free = SHELF_WIDTH - used;
   const bookend = used > 0 && free >= BOOKEND_WIDTH + 2;
   const start = used + (bookend ? BOOKEND_WIDTH : 0);
   const room = SHELF_WIDTH - start;
   const ornaments: ShelfDressing["ornaments"] = [];
-  if (room < 9) return { bookend, ornaments };
-
   const h = hash(`shelf ${n}`);
+  if (how === "plenty") {
+    // A different one each time, while they fit with a little space
+    // round each, then spread evenly along the space.
+    const picks: Ornament[] = [];
+    let width = 0;
+    for (let i = 0; picks.length < PLENTY && i < 16; i++) {
+      const kind = ALL_ORNAMENTS[(hash(`shelf ${n} ${i}`) + h) % ALL_ORNAMENTS.length];
+      if (picks.includes(kind)) continue;
+      const w = ORNAMENT_WIDTH[kind];
+      if (width + w + SPACING * (picks.length + 2) > room) continue;
+      picks.push(kind);
+      width += w;
+    }
+    const gap = (room - width) / (picks.length + 1);
+    let x = start + gap;
+    for (const kind of picks) {
+      ornaments.push({ kind, x: Math.round(x) });
+      x += ORNAMENT_WIDTH[kind] + gap;
+    }
+    return { bookend, ornaments };
+  }
+  if (how === "none" || room < 9) return { bookend, ornaments };
+
   const first = ORNAMENTS[h % ORNAMENTS.length];
   const second = ORNAMENTS[(h >>> 8) % ORNAMENTS.length];
   // One ornament in the middle of the space, or two spread out when it is

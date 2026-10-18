@@ -133,6 +133,29 @@ export const ROOM_LAMP_LABELS: Record<RoomLamp, string> = {
   lantern: "Paper lantern",
 };
 
+/** The bookcases (Decorate › House › Bookcases, components/room-
+ *  bookcases.ts), in the wood colour, and what stands on their shelves
+ *  beside the books. */
+export const ROOM_BOOKCASES = ["classic", "open", "pediment", "gothic", "glazed"] as const;
+export type RoomBookcase = (typeof ROOM_BOOKCASES)[number];
+
+export const ROOM_BOOKCASE_LABELS: Record<RoomBookcase, string> = {
+  classic: "Classic",
+  open: "Open shelves",
+  pediment: "Pediment",
+  gothic: "Gothic",
+  glazed: "Glass doors",
+};
+
+export const ROOM_ORNAMENTS = ["some", "plenty", "none"] as const;
+export type RoomOrnaments = (typeof ROOM_ORNAMENTS)[number];
+
+export const ROOM_ORNAMENT_LABELS: Record<RoomOrnaments, string> = {
+  some: "A few",
+  plenty: "Plenty",
+  none: "Just books",
+};
+
 /** Wallpaper: the style's own, or any of the styles' patterns, or one of
  *  four more. Printed in the wall colour, a shade darker. */
 export const ROOM_PAPERS = [

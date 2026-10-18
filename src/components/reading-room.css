@@ -174,6 +174,8 @@
   --room-tiff-green: #5f9a50;
   --room-tiff-red: #c0473d;
   --room-tiff-blue: #4174b2;
+  /* The glass doors of a bookcase, over the books. */
+  --room-pane-tint: rgb(205 230 245 / 0.14);
   /* Painted red: the tool chest, a building block, the toy box's heart. */
   --room-red-hi: color-mix(in oklab, #e0675a, var(--dusk) calc(var(--night) * 40%));
   --room-red: color-mix(in oklab, #c0403a, var(--dusk) calc(var(--night) * 40%));
@@ -283,6 +285,7 @@
   --room-tiff-green: #9ad877;
   --room-tiff-red: #ff7258;
   --room-tiff-blue: #78adff;
+  --room-pane-tint: rgb(150 185 215 / 0.1);
   --room-wood-hi: #8d5c39;
   --room-wood: #6c4529;
   --room-wood-lo: #50311d;
@@ -773,6 +776,7 @@
 .rp-tiff-green { fill: var(--room-tiff-green); }
 .rp-tiff-red { fill: var(--room-tiff-red); }
 .rp-tiff-blue { fill: var(--room-tiff-blue); }
+.rp-pane-tint { fill: var(--room-pane-tint); }
 .rp-red-hi { fill: var(--room-red-hi); }
 .rp-red { fill: var(--room-red); }
 .rp-red-lo { fill: var(--room-red-lo); }
@@ -1239,6 +1243,10 @@
   position: absolute;
   display: flex;
   align-items: flex-end;
+}
+/* A bookcase's glass doors: seen through, and clicked through. */
+.room-case-front {
+  pointer-events: none;
 }
 .room-spine {
   --hi: color-mix(in oklab, var(--spine), #fff 24%);

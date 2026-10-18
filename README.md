@@ -106,6 +106,11 @@ server.
   Persian, braided or kilim rug, a sheepskin or none; and a standard lamp,
   a Tiffany lamp, an arc lamp, a candle stand or a paper lantern, all lit
   at night. The chair and the rug take the fabric colour.
+- Choose the bookcases: classic, open shelves with the wallpaper showing
+  behind the books, a pediment, Gothic pinnacles and a pointed gable, or a
+  barrister's case with a glass door over each shelf; and whether a few
+  ornaments stand beside the books, plenty of them (a pile of books lying
+  flat, a cactus in flower, a china bird, an inkwell and more), or none.
 - Add rooms, each upstairs on a floor of its own or next to the library
   (or the room before it), so the house grows wider instead of taller
   where the screen has space, with a door in the wall between that opens

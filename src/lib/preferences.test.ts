@@ -334,6 +334,13 @@ describe("parsePreferences: the reading room", () => {
     ]);
   });
 
+  it("keeps the bookcases' design and ornaments, and the old ones for anything unknown", () => {
+    const prefs = parsePreferences({ roomBookcase: "gothic", roomOrnaments: "plenty" });
+    expect([prefs.roomBookcase, prefs.roomOrnaments]).toEqual(["gothic", "plenty"]);
+    const plain = parsePreferences({ roomBookcase: "crate", roomOrnaments: true });
+    expect([plain.roomBookcase, plain.roomOrnaments]).toEqual(["classic", "some"]);
+  });
+
   it("keeps one sound place for each piece of furniture", () => {
     const prefs = parsePreferences({
       roomLayout: [

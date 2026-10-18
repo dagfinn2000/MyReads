@@ -15,6 +15,8 @@ import {
   ROOM_CLIMBERS,
   ROOM_FIREPLACES,
   ROOM_LAMPS,
+  ROOM_BOOKCASES,
+  ROOM_ORNAMENTS,
   ROOM_RUGS,
   ROOM_GARDEN,
   ROOM_WINDOWS,
@@ -30,6 +32,8 @@ import {
   type RoomClimber,
   type RoomFireplace,
   type RoomLamp,
+  type RoomBookcase,
+  type RoomOrnaments,
   type RoomRug,
   type RoomGarden,
   type RoomWindow,
@@ -434,6 +438,9 @@ export type Preferences = {
   roomChair: RoomChair;
   roomRug: RoomRug;
   roomLamp: RoomLamp;
+  /** The bookcases' design, and how many ornaments share their shelves. */
+  roomBookcase: RoomBookcase;
+  roomOrnaments: RoomOrnaments;
   /** Added rooms' own walls and floors, by room; a room not here is like
    *  the rest of the house. */
   roomOwn: Partial<Record<RoomKind, RoomOwn>>;
@@ -539,6 +546,8 @@ export const DEFAULT_PREFERENCES: Preferences = {
   roomChair: "wingback",
   roomRug: "fringed",
   roomLamp: "standard",
+  roomBookcase: "classic",
+  roomOrnaments: "some",
   roomOwn: {},
   roomWindows: "none",
   roomClimber: "none",
@@ -834,6 +843,8 @@ export function parsePreferences(raw: unknown): Preferences {
     roomChair: pick(ROOM_CHAIRS, obj.roomChair, d.roomChair),
     roomRug: pick(ROOM_RUGS, obj.roomRug, d.roomRug),
     roomLamp: pick(ROOM_LAMPS, obj.roomLamp, d.roomLamp),
+    roomBookcase: pick(ROOM_BOOKCASES, obj.roomBookcase, d.roomBookcase),
+    roomOrnaments: pick(ROOM_ORNAMENTS, obj.roomOrnaments, d.roomOrnaments),
     roomOwn: parseRoomOwn(obj.roomOwn),
     roomWindows: pick(ROOM_WINDOWS, obj.roomWindows, d.roomWindows),
     roomClimber: pick(ROOM_CLIMBERS, obj.roomClimber, d.roomClimber),

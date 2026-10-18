@@ -10,6 +10,7 @@
  */
 import { useMemo } from "react";
 import { FLAMES_A, LOGS, Rects, type Art, type Rect } from "@/components/room-art";
+import { bookcaseSample } from "@/components/room-bookcases";
 import { CHAIRS, FIREPLACES, LAMPS, rugFor } from "@/components/room-fireside";
 import { ceilingSample, floorSample, styleFloor, stylePaper, wallSample } from "@/components/room-shells";
 import { climberSample, gardenSample } from "@/components/room-garden";
@@ -21,6 +22,10 @@ import { ROOM_LABELS, type RoomKind } from "@/lib/room";
 import { cn } from "@/lib/utils";
 import {
   COLOUR_LABELS,
+  ROOM_BOOKCASES,
+  ROOM_BOOKCASE_LABELS,
+  ROOM_ORNAMENTS,
+  ROOM_ORNAMENT_LABELS,
   ROOM_CEILINGS,
   ROOM_CEILING_LABELS,
   ROOM_CHAIRS,
@@ -206,6 +211,45 @@ export function FiresideControls({ decor, onChange }: { decor: RoomDecor; onChan
         box={{ w: 4.75, h: 8.75 }}
       >
         {(l) => <Sample art={samples.lamp.get(l)!} decor={decor} />}
+      </Tiles>
+    </>
+  );
+}
+
+/** The bookcases' design and what stands on their shelves (Decorate ›
+ *  House). */
+export function BookcaseControls({ decor, onChange }: { decor: RoomDecor; onChange: (patch: Partial<RoomDecor>) => void }) {
+  const designs = useMemo(
+    () => new Map(ROOM_BOOKCASES.map((b) => [b, bookcaseSample(b, decor.ornaments, [34, 26])])),
+    [decor.ornaments],
+  );
+  const ornaments = useMemo(
+    () => new Map(ROOM_ORNAMENTS.map((o) => [o, bookcaseSample(decor.bookcase, o, [22, 9])])),
+    [decor.bookcase],
+  );
+  return (
+    <>
+      <Tiles
+        label="Design"
+        hint="In the wood's colour."
+        options={ROOM_BOOKCASES}
+        labels={ROOM_BOOKCASE_LABELS}
+        chosen={(bookcase) => decor.bookcase === bookcase}
+        onPick={(bookcase) => onChange({ bookcase })}
+        box={{ w: 6.25, h: 8.25 }}
+      >
+        {(b) => <Sample art={designs.get(b)!} decor={decor} />}
+      </Tiles>
+      <Tiles
+        label="On the shelves"
+        hint="Beside the books, wherever there's room."
+        options={ROOM_ORNAMENTS}
+        labels={ROOM_ORNAMENT_LABELS}
+        chosen={(o) => decor.ornaments === o}
+        onPick={(o) => onChange({ ornaments: o })}
+        box={{ w: 6.25, h: 8.25 }}
+      >
+        {(o) => <Sample art={ornaments.get(o)!} decor={decor} />}
       </Tiles>
     </>
   );

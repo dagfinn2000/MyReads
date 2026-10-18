@@ -35,6 +35,7 @@ import {
 import { ExtraPreview } from "@/components/room-extras";
 import { RoomPreview } from "@/components/room-rooms";
 import {
+  BookcaseControls,
   FiresideControls,
   InteriorControls,
   OutsideControls,
@@ -76,6 +77,8 @@ const PREFERENCE: Record<keyof RoomDecor, keyof Preferences> = {
   chair: "roomChair",
   rug: "roomRug",
   lamp: "roomLamp",
+  bookcase: "roomBookcase",
+  ornaments: "roomOrnaments",
   own: "roomOwn",
   windows: "roomWindows",
   climber: "roomClimber",
@@ -99,6 +102,8 @@ const HOUSE: (keyof RoomDecor)[] = [
   "chair",
   "rug",
   "lamp",
+  "bookcase",
+  "ornaments",
   "windows",
   "climber",
   "garden",
@@ -539,7 +544,7 @@ export function RoomView({
                         )}
                         {...decorData({ ...decor, style })}
                       >
-                        <HousePreview style={style} hanging={decor.hanging} fireside={decor} />
+                        <HousePreview style={style} hanging={decor.hanging} furnishings={decor} />
                       </span>
                       <span className={cn("leading-tight", decor.style === style && "font-medium text-foreground")}>
                         {ROOM_STYLE_LABELS[style].name}
@@ -584,6 +589,10 @@ export function RoomView({
 
               <Group title="By the fire">
                 <FiresideControls decor={decor} onChange={change} />
+              </Group>
+
+              <Group title="Bookcases">
+                <BookcaseControls decor={decor} onChange={change} />
               </Group>
 
               <Group title="Windows and garden">
