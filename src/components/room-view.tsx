@@ -81,6 +81,7 @@ const PREFERENCE: Record<keyof RoomDecor, keyof Preferences> = {
   ornaments: "roomOrnaments",
   own: "roomOwn",
   windows: "roomWindows",
+  pictures: "roomPictures",
   climber: "roomClimber",
   garden: "roomGarden",
   cat: "roomCat",
@@ -105,6 +106,7 @@ const HOUSE: (keyof RoomDecor)[] = [
   "bookcase",
   "ornaments",
   "windows",
+  "pictures",
   "climber",
   "garden",
 ];

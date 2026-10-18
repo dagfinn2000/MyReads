@@ -10,6 +10,7 @@ import type {
   RoomFireplace,
   RoomLamp,
   RoomOrnaments,
+  RoomPictures,
   RoomRug,
   RoomFabric,
   RoomFloor,
@@ -68,6 +69,7 @@ import type { AvatarLook } from "@/lib/avatar";
 import type { CatCoat, DogCoat, Pet } from "@/lib/pets";
 import { chimneyFoot, chimneyRise, roofCrown, roofHeight, shellArt, type Moving, type Shell } from "@/components/room-shells";
 import { WINDOW_W } from "@/components/room-windows";
+import { PICTURE_W } from "@/components/room-pictures";
 import { isClosingBook } from "@/lib/cover-flight";
 import { OWNERSHIP_LABELS, STATUS_LABELS } from "@/lib/display";
 import {
@@ -100,6 +102,7 @@ import {
   shelve,
   spineFor,
   windowSpots,
+  wallSpots,
   type Arrangement,
   type HousePlan,
   type Movable,
@@ -395,6 +398,8 @@ export interface RoomDecor {
   /** Added rooms' own walls and floors. */
   own: Partial<Record<RoomKind, RoomOwn>>;
   windows: RoomWindow;
+  /** Pictures on the bare walls (room-pictures.ts). */
+  pictures: RoomPictures;
   climber: RoomClimber;
   garden: RoomGarden[];
   /** The coat of every cat in the house, and of the dog in its basket. */
@@ -419,6 +424,7 @@ export const PLAIN_DECOR: RoomDecor = {
   ornaments: "some",
   own: {},
   windows: "none",
+  pictures: "none",
   climber: "none",
   garden: [],
   cat: "ginger",
@@ -505,29 +511,30 @@ export function ReadingRoom({
     () => (width ? layoutRoom(books, width, style, arrangement) : null),
     [books, width, style, arrangement],
   );
-  const { paper, floor, ceiling, own, windows, climber, garden } = decor;
+  const { paper, floor, ceiling, own, windows, pictures, climber, garden } = decor;
   const fireside = useMemo<Fireside>(
     () => ({ fireplace: decor.fireplace, chair: decor.chair, rug: decor.rug, lamp: decor.lamp }),
     [decor.fireplace, decor.chair, decor.rug, decor.lamp],
   );
-  const shell = useMemo(
-    () =>
-      layout
-        ? shellArt(layout.geo, style, {
-            paper,
-            floor,
-            ceiling,
-            own,
-            rooms: layout.plan.rooms,
-            spans: layout.plan.spans,
-            windows,
-            windowSpots: windows === "none" ? undefined : windowSpots(layout.plan, WINDOW_W),
-            climber,
-            garden,
-          })
-        : null,
-    [layout, style, paper, floor, ceiling, own, windows, climber, garden],
-  );
+  const shell = useMemo(() => {
+    if (!layout) return null;
+    // Pictures share the walls with the windows, if there are both.
+    const hung = pictures === "none" ? null : wallSpots(layout.plan, PICTURE_W, windows === "none" ? null : WINDOW_W);
+    return shellArt(layout.geo, style, {
+      paper,
+      floor,
+      ceiling,
+      own,
+      rooms: layout.plan.rooms,
+      spans: layout.plan.spans,
+      windows,
+      windowSpots: windows === "none" ? undefined : (hung?.windows ?? windowSpots(layout.plan, WINDOW_W)),
+      pictures,
+      pictureSpots: hung?.pictures,
+      climber,
+      garden,
+    });
+  }, [layout, style, paper, floor, ceiling, own, windows, pictures, climber, garden]);
   // The doors between rooms side by side, floor by floor (as the shell
   // draws them, after each room but the last).
   const doors = useMemo(() => layout?.plan.spans.map((spans) => spans.slice(0, -1).map((sp) => sp.x + sp.w)) ?? [], [layout]);

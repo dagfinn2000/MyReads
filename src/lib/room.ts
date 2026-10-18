@@ -875,6 +875,22 @@ export function placeAt(plan: HousePlan, floor: number, middle: number, except?:
   return { span, slot: row.filter((p) => p.x + PIECE_WIDTH[p.kind] / 2 < middle).length };
 }
 
+/** The stretches the furniture in a room takes up where the windows and
+ *  pictures hang (HIGH_PART), left to right, run together where they
+ *  meet. */
+function highParts(pieces: readonly Piece[]): [number, number][] {
+  const taken: [number, number][] = [];
+  for (const p of pieces) {
+    const high = HIGH_PART[p.kind];
+    if (!high) continue;
+    const [a, b] = [p.x + high[0], p.x + high[1]];
+    const last = taken.at(-1);
+    if (last && a <= last[1]) last[1] = Math.max(last[1], b);
+    else taken.push([a, b]);
+  }
+  return taken;
+}
+
 /** Where windows go on each floor (top first): x, in from the left wall,
  *  of each window `width` wide, in the stretches of wall that the
  *  furniture in each room leaves clear up there (HIGH_PART), with room
@@ -883,15 +899,7 @@ export function windowSpots(plan: HousePlan, width: number): number[][] {
   const margin = 4;
   return plan.floors.map((floor, f) =>
     plan.spans[f].flatMap((sp) => {
-      const taken: [number, number][] = [];
-      for (const p of floor.slice(sp.from, sp.to)) {
-        const high = HIGH_PART[p.kind];
-        if (!high) continue;
-        const [a, b] = [p.x + high[0], p.x + high[1]];
-        const last = taken.at(-1);
-        if (last && a <= last[1]) last[1] = Math.max(last[1], b);
-        else taken.push([a, b]);
-      }
+      const taken = highParts(floor.slice(sp.from, sp.to));
       const edges = [sp.x, ...taken.flat(), sp.x + sp.w];
       const spots: number[] = [];
       for (let i = 0; i < edges.length; i += 2) {
@@ -905,6 +913,48 @@ export function windowSpots(plan: HousePlan, width: number): number[][] {
       return spots;
     }),
   );
+}
+
+/** Where pictures hang on each floor (top first), and the windows with
+ *  them if there are any (`windowW` wide, else null): x, in from the left
+ *  wall, of each picture's box `pictureW` wide and each window, on the
+ *  stretches of wall that the furniture leaves clear (HIGH_PART). A
+ *  window comes first along each stretch, then a picture, and so on, as
+ *  many as fit with room between them. */
+export function wallSpots(
+  plan: HousePlan,
+  pictureW: number,
+  windowW: number | null,
+): { pictures: number[][]; windows: number[][] } {
+  const margin = 4;
+  const gap = 12;
+  const pictures: number[][] = [];
+  const windows: number[][] = [];
+  plan.floors.forEach((floor, f) => {
+    const hung = { pictures: [] as number[], windows: [] as number[] };
+    for (const sp of plan.spans[f]) {
+      const taken = highParts(floor.slice(sp.from, sp.to));
+      const edges = [sp.x, ...taken.flat(), sp.x + sp.w];
+      for (let i = 0; i < edges.length; i += 2) {
+        const [a, b] = [edges[i], edges[i + 1]];
+        const free = b - a - 2 * margin;
+        // Each gets an equal share of the stretch, wide enough for the
+        // widest with room beside it; or the first alone if it fits.
+        const widest = Math.max(pictureW, windowW ?? 0);
+        let n = Math.min(5, Math.floor(free / (widest + gap)));
+        if (n === 0 && free >= (windowW ?? pictureW)) n = 1;
+        for (let k = 0; k < n; k++) {
+          const window = windowW !== null && k % 2 === 0;
+          const w = window ? windowW : pictureW;
+          const x = Math.round(a + margin + (free * (2 * k + 1)) / (2 * n) - w / 2);
+          (window ? hung.windows : hung.pictures).push(x);
+        }
+      }
+    }
+    pictures.push(hung.pictures);
+    windows.push(hung.windows);
+  });
+  return { pictures, windows };
 }
 
 /** `kind` put away. Whatever stood to its right on its floor moves up a

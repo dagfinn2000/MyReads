@@ -15,6 +15,7 @@ import { CHAIRS, FIREPLACES, LAMPS, rugFor } from "@/components/room-fireside";
 import { ceilingSample, floorSample, styleFloor, stylePaper, wallSample } from "@/components/room-shells";
 import { climberSample, gardenSample } from "@/components/room-garden";
 import { windowSample } from "@/components/room-windows";
+import { pictureSample } from "@/components/room-pictures";
 import { Row, Swatches, Tiles } from "@/components/decorate-controls";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { HangingPreview, decorData, type RoomDecor } from "@/components/reading-room";
@@ -22,6 +23,8 @@ import { ROOM_LABELS, type RoomKind } from "@/lib/room";
 import { cn } from "@/lib/utils";
 import {
   COLOUR_LABELS,
+  ROOM_PICTURES,
+  ROOM_PICTURE_LABELS,
   ROOM_BOOKCASES,
   ROOM_BOOKCASE_LABELS,
   ROOM_ORNAMENTS,
@@ -84,6 +87,7 @@ export function InteriorControls({ decor, onChange }: { decor: RoomDecor; onChan
     [decor.style],
   );
   const ceilings = useMemo(() => new Map(ROOM_CEILINGS.map((c) => [c, ceilingSample(c, 27, 20)])), []);
+  const pictures = useMemo(() => new Map(ROOM_PICTURES.map((p) => [p, pictureSample(p, 44, 36)])), []);
   return (
     <>
       <Tiles
@@ -115,6 +119,17 @@ export function InteriorControls({ decor, onChange }: { decor: RoomDecor; onChan
         onPick={(ceiling) => onChange({ ceiling })}
       >
         {(ceiling) => <Sample art={ceilings.get(ceiling)!} decor={decor} />}
+      </Tiles>
+      <Tiles
+        label="On the bare walls"
+        hint="In every room, wherever furniture leaves space, taking turns with the windows."
+        options={ROOM_PICTURES}
+        labels={ROOM_PICTURE_LABELS}
+        chosen={(p) => decor.pictures === p}
+        onPick={(p) => onChange({ pictures: p })}
+        box={{ w: 5.5, h: 4.5 }}
+      >
+        {(p) => <Sample art={pictures.get(p)!} decor={decor} />}
       </Tiles>
     </>
   );

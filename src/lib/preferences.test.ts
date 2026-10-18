@@ -341,6 +341,11 @@ describe("parsePreferences: the reading room", () => {
     expect([plain.roomBookcase, plain.roomOrnaments]).toEqual(["classic", "some"]);
   });
 
+  it("keeps the pictures on the walls, and bare walls for anything unknown", () => {
+    expect(parsePreferences({ roomPictures: "portraits" }).roomPictures).toBe("portraits");
+    expect(parsePreferences({ roomPictures: "posters" }).roomPictures).toBe("none");
+  });
+
   it("keeps one sound place for each piece of furniture", () => {
     const prefs = parsePreferences({
       roomLayout: [
