@@ -18,11 +18,13 @@ import type {
   RoomHanging,
   RoomOwn,
   RoomPaper,
+  RoomSeason,
   RoomStyle,
   RoomWalls,
   RoomWindow,
   RoomWood,
 } from "@/lib/room-styles";
+import { seasonOn } from "@/lib/room-styles";
 import { ReadingStatus } from "@/lib/enums";
 import { BookLink } from "@/components/book-link";
 import {
@@ -69,6 +71,7 @@ import type { AvatarLook } from "@/lib/avatar";
 import type { CatCoat, DogCoat, Pet } from "@/lib/pets";
 import { chimneyFoot, chimneyRise, roofCrown, roofHeight, shellArt, type Moving, type Shell } from "@/components/room-shells";
 import { WINDOW_W } from "@/components/room-windows";
+import { flakesFor, type Box, type Fall } from "@/components/room-seasons";
 import { PICTURE_W } from "@/components/room-pictures";
 import { isClosingBook } from "@/lib/cover-flight";
 import { OWNERSHIP_LABELS, STATUS_LABELS } from "@/lib/display";
@@ -402,6 +405,8 @@ export interface RoomDecor {
   pictures: RoomPictures;
   climber: RoomClimber;
   garden: RoomGarden[];
+  /** The time of year outside (room-seasons.ts). */
+  season: RoomSeason;
   /** The coat of every cat in the house, and of the dog in its basket. */
   cat: CatCoat;
   dog: DogCoat;
@@ -427,6 +432,7 @@ export const PLAIN_DECOR: RoomDecor = {
   pictures: "none",
   climber: "none",
   garden: [],
+  season: "summer",
   cat: "ginger",
   dog: "brown",
 };
@@ -512,6 +518,8 @@ export function ReadingRoom({
     [books, width, style, arrangement],
   );
   const { paper, floor, ceiling, own, windows, pictures, climber, garden } = decor;
+  // Following the calendar, the season it is now.
+  const season = useMemo(() => (decor.season === "calendar" ? seasonOn(new Date()) : decor.season), [decor.season]);
   const fireside = useMemo<Fireside>(
     () => ({ fireplace: decor.fireplace, chair: decor.chair, rug: decor.rug, lamp: decor.lamp }),
     [decor.fireplace, decor.chair, decor.rug, decor.lamp],
@@ -533,8 +541,9 @@ export function ReadingRoom({
       pictureSpots: hung?.pictures,
       climber,
       garden,
+      season,
     });
-  }, [layout, style, paper, floor, ceiling, own, windows, pictures, climber, garden]);
+  }, [layout, style, paper, floor, ceiling, own, windows, pictures, climber, garden, season]);
   // The doors between rooms side by side, floor by floor (as the shell
   // draws them, after each room but the last).
   const doors = useMemo(() => layout?.plan.spans.map((spans) => spans.slice(0, -1).map((sp) => sp.x + sp.w)) ?? [], [layout]);
@@ -746,6 +755,9 @@ export function ReadingRoom({
         ))}
         {shell.fireflies.map((box, i) => (
           <Fireflies key={i} box={box} scale={s} />
+        ))}
+        {shell.fall?.areas.map((area, i) => (
+          <Falling key={i} kind={shell.fall!.kind} area={area} seed={i} scale={s} />
         ))}
 
         {layout.floors.map((pieces, f) => (
@@ -1249,6 +1261,46 @@ function Fireflies({ box, scale: s }: { box: Shell["fireflies"][number]; scale: 
     </div>
   );
 }
+
+/** Snow, leaves or petals falling through `area`, in their season
+ *  (room-seasons.ts). */
+const Falling = memo(function Falling({ kind, area, seed, scale: s }: { kind: Fall["kind"]; area: Box; seed: number; scale: number }) {
+  const flakes = useMemo(() => flakesFor(kind, area, seed), [kind, area, seed]);
+  return (
+    <div
+      className={`room-fall room-fall-${kind}`}
+      aria-hidden="true"
+      style={
+        {
+          left: area.x * s,
+          top: area.y * s,
+          width: area.w * s,
+          height: area.h * s,
+          "--h": `${area.h * s}px`,
+          "--n": area.h + 4,
+        } as React.CSSProperties
+      }
+    >
+      {flakes.map((f, i) => (
+        <span
+          key={i}
+          data-look={f.look || undefined}
+          style={
+            {
+              left: f.x * s,
+              "--p": f.p,
+              "--t": `${f.t}s`,
+              "--s": `${f.s}s`,
+              "--q": f.q,
+              "--sway": `${f.sway * s}px`,
+              "--k": f.sway * 2,
+            } as React.CSSProperties
+          }
+        />
+      ))}
+    </div>
+  );
+});
 
 function Furniture({
   kind,

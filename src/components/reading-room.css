@@ -12,7 +12,8 @@
 
    Motion: the fire flickers, smoke rises, the clock ticks, the cat's tail
    twitches, banners ripple, gears turn, beacons blink, fireflies drift at
-   night, and books settle onto their shelves as the room opens. All of
+   night, snow, leaves or petals fall in their season, and books settle
+   onto their shelves as the room opens. All of
    it is CSS animation, which globals.css stops when Animations are off or
    the device asks for reduced motion; every animation's resting state is
    the still picture. The avatar is walked about by script, which checks
@@ -248,6 +249,19 @@
   --room-picket-lo: color-mix(in oklab, #c3baa9, var(--dusk) calc(var(--night) * 50%));
   --room-picket-deep: color-mix(in oklab, #8b8274, var(--dusk) calc(var(--night) * 50%));
   --room-garden-shadow: rgb(0 0 0 / calc(0.16 + var(--night) * 0.12));
+  /* The seasons (room-seasons.ts): leaves turning in autumn, and snow,
+     blue under the moon. */
+  --room-autumn-gold: color-mix(in oklab, #f2c14e, var(--dusk) calc(var(--night) * 32%));
+  --room-autumn-hi: color-mix(in oklab, #e8913a, var(--dusk) calc(var(--night) * 32%));
+  --room-autumn: color-mix(in oklab, #c9602b, var(--dusk) calc(var(--night) * 32%));
+  --room-autumn-lo: color-mix(in oklab, #9a3b24, var(--dusk) calc(var(--night) * 32%));
+  --room-autumn-deep: color-mix(in oklab, #64261c, var(--dusk) calc(var(--night) * 32%));
+  --room-snow-edge: color-mix(in oklab, #a3b6cd, #d2dbee calc(var(--night) * 100%));
+  --room-snow-hi: color-mix(in oklab, #ffffff, #8b9fca calc(var(--night) * 36%));
+  --room-snow: color-mix(in oklab, #e3eaf3, #6c80ad calc(var(--night) * 42%));
+  --room-snow-lo: color-mix(in oklab, #b3c3d7, #4a5a85 calc(var(--night) * 50%));
+  --room-ice: color-mix(in oklab, #cfe9f8, #7d9bc8 calc(var(--night) * 45%));
+  --room-ice-lo: color-mix(in oklab, #93c4e6, #5a7bb0 calc(var(--night) * 45%));
   /* The pets (pet-art.ts): a rabbit, a hedgehog, a fox, a little dragon. */
   --room-pet-eye: #1e1714;
   /* Fairy lights (room-shells.ts): coloured glass by day, lit at night. */
@@ -588,6 +602,18 @@
 .rp-picket-lo { fill: var(--room-picket-lo); }
 .rp-picket-deep { fill: var(--room-picket-deep); }
 .rp-garden-shadow { fill: var(--room-garden-shadow); }
+.rp-stem { fill: var(--room-leaf-lo); }
+.rp-autumn-gold { fill: var(--room-autumn-gold); }
+.rp-autumn-hi { fill: var(--room-autumn-hi); }
+.rp-autumn { fill: var(--room-autumn); }
+.rp-autumn-lo { fill: var(--room-autumn-lo); }
+.rp-autumn-deep { fill: var(--room-autumn-deep); }
+.rp-snow-edge { fill: var(--room-snow-edge); }
+.rp-snow-hi { fill: var(--room-snow-hi); }
+.rp-snow { fill: var(--room-snow); }
+.rp-snow-lo { fill: var(--room-snow-lo); }
+.rp-ice { fill: var(--room-ice); }
+.rp-ice-lo { fill: var(--room-ice-lo); }
 .rp-pet-eye { fill: var(--room-pet-eye); }
 .rp-bulb-wire { fill: var(--room-bulb-wire); }
 .rp-bulb-1 { fill: var(--room-bulb-1); }
@@ -1849,6 +1875,96 @@
   75% {
     opacity: 0.3;
     transform: translate(calc(var(--u) * 1), calc(var(--u) * -4));
+  }
+}
+
+/* What falls in its season: snow, leaves, petals. Each falls a dot at a
+   time and sways as it goes, the leaves and petals turning over; still,
+   they hang in the air where they are. Snow is pale blue against a light
+   page, so it shows, and white against a dark one. */
+.room-fall {
+  position: absolute;
+  overflow: hidden;
+  pointer-events: none;
+}
+.room-fall span {
+  position: absolute;
+  top: 0;
+  width: var(--u);
+  height: var(--u);
+  translate: 0 calc(var(--p) * (var(--h) + var(--u) * 4) - var(--u) * 4);
+}
+.room-fall-snow span {
+  background: #fff;
+  box-shadow: 0 0 0 calc(var(--u) / 3) rgb(112 136 172 / 0.45);
+  opacity: 0.95;
+}
+:where(.dark) .room-fall-snow span {
+  background: #eef3ff;
+  box-shadow: none;
+  opacity: 0.85;
+}
+.room-fall-snow span[data-look="1"] {
+  width: calc(var(--u) * 2);
+  height: calc(var(--u) * 2);
+}
+.room-fall-snow span[data-look="2"] {
+  opacity: 0.6;
+}
+.room-fall-leaves span {
+  width: calc(var(--u) * 2);
+  background: linear-gradient(90deg, var(--room-autumn-gold) 50%, var(--room-autumn-hi) 50%);
+}
+.room-fall-leaves span[data-look="1"] {
+  background: linear-gradient(90deg, var(--room-autumn-hi) 50%, var(--room-autumn) 50%);
+}
+.room-fall-leaves span[data-look="2"] {
+  background: linear-gradient(90deg, var(--room-autumn) 50%, var(--room-autumn-lo) 50%);
+}
+.room-fall-leaves span[data-look="3"] {
+  width: var(--u);
+  background: var(--room-autumn-gold);
+}
+.room-fall-petals span {
+  background: var(--room-blossom);
+}
+.room-fall-petals span[data-look="1"] {
+  background: var(--room-petal-white);
+}
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-motion="off"]) .room-fall span {
+    animation:
+      room-fall var(--t) steps(var(--n)) calc(var(--p) * var(--t) * -1) infinite,
+      room-sway var(--s) steps(var(--k)) calc(var(--q) * var(--s) * -1) infinite alternate;
+  }
+  html:not([data-motion="off"]) .room-fall-leaves span,
+  html:not([data-motion="off"]) .room-fall-petals span {
+    animation-name: room-fall, room-tumble;
+    animation-timing-function: steps(var(--n)), ease-in-out;
+  }
+}
+@keyframes room-fall {
+  from {
+    translate: 0 calc(var(--u) * -4);
+  }
+  to {
+    translate: 0 var(--h);
+  }
+}
+@keyframes room-sway {
+  from {
+    transform: translateX(calc(var(--sway) * -1));
+  }
+  to {
+    transform: translateX(var(--sway));
+  }
+}
+@keyframes room-tumble {
+  from {
+    transform: translateX(calc(var(--sway) * -1)) scaleX(1);
+  }
+  to {
+    transform: translateX(var(--sway)) scaleX(-1);
   }
 }
 

@@ -84,6 +84,7 @@ const PREFERENCE: Record<keyof RoomDecor, keyof Preferences> = {
   pictures: "roomPictures",
   climber: "roomClimber",
   garden: "roomGarden",
+  season: "roomSeason",
   cat: "roomCat",
   dog: "roomDog",
 };
@@ -109,6 +110,7 @@ const HOUSE: (keyof RoomDecor)[] = [
   "pictures",
   "climber",
   "garden",
+  "season",
 ];
 const sameHouse = (a: RoomDecor, b: RoomDecor) => HOUSE.every((k) => a[k] === b[k]);
 
@@ -597,7 +599,7 @@ export function RoomView({
                 <BookcaseControls decor={decor} onChange={change} />
               </Group>
 
-              <Group title="Windows and garden">
+              <Group title="Windows, garden and seasons">
                 <OutsideControls decor={decor} onChange={change} />
               </Group>
             </div>

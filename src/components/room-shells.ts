@@ -10,10 +10,14 @@
  * Everything is in dots, in scene coordinates (the scene's top left is 0,
  * 0). Texture comes from `noise`, a fixed function of position, so a house
  * looks the same on every visit.
+ *
+ * Outside, it is the season chosen (room-seasons.ts): what grows round the
+ * house changes with it, and in winter snow lies over everything.
  */
-import { art, grid, type Art, type HouseGeometry, type Rect } from "@/components/room-art";
+import { art, grid, type Art, type HouseGeometry, type Paint, type Rect } from "@/components/room-art";
 import { DOOR_H, doorFor } from "@/components/room-doors";
 import { climberArt, gardenArt } from "@/components/room-garden";
+import { smooth, snowCaps, snowGround, type Fall } from "@/components/room-seasons";
 import { WINDOW_DROP, WINDOW_W, windowFor } from "@/components/room-windows";
 import { PICTURE_W, pictureAt, pictureFor } from "@/components/room-pictures";
 import { PARTITION, type RoomKind } from "@/lib/room";
@@ -28,6 +32,7 @@ import type {
   RoomWalls,
   RoomPictures,
   RoomWindow,
+  Season,
 } from "@/lib/room-styles";
 
 /** Something on the house that moves: frames shown in turn (or one that
@@ -71,6 +76,8 @@ export interface Shell {
   yard: { art: Art; x: number; y: number }[];
   /** Fireflies drift over these boxes at night. */
   fireflies: { x: number; y: number; w: number; h: number }[];
+  /** Snow, leaves or petals falling, in their season. */
+  fall: Fall | null;
 }
 
 /** A steady pseudo-random number in [0, 1) for a place. */
@@ -1117,6 +1124,8 @@ export interface Interior {
   /** What grows up the outside walls, and in the garden. */
   climber?: RoomClimber;
   garden?: readonly RoomGarden[];
+  /** The time of year outside; summer if not said. */
+  season?: Season;
 }
 
 export const PLAIN_INTERIOR: Interior = { paper: "style", floor: "style", ceiling: "none", rooms: [], own: {} };
@@ -1185,7 +1194,7 @@ function storey(
   parts: readonly Part[],
   above: readonly Part[] | null,
   twinkle: Rect[][],
-  windows: { kind: RoomWindow; spots: readonly number[] },
+  windows: { kind: RoomWindow; spots: readonly number[]; season: Season },
   pictures: { kind: RoomPictures; spots: readonly number[]; first: number },
   doors: Shell["doors"],
 ) {
@@ -1211,7 +1220,7 @@ function storey(
       for (const [n, wx] of windows.spots.entries()) {
         if (wx < x || wx + WINDOW_W > x + w) continue;
         // A different view out of each window along the house.
-        const pane = windowFor(windows.kind, f * 2 + n);
+        const pane = windowFor(windows.kind, f * 2 + n, windows.season);
         R.push(...pane.rects.map(([rx, ry, rw, rh, p]): Rect => [hx + wall + wx + rx, top + WINDOW_DROP + ry, rw, rh, p]));
       }
     }
@@ -1432,14 +1441,43 @@ const TOADSTOOLS = art([
 ]);
 
 /** A silver birch `w` dots across: a tall oval crown, lit from the upper
- *  left, over a white trunk with dark marks. */
-function birchArt(w: number): Art {
+ *  left, over a white trunk with dark marks. Gold in autumn; in winter its
+ *  trunk goes on up, with fine dark branches where the crown was. */
+function birchArt(w: number, season: Season = "summer"): Art {
   const crownH = Math.round(w * 1.7);
   const trunkH = Math.round(w * 2.2);
   const cx = (w - 1) / 2;
   const cy = (crownH - 1) / 2;
   const rows: string[] = [];
-  for (let y = 0; y < crownH; y++) {
+  if (season === "winter") {
+    const t = Math.floor(cx);
+    const twigs: string[][] = Array.from({ length: crownH }, () => Array<string>(w).fill("."));
+    const line = (x0: number, y0: number, x1: number, y1: number) => {
+      const n = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0), 1);
+      for (let k = 0; k <= n; k++) {
+        const x = Math.round(x0 + ((x1 - x0) * k) / n);
+        const y = Math.round(y0 + ((y1 - y0) * k) / n);
+        if (x >= 0 && x < w && y >= 0 && y < crownH) twigs[y][x] = "/";
+      }
+    };
+    // A few branches up and out from the trunk, each side in turn, each
+    // with a twig off it.
+    for (let i = 0, y = Math.round(crownH * 0.82); y > crownH * 0.25; i++, y -= Math.max(3, Math.round(crownH / 6))) {
+      const dir = i % 2 ? 1 : -1;
+      const reach = Math.round((w / 2) * (0.55 + 0.4 * Math.sin((Math.PI * y) / crownH)));
+      const from = dir < 0 ? t : t + 1;
+      const ex = from + dir * reach;
+      const ey = y - Math.round(reach * 1.4);
+      line(from, y, ex, ey);
+      const mx = Math.round(from + (ex - from) * 0.5);
+      const my = Math.round(y + (ey - y) * 0.5);
+      line(mx, my, mx + dir, my - 3);
+    }
+    for (let y = 0; y < crownH; y++) {
+      if (y > crownH * 0.12) twigs[y][t] = twigs[y][t + 1] = noise(y, 3, 92) < 0.22 ? ">" : "<";
+      rows.push(twigs[y].join(""));
+    }
+  } else for (let y = 0; y < crownH; y++) {
     let row = "";
     for (let x = 0; x < w; x++) {
       const d = ((x - cx) / (w / 2)) ** 2 + ((y - cy) / (crownH / 2)) ** 2;
@@ -1458,10 +1496,16 @@ function birchArt(w: number): Art {
     rows.push(".".repeat(t) + mark + (noise(y, 4, 92) < 0.15 ? ">" : "<") + ".".repeat(w - t - 2));
   }
   rows.push(".".repeat(t - 1) + "<<<<" + ".".repeat(w - t - 3));
-  return art(rows);
+  const key: Record<string, Paint> =
+    season === "autumn" ? { g: "autumn-gold", G: "autumn-hi", j: "autumn" } : { "/": "trunk-lo" };
+  return { w, h: rows.length, rects: grid(rows, 0, 0, key) };
 }
 const BIRCH = birchArt(13);
 const BIG_BIRCH = birchArt(19);
+const BIRCHES: Record<"autumn" | "winter", [Art, Art]> = {
+  autumn: [birchArt(13, "autumn"), birchArt(19, "autumn")],
+  winter: [birchArt(13, "winter"), birchArt(19, "winter")],
+};
 
 const BEACON = art([
   ".....",
@@ -1629,7 +1673,7 @@ const BOILER = art([
   ".==.....==..",
 ]);
 
-function yard(style: RoomStyle, g: HouseGeometry, earth: number, shell: Shell) {
+function yard(style: RoomStyle, g: HouseGeometry, earth: number, shell: Shell, season: Season) {
   const stand = (a: Art, x: number) => shell.yard.push({ art: a, x, y: earth + 1 - a.h });
   const left = (a: Art) => stand(a, Math.max(0, Math.floor((g.houseX - a.w) / 2)));
   const right = (a: Art) => stand(a, g.sceneW - a.w - Math.max(0, Math.floor((g.houseX - a.w) / 2)));
@@ -1650,14 +1694,18 @@ function yard(style: RoomStyle, g: HouseGeometry, earth: number, shell: Shell) {
       right(TOADSTOOLS);
       return;
     case "elven": {
-      const tree = g.houseX >= BIG_BIRCH.w + 2 ? BIG_BIRCH : BIRCH;
+      const big = g.houseX >= BIG_BIRCH.w + 2;
+      const turned = season === "autumn" || season === "winter" ? BIRCHES[season] : null;
+      const tree = turned ? turned[big ? 1 : 0] : big ? BIG_BIRCH : BIRCH;
       left(tree);
       right(tree);
-      // Fireflies in the garden either side.
-      shell.fireflies = [
-        { x: 0, y: earth - 56, w: g.houseX, h: 48 },
-        { x: g.sceneW - g.houseX, y: earth - 56, w: g.houseX, h: 48 },
-      ];
+      // Fireflies in the garden either side, but not in the cold.
+      if (season !== "winter") {
+        shell.fireflies = [
+          { x: 0, y: earth - 56, w: g.houseX, h: 48 },
+          { x: g.sceneW - g.houseX, y: earth - 56, w: g.houseX, h: 48 },
+        ];
+      }
       return;
     }
     case "cave":
@@ -1705,12 +1753,35 @@ export function shellArt(g: HouseGeometry, style: RoomStyle, interior: Interior 
   const R: Rect[] = [];
   const over: Rect[] = [];
   const twinkle: Rect[][] = [[], [], []];
-  const shell: Shell = { rects: R, storeys: [], doors: [], twinkle, over, moving: [], lights: [], smoke: null, yard: [], fireflies: [] };
+  const shell: Shell = {
+    rects: R,
+    storeys: [],
+    doors: [],
+    twinkle,
+    over,
+    moving: [],
+    lights: [],
+    smoke: null,
+    yard: [],
+    fireflies: [],
+    fall: null,
+  };
+  const season = interior.season ?? "summer";
   shell.smoke = chimney(R, g, style);
+  const roofFrom = [R.length, over.length];
   roof(R, over, g, style, shell);
+  if (season === "autumn" && ROOFS[style] === "canopy") {
+    // The leafy roof turns gold, and the vines trailing from it.
+    for (const [list, from] of [[R, roofFrom[0]], [over, roofFrom[1]]] as const) {
+      for (let i = from; i < list.length; i++) {
+        const turned = TURNED[list[i][4]];
+        if (turned) list[i] = [list[i][0], list[i][1], list[i][2], list[i][3], turned];
+      }
+    }
+  }
   const parts = storeyParts(style, interior, g);
   for (let f = 0, first = 0; f < g.floorCount; f++) {
-    const windows = { kind: interior.windows ?? "none", spots: interior.windowSpots?.[f] ?? [] };
+    const windows = { kind: interior.windows ?? "none", spots: interior.windowSpots?.[f] ?? [], season };
     const pictures = { kind: interior.pictures ?? "none", spots: interior.pictureSpots?.[f] ?? [], first };
     first += pictures.spots.length;
     storey(R, shell.storeys, g, style, f, parts[f], f > 0 ? parts[f - 1] : null, twinkle, windows, pictures, shell.doors);
@@ -1724,17 +1795,129 @@ export function shellArt(g: HouseGeometry, style: RoomStyle, interior: Interior 
   R.push([hx - 2, base, hw + 4, 1, "stone-hi"], [hx - 2, base + g.foundation - 1, hw + 4, 1, "stone-lo"]);
   for (let x = hx + 4; x < hx + hw; x += 9) R.push([x, base + 1, 1, g.foundation - 2, "stone-lo"]);
   const earth = base + g.foundation;
+  const sceneH = earth + g.ground;
+  const winter = season === "winter";
+  // In winter, snow on the roof, the chimney and every ledge, but none in
+  // the rooms; icicles under the eaves.
+  const indoors = (x: number, y: number) => x >= hx + g.wall && x < hx + hw - g.wall && y >= g.floorsTop && y < earth;
+  if (winter) over.push(...snowCaps([...R, ...over], g.sceneW, sceneH, roofSnow(style, g, indoors)));
   R.push([0, earth, g.sceneW, 1, "grass-hi"], [0, earth + 1, g.sceneW, 1, "grass"], [0, earth + 2, g.sceneW, g.ground - 2, "soil"]);
   if (style === "cave") {
     // Under the hill: earth beneath the foundations, not grass.
     R.push([hx - 2, earth, hw + 4, 2, "soil"]);
   } else {
     for (let x = 1; x < g.sceneW; x += 5) R.push([x, earth - 1, 1, 1, "grass"], [x + 2, earth + 3, 1, 1, "soil-lo"]);
+    if (winter) R.push(...snowGround(0, g.sceneW, earth, 5));
+    else if (season !== "summer") R.push(...inTheGrass(season, g, earth));
     // The garden round the house, and what climbs its walls. A cave has
     // neither: it is dug into its hill.
-    if (interior.garden?.length) R.push(...gardenArt(interior.garden, g, earth));
-    if (interior.climber && interior.climber !== "none") over.push(...climberArt(interior.climber, g, earth));
+    if (interior.garden?.length) {
+      const garden = gardenArt(interior.garden, g, earth, season);
+      R.push(...garden);
+      if (winter) R.push(...snowCaps(garden, g.sceneW, sceneH, { catches: twiggy, deep: leafy, sheltered: indoors, seed: 1 }));
+    }
+    if (interior.climber && interior.climber !== "none") {
+      const climber = climberArt(interior.climber, g, earth, season);
+      over.push(...climber);
+      if (winter) over.push(...snowCaps(climber, g.sceneW, sceneH, { catches: twiggy, deep: leafy, heap: 1, sheltered: indoors, seed: 2 }));
+    }
   }
-  yard(style, g, earth, shell);
+  yard(style, g, earth, shell, season);
+  if (winter) {
+    // Snow on the garden pieces too, but none on a burning torch.
+    shell.yard = shell.yard.map((y) => (y.art === TORCH ? y : { art: snowOn(y.art), x: y.x, y: y.y - SNOW_ON }));
+  }
+  shell.fall = fallFor(season, style, g, earth, interior.garden ?? [], shell);
   return shell;
+}
+
+/** Leaf paints and what they turn to in autumn. */
+const TURNED: Partial<Record<Paint, Paint>> = { "leaf-hi": "autumn-gold", leaf: "autumn-hi", "leaf-lo": "autumn" };
+
+/** How likely a top of this paint catches snow: the thinnest twigs and
+ *  stems only now and then, so a bare tree isn't drawn over in white. */
+const twiggy = (paint: Paint) => (paint === "trunk-lo" ? 0.35 : paint === "trunk" ? 0.7 : 1);
+/** Snow settles into the top of a bush, an evergreen or a mat of ivy, a
+ *  dot or two down. */
+const leafy = (paint: Paint) => (/^(leaf|ivy|pine)/.test(paint) ? (paint.endsWith("-lo") || paint.endsWith("-deep") ? 1 : 2) : 0);
+
+/** How the snow lies on the house: deep over the roof, its lower edge
+ *  wavering, but not over its windows and lanterns, nor down the chimney
+ *  or a parapet; heaped on a flat roof or a battlement; icicles from the
+ *  eaves. */
+function roofSnow(style: RoomStyle, g: HouseGeometry, indoors: (x: number, y: number) => boolean): Parameters<typeof snowCaps>[3] {
+  const shape = ROOFS[style];
+  const shows = (paint: Paint) => /^(light|glass|sky|brass|metal|ink|trim|art-sun|outer|stone)/.test(paint);
+  const flat = shape === "flat" || shape === "battlements";
+  // Deeper on a bigger roof.
+  const depth = Math.max(3, Math.min(8, Math.round(g.roofH * 0.17)));
+  return {
+    heap: flat ? 4 : 2,
+    deep: flat ? undefined : (paint, x, y) => (y < g.floorsTop && !shows(paint) ? depth + Math.floor(smooth(x, 5, 7) * 3 - 1) : 0),
+    hangs: (paint, x, y) => y < g.floorsTop + g.beam && (paint.startsWith("roof") || paint === "trim" || paint === "stone-deep") && !indoors(x, y + 1),
+    sheltered: indoors,
+    seed: 3,
+  };
+}
+
+/** How far snow can heap above a garden piece. */
+const SNOW_ON = 3;
+
+/** A garden piece with snow on it, SNOW_ON dots taller. */
+function snowOn(a: Art): Art {
+  const R: Rect[] = a.rects.map(([x, y, w, h, p]): Rect => [x, y + SNOW_ON, w, h, p]);
+  return { w: a.w, h: a.h + SNOW_ON, rects: [...R, ...snowCaps(R, a.w, a.h + SNOW_ON, { catches: twiggy, deep: leafy, seed: a.w })] };
+}
+
+/** What's in the grass in spring (daisies, crocuses, a primrose) and in
+ *  autumn (fallen leaves), scattered thinly along the garden. */
+function inTheGrass(season: "spring" | "autumn", g: HouseGeometry, earth: number): Rect[] {
+  const R: Rect[] = [];
+  const front = (x: number) => x >= g.houseX - 2 && x < g.houseX + g.houseW + 2;
+  for (let x = 0; x < g.sceneW; x++) {
+    const n = noise(x, 3, 61);
+    if (season === "spring") {
+      if (n > 0.07 || front(x)) continue;
+      const kind = noise(x, 4, 61);
+      if (kind < 0.45) R.push([x, earth - 1, 1, 1, "petal-white"], [x, earth, 1, 1, "petal-gold"]);
+      else if (kind < 0.8) R.push([x, earth - 2, 1, 1, "wis-hi"], [x, earth - 1, 1, 1, "wis"]);
+      else R.push([x, earth - 1, 1, 1, "petal-gold"]);
+    } else if (n < 0.1) {
+      R.push([x, earth + (noise(x, 5, 61) < 0.6 ? 0 : 1), 1 + (noise(x, 6, 61) < 0.3 ? 1 : 0), 1, (["autumn-gold", "autumn-hi", "autumn", "autumn-lo"] as const)[Math.floor(noise(x, 7, 61) * 4)]]);
+    }
+  }
+  return R;
+}
+
+/** What falls through the air in this season: snow everywhere outside in
+ *  winter, though not in front of the rooms; under the trees, leaves in
+ *  autumn and petals in spring. Nothing in summer. */
+function fallFor(season: Season, style: RoomStyle, g: HouseGeometry, earth: number, garden: readonly RoomGarden[], shell: Shell): Fall | null {
+  const { houseX: hx, houseW: hw, sceneW } = g;
+  if (season === "winter") {
+    // Down the garden either side to the ground, and over the house to
+    // its eaves.
+    return {
+      kind: "snow",
+      areas: [
+        { x: 0, y: 0, w: hx, h: earth },
+        { x: hx, y: 0, w: hw, h: g.floorsTop },
+        { x: hx + hw, y: 0, w: sceneW - hx - hw, h: earth },
+      ],
+    };
+  }
+  if (season === "summer" || style === "cave") return null;
+  // Under a tree either side: the garden's, or the elven birches.
+  const trees = garden.includes("trees");
+  const birches = style === "elven" && season === "autumn";
+  if (!trees && !birches) return null;
+  const tall = trees ? Math.min(earth, 100) : Math.max(...shell.yard.map((y) => y.art.h));
+  const top = earth - tall;
+  return {
+    kind: season === "autumn" ? "leaves" : "petals",
+    areas: [
+      { x: 0, y: top, w: hx, h: tall },
+      { x: hx + hw, y: top, w: sceneW - hx - hw, h: tall },
+    ],
+  };
 }
