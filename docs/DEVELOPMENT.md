@@ -91,7 +91,8 @@ src/
 │                      room-rooms.tsx (the added rooms' furniture),
 │                      room-fireside.ts (the fireplaces, armchairs, rugs
 │                      and lamps to choose from), room-bookcases.ts (the
-│                      bookcases' designs) and
+│                      bookcases' designs), room-pictures.ts (the
+│                      pictures on the walls) and
 │                      room-extras.tsx (the furniture catalogue) draw the
 │                      reading room, with its colours in
 │                      reading-room.css; room-view.tsx is its Decorate panel;

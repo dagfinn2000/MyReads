@@ -15,6 +15,7 @@ import { art, grid, type Art, type HouseGeometry, type Rect } from "@/components
 import { DOOR_H, doorFor } from "@/components/room-doors";
 import { climberArt, gardenArt } from "@/components/room-garden";
 import { WINDOW_DROP, WINDOW_W, windowFor } from "@/components/room-windows";
+import { PICTURE_W, pictureAt, pictureFor } from "@/components/room-pictures";
 import { PARTITION, type RoomKind } from "@/lib/room";
 import type {
   RoomCeiling,
@@ -25,6 +26,7 @@ import type {
   RoomPaper,
   RoomStyle,
   RoomWalls,
+  RoomPictures,
   RoomWindow,
 } from "@/lib/room-styles";
 
@@ -1108,6 +1110,10 @@ export interface Interior {
   spans?: readonly (readonly { room: RoomKind | null; x: number; w: number }[])[];
   windows?: RoomWindow;
   windowSpots?: readonly (readonly number[])[];
+  /** Pictures on the walls, at `pictureSpots` (lib/room.ts: wallSpots),
+   *  as windows. */
+  pictures?: RoomPictures;
+  pictureSpots?: readonly (readonly number[])[];
   /** What grows up the outside walls, and in the garden. */
   climber?: RoomClimber;
   garden?: readonly RoomGarden[];
@@ -1180,6 +1186,7 @@ function storey(
   above: readonly Part[] | null,
   twinkle: Rect[][],
   windows: { kind: RoomWindow; spots: readonly number[] },
+  pictures: { kind: RoomPictures; spots: readonly number[]; first: number },
   doors: Shell["doors"],
 ) {
   const { houseX: hx, houseW: hw, wall } = g;
@@ -1206,6 +1213,15 @@ function storey(
         // A different view out of each window along the house.
         const pane = windowFor(windows.kind, f * 2 + n);
         R.push(...pane.rects.map(([rx, ry, rw, rh, p]): Rect => [hx + wall + wx + rx, top + WINDOW_DROP + ry, rw, rh, p]));
+      }
+    }
+    if (pictures.kind !== "none") {
+      for (const [n, px] of pictures.spots.entries()) {
+        if (px < x || px + PICTURE_W > x + w) continue;
+        // Each one along the house a different picture.
+        const pic = pictureFor(pictures.kind, pictures.first + n);
+        const { dx, dy } = pictureAt(pic);
+        R.push(...pic.rects.map(([rx, ry, rw, rh, p]): Rect => [hx + wall + px + dx + rx, top + dy + ry, rw, rh, p]));
       }
     }
     ceiling(R, look.ceiling, x0, w, top + 3, twinkle);
@@ -1693,9 +1709,11 @@ export function shellArt(g: HouseGeometry, style: RoomStyle, interior: Interior 
   shell.smoke = chimney(R, g, style);
   roof(R, over, g, style, shell);
   const parts = storeyParts(style, interior, g);
-  for (let f = 0; f < g.floorCount; f++) {
+  for (let f = 0, first = 0; f < g.floorCount; f++) {
     const windows = { kind: interior.windows ?? "none", spots: interior.windowSpots?.[f] ?? [] };
-    storey(R, shell.storeys, g, style, f, parts[f], f > 0 ? parts[f - 1] : null, twinkle, windows, shell.doors);
+    const pictures = { kind: interior.pictures ?? "none", spots: interior.pictureSpots?.[f] ?? [], first };
+    first += pictures.spots.length;
+    storey(R, shell.storeys, g, style, f, parts[f], f > 0 ? parts[f - 1] : null, twinkle, windows, pictures, shell.doors);
   }
 
   const { houseX: hx, houseW: hw } = g;

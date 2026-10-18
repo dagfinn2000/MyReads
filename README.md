@@ -106,6 +106,10 @@ server.
   Persian, braided or kilim rug, a sheepskin or none; and a standard lamp,
   a Tiffany lamp, an arc lamp, a candle stand or a paper lantern, all lit
   at night. The chair and the rug take the fabric colour.
+- Hang pictures on the bare walls of every room, taking turns with the
+  windows: paintings, portraits in oval frames (the cat of the house has
+  one), botanical prints, maps and star charts, groups of old
+  photographs, or a bit of each.
 - Choose the bookcases: classic, open shelves with the wallpaper showing
   behind the books, a pediment, Gothic pinnacles and a pointed gable, or a
   barrister's case with a glass door over each shelf; and whether a few

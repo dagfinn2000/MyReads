@@ -110,6 +110,7 @@ export default async function ReadingRoomPage() {
           ornaments: prefs.roomOrnaments,
           own: prefs.roomOwn,
           windows: prefs.roomWindows,
+          pictures: prefs.roomPictures,
           climber: prefs.roomClimber,
           garden: prefs.roomGarden,
           cat: prefs.roomCat,

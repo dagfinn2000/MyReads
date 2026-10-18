@@ -33,6 +33,7 @@ import {
   shelve,
   spineFor,
   windowSpots,
+  wallSpots,
   type HousePlan,
   type PieceKind,
 } from "@/lib/room";
@@ -626,6 +627,35 @@ describe("rooms side by side", () => {
     expect(spots[music].some((x) => x < piano.x + PIECE_WIDTH.piano && x + 22 > piano.x)).toBe(true);
     // A packed library floor has none.
     expect(windowSpots(planHouse(12, 0, 300), 22).some((xs) => xs.length === 0)).toBe(true);
+  });
+
+  it("hangs pictures on clear wall, in turn with the windows and never behind tall furniture", () => {
+    const plan = planHouse(1, 0, 600, a(["spare", "kitchen", "music"], ["kitchen"]));
+    for (const windowW of [null, 22]) {
+      const { pictures, windows } = wallSpots(plan, 31, windowW);
+      expect(pictures).toHaveLength(plan.floors.length);
+      expect(pictures.flat().length).toBeGreaterThan(0);
+      if (windowW === null) expect(windows.flat()).toEqual([]);
+      else expect(windows.flat().length).toBeGreaterThan(0);
+      for (const f of plan.floors.keys()) {
+        const boxes = [...pictures[f].map((x) => [x, x + 31]), ...windows[f].map((x) => [x, x + (windowW ?? 0)])].sort(
+          (m, n) => m[0] - n[0],
+        );
+        boxes.forEach(([x, end], i) => {
+          expect(x).toBeGreaterThanOrEqual(0);
+          expect(end).toBeLessThanOrEqual(plan.inner);
+          if (i > 0) expect(x).toBeGreaterThanOrEqual(boxes[i - 1][1] + 8);
+          for (const p of plan.floors[f]) {
+            const high = HIGH_PART[p.kind];
+            if (high) expect(end <= p.x + high[0] || x >= p.x + high[1]).toBe(true);
+          }
+          expect(plan.spans[f].some((sp) => x >= sp.x && end <= sp.x + sp.w)).toBe(true);
+        });
+      }
+    }
+    // Where only a window fits, the window it is.
+    const tight = planHouse(5, 198, 360);
+    expect(wallSpots(tight, 31, 22)).toEqual({ pictures: [[]], windows: windowSpots(tight, 22) });
   });
 
   it("knows what reaches up the wall for every piece", () => {

@@ -238,6 +238,22 @@ export const ROOM_WINDOW_LABELS: Record<RoomWindow, string> = {
   leaded: "Leaded panes",
 };
 
+/** Pictures on the walls of every room, wherever furniture leaves space,
+ *  in turn with the windows (components/room-pictures.ts); a mix takes
+ *  each kind in turn. */
+export const ROOM_PICTURES = ["none", "paintings", "portraits", "prints", "maps", "photos", "mixed"] as const;
+export type RoomPictures = (typeof ROOM_PICTURES)[number];
+
+export const ROOM_PICTURE_LABELS: Record<RoomPictures, string> = {
+  none: "Bare walls",
+  paintings: "Paintings",
+  portraits: "Portraits",
+  prints: "Botanical prints",
+  maps: "Maps and charts",
+  photos: "Photographs",
+  mixed: "A bit of each",
+};
+
 /** What grows up the outside walls of the house. */
 export const ROOM_CLIMBERS = ["none", "ivy", "roses", "wisteria"] as const;
 export type RoomClimber = (typeof ROOM_CLIMBERS)[number];

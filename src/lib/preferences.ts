@@ -20,6 +20,7 @@ import {
   ROOM_RUGS,
   ROOM_GARDEN,
   ROOM_WINDOWS,
+  ROOM_PICTURES,
   ROOM_FABRICS,
   ROOM_FLOORS,
   ROOM_HANGINGS,
@@ -37,6 +38,7 @@ import {
   type RoomRug,
   type RoomGarden,
   type RoomWindow,
+  type RoomPictures,
   type RoomFabric,
   type RoomFloor,
   type RoomHanging,
@@ -446,6 +448,8 @@ export type Preferences = {
   roomOwn: Partial<Record<RoomKind, RoomOwn>>;
   /** Windows in the rooms' back walls. */
   roomWindows: RoomWindow;
+  /** Pictures where the walls are bare. */
+  roomPictures: RoomPictures;
   /** Ivy, roses or wisteria up the outside walls. */
   roomClimber: RoomClimber;
   /** Flower beds, bushes, trees and a fence round the house. */
@@ -550,6 +554,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
   roomOrnaments: "some",
   roomOwn: {},
   roomWindows: "none",
+  roomPictures: "none",
   roomClimber: "none",
   roomGarden: [],
   roomCat: "ginger",
@@ -847,6 +852,7 @@ export function parsePreferences(raw: unknown): Preferences {
     roomOrnaments: pick(ROOM_ORNAMENTS, obj.roomOrnaments, d.roomOrnaments),
     roomOwn: parseRoomOwn(obj.roomOwn),
     roomWindows: pick(ROOM_WINDOWS, obj.roomWindows, d.roomWindows),
+    roomPictures: pick(ROOM_PICTURES, obj.roomPictures, d.roomPictures),
     roomClimber: pick(ROOM_CLIMBERS, obj.roomClimber, d.roomClimber),
     roomGarden: pickList(ROOM_GARDEN, obj.roomGarden),
     roomCat: parseCatCoat(obj.roomCat),
