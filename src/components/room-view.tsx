@@ -34,14 +34,18 @@ import {
 } from "@/lib/room";
 import { ExtraPreview } from "@/components/room-extras";
 import { RoomPreview } from "@/components/room-rooms";
-import { InteriorControls, OutsideControls, RoomOwnControls, RoomPlaceControls } from "@/components/room-interior";
+import {
+  FiresideControls,
+  InteriorControls,
+  OutsideControls,
+  RoomOwnControls,
+  RoomPlaceControls,
+} from "@/components/room-interior";
 import {
   COLOUR_LABELS,
   FABRIC_SWATCHES,
   ROOM_FABRICS,
-  ROOM_HANGINGS,
   ROOM_FITTED,
-  ROOM_HANGING_LABELS,
   ROOM_STYLES,
   ROOM_STYLE_LABELS,
   ROOM_WALLS,
@@ -52,7 +56,6 @@ import {
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
-  HangingPreview,
   HousePreview,
   PLAIN_DECOR,
   ReadingRoom,
@@ -69,6 +72,10 @@ const PREFERENCE: Record<keyof RoomDecor, keyof Preferences> = {
   paper: "roomPaper",
   floor: "roomFloor",
   ceiling: "roomCeiling",
+  fireplace: "roomFireplace",
+  chair: "roomChair",
+  rug: "roomRug",
+  lamp: "roomLamp",
   own: "roomOwn",
   windows: "roomWindows",
   climber: "roomClimber",
@@ -88,6 +95,10 @@ const HOUSE: (keyof RoomDecor)[] = [
   "paper",
   "floor",
   "ceiling",
+  "fireplace",
+  "chair",
+  "rug",
+  "lamp",
   "windows",
   "climber",
   "garden",
@@ -496,6 +507,7 @@ export function RoomView({
                 looks={avatarLooks}
                 pet={pet}
                 coats={{ cat: decor.cat, dog: decor.dog }}
+                chair={decor.chair}
                 onChange={changeAvatar}
                 onShown={showAvatar}
                 onLooks={keepLooks}
@@ -527,7 +539,7 @@ export function RoomView({
                         )}
                         {...decorData({ ...decor, style })}
                       >
-                        <HousePreview style={style} hanging={decor.hanging} />
+                        <HousePreview style={style} hanging={decor.hanging} fireside={decor} />
                       </span>
                       <span className={cn("leading-tight", decor.style === style && "font-medium text-foreground")}>
                         {ROOM_STYLE_LABELS[style].name}
@@ -570,39 +582,12 @@ export function RoomView({
                 <InteriorControls decor={decor} onChange={change} />
               </Group>
 
-              <Group title="Windows and garden">
-                <OutsideControls decor={decor} onChange={change} />
+              <Group title="By the fire">
+                <FiresideControls decor={decor} onChange={change} />
               </Group>
 
-              <Group title="Over the fireplace">
-                <div role="radiogroup" aria-label="Over the fireplace" className="flex flex-wrap gap-2">
-                  {ROOM_HANGINGS.map((hanging) => (
-                    <button
-                      key={hanging}
-                      type="button"
-                      role="radio"
-                      aria-checked={decor.hanging === hanging}
-                      aria-label={ROOM_HANGING_LABELS[hanging]}
-                      title={ROOM_HANGING_LABELS[hanging]}
-                      onClick={() => change({ hanging })}
-                      className="group rounded-lg outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
-                    >
-                      <span
-                        className={cn(
-                          "room-scene room-wall-tile grid h-[6.5rem] w-[4.75rem] place-items-center rounded-md border ring-offset-2 ring-offset-card transition-shadow group-hover:border-ring/60",
-                          decor.hanging === hanging && "ring-2 ring-foreground",
-                        )}
-                        {...decorData(decor)}
-                      >
-                        {hanging === "none" ? (
-                          <span className="text-[11px] text-muted-foreground">Nothing</span>
-                        ) : (
-                          <HangingPreview hanging={hanging} />
-                        )}
-                      </span>
-                    </button>
-                  ))}
-                </div>
+              <Group title="Windows and garden">
+                <OutsideControls decor={decor} onChange={change} />
               </Group>
             </div>
           )}

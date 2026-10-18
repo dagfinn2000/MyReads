@@ -2,25 +2,37 @@
 
 /**
  * Decorate's controls for the inside of the house: its wallpaper and floor,
- * what hangs along the ceilings, its windows, what grows round it, each
+ * what hangs along the ceilings, the fireside's pieces, its windows, what
+ * grows round it, each
  * added room's own paint, wallpaper and floor, and whether a room goes
  * upstairs or next to the one before it. Each choice is pictured in the
  * house's colours.
  */
 import { useMemo } from "react";
-import { Rects, type Art } from "@/components/room-art";
+import { FLAMES_A, LOGS, Rects, type Art, type Rect } from "@/components/room-art";
+import { CHAIRS, FIREPLACES, LAMPS, rugFor } from "@/components/room-fireside";
 import { ceilingSample, floorSample, styleFloor, stylePaper, wallSample } from "@/components/room-shells";
 import { climberSample, gardenSample } from "@/components/room-garden";
 import { windowSample } from "@/components/room-windows";
 import { Row, Swatches, Tiles } from "@/components/decorate-controls";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { decorData, type RoomDecor } from "@/components/reading-room";
+import { HangingPreview, decorData, type RoomDecor } from "@/components/reading-room";
 import { ROOM_LABELS, type RoomKind } from "@/lib/room";
 import { cn } from "@/lib/utils";
 import {
   COLOUR_LABELS,
   ROOM_CEILINGS,
   ROOM_CEILING_LABELS,
+  ROOM_CHAIRS,
+  ROOM_CHAIR_LABELS,
+  ROOM_FIREPLACES,
+  ROOM_FIREPLACE_LABELS,
+  ROOM_HANGINGS,
+  ROOM_HANGING_LABELS,
+  ROOM_LAMPS,
+  ROOM_LAMP_LABELS,
+  ROOM_RUGS,
+  ROOM_RUG_LABELS,
   ROOM_CLIMBERS,
   ROOM_CLIMBER_LABELS,
   ROOM_GARDEN,
@@ -98,6 +110,102 @@ export function InteriorControls({ decor, onChange }: { decor: RoomDecor; onChan
         onPick={(ceiling) => onChange({ ceiling })}
       >
         {(ceiling) => <Sample art={ceilings.get(ceiling)!} decor={decor} />}
+      </Tiles>
+    </>
+  );
+}
+
+/** `a` standing on a strip of floor `w` wide, with `extra` drawn over it
+ *  (the fire in a fireplace, a candle's flames). */
+function onFloor(a: Art | null, w: number, extra: readonly Rect[] = []): Art {
+  const x = a ? Math.floor((w - a.w) / 2) : 0;
+  const h = (a?.h ?? 4) + 2;
+  const rects: Rect[] = a ? [...a.rects, ...extra].map(([rx, ry, rw, rh, p]): Rect => [rx + x, ry, rw, rh, p]) : [];
+  rects.push([0, h - 2, w, 1, "floor-hi"], [0, h - 1, w, 1, "floor"]);
+  return { w, h, rects };
+}
+
+const shift = (rects: readonly Rect[], dx: number, dy: number): Rect[] =>
+  rects.map(([x, y, w, h, p]): Rect => [x + dx, y + dy, w, h, p]);
+
+/** The fireplace, what hangs over it, the armchair, the rug and the lamp
+ *  (Decorate › House). */
+export function FiresideControls({ decor, onChange }: { decor: RoomDecor; onChange: (patch: Partial<RoomDecor>) => void }) {
+  const samples = useMemo(
+    () => ({
+      fireplace: new Map(
+        ROOM_FIREPLACES.map((f) => {
+          const { art, fires, logs } = FIREPLACES[f];
+          const fire = fires.flatMap((at) => [...(logs ? shift(LOGS, at.x, at.y + 9) : []), ...shift(FLAMES_A, at.x, at.y)]);
+          return [f, onFloor(art, 46, fire)];
+        }),
+      ),
+      chair: new Map(ROOM_CHAIRS.map((c) => [c, onFloor(CHAIRS[c], 35)])),
+      rug: new Map(ROOM_RUGS.map((r) => [r, onFloor(rugFor(r, 24), 24)])),
+      lamp: new Map(ROOM_LAMPS.map((l) => [l, onFloor(LAMPS[l].art, 38, LAMPS[l].flames?.[0])])),
+    }),
+    [],
+  );
+  return (
+    <>
+      <Tiles
+        label="Fireplace"
+        options={ROOM_FIREPLACES}
+        labels={ROOM_FIREPLACE_LABELS}
+        chosen={(fireplace) => decor.fireplace === fireplace}
+        onPick={(fireplace) => onChange({ fireplace })}
+        box={{ w: 6.25, h: 6.5 }}
+      >
+        {(f) => <Sample art={samples.fireplace.get(f)!} decor={decor} />}
+      </Tiles>
+      <Tiles
+        label="Over it"
+        hint="Tapestries are woven in the fabrics' colours."
+        options={ROOM_HANGINGS}
+        labels={ROOM_HANGING_LABELS}
+        chosen={(hanging) => decor.hanging === hanging}
+        onPick={(hanging) => onChange({ hanging })}
+        box={{ w: 4.75, h: 6.5 }}
+      >
+        {(hanging) =>
+          hanging === "none" ? null : (
+            <span className="room-scene self-center" {...decorData(decor)}>
+              <HangingPreview hanging={hanging} />
+            </span>
+          )
+        }
+      </Tiles>
+      <Tiles
+        label="Armchair"
+        hint="Upholstered in the fabrics' colour. The cat sleeps in it."
+        options={ROOM_CHAIRS}
+        labels={ROOM_CHAIR_LABELS}
+        chosen={(chair) => decor.chair === chair}
+        onPick={(chair) => onChange({ chair })}
+        box={{ w: 4.75, h: 4.75 }}
+      >
+        {(c) => <Sample art={samples.chair.get(c)!} decor={decor} />}
+      </Tiles>
+      <Tiles
+        label="Rug"
+        options={ROOM_RUGS}
+        labels={ROOM_RUG_LABELS}
+        chosen={(rug) => decor.rug === rug}
+        onPick={(rug) => onChange({ rug })}
+        box={{ w: 4.75, h: 3 }}
+      >
+        {(r) => <Sample art={samples.rug.get(r)!} decor={decor} scale={3} />}
+      </Tiles>
+      <Tiles
+        label="Lamp"
+        hint="Lit at night."
+        options={ROOM_LAMPS}
+        labels={ROOM_LAMP_LABELS}
+        chosen={(lamp) => decor.lamp === lamp}
+        onPick={(lamp) => onChange({ lamp })}
+        box={{ w: 4.75, h: 8.75 }}
+      >
+        {(l) => <Sample art={samples.lamp.get(l)!} decor={decor} />}
       </Tiles>
     </>
   );

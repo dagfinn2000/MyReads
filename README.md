@@ -100,6 +100,12 @@ server.
   of the walls, the wood and the fabrics, hang a painting or one of five
   tapestries over the fireplace, put furniture away, and drag the furniture
   to wherever you like it (or move it with the arrow keys).
+- Choose the fireside: a stone, brick, marble, blue-tiled or modern
+  fireplace (the modern one burns along a bed of stones); a wingback, club
+  chair, Chesterfield, lounge chair or carved chair to read in; a fringed,
+  Persian, braided or kilim rug, a sheepskin or none; and a standard lamp,
+  a Tiffany lamp, an arc lamp, a candle stand or a paper lantern, all lit
+  at night. The chair and the rug take the fabric colour.
 - Add rooms, each upstairs on a floor of its own or next to the library
   (or the room before it), so the house grows wider instead of taller
   where the screen has space, with a door in the wall between that opens

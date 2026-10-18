@@ -75,13 +75,62 @@ export const ROOM_HANGINGS = ["painting", "tree", "stag", "stars", "waves", "kil
 export type RoomHanging = (typeof ROOM_HANGINGS)[number];
 
 export const ROOM_HANGING_LABELS: Record<RoomHanging, string> = {
-  painting: "A painting",
-  tree: "Tapestry: tree of life",
-  stag: "Tapestry: a stag in the forest",
-  stars: "Tapestry: sun, moon and stars",
-  waves: "Tapestry: waves",
-  kilim: "Tapestry: kilim pattern",
+  painting: "Painting",
+  tree: "Tree of life",
+  stag: "Stag",
+  stars: "Sun and moon",
+  waves: "Waves",
+  kilim: "Kilim",
   none: "Nothing",
+};
+
+/** The fireside (Decorate › House › By the fire, components/room-
+ *  fireside.ts): the fireplace, the armchair the reading happens in, the
+ *  rug in front and the lamp by the side table. The first of each is the
+ *  one the house has always had. */
+export const ROOM_FIREPLACES = ["stone", "brick", "marble", "tiles", "modern"] as const;
+export type RoomFireplace = (typeof ROOM_FIREPLACES)[number];
+
+export const ROOM_FIREPLACE_LABELS: Record<RoomFireplace, string> = {
+  stone: "Stone arch",
+  brick: "Brick",
+  marble: "Marble",
+  tiles: "Blue tiles",
+  modern: "Modern",
+};
+
+export const ROOM_CHAIRS = ["wingback", "club", "chesterfield", "lounge", "throne"] as const;
+export type RoomChair = (typeof ROOM_CHAIRS)[number];
+
+export const ROOM_CHAIR_LABELS: Record<RoomChair, string> = {
+  wingback: "Wingback",
+  club: "Club chair",
+  chesterfield: "Chesterfield",
+  lounge: "Lounge chair",
+  throne: "Carved chair",
+};
+
+export const ROOM_RUGS = ["fringed", "persian", "braided", "kilim", "sheepskin", "none"] as const;
+export type RoomRug = (typeof ROOM_RUGS)[number];
+
+export const ROOM_RUG_LABELS: Record<RoomRug, string> = {
+  fringed: "Fringed",
+  persian: "Persian",
+  braided: "Braided",
+  kilim: "Kilim",
+  sheepskin: "Sheepskin",
+  none: "No rug",
+};
+
+export const ROOM_LAMPS = ["standard", "tiffany", "arc", "candles", "lantern"] as const;
+export type RoomLamp = (typeof ROOM_LAMPS)[number];
+
+export const ROOM_LAMP_LABELS: Record<RoomLamp, string> = {
+  standard: "Standard lamp",
+  tiffany: "Tiffany lamp",
+  arc: "Arc lamp",
+  candles: "Candle stand",
+  lantern: "Paper lantern",
 };
 
 /** Wallpaper: the style's own, or any of the styles' patterns, or one of

@@ -156,6 +156,24 @@
   --room-bird-lo: color-mix(in oklab, #d49a1c, var(--dusk) calc(var(--night) * 30%));
   --room-tile: color-mix(in oklab, #f4f1e8, var(--dusk) calc(var(--night) * 55%));
   --room-tile-lo: color-mix(in oklab, #cfc7b6, var(--dusk) calc(var(--night) * 55%));
+  /* The fireside's own materials (room-fireside.ts): a brick fireplace,
+     blue-and-white tiles, a sheepskin, and a Tiffany lamp's glass, which
+     glows brighter at night with the lamp lit behind it. */
+  --room-firebrick-hi: color-mix(in oklab, #cf7f61, var(--dusk) calc(var(--night) * 42%));
+  --room-firebrick: color-mix(in oklab, #ab5640, var(--dusk) calc(var(--night) * 42%));
+  --room-firebrick-lo: color-mix(in oklab, #974834, var(--dusk) calc(var(--night) * 42%));
+  --room-firebrick-dark: color-mix(in oklab, #7e3a2a, var(--dusk) calc(var(--night) * 42%));
+  --room-firebrick-deep: color-mix(in oklab, #3b1d16, var(--dusk) calc(var(--night) * 30%));
+  --room-mortar: color-mix(in oklab, #d2c4ac, var(--dusk) calc(var(--night) * 50%));
+  --room-delft: color-mix(in oklab, #2f5ea8, var(--dusk) calc(var(--night) * 45%));
+  --room-delft-lo: color-mix(in oklab, #8eaad6, var(--dusk) calc(var(--night) * 50%));
+  --room-fleece-hi: color-mix(in oklab, #fffaf0, var(--dusk) calc(var(--night) * 40%));
+  --room-fleece: color-mix(in oklab, #efe6d4, var(--dusk) calc(var(--night) * 42%));
+  --room-fleece-lo: color-mix(in oklab, #cdbfa6, var(--dusk) calc(var(--night) * 45%));
+  --room-tiff-amber: #e3a03c;
+  --room-tiff-green: #5f9a50;
+  --room-tiff-red: #c0473d;
+  --room-tiff-blue: #4174b2;
   /* Painted red: the tool chest, a building block, the toy box's heart. */
   --room-red-hi: color-mix(in oklab, #e0675a, var(--dusk) calc(var(--night) * 40%));
   --room-red: color-mix(in oklab, #c0403a, var(--dusk) calc(var(--night) * 40%));
@@ -261,6 +279,10 @@
 
 :where(.dark) .room-scene {
   /* Night. */
+  --room-tiff-amber: #ffc760;
+  --room-tiff-green: #9ad877;
+  --room-tiff-red: #ff7258;
+  --room-tiff-blue: #78adff;
   --room-wood-hi: #8d5c39;
   --room-wood: #6c4529;
   --room-wood-lo: #50311d;
@@ -735,6 +757,22 @@
 }
 .rp-tile { fill: var(--room-tile); }
 .rp-tile-lo { fill: var(--room-tile-lo); }
+/* The fireside (room-fireside.ts). */
+.rp-firebrick-hi { fill: var(--room-firebrick-hi); }
+.rp-firebrick { fill: var(--room-firebrick); }
+.rp-firebrick-lo { fill: var(--room-firebrick-lo); }
+.rp-firebrick-dark { fill: var(--room-firebrick-dark); }
+.rp-firebrick-deep { fill: var(--room-firebrick-deep); }
+.rp-mortar { fill: var(--room-mortar); }
+.rp-delft { fill: var(--room-delft); }
+.rp-delft-lo { fill: var(--room-delft-lo); }
+.rp-fleece-hi { fill: var(--room-fleece-hi); }
+.rp-fleece { fill: var(--room-fleece); }
+.rp-fleece-lo { fill: var(--room-fleece-lo); }
+.rp-tiff-amber { fill: var(--room-tiff-amber); }
+.rp-tiff-green { fill: var(--room-tiff-green); }
+.rp-tiff-red { fill: var(--room-tiff-red); }
+.rp-tiff-blue { fill: var(--room-tiff-blue); }
 .rp-red-hi { fill: var(--room-red-hi); }
 .rp-red { fill: var(--room-red); }
 .rp-red-lo { fill: var(--room-red-lo); }
