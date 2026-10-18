@@ -11,6 +11,9 @@ import {
 } from "@/lib/room";
 import {
   ROOM_CEILINGS,
+  ROOM_CLIMBERS,
+  ROOM_GARDEN,
+  ROOM_WINDOWS,
   ROOM_FABRICS,
   ROOM_FLOORS,
   ROOM_HANGINGS,
@@ -19,6 +22,9 @@ import {
   ROOM_WALLS,
   ROOM_WOODS,
   type RoomCeiling,
+  type RoomClimber,
+  type RoomGarden,
+  type RoomWindow,
   type RoomFabric,
   type RoomFloor,
   type RoomHanging,
@@ -418,6 +424,12 @@ export type Preferences = {
   /** Added rooms' own walls and floors, by room; a room not here is like
    *  the rest of the house. */
   roomOwn: Partial<Record<RoomKind, RoomOwn>>;
+  /** Windows in the rooms' back walls. */
+  roomWindows: RoomWindow;
+  /** Ivy, roses or wisteria up the outside walls. */
+  roomClimber: RoomClimber;
+  /** Flower beds, bushes, trees and a fence round the house. */
+  roomGarden: RoomGarden[];
   /** The coat of every cat in the house, and of the dog in its basket
    *  (lib/pets.ts). */
   roomCat: CatCoat;
@@ -428,6 +440,9 @@ export type Preferences = {
   roomAway: Stowable[];
   /** Rooms added over the library (lib/room.ts), from the bottom up. */
   roomRooms: RoomKind[];
+  /** Added rooms set beside the one before them rather than on a floor of
+   *  their own, so the house grows wider. */
+  roomBeside: RoomKind[];
   /** Furniture added from the catalogue (lib/room.ts). */
   roomExtras: Extra[];
   // The reader's avatar in the room (lib/avatar.ts)
@@ -508,11 +523,15 @@ export const DEFAULT_PREFERENCES: Preferences = {
   roomFloor: "style",
   roomCeiling: "none",
   roomOwn: {},
+  roomWindows: "none",
+  roomClimber: "none",
+  roomGarden: [],
   roomCat: "ginger",
   roomDog: "brown",
   roomLayout: [],
   roomAway: [],
   roomRooms: [],
+  roomBeside: [],
   roomExtras: [],
   avatarShown: true,
   avatar: DEFAULT_AVATAR,
@@ -795,11 +814,15 @@ export function parsePreferences(raw: unknown): Preferences {
     roomFloor: pick(ROOM_FLOORS, obj.roomFloor, d.roomFloor),
     roomCeiling: pick(ROOM_CEILINGS, obj.roomCeiling, d.roomCeiling),
     roomOwn: parseRoomOwn(obj.roomOwn),
+    roomWindows: pick(ROOM_WINDOWS, obj.roomWindows, d.roomWindows),
+    roomClimber: pick(ROOM_CLIMBERS, obj.roomClimber, d.roomClimber),
+    roomGarden: pickList(ROOM_GARDEN, obj.roomGarden),
     roomCat: parseCatCoat(obj.roomCat),
     roomDog: parseDogCoat(obj.roomDog),
     roomLayout: parseRoomLayout(obj.roomLayout),
     roomAway: pickList(STOWABLE, obj.roomAway),
     roomRooms: pickList(ROOMS, obj.roomRooms),
+    roomBeside: pickList(ROOMS, obj.roomBeside),
     roomExtras: pickList(EXTRAS, obj.roomExtras),
     avatarShown: bool(obj.avatarShown, d.avatarShown),
     avatar: parseAvatar(obj.avatar),

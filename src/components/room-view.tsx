@@ -23,6 +23,7 @@ import {
   putAway,
   removeExtra,
   removeRoom,
+  setBeside,
   type Arrangement,
   type Extra,
   type HousePlan,
@@ -33,7 +34,7 @@ import {
 } from "@/lib/room";
 import { ExtraPreview } from "@/components/room-extras";
 import { RoomPreview } from "@/components/room-rooms";
-import { InteriorControls, RoomOwnControls } from "@/components/room-interior";
+import { InteriorControls, OutsideControls, RoomOwnControls, RoomPlaceControls } from "@/components/room-interior";
 import {
   COLOUR_LABELS,
   FABRIC_SWATCHES,
@@ -69,13 +70,28 @@ const PREFERENCE: Record<keyof RoomDecor, keyof Preferences> = {
   floor: "roomFloor",
   ceiling: "roomCeiling",
   own: "roomOwn",
+  windows: "roomWindows",
+  climber: "roomClimber",
+  garden: "roomGarden",
   cat: "roomCat",
   dog: "roomDog",
 };
 
 /** The house's own decor, which "Back to the cottage" puts back; the
  *  added rooms keep their walls and floors, and the animals their coats. */
-const HOUSE: (keyof RoomDecor)[] = ["style", "walls", "wood", "fabric", "hanging", "paper", "floor", "ceiling"];
+const HOUSE: (keyof RoomDecor)[] = [
+  "style",
+  "walls",
+  "wood",
+  "fabric",
+  "hanging",
+  "paper",
+  "floor",
+  "ceiling",
+  "windows",
+  "climber",
+  "garden",
+];
 const sameHouse = (a: RoomDecor, b: RoomDecor) => HOUSE.every((k) => a[k] === b[k]);
 
 const TABS = [
@@ -99,6 +115,7 @@ export function RoomView({
   layout,
   away,
   rooms,
+  beside,
   extras,
   avatar: savedAvatar,
   avatarShown: savedShown,
@@ -112,6 +129,7 @@ export function RoomView({
   layout: Placement[];
   away: Stowable[];
   rooms: RoomKind[];
+  beside: RoomKind[];
   extras: Extra[];
   avatar: AvatarLook;
   avatarShown: boolean;
@@ -127,6 +145,7 @@ export function RoomView({
     places: layout,
     away,
     rooms,
+    beside,
     extras,
   }));
   const [avatar, setAvatar] = useState(savedAvatar);
@@ -140,7 +159,13 @@ export function RoomView({
   // What the house has room for at this width, to say when something
   // added from the catalogue hasn't found a place.
   const [inHouse, setInHouse] = useState<ReadonlySet<string> | null>(null);
-  const onPlan = useCallback((plan: HousePlan) => setInHouse(new Set(plan.floors.flat().map((p) => p.kind))), []);
+  // The rooms that start a floor of their own, to say when one set next to
+  // another had to go upstairs.
+  const [floorFirst, setFloorFirst] = useState<ReadonlySet<string>>(new Set());
+  const onPlan = useCallback((plan: HousePlan) => {
+    setInHouse(new Set(plan.floors.flat().map((p) => p.kind)));
+    setFloorFirst(new Set(plan.spans.map((f) => f[0].room ?? "library")));
+  }, []);
 
   const change = (patch: Partial<RoomDecor>) => {
     setDecor((d) => ({ ...d, ...patch }));
@@ -156,6 +181,7 @@ export function RoomView({
       roomLayout: [...next.places],
       roomAway: [...next.away],
       roomRooms: [...(next.rooms ?? [])],
+      roomBeside: [...(next.beside ?? [])],
       roomExtras: [...(next.extras ?? [])],
     }).catch(() => {});
   };
@@ -276,8 +302,8 @@ export function RoomView({
             <div id="decorate-rooms" role="tabpanel" aria-labelledby="decorate-tab-rooms" className="grid gap-5">
               <Group title="Rooms">
                 <p className="-mt-1 text-sm text-muted-foreground">
-                  Each room you add is a new floor over your library, with its own furniture. Move it anywhere you like,
-                  or put pieces away.
+                  Each room you add comes with its own furniture, on a new floor over your library or next to it. Move
+                  the furniture anywhere you like, or put pieces away.
                 </p>
                 <div className="grid grid-cols-[repeat(auto-fill,minmax(9.5rem,1fr))] gap-3">
                   {ROOMS.map((room) => {
@@ -333,6 +359,21 @@ export function RoomView({
                   })}
                 </div>
               </Group>
+
+              {added.length > 0 && (
+                <Group title="Where each room goes">
+                  <p className="-mt-1 text-sm text-muted-foreground">
+                    A room next to another makes the house wider instead of taller, with a door between them,
+                    where the screen has space for both. On a narrow screen it goes upstairs.
+                  </p>
+                  <RoomPlaceControls
+                    rooms={added}
+                    beside={arrangement.beside ?? []}
+                    upstairs={added.filter((r) => floorFirst.has(r))}
+                    onChange={(room, on) => arrange(setBeside(arrangement, room, on))}
+                  />
+                </Group>
+              )}
 
               {added.length > 0 && (
                 <Group title="Each room's walls and floor">
@@ -527,6 +568,10 @@ export function RoomView({
 
               <Group title="Walls and floors">
                 <InteriorControls decor={decor} onChange={change} />
+              </Group>
+
+              <Group title="Windows and garden">
+                <OutsideControls decor={decor} onChange={change} />
               </Group>
 
               <Group title="Over the fireplace">
