@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Geist, Literata, Nunito } from "next/font/google";
 import { BackgroundScene } from "@/components/background-scene";
+import { IconSprite } from "@/components/icon-sprite";
 import { getCurrentUser } from "@/lib/current-user";
 import { serverTimeZone } from "@/lib/preferences";
 import { skyAt, skyStyle } from "@/lib/sky";
@@ -92,6 +93,8 @@ export default async function RootLayout({
           timeZone={prefs?.timeZone ?? ""}
           sky={sky}
         />
+        {/* Star and book icons that pages repeat, drawn once. */}
+        <IconSprite />
         {children}
       </body>
     </html>

@@ -2,6 +2,7 @@
 
 import { Star } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { SpriteIcon } from "@/components/icon-sprite";
 import { usePreferences } from "@/components/preferences-provider";
 
 function StarRow({ filled, sizeClass }: { filled?: boolean; sizeClass: string }) {
@@ -11,9 +12,12 @@ function StarRow({ filled, sizeClass }: { filled?: boolean; sizeClass: string })
   // the outline row underneath.
   return (
     <div className="flex w-max">
+      {/* Ten stars per rating add up on a page of books, so these are
+          sprite icons (components/icon-sprite.tsx). */}
       {[0, 1, 2, 3, 4].map((i) => (
-        <Star
+        <SpriteIcon
           key={i}
+          name="star"
           className={cn(sizeClass, "shrink-0", filled && "fill-current")}
         />
       ))}

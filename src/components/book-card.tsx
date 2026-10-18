@@ -2,13 +2,13 @@ import type { Book } from "@prisma/client";
 import { BookOwnership, ReadingStatus } from "@/lib/enums";
 import {
   ArrowLeftRight,
-  BookOpen,
   Gift,
   HandHeart,
   Heart,
   type LucideIcon,
 } from "lucide-react";
 import { BookLink } from "@/components/book-link";
+import { SpriteIcon } from "@/components/icon-sprite";
 import { Badge } from "@/components/ui/badge";
 import { Stars } from "@/components/stars";
 import {
@@ -131,7 +131,7 @@ function MissingCover({ title, author }: { title: string; author?: string }) {
         </div>
       </div>
       <div className="plain-cover h-full w-full items-center justify-center">
-        <BookOpen className="size-10 text-muted-foreground/40" />
+        <SpriteIcon name="book-open" className="size-10 text-muted-foreground/40" />
       </div>
     </>
   );
