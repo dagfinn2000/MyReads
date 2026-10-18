@@ -1,8 +1,7 @@
 import { redirect } from "next/navigation";
 import { HardDriveDownload } from "lucide-react";
-import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { getCurrentUser, getPreferences } from "@/lib/current-user";
+import { getCurrentUser, getPreferences, getSession } from "@/lib/current-user";
 import { backupStatusText } from "@/lib/backup";
 import { formatDate, formatNumber } from "@/lib/display";
 import { orderByIds } from "@/lib/library-order";
@@ -25,7 +24,7 @@ export const dynamic = "force-dynamic";
 export const metadata = { title: "Account · MyReads" };
 
 export default async function AccountPage() {
-  const session = await auth();
+  const session = await getSession();
   if (!session?.user?.id) redirect("/login"); // revoked session (see auth.ts)
   const userId = session.user.id;
 

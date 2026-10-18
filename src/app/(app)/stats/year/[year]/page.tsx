@@ -10,17 +10,15 @@ import {
   Repeat,
   Star,
 } from "lucide-react";
-import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { getPreferences } from "@/lib/current-user";
+import { getPreferences, getSession } from "@/lib/current-user";
 import { dayKey } from "@/lib/dates";
 import { formatDate, formatDayKey, formatNumber } from "@/lib/display";
 import { describePace, goalPace, goalProgress, yearClock } from "@/lib/goals";
 import { readingStreaks } from "@/lib/progress";
-import { dailyPageTotalsForUser } from "@/lib/progress-query";
 import { buildPasses, countWindow, ruleNotes, tally } from "@/lib/stats-count";
 import { yearWindow } from "@/lib/stats-period";
-import { loadStatsInputs, type StatsBook } from "@/lib/stats-query";
+import { dayPageTotals, loadStatsInputs, type StatsBook } from "@/lib/stats-query";
 import { BookCover } from "@/components/book-card";
 import { GoldMedal } from "@/components/gold-medal";
 import { Bar, StatCard } from "@/components/stat-blocks";
@@ -77,7 +75,7 @@ export default async function YearInReviewPage({
 }: {
   params: Promise<{ year: string }>;
 }) {
-  const session = await auth();
+  const session = await getSession();
   if (!session?.user?.id) redirect("/login"); // revoked session (see auth.ts)
   const userId = session.user.id;
 
@@ -90,15 +88,16 @@ export default async function YearInReviewPage({
 
   // Fetch everything and slice by year in JS, with the same counting the
   // stats page uses (lib/stats-count.ts), so the numbers always agree.
-  const [inputs, goal, pageTotals] = await Promise.all([
+  const [inputs, goal] = await Promise.all([
     loadStatsInputs(userId, prefs.timeZone),
     prisma.readingGoal.findUnique({
       where: { userId_year: { userId, year } },
     }),
-    // Pages per day, as the reading calendar counts them. No date bound:
-    // deltas need each entry's predecessor, so the year slice comes after.
-    dailyPageTotalsForUser(userId, prefs.timeZone),
   ]);
+  // Pages per day, as the reading calendar counts them. The log has no date
+  // bound (deltas need each entry's predecessor), so the year slice comes
+  // after.
+  const pageTotals = dayPageTotals(inputs.logDays);
 
   // Every pass that counts in this year: dated finishes (re-reads tagged,
   // see markRereads), plus books put down and pages logged when the "What

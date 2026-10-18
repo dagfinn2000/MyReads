@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation";
-import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { getPreferences } from "@/lib/current-user";
+import { getPreferences, getSession } from "@/lib/current-user";
 import { ownershipParam } from "@/lib/check-verdict";
 import { tagImportFor } from "@/lib/user-tags";
 import { AddBookClient } from "@/components/add-book-client";
@@ -14,7 +13,7 @@ export default async function NewBookPage({
 }: {
   searchParams: Promise<{ isbn?: string; ownership?: string | string[] }>;
 }) {
-  const session = await auth();
+  const session = await getSession();
   if (!session?.user?.id) redirect("/login"); // revoked session (see auth.ts)
   // Handoff from the "do I own this?" page: ?isbn= seeds the import search,
   // and "Add to wishlist" adds ?ownership=WISHLIST over the usual default.

@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { getPreferences } from "@/lib/current-user";
+import { getPreferences, getSession } from "@/lib/current-user";
 import { formatNumber } from "@/lib/display";
 import { sortBooks } from "@/lib/library-sort";
 import { caseCount, shelve, spineFor, type RoomBook } from "@/lib/room";
@@ -19,7 +18,7 @@ export const metadata = { title: "Reading room · MyReads" };
  * decorated as the reader likes (components/room-view.tsx).
  */
 export default async function ReadingRoomPage() {
-  const session = await auth();
+  const session = await getSession();
   if (!session?.user?.id) redirect("/login"); // revoked session (see auth.ts)
   const userId = session.user.id;
   const prefs = await getPreferences();
@@ -37,34 +36,39 @@ export default async function ReadingRoomPage() {
     );
   }
 
-  const rows = await prisma.book.findMany({
-    where: { userId },
-    select: {
-      id: true,
-      title: true,
-      authors: true,
-      coverUrl: true,
-      pageCount: true,
-      currentPage: true,
-      status: true,
-      ownership: true,
-      seriesName: true,
-      seriesNumber: true,
-      // The rest of what sortBooks reads; only the author order is used.
-      rating: true,
-      dateFinished: true,
-      dateStarted: true,
-      publishedDate: true,
-      createdAt: true,
-      updatedAt: true,
-      loans: {
-        where: { returnedAt: null },
-        select: { borrower: true },
-        orderBy: { lentAt: "desc" },
-        take: 1,
+  const [rows, openLoans] = await Promise.all([
+    prisma.book.findMany({
+      where: { userId },
+      select: {
+        id: true,
+        title: true,
+        authors: true,
+        coverUrl: true,
+        pageCount: true,
+        currentPage: true,
+        status: true,
+        ownership: true,
+        seriesName: true,
+        seriesNumber: true,
+        // The rest of what sortBooks reads; only the author order is used.
+        rating: true,
+        dateFinished: true,
+        dateStarted: true,
+        publishedDate: true,
+        createdAt: true,
+        updatedAt: true,
       },
-    },
-  });
+    }),
+    // Who has each copy that's out, newest loan first, fetched alongside the
+    // books rather than in a second query listing every book's id.
+    prisma.loan.findMany({
+      where: { returnedAt: null, book: { userId } },
+      select: { bookId: true, borrower: true },
+      orderBy: { lentAt: "desc" },
+    }),
+  ]);
+  const lentTo = new Map<string, string>();
+  for (const l of openLoans) if (!lentTo.has(l.bookId)) lentTo.set(l.bookId, l.borrower);
 
   const sorted = sortBooks(rows, "author", "asc", {
     ignoreArticles: prefs.ignoreArticles,
@@ -81,7 +85,7 @@ export default async function ReadingRoomPage() {
     currentPage: b.currentPage,
     status: b.status,
     ownership: b.ownership,
-    lentTo: b.loans[0]?.borrower ?? null,
+    lentTo: lentTo.get(b.id) ?? null,
   }));
   const cases = caseCount(shelve(books.map((b) => spineFor(b).width)).length);
 

@@ -12,8 +12,8 @@ import {
   ScanSearch,
   UserRound,
 } from "lucide-react";
-import { auth, signOut } from "@/auth";
-import { getPreferences } from "@/lib/current-user";
+import { signOut } from "@/auth";
+import { getPreferences, getSession } from "@/lib/current-user";
 import { Button } from "@/components/ui/button";
 import { NavLink } from "@/components/nav-link";
 import { ThemePicker } from "@/components/theme-picker";
@@ -23,7 +23,7 @@ import { ThemePicker } from "@/components/theme-picker";
  *  Check, Quotes and Reading room links can be hidden in Preferences; the
  *  logo goes to the start page chosen there. */
 export async function Nav() {
-  const [session, prefs] = await Promise.all([auth(), getPreferences()]);
+  const [session, prefs] = await Promise.all([getSession(), getPreferences()]);
   const hidden = new Set(prefs.hiddenNav);
 
   return (

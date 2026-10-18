@@ -10,6 +10,17 @@ import {
 } from "@/lib/preferences";
 
 /**
+ * The session, resolved once per request.
+ *
+ * auth() runs the `jwt` callback in auth.ts, which reads the user row to
+ * check `tokenVersion`. The page, the top bar and getCurrentUser below each
+ * asked for the session, so every page render made that same query three
+ * times. Pages and server components call this instead; server actions and
+ * API routes resolve the session once anyway and keep calling auth().
+ */
+export const getSession = cache(() => auth());
+
+/**
  * The signed-in user's id plus the bits the shell needs, fetched once per
  * request.
  *
@@ -35,7 +46,7 @@ export const getCurrentUser = cache(
     /** For the backup reminder the shell shows. */
     lastBackupAt: Date | null;
   } | null> => {
-    const session = await auth();
+    const session = await getSession();
     if (!session?.user?.id) return null;
 
     const user = await prisma.user.findUnique({

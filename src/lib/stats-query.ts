@@ -23,14 +23,25 @@ export type StatsBook = Prisma.BookGetPayload<{ select: typeof statsBookSelect }
 
 /**
  * Pages logged per book per day, computed in the database, and whether each
- * day's pages belong to the book's current reading pass.
+ * day's pages belong to the book's current reading pass. Summed per day
+ * (dayPageTotals below) they are the reading calendar's totals.
  *
- * The deltas are exactly those of `dailyPageTotalsForUser` in
- * lib/progress-query.ts (rises between consecutive entries of a book,
- * ordered by date then page, bucketed in the reader's zone), only not summed
- * across books: summed per day they give the reading calendar's totals,
- * which stats-query.db.test.ts checks. If the delta rule there changes, this
- * must change with it.
+ * The pages for a day are the rises between consecutive entries of a book,
+ * the rule `dailyPageTotals` in lib/progress.ts applies in memory (the book
+ * page still uses it; stats-query.db.test.ts checks the two agree). Three
+ * details keep them equal rather than merely similar:
+ *
+ *  - The window is ordered by (date, page), matching the JS sort exactly, so
+ *    a pass-start anchor and the first real entry of that pass tie-break the
+ *    same way.
+ *
+ *  - Days are bucketed in the *reader's* time zone, not the database's.
+ *    `date` is `timestamp without time zone` holding a UTC instant; a naive
+ *    `date_trunc` would file late-night reading under the wrong day and
+ *    quietly change the calendar and the longest streak.
+ *
+ *  - There is no date filter. The calendar shows twelve months, but the
+ *    longest streak is all time, and every delta needs the entry before it.
  *
  * The current pass starts at the latest page-0 anchor, else on the book's
  * start date (that calendar day in the reader's zone, or later), else at
@@ -83,6 +94,17 @@ export async function bookDayPageTotalsForUser(
     GROUP BY 1, 2, 3
   `;
   return rows.map((r) => ({ bookId: r.bookId, day: r.day, pages: r.pages, current: r.current }));
+}
+
+/**
+ * Pages read per calendar day, for the reading calendar and the year in
+ * review: the log by book and day, summed across books. The stats pages
+ * already load that log, so the totals cost no second query.
+ */
+export function dayPageTotals(logDays: readonly BookDayPages[]): Map<string, number> {
+  const totals = new Map<string, number>();
+  for (const r of logDays) totals.set(r.day, (totals.get(r.day) ?? 0) + r.pages);
+  return totals;
 }
 
 /** Everything lib/stats-count.ts needs for one reader, scoped to them. */

@@ -3,11 +3,10 @@ import { redirect } from "next/navigation";
 import type { Prisma } from "@prisma/client";
 import { ReadingStatus } from "@/lib/enums";
 import { LibraryBig, Plus } from "lucide-react";
-import { auth } from "@/auth";
 import { BULK_MAX_IDS } from "@/lib/bulk";
 import { orderByIds } from "@/lib/library-order";
 import { prisma } from "@/lib/prisma";
-import { getPreferences } from "@/lib/current-user";
+import { getCurrentUser, getPreferences, getSession } from "@/lib/current-user";
 import { calendarDay } from "@/lib/dates";
 import {
   groupBooks,
@@ -67,17 +66,13 @@ const librarySelect = {
   format: true,
   ownership: true,
   tags: true,
-  // Just enough to know whether the copy is out — one row at most, rather
-  // than the loan history the card would never render.
-  loans: { where: { returnedAt: null }, select: { id: true }, take: 1 },
 } satisfies Prisma.BookSelect;
 
-/** What the card actually receives: the selected columns with the open-loan
- *  probe collapsed into a boolean. */
-type LibraryBook = Omit<
-  Prisma.BookGetPayload<{ select: typeof librarySelect }>,
-  "loans"
-> & { lentOut: boolean };
+/** What the card actually receives: the selected columns plus whether the
+ *  copy is lent out. */
+type LibraryBook = Prisma.BookGetPayload<{ select: typeof librarySelect }> & {
+  lentOut: boolean;
+};
 
 /** A book as its card gets it: the fields only sorting and grouping read
  *  stay on the server. */
@@ -98,7 +93,7 @@ export default async function BooksPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const session = await auth();
+  const session = await getSession();
   if (!session?.user?.id) redirect("/login"); // revoked session (see auth.ts)
   const userId = session.user.id;
 
@@ -138,9 +133,16 @@ export default async function BooksPage({
     MAX_PAGE_SIZE,
   );
 
-  const [books, statusCounts, tagRows, shelves, viewUser, bookFinishes, pastFinishes] =
+  const [books, openLoans, statusCounts, tagRows, shelves, user, bookFinishes, pastFinishes] =
     await Promise.all([
     prisma.book.findMany({ where, select: librarySelect }),
+    // Which copies are out: the library's open loans, fetched alongside the
+    // books. Selecting them through the books made Prisma send a second
+    // query after the first, listing every book's id.
+    prisma.loan.findMany({
+      where: { returnedAt: null, book: { userId } },
+      select: { bookId: true },
+    }),
     prisma.book.groupBy({
       by: ["status"],
       where: { userId },
@@ -159,12 +161,9 @@ export default async function BooksPage({
       orderBy: { name: "asc" },
     }),
     // The saved view only affects sort/group and how cards are drawn,
-    // never the where clause, so its lookup can ride in the same round of
-    // queries.
-    prisma.user.findUnique({
-      where: { id: userId },
-      select: { libraryView: true },
-    }),
+    // never the where clause. It comes with the user row the shell has
+    // already read for this request.
+    getCurrentUser(),
     // The span of years anything was finished in, for "Finished in".
     prisma.book.aggregate({
       where: { userId, status: ReadingStatus.READ },
@@ -178,7 +177,7 @@ export default async function BooksPage({
     }),
   ]);
 
-  const accountView = parseLibraryView(viewUser?.libraryView);
+  const accountView = user?.libraryView ?? parseLibraryView(null);
   // Sort and grouping from the account only fill in a param-less visit; the
   // display settings (card size, layout, card details) always apply.
   const savedView = hasViewParams ? parseLibraryView(null) : accountView;
@@ -229,11 +228,10 @@ export default async function BooksPage({
   // book to place any of them — then hand the client only the slice it
   // renders. Passing all of them was the page's real cost: a 20k-book library
   // serialized ~6.7 MB of props to draw two hundred cards.
-  // Flatten the open-loan probe into a boolean before sorting, so the client
-  // payload carries a flag rather than a relation.
-  const withLoanFlag = books.map(({ loans, ...b }) => ({
+  const lent = new Set(openLoans.map((l) => l.bookId));
+  const withLoanFlag = books.map((b) => ({
     ...b,
-    lentOut: loans.length > 0,
+    lentOut: lent.has(b.id),
     shelves: shelvesOf.get(b.id) ?? [],
   }));
 

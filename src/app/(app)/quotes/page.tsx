@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Quote } from "lucide-react";
-import { auth } from "@/auth";
-import { getPreferences } from "@/lib/current-user";
+import { getPreferences, getSession } from "@/lib/current-user";
 import { formatNumber } from "@/lib/display";
 import {
   QUOTES_MAX,
@@ -32,7 +31,7 @@ export default async function QuotesPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const session = await auth();
+  const session = await getSession();
   if (!session?.user?.id) redirect("/login"); // revoked session (see auth.ts)
   const userId = session.user.id;
 
