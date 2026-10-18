@@ -2,9 +2,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ReadingStatus } from "@/lib/enums";
 import { BookOpenText } from "lucide-react";
-import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { getPreferences } from "@/lib/current-user";
+import { getPreferences, getSession } from "@/lib/current-user";
 import { formatWeekdayDay } from "@/lib/display";
 import { upNext } from "@/lib/up-next";
 import { BookCover } from "@/components/book-card";
@@ -23,7 +22,7 @@ const UP_NEXT = 10;
  * the Want to Read books that are up next.
  */
 export default async function NowReadingPage() {
-  const session = await auth();
+  const session = await getSession();
   if (!session?.user?.id) redirect("/login"); // revoked session (see auth.ts)
   const userId = session.user.id;
   const prefs = await getPreferences();

@@ -1,8 +1,7 @@
 import { notFound, redirect } from "next/navigation";
-import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { updateBook } from "@/lib/actions/books";
-import { getPreferences } from "@/lib/current-user";
+import { getPreferences, getSession } from "@/lib/current-user";
 import { tagImportFor } from "@/lib/user-tags";
 import { BookForm } from "@/components/book-form";
 
@@ -14,7 +13,7 @@ export default async function EditBookPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const session = await auth();
+  const session = await getSession();
   if (!session?.user?.id) redirect("/login"); // revoked session (see auth.ts)
   const { id } = await params;
 

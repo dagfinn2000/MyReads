@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { auth } from "@/auth";
+import { getSession } from "@/lib/current-user";
 import { CheckBookClient } from "@/components/check-book-client";
 
 export const dynamic = "force-dynamic";
@@ -11,7 +11,7 @@ export const metadata = { title: "Do I own this? · MyReads" };
  * or the same title as a different edition via the metadata sources.
  */
 export default async function CheckBookPage() {
-  const session = await auth();
+  const session = await getSession();
   if (!session?.user?.id) redirect("/login"); // revoked session (see auth.ts)
 
   return (

@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { auth } from "@/auth";
+import { getSession } from "@/lib/current-user";
 import { RegisterForm } from "@/components/register-form";
 
 export const dynamic = "force-dynamic";
@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
  *  live session from a revoked one, so the "already signed in" redirect
  *  belongs here and not in the middleware. */
 export default async function RegisterPage() {
-  const session = await auth();
+  const session = await getSession();
   if (session?.user?.id) redirect("/");
 
   return <RegisterForm />;

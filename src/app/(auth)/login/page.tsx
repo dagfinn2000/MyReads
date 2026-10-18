@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
-import { auth } from "@/auth";
+import { getSession } from "@/lib/current-user";
 import { LoginForm } from "@/components/login-form";
 import { Card } from "@/components/ui/card";
 
@@ -16,7 +16,7 @@ export const dynamic = "force-dynamic";
  * revoked session bounced between /login and /books forever.
  */
 export default async function LoginPage() {
-  const session = await auth();
+  const session = await getSession();
   if (session?.user?.id) redirect("/");
 
   // useSearchParams needs a Suspense boundary to keep this page

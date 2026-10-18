@@ -3,9 +3,8 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { BookFormat, ReadingStatus } from "@/lib/enums";
 import { Library, Pencil, Repeat } from "lucide-react";
-import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { getPreferences } from "@/lib/current-user";
+import { getPreferences, getSession } from "@/lib/current-user";
 import { arrangeBookCards, FORCED_CARD_NOTES } from "@/lib/book-page";
 import { orderByIds } from "@/lib/library-order";
 import type { BookPageCard } from "@/lib/preferences";
@@ -40,7 +39,7 @@ export default async function BookDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const session = await auth();
+  const session = await getSession();
   if (!session?.user?.id) redirect("/login"); // revoked session (see auth.ts)
   const { id } = await params;
   const userId = session.user.id;

@@ -1,15 +1,13 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { PrismaClient } from "@prisma/client";
 import { dailyPageTotals } from "@/lib/progress";
-import { dailyPageTotalsForUser } from "@/lib/progress-query";
-import { bookDayPageTotalsForUser, loadStatsInputs } from "@/lib/stats-query";
+import { bookDayPageTotalsForUser, dayPageTotals, loadStatsInputs } from "@/lib/stats-query";
 
 /**
- * The per-book log totals behind "Pages I logged" must be the reading
- * calendar's numbers split by book: per book they equal dailyPageTotals on
- * that book's entries, and summed per day they equal dailyPageTotalsForUser.
- * If the delta rule changes in lib/progress.ts or lib/progress-query.ts and
- * not here, this fails.
+ * The per-book log totals behind "Pages I logged" and the reading calendar
+ * must follow the delta rule in lib/progress.ts: per book they equal
+ * dailyPageTotals on that book's entries, and summed per day they equal it
+ * on all of them. If the rule changes there and not in the SQL, this fails.
  */
 const prisma = new PrismaClient();
 const USER = "stats-query-user";
@@ -120,10 +118,8 @@ describe("bookDayPageTotalsForUser", () => {
 
   it("sums per day to the reading calendar's totals", async () => {
     for (const zone of ZONES) {
-      const rows = await bookDayPageTotalsForUser(USER, zone);
-      const summed = new Map<string, number>();
-      for (const r of rows) summed.set(r.day, (summed.get(r.day) ?? 0) + r.pages);
-      const calendar = await dailyPageTotalsForUser(USER, zone);
+      const summed = dayPageTotals(await bookDayPageTotalsForUser(USER, zone));
+      const calendar = dailyPageTotals(entries, zone);
       expect(Object.fromEntries([...summed].sort()), zone).toEqual(
         Object.fromEntries([...calendar].sort()),
       );

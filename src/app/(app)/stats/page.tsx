@@ -2,13 +2,11 @@ import Link from "next/link";
 import { BookCheck, BookOpenText, FileText, LibraryBig, Star } from "lucide-react";
 import { redirect } from "next/navigation";
 import { ReadingStatus } from "@/lib/enums";
-import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { getPreferences } from "@/lib/current-user";
+import { getPreferences, getSession } from "@/lib/current-user";
 import { dayKey } from "@/lib/dates";
 import { FORMAT_LABELS, formatNumber } from "@/lib/display";
 import { goalPace, goalProgress, splitGoals, yearClock } from "@/lib/goals";
-import { dailyPageTotalsForUser } from "@/lib/progress-query";
 import {
   booksReadAllTime,
   buildPasses,
@@ -26,7 +24,7 @@ import {
   statsHref,
   yearWindow,
 } from "@/lib/stats-period";
-import { loadStatsInputs } from "@/lib/stats-query";
+import { dayPageTotals, loadStatsInputs } from "@/lib/stats-query";
 import { GoalCard } from "@/components/goal-card";
 import { ReadingHeatmap } from "@/components/reading-heatmap";
 import { Bar, StatCard } from "@/components/stat-blocks";
@@ -47,7 +45,7 @@ export default async function StatsPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const session = await auth();
+  const session = await getSession();
   if (!session?.user?.id) redirect("/login"); // revoked session (see auth.ts)
 
   const userId = session.user.id;
@@ -64,7 +62,7 @@ export default async function StatsPage({
   const period = parsePeriod(sp.period, prefs.statsPeriod);
   const words = PERIOD_WORDS[period];
 
-  const [inputs, goals, pageTotals, quoteCount, randomQuotes] = await Promise.all([
+  const [inputs, goals, quoteCount, randomQuotes] = await Promise.all([
     // Books, past reads and the log by book and day: what lib/stats-count.ts
     // turns into passes, by the "What counts" preferences.
     loadStatsInputs(userId, prefs.timeZone),
@@ -72,10 +70,6 @@ export default async function StatsPage({
       where: { userId },
       orderBy: { year: "desc" },
     }),
-    // Pages-per-day for the heatmap, aggregated in SQL — one row per reading
-    // day rather than every log entry ever written. See lib/progress-query.ts
-    // for why this is not simply a date-bounded findMany.
-    dailyPageTotalsForUser(userId, prefs.timeZone),
     prisma.quote.count({ where: { book: { userId } } }),
     // A random quote for the serendipity card — new one on every visit.
     // ORDER BY random() picks uniformly in one query, where the previous
@@ -92,6 +86,8 @@ export default async function StatsPage({
   ]);
 
   const randomQuote = randomQuotes[0] ?? null;
+  // Pages per day for the reading calendar, from the log loaded above.
+  const pageTotals = dayPageTotals(inputs.logDays);
   const { books } = inputs;
   const reading = books.filter((b) => b.status === ReadingStatus.READING);
 

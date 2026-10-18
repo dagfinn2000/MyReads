@@ -1,14 +1,15 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { PrismaClient } from "@prisma/client";
 import { dailyPageTotals } from "@/lib/progress";
-import { dailyPageTotalsForUser } from "@/lib/progress-query";
+import { serverTimeZone } from "@/lib/preferences";
+import { bookDayPageTotalsForUser, dayPageTotals } from "@/lib/stats-query";
 
 /**
- * Differential test: the SQL implementation must agree with the JS one that
- * the book page still uses, entry for entry. The SQL exists purely to avoid
- * loading every ProgressEntry into memory — if it ever disagreed, the
- * heatmap and the all-time streak would drift without anything looking
- * broken.
+ * Differential test: the reading calendar's totals, worked out in SQL and
+ * summed per day (lib/stats-query.ts), must agree with the JS rule the book
+ * page still uses, entry for entry. The SQL exists purely to avoid loading
+ * every ProgressEntry into memory — if it ever disagreed, the heatmap and
+ * the all-time streak would drift without anything looking broken.
  *
  * Deliberately includes times that fall on different calendar days in UTC
  * than in a non-UTC local zone, which is where a naive rewrite goes wrong.
@@ -69,9 +70,14 @@ afterAll(async () => {
   await prisma.$disconnect();
 });
 
-describe("dailyPageTotalsForUser", () => {
+/** The calendar's totals as the stats pages get them. */
+async function calendar(zone = serverTimeZone()) {
+  return dayPageTotals(await bookDayPageTotalsForUser(USER, zone));
+}
+
+describe("the reading calendar's totals", () => {
   it("matches the in-memory implementation exactly", async () => {
-    const fromSql = await dailyPageTotalsForUser(USER);
+    const fromSql = await calendar();
     const fromJs = dailyPageTotals(entries);
 
     expect(Object.fromEntries([...fromSql].sort())).toEqual(
@@ -80,21 +86,21 @@ describe("dailyPageTotalsForUser", () => {
   });
 
   it("buckets late-night reading on the local day, not the UTC day", async () => {
-    const fromSql = await dailyPageTotalsForUser(USER);
+    const fromSql = await calendar();
     // 00:30 local on the 3rd is the 2nd in UTC when east of Greenwich; the
     // 60 pages must land on the 3rd either way.
     expect(fromSql.get("2026-03-03")).toBe(60 + 50);
   });
 
   it("credits nothing for a lone entry or a backwards correction", async () => {
-    const fromSql = await dailyPageTotalsForUser(USER);
+    const fromSql = await calendar();
     expect(fromSql.has("2026-03-06")).toBe(false); // tz-c, no predecessor
     expect(fromSql.has("2026-03-04")).toBe(false); // tz-b went backwards
   });
 
   it("agrees with the in-memory version in the reader's own zone", async () => {
     for (const zone of ["UTC", "America/New_York", "Asia/Tokyo", "Europe/Oslo"]) {
-      const fromSql = await dailyPageTotalsForUser(USER, zone);
+      const fromSql = await calendar(zone);
       const fromJs = dailyPageTotals(entries, zone);
       expect(Object.fromEntries([...fromSql].sort()), zone).toEqual(
         Object.fromEntries([...fromJs].sort()),
