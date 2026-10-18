@@ -235,6 +235,12 @@ src/
   client components use. And `package.json` says only CSS files have side
   effects (`"sideEffects": ["*.css"]`), so the bundler can leave out a
   module a page imports but never calls.
+- **Icons a page repeats are drawn once.** Ratings and the plain cover's
+  book use `SpriteIcon` from [icon-sprite.tsx](../src/components/icon-sprite.tsx),
+  which points at a symbol the root layout renders instead of repeating the
+  icon's path. The repeated star paths were a quarter of the library's HTML.
+  Add an icon there when a page shows it dozens of times; a test checks the
+  paths still match lucide's.
 - **Migrations run when the container starts** (`prisma migrate deploy` in
   [docker-entrypoint.sh](../docker-entrypoint.sh)). The first start creates
   the tables, later starts apply anything new, and an up-to-date database is
