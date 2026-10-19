@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { ReadingStatus } from "@/lib/enums";
-import { upNext } from "@/lib/up-next";
+import { upNext, upNextWithPicks } from "@/lib/up-next";
 
 const { READ, READING, WANT_TO_READ } = ReadingStatus;
 const book = (
@@ -43,5 +43,28 @@ describe("upNext", () => {
   it("stops at the limit", () => {
     const want = Array.from({ length: 5 }, (_, i) => book(`b${i}`, WANT_TO_READ));
     expect(upNext(want, [], 3)).toHaveLength(3);
+  });
+});
+
+describe("upNextWithPicks", () => {
+  const pick = (id: string, upNextRank: number | null, series: [string, number] | null = null) => ({
+    ...book(id, WANT_TO_READ, series?.[0] ?? null, series?.[1] ?? null),
+    upNextRank,
+    title: id,
+  });
+
+  it("puts the reader's picks first, in their order, then fills up with suggestions", () => {
+    const want = [pick("new", null), pick("second", 5), pick("first", 2), pick("older", null)];
+    const { picks, suggested } = upNextWithPicks(want, [], 3);
+    expect(picks.map((b) => b.id)).toEqual(["first", "second"]);
+    expect(suggested.map((b) => b.id)).toEqual(["new"]);
+  });
+
+  it("keeps a pick the series would leave out, and every pick past the limit", () => {
+    const want = [pick("dune3", 1, ["Dune", 3]), pick("a", 2), pick("b", 3)];
+    const series = [book("dune1", READ, "Dune", 1), want[0]];
+    const { picks, suggested } = upNextWithPicks(want, series, 2);
+    expect(picks.map((b) => b.id)).toEqual(["dune3", "a", "b"]);
+    expect(suggested).toEqual([]);
   });
 });

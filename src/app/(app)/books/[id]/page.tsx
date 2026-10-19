@@ -29,6 +29,7 @@ import { LendingCard } from "@/components/lending-card";
 import { showsLendingCard } from "@/lib/loans";
 import { ReadHistoryCard } from "@/components/read-history-card";
 import { ReadingCard } from "@/components/reading-card";
+import { UpNextButton } from "@/components/up-next-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
@@ -86,7 +87,7 @@ export default async function BookDetailPage({
 
   // Sidebar data: every shelf (for the assignment card) and, if this book is
   // part of a series, its siblings ordered by series number.
-  const [allShelves, seriesBooks] = await Promise.all([
+  const [allShelves, seriesBooks, upNextPlace] = await Promise.all([
     shelvesPromise,
     book.seriesName
       ? prisma.book.findMany({
@@ -100,6 +101,14 @@ export default async function BookDetailPage({
           orderBy: { seriesNumber: "asc" },
         })
       : Promise.resolve([]),
+    // Where it stands on the reader's own Up next list.
+    book.status === ReadingStatus.WANT_TO_READ && book.upNextRank !== null
+      ? prisma.book
+          .count({
+            where: { userId, status: ReadingStatus.WANT_TO_READ, upNextRank: { lt: book.upNextRank } },
+          })
+          .then((ahead) => ahead + 1)
+      : null,
   ]);
 
   const seriesHref = book.seriesName
@@ -190,6 +199,9 @@ export default async function BookDetailPage({
             <Badge className={STATUS_BADGE_CLASS[book.status]}>
               {STATUS_LABELS[book.status]}
             </Badge>
+            {book.status === ReadingStatus.WANT_TO_READ && (
+              <UpNextButton bookId={book.id} place={upNextPlace} />
+            )}
             <Badge variant="secondary">{FORMAT_LABELS[book.format]}</Badge>
             <Badge variant="outline">
               {OWNERSHIP_BADGE_LABELS[book.ownership]}

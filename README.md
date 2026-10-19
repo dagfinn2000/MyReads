@@ -53,6 +53,10 @@ server.
   you log your reading through the day, with a little confetti when you
   reach it. It counts the days in a row you've met it, and the reading
   calendar on Stats says how many days you met it in the last year.
+- Keep your own Up next list: add Want to Read books from their page or from
+  Now reading, put them in order, and they come first in Up next on Now
+  reading, before the suggestions (the next book of a series you're
+  reading, then the books you added last). Starting a book takes it off.
 - Re-reads are kept as history and count in your stats.
 - Save favourite quotes with page numbers, and search all of them on the
   Quotes page.

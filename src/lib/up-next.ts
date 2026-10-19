@@ -46,3 +46,21 @@ export function upNext<T extends UpNextBook>(
   }
   return [...underway, ...rest].slice(0, limit);
 }
+
+/**
+ * Up next with the reader's own list: their picks first, in the order they
+ * put them in (whatever the series say: a pick is a decision), then
+ * suggestions from upNext() to fill the strip up to `limit`. Every pick is
+ * shown even past the limit.
+ */
+export function upNextWithPicks<T extends UpNextBook & { upNextRank: number | null; title: string }>(
+  wantToRead: T[],
+  seriesBooks: UpNextBook[],
+  limit: number,
+): { picks: T[]; suggested: T[] } {
+  const picks = wantToRead
+    .filter((b) => b.upNextRank !== null)
+    .sort((a, b) => a.upNextRank! - b.upNextRank! || a.title.localeCompare(b.title));
+  const rest = wantToRead.filter((b) => b.upNextRank === null);
+  return { picks, suggested: upNext(rest, seriesBooks, Math.max(limit - picks.length, 0)) };
+}

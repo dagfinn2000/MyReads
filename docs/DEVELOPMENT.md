@@ -56,7 +56,7 @@ password matches `POSTGRES_PASSWORD`. Every setting is described in
   the database tests, and removes it. They cover backup and restore (the
   round trip, merging, duplicates, and settings), re-read counts, the book
   form and the reading log it writes (with the reading timer's time),
-  importing Kindle highlights, library search, bulk edit, saving
+  importing Kindle highlights, the Up next list, library search, bulk edit, saving
   preferences and saved views, and the checks that stop one user from
   touching another user's books.
 

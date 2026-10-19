@@ -176,6 +176,10 @@ model Book {
   /// Where you are in the book right now. Kept for READING and DNF
   /// ("stopped at p. 218"); cleared when the book is finished or reshelved.
   currentPage  Int?
+  /// Place on the reader's own Up next list on Now reading, lowest first;
+  /// null when it isn't on it. Only Want to Read books show there, and
+  /// starting a book takes it off.
+  upNextRank   Int?
 
   /// Denormalized lowercase "title + authors" so search can be a single
   /// case-insensitive `contains` (Prisma can't substring-search String[]).
