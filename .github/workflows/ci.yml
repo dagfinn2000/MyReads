@@ -34,7 +34,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: "22" # README's documented minimum (Node 22+)
+          node-version: "22" # newest 22.x; README asks for Node 22.13 or newer
           cache: npm
 
       - name: Install dependencies

@@ -9,7 +9,7 @@ import type { ActionState } from "@/lib/actions/helpers";
 
 const setOwnershipSchema = z.object({
   bookId: z.string().min(1).max(100),
-  ownership: z.nativeEnum(BookOwnership),
+  ownership: z.enum(BookOwnership),
 });
 
 /**

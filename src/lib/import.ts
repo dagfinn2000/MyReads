@@ -115,15 +115,15 @@ const importedBookSchema = z.object({
     .array(z.string().trim().toLowerCase().max(50))
     .catch([])
     .transform((tags) => tags.flatMap((t) => t.split(",").map((s) => s.trim())).filter(Boolean)),
-  format: z.nativeEnum(BookFormat).catch(BookFormat.PHYSICAL),
+  format: z.enum(BookFormat).catch(BookFormat.PHYSICAL),
   /** Legacy field, still written by exports for older instances to read. */
   owned: z.boolean().nullable().optional().catch(null),
   /** Present in exports from this version onward. */
-  ownership: z.nativeEnum(BookOwnership).nullable().optional().catch(null),
+  ownership: z.enum(BookOwnership).nullable().optional().catch(null),
   seriesName: z.string().trim().max(200).nullable().optional(),
   seriesNumber: z.number().min(0).max(10000).nullable().optional().catch(null),
   openLibraryId: z.string().trim().max(50).nullable().optional(),
-  status: z.nativeEnum(ReadingStatus).catch(ReadingStatus.WANT_TO_READ),
+  status: z.enum(ReadingStatus).catch(ReadingStatus.WANT_TO_READ),
   rating: z.number().int().min(1).max(10).nullable().optional().catch(null),
   review: z.string().max(20000).nullable().optional(),
   dateStarted: dateField,
@@ -164,8 +164,9 @@ const exportPayloadSchema = z.object({
   settings: z
     .object({
       theme: z.string().max(100).nullable().catch(null),
-      libraryView: z.unknown(),
-      preferences: z.unknown(),
+      // Optional, or zod 4 drops the whole block when a backup lacks one.
+      libraryView: z.unknown().optional(),
+      preferences: z.unknown().optional(),
       defaultViewName: z.string().max(SAVED_VIEW_NAME_MAX).nullable().catch(null),
       // Shelf and saved-view preferences, by name (see restoreSettings).
       shelfOrderNames: nameList,

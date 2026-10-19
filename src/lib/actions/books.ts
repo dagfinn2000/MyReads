@@ -19,7 +19,7 @@ import { settleReadingState } from "@/lib/reading-state";
 import { buildSearchText, foldForSearch } from "@/lib/utils";
 import { AFTER_ADD } from "@/lib/preferences";
 
-const statusField = z.nativeEnum(ReadingStatus).catch(ReadingStatus.WANT_TO_READ);
+const statusField = z.enum(ReadingStatus).catch(ReadingStatus.WANT_TO_READ);
 
 /** Create a book from the add form (manual or import-prefilled). */
 export async function createBook(

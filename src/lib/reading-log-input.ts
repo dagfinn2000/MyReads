@@ -57,7 +57,7 @@ export const moveTargetSchema = z.enum(["READ", "DNF"]);
  */
 export const undoMoveSchema = z.object({
   from: moveTargetSchema,
-  finishedAt: z.string().datetime().nullable(),
+  finishedAt: z.iso.datetime().nullable(),
   page: z.number().int().min(1).max(MAX_PAGE).nullable(),
 });
 

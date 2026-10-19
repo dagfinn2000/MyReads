@@ -327,8 +327,8 @@ automatically every time the app starts.
 ## Development
 
 MyReads is a [Next.js](https://nextjs.org/) app with PostgreSQL and
-[Prisma](https://www.prisma.io/). To run it without Docker you need Node 22+
-and a Postgres database. See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) for
+[Prisma](https://www.prisma.io/). To run it without Docker you need Node 22.13
+or newer and a Postgres database. See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) for
 setup, tests, the project layout and the main design decisions.
 
 ## License

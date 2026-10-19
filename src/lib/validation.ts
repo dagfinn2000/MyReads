@@ -39,9 +39,15 @@ export const changePasswordSchema = z.object({
 });
 
 /** Shared shape for creating and editing books. Forms submit strings; this
- *  schema does the coercion so server actions can pass FormData through. */
+ *  schema does the coercion so server actions can pass FormData through.
+ *  Length limits the form doesn't enforce itself (here and on the review)
+ *  name the field, so the message says what to shorten. */
 export const bookSchema = z.object({
-  title: z.string().trim().min(1, "Title is required").max(500),
+  title: z
+    .string()
+    .trim()
+    .min(1, "Title is required")
+    .max(500, "Title must be at most 500 characters"),
   /** Comma-separated in the form; stored as an array. */
   authors: z
     .string()
@@ -54,14 +60,14 @@ export const bookSchema = z.object({
   isbn: z
     .string()
     .trim()
-    .max(20)
+    .max(20, "ISBN must be at most 20 characters")
     .transform((s) => s.replace(/[\s-]/g, "") || null)
     .nullable()
     .optional(),
   description: z
     .string()
     .trim()
-    .max(10000)
+    .max(10000, "Description must be at most 10,000 characters")
     .transform((s) => s || null)
     .nullable()
     .optional(),
@@ -104,7 +110,7 @@ export const bookSchema = z.object({
   publishedDate: z
     .string()
     .trim()
-    .max(20)
+    .max(20, "Published date must be at most 20 characters")
     .transform((s) => s || null)
     .nullable()
     .optional(),
@@ -124,7 +130,7 @@ export const bookSchema = z.object({
   seriesName: z
     .string()
     .trim()
-    .max(200)
+    .max(200, "Series name must be at most 200 characters")
     .transform((s) => s || null)
     .nullable()
     .optional(),
@@ -135,10 +141,10 @@ export const bookSchema = z.object({
     (v) => (typeof v === "string" && v.trim() === "" ? null : v),
     z.coerce.number().min(0).max(10000).nullable().optional().catch(null),
   ),
-  format: z.nativeEnum(BookFormat),
+  format: z.enum(BookFormat),
   /** Defaults to OWNED so a form that omits the field (or sends something
    *  unexpected) still saves as an ordinary book on your shelf. */
-  ownership: z.nativeEnum(BookOwnership).catch(BookOwnership.OWNED),
+  ownership: z.enum(BookOwnership).catch(BookOwnership.OWNED),
   openLibraryId: z
     .string()
     .trim()
@@ -182,13 +188,13 @@ function checkReadDates(
 
 /** Personal reading data, editable from the book detail page. */
 export const readingSchema = z.object({
-  status: z.nativeEnum(ReadingStatus),
+  status: z.enum(ReadingStatus),
   /** 1–10 half-star units; empty string/0 clears the rating. */
   rating: z.coerce.number().int().min(0).max(10).nullable().optional().catch(null),
   review: z
     .string()
     .trim()
-    .max(20000)
+    .max(20000, "Review must be at most 20,000 characters")
     .transform((s) => s || null)
     .nullable()
     .optional(),

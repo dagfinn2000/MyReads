@@ -11,7 +11,7 @@ const goalSchema = z.object({
   // A pages goal runs into the thousands, so the cap is far above any
   // sensible book count.
   target: z.coerce.number().int().min(0).max(1_000_000),
-  unit: z.nativeEnum(GoalUnit).catch(GoalUnit.BOOKS),
+  unit: z.enum(GoalUnit).catch(GoalUnit.BOOKS),
   countRereads: z.boolean(),
 });
 
