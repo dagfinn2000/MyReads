@@ -218,6 +218,14 @@ export const AUDIOBOOK_UNITS = ["page", "percent", "time"] as const;
  *  the last 7 or 14 days. */
 export const PACE_FROM = ["read", "7d", "14d"] as const;
 
+/** A daily reading goal: none, a number of pages, or minutes of reading
+ *  (from the reading timer, or time typed in). */
+export const DAILY_GOALS = ["off", "pages", "minutes"] as const;
+
+/** The amounts the daily goal offers, as strings for the menus. */
+export const DAILY_GOAL_PAGES = ["5", "10", "15", "20", "25", "30", "40", "50", "75", "100"] as const;
+export const DAILY_GOAL_MINUTES = ["5", "10", "15", "20", "30", "45", "60", "90", "120"] as const;
+
 /** Cards on a book's page, in their default order. */
 export const BOOK_PAGE_CARDS = ["shelves", "reading", "history", "lending", "quotes"] as const;
 
@@ -312,6 +320,7 @@ export type QuickLogSteps = (typeof QUICK_LOG_STEPS)[number];
 export type EbookUnit = (typeof EBOOK_UNITS)[number];
 export type AudiobookUnit = (typeof AUDIOBOOK_UNITS)[number];
 export type PaceFrom = (typeof PACE_FROM)[number];
+export type DailyGoal = (typeof DAILY_GOALS)[number];
 export type BookPageCard = (typeof BOOK_PAGE_CARDS)[number];
 export type BookDescriptionMode = (typeof BOOK_DESCRIPTIONS)[number];
 export type ShelvesCardMode = (typeof SHELVES_CARD_MODES)[number];
@@ -394,6 +403,13 @@ export type Preferences = {
   ebookUnit: EbookUnit;
   audiobookUnit: AudiobookUnit;
   paceFrom: PaceFrom;
+  /** Off, or what the daily goal counts. */
+  dailyGoal: DailyGoal;
+  /** Pages a day for a pages goal; one of DAILY_GOAL_PAGES. Kept while the
+   *  goal counts minutes, so switching back finds it again. */
+  dailyGoalPages: number;
+  /** Minutes a day for a time goal; one of DAILY_GOAL_MINUTES. */
+  dailyGoalMinutes: number;
 
   // Book page
   /** Every card, in the order shown. Always a full list (see parse). */
@@ -524,6 +540,9 @@ export const DEFAULT_PREFERENCES: Preferences = {
   ebookUnit: "page",
   audiobookUnit: "page",
   paceFrom: "read",
+  dailyGoal: "off",
+  dailyGoalPages: 20,
+  dailyGoalMinutes: 30,
   bookPageCards: [...BOOK_PAGE_CARDS],
   hiddenBookPageCards: [],
   bookDescription: "full",
@@ -606,6 +625,12 @@ function pickList<T extends readonly string[]>(allowed: T, value: unknown): T[nu
     }
   }
   return out;
+}
+
+/** A number from a menu of amounts (kept as strings, like every other
+ *  menu), or the fallback. */
+function pickAmount(allowed: readonly string[], value: unknown, fallback: number): number {
+  return typeof value === "number" && allowed.includes(String(value)) ? value : fallback;
 }
 
 function bool(value: unknown, fallback: boolean): boolean {
@@ -821,6 +846,9 @@ export function parsePreferences(raw: unknown): Preferences {
     ebookUnit: pick(EBOOK_UNITS, obj.ebookUnit, d.ebookUnit),
     audiobookUnit: pick(AUDIOBOOK_UNITS, obj.audiobookUnit, d.audiobookUnit),
     paceFrom: pick(PACE_FROM, obj.paceFrom, d.paceFrom),
+    dailyGoal: pick(DAILY_GOALS, obj.dailyGoal, d.dailyGoal),
+    dailyGoalPages: pickAmount(DAILY_GOAL_PAGES, obj.dailyGoalPages, d.dailyGoalPages),
+    dailyGoalMinutes: pickAmount(DAILY_GOAL_MINUTES, obj.dailyGoalMinutes, d.dailyGoalMinutes),
     bookPageCards: parseBookPageCards(obj.bookPageCards),
     hiddenBookPageCards: pickList(BOOK_PAGE_CARDS, obj.hiddenBookPageCards),
     bookDescription: pick(BOOK_DESCRIPTIONS, obj.bookDescription, d.bookDescription),

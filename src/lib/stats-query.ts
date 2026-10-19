@@ -135,28 +135,43 @@ export async function loadStatsInputs(
   return { books, reads, logDays, lastLogDates };
 }
 
+/** Minutes read on one day, from audiobooks or from the rest. */
+export interface DayMinutes {
+  /** "2026-05-12", in the reader's zone. */
+  day: string;
+  audiobook: boolean;
+  minutes: number;
+}
+
 /**
  * Minutes read per calendar day in the reader's zone, from the log entries
- * that carry a time (the reading timer, or a time typed in). Untimed
- * entries are left out, so a reader who never times anything gets an empty
- * map, and the time cards stay away. With audiobooks left out of the stats
- * (Preferences > What counts), their listening is left out here too.
+ * that carry a time (the reading timer, or a time typed in), with
+ * audiobooks apart so Stats can leave them out (Preferences > What counts)
+ * while the daily goal counts them. Untimed entries are left out, so a
+ * reader who never times anything gets nothing back.
  */
-export async function minutesByDayForUser(
-  userId: string,
-  timeZone: string,
-  withoutAudiobooks: boolean,
-): Promise<Map<string, number>> {
-  const rows = await prisma.$queryRaw<{ day: string; minutes: number }[]>`
+export async function minutesByDayForUser(userId: string, timeZone: string): Promise<DayMinutes[]> {
+  return prisma.$queryRaw<DayMinutes[]>`
     SELECT
       to_char((pe."date" AT TIME ZONE 'UTC') AT TIME ZONE ${timeZone}, 'YYYY-MM-DD') AS day,
+      (b."format" = 'AUDIOBOOK') AS audiobook,
       SUM(pe."minutes")::int AS minutes
     FROM "ProgressEntry" pe
     JOIN "Book" b ON b."id" = pe."bookId"
-    WHERE b."userId" = ${userId}
-      AND pe."minutes" IS NOT NULL
-      AND (${withoutAudiobooks} = false OR b."format" <> 'AUDIOBOOK')
-    GROUP BY 1
+    WHERE b."userId" = ${userId} AND pe."minutes" IS NOT NULL
+    GROUP BY 1, 2
   `;
-  return new Map(rows.map((r) => [r.day, r.minutes]));
+}
+
+/** Those minutes summed per day, with or without audiobooks. */
+export function dayMinuteTotals(
+  rows: readonly DayMinutes[],
+  withoutAudiobooks = false,
+): Map<string, number> {
+  const totals = new Map<string, number>();
+  for (const r of rows) {
+    if (withoutAudiobooks && r.audiobook) continue;
+    totals.set(r.day, (totals.get(r.day) ?? 0) + r.minutes);
+  }
+  return totals;
 }

@@ -19,6 +19,8 @@ import {
   ACCENTS,
   BACKGROUNDS,
   CATALOGUES,
+  DAILY_GOAL_MINUTES,
+  DAILY_GOAL_PAGES,
   DATE_FORMATS,
   HIDEABLE_NAV,
   HIDEABLE_STATS,
@@ -494,7 +496,7 @@ export function PreferencesForm({
         </ul>
       </Section>
 
-      <Section title="Reading">
+      <Section title="Reading" id="reading">
         <Choice
           label="Step buttons"
           hint="The buttons next to the page box, in the book's own unit: pages, percent or minutes."
@@ -537,6 +539,33 @@ export function PreferencesForm({
           ]}
           onChange={(v) => update({ paceFrom: v })}
         />
+        <Choice
+          label="Daily goal"
+          hint="A ring on Now reading fills as you read each day. Minutes come from the reading timer."
+          value={prefs.dailyGoal}
+          options={[
+            { value: "off", label: "None" },
+            { value: "pages", label: "Pages a day" },
+            { value: "minutes", label: "Minutes a day" },
+          ]}
+          onChange={(v) => update({ dailyGoal: v })}
+        />
+        {prefs.dailyGoal === "pages" && (
+          <Choice
+            label="Pages a day"
+            value={String(prefs.dailyGoalPages)}
+            options={DAILY_GOAL_PAGES.map((n) => ({ value: n, label: `${n} pages` }))}
+            onChange={(v) => update({ dailyGoalPages: Number(v) })}
+          />
+        )}
+        {prefs.dailyGoal === "minutes" && (
+          <Choice
+            label="Minutes a day"
+            value={String(prefs.dailyGoalMinutes)}
+            options={DAILY_GOAL_MINUTES.map((n) => ({ value: n, label: `${n} minutes` }))}
+            onChange={(v) => update({ dailyGoalMinutes: Number(v) })}
+          />
+        )}
       </Section>
 
       <Section title="Dates and numbers">

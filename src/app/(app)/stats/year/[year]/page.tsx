@@ -21,6 +21,7 @@ import { minutesInWindow } from "@/lib/reading-time";
 import { buildPasses, countWindow, ruleNotes, tally } from "@/lib/stats-count";
 import { yearWindow } from "@/lib/stats-period";
 import {
+  dayMinuteTotals,
   dayPageTotals,
   loadStatsInputs,
   minutesByDayForUser,
@@ -95,14 +96,16 @@ export default async function YearInReviewPage({
 
   // Fetch everything and slice by year in JS, with the same counting the
   // stats page uses (lib/stats-count.ts), so the numbers always agree.
-  const [inputs, goal, minutesByDay] = await Promise.all([
+  const [inputs, goal, dayMinutes] = await Promise.all([
     loadStatsInputs(userId, prefs.timeZone),
     prisma.readingGoal.findUnique({
       where: { userId_year: { userId, year } },
     }),
-    minutesByDayForUser(userId, prefs.timeZone, prefs.statsAudiobooks === "out"),
+    minutesByDayForUser(userId, prefs.timeZone),
   ]);
-  // Time from the reading timer this year.
+  // Time from the reading timer this year (without audiobooks when they're
+  // left out of the stats).
+  const minutesByDay = dayMinuteTotals(dayMinutes, prefs.statsAudiobooks === "out");
   const timeRead = minutesInWindow(minutesByDay, yearWindow(year)).minutes;
   // Pages per day, as the reading calendar counts them. The log has no date
   // bound (deltas need each entry's predecessor), so the year slice comes
