@@ -273,6 +273,21 @@ export const quoteSchema = z.object({
     .optional(),
 });
 
+/** Highlights from a Kindle's My Clippings.txt, one book's worth (or part
+ *  of one) per call, as the quotes page's import sends them. */
+export const kindleQuotesSchema = z
+  .array(
+    z.object({
+      text: quoteSchema.shape.text,
+      page: z.number().int().min(1).max(100000).nullable().catch(null),
+      note: z.string().trim().max(2000).nullable().catch(null).transform((s) => s || null),
+      /** When it was highlighted; anything unreadable dates from the import. */
+      addedAt: z.iso.datetime().nullable().catch(null),
+    }),
+  )
+  .min(1)
+  .max(500);
+
 /** Lending a copy out. Only the borrower is required — "I lent it to Kari"
  *  is a complete thought, and the date defaults to today. */
 export const loanSchema = z.object({

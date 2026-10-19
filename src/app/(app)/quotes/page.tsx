@@ -12,6 +12,7 @@ import {
 } from "@/lib/quote-order";
 import { loadQuotes, quoteSources } from "@/lib/quotes-query";
 import { BookCover } from "@/components/book-card";
+import { KindleImport } from "@/components/kindle-import";
 import { QuoteItem } from "@/components/quote-item";
 import { QuotesToolbar } from "@/components/quotes-toolbar";
 import { Button } from "@/components/ui/button";
@@ -73,6 +74,7 @@ export default async function QuotesPage({
           {filtered ? " matching" : ""}
           {hidden > 0 ? ` · showing ${formatNumber(shown, prefs)}` : ""}
         </span>
+        <KindleImport />
       </div>
 
       <QuotesToolbar
@@ -90,7 +92,7 @@ export default async function QuotesPage({
               ? "No quotes match these filters."
               : params.q
                 ? "No quotes match that search."
-                : "No quotes yet — add passages worth keeping from any book page."}
+                : "No quotes yet — add passages worth keeping from any book page, or import your Kindle highlights."}
           </p>
           {fromFilter && (
             <Link
