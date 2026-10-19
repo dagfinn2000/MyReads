@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { handOverSceneMotion } from "@/lib/scene-motion";
 import { skyAt, skyStyle } from "@/lib/sky";
 
 /**
@@ -23,6 +24,11 @@ import { skyAt, skyStyle } from "@/lib/sky";
  * colours are the time of day rather than motion, so they always show. The
  * server works out the sky for the moment it renders, so the first paint is
  * right; from then on it is updated here.
+ *
+ * Once the animations are running they are handed over to script
+ * (lib/scene-motion.ts), where they look the same but cost less: they no
+ * longer wake the page every time they loop, and the slow ones step
+ * together a few times a second, so the screen isn't redrawn every frame.
  *
  * The background is read from <html> rather than taken as a prop alone, so
  * a change in Preferences (which sets the attribute at once) shows here
@@ -148,6 +154,9 @@ export function BackgroundScene({
 }) {
   const current = useSyncExternalStore(subscribe, readBackground, () => background);
   const [sky, setSky] = useState(initialSky);
+  const night = Number(sky?.["--sky-stars"] ?? 0) > 0;
+  const ref = useRef<HTMLDivElement>(null);
+  useSceneMotion(ref, current === "sky" && night ? "sky-night" : current);
 
   useEffect(() => {
     if (current !== "sky") return;
@@ -167,10 +176,11 @@ export function BackgroundScene({
     };
   }, [current, timeZone]);
 
+  let scene: React.ReactNode;
   switch (current) {
     case "rain":
-      return (
-        <div className="bg-scene" data-scene="rain" aria-hidden="true">
+      scene = (
+        <>
           <i className="bg-rain-far-a" />
           <i className="bg-rain-far-b" />
           <b className="bg-many bg-rain-near">
@@ -178,11 +188,12 @@ export function BackgroundScene({
               <i key={i} className="bg-raindrop" style={s} />
             ))}
           </b>
-        </div>
+        </>
       );
+      break;
     case "snow":
-      return (
-        <div className="bg-scene" data-scene="snow" aria-hidden="true">
+      scene = (
+        <>
           {(["far-a", "far-b", "mid-a", "mid-b"] as const).map((layer) => (
             <b key={layer} className={`bg-sway bg-sway-${layer}`}>
               <i className={`bg-snow-${layer}`} />
@@ -193,49 +204,76 @@ export function BackgroundScene({
               <i key={i} className="bg-flake" style={s} />
             ))}
           </b>
-        </div>
+        </>
       );
+      break;
     case "stars":
-      return (
-        <div className="bg-scene" data-scene="stars" aria-hidden="true">
+      scene = (
+        <>
           <Stars />
           <ShootingStars count={3} />
-        </div>
+        </>
       );
+      break;
     case "aurora":
-      return (
-        <div className="bg-scene" data-scene="aurora" aria-hidden="true">
+      scene = (
+        <>
           <i className="bg-aurora-1" />
           <i className="bg-aurora-2" />
           <i className="bg-aurora-3" />
-        </div>
+        </>
       );
+      break;
     case "ripples":
-      return (
-        <div className="bg-scene" data-scene="ripples" aria-hidden="true">
-          {DROPS.map((d) => (
-            <i
-              key={`${d.x}-${d.y}`}
-              className="bg-drop"
-              style={style({ left: `${d.x}%`, top: `${d.y}%`, "--t": `${d.t}s`, "--d": `${d.d}s` })}
-            />
-          ))}
-        </div>
-      );
+      scene = DROPS.map((d) => (
+        <i
+          key={`${d.x}-${d.y}`}
+          className="bg-drop"
+          style={style({ left: `${d.x}%`, top: `${d.y}%`, "--t": `${d.t}s`, "--d": `${d.d}s` })}
+        />
+      ));
+      break;
     case "sky":
-      return (
-        <div className="bg-scene" data-scene="sky" aria-hidden="true" style={sky}>
-          {/* Everything that only comes out at night, faded in by
-              --sky-stars. */}
-          <i className="bg-sky-night">
-            <Stars />
-            <ShootingStars count={1} />
-          </i>
-        </div>
+      // Everything that only comes out at night, faded in by --sky-stars.
+      // By day it isn't there at all, so no stars twinkle unseen.
+      scene = night && (
+        <i className="bg-sky-night">
+          <Stars />
+          <ShootingStars count={1} />
+        </i>
       );
+      break;
     default:
       return null;
   }
+  return (
+    <div
+      ref={ref}
+      className="bg-scene"
+      data-scene={current}
+      aria-hidden="true"
+      style={current === "sky" ? sky : undefined}
+    >
+      {scene}
+    </div>
+  );
+}
+
+/**
+ * Hands the scene's animations over to lib/scene-motion.ts once they are
+ * running, and again whenever what the scene shows changes.
+ */
+function useSceneMotion(ref: React.RefObject<HTMLElement | null>, shows: string) {
+  const motion = useRef<ReturnType<typeof handOverSceneMotion>>(null);
+  useEffect(() => {
+    const handover = handOverSceneMotion(() => ref.current);
+    motion.current = handover;
+    return () => {
+      handover.stop();
+      motion.current = null;
+    };
+  }, [ref]);
+  useEffect(() => motion.current?.sync(), [shows]);
 }
 
 /** The still field of faint stars, and the brighter ones over it. */
