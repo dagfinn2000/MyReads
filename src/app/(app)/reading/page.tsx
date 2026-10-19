@@ -44,7 +44,7 @@ export default async function NowReadingPage() {
         // Oldest first, page breaking same-instant ties (the anchor first).
         progress: {
           orderBy: [{ date: "asc" }, { page: "asc" }],
-          select: { id: true, page: true, date: true },
+          select: { id: true, page: true, date: true, minutes: true },
         },
       },
     }),

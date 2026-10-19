@@ -6,6 +6,7 @@ import { undoMoveFromReading } from "@/lib/actions/progress";
 import { nowReadingPaceText } from "@/lib/pace";
 import { currentPassEntries } from "@/lib/progress";
 import { progressFigure, unitFor } from "@/lib/progress-units";
+import { speedText } from "@/lib/reading-time";
 import type { UndoMove } from "@/lib/reading-log";
 import { usePreferences } from "@/components/preferences-provider";
 import { BookCover } from "@/components/book-card";
@@ -18,7 +19,7 @@ import { Card, CardContent } from "@/components/ui/card";
 export interface NowReadingBook extends QuickLogBook, LogBook {
   authors: string[];
   coverUrl: string | null;
-  progress: { id: string; page: number; date: Date }[];
+  progress: { id: string; page: number; date: Date; minutes: number | null }[];
 }
 
 interface Moved {
@@ -102,6 +103,7 @@ function NowReadingRow({
   const info = unitFor(book, prefs);
   const pass = currentPassEntries(book.progress, book.dateStarted, prefs.timeZone);
   const pace = nowReadingPaceText({ pass, info, from: prefs.paceFrom, now: new Date(), prefs });
+  const speed = speedText(pass, info);
   const pct =
     book.currentPage != null && book.pageCount
       ? Math.min((book.currentPage / book.pageCount) * 100, 100)
@@ -131,7 +133,10 @@ function NowReadingRow({
           )}
           <div className="flex flex-wrap justify-between gap-x-3 gap-y-0.5 text-xs text-muted-foreground tabular-nums sm:text-sm">
             <span>{book.currentPage != null ? progressFigure(book.currentPage, info) : "Not started"}</span>
-            <span>{pace}</span>
+            <span className="grid sm:justify-items-end">
+              <span>{pace}</span>
+              {speed && <span>{speed}</span>}
+            </span>
           </div>
           <QuickLog book={book} showMoveButtons onMoved={onMoved} autoFocus={autoFocus} />
           <div className="grid gap-1">

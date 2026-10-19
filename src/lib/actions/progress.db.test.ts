@@ -536,3 +536,119 @@ describe("moveFromReading and undo", () => {
     expect((await bookRow(book.id)).currentPage).toBe(100);
   });
 });
+
+describe("time read (the reading timer)", () => {
+  async function timedLog(bookId: string) {
+    const rows = await prisma.progressEntry.findMany({
+      where: { bookId },
+      orderBy: [{ date: "asc" }, { page: "asc" }],
+    });
+    return rows.map((r) => [r.page, r.minutes] as const);
+  }
+
+  it("saves the time with the entry and says it back", async () => {
+    const book = await makeBook();
+    const result = await logPage(book.id, { page: 40, day: "today", minutes: 35 });
+    expect(result).toMatchObject({ ok: true, message: "Logged page 40 for today (35 min)." });
+    expect(await timedLog(book.id)).toEqual([
+      [0, null],
+      [40, 35],
+    ]);
+  });
+
+  it("keeps time read without getting further, on its own day, crediting no pages", async () => {
+    const book = await makeBook({ currentPage: 40 });
+    await addEntries(book.id, [[0, "2026-10-05T00:00:00.000Z"], [40, "2026-10-11T18:00:00.000Z"]]);
+    expect(await logPage(book.id, { page: 40, day: "today", minutes: 20 })).toMatchObject({
+      ok: true,
+      message: "Logged page 40 for today (20 min).",
+    });
+    const rows = await prisma.progressEntry.findMany({
+      where: { bookId: book.id },
+      orderBy: [{ date: "asc" }, { page: "asc" }],
+    });
+    expect(rows.map((r) => [r.page, r.minutes])).toEqual([
+      [0, null],
+      [40, null],
+      [40, 20],
+    ]);
+    const totals = dailyPageTotals(
+      rows.map((r) => ({ bookId: book.id, page: r.page, date: r.date })),
+      OSLO,
+    );
+    expect(totals.get("2026-10-12")).toBeUndefined();
+    // Without a time it's still "already there".
+    expect(await logPage(book.id, { page: 40, day: "today" })).toMatchObject({
+      message: "Already at page 40.",
+    });
+  });
+
+  it("refuses a time that isn't whole minutes, or more than a day", async () => {
+    const book = await makeBook();
+    expect(await logPage(book.id, { page: 40, day: "today", minutes: 0 })).toEqual({
+      error: "Give at least a minute",
+    });
+    expect(await logPage(book.id, { page: 40, day: "today", minutes: 1441 })).toEqual({
+      error: "That's more than a day of reading",
+    });
+    expect(await log(book.id)).toEqual([]);
+  });
+
+  it("fixes or clears an entry's time, and leaves it when not asked", async () => {
+    const book = await makeBook({ currentPage: 100 });
+    await prisma.progressEntry.createMany({
+      data: [
+        { bookId: book.id, page: 0, date: at("2026-10-05T00:00:00.000Z") },
+        { bookId: book.id, page: 100, date: at("2026-10-11T18:00:00.000Z"), minutes: 30 },
+      ],
+    });
+    const entry = await prisma.progressEntry.findFirstOrThrow({ where: { bookId: book.id, page: 100 } });
+
+    await updateProgressEntry(entry.id, { page: 110, day: "2026-10-11" });
+    expect((await prisma.progressEntry.findUniqueOrThrow({ where: { id: entry.id } })).minutes).toBe(30);
+    await updateProgressEntry(entry.id, { page: 110, day: "2026-10-11", minutes: 45 });
+    expect((await prisma.progressEntry.findUniqueOrThrow({ where: { id: entry.id } })).minutes).toBe(45);
+    await updateProgressEntry(entry.id, { page: 110, day: "2026-10-11", minutes: null });
+    expect((await prisma.progressEntry.findUniqueOrThrow({ where: { id: entry.id } })).minutes).toBeNull();
+  });
+
+  it("puts a running timer's time on Finished's closing entry, and on Stopped's page", async () => {
+    const book = await makeBook({ currentPage: 218 });
+    await addEntries(book.id, [[0, "2026-10-05T00:00:00.000Z"], [218, "2026-10-11T18:00:00.000Z"]]);
+    await moveFromReading(book.id, "READ", 50);
+    expect((await timedLog(book.id)).at(-1)).toEqual([300, 50]);
+
+    const other = await makeBook({ title: "Villette", currentPage: 120 });
+    await addEntries(other.id, [[0, "2026-10-05T00:00:00.000Z"], [120, "2026-10-11T18:00:00.000Z"]]);
+    await moveFromReading(other.id, "DNF", 15);
+    expect(await timedLog(other.id)).toEqual([
+      [0, null],
+      [120, null],
+      [120, 15],
+    ]);
+  });
+
+  it("finishes a book already on its last page with the time on a closing entry, undone together", async () => {
+    const book = await makeBook({ currentPage: 300 });
+    await addEntries(book.id, [[0, "2026-10-05T00:00:00.000Z"], [300, "2026-10-11T18:00:00.000Z"]]);
+    const moved = await moveFromReading(book.id, "READ", 10);
+    expect((await timedLog(book.id)).at(-1)).toEqual([300, 10]);
+    expect(await undoMoveFromReading(book.id, undoOf(moved))).toEqual({});
+    expect(await timedLog(book.id)).toEqual([
+      [0, null],
+      [300, null],
+    ]);
+    expect((await bookRow(book.id)).currentPage).toBe(300);
+  });
+
+  it("keeps no time for a read with no log, and never writes it on a start anchor", async () => {
+    const book = await makeBook({ currentPage: 50 });
+    await moveFromReading(book.id, "DNF", 20);
+    expect(await log(book.id)).toEqual([]);
+
+    const anchored = await makeBook({ title: "Shirley" });
+    await addEntries(anchored.id, [[0, "2026-10-05T00:00:00.000Z"]]);
+    await moveFromReading(anchored.id, "DNF", 20);
+    expect(await timedLog(anchored.id)).toEqual([[0, null]]);
+  });
+});

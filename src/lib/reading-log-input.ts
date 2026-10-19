@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { keyToUtcDate } from "@/lib/dates";
+import { MAX_ENTRY_MINUTES } from "@/lib/reading-time";
 
 /**
  * What the progress actions (lib/actions/progress.ts) accept from the
@@ -34,17 +35,30 @@ const pageField = z.coerce
  *  as typed. Only ever shown; anything odd is dropped, never refused. */
 const typedValue = z.number().int().min(0).max(1_000_000).optional().catch(undefined);
 
+/** How long the reading took, from the timer or typed in. */
+const minutesField = z
+  .number()
+  .int("Give the time in whole minutes")
+  .min(1, "Give at least a minute")
+  .max(MAX_ENTRY_MINUTES, "That's more than a day of reading");
+
 export const logPageSchema = z.object({
   page: pageField,
   day: dayChoiceSchema.default("today"),
   value: typedValue,
+  minutes: minutesField.optional(),
 });
 
 export const editEntrySchema = z.object({
   page: pageField,
   day: dayKeySchema,
   value: typedValue,
+  /** Left out: the entry keeps its time. Null: the time is cleared. */
+  minutes: minutesField.nullable().optional(),
 });
+
+/** The time a running or stopped timer hands to Finished. */
+export const moveMinutesSchema = minutesField.optional();
 
 export const moveTargetSchema = z.enum(["READ", "DNF"]);
 

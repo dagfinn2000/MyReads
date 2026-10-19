@@ -249,6 +249,11 @@ model ProgressEntry {
 
   page Int
   date DateTime @default(now())
+  /// How long you read to get here from the entry before, in minutes, when
+  /// the reading timer ran or you typed the time in. Null = not timed. Only
+  /// shown and summed (reading speed, time left, time read); the pages a
+  /// day still come from the positions alone.
+  minutes Int?
 
   @@index([bookId, date])
 }

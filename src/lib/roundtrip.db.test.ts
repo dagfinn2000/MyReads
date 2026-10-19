@@ -95,7 +95,7 @@ describe("export -> import round trip", () => {
         progress: {
           create: [
             { page: 0, date: new Date("2026-01-01T09:00:00.000Z") },
-            { page: 250, date: new Date("2026-01-10T09:00:00.000Z") },
+            { page: 250, date: new Date("2026-01-10T09:00:00.000Z"), minutes: 95 },
           ],
         },
         loans: {
@@ -163,6 +163,9 @@ describe("export -> import round trip", () => {
     expect(restored.reads[0].rating).toBe(8);
     expect(restored.reads[0].note).toBe("Read aloud");
     expect(restored.progress.map((p) => p.page).sort((a, b) => a - b)).toEqual([0, 250]);
+    // The reading timer's time comes back with its entry.
+    expect(restored.progress.find((p) => p.page === 250)?.minutes).toBe(95);
+    expect(restored.progress.find((p) => p.page === 0)?.minutes).toBeNull();
 
     // Lending survives, including which loan is still open.
     expect(restored.loans).toHaveLength(2);

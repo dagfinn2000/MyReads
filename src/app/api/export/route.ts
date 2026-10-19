@@ -18,8 +18,8 @@ import { parsePreferences } from "@/lib/preferences";
  *
  * The JSON inside is still the version-1 export format — quotes, reads,
  * progress, loans, settings, saved views and pages goals are additive
- * fields (as are a goal's `countRereads`, a book's `lengthMinutes` and a
- * past read's `note`), and `owned` is still written
+ * fields (as are a goal's `countRereads`, a book's `lengthMinutes`, a
+ * past read's `note` and a log entry's `minutes`), and `owned` is still written
  * alongside the newer `ownership` — so unzipping and feeding `library.json`
  * to an older instance keeps working.
  *
@@ -55,7 +55,7 @@ export async function GET() {
           orderBy: { createdAt: "asc" },
         },
         progress: {
-          select: { page: true, date: true },
+          select: { page: true, date: true, minutes: true },
           orderBy: [{ date: "asc" }, { page: "asc" }],
         },
         loans: {

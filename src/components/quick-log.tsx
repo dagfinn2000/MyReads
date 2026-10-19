@@ -19,6 +19,7 @@ import { recentDays, type MoveResult } from "@/lib/reading-log";
 import { cn } from "@/lib/utils";
 import { usePreferences } from "@/components/preferences-provider";
 import { ProgressField, ProgressNotes, unitLabel } from "@/components/progress-input";
+import { ReadingTimer, useReadingTimer } from "@/components/reading-timer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -58,7 +59,8 @@ const AT_LEAST: Record<ProgressUnit, string> = {
  * The quick-log row for a book being read: the progress box in the book's
  * unit, step buttons, which day, and Log. On Now reading it also has
  * Finished and Stopped. Logging the last page asks whether the book is
- * finished.
+ * finished. Under it, the reading timer: its time goes with the next log,
+ * or with Finished or Stopped.
  *
  * Its own form, outside the reading card's, so Enter in the box logs and
  * none of these buttons can submit the reading form.
@@ -90,6 +92,7 @@ export function QuickLog({
   // The page just logged when it was the last one: asks "Mark as Read?".
   const [lastPage, setLastPage] = useState<number | null>(null);
   const [pending, startTransition] = useTransition();
+  const timer = useReadingTimer(book.id);
 
   const text = draft ?? positionText(book.currentPage, info);
   const today = dayKey(new Date(), prefs.timeZone);
@@ -131,10 +134,18 @@ export function QuickLog({
     ) {
       return fail(`That's still page ${parsed.page} of ${info.pageCount}. Log a little further.`);
     }
+    const timed = timer.minutesForLog();
+    if ("error" in timed) return fail(timed.error);
 
     startTransition(async () => {
-      const result = await logPage(book.id, { page: parsed.page, day: when, value: parsed.value });
+      const result = await logPage(book.id, {
+        page: parsed.page,
+        day: when,
+        value: parsed.value,
+        minutes: timed.minutes,
+      });
       if ("error" in result) return fail(result.error);
+      if (timed.minutes) timer.consumed();
       setDraft(null);
       setDay("today");
       if (result.lastPage) {
@@ -148,9 +159,12 @@ export function QuickLog({
 
   function move(to: "READ" | "DNF", origin: HTMLElement) {
     setMessage(null);
+    const timed = timer.minutesForLog();
+    if ("error" in timed) return fail(timed.error);
     startTransition(async () => {
-      const result = await moveFromReading(book.id, to);
+      const result = await moveFromReading(book.id, to, timed.minutes);
       if ("error" in result) return fail(result.error);
+      if (timed.minutes) timer.consumed();
       // Before the row goes away with the move.
       if (result.finished) celebrate(origin);
       onMoved?.(result);
@@ -264,6 +278,7 @@ export function QuickLog({
           bookId={book.id}
           showSaved={text !== positionText(book.currentPage, info)}
         />
+        <ReadingTimer control={timer} />
         {lastPage !== null && (
           <div
             role="group"

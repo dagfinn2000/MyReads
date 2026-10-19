@@ -12,11 +12,13 @@ import { currentPassEntries } from "@/lib/progress";
 import {
   formatPosition,
   parseBoxText,
+  parseDuration,
   positionText,
   unitFor,
   type UnitInfo,
 } from "@/lib/progress-units";
 import { subjectDay } from "@/lib/reading-log";
+import { MAX_ENTRY_MINUTES, entryTime, speedText, totalMinutes } from "@/lib/reading-time";
 import { usePreferences } from "@/components/preferences-provider";
 import { ProgressField, ProgressNotes, unitLabel } from "@/components/progress-input";
 import { Button } from "@/components/ui/button";
@@ -34,7 +36,7 @@ export function ProgressChart({
   status,
   info,
 }: {
-  entries: Pick<ProgressEntry, "page" | "date">[];
+  entries: (Pick<ProgressEntry, "page" | "date"> & { minutes?: number | null })[];
   status: ReadingStatus;
   info: UnitInfo;
 }) {
@@ -66,6 +68,15 @@ export function ProgressChart({
     now: new Date(),
     prefs,
   });
+  // With the reading timer: how fast it goes and what's left while reading,
+  // how long the read took once it's done.
+  const timed = totalMinutes(entries);
+  const timeText =
+    status === ReadingStatus.READING
+      ? speedText(entries, info)
+      : status === ReadingStatus.READ && timed > 0
+        ? `${entryTime(timed)} of reading timed`
+        : null;
 
   return (
     <div className="grid max-w-sm gap-1">
@@ -92,6 +103,7 @@ export function ProgressChart({
       {paceText && (
         <p className="text-xs text-muted-foreground tabular-nums">{paceText}</p>
       )}
+      {timeText && <p className="text-xs text-muted-foreground tabular-nums">{timeText}</p>}
     </div>
   );
 }
@@ -106,7 +118,7 @@ export interface LogBook {
   dateStarted: Date | null;
 }
 
-type LogEntry = Pick<ProgressEntry, "id" | "page" | "date">;
+type LogEntry = Pick<ProgressEntry, "id" | "page" | "date"> & { minutes?: number | null };
 
 /**
  * The raw reading log, collapsed by default: every logged position, newest
@@ -229,9 +241,15 @@ function EntryRow({
   }, [editing]);
 
   const anchor = entry.page === 0;
+  const time = entryTime(entry.minutes);
   const position = (
     <span className={layout === "log" ? "w-20 shrink-0 tabular-nums" : "w-16 shrink-0 tabular-nums text-foreground"}>
       {label}
+    </span>
+  );
+  const timeLabel = time && (
+    <span className="shrink-0 text-xs text-muted-foreground tabular-nums" title="Time read">
+      {time}
     </span>
   );
   const day = (
@@ -256,11 +274,13 @@ function EntryRow({
             <>
               {position}
               {day}
+              {timeLabel}
             </>
           ) : (
             <>
               {day}
               {position}
+              {timeLabel}
             </>
           )}
           {!anchor && (
@@ -312,6 +332,7 @@ function EntryEditor({
   const inputRef = useRef<HTMLInputElement>(null);
   const [text, setText] = useState(() => positionText(entry.page, info));
   const [day, setDay] = useState(() => calendarDay(entry.date, prefs.timeZone));
+  const [minutesText, setMinutesText] = useState(() => (entry.minutes ? String(entry.minutes) : ""));
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const today = dayKey(new Date(), prefs.timeZone);
@@ -330,9 +351,18 @@ function EntryEditor({
     if (!parsed || "error" in parsed) return setError(parsed?.error ?? "Type where you were.");
     if (parsed.page < 1) return setError("An entry needs at least page 1.");
     if (!day) return setError("Pick a day.");
+    // An empty box clears the time; "0" too.
+    const minutes = minutesText.trim() === "" ? 0 : parseDuration(minutesText);
+    if (minutes === null) return setError("Type the time read in minutes, like 25 or 1:10.");
+    if (minutes > MAX_ENTRY_MINUTES) return setError("That's more than a day of reading.");
     setError(null);
     startTransition(async () => {
-      const result = await updateProgressEntry(entry.id, { page: parsed.page, day, value: parsed.value });
+      const result = await updateProgressEntry(entry.id, {
+        page: parsed.page,
+        day,
+        value: parsed.value,
+        minutes: minutes || null,
+      });
       if (result.error) setError(result.error);
       else onDone(result.message ?? null);
     });
@@ -373,6 +403,18 @@ function EntryEditor({
           value={day}
           onChange={(e) => setDay(e.target.value)}
         />
+        <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
+          <Input
+            aria-label="Minutes read"
+            inputMode="numeric"
+            autoComplete="off"
+            placeholder="–"
+            className="w-16 tabular-nums"
+            value={minutesText}
+            onChange={(e) => setMinutesText(e.target.value)}
+          />
+          min
+        </span>
         <Button type="submit" size="sm" disabled={pending}>
           {pending ? "Saving…" : "Save"}
         </Button>

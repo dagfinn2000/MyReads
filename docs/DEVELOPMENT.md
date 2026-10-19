@@ -42,7 +42,8 @@ password matches `POSTGRES_PASSWORD`. Every setting is described in
 ## Tests
 
 - **`npm test`** covers the pure logic that is easiest to break without
-  noticing: ISBN-10/13 conversion, reading pace and streaks, which day a date
+  noticing: ISBN-10/13 conversion, reading pace and streaks, the reading
+  timer and reading speed, which day a date
   falls on in each time zone, sorting authors by surname and series in
   order, the sorting rules and alphabets, saved library views, reading
   goals, reading preferences and themes, the colours of drawn covers,
@@ -53,7 +54,8 @@ password matches `POSTGRES_PASSWORD`. Every setting is described in
 - **`npm run test:db:docker`** starts a `postgres:16-alpine` container, runs
   the database tests, and removes it. They cover backup and restore (the
   round trip, merging, duplicates, and settings), re-read counts, the book
-  form and the reading log it writes, library search, bulk edit, saving
+  form and the reading log it writes (with the reading timer's time),
+  library search, bulk edit, saving
   preferences and saved views, and the checks that stop one user from
   touching another user's books.
 

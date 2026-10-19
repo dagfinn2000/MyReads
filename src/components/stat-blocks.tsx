@@ -50,3 +50,27 @@ export function StatCard({
     </Card>
   );
 }
+
+/** A stretch of time as a stat card shows it: the numbers big, the units
+ *  small, "12 h 40 min". */
+export function Duration({ minutes }: { minutes: number }) {
+  const h = Math.floor(minutes / 60);
+  const m = Math.round(minutes % 60);
+  const unit = "text-base font-normal text-muted-foreground";
+  return (
+    <span>
+      {h > 0 && (
+        <>
+          {h}
+          <span className={unit}> h </span>
+        </>
+      )}
+      {(m > 0 || h === 0) && (
+        <>
+          {m}
+          <span className={unit}> min</span>
+        </>
+      )}
+    </span>
+  );
+}
