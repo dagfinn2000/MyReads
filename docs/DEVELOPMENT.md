@@ -132,6 +132,7 @@ src/
 │  │                   and where bookcases and furniture go as it grows
 │  │                   or as the reader moves it
 │  ├─ room-styles.ts   the reading room's house styles and colours
+│  ├─ scene-motion.ts  runs the moving backgrounds' animations cheaply
 │  ├─ sky.ts           the Sky background: how high the sun is where
 │  │                   the reader's time zone is, as colours
 │  ├─ spine-colour.ts  a spine's colour, picked from its cover
@@ -184,6 +185,16 @@ src/
   Sky background is worked out from the sun's height where the reader's
   time zone is ([sky.ts](../src/lib/sky.ts)), on the server for the first
   paint and then once a minute in the browser.
+- **Moving backgrounds keep the page asleep.** The animations are written
+  in CSS, but once they run,
+  [scene-motion.ts](../src/lib/scene-motion.ts) hands each one to a Web
+  Animation with the same keyframes and timing. A CSS animation wakes the
+  page's main thread every time it loops (React listens for that), and
+  with a hundred raindrops that is many times a second; a Web Animation
+  loops quietly on the compositor. Slow changes (stars twinkling, the
+  aurora drifting) also step together a few times a second rather than
+  every frame, so in between the browser has nothing to redraw. By day the
+  Sky background doesn't draw its stars at all.
 - **The reading room is drawn in code**, with no image files. Its pixel art
   is rectangles ([room-art.tsx](../src/components/room-art.tsx)), each
   naming a paint whose colour lives in

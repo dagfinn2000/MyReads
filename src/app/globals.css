@@ -1138,7 +1138,12 @@ html.dark[data-background="ripples"] body,
    reduced motion. Otherwise rain, snow and stars hold still where they
    are, and aurora and ripples are hidden, leaving their still textures
    above. The sky's colours tell the time of day rather than move, so they
-   always show. */
+   always show.
+
+   Once they are running, most of these animations are handed over to
+   script (lib/scene-motion.ts) with the same keyframes and timing, which
+   costs less to run. The rules here still decide what moves, how, and
+   when. */
 .bg-scene {
   position: fixed;
   inset: 0;
@@ -1502,9 +1507,15 @@ html.dark[data-background="ripples"] body,
     scale: 1;
   }
 }
-/* A streak about a second long, then nothing for the rest of the loop. */
+/* A streak about a second long, then nothing for the rest of the loop.
+   The wait is held in a single step: eased between two equal frames, Chrome
+   would still redraw the screen every frame for the unseen star. */
 @keyframes bg-meteor {
-  0%,
+  0% {
+    opacity: 0;
+    transform: rotate(var(--angle)) translateX(0) scaleX(0.2);
+    animation-timing-function: step-end;
+  }
   96% {
     opacity: 0;
     transform: rotate(var(--angle)) translateX(0) scaleX(0.2);
