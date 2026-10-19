@@ -1,6 +1,7 @@
 import type { Prisma } from "@prisma/client";
 import { ReadingStatus } from "@/lib/enums";
 import { prisma } from "@/lib/prisma";
+import type { TimedEntry } from "@/lib/reading-habits";
 import type { BookDayPages, StatsInputs } from "@/lib/stats-count";
 
 /** The book fields the stats page and the year in review use. */
@@ -160,6 +161,30 @@ export async function minutesByDayForUser(userId: string, timeZone: string): Pro
     JOIN "Book" b ON b."id" = pe."bookId"
     WHERE b."userId" = ${userId} AND pe."minutes" IS NOT NULL
     GROUP BY 1, 2
+  `;
+}
+
+/**
+ * Every timed log entry (lib/reading-habits.ts): its day in the reader's
+ * zone, its minutes, and the pages since the book's entry before it, by
+ * the same rule as the reading log (a step back, such as a re-read's page-0
+ * anchor, adds nothing). A book's first entry has no pages to give.
+ */
+export async function timedEntriesForUser(userId: string, timeZone: string): Promise<TimedEntry[]> {
+  return prisma.$queryRaw<TimedEntry[]>`
+    SELECT day, minutes, CASE WHEN prev IS NULL THEN NULL ELSE GREATEST(page - prev, 0) END AS pages, audiobook
+    FROM (
+      SELECT
+        to_char((pe."date" AT TIME ZONE 'UTC') AT TIME ZONE ${timeZone}, 'YYYY-MM-DD') AS day,
+        pe."minutes" AS minutes,
+        pe."page" AS page,
+        LAG(pe."page") OVER (PARTITION BY pe."bookId" ORDER BY pe."date", pe."page") AS prev,
+        (b."format" = 'AUDIOBOOK') AS audiobook
+      FROM "ProgressEntry" pe
+      JOIN "Book" b ON b."id" = pe."bookId"
+      WHERE b."userId" = ${userId}
+    ) t
+    WHERE minutes IS NOT NULL
   `;
 }
 

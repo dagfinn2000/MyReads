@@ -187,6 +187,7 @@ export const HIDEABLE_NAV = ["reading", "check", "quotes", "room"] as const;
 export const HIDEABLE_STATS = [
   "goal",
   "heatmap",
+  "habits",
   "perYear",
   "tags",
   "formats",
