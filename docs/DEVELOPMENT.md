@@ -46,10 +46,10 @@ password matches `POSTGRES_PASSWORD`. Every setting is described in
   timer and reading speed, which day a date
   falls on in each time zone, sorting authors by surname and series in
   order, the sorting rules and alphabets, saved library views, reading
-  goals, On this day, reading preferences and themes, reading a Kindle's
-  clippings file and matching its books to the library, the colours of
-  drawn covers,
-  the reading room's shelves and spine colours, lending, the rate
+  goals, On this day, reading habits, reading preferences and themes,
+  reading a Kindle's clippings file and matching its books to the library,
+  the colours of drawn covers, the reading room's shelves and spine
+  colours, lending, the rate
   limiter, the
   guard that stops cover downloads from reaching private addresses, image
   type detection, and the size limits on uploads and backup files.

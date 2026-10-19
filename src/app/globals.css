@@ -1869,6 +1869,16 @@ html[data-covers="plain"] .drawn-cover {
   transform-origin: left;
   animation: bar-grow 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
 }
+/* The weekday bars on Stats rise from the floor, one after another. */
+@keyframes bar-rise {
+  from {
+    transform: scaleY(0);
+  }
+}
+.bar-rise {
+  transform-origin: bottom;
+  animation: bar-rise 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+}
 .gold-medal-in {
   animation: medal-in 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
 }

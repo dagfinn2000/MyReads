@@ -96,6 +96,9 @@ server.
 - Books read per year, pages read, ratings, genres and formats, and a
   calendar of the days you read. Look at all time, this year, the last 12
   months or the last 30 days.
+- Reading habits: which days of the week you read most, pages on an
+  average reading day, how long a book takes you from start to finish, and
+  with the timer your average sitting and pages an hour.
 - Decide what counts: whole books when you finish them or the pages you
   log, whether books you stop reading count, and how audiobooks count.
 - A "year in review" page for every year, and yearly reading goals in books

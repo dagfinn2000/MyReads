@@ -7,6 +7,7 @@ import {
   dayPageTotals,
   loadStatsInputs,
   minutesByDayForUser,
+  timedEntriesForUser,
 } from "@/lib/stats-query";
 
 /**
@@ -232,5 +233,21 @@ describe("minutesByDayForUser", () => {
     expect(dayMinuteTotals(utc, true)).toEqual(new Map([["2026-03-01", 30]]));
     // Nobody else's time, and none at all for a reader who never timed.
     expect(await minutesByDayForUser(USER, "UTC")).toEqual([]);
+  });
+
+  it("gives each timed entry its pages since the book's entry before", async () => {
+    // Same reader and log as above, plus a stretch that went back a page
+    // (a re-read's anchor would too): it adds no pages.
+    await prisma.progressEntry.create({
+      data: { bookId: "sq-t1", page: 55, date: at("2026-03-03T12:00:00Z"), minutes: 10 },
+    });
+    const rows = await timedEntriesForUser(TIMED, "Europe/Oslo");
+    expect(rows.sort((a, b) => a.day.localeCompare(b.day) || a.minutes - b.minutes)).toEqual([
+      { day: "2026-03-02", minutes: 30, pages: 40, audiobook: false },
+      // The audiobook's first entry has nothing before it.
+      { day: "2026-03-02", minutes: 45, pages: null, audiobook: true },
+      { day: "2026-03-03", minutes: 10, pages: 0, audiobook: false },
+    ]);
+    expect(await timedEntriesForUser(USER, "UTC")).toEqual([]);
   });
 });

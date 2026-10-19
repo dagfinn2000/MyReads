@@ -9,6 +9,7 @@ import { FORMAT_LABELS, formatNumber } from "@/lib/display";
 import { goalPace, goalProgress, splitGoals, yearClock } from "@/lib/goals";
 import { dailyGoalTarget, goalMetDays } from "@/lib/daily-goal";
 import { minutesInWindow } from "@/lib/reading-time";
+import { readingHabits } from "@/lib/reading-habits";
 import {
   booksReadAllTime,
   buildPasses,
@@ -31,8 +32,10 @@ import {
   dayPageTotals,
   loadStatsInputs,
   minutesByDayForUser,
+  timedEntriesForUser,
 } from "@/lib/stats-query";
 import { GoalCard } from "@/components/goal-card";
+import { ReadingHabitsCard } from "@/components/reading-habits-card";
 import { ReadingHeatmap } from "@/components/reading-heatmap";
 import { Bar, Duration, StatCard } from "@/components/stat-blocks";
 import { StatsPeriodNav } from "@/components/stats-period-nav";
@@ -77,7 +80,7 @@ export default async function StatsPage({
   const period = parsePeriod(sp.period, prefs.statsPeriod);
   const words = PERIOD_WORDS[period];
 
-  const [inputs, goals, quoteCount, randomQuotes, dayMinutes] = await Promise.all([
+  const [inputs, goals, quoteCount, randomQuotes, dayMinutes, timedEntries] = await Promise.all([
     // Books, past reads and the log by book and day: what lib/stats-count.ts
     // turns into passes, by the "What counts" preferences.
     loadStatsInputs(userId, prefs.timeZone),
@@ -98,8 +101,9 @@ export default async function StatsPage({
       WHERE b."userId" = ${userId}
       ORDER BY random()
       LIMIT 1`,
-    // Time from the reading timer, by day.
+    // Time from the reading timer, by day, and each timed stretch.
     minutesByDayForUser(userId, prefs.timeZone),
+    hidden.has("habits") ? [] : timedEntriesForUser(userId, prefs.timeZone),
   ]);
 
   const randomQuote = randomQuotes[0] ?? null;
@@ -204,6 +208,19 @@ export default async function StatsPage({
       ? null
       : "every book in the library";
   const nothingRead = period === "all" ? "Nothing read yet." : "Nothing in this period.";
+
+  // When the reading happens, in the period: from the same passes as Pages
+  // read, and the timer's stretches.
+  const habits = readingHabits(
+    passes,
+    period === "all" ? ALL_TIME : periodWindow(period, todayKey),
+    timedEntries,
+    {
+      weekStart: prefs.weekStart,
+      timeZone: prefs.timeZone,
+      withoutAudiobooks: prefs.statsAudiobooks === "out",
+    },
+  );
 
   // Genre/tag breakdown, top 10.
   const tagCounts = new Map<string, number>();
@@ -333,6 +350,19 @@ export default async function StatsPage({
             <ReadingHeatmap totals={pageTotals} goalDays={goalDays ?? undefined} prefs={prefs} />
           </CardContent>
         </Card>
+      )}
+
+      {!hidden.has("habits") && (
+        <ReadingHabitsCard
+          habits={habits}
+          words={words}
+          fmt={fmt}
+          emptyText={
+            period === "all"
+              ? "Log your reading as you go, and this shows when you read."
+              : "Nothing logged in this period."
+          }
+        />
       )}
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
