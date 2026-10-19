@@ -2,7 +2,9 @@
 
 import { useEffect, useRef, useState, useTransition } from "react";
 import Link from "next/link";
+import { Hourglass } from "lucide-react";
 import { undoMoveFromReading } from "@/lib/actions/progress";
+import { lastReadText } from "@/lib/on-this-day";
 import { nowReadingPaceText } from "@/lib/pace";
 import { currentPassEntries } from "@/lib/progress";
 import { progressFigure, unitFor } from "@/lib/progress-units";
@@ -104,6 +106,14 @@ function NowReadingRow({
   const pass = currentPassEntries(book.progress, book.dateStarted, prefs.timeZone);
   const pace = nowReadingPaceText({ pass, info, from: prefs.paceFrom, now: new Date(), prefs });
   const speed = speedText(pass, info);
+  // Put down for a while? Finished and Stopped are right below. The newest
+  // entry, or the start when that's later (a re-read not logged yet).
+  const lastEntry = book.progress[book.progress.length - 1]?.date ?? null;
+  const quiet = lastReadText(
+    [lastEntry, book.dateStarted].reduce<Date | null>((a, d) => (d && (!a || d > a) ? d : a), null),
+    new Date(),
+    prefs.timeZone,
+  );
   const pct =
     book.currentPage != null && book.pageCount
       ? Math.min((book.currentPage / book.pageCount) * 100, 100)
@@ -124,6 +134,12 @@ function NowReadingRow({
             </h2>
             {book.authors.length > 0 && (
               <p className="truncate text-sm text-muted-foreground">{book.authors.join(", ")}</p>
+            )}
+            {quiet && (
+              <p className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+                <Hourglass className="size-3" aria-hidden="true" />
+                {quiet}
+              </p>
             )}
           </div>
           {pct !== null && (
