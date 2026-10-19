@@ -57,6 +57,9 @@ server.
   Now reading, put them in order, and they come first in Up next on Now
   reading, before the suggestions (the next book of a series you're
   reading, then the books you added last). Starting a book takes it off.
+- On this day: Now reading remembers what you finished or started on
+  today's date in earlier years, and a quote you saved on it. A book you
+  haven't logged for two weeks says when you last read it.
 - Re-reads are kept as history and count in your stats.
 - Save favourite quotes with page numbers, and search all of them on the
   Quotes page.

@@ -46,8 +46,9 @@ password matches `POSTGRES_PASSWORD`. Every setting is described in
   timer and reading speed, which day a date
   falls on in each time zone, sorting authors by surname and series in
   order, the sorting rules and alphabets, saved library views, reading
-  goals, reading preferences and themes, reading a Kindle's clippings
-  file and matching its books to the library, the colours of drawn covers,
+  goals, On this day, reading preferences and themes, reading a Kindle's
+  clippings file and matching its books to the library, the colours of
+  drawn covers,
   the reading room's shelves and spine colours, lending, the rate
   limiter, the
   guard that stops cover downloads from reaching private addresses, image
@@ -56,7 +57,8 @@ password matches `POSTGRES_PASSWORD`. Every setting is described in
   the database tests, and removes it. They cover backup and restore (the
   round trip, merging, duplicates, and settings), re-read counts, the book
   form and the reading log it writes (with the reading timer's time),
-  importing Kindle highlights, the Up next list, library search, bulk edit, saving
+  importing Kindle highlights, the Up next list, On this day, library
+  search, bulk edit, saving
   preferences and saved views, and the checks that stop one user from
   touching another user's books.
 

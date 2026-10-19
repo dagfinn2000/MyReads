@@ -8,6 +8,8 @@ import { getPreferences, getSession } from "@/lib/current-user";
 import { dailyGoalLines, dailyGoalStatus, dailyGoalTarget } from "@/lib/daily-goal";
 import { dayKey } from "@/lib/dates";
 import { formatWeekdayDay } from "@/lib/display";
+import { onThisDay } from "@/lib/on-this-day";
+import { onThisDayCandidates } from "@/lib/on-this-day-query";
 import {
   bookDayPageTotalsForUser,
   dayMinuteTotals,
@@ -19,6 +21,7 @@ import { BookCover } from "@/components/book-card";
 import { BookLink } from "@/components/book-link";
 import { DailyGoalRing } from "@/components/daily-goal-ring";
 import { NowReading } from "@/components/now-reading";
+import { OnThisDayCard } from "@/components/on-this-day-card";
 import { UpNextEditor } from "@/components/up-next-editor";
 import { Button } from "@/components/ui/button";
 
@@ -30,8 +33,9 @@ const UP_NEXT = 10;
 /**
  * Every book being read on one page, each with the quick-log row, so
  * telling the app where you are doesn't mean opening each book. Under them,
- * the Want to Read books that are up next: the reader's own picks, then
- * suggestions (lib/up-next.ts).
+ * what happened on this day in earlier years, and the Want to Read books
+ * that are up next: the reader's own picks, then suggestions
+ * (lib/up-next.ts).
  */
 export default async function NowReadingPage() {
   const session = await getSession();
@@ -39,8 +43,9 @@ export default async function NowReadingPage() {
   const userId = session.user.id;
   const prefs = await getPreferences();
   const goal = dailyGoalTarget(prefs);
+  const todayKey = dayKey(new Date(), prefs.timeZone);
 
-  const [reading, wantToRead, seriesBooks, goalByDay] = await Promise.all([
+  const [reading, wantToRead, seriesBooks, goalByDay, memories] = await Promise.all([
     prisma.book.findMany({
       where: { userId, status: ReadingStatus.READING },
       select: {
@@ -89,8 +94,9 @@ export default async function NowReadingPage() {
       : goal.unit === "pages"
         ? bookDayPageTotalsForUser(userId, prefs.timeZone).then(dayPageTotals)
         : minutesByDayForUser(userId, prefs.timeZone).then((rows) => dayMinuteTotals(rows)),
+    onThisDayCandidates(userId, todayKey),
   ]);
-  const goalStatus = goal && goalByDay && dailyGoalStatus(goalByDay, goal, dayKey(new Date(), prefs.timeZone));
+  const goalStatus = goal && goalByDay && dailyGoalStatus(goalByDay, goal, todayKey);
 
   // The book read most recently first: its newest log entry, or when it
   // was started.
@@ -146,6 +152,8 @@ export default async function NowReadingPage() {
           </div>
         }
       />
+
+      <OnThisDayCard {...onThisDay(memories.events, memories.quotes, todayKey, prefs.timeZone)} />
 
       {next.length > 0 && (
         <section className="grid min-w-0 gap-2">
