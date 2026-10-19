@@ -49,6 +49,10 @@ server.
   how long the rest will take, and Stats adds up your time read. The timer
   keeps going if you close the page or lock your phone, on the device you
   started it on.
+- Set a daily goal, in pages or minutes, and a ring on Now reading fills as
+  you log your reading through the day, with a little confetti when you
+  reach it. It counts the days in a row you've met it, and the reading
+  calendar on Stats says how many days you met it in the last year.
 - Re-reads are kept as history and count in your stats.
 - Save favourite quotes with page numbers, and search all of them on the
   Quotes page.

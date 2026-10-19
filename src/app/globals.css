@@ -1889,6 +1889,22 @@ html[data-covers="plain"] .drawn-cover {
   animation: timer-breathe 2.4s ease-in-out infinite;
 }
 
+/* The daily goal's ring fills from empty as Now reading opens, moves on
+   when a log adds to it, and keeps a soft glow once the goal is met (a
+   still glow, so it shows with motion off too). */
+@keyframes ring-in {
+  from {
+    stroke-dashoffset: var(--ring-empty);
+  }
+}
+.goal-ring-arc {
+  transition: stroke-dashoffset 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+  animation: ring-in 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+}
+.goal-ring-met {
+  filter: drop-shadow(0 0 6px color-mix(in oklab, var(--primary) 50%, transparent));
+}
+
 /* A clicked cover flying to its place on the book page
    (lib/cover-flight.ts). A touch slower than the page cross-fade, with an
    ease that settles, so the cover visibly lands. */

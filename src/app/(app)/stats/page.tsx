@@ -7,6 +7,7 @@ import { getPreferences, getSession } from "@/lib/current-user";
 import { dayKey } from "@/lib/dates";
 import { FORMAT_LABELS, formatNumber } from "@/lib/display";
 import { goalPace, goalProgress, splitGoals, yearClock } from "@/lib/goals";
+import { dailyGoalTarget, goalMetDays } from "@/lib/daily-goal";
 import { minutesInWindow } from "@/lib/reading-time";
 import {
   booksReadAllTime,
@@ -25,7 +26,12 @@ import {
   statsHref,
   yearWindow,
 } from "@/lib/stats-period";
-import { dayPageTotals, loadStatsInputs, minutesByDayForUser } from "@/lib/stats-query";
+import {
+  dayMinuteTotals,
+  dayPageTotals,
+  loadStatsInputs,
+  minutesByDayForUser,
+} from "@/lib/stats-query";
 import { GoalCard } from "@/components/goal-card";
 import { ReadingHeatmap } from "@/components/reading-heatmap";
 import { Bar, Duration, StatCard } from "@/components/stat-blocks";
@@ -71,7 +77,7 @@ export default async function StatsPage({
   const period = parsePeriod(sp.period, prefs.statsPeriod);
   const words = PERIOD_WORDS[period];
 
-  const [inputs, goals, quoteCount, randomQuotes, minutesByDay] = await Promise.all([
+  const [inputs, goals, quoteCount, randomQuotes, dayMinutes] = await Promise.all([
     // Books, past reads and the log by book and day: what lib/stats-count.ts
     // turns into passes, by the "What counts" preferences.
     loadStatsInputs(userId, prefs.timeZone),
@@ -93,7 +99,7 @@ export default async function StatsPage({
       ORDER BY random()
       LIMIT 1`,
     // Time from the reading timer, by day.
-    minutesByDayForUser(userId, prefs.timeZone, prefs.statsAudiobooks === "out"),
+    minutesByDayForUser(userId, prefs.timeZone),
   ]);
 
   const randomQuote = randomQuotes[0] ?? null;
@@ -108,14 +114,25 @@ export default async function StatsPage({
   const counted =
     period === "all" ? allTime : countWindow(passes, periodWindow(period, todayKey), prefs);
   const totals = tally(counted);
-  // Time read in the period. The card only appears once something has been
-  // timed, so a reader who never uses the timer doesn't get an empty one.
-  const timed = minutesByDay.size > 0;
+  // Time read in the period, without audiobooks when they're left out. The
+  // card only appears once something has been timed, so a reader who never
+  // uses the timer doesn't get an empty one.
+  const minutesByDay = dayMinuteTotals(dayMinutes, prefs.statsAudiobooks === "out");
+  const timed = dayMinutes.length > 0;
   const timeRead = minutesInWindow(
     minutesByDay,
     period === "all" ? ALL_TIME : periodWindow(period, todayKey),
   );
   const topCards = 4 + (ratings ? 1 : 0) + (timed ? 1 : 0);
+  // The daily goal's days, counted as Now reading counts them: every book,
+  // audiobooks too.
+  const dailyGoal = dailyGoalTarget(prefs);
+  const goalDays =
+    dailyGoal &&
+    goalMetDays(
+      dailyGoal.unit === "pages" ? pageTotals : dayMinuteTotals(dayMinutes),
+      dailyGoal.amount,
+    );
 
   // Books read: all time it's the books on the Read shelf, each once. In a
   // period it's finishes, re-reads included, so it says "Books finished".
@@ -313,7 +330,7 @@ export default async function StatsPage({
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <ReadingHeatmap totals={pageTotals} prefs={prefs} />
+            <ReadingHeatmap totals={pageTotals} goalDays={goalDays ?? undefined} prefs={prefs} />
           </CardContent>
         </Card>
       )}

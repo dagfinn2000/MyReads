@@ -3,6 +3,7 @@ import { PrismaClient } from "@prisma/client";
 import { dailyPageTotals } from "@/lib/progress";
 import {
   bookDayPageTotalsForUser,
+  dayMinuteTotals,
   dayPageTotals,
   loadStatsInputs,
   minutesByDayForUser,
@@ -218,17 +219,18 @@ describe("minutesByDayForUser", () => {
     });
 
     // 23:30 UTC on 1 March is already 2 March in Oslo.
-    expect(await minutesByDayForUser(TIMED, "UTC", false)).toEqual(
+    const utc = await minutesByDayForUser(TIMED, "UTC");
+    expect(dayMinuteTotals(utc)).toEqual(
       new Map([
         ["2026-03-01", 30],
         ["2026-03-02", 45],
       ]),
     );
-    expect(await minutesByDayForUser(TIMED, "Europe/Oslo", false)).toEqual(
+    expect(dayMinuteTotals(await minutesByDayForUser(TIMED, "Europe/Oslo"))).toEqual(
       new Map([["2026-03-02", 75]]),
     );
-    expect(await minutesByDayForUser(TIMED, "UTC", true)).toEqual(new Map([["2026-03-01", 30]]));
+    expect(dayMinuteTotals(utc, true)).toEqual(new Map([["2026-03-01", 30]]));
     // Nobody else's time, and none at all for a reader who never timed.
-    expect(await minutesByDayForUser(USER, "UTC", false)).toEqual(new Map());
+    expect(await minutesByDayForUser(USER, "UTC")).toEqual([]);
   });
 });

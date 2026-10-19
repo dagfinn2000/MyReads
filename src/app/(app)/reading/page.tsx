@@ -4,10 +4,19 @@ import { ReadingStatus } from "@/lib/enums";
 import { BookOpenText } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { getPreferences, getSession } from "@/lib/current-user";
+import { dailyGoalLines, dailyGoalStatus, dailyGoalTarget } from "@/lib/daily-goal";
+import { dayKey } from "@/lib/dates";
 import { formatWeekdayDay } from "@/lib/display";
+import {
+  bookDayPageTotalsForUser,
+  dayMinuteTotals,
+  dayPageTotals,
+  minutesByDayForUser,
+} from "@/lib/stats-query";
 import { upNext } from "@/lib/up-next";
 import { BookCover } from "@/components/book-card";
 import { BookLink } from "@/components/book-link";
+import { DailyGoalRing } from "@/components/daily-goal-ring";
 import { NowReading } from "@/components/now-reading";
 import { Button } from "@/components/ui/button";
 
@@ -26,8 +35,9 @@ export default async function NowReadingPage() {
   if (!session?.user?.id) redirect("/login"); // revoked session (see auth.ts)
   const userId = session.user.id;
   const prefs = await getPreferences();
+  const goal = dailyGoalTarget(prefs);
 
-  const [reading, wantToRead, seriesBooks] = await Promise.all([
+  const [reading, wantToRead, seriesBooks, goalByDay] = await Promise.all([
     prisma.book.findMany({
       where: { userId, status: ReadingStatus.READING },
       select: {
@@ -67,7 +77,16 @@ export default async function NowReadingPage() {
       where: { userId, seriesName: { not: null } },
       select: { seriesName: true, seriesNumber: true, status: true, timesRead: true },
     }),
+    // The daily goal's unit by day, across every book (one finished today
+    // still counts): pages as the reading calendar counts them, or minutes
+    // from the reading timer.
+    goal === null
+      ? null
+      : goal.unit === "pages"
+        ? bookDayPageTotalsForUser(userId, prefs.timeZone).then(dayPageTotals)
+        : minutesByDayForUser(userId, prefs.timeZone).then((rows) => dayMinuteTotals(rows)),
   ]);
+  const goalStatus = goal && goalByDay && dailyGoalStatus(goalByDay, goal, dayKey(new Date(), prefs.timeZone));
 
   // The book read most recently first: its newest log entry, or when it
   // was started.
@@ -83,6 +102,15 @@ export default async function NowReadingPage() {
         <h1 className="text-2xl font-semibold tracking-tight">Now reading</h1>
         <span className="text-sm text-muted-foreground">{formatWeekdayDay(new Date(), prefs)}</span>
       </div>
+
+      {goal && goalStatus && (
+        <DailyGoalRing
+          target={goal}
+          today={goalStatus.today}
+          met={goalStatus.met}
+          {...dailyGoalLines(goalStatus, goal)}
+        />
+      )}
 
       <NowReading
         books={reading}

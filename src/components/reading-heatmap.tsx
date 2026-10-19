@@ -35,9 +35,12 @@ const DAY_LABELS = {
  */
 export function ReadingHeatmap({
   totals,
+  goalDays,
   prefs,
 }: {
   totals: Map<string, number>;
+  /** The days the daily goal was met, when there is one. */
+  goalDays?: ReadonlySet<string>;
   prefs: Pick<
     Preferences,
     "weekStart" | "timeZone" | "heatmapScale" | "dateFormat" | "numberFormat"
@@ -89,6 +92,7 @@ export function ReadingHeatmap({
   const windowTotals = windowDays.map((d) => totals.get(d.key) ?? 0);
   const daysRead = windowTotals.filter((p) => p > 0).length;
   const pagesInWindow = windowTotals.reduce((sum, p) => sum + p, 0);
+  const goalMet = goalDays ? windowDays.filter((d) => goalDays.has(d.key)).length : null;
   const { current, longest } = readingStreaks(
     new Set(totals.keys()),
     now,
@@ -116,6 +120,14 @@ export function ReadingHeatmap({
           </>
         )}
         {longest > 1 && ` · longest ${longest}`}
+        {goalMet !== null && (
+          <>
+            {" "}
+            · daily goal met on{" "}
+            <span className="font-medium text-foreground tabular-nums">{goalMet}</span>{" "}
+            {goalMet === 1 ? "day" : "days"}
+          </>
+        )}
       </p>
 
       {/* Right to left so a narrow screen opens on the latest weeks. */}
@@ -139,14 +151,15 @@ export function ReadingHeatmap({
               </div>
               {week.map((day) => {
                 const pages = totals.get(day.key) ?? 0;
+                const met = goalDays?.has(day.key) ? " · daily goal met" : "";
                 return (
                   <div
                     key={day.key}
                     className={`size-3 rounded-[3px] ${LEVEL_CLASS[heatmapLevel(pages, thresholds)]}`}
                     title={
                       pages > 0
-                        ? `${pages} pages · ${formatDate(day.date, prefs)}`
-                        : formatDate(day.date, prefs)
+                        ? `${pages} pages · ${formatDate(day.date, prefs)}${met}`
+                        : `${formatDate(day.date, prefs)}${met}`
                     }
                   />
                 );
