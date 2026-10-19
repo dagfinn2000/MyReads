@@ -178,6 +178,28 @@ describe("export -> import round trip", () => {
     expect(goal.target).toBe(24);
   });
 
+  it("keeps the Up next list, for Want to Read books only", async () => {
+    await prisma.book.createMany({
+      data: [
+        { userId: sourceUserId, title: "Picked", status: ReadingStatus.WANT_TO_READ, upNextRank: 3 },
+        { userId: sourceUserId, title: "Not picked", status: ReadingStatus.WANT_TO_READ },
+        // A stray place on a book already being read means nothing.
+        { userId: sourceUserId, title: "Started", status: ReadingStatus.READING, upNextRank: 1 },
+      ],
+    });
+    await importLibrary(targetUserId, await exportLibrary());
+    const restored = await prisma.book.findMany({
+      where: { userId: targetUserId },
+      select: { title: true, upNextRank: true },
+      orderBy: { title: "asc" },
+    });
+    expect(restored).toEqual([
+      { title: "Not picked", upNextRank: null },
+      { title: "Picked", upNextRank: 3 },
+      { title: "Started", upNextRank: null },
+    ]);
+  });
+
   it("still writes the legacy `owned` boolean for older instances", async () => {
     // The export format promises an older build can read this file, and
     // `owned` is the only ownership vocabulary such a build has.

@@ -256,6 +256,8 @@ export async function updateReading(
         dateFinished,
         timesRead,
         currentPage,
+        // Starting a book (or finishing, stopping) takes it off Up next.
+        ...(data.status !== ReadingStatus.WANT_TO_READ && { upNextRank: null }),
       },
     });
 

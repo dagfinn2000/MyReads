@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { Prisma } from "@prisma/client";
-import { BookFormat } from "@/lib/enums";
+import { BookFormat, ReadingStatus } from "@/lib/enums";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import {
@@ -172,7 +172,12 @@ export async function bulkUpdateBooks(input: BulkInput): Promise<BulkResult> {
           new Date(),
           { undatedFinish },
         );
-        await tx.book.update({ where: { id: b.id }, data: next });
+        // Starting a book, or shelving it anywhere but Want to Read, takes
+        // it off Up next.
+        await tx.book.update({
+          where: { id: b.id },
+          data: { ...next, ...(status !== ReadingStatus.WANT_TO_READ && { upNextRank: null }) },
+        });
       }
     }
 

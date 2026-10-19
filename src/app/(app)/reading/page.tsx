@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ReadingStatus } from "@/lib/enums";
@@ -13,11 +14,12 @@ import {
   dayPageTotals,
   minutesByDayForUser,
 } from "@/lib/stats-query";
-import { upNext } from "@/lib/up-next";
+import { upNext, upNextWithPicks } from "@/lib/up-next";
 import { BookCover } from "@/components/book-card";
 import { BookLink } from "@/components/book-link";
 import { DailyGoalRing } from "@/components/daily-goal-ring";
 import { NowReading } from "@/components/now-reading";
+import { UpNextEditor } from "@/components/up-next-editor";
 import { Button } from "@/components/ui/button";
 
 export const dynamic = "force-dynamic";
@@ -28,7 +30,8 @@ const UP_NEXT = 10;
 /**
  * Every book being read on one page, each with the quick-log row, so
  * telling the app where you are doesn't mean opening each book. Under them,
- * the Want to Read books that are up next.
+ * the Want to Read books that are up next: the reader's own picks, then
+ * suggestions (lib/up-next.ts).
  */
 export default async function NowReadingPage() {
   const session = await getSession();
@@ -69,6 +72,7 @@ export default async function NowReadingPage() {
         timesRead: true,
         seriesName: true,
         seriesNumber: true,
+        upNextRank: true,
       },
       orderBy: [{ createdAt: "desc" }, { id: "asc" }],
     }),
@@ -94,7 +98,19 @@ export default async function NowReadingPage() {
     (b.progress[b.progress.length - 1]?.date ?? b.dateStarted)?.getTime() ?? 0;
   reading.sort((a, b) => lastTouched(b) - lastTouched(a) || a.title.localeCompare(b.title));
 
-  const next = upNext(wantToRead, seriesBooks, UP_NEXT);
+  const { picks, suggested } = upNextWithPicks(wantToRead, seriesBooks, UP_NEXT);
+  const next = [...picks, ...suggested];
+  // What the list editor offers to add: the suggestions first, then the
+  // rest of Want to Read, newest first.
+  const unpicked = wantToRead.filter((b) => b.upNextRank === null);
+  const suggestedFirst = upNext(unpicked, seriesBooks, unpicked.length);
+  const others = [...suggestedFirst, ...unpicked.filter((b) => !suggestedFirst.includes(b))];
+  const editorItem = ({ id, title, authors, coverUrl }: (typeof wantToRead)[number]) => ({
+    id,
+    title,
+    authors,
+    coverUrl,
+  });
 
   return (
     <div className="grid gap-6">
@@ -135,27 +151,47 @@ export default async function NowReadingPage() {
         <section className="grid min-w-0 gap-2">
           <div className="flex flex-wrap items-baseline justify-between gap-x-3">
             <h2 className="text-sm font-medium text-muted-foreground">Up next</h2>
-            <Link
-              href="/books?shelf=WANT_TO_READ"
-              className="text-sm text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
-            >
-              All Want to Read
-            </Link>
+            <span className="flex flex-wrap items-baseline gap-x-4">
+              <UpNextEditor picks={picks.map(editorItem)} others={others.map(editorItem)} />
+              <Link
+                href="/books?shelf=WANT_TO_READ"
+                className="text-sm text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+              >
+                All Want to Read
+              </Link>
+            </span>
           </div>
           {/* Scrolls inside its own box on a phone, never the page. */}
           <ul className="relative flex gap-3 overflow-x-auto pb-1">
-            {next.map((b) => (
-              <li key={b.id} className="shrink-0">
-                <BookLink bookId={b.id} className="lift-cover block w-16 sm:w-20" title={b.title}>
-                  <BookCover book={b} className="cover-shadow aspect-[2/3] w-full" />
-                  {/* A cover this small has no room for its own title. */}
-                  <span aria-hidden="true" className="mt-1.5 line-clamp-2 text-[11px] leading-tight text-muted-foreground">
-                    {b.title}
-                  </span>
-                  {/* A cover image is named by its alt text; a drawn one isn't. */}
-                  {!b.coverUrl && <span className="sr-only">{b.title}</span>}
-                </BookLink>
-              </li>
+            {next.map((b, i) => (
+              <Fragment key={b.id}>
+                {/* The reader's picks, then the suggestions. */}
+                {i === picks.length && i > 0 && (
+                  <li aria-hidden="true" className="my-3 w-px shrink-0 self-stretch bg-border" />
+                )}
+                <li className="shrink-0">
+                  <BookLink bookId={b.id} className="lift-cover block w-16 sm:w-20" title={b.title}>
+                    <span className="relative block">
+                      <BookCover book={b} className="cover-shadow aspect-[2/3] w-full" />
+                      {i < picks.length && (
+                        <span
+                          aria-hidden="true"
+                          className="absolute top-1 left-1 grid size-5 place-items-center rounded-full bg-primary text-[10px] font-semibold text-primary-foreground tabular-nums shadow-sm ring-2 ring-background/70"
+                        >
+                          {i + 1}
+                        </span>
+                      )}
+                    </span>
+                    {/* A cover this small has no room for its own title. */}
+                    <span aria-hidden="true" className="mt-1.5 line-clamp-2 text-[11px] leading-tight text-muted-foreground">
+                      {b.title}
+                    </span>
+                    {/* A cover image is named by its alt text; a drawn one isn't. */}
+                    {!b.coverUrl && <span className="sr-only">{b.title}</span>}
+                    {i < picks.length && <span className="sr-only">, number {i + 1} on your list</span>}
+                  </BookLink>
+                </li>
+              </Fragment>
             ))}
           </ul>
         </section>

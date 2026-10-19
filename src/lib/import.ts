@@ -133,6 +133,8 @@ const importedBookSchema = z.object({
   dateFinished: dateField,
   timesRead: z.number().int().min(0).max(1000).catch(0),
   currentPage: z.number().int().min(0).max(100000).nullable().optional().catch(null),
+  /** Additive: the book's place on the reader's own Up next list. */
+  upNextRank: z.number().int().min(1).max(1_000_000).nullable().optional().catch(null),
   shelves: shelfNames,
   quotes: z.array(importedQuoteSchema).catch([]),
   reads: z.array(importedReadSchema).catch([]),
@@ -533,6 +535,7 @@ export async function importLibrary(
         dateFinished: b.dateFinished,
         timesRead,
         currentPage: b.currentPage ?? null,
+        upNextRank: b.status === ReadingStatus.WANT_TO_READ ? (b.upNextRank ?? null) : null,
         searchText: buildSearchText(b.title, b.authors, b.seriesName),
         // Preserve "date added" ordering from the original library.
         ...(b.createdAt && { createdAt: b.createdAt }),
