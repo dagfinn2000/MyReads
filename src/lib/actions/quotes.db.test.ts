@@ -17,7 +17,9 @@ vi.mock("@/auth", () => ({
 const revalidated: string[] = [];
 vi.mock("next/cache", () => ({ revalidatePath: (p: string) => revalidated.push(p) }));
 
-const { addQuote, updateQuote, deleteQuote } = await import("@/lib/actions/quotes");
+const { addQuote, updateQuote, deleteQuote, importKindleQuotes, kindleLibrary } = await import(
+  "@/lib/actions/quotes"
+);
 
 let userId: string;
 let otherUserId: string;
@@ -118,5 +120,86 @@ describe("quote actions", () => {
     currentUserId = null;
     await expect(updateQuote(q.id, {}, form({ text: "x" }))).rejects.toThrow("Not authenticated");
     await expect(deleteQuote(q.id)).rejects.toThrow("Not authenticated");
+  });
+});
+
+describe("importing Kindle highlights", () => {
+  const highlight = (text: string, extra: Record<string, unknown> = {}) => ({
+    text,
+    page: null,
+    note: null,
+    addedAt: null,
+    ...extra,
+  });
+
+  it("adds them as quotes, dated when they were highlighted, with page and note", async () => {
+    const book = await prisma.book.create({
+      data: { userId, title: "The Name of the Wind", searchText: "x", pageCount: 662 },
+    });
+    const res = await importKindleQuotes(book.id, [
+      highlight("It was night again.", { page: 12, note: "Lovely.", addedAt: "2023-03-05T20:14:03.000Z" }),
+      // Past the end of this edition: kept, without the page.
+      highlight("Words are pale shadows.", { page: 900 }),
+    ]);
+    expect(res).toEqual({ added: 2, already: 0 });
+
+    const quotes = await prisma.quote.findMany({ where: { bookId: book.id }, orderBy: { createdAt: "asc" } });
+    expect(quotes).toMatchObject([
+      { text: "It was night again.", page: 12, note: "Lovely.", createdAt: new Date("2023-03-05T20:14:03.000Z") },
+      { text: "Words are pale shadows.", page: null, note: null },
+    ]);
+    // No date: it dates from the import.
+    expect(Date.now() - quotes[1].createdAt.getTime()).toBeLessThan(60_000);
+    expect(revalidated).toContain("/quotes");
+  });
+
+  it("only adds what's new when the same file comes again", async () => {
+    const book = await prisma.book.create({ data: { userId, title: "Book", searchText: "book" } });
+    await prisma.quote.create({ data: { bookId: book.id, text: "Typed in  by HAND." } });
+    expect(await importKindleQuotes(book.id, [highlight("One."), highlight("typed in by hand.")])).toEqual({
+      added: 1,
+      already: 1,
+    });
+    expect(await importKindleQuotes(book.id, [highlight("One."), highlight("Two.")])).toEqual({
+      added: 1,
+      already: 1,
+    });
+    expect(await prisma.quote.count({ where: { bookId: book.id } })).toBe(3);
+  });
+
+  it("ignores a date from the future or before the Kindle", async () => {
+    const book = await prisma.book.create({ data: { userId, title: "Book", searchText: "book" } });
+    await importKindleQuotes(book.id, [
+      highlight("Future.", { addedAt: "2999-01-01T00:00:00.000Z" }),
+      highlight("Past.", { addedAt: "1999-01-01T00:00:00.000Z" }),
+    ]);
+    const quotes = await prisma.quote.findMany({ where: { bookId: book.id } });
+    for (const q of quotes) expect(Date.now() - q.createdAt.getTime()).toBeLessThan(60_000);
+  });
+
+  it("refuses another reader's book and anything that isn't highlights", async () => {
+    const theirs = await prisma.book.create({ data: { userId: otherUserId, title: "Theirs", searchText: "x" } });
+    expect(await importKindleQuotes(theirs.id, [highlight("Sneaky.")])).toEqual({ error: "Book not found" });
+    expect(await prisma.quote.count({ where: { bookId: theirs.id } })).toBe(0);
+
+    const mine = await prisma.book.create({ data: { userId, title: "Mine", searchText: "x" } });
+    expect(await importKindleQuotes(mine.id, [])).toEqual({ error: "Those highlights couldn't be read" });
+    expect(await importKindleQuotes(mine.id, [{ text: "" }])).toEqual({
+      error: "Those highlights couldn't be read",
+    });
+    expect(await importKindleQuotes(mine.id, "nonsense")).toEqual({
+      error: "Those highlights couldn't be read",
+    });
+  });
+
+  it("matches against the reader's own books only", async () => {
+    await prisma.book.create({ data: { userId, title: "Mine", searchText: "x", authors: ["Me"] } });
+    await prisma.book.create({ data: { userId: otherUserId, title: "Theirs", searchText: "x" } });
+    expect(await kindleLibrary()).toEqual([
+      { id: expect.any(String), title: "Mine", authors: ["Me"], format: "PHYSICAL" },
+    ]);
+    currentUserId = null;
+    await expect(kindleLibrary()).rejects.toThrow("Not authenticated");
+    await expect(importKindleQuotes("x", [])).rejects.toThrow("Not authenticated");
   });
 });

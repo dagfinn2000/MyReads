@@ -1,8 +1,10 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import type { Prisma } from "@prisma/client";
+import { quoteKey, type LibraryBookRef } from "@/lib/kindle-clippings";
 import { prisma } from "@/lib/prisma";
-import { quoteSchema } from "@/lib/validation";
+import { kindleQuotesSchema, quoteSchema } from "@/lib/validation";
 import { requireUserId } from "@/lib/actions/helpers";
 import type { ActionState } from "@/lib/actions/helpers";
 
@@ -100,4 +102,71 @@ export async function deleteQuote(quoteId: string): Promise<void> {
   await prisma.quote.delete({ where: { id: quoteId } });
   revalidatePath(`/books/${existing.bookId}`);
   revalidatePath("/quotes");
+}
+
+/** The library as the Kindle import matches against it. */
+export async function kindleLibrary(): Promise<LibraryBookRef[]> {
+  const userId = await requireUserId();
+  return prisma.book.findMany({
+    where: { userId },
+    select: { id: true, title: true, authors: true, format: true },
+    orderBy: { title: "asc" },
+  });
+}
+
+export type KindleImportResult = { added: number; already: number } | { error: string };
+
+/** Kindle launched in November 2007: an older date is a clock gone wrong. */
+const FIRST_KINDLE = Date.UTC(2007, 10, 1);
+
+/**
+ * Add highlights from a Kindle (see lib/kindle-clippings.ts) to one book as
+ * quotes. Any already among the book's quotes, the same text with case and
+ * spacing aside, are left out, so importing the same file again only adds
+ * the new ones. Each quote is dated when it was highlighted, so Newest
+ * first puts it where it belongs. A page past the end of this edition is
+ * dropped rather than refused: Kindle pages follow the publisher's print
+ * edition, which may not be the one in the library.
+ */
+export async function importKindleQuotes(
+  bookId: string,
+  highlights: unknown,
+): Promise<KindleImportResult> {
+  const userId = await requireUserId();
+
+  const book = await prisma.book.findFirst({
+    where: { id: bookId, userId },
+    select: { id: true, pageCount: true },
+  });
+  if (!book) return { error: "Book not found" };
+
+  const parsed = kindleQuotesSchema.safeParse(highlights);
+  if (!parsed.success) return { error: "Those highlights couldn't be read" };
+
+  const existing = await prisma.quote.findMany({ where: { bookId }, select: { text: true } });
+  const seen = new Set(existing.map((q) => quoteKey(q.text)));
+  const now = Date.now();
+  const rows: Prisma.QuoteCreateManyInput[] = [];
+  let already = 0;
+  for (const h of parsed.data) {
+    const key = quoteKey(h.text);
+    if (seen.has(key)) {
+      already++;
+      continue;
+    }
+    seen.add(key);
+    const at = h.addedAt ? new Date(h.addedAt).getTime() : NaN;
+    rows.push({
+      bookId,
+      text: h.text,
+      page: h.page && !pastTheEnd(h.page, book.pageCount) ? h.page : null,
+      note: h.note,
+      ...(at >= FIRST_KINDLE && at <= now && { createdAt: new Date(at) }),
+    });
+  }
+  if (rows.length > 0) await prisma.quote.createMany({ data: rows });
+
+  revalidatePath(`/books/${bookId}`);
+  revalidatePath("/quotes");
+  return { added: rows.length, already };
 }

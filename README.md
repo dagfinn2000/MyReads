@@ -56,6 +56,11 @@ server.
 - Re-reads are kept as history and count in your stats.
 - Save favourite quotes with page numbers, and search all of them on the
   Quotes page.
+- Import your Kindle highlights into Quotes from the Kindle's
+  `My Clippings.txt`. You see each book and the library book it goes into
+  before anything is saved, notes come along with their highlights, and
+  importing the same file again only adds the new ones. The file is read in
+  your browser.
 
 **Organising your library**
 
