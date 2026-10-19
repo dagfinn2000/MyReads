@@ -76,16 +76,16 @@ function oneTarget(
       ? data.bookIds.length > 0 && data.matching === undefined
       : data.matching !== undefined;
   if (!ok) {
-    ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Select some books first." });
+    ctx.addIssue({ code: "custom", message: "Select some books first." });
   }
 }
 
 export const bulkSchema = z
   .object({
     ...targetFields,
-    status: z.nativeEnum(ReadingStatus).optional(),
-    format: z.nativeEnum(BookFormat).optional(),
-    ownership: z.nativeEnum(BookOwnership).optional(),
+    status: z.enum(ReadingStatus).optional(),
+    format: z.enum(BookFormat).optional(),
+    ownership: z.enum(BookOwnership).optional(),
     addShelfId: z.string().max(64).optional(),
     removeShelfId: z.string().max(64).optional(),
     addTags: tagList,
@@ -96,7 +96,7 @@ export const bulkSchema = z
     const both = data.addTags?.find((t) => data.removeTags?.includes(t));
     if (both) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         message: `“${both}” is in both Add tags and Remove tags.`,
       });
     }
@@ -113,7 +113,7 @@ export const bulkDeleteSchema = z
     oneTarget(data, ctx);
     if (data.matching !== undefined && data.expectedCount === undefined) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         message: "Confirm how many books to delete first.",
       });
     }

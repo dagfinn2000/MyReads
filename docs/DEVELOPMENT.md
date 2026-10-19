@@ -6,8 +6,9 @@ code. To just use the app, follow the install steps in the
 
 ## Run it locally
 
-You need Node 22+ and a Postgres database. The compose `db` service works
-fine for the database.
+You need Node 22.13 or newer and a Postgres database. Older 22.x releases
+can run the app, but the linter and test runner don't support them. The
+compose `db` service works fine for the database.
 
 ```bash
 cp .env.example .env       # set POSTGRES_PASSWORD and AUTH_SECRET
@@ -67,7 +68,13 @@ type check, both test suites and a production build on every pull request.
 
 - [Next.js 16](https://nextjs.org/) (App Router, TypeScript), built as a
   standalone server for a small Docker image
-- [PostgreSQL](https://www.postgresql.org/) with [Prisma](https://www.prisma.io/)
+- [PostgreSQL](https://www.postgresql.org/) with [Prisma](https://www.prisma.io/) 6.
+  The `overrides` entry in `package.json` gives Prisma 6's command-line tool a
+  newer copy of deepmerge-ts, which fixes a security advisory that Prisma 6
+  never got a fix for. Remove it when upgrading to Prisma 7.10.1 or newer,
+  which includes the fix. The Docker image installs its own copy of the
+  tool, which the override doesn't reach; it only runs migrations there and
+  never sees untrusted input, so the advisory can't be triggered.
 - [Auth.js v5](https://authjs.dev/): username and password, JWT sessions,
   passwords hashed with bcrypt
 - [Tailwind CSS v4](https://tailwindcss.com/) and [shadcn/ui](https://ui.shadcn.com/)
