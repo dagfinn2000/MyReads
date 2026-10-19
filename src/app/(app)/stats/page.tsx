@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BookCheck, BookOpenText, FileText, LibraryBig, Star } from "lucide-react";
+import { BookCheck, BookOpenText, FileText, LibraryBig, Star, Timer } from "lucide-react";
 import { redirect } from "next/navigation";
 import { ReadingStatus } from "@/lib/enums";
 import { prisma } from "@/lib/prisma";
@@ -7,6 +7,7 @@ import { getPreferences, getSession } from "@/lib/current-user";
 import { dayKey } from "@/lib/dates";
 import { FORMAT_LABELS, formatNumber } from "@/lib/display";
 import { goalPace, goalProgress, splitGoals, yearClock } from "@/lib/goals";
+import { minutesInWindow } from "@/lib/reading-time";
 import {
   booksReadAllTime,
   buildPasses,
@@ -24,10 +25,10 @@ import {
   statsHref,
   yearWindow,
 } from "@/lib/stats-period";
-import { dayPageTotals, loadStatsInputs } from "@/lib/stats-query";
+import { dayPageTotals, loadStatsInputs, minutesByDayForUser } from "@/lib/stats-query";
 import { GoalCard } from "@/components/goal-card";
 import { ReadingHeatmap } from "@/components/reading-heatmap";
-import { Bar, StatCard } from "@/components/stat-blocks";
+import { Bar, Duration, StatCard } from "@/components/stat-blocks";
 import { StatsPeriodNav } from "@/components/stats-period-nav";
 import { Stars } from "@/components/stars";
 import {
@@ -39,6 +40,14 @@ import {
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Stats · MyReads" };
+
+/** The top row's columns on a wide screen, by how many cards it has. Six
+ *  go in two rows of three until the screen is wide enough for one. */
+const TOP_GRID: Record<number, string> = {
+  4: "lg:grid-cols-4",
+  5: "lg:grid-cols-5",
+  6: "lg:grid-cols-3 xl:grid-cols-6",
+};
 
 export default async function StatsPage({
   searchParams,
@@ -62,7 +71,7 @@ export default async function StatsPage({
   const period = parsePeriod(sp.period, prefs.statsPeriod);
   const words = PERIOD_WORDS[period];
 
-  const [inputs, goals, quoteCount, randomQuotes] = await Promise.all([
+  const [inputs, goals, quoteCount, randomQuotes, minutesByDay] = await Promise.all([
     // Books, past reads and the log by book and day: what lib/stats-count.ts
     // turns into passes, by the "What counts" preferences.
     loadStatsInputs(userId, prefs.timeZone),
@@ -83,6 +92,8 @@ export default async function StatsPage({
       WHERE b."userId" = ${userId}
       ORDER BY random()
       LIMIT 1`,
+    // Time from the reading timer, by day.
+    minutesByDayForUser(userId, prefs.timeZone, prefs.statsAudiobooks === "out"),
   ]);
 
   const randomQuote = randomQuotes[0] ?? null;
@@ -97,6 +108,14 @@ export default async function StatsPage({
   const counted =
     period === "all" ? allTime : countWindow(passes, periodWindow(period, todayKey), prefs);
   const totals = tally(counted);
+  // Time read in the period. The card only appears once something has been
+  // timed, so a reader who never uses the timer doesn't get an empty one.
+  const timed = minutesByDay.size > 0;
+  const timeRead = minutesInWindow(
+    minutesByDay,
+    period === "all" ? ALL_TIME : periodWindow(period, todayKey),
+  );
+  const topCards = 4 + (ratings ? 1 : 0) + (timed ? 1 : 0);
 
   // Books read: all time it's the books on the Read shelf, each once. In a
   // period it's finishes, re-reads included, so it says "Books finished".
@@ -195,7 +214,7 @@ export default async function StatsPage({
       </div>
 
       <div className="grid gap-3">
-        <div className={`grid grid-cols-2 gap-4 max-lg:[&>:last-child:nth-child(odd)]:col-span-2 ${ratings ? "lg:grid-cols-5" : "lg:grid-cols-4"}`}>
+        <div className={`grid grid-cols-2 gap-4 max-lg:[&>:last-child:nth-child(odd)]:col-span-2 ${TOP_GRID[topCards]}`}>
           <StatCard label="Books in library" icon={LibraryBig}>{fmt(books.length)}</StatCard>
           <StatCard label={`${booksLabel} · ${words}`} icon={BookCheck} note={notes.books.join(" · ")}>
             {fmt(period === "all" ? readAllTime.books : totals.books)}
@@ -208,6 +227,19 @@ export default async function StatsPage({
           >
             {fmt(totals.pages)}
           </StatCard>
+          {timed && (
+            <StatCard
+              label={`Time read · ${words}`}
+              icon={Timer}
+              note={
+                timeRead.days > 0
+                  ? `on ${fmt(timeRead.days)} ${timeRead.days === 1 ? "day" : "days"}, with the timer`
+                  : "with the timer"
+              }
+            >
+              {timeRead.minutes > 0 ? <Duration minutes={timeRead.minutes} /> : "–"}
+            </StatCard>
+          )}
           {ratings && (
             <StatCard
               label={`Average rating · ${words}`}

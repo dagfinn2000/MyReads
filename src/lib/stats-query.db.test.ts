@@ -1,7 +1,12 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { PrismaClient } from "@prisma/client";
 import { dailyPageTotals } from "@/lib/progress";
-import { bookDayPageTotalsForUser, dayPageTotals, loadStatsInputs } from "@/lib/stats-query";
+import {
+  bookDayPageTotalsForUser,
+  dayPageTotals,
+  loadStatsInputs,
+  minutesByDayForUser,
+} from "@/lib/stats-query";
 
 /**
  * The per-book log totals behind "Pages I logged" and the reading calendar
@@ -176,5 +181,54 @@ describe("loadStatsInputs", () => {
   it("dates stopped books by their latest log entry, and only those", async () => {
     const inputs = await loadStatsInputs(USER, "UTC");
     expect([...inputs.lastLogDates]).toEqual([["sq-e", at("2026-05-09T18:00:00Z")]]);
+  });
+});
+
+describe("minutesByDayForUser", () => {
+  const TIMED = "stats-query-timed";
+
+  afterAll(async () => {
+    await prisma.user.deleteMany({ where: { id: TIMED } });
+  });
+
+  it("sums timed minutes by day in the reader's zone, and can leave audiobooks out", async () => {
+    await prisma.user.create({
+      data: { id: TIMED, username: `statsq-timed-${Date.now()}`, passwordHash: "x" },
+    });
+    await prisma.book.create({
+      data: { id: "sq-t1", userId: TIMED, title: "t1", searchText: "t1", status: "READING" },
+    });
+    await prisma.book.create({
+      data: {
+        id: "sq-t2",
+        userId: TIMED,
+        title: "t2",
+        searchText: "t2",
+        status: "READING",
+        format: "AUDIOBOOK",
+      },
+    });
+    await prisma.progressEntry.createMany({
+      data: [
+        { bookId: "sq-t1", page: 0, date: at("2026-03-01T09:00:00Z") },
+        { bookId: "sq-t1", page: 40, date: at("2026-03-01T23:30:00Z"), minutes: 30 },
+        { bookId: "sq-t1", page: 60, date: at("2026-03-02T12:00:00Z") },
+        { bookId: "sq-t2", page: 50, date: at("2026-03-02T13:00:00Z"), minutes: 45 },
+      ],
+    });
+
+    // 23:30 UTC on 1 March is already 2 March in Oslo.
+    expect(await minutesByDayForUser(TIMED, "UTC", false)).toEqual(
+      new Map([
+        ["2026-03-01", 30],
+        ["2026-03-02", 45],
+      ]),
+    );
+    expect(await minutesByDayForUser(TIMED, "Europe/Oslo", false)).toEqual(
+      new Map([["2026-03-02", 75]]),
+    );
+    expect(await minutesByDayForUser(TIMED, "UTC", true)).toEqual(new Map([["2026-03-01", 30]]));
+    // Nobody else's time, and none at all for a reader who never timed.
+    expect(await minutesByDayForUser(USER, "UTC", false)).toEqual(new Map());
   });
 });

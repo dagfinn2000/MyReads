@@ -43,6 +43,12 @@ server.
   of 10, or switch ratings off.
 - Update your current page as you go. The book page shows your pace and when
   you're likely to finish.
+- Time your reading: press Start timer when you sit down with a book, and
+  the time goes with the next page you log (or type the minutes in). Once a
+  book has some timed reading it shows how many pages you read an hour and
+  how long the rest will take, and Stats adds up your time read. The timer
+  keeps going if you close the page or lock your phone, on the device you
+  started it on.
 - Re-reads are kept as history and count in your stats.
 - Save favourite quotes with page numbers, and search all of them on the
   Quotes page.

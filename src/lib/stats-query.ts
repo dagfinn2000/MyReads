@@ -134,3 +134,29 @@ export async function loadStatsInputs(
   }
   return { books, reads, logDays, lastLogDates };
 }
+
+/**
+ * Minutes read per calendar day in the reader's zone, from the log entries
+ * that carry a time (the reading timer, or a time typed in). Untimed
+ * entries are left out, so a reader who never times anything gets an empty
+ * map, and the time cards stay away. With audiobooks left out of the stats
+ * (Preferences > What counts), their listening is left out here too.
+ */
+export async function minutesByDayForUser(
+  userId: string,
+  timeZone: string,
+  withoutAudiobooks: boolean,
+): Promise<Map<string, number>> {
+  const rows = await prisma.$queryRaw<{ day: string; minutes: number }[]>`
+    SELECT
+      to_char((pe."date" AT TIME ZONE 'UTC') AT TIME ZONE ${timeZone}, 'YYYY-MM-DD') AS day,
+      SUM(pe."minutes")::int AS minutes
+    FROM "ProgressEntry" pe
+    JOIN "Book" b ON b."id" = pe."bookId"
+    WHERE b."userId" = ${userId}
+      AND pe."minutes" IS NOT NULL
+      AND (${withoutAudiobooks} = false OR b."format" <> 'AUDIOBOOK')
+    GROUP BY 1
+  `;
+  return new Map(rows.map((r) => [r.day, r.minutes]));
+}

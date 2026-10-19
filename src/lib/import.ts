@@ -10,6 +10,7 @@ import { buildSearchText, foldForSearch } from "@/lib/utils";
 import { isAllowedCoverUrl, shelfNameSchema } from "@/lib/validation";
 import { cleanLibraryViewPatch } from "@/lib/library-view";
 import { cleanPreferencesPatch } from "@/lib/preferences";
+import { MAX_ENTRY_MINUTES } from "@/lib/reading-time";
 import {
   MAX_SAVED_VIEWS,
   SAVED_VIEW_NAME_MAX,
@@ -96,6 +97,8 @@ const importedLoanSchema = z.object({
 const importedProgressSchema = z.object({
   page: z.number().int().min(0).max(100000),
   date: dateField,
+  /** Additive: the time read, from the reading timer. */
+  minutes: z.number().int().min(1).max(MAX_ENTRY_MINUTES).nullable().optional().catch(null),
 });
 
 const importedBookSchema = z.object({
@@ -562,7 +565,7 @@ export async function importLibrary(
         progress: {
           create: b.progress
             .filter((e) => e.date != null)
-            .map((e) => ({ page: e.page, date: e.date! })),
+            .map((e) => ({ page: e.page, date: e.date!, minutes: e.minutes ?? null })),
         },
         loans: {
           // An undated loan cannot be reasoned about (how long has it been

@@ -14,11 +14,18 @@ import { prisma } from "@/lib/prisma";
 import { getPreferences, getSession } from "@/lib/current-user";
 import { dayKey } from "@/lib/dates";
 import { formatDate, formatDayKey, formatNumber } from "@/lib/display";
+import { formatLength } from "@/lib/progress-units";
 import { describePace, goalPace, goalProgress, yearClock } from "@/lib/goals";
 import { readingStreaks } from "@/lib/progress";
+import { minutesInWindow } from "@/lib/reading-time";
 import { buildPasses, countWindow, ruleNotes, tally } from "@/lib/stats-count";
 import { yearWindow } from "@/lib/stats-period";
-import { dayPageTotals, loadStatsInputs, type StatsBook } from "@/lib/stats-query";
+import {
+  dayPageTotals,
+  loadStatsInputs,
+  minutesByDayForUser,
+  type StatsBook,
+} from "@/lib/stats-query";
 import { BookCover } from "@/components/book-card";
 import { GoldMedal } from "@/components/gold-medal";
 import { Bar, StatCard } from "@/components/stat-blocks";
@@ -88,12 +95,15 @@ export default async function YearInReviewPage({
 
   // Fetch everything and slice by year in JS, with the same counting the
   // stats page uses (lib/stats-count.ts), so the numbers always agree.
-  const [inputs, goal] = await Promise.all([
+  const [inputs, goal, minutesByDay] = await Promise.all([
     loadStatsInputs(userId, prefs.timeZone),
     prisma.readingGoal.findUnique({
       where: { userId_year: { userId, year } },
     }),
+    minutesByDayForUser(userId, prefs.timeZone, prefs.statsAudiobooks === "out"),
   ]);
+  // Time from the reading timer this year.
+  const timeRead = minutesInWindow(minutesByDay, yearWindow(year)).minutes;
   // Pages per day, as the reading calendar counts them. The log has no date
   // bound (deltas need each entry's predecessor), so the year slice comes
   // after.
@@ -429,6 +439,12 @@ export default async function YearInReviewPage({
                     <Highlight label="Longest streak">
                       <span className="tabular-nums">{longestStreak}</span> days
                       in a row
+                    </Highlight>
+                  )}
+                  {timeRead > 0 && (
+                    <Highlight label="Time reading">
+                      <span className="tabular-nums">{formatLength(timeRead)}</span>, with
+                      the timer
                     </Highlight>
                   )}
                 </div>
