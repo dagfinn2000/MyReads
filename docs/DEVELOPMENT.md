@@ -69,6 +69,14 @@ the one feature whose failure loses data you can't get back.
 CI ([.github/workflows/ci.yml](../.github/workflows/ci.yml)) runs lint, the
 type check, both test suites and a production build on every pull request.
 
+## Keeping the docs current
+
+The [README](../README.md) is a short overview for someone deciding
+whether to install MyReads. [FEATURES.md](FEATURES.md) lists everything
+the app can do. When a change adds or changes something a reader can see,
+update FEATURES.md, and the README only when its overview no longer fits.
+Screenshots live in `docs/`, next to FEATURES.md.
+
 ## Tech stack
 
 - [Next.js 16](https://nextjs.org/) (App Router, TypeScript), built as a
@@ -92,9 +100,9 @@ src/
 ├─ app/
 │  ├─ (auth)/          login and register pages
 │  ├─ (app)/           pages behind login: books (the library), books/new,
-│  │                   books/[id], books/[id]/edit, books/check, quotes,
-│  │                   room (the reading room), stats, stats/year/[year],
-│  │                   account
+│  │                   books/[id], books/[id]/edit, books/check, reading
+│  │                   (Now reading), quotes, room (the reading room),
+│  │                   stats, stats/year/[year], account
 │  └─ api/             Auth.js, register, metadata search/details/covers,
 │                      library check, cover upload and serving,
 │                      backup export and import
@@ -216,15 +224,18 @@ src/
   (`roomStyle`, `roomLayout` and the rest); placements name a floor and a
   place among the pieces there, so they survive a different screen width,
   falling back to where a piece would go by itself when it doesn't fit.
-  Added rooms (`roomRooms`) are floors over the library's own, in the
-  order they were added; a piece moved into one names the room rather
-  than a floor number, so it stays put as the library grows underneath.
+  Added rooms (`roomRooms`) go over the library's own floors, in the
+  order they were added. A room in `roomBeside` shares the floor of the
+  one before it (or the library's top floor) when all its furniture fits
+  there, and takes a floor of its own when it doesn't. A piece moved into
+  a room names the room rather than a floor number, so it stays put as
+  the library grows underneath.
   Furniture added from the catalogue (`roomExtras`) goes wherever there
   is space, like the library's own; no floor is added just to hold it, so
   on a narrow screen a piece may wait for space, and Decorate says so.
   The avatar is painted dot by dot and outlined in code
   ([avatar-art.ts](../src/components/avatar-art.ts)) in layers, from a
-  cape behind to a hat on top, and coloured from five `--av-*` colours, so
+  cape behind to a hat on top, and coloured from six `--av-*` colours, so
   a colour pick redraws nothing. Its look is one Preferences value
   (`avatar`), checked by `parseAvatar` in [avatar.ts](../src/lib/avatar.ts),
   which also reads the looks saved before the wardrobe. The tests draw

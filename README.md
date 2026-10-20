@@ -8,231 +8,81 @@ server.
 
 ## What it does
 
-**Adding books**
+**Add books**
 
-- Search by title, author or ISBN and import the details from
-  [Open Library](https://openlibrary.org/), with
+- Search by title, author or ISBN in [Open Library](https://openlibrary.org/),
   [Google Books](https://developers.google.com/books) (optional) and the
-  [National Library of Norway](https://api.nb.no/) as extra sources. You
-  choose which of them to search and in what order. You can check and edit
-  everything before saving, or type a book in by hand.
-- Scan the barcode on a book with your phone's camera. Switch on Keep
-  scanning to work through a whole shelf: each book is looked up and added
-  as you scan it, with Undo, and books you already have are pointed out.
-- "Add and add another" brings you straight back for the next book (with
-  the camera open again if you scanned). In Preferences you choose what
-  adding a book does: open it, add another, or go to the library.
-- A book added as Read can say when you finished it, or that you don't
-  remember, so years of old reading don't land in this year's stats. A book
-  added as Currently Reading can say when you started and what page you're
-  on.
-- Subjects from the catalogues can be copied in as tags: all of them, only
-  the tags you already use, or none. Renaming or removing a tag in Manage
-  tags can apply to future imports too.
-- "Look up details" on a book's edit page fills in what's missing, like a
-  page count, from the catalogues.
-- Choose a cover from the search results, paste an image link, or upload a
-  photo. Covers are stored on your server.
-- **Do I own this?** In a bookshop, scan a barcode on the Check page to see
-  whether the book is already in your library.
+  [National Library of Norway](https://api.nb.no/), check the details, and
+  save. Or type a book in by hand.
+- Scan the barcode with your phone's camera (in Chrome or Edge), one book
+  at a time or a whole shelf in a row.
+- **Do I own this?** In a bookshop, scan a barcode to see whether the book
+  is already in your library.
 
-**Tracking your reading**
+**Track your reading**
 
-- Status (Want to Read, Currently Reading, Read, Did Not Finish), ratings,
-  notes, and start and finish dates. Rate in half stars, whole stars or out
-  of 10, or switch ratings off.
-- Update your current page as you go. The book page shows your pace and when
-  you're likely to finish.
-- Time your reading: press Start timer when you sit down with a book, and
-  the time goes with the next page you log (or type the minutes in). Once a
-  book has some timed reading it shows how many pages you read an hour and
-  how long the rest will take, and Stats adds up your time read. The timer
-  keeps going if you close the page or lock your phone, on the device you
-  started it on.
-- Set a daily goal, in pages or minutes, and a ring on Now reading fills as
-  you log your reading through the day, with a little confetti when you
-  reach it. It counts the days in a row you've met it, and the reading
-  calendar on Stats says how many days you met it in the last year.
-- Keep your own Up next list: add Want to Read books from their page or from
-  Now reading, put them in order, and they come first in Up next on Now
-  reading, before the suggestions (the next book of a series you're
-  reading, then the books you added last). Starting a book takes it off.
-- On this day: Now reading remembers what you finished or started on
-  today's date in earlier years, and a quote you saved on it. A book you
-  haven't logged for two weeks says when you last read it.
-- Re-reads are kept as history and count in your stats.
-- Save favourite quotes with page numbers, and search all of them on the
-  Quotes page.
-- Import your Kindle highlights into Quotes from the Kindle's
-  `My Clippings.txt`. You see each book and the library book it goes into
-  before anything is saved, notes come along with their highlights, and
-  importing the same file again only adds the new ones. The file is read in
-  your browser.
+- Status, ratings, notes, start and finish dates, and re-reads.
+- Log the page you're on and see your pace and when you'll finish.
+  Ebooks can also go by percent, and audiobooks by time listened.
+- Time your reading, set a daily goal in pages or minutes, and keep your
+  own list of what to read next.
+- Save quotes, or import your Kindle highlights.
 
-**Organising your library**
+**Organise your library**
 
-- Custom shelves, tags, series in reading order, format (physical, ebook,
-  audiobook) and ownership (owned, wishlist, borrowed, no longer have it).
-- Keep track of who borrowed your books and when.
-- Search, filter, sort and group the library. Authors sort by surname, the
-  way a bookshelf is filed. "Pick for me" opens a random book from Want to
-  Read.
-- A book opened from the library has an X in its corner (or press Esc) that
-  takes you back to the same spot in the library, with your filters still
-  on.
-- Show the library as cards, bare covers or a bookshelf, in three sizes, or
-  as a list, and choose what each book shows. Covers can look like little
-  hardbacks, and books without a cover get one drawn with their title. Save
-  the searches and filters you use often as views, and open the library on
-  one of them if you like.
-- Edit many books at once: set their status, format or ownership, add or
-  remove tags, put them on a shelf or take them off it, or delete them.
-  Pick the books on screen, or every book that matches your filters.
-- Rename, merge, reorder and hide shelves, and choose which status tabs the
-  library shows. Saved views can be renamed and reordered too.
+- Shelves, tags, series in reading order, formats, what you own or wish
+  for, and which books you've lent to whom.
+- Search, filter, sort and group, and save the views you use often.
+- Show the library as cards, covers, a bookshelf or a list, and edit many
+  books at once.
 
-**Stats**
+**See your stats**
 
-- Books read per year, pages read, ratings, genres and formats, and a
-  calendar of the days you read. Look at all time, this year, the last 12
-  months or the last 30 days.
-- Reading habits: which days of the week you read most, pages on an
-  average reading day, how long a book takes you from start to finish, and
-  with the timer your average sitting and pages an hour.
-- Decide what counts: whole books when you finish them or the pages you
-  log, whether books you stop reading count, and how audiobooks count.
-- A "year in review" page for every year, and yearly reading goals in books
-  or pages, with or without re-reads. The goal shows whether you're on
-  track, and next year's can be set ahead of time.
+- Books and pages per year, ratings, genres, a calendar of the days you
+  read, and your reading habits.
+- Yearly goals in books or pages, and a year in review for every year.
 
 **The reading room**
 
-- Your library drawn as a cozy pixel-art house. Every book is a spine on a
-  shelf, filed by author and coloured from its cover, with thick books on
-  wide spines. Point at one to see its title, click it to open the book;
-  the book's X puts it back on its shelf.
-- The house grows with your library: more bookcases, then more floors, and
-  furniture moves in as you add books, from a plant and a cat asleep in the
-  armchair to a clock, a library ladder, a window seat and a study.
-- A ribbon marks the books you're reading, and books on your wishlist, lent
-  out or given away keep their place as an outline. Light themes show it by
-  day; dark themes by lamplight, with the fire going.
-- Decorate it: ten house styles (a cottage, a castle, a wizard's house, an
-  elven hall, a cave in a hill, a space station, a modern house, a log
-  cabin, a tea house and a workshop), each with its own roof, walls and
-  garden, and things that move, from a banner on the battlements to a gear
-  on the workshop's gable and fireflies among the birches. Pick the colour
-  of the walls, the wood and the fabrics, hang a painting or one of five
-  tapestries over the fireplace, put furniture away, and drag the furniture
-  to wherever you like it (or move it with the arrow keys).
-- Choose the fireside: a stone, brick, marble, blue-tiled or modern
-  fireplace (the modern one burns along a bed of stones); a wingback, club
-  chair, Chesterfield, lounge chair or carved chair to read in; a fringed,
-  Persian, braided or kilim rug, a sheepskin or none; and a standard lamp,
-  a Tiffany lamp, an arc lamp, a candle stand or a paper lantern, all lit
-  at night. The chair and the rug take the fabric colour.
-- Hang pictures on the bare walls of every room, taking turns with the
-  windows: paintings, portraits in oval frames (the cat of the house has
-  one), botanical prints, maps and star charts, groups of old
-  photographs, or a bit of each.
-- Choose the bookcases: classic, open shelves with the wallpaper showing
-  behind the books, a pediment, Gothic pinnacles and a pointed gable, or a
-  barrister's case with a glass door over each shelf; and whether a few
-  ornaments stand beside the books, plenty of them (a pile of books lying
-  flat, a cactus in flower, a china bird, an inkwell and more), or none.
-- Add rooms, each upstairs on a floor of its own or next to the library
-  (or the room before it), so the house grows wider instead of taller
-  where the screen has space, with a door in the wall between that opens
-  as your little you wanders through: a kitchen with the kettle on the
-  range, a bedroom under a patchwork quilt, a music room, a conservatory
-  with a songbird, a games room with a billiard table, a studio with an
-  easel, a bathroom with a bubble bath, a dining room under a chandelier,
-  a nursery with a mobile over the cot, a woodshop, a sauna with steam
-  rising off the stove, or a spare room to fill yourself. The bathroom
-  comes tiled and the sauna panelled in logs. Their furniture can be moved
-  anywhere in the house or put away like the rest.
-- Paper the walls (stripes, damask, flowers, trellis, stars, stone, tiles,
-  paper screens and more) and lay the floor (boards, parquet, flagstones,
-  chequered tiles, carpet, tatami or a metal grate), for the whole house
-  and for each added room on its own, which can have walls of its own
-  colour too. String fairy lights, bunting, paper lanterns or ivy along
-  the ceilings; at night the fairy lights twinkle.
-- Put windows in the rooms (sash, arched, round, shuttered or leaded),
-  wherever the wall above the furniture is clear, with the sky outside by
-  day and the moon and stars at night. Grow ivy, climbing roses or
-  wisteria up the outside walls, and plant flower beds, bushes and trees
-  round the house behind a picket fence.
-- Pick the time of year, or follow the calendar: blossom, tulips and
-  daffodils in spring; gold and red leaves falling in autumn, with
-  chrysanthemums in the beds and red ivy; in winter bare trees, snowdrops,
-  snow on the roof and in the garden, icicles under the eaves and snow
-  falling. The view from the windows changes with it.
-- Add furniture from a catalogue: a Chesterfield sofa, a rocking chair, an
-  aquarium with fish swimming in it, a spaniel asleep in its basket, a suit
-  of armour, a sea chest, a coat stand, a telescope, a rocking horse, a
-  curio cabinet, a spinning wheel, a bean bag, a macaw on its perch, a
-  monstera, a standing mirror, a wood stove, an old radio playing, a tea
-  trolley and a dollhouse. Each goes wherever there's space, and you can
-  move it from there.
-- Make a little you who lives there, from a wardrobe: ten skin tones (an
-  elf or a spaceman too), eyes in seven colours, round or pointed ears, a
-  mouth, blush or freckles, a beard, 23 hairstyles in 14 colours, three
-  heights, jumpers, shirts, hoodies, a coat, a dress or a robe, trousers,
-  jeans, shorts, skirts or dungarees, six kinds of shoes, 24 hats from a
-  beanie to a halo (a headscarf, a turban, a head wrap and a kippah
-  among them), and glasses, a monocle, an eye patch, hearing aids,
-  earrings, a scarf, headphones, a backpack, a cape or fairy wings, all in
-  colours of your choosing. Get about on foot, with a walking stick or in
-  a wheelchair, and carry a mug of tea, a book, a lantern, a magic wand, a
-  teddy bear or a sunflower. Keep up to six looks to switch between, or
-  let Surprise me pick. They potter about the house
-  and stop by the fire, and while you're reading a book they sit in the
-  armchair reading it (the cat moves to the rug). With animations off they
-  stand still by the fire.
-- Bring a pet: a cat, a dog, a rabbit, a hedgehog, a fox or a little
-  dragon trots at your avatar's heels and curls up at its feet while it
-  reads. Choose the coat of every cat in the house (ginger, tabby, black,
-  white, grey, calico or Siamese) and of the dog.
-- Not for you? Turn the reading room off in Preferences, or from Decorate,
-  and the Room tab goes away. You can also keep the house and leave the
-  avatar out.
+- Your library drawn as a pixel-art house, with every book a spine on a
+  shelf. The house grows as your library does.
+- Decorate it: ten house styles, colours, furniture, more rooms, a garden
+  and the seasons.
+- Make a little you who lives there and sits down to read the book you're
+  reading. Or turn the room off.
 
-**Everything else**
+**Make it yours**
 
-- Download a backup (a zip with everything, covers and settings included)
-  and restore it on any MyReads server.
-- 26 colour themes, or a light and a dark one that switch with your device,
-  with an accent colour of your own on top if you like. Your choice follows
-  you to every device you sign in on.
-- Preferences on the Account page: date and number formats, your time zone
-  and the first day of the week, how titles and authors sort, what new books
-  start as, text size, a serif font for reviews and quotes, the font for
-  headings, how round the corners are, flat, raised or frosted cards, one
-  of 26 background textures (one of them, Sky, follows the time of day
-  where you are), a wash of the cover's colours behind each book's page,
-  which page opens first, and which links and stats cards you see.
-- A little motion: pages fade in, a book's cover flies to its page and back
-  into its place in the library when you close it, bars fill up,
-  finishing a book or reaching your goal sets off confetti, and the
-  reading room's fire flickers. On the Rain, Snow, Starry night, Aurora and
-  Ripples backgrounds, rain falls, snow drifts, stars twinkle and the odd
-  one shoots across the night, the light shifts and drops ripple the pond.
-  Animations can be turned off (or only the backgrounds kept still), and
-  stay off when your device asks for reduced motion.
+- 26 colour themes and 26 background textures. On some of the textures
+  rain falls, snow drifts or stars twinkle.
+- Preferences for date formats, time zone, sorting, fonts and much more.
+  Your settings follow you to every device.
 - Install it on your phone's home screen like an app.
 
-Deliberately out of scope: anything social, recommendation engines, and CSV
-import.
+**Keep it safe**
+
+- Download everything as one zip, covers and settings included, and
+  restore it on any MyReads server.
+
+Every feature is described in [docs/FEATURES.md](docs/FEATURES.md).
+
+Left out on purpose: anything social, recommendations of books you don't
+have, and importing a list of books from a spreadsheet (CSV) file.
 
 ## Screenshots
 
 <details>
-<summary>Show screenshots: book page, adding a book, cover picker, series, stats, year in review, reading room, themes</summary>
+<summary>Show screenshots: book page, Now reading, adding a book, cover picker, series, stats, year in review, reading room, themes</summary>
 
 **Book page**: details, the rest of the series, shelves, and your own
 reading data.
 
 ![Book page](docs/book-page.png)
+
+**Now reading**: the daily goal, a reading timer, the reading log, On this
+day and Up next.
+
+![Now reading, with the daily goal met, a timer running and the Up next list](docs/now-reading.png)
 
 **Adding a book**: search by title, author or ISBN, or scan the barcode, then
 pick a result to fill in the form.
@@ -256,11 +106,12 @@ edition first.
 
 ![Year in review](docs/year-in-review.png)
 
-**Reading room**: the library as a house, by day and by lamplight.
+**Reading room**: a cottage in autumn by day, and a castle in winter by
+lamplight, each with a room added upstairs.
 
-![The reading room in a light theme, with a book's title showing over its spine](docs/room.png)
+![The reading room as a cottage in autumn, with a book's title showing over its spine](docs/room.png)
 
-![The reading room in a dark theme](docs/room-dark.png)
+![The reading room as a castle in winter, in a dark theme](docs/room-dark.png)
 
 **Themes**: a dark theme, and the theme picker.
 
@@ -305,21 +156,26 @@ automatically.
   so nobody else can sign up.
 - **Use HTTPS for the phone features.** Browsers only allow the barcode
   camera and installing the app on HTTPS or `localhost`, so on a plain
-  `http://192.168.x.x` address they won't work. Put MyReads behind a reverse
-  proxy with HTTPS (for example Caddy, nginx or Traefik). Barcode scanning
-  works in Chrome and Edge, including Chrome on Android. With nginx, add
-  `client_max_body_size 200m;` too: nginx turns away uploads over 1 MB by
-  default, which stops most backups from being restored.
+  `http://192.168.x.x` address they won't work. Put MyReads behind a web
+  server that adds HTTPS (a reverse proxy, such as Caddy, nginx or
+  Traefik). Barcode scanning only works in Chrome and Edge, including
+  Chrome on Android. In other browsers, type the ISBN instead.
+- **If you use nginx, let it accept big uploads.** nginx refuses uploads
+  over 1 MB unless you change it, which stops most backups from being
+  restored and most phone photos from being uploaded as covers. Add
+  `client_max_body_size 200m;` to its settings for MyReads.
 - **Make backups.** On the Account page, **Download backup** saves
   everything as a zip. **Restore backup** on the same page loads one into any
   MyReads server. Books you already have are skipped, so restoring twice is
-  safe. The Backup card shows when you last downloaded one, and its
-  **Remind me to back up** setting (not in Preferences) can put a note on
-  the Library and Stats pages once a month.
+  safe. The Backup card also shows when you last downloaded one. Set its
+  **Remind me to back up** to Every month, and a note on the Library and
+  Stats pages reminds you when your last backup is over a month old.
 - **Know where your data is.** The library lives in two Docker volumes:
   `pgdata` (the database) and `covers` (cover images).
 - **Update.** Run `git pull`, then `docker compose up -d --build`. Database
-  changes are applied automatically when the app starts.
+  changes are applied automatically when the app starts. What changed in
+  each version is on the
+  [Releases](https://github.com/dagfinn2000/MyReads/releases) page.
 
 ## Server settings
 
