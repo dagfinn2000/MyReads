@@ -14,16 +14,16 @@ server.
   [Google Books](https://developers.google.com/books) (optional) and the
   [National Library of Norway](https://api.nb.no/), check the details, and
   save. Or type a book in by hand.
-- Scan the barcode with your phone's camera, one book at a time or a whole
-  shelf in a row.
+- Scan the barcode with your phone's camera (in Chrome or Edge), one book
+  at a time or a whole shelf in a row.
 - **Do I own this?** In a bookshop, scan a barcode to see whether the book
   is already in your library.
 
 **Track your reading**
 
 - Status, ratings, notes, start and finish dates, and re-reads.
-- Log the page you're on (percent for ebooks, hours and minutes for
-  audiobooks) and see your pace and when you'll finish.
+- Log the page you're on and see your pace and when you'll finish.
+  Ebooks can also go by percent, and audiobooks by time listened.
 - Time your reading, set a daily goal in pages or minutes, and keep your
   own list of what to read next.
 - Save quotes, or import your Kindle highlights.
@@ -31,7 +31,7 @@ server.
 **Organise your library**
 
 - Shelves, tags, series in reading order, formats, what you own or wish
-  for, and who borrowed which book.
+  for, and which books you've lent to whom.
 - Search, filter, sort and group, and save the views you use often.
 - Show the library as cards, covers, a bookshelf or a list, and edit many
   books at once.
@@ -53,8 +53,8 @@ server.
 
 **Make it yours**
 
-- 26 colour themes and 26 backgrounds. On some of them rain falls, snow
-  drifts or stars twinkle.
+- 26 colour themes and 26 background textures. On some of the textures
+  rain falls, snow drifts or stars twinkle.
 - Preferences for date formats, time zone, sorting, fonts and much more.
   Your settings follow you to every device.
 - Install it on your phone's home screen like an app.
@@ -66,8 +66,8 @@ server.
 
 Every feature is described in [docs/FEATURES.md](docs/FEATURES.md).
 
-Deliberately out of scope: anything social, recommendation engines, and CSV
-import.
+Left out on purpose: anything social, recommendations of books you don't
+have, and importing a list of books from a spreadsheet (CSV) file.
 
 ## Screenshots
 
@@ -156,18 +156,20 @@ automatically.
   so nobody else can sign up.
 - **Use HTTPS for the phone features.** Browsers only allow the barcode
   camera and installing the app on HTTPS or `localhost`, so on a plain
-  `http://192.168.x.x` address they won't work. Put MyReads behind a reverse
-  proxy with HTTPS (for example Caddy, nginx or Traefik). Barcode scanning
-  works in Chrome and Edge, including Chrome on Android.
-- **Let nginx take backups.** nginx turns away uploads over 1 MB by
-  default, which stops most backups from being restored. Add
+  `http://192.168.x.x` address they won't work. Put MyReads behind a web
+  server that adds HTTPS (a reverse proxy, such as Caddy, nginx or
+  Traefik). Barcode scanning only works in Chrome and Edge, including
+  Chrome on Android. In other browsers, type the ISBN instead.
+- **If you use nginx, let it accept big uploads.** nginx refuses uploads
+  over 1 MB unless you change it, which stops most backups from being
+  restored and most phone photos from being uploaded as covers. Add
   `client_max_body_size 200m;` to its settings for MyReads.
 - **Make backups.** On the Account page, **Download backup** saves
   everything as a zip. **Restore backup** on the same page loads one into any
   MyReads server. Books you already have are skipped, so restoring twice is
-  safe. The Backup card shows when you last downloaded one, and its
-  **Remind me to back up** setting (not in Preferences) can put a note on
-  the Library and Stats pages once a month.
+  safe. The Backup card also shows when you last downloaded one. Set its
+  **Remind me to back up** to Every month, and a note on the Library and
+  Stats pages reminds you when your last backup is over a month old.
 - **Know where your data is.** The library lives in two Docker volumes:
   `pgdata` (the database) and `covers` (cover images).
 - **Update.** Run `git pull`, then `docker compose up -d --build`. Database

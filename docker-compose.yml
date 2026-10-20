@@ -35,6 +35,8 @@ services:
       GOOGLE_BOOKS_API_KEY: ${GOOGLE_BOOKS_API_KEY:-}
       COVERS_DIR: /app/data/covers
       DISABLE_REGISTRATION: ${DISABLE_REGISTRATION:-false}
+      TRUSTED_PROXY_HOPS: ${TRUSTED_PROXY_HOPS:-1}
+      COVER_FETCH_ALLOW_PRIVATE: ${COVER_FETCH_ALLOW_PRIVATE:-false}
     volumes:
       - covers:/app/data/covers
     depends_on:

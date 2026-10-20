@@ -75,7 +75,7 @@ The [README](../README.md) is a short overview for someone deciding
 whether to install MyReads. [FEATURES.md](FEATURES.md) lists everything
 the app can do. When a change adds or changes something a reader can see,
 update FEATURES.md, and the README only when its overview no longer fits.
-Screenshots live next to these files in `docs/`.
+Screenshots live in `docs/`, next to FEATURES.md.
 
 ## Tech stack
 
@@ -100,9 +100,9 @@ src/
 ├─ app/
 │  ├─ (auth)/          login and register pages
 │  ├─ (app)/           pages behind login: books (the library), books/new,
-│  │                   books/[id], books/[id]/edit, books/check, quotes,
-│  │                   room (the reading room), stats, stats/year/[year],
-│  │                   account
+│  │                   books/[id], books/[id]/edit, books/check, reading
+│  │                   (Now reading), quotes, room (the reading room),
+│  │                   stats, stats/year/[year], account
 │  └─ api/             Auth.js, register, metadata search/details/covers,
 │                      library check, cover upload and serving,
 │                      backup export and import
@@ -235,7 +235,7 @@ src/
   on a narrow screen a piece may wait for space, and Decorate says so.
   The avatar is painted dot by dot and outlined in code
   ([avatar-art.ts](../src/components/avatar-art.ts)) in layers, from a
-  cape behind to a hat on top, and coloured from five `--av-*` colours, so
+  cape behind to a hat on top, and coloured from six `--av-*` colours, so
   a colour pick redraws nothing. Its look is one Preferences value
   (`avatar`), checked by `parseAvatar` in [avatar.ts](../src/lib/avatar.ts),
   which also reads the looks saved before the wardrobe. The tests draw

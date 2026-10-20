@@ -82,16 +82,21 @@ page by page.
 
 - Save favourite quotes with page numbers, and search all of them on the
   Quotes page.
-- **Import from Kindle.** On the Quotes page, bring in your highlights
-  from the Kindle's `My Clippings.txt`. You see each book and the library
-  book it goes into before anything is saved. Notes come along with their highlights, and importing the same
-  file again only adds the new ones. The file is read in your browser.
+- **Import from Kindle.** On the Quotes page, bring in your highlights.
+  Connect your Kindle to a computer and pick `My Clippings.txt` from its
+  documents folder. Before anything is saved, you check which book in
+  your library each Kindle book's highlights go into. Notes you made on
+  the Kindle come along too, and importing the same file again only adds
+  new ones. The file stays on your device: only the highlights you import
+  are saved.
 
 ## The library
 
 - Custom shelves, tags, series in reading order, format (physical, ebook,
-  audiobook) and ownership (owned, wishlist, borrowed, no longer have it).
-- Keep track of who borrowed your books and when.
+  audiobook) and ownership (owned, wishlist, borrowed from someone, no
+  longer have it).
+- Keep track of the books you've lent out, who has them and since when,
+  on each book's Lending card.
 - Search, filter, sort and group the library. Authors sort by surname, the
   way a bookshelf is filed.
 - "Pick for me" opens a random book from the ones on screen, keeping to
@@ -120,8 +125,9 @@ page by page.
 - **Reading habits:** which days of the week you read most, pages on an
   average reading day, how long a book takes you from start to finish, and
   with the timer your average sitting and pages an hour.
-- Decide what counts: whole books when you finish them or the pages you
-  log, whether books you stop reading count, and how audiobooks count.
+- Decide what counts in your stats. Pages read can mean a whole book's
+  pages when you finish it, or the pages you log as you go. You also
+  choose whether books you stop reading count, and how audiobooks count.
 - A "year in review" page for every year.
 - Yearly reading goals in books or pages, with or without re-reads. The
   goal shows whether you're on track, and next year's can be set ahead of
@@ -197,7 +203,8 @@ Everything below is under **Decorate** on the Room page.
   spare room to fill yourself.
 - Each room goes upstairs on a floor of its own, or next to the library
   (or the room before it) where the screen has space. The wall between
-  has a door that opens as your little you walks through.
+  has a door. When the room is on the same floor as the fireplace, the
+  door opens as your little you walks through.
 - Each added room can have its own wall colour, wallpaper and floor. The
   bathroom comes tiled and the sauna panelled in logs.
 - Add furniture from a catalogue: a Chesterfield sofa, a rocking chair, an
@@ -206,14 +213,17 @@ Everything below is under **Decorate** on the Room page.
   curio cabinet, a spinning wheel, a bean bag, a macaw on its perch, a
   monstera, a standing mirror, a wood stove, an old radio playing, a tea
   trolley and a dollhouse. Each goes wherever there's space.
-- Drag any piece of furniture to where you like it, or move it with the
-  arrow keys. Put away what you don't want.
+- Press Move furniture, then drag a piece to where you like it, or select
+  it and use the arrow keys. The bookcases stay in the order of your
+  books. To put a piece away, untick it under Furniture in Decorate.
 
 ### Outside and the seasons
 
-- Grow ivy, climbing roses or wisteria up the outside walls, and plant
-  flower beds, bushes and trees round the house behind a picket fence.
-- Pick the time of year, or follow the calendar: blossom, tulips and
+- Grow ivy, climbing roses or wisteria up the outside walls. Plant flower
+  beds, bushes and trees round the house, and put up a picket fence if you
+  like. (A cave is dug into its hill, so it has neither.)
+- Pick the time of year, or follow the calendar (with northern seasons,
+  so winter starts in December): blossom, tulips and
   daffodils in spring; gold and red leaves falling in autumn, with
   chrysanthemums in the beds and red ivy; in winter bare trees, snowdrops,
   snow on the roof and in the garden, icicles under the eaves and snow
@@ -227,17 +237,19 @@ it (the cat moves to the rug). With animations off they stand still by the
 fire.
 
 - **Face:** ten skin tones (an elf or a spaceman too), eyes in seven
-  colours, round or pointed ears, a mouth, blush or freckles, and a beard.
+  colours, round or pointed ears, a mouth, blush, freckles or a beauty
+  spot (or all three), and a beard.
 - **Hair:** 23 hairstyles in 14 colours.
 - **Body:** three heights. Get about on foot, with a walking stick or in a
   wheelchair.
-- **Clothes:** jumpers, shirts, hoodies, a coat, a dress or a robe;
-  trousers, jeans, shorts, skirts or dungarees; and six kinds of shoes, all
-  in colours of your choosing.
+- **Clothes:** jumpers, T-shirts, shirts, cardigans, hoodies, a waistcoat,
+  a long coat, a dress or a robe; trousers, jeans, shorts, skirts or
+  dungarees, in colours of your choosing; and six kinds of shoes.
 - **Hats and extras:** 24 hats from a beanie to a halo (a headscarf, a
-  turban, a head wrap and a kippah among them), and glasses, a monocle, an
-  eye patch, hearing aids, earrings, a scarf, headphones, a backpack, a
-  cape or fairy wings.
+  turban, a head wrap and a kippah among them), and as many extras as you
+  like: glasses, sunglasses, a monocle, an eye patch, hearing aids,
+  earrings, a necklace, a scarf, a bow tie, headphones, a backpack, a cape
+  and fairy wings.
 - **Something to carry:** a mug of tea, a book, a lantern, a magic wand, a
   teddy bear or a sunflower.
 - **Saved looks:** keep up to six to switch between, or let Surprise me
@@ -257,10 +269,11 @@ tab goes away. You can also keep the house and leave the avatar out.
 - 26 colour themes, or a light and a dark one that switch with your
   device, with an accent colour of your own on top if you like. Your
   choice follows you to every device you sign in on.
-- 26 background textures. On Rain, Snow, Starry night, Aurora and Ripples,
-  rain falls, snow drifts, stars twinkle (and on dark themes the odd one
-  shoots across the sky), the light shifts and drops ripple the pond. Sky
-  follows the time of day where you are.
+- 26 background textures. Five of them move: rain falls on Rain, snow
+  drifts on Snow, and stars twinkle on Starry night (on dark themes, a
+  star now and then shoots across the sky). The light shifts on Aurora,
+  and drops ripple the pond on Ripples. Sky changes colour with the time
+  of day where you are.
 - A little motion: pages fade in, a book's cover flies to its page and
   back into its place in the library when you close it, bars fill up,
   finishing a book or reaching your goal sets off confetti, and the
@@ -300,6 +313,6 @@ On the Account page:
   and settings included.
 - Restore it on any MyReads server. Books you already have are skipped,
   so restoring twice is safe.
-- The Backup card shows when you last made one. Turn on "Remind me to
-  back up" there, and a note on the Library and Stats pages tells you when
-  your last backup is a month old.
+- The Backup card shows when you last made one. Set its "Remind me to
+  back up" to Every month, and a note on the Library and Stats pages
+  reminds you when your last backup is over a month old.
