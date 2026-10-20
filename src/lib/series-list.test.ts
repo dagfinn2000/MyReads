@@ -7,6 +7,7 @@ import {
   seriesState,
   showSeries,
   type SeriesBook,
+  type SeriesSlot,
 } from "@/lib/series-list";
 
 let n = 0;
@@ -31,6 +32,13 @@ function book(
     ...over,
   };
 }
+
+const slotLabel = (slot: SeriesSlot<SeriesBook>) =>
+  slot.kind === "book"
+    ? slot.book.seriesNumber
+    : slot.from === slot.to
+      ? `gap ${slot.from}`
+      : `gap ${slot.from}-${slot.to}`;
 
 describe("buildSeriesList", () => {
   it("groups by series name however it's spelled, in series order", () => {
@@ -58,10 +66,32 @@ describe("buildSeriesList", () => {
       book("Discworld", 4),
       book("Discworld", 6),
     ]);
-    expect(
-      s.slots.map((slot) => (slot.kind === "gap" ? `gap ${slot.number}` : slot.book.seriesNumber)),
-    ).toEqual([1, 1.5, "gap 2", "gap 3", 4, "gap 5", 6]);
+    expect(s.slots.map(slotLabel)).toEqual([1, 1.5, "gap 2", "gap 3", 4, "gap 5", 6]);
     expect(s.slots.filter((slot) => slot.kind === "book" && slot.next)).toHaveLength(1);
+  });
+
+  it("makes a long run of missing numbers one place", () => {
+    const [byYear] = buildSeriesList([book("Annual", 2019, "READ"), book("Annual", 2021)]);
+    expect(byYear.slots.map(slotLabel)).toEqual(["gap 1-2018", 2019, "gap 2020", 2021]);
+    const [kept] = buildSeriesList([
+      book("Pockets", 1),
+      book("Pockets", 4),
+      book("Pockets", 9),
+    ]);
+    expect(kept.slots.map(slotLabel)).toEqual([1, "gap 2", "gap 3", 4, "gap 5-8", 9]);
+  });
+
+  it("is finished when every number is read in some copy", () => {
+    // Two editions of #1, one read: nothing is next, so nothing is left.
+    const [s] = buildSeriesList([
+      book("Editions", 1, "WANT_TO_READ", { title: "A" }),
+      book("Editions", 1, "READ", { title: "B" }),
+      book("Editions", 2, "READ"),
+    ]);
+    expect(s.next).toBeNull();
+    expect(s.state).toBe("finished");
+    // The read copy comes first.
+    expect(s.books.map((b) => b.title)).toEqual(["B", "A", s.books[2].title]);
   });
 
   it("marks no next book while one is being read", () => {
@@ -88,6 +118,7 @@ describe("buildSeriesList", () => {
 describe("seriesState", () => {
   it("is finished once every book is read or put down, gaps or not", () => {
     expect(seriesState([book("S", 1, "READ"), book("S", 3, "DNF")])).toBe("finished");
+    expect(seriesState([book("S", 1, "READ"), book("S", null)])).toBe("underway");
     // Re-reading a finished series keeps it finished.
     expect(seriesState([book("S", 1, "READING", { timesRead: 1 })])).toBe("finished");
   });
@@ -127,10 +158,17 @@ describe("parseSeriesShow and seriesAnchor", () => {
     expect(parseSeriesShow(undefined)).toBe("all");
   });
 
-  it("makes the same anchor for any spelling of a name", () => {
-    expect(seriesAnchor("The Expanse")).toBe("series-the-expanse");
-    expect(seriesAnchor(" the  expanse ")).toBe("series-the-expanse");
-    expect(seriesAnchor("Mumin & Co.")).toBe("series-mumin-co");
-    expect(seriesAnchor("Ørnenes høst")).toBe("series-ørnenes-høst");
+  it("makes the same anchor for any spelling the library groups together", () => {
+    expect(seriesAnchor("The Expanse")).toMatch(/^series-the-expanse-[0-9a-z]+$/);
+    expect(seriesAnchor(" the expanse ")).toBe(seriesAnchor("The Expanse"));
+    expect(seriesAnchor("Mumin & Co.")).toMatch(/^series-mumin-co-[0-9a-z]+$/);
+    expect(seriesAnchor("Ørnenes høst")).toMatch(/^series-ørnenes-høst-[0-9a-z]+$/);
+  });
+
+  it("never gives two series the same anchor", () => {
+    expect(seriesAnchor("Dune")).not.toBe(seriesAnchor("Dune:"));
+    expect(seriesAnchor("Mumin & Co.")).not.toBe(seriesAnchor("Mumin Co"));
+    expect(seriesAnchor("★")).not.toBe(seriesAnchor("☆"));
+    expect(seriesAnchor("★")).toMatch(/^series-[0-9a-z]+$/);
   });
 });

@@ -23,9 +23,19 @@ export interface SeriesBook extends SeriesMember {
 export type SeriesState = "underway" | "unstarted" | "finished";
 
 /** The id of a series' card on the Series page, for links from the library
- *  and book pages: "/series#series-the-expanse". */
+ *  and book pages: "/series#series-the-expanse-1k2x9q". The slug keeps the
+ *  link readable; the hash of the series key keeps "Dune" and "Dune:" (or
+ *  two names made only of symbols) from sharing an id. */
 export function seriesAnchor(name: string): string {
-  return `series-${seriesKey(name).replace(/[^\p{L}\p{N}]+/gu, "-").replace(/^-|-$/g, "")}`;
+  const key = seriesKey(name);
+  const slug = key.replace(/[^\p{L}\p{N}]+/gu, "-").replace(/^-|-$/g, "");
+  // FNV-1a: short, stable, and the same on the server and in the browser.
+  let hash = 0x811c9dc5;
+  for (const ch of key) {
+    hash ^= ch.codePointAt(0)!;
+    hash = Math.imul(hash, 0x01000193) >>> 0;
+  }
+  return `series-${slug ? `${slug}-` : ""}${hash.toString(36)}`;
 }
 
 export const SERIES_SHOW = ["all", "underway", "unstarted", "finished"] as const;
@@ -38,11 +48,16 @@ export const SERIES_SHOW_LABELS: Record<SeriesShow, string> = {
   finished: "Finished",
 };
 
-/** One place in a series as the page draws it: a book, or a number the
- *  library has no book for. */
+/** One place in a series as the page draws it: a book, or numbers the
+ *  library has no book for. A long run of missing numbers (a series
+ *  numbered by year, or only #1 and #60 kept) is one place, "#3–#59", so
+ *  the card never draws thousands of empty tiles. */
 export type SeriesSlot<B> =
   | { kind: "book"; book: B; next: boolean }
-  | { kind: "gap"; number: number };
+  | { kind: "gap"; from: number; to: number };
+
+/** Runs of missing numbers longer than this become one place. */
+const GAP_RUN = 2;
 
 export interface SeriesEntry<B extends SeriesBook = SeriesBook> {
   key: string;
@@ -69,22 +84,39 @@ function mostCommon(values: string[]): string[] {
   return [...counts.entries()].sort((a, b) => b[1] - a[1]).map(([v]) => v);
 }
 
-/** Series order: by number, unnumbered books last by title. */
+/** Series order: by number, unnumbered books last by title. Two copies of
+ *  one number put the one already read first. */
 function bySeriesOrder(a: SeriesBook, b: SeriesBook): number {
   if (a.seriesNumber !== null && b.seriesNumber !== null && a.seriesNumber !== b.seriesNumber) {
     return a.seriesNumber - b.seriesNumber;
   }
   if (a.seriesNumber === null && b.seriesNumber !== null) return 1;
   if (a.seriesNumber !== null && b.seriesNumber === null) return -1;
-  return a.title.localeCompare(b.title);
+  return Number(isDoneInSeries(b)) - Number(isDoneInSeries(a)) || a.title.localeCompare(b.title);
 }
 
-/** Finished when every book of it in the library is read (or put down for
- *  good); under way once any is read or being read; otherwise not started.
- *  A number the library has no book for doesn't hold "finished" back: the
+/**
+ * The books with nothing left to do: read or put down, or another copy of
+ * the same number is (two editions of #1, one read) — the rule
+ * nextInSeries uses, so a series is finished exactly when it has no next.
+ */
+export function settledInSeries<T extends SeriesMember>(books: T[]): Set<T> {
+  const doneNumbers = new Set(
+    books.filter((b) => b.seriesNumber !== null && isDoneInSeries(b)).map((b) => b.seriesNumber),
+  );
+  return new Set(
+    books.filter(
+      (b) => isDoneInSeries(b) || (b.seriesNumber !== null && doneNumbers.has(b.seriesNumber)),
+    ),
+  );
+}
+
+/** Finished when every book of it in the library is settled (see above);
+ *  under way once any is read or being read; otherwise not started. A
+ *  number the library has no book for doesn't hold "finished" back: the
  *  reader may well have read it somewhere else. */
 export function seriesState(books: SeriesMember[]): SeriesState {
-  if (books.length > 0 && books.every(isDoneInSeries)) return "finished";
+  if (books.length > 0 && settledInSeries(books).size === books.length) return "finished";
   return books.some((b) => isDoneInSeries(b) || b.status === ReadingStatus.READING)
     ? "underway"
     : "unstarted";
@@ -109,7 +141,19 @@ export function buildSeriesList<B extends SeriesBook>(books: B[]): SeriesEntry<B
     const slots: SeriesSlot<B>[] = [];
     let gapFrom = 1;
     const pushGapsBelow = (n: number) => {
-      for (; gapFrom < n; gapFrom++) if (gaps.has(gapFrom)) slots.push({ kind: "gap", number: gapFrom });
+      // Walk by runs: a run of up to GAP_RUN numbers is a place each, a
+      // longer one a single place. Bounded by the highest number kept.
+      while (gapFrom < n) {
+        if (!gaps.has(gapFrom)) {
+          gapFrom++;
+          continue;
+        }
+        let to = gapFrom;
+        while (to + 1 < n && gaps.has(to + 1)) to++;
+        if (to - gapFrom + 1 > GAP_RUN) slots.push({ kind: "gap", from: gapFrom, to });
+        else for (let k = gapFrom; k <= to; k++) slots.push({ kind: "gap", from: k, to: k });
+        gapFrom = to + 1;
+      }
     };
     for (const b of ordered) {
       if (b.seriesNumber !== null) pushGapsBelow(Math.ceil(b.seriesNumber));

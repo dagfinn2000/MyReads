@@ -4,7 +4,13 @@ import { ReadingStatus } from "@/lib/enums";
 import { formatNumber } from "@/lib/display";
 import type { NumberFormat } from "@/lib/preferences";
 import { isDoneInSeries } from "@/lib/series";
-import { seriesAnchor, type SeriesBook, type SeriesEntry, type SeriesSlot } from "@/lib/series-list";
+import {
+  seriesAnchor,
+  settledInSeries,
+  type SeriesBook,
+  type SeriesEntry,
+  type SeriesSlot,
+} from "@/lib/series-list";
 import { cn } from "@/lib/utils";
 import { BookCover } from "@/components/book-card";
 import { BookLink } from "@/components/book-link";
@@ -30,13 +36,24 @@ export function SeriesCard({
 }) {
   const fmt = (n: number) => formatNumber(n, prefs);
   const { progress: p, next } = series;
-  const reading = series.books.find(
-    (b) => b.status === ReadingStatus.READING && !isDoneInSeries(b),
-  );
+  // The book being read, by the library heading's rule ("reading #2"):
+  // the lowest-numbered one, re-reads included.
+  const reading =
+    p.reading === null
+      ? undefined
+      : series.books.find(
+          (b) => b.status === ReadingStatus.READING && b.seriesNumber === p.reading,
+        );
+  // Asking for numbers only helps when a book still to read has none.
+  const settled = settledInSeries(series.books);
+  const unnumbered = series.books.some((b) => b.seriesNumber === null && !settled.has(b));
   const href = `/books?series=${encodeURIComponent(series.name)}&group=series`;
 
   return (
-    <Card id={seriesAnchor(series.name)} className="scroll-mt-20 target:ring-2 target:ring-amber-500/60">
+    <Card
+      id={seriesAnchor(series.name)}
+      className="scroll-mt-20 data-[arrived]:ring-2 data-[arrived]:ring-amber-500/60"
+    >
       <CardContent className="grid gap-3">
         <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
           <div className="min-w-0">
@@ -53,7 +70,7 @@ export function SeriesCard({
             )}
           </div>
           <p className="text-sm text-muted-foreground tabular-nums">
-            {series.state === "finished" ? (
+            {p.total > 0 && p.read === p.total ? (
               <span className="font-medium text-foreground">All read</span>
             ) : (
               <>
@@ -68,8 +85,8 @@ export function SeriesCard({
 
         <ol className="-mx-1 flex gap-3 overflow-x-auto px-1 pt-1 pb-2">
           {series.slots.map((slot) => (
-            <li key={slot.kind === "gap" ? `gap-${slot.number}` : slot.book.id} className="shrink-0">
-              {slot.kind === "gap" ? <Gap number={slot.number} /> : <Place slot={slot} />}
+            <li key={slot.kind === "gap" ? `gap-${slot.from}` : slot.book.id} className="shrink-0">
+              {slot.kind === "gap" ? <Gap from={slot.from} to={slot.to} /> : <Place slot={slot} />}
             </li>
           ))}
         </ol>
@@ -91,10 +108,14 @@ export function SeriesCard({
               </BookLink>
             </>
           ) : series.state === "finished" ? (
-            "Every book you have in this series is read."
-          ) : (
+            p.read === p.total ? (
+              "Every book you have in this series is read."
+            ) : (
+              "Nothing left to read in this series."
+            )
+          ) : unnumbered ? (
             "Give the books series numbers to see which comes next."
-          )}
+          ) : null}
           {p.missing.length > 0 && (
             <span>
               {" "}
@@ -109,25 +130,33 @@ export function SeriesCard({
   );
 }
 
-/** A segment per place: read, being read, still to read, or a gap. */
+/** "#3", or "#3–#59" for a run. */
+function gapLabel(from: number, to: number): string {
+  return from === to ? numberLabel(from) : `${numberLabel(from)}–${numberLabel(to)}`;
+}
+
+/** A segment per place: read, being read, still to read, or a gap. Never
+ *  wider than the card: with many places the segments just get thin. */
 function SeriesBar({ slots }: { slots: SeriesSlot<SeriesBook>[] }) {
   const label = slots
     .map((s) =>
       s.kind === "gap"
-        ? `${numberLabel(s.number)} missing`
+        ? `${gapLabel(s.from, s.to)} missing`
         : `${numberLabel(s.book.seriesNumber) || s.book.title}: ${placeState(s.book)}`,
     )
     .join(", ");
   return (
-    <div role="img" aria-label={label} className="flex h-2 gap-0.5">
+    <div role="img" aria-label={label} className="flex h-2 min-w-0 gap-0.5 overflow-hidden">
       {slots.map((s) => (
         <span
-          key={s.kind === "gap" ? `gap-${s.number}` : s.book.id}
+          key={s.kind === "gap" ? `gap-${s.from}` : s.book.id}
           className={cn(
-            "bar-grow h-full min-w-1 flex-1 first:rounded-l-full last:rounded-r-full",
+            "bar-grow h-full min-w-px flex-1 first:rounded-l-full last:rounded-r-full",
             s.kind === "gap"
               ? "border border-dashed border-muted-foreground/40"
-              : isDoneInSeries(s.book)
+              : s.book.status === ReadingStatus.DNF
+                ? "bg-muted-foreground/40"
+                : isDoneInSeries(s.book)
                 ? "bg-amber-500"
                 : s.book.status === ReadingStatus.READING
                   ? "bg-primary/70"
@@ -151,7 +180,8 @@ function placeState(b: SeriesBook): string {
 function Place({ slot }: { slot: Extract<SeriesSlot<SeriesBook>, { kind: "book" }> }) {
   const b = slot.book;
   const done = isDoneInSeries(b);
-  const reading = !done && b.status === ReadingStatus.READING;
+  // A re-read keeps its tick and gets the tag as well.
+  const reading = b.status === ReadingStatus.READING;
   const tag = reading ? "Reading" : slot.next ? "Next" : null;
   return (
     <BookLink
@@ -196,17 +226,25 @@ function Place({ slot }: { slot: Extract<SeriesSlot<SeriesBook>, { kind: "book" 
   );
 }
 
-/** A number the library has no book for. */
-function Gap({ number }: { number: number }) {
+/** Numbers the library has no book for: one, or a run of them. */
+function Gap({ from, to }: { from: number; to: number }) {
+  const label = gapLabel(from, to);
   return (
     <Link
       href="/books/new"
       className="group grid w-20 gap-1"
-      title={`No book for ${numberLabel(number)}. Add it`}
+      title={from === to ? `No book for ${label}. Add it` : `No books for ${label}. Add one`}
     >
       <span className="grid aspect-[2/3] w-20 place-items-center rounded-md border-2 border-dashed border-muted-foreground/30 text-muted-foreground transition-colors group-hover:border-muted-foreground/60 group-hover:text-foreground">
-        <span className="grid justify-items-center gap-1">
-          <span className="text-lg font-semibold tabular-nums">{numberLabel(number)}</span>
+        <span className="grid justify-items-center gap-1 px-1 text-center">
+          <span
+            className={cn(
+              "font-semibold tabular-nums",
+              from === to ? "text-lg" : "text-xs leading-tight break-all",
+            )}
+          >
+            {label}
+          </span>
           <Plus className="size-4" aria-hidden="true" />
         </span>
       </span>

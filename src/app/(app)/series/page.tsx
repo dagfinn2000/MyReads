@@ -12,6 +12,7 @@ import {
   showSeries,
 } from "@/lib/series-list";
 import { cn } from "@/lib/utils";
+import { SeriesArrival } from "@/components/series-arrival";
 import { SeriesCard } from "@/components/series-card";
 
 export const dynamic = "force-dynamic";
@@ -100,6 +101,7 @@ export default async function SeriesPage({
               {shown.map((s) => (
                 <SeriesCard key={s.key} series={s} prefs={prefs} />
               ))}
+              <SeriesArrival />
             </div>
           )}
         </>
