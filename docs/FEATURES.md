@@ -48,24 +48,30 @@ page by page.
   stars, whole stars or out of 10, or switch ratings off.
 - Re-reads are kept as history and count in your stats.
 - **Now reading** lists the books you're reading. Log the page you're on,
-  for today or an earlier day. Ebooks can go in percent and audiobooks in
-  hours and minutes. Each book shows your pace and when you're likely to
-  finish.
+  for today or an earlier day. Each book shows your pace and when you're
+  likely to finish.
+- In Preferences you can log ebooks in percent, and audiobooks in percent
+  or in hours and minutes listened. Percent needs the book's page count,
+  and time needs the audiobook's length too. Both go on the book's Edit
+  page.
 - **Reading timer.** Press Start timer when you sit down with a book, and
   the time goes with the next page you log (or type the minutes in). Once
   a book has some timed reading, it shows how many pages you read an hour
   and how long the rest will take, and Stats adds up your time read. The
-  timer keeps going if you close the page or lock your phone, on the
-  device you started it on.
-- **Daily goal.** Set one in pages or minutes, and a ring on Now reading
-  fills as you log your reading through the day, with a little confetti
-  when you reach it. It counts the days in a row you've met it, and the
-  reading calendar on Stats says how many days you met it in the last
-  year.
+  timer keeps going if you close the page or lock your phone, in the
+  browser you started it in.
+- **Daily goal.** Set one in pages or minutes in Preferences > Reading,
+  and a ring on Now reading fills as you read through the day, with a
+  little confetti when you reach it. Minutes come from the reading timer
+  or the time you type in. The ring counts the days in a row you've met
+  the goal, and the Reading days calendar on Stats says how many days you
+  met it in the last year.
 - **Up next.** Add Want to Read books to your own list, from their page or
   from Now reading, and put them in order. They come first in Up next on
   Now reading, before the suggestions (the next book of a series you're
-  reading, then the books you added last). Starting a book takes it off.
+  reading, then the books you added last). Starting or finishing a book
+  takes it off, and you can take one off yourself on its page or in Edit
+  list.
 - **On this day.** Now reading remembers what you finished or started on
   today's date in earlier years, and a quote you saved on it.
 - A book you haven't logged for two weeks says when you last read it.
@@ -76,9 +82,9 @@ page by page.
 
 - Save favourite quotes with page numbers, and search all of them on the
   Quotes page.
-- **Import Kindle highlights** from the Kindle's `My Clippings.txt`. You
-  see each book and the library book it goes into before anything is
-  saved. Notes come along with their highlights, and importing the same
+- **Import from Kindle.** On the Quotes page, bring in your highlights
+  from the Kindle's `My Clippings.txt`. You see each book and the library
+  book it goes into before anything is saved. Notes come along with their highlights, and importing the same
   file again only adds the new ones. The file is read in your browser.
 
 ## The library
@@ -87,8 +93,11 @@ page by page.
   audiobook) and ownership (owned, wishlist, borrowed, no longer have it).
 - Keep track of who borrowed your books and when.
 - Search, filter, sort and group the library. Authors sort by surname, the
-  way a bookshelf is filed. "Pick for me" opens a random book from Want to
-  Read.
+  way a bookshelf is filed.
+- "Pick for me" opens a random book from the ones on screen, keeping to
+  your filters. On the All tab it picks from Want to Read first. In
+  Preferences you can have it pick only books you have, or only the next
+  book in a series.
 - Show the library as cards, bare covers or a bookshelf, in three sizes, or
   as a list, and choose what each book shows. Covers can look like little
   hardbacks, and books without a cover get one drawn with their title.
@@ -128,24 +137,26 @@ The Room page draws your library as a cozy pixel-art house.
 - A ribbon marks the books you're reading. Books on your wishlist, lent
   out or given away keep their place as an outline.
 - The house grows with your library: more bookcases, then more floors.
-  Furniture moves in as you add books, from a plant and a cat asleep in
-  the armchair to a clock, a library ladder, a window seat and a study.
-- Light themes show it by day. Dark themes show it by lamplight, with the
-  fire going.
+  Furniture moves in as you add books: a plant, a cat asleep in the
+  armchair, a grandfather clock, a library ladder, a window seat, a
+  writing desk and a gramophone.
+- Light themes show it by day. Dark themes show it at night, with the
+  lamps lit and the fire glowing.
 
 Everything below is under **Decorate** on the Room page.
 
 ### The house
 
-- Ten house styles, each with its own roof, walls and garden, and
-  something that moves: a cottage, a castle (with a banner on the
-  battlements), a wizard's house, an elven hall (fireflies among the
-  birches), a cave in a hill, a space station, a modern house, a log
-  cabin, a tea house and a workshop (a gear turning on the gable).
+- Ten house styles, each with its own roof, walls and garden: a cottage,
+  a castle (with a banner on the battlements), a wizard's house, an elven
+  hall (fireflies among the birches at night), a cave in a hill, a space
+  station (with a blinking beacon), a modern house, a log cabin, a tea
+  house and a workshop (a gear turning on the gable). Most have smoke
+  rising from the chimney.
 - The colour of the walls, the wood and the fabrics.
 - Wallpaper (stripes, damask, flowers, trellis, stars, stone, tiles, paper
-  screens and more) and floors (boards, parquet, flagstones, chequered
-  tiles, carpet, tatami or a metal grate).
+  screens and more) and floors (boards, wide planks, parquet, flagstones,
+  chequered tiles, carpet, tatami or a metal grate).
 - Fairy lights, bunting, paper lanterns or ivy along the ceilings. At
   night the fairy lights twinkle.
 - Windows (sash, arched, round, shuttered or leaded) wherever the wall
@@ -247,9 +258,9 @@ tab goes away. You can also keep the house and leave the avatar out.
   device, with an accent colour of your own on top if you like. Your
   choice follows you to every device you sign in on.
 - 26 background textures. On Rain, Snow, Starry night, Aurora and Ripples,
-  rain falls, snow drifts, stars twinkle (and the odd one shoots across the
-  night), the light shifts and drops ripple the pond. Sky follows the time
-  of day where you are.
+  rain falls, snow drifts, stars twinkle (and on dark themes the odd one
+  shoots across the sky), the light shifts and drops ripple the pond. Sky
+  follows the time of day where you are.
 - A little motion: pages fade in, a book's cover flies to its page and
   back into its place in the library when you close it, bars fill up,
   finishing a book or reaching your goal sets off confetti, and the
@@ -266,14 +277,22 @@ On the Account page:
 - How titles and authors sort, with Norwegian, Danish, Swedish and German
   alphabets.
 - What new books start as, and which book catalogues to search.
-- Rating style, the daily goal, and what counts in your stats.
-- Text size, a serif font for reviews and quotes, the font for headings,
-  how round the corners are, and flat, raised or frosted cards.
-- The background texture, and a wash of the cover's colours behind each
-  book's page.
-- Which page opens first, which pages are in the top bar, and which links
-  and stats cards you see.
-- The reading room, on or off.
+- How you log reading: the step buttons, page or percent for ebooks, page,
+  percent or time for audiobooks, where your pace comes from, and the
+  daily goal.
+- The rating style, and what counts in your stats.
+- Which status tabs the library shows, what its search also looks in
+  (tags, ISBN, your review), and what Pick for me leaves out.
+- The accent colour, text size, a serif font for reviews and quotes, the
+  font for headings, how round the corners are, flat, raised or frosted
+  cards, the background texture, and a wash of the cover's colours behind
+  the top of each book's page.
+- Animations on or off, and whether the moving backgrounds move.
+- The book page: which cards show and in what order, long descriptions in
+  full or cut short, and your own "Find it at" links.
+- Which page opens first, whether Now reading, Check and Quotes are in the
+  top bar, and which cards show on the Stats page.
+- The reading room and your avatar, on or off.
 
 ## Backups
 
@@ -281,5 +300,6 @@ On the Account page:
   and settings included.
 - Restore it on any MyReads server. Books you already have are skipped,
   so restoring twice is safe.
-- The Backup card shows when you last made one, and can remind you once a
-  month.
+- The Backup card shows when you last made one. Turn on "Remind me to
+  back up" there, and a note on the Library and Stats pages tells you when
+  your last backup is a month old.
