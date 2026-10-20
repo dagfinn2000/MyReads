@@ -43,6 +43,7 @@ export function RestoreBackup() {
         data.loansRestored > 0 ? `${n(data.loansRestored, "loan")} restored` : null,
         data.shelvesCreated > 0 ? `${n(data.shelvesCreated, "shelf", "shelves")} created` : null,
         data.goalsRestored > 0 ? `${n(data.goalsRestored, "goal")} restored` : null,
+        data.challengesRestored > 0 ? `${n(data.challengesRestored, "challenge")} restored` : null,
         data.savedViewsRestored > 0 ? `${n(data.savedViewsRestored, "saved view")} restored` : null,
         data.settingsRestored ? "settings restored" : null,
       ].filter(Boolean);

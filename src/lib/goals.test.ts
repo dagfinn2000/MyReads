@@ -5,7 +5,12 @@ import {
   goalPace,
   goalProgress,
   markRereads,
+  monthClock,
+  monthEnd,
+  readingDaysIn,
+  spanClock,
   splitGoals,
+  unitWord,
   yearClock,
 } from "@/lib/goals";
 
@@ -143,6 +148,75 @@ describe("goalPace and describePace", () => {
     expect(say(0, 26, "BOOKS", yearClock("2026-10-12", 2027))).toBe(
       "Starts counting on 1 Jan 2027.",
     );
+  });
+});
+
+describe("month clocks", () => {
+  it("knows each month's last day, leap Februaries included", () => {
+    expect(monthEnd(2026, 1)).toBe("2026-01-31");
+    expect(monthEnd(2026, 2)).toBe("2026-02-28");
+    expect(monthEnd(2028, 2)).toBe("2028-02-29");
+    expect(monthEnd(2026, 4)).toBe("2026-04-30");
+    expect(monthEnd(2026, 12)).toBe("2026-12-31");
+  });
+
+  it("counts today as gone and as left, like the year's clock", () => {
+    expect(monthClock("2026-10-12", 2026, 10)).toEqual({
+      when: "current",
+      elapsed: 12,
+      total: 31,
+      daysLeft: 20,
+      fraction: 12 / 31,
+    });
+    expect(monthClock("2026-10-12", 2026, 9).when).toBe("past");
+    expect(monthClock("2026-10-12", 2026, 11)).toMatchObject({ when: "future", daysLeft: 30 });
+  });
+
+  it("is the year's clock for a whole year", () => {
+    expect(spanClock("2026-10-12", "2026-01-01", "2026-12-31")).toEqual(
+      yearClock("2026-10-12", 2026),
+    );
+  });
+});
+
+describe("reading-days goals", () => {
+  const fmt = (n: number) => formatNumber(n);
+  const oct12 = monthClock("2026-10-12", 2026, 10);
+
+  it("counts the days in the window", () => {
+    const days = ["2026-09-30", "2026-10-01", "2026-10-12", "2026-11-01"];
+    expect(readingDaysIn(days, "2026-10-01", "2026-10-31")).toBe(2);
+    expect(unitWord("DAYS", 1)).toBe("day");
+    expect(unitWord("DAYS", 2)).toBe("days");
+  });
+
+  it("says on how many of the days left to read", () => {
+    // 20 days a month: about 7.7 expected by the 12th, 3 read; 17 to go in 20.
+    const pace = goalPace(3, 20, "DAYS", oct12);
+    expect(pace).toEqual({ kind: "behind", by: 5, daysOf: [17, 20] });
+    expect(describePace(pace, "DAYS", fmt)).toBe(
+      "5 days behind. Reading on 17 of the 20 days left gets you there.",
+    );
+  });
+
+  it("asks for every day left when that's exactly what it takes", () => {
+    const pace = goalPace(5, 25, "DAYS", oct12);
+    expect(describePace(pace, "DAYS", fmt)).toBe(
+      "5 days behind. Read every day left to get there.",
+    );
+  });
+
+  it("says when the days left can't get there any more", () => {
+    const pace = goalPace(2, 25, "DAYS", oct12);
+    expect(pace).toEqual({ kind: "out-of-reach", short: 3 });
+    expect(describePace(pace, "DAYS", fmt)).toBe(
+      "Out of reach: reading every day left still ends 3 days short.",
+    );
+  });
+
+  it("is on schedule within half a day", () => {
+    expect(goalPace(8, 20, "DAYS", oct12)).toEqual({ kind: "on-schedule" });
+    expect(describePace(goalPace(20, 20, "DAYS", oct12), "DAYS", fmt)).toBe("Goal reached.");
   });
 });
 

@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { GoalUnit } from "@/lib/enums";
+import { GoalSpan, GoalUnit } from "@/lib/enums";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/actions/helpers";
@@ -12,6 +12,7 @@ const goalSchema = z.object({
   // sensible book count.
   target: z.coerce.number().int().min(0).max(1_000_000),
   unit: z.enum(GoalUnit).catch(GoalUnit.BOOKS),
+  span: z.enum(GoalSpan).catch(GoalSpan.YEAR),
   countRereads: z.boolean(),
 });
 
@@ -22,10 +23,11 @@ export interface GoalFormState {
 }
 
 /**
- * Sets (or clears, with target 0 / empty) the reading goal for a year,
- * along with what it counts: books or pages, with or without re-reads.
- * Any year can be saved, so next year's goal can be set in December and a
- * past one corrected; each year's goal is its own row.
+ * Sets (or clears, with target 0 / empty) the reading goal for a year, or
+ * for each month of it, along with what it counts: books, pages or reading
+ * days, with or without re-reads. Any year can be saved, so next year's
+ * goal can be set in December and a past one corrected; each year's goal
+ * and monthly goal is its own row.
  */
 export async function setReadingGoal(formData: FormData): Promise<GoalFormState> {
   const userId = await requireUserId();
@@ -35,18 +37,24 @@ export async function setReadingGoal(formData: FormData): Promise<GoalFormState>
     // An emptied number input submits "" — treat it as clearing the goal.
     target: formData.get("target") || 0,
     unit: formData.get("unit"),
+    span: formData.get("span"),
     // An unticked checkbox submits nothing at all.
     countRereads: formData.get("countRereads") === "on",
   });
   if (!parsed.success) return { error: "Enter a whole number from 0 to 1,000,000." };
-  const { year, target, unit, countRereads } = parsed.data;
+  const { year, target, unit, span, countRereads } = parsed.data;
+  // A month has at most 31 reading days, and a year 366.
+  const maxDays = span === GoalSpan.MONTH ? 31 : 366;
+  if (unit === GoalUnit.DAYS && target > maxDays) {
+    return { error: `A ${span === GoalSpan.MONTH ? "month" : "year"} has at most ${maxDays} days.` };
+  }
 
   if (target === 0) {
-    await prisma.readingGoal.deleteMany({ where: { userId, year } });
+    await prisma.readingGoal.deleteMany({ where: { userId, year, span } });
   } else {
     await prisma.readingGoal.upsert({
-      where: { userId_year: { userId, year } },
-      create: { userId, year, target, unit, countRereads },
+      where: { userId_year_span: { userId, year, span } },
+      create: { userId, year, span, target, unit, countRereads },
       update: { target, unit, countRereads },
     });
   }

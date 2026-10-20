@@ -5,8 +5,16 @@ import { ReadingStatus } from "@/lib/enums";
 import { prisma } from "@/lib/prisma";
 import { getPreferences, getSession } from "@/lib/current-user";
 import { dayKey } from "@/lib/dates";
-import { FORMAT_LABELS, formatNumber } from "@/lib/display";
-import { goalPace, goalProgress, splitGoals, yearClock } from "@/lib/goals";
+import { FORMAT_LABELS, formatDayKey, formatNumber } from "@/lib/display";
+import { goalPace, splitGoals, yearClock } from "@/lib/goals";
+import { monthlyProgress, monthsMet, progressIn, readingDaySet } from "@/lib/goal-progress";
+import {
+  challengeBooks,
+  challengeHref,
+  challengePaceText,
+  challengeSources,
+} from "@/lib/challenges";
+import { challengeMatches } from "@/lib/challenges-query";
 import { dailyGoalTarget, goalMetDays } from "@/lib/daily-goal";
 import { minutesInWindow } from "@/lib/reading-time";
 import { readingHabits } from "@/lib/reading-habits";
@@ -34,6 +42,7 @@ import {
   minutesByDayForUser,
   timedEntriesForUser,
 } from "@/lib/stats-query";
+import { ChallengesCard } from "@/components/challenges-card";
 import { GoalCard } from "@/components/goal-card";
 import { ReadingHabitsCard } from "@/components/reading-habits-card";
 import { ReadingHeatmap } from "@/components/reading-heatmap";
@@ -80,7 +89,18 @@ export default async function StatsPage({
   const period = parsePeriod(sp.period, prefs.statsPeriod);
   const words = PERIOD_WORDS[period];
 
-  const [inputs, goals, quoteCount, randomQuotes, dayMinutes, timedEntries] = await Promise.all([
+  const showChallenges = !hidden.has("challenges");
+  const [
+    inputs,
+    goals,
+    quoteCount,
+    randomQuotes,
+    dayMinutes,
+    timedEntries,
+    challenges,
+    shelves,
+    views,
+  ] = await Promise.all([
     // Books, past reads and the log by book and day: what lib/stats-count.ts
     // turns into passes, by the "What counts" preferences.
     loadStatsInputs(userId, prefs.timeZone),
@@ -104,6 +124,27 @@ export default async function StatsPage({
     // Time from the reading timer, by day, and each timed stretch.
     minutesByDayForUser(userId, prefs.timeZone),
     hidden.has("habits") ? [] : timedEntriesForUser(userId, prefs.timeZone),
+    // Challenges, and the shelves and saved views a new one can count.
+    showChallenges
+      ? prisma.challenge.findMany({
+          where: { userId },
+          orderBy: [{ year: "desc" }, { createdAt: "asc" }],
+        })
+      : [],
+    showChallenges
+      ? prisma.shelf.findMany({
+          where: { userId },
+          select: { id: true, name: true },
+          orderBy: { name: "asc" },
+        })
+      : [],
+    showChallenges
+      ? prisma.savedView.findMany({
+          where: { userId },
+          select: { id: true, name: true },
+          orderBy: { createdAt: "asc" },
+        })
+      : [],
   ]);
 
   const randomQuote = randomQuotes[0] ?? null;
@@ -181,16 +222,62 @@ export default async function StatsPage({
 
   // Reading goals: one year at a time (this year unless the address picks
   // next year or a past one), with progress by the goal's own rule and the
-  // same counting as the cards.
-  const { upcoming, past } = splitGoals(goals, currentYear);
-  const goalYear = parseGoalYear(sp.goalYear, currentYear, new Set(past.map((g) => g.year)));
+  // same counting as the cards. A year can also have a goal for each month.
+  const goalContext = {
+    passes,
+    rules: prefs,
+    readingDays: readingDaySet(pageTotals, dayMinuteTotals(dayMinutes)),
+  };
+  const yearGoals = goals.filter((g) => g.span === "YEAR");
+  const monthGoals = goals.filter((g) => g.span === "MONTH");
+  const { upcoming, past } = splitGoals(yearGoals, currentYear);
+  const pastYears = [
+    ...new Set([...goals].filter((g) => g.year < currentYear).map((g) => g.year)),
+  ].sort((a, b) => b - a);
+  const goalYear = parseGoalYear(sp.goalYear, currentYear, new Set(pastYears));
   const shownYear = goalYear ?? currentYear;
-  const shownGoal = goals.find((g) => g.year === shownYear) ?? null;
+  const shownGoal = yearGoals.find((g) => g.year === shownYear) ?? null;
   const progressFor = (g: (typeof goals)[number]) =>
-    goalProgress(countWindow(passes, yearWindow(g.year), prefs), g);
+    progressIn(g, `${g.year}-01-01`, `${g.year}-12-31`, goalContext);
   const clock = yearClock(todayKey, shownYear);
   const goalDone = shownGoal ? progressFor(shownGoal) : 0;
   const nextGoal = upcoming.find((g) => g.year === currentYear + 1) ?? null;
+  const shownMonthGoal = monthGoals.find((g) => g.year === shownYear) ?? null;
+  const monthsFor = (g: (typeof goals)[number]) =>
+    monthlyProgress(g, g.year, todayKey, goalContext);
+
+  // Challenges: books from a slice of the library finished in the year,
+  // counted by the same rules as the cards (an audiobook left out of the
+  // stats is left out here too).
+  const matches = showChallenges
+    ? await challengeMatches(userId, challenges, prefs)
+    : new Map<string, Set<string>>();
+  const yearItems = new Map<number, typeof allTime>();
+  const itemsIn = (year: number) => {
+    let items = yearItems.get(year);
+    if (!items) {
+      items = countWindow(passes, yearWindow(year), prefs);
+      yearItems.set(year, items);
+    }
+    return items;
+  };
+  const challengeViews = challenges.map((c) => {
+    const counted = challengeBooks(itemsIn(c.year), matches.get(c.id) ?? new Set());
+    const done = counted.length;
+    const pace = goalPace(done, c.target, "BOOKS", yearClock(todayKey, c.year));
+    return {
+      id: c.id,
+      name: c.name,
+      year: c.year,
+      target: c.target,
+      done,
+      met: done >= c.target,
+      paceText: challengePaceText(pace, fmt, formatDayKey(`${c.year}-01-01`, prefs.dateFormat)),
+      href: challengeHref(c.query, c.year),
+      books: counted,
+    };
+  });
+  const tags = [...new Set(books.flatMap((b) => b.tags))].sort((a, b) => a.localeCompare(b));
 
   // Genres and formats: every book in the library, or (Preferences) the
   // books read in the period, each once however many times it was read.
@@ -313,15 +400,23 @@ export default async function StatsPage({
           nextYear={
             nextGoal && { ...nextGoal, href: statsHref({ period, goalYear: nextGoal.year }) }
           }
-          past={past.map((g) => {
-            const done = progressFor(g);
+          monthly={{
+            goal: shownMonthGoal,
+            months: shownMonthGoal ? monthsFor(shownMonthGoal) : [],
+          }}
+          past={pastYears.map((year) => {
+            const yearly = past.find((g) => g.year === year);
+            const monthly = monthGoals.find((g) => g.year === year);
+            const done = yearly ? progressFor(yearly) : 0;
             return {
-              year: g.year,
-              target: g.target,
-              unit: g.unit,
-              done,
-              met: done >= g.target,
-              editHref: statsHref({ period, goalYear: g.year, hash: "goal" }),
+              year,
+              yearly: yearly
+                ? { target: yearly.target, unit: yearly.unit, done, met: done >= yearly.target }
+                : null,
+              monthly: monthly
+                ? { target: monthly.target, unit: monthly.unit, ...monthsMet(monthsFor(monthly)) }
+                : null,
+              editHref: statsHref({ period, goalYear: year, hash: "goal" }),
             };
           })}
           yearOptions={[...new Set([currentYear, currentYear + 1, shownYear])]
@@ -331,6 +426,15 @@ export default async function StatsPage({
               href: statsHref({ period, goalYear: y === currentYear ? null : y }),
             }))}
           ruleLine={goalRuleLine(prefs)}
+          prefs={prefs}
+        />
+      )}
+
+      {showChallenges && (
+        <ChallengesCard
+          challenges={challengeViews}
+          currentYear={currentYear}
+          sources={challengeSources({ tags, shelves, views })}
           prefs={prefs}
         />
       )}

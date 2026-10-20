@@ -78,6 +78,7 @@ model User {
   shelves      Shelf[]
   readingGoals ReadingGoal[]
   savedViews   SavedView[]
+  challenges   Challenge[]
 }
 
 /// A library view saved under a name ("Unread fantasy"): the filters, sort
@@ -99,18 +100,31 @@ model SavedView {
 enum GoalUnit {
   BOOKS
   PAGES
+  /// Days with any reading logged.
+  DAYS
 }
 
-/// A yearly reading goal ("24 books in 2026", or "8,000 pages"). Progress is
-/// derived from the books finished in that year (see lib/goals.ts); hitting
-/// the target earns a gold medal on the stats page.
+/// Whether a goal is for the whole year, or for each month of it.
+enum GoalSpan {
+  YEAR
+  MONTH
+}
+
+/// A reading goal ("24 books in 2026", "8,000 pages", "reading on 200
+/// days"), for the year or for each month of it ("2 books a month").
+/// Progress is derived from the books finished, or the days read, in that
+/// span (see lib/goals.ts); hitting the target earns a gold medal on the
+/// stats page.
 model ReadingGoal {
   id           String   @id @default(cuid())
   userId       String
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   year         Int
+  /// YEAR: `target` is for the whole year. MONTH: for every month of it.
+  span         GoalSpan @default(YEAR)
   target       Int
-  /// What `target` counts: finished books, or the pages of finished books.
+  /// What `target` counts: finished books, the pages of finished books, or
+  /// days with reading logged.
   unit         GoalUnit @default(BOOKS)
   /// Whether finishing a book again counts. False = only books finished for
   /// the first time that year.
@@ -118,7 +132,26 @@ model ReadingGoal {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  @@unique([userId, year])
+  @@unique([userId, year, span])
+}
+
+/// A goal for a slice of the library: "6 classics in 2026" is 6 books
+/// matching the reader's "classics" tag (or a shelf, or a saved view)
+/// finished in 2026. Each book counts once, however often it's read.
+model Challenge {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  year      Int
+  target    Int
+  /// Which books count, as a /books query string rebuilt from the parsed
+  /// filters (lib/saved-views.ts), like a saved view's. Copied when the
+  /// challenge is made, so changing or deleting the view leaves it be.
+  query     String
+  createdAt DateTime @default(now())
+
+  @@index([userId, year])
 }
 
 /// A user-defined shelf ("Sanderson", "Fantasy") — freeform grouping

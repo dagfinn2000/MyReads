@@ -186,6 +186,7 @@ export const HIDEABLE_NAV = ["reading", "check", "quotes", "room"] as const;
 /** Cards on the stats page that can be hidden. */
 export const HIDEABLE_STATS = [
   "goal",
+  "challenges",
   "heatmap",
   "habits",
   "perYear",

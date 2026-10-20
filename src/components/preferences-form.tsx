@@ -211,6 +211,7 @@ function BackgroundPicker({
 
 const STATS_LABELS: Record<HideableStat, string> = {
   goal: "Reading goal",
+  challenges: "Challenges",
   heatmap: "Reading days calendar",
   habits: "Reading habits",
   perYear: "Books read per year",

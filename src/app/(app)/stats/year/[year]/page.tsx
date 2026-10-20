@@ -15,7 +15,10 @@ import { getPreferences, getSession } from "@/lib/current-user";
 import { dayKey } from "@/lib/dates";
 import { formatDate, formatDayKey, formatNumber } from "@/lib/display";
 import { formatLength } from "@/lib/progress-units";
-import { describePace, goalPace, goalProgress, yearClock } from "@/lib/goals";
+import { describePace, goalPace, unitWord, yearClock } from "@/lib/goals";
+import { monthlyProgress, monthsMet, progressIn, readingDaySet } from "@/lib/goal-progress";
+import { challengeBooks, challengeHref } from "@/lib/challenges";
+import { challengeMatches } from "@/lib/challenges-query";
 import { readingStreaks } from "@/lib/progress";
 import { minutesInWindow } from "@/lib/reading-time";
 import { buildPasses, countWindow, ruleNotes, tally } from "@/lib/stats-count";
@@ -96,13 +99,14 @@ export default async function YearInReviewPage({
 
   // Fetch everything and slice by year in JS, with the same counting the
   // stats page uses (lib/stats-count.ts), so the numbers always agree.
-  const [inputs, goal, dayMinutes] = await Promise.all([
+  const [inputs, goals, dayMinutes, challenges] = await Promise.all([
     loadStatsInputs(userId, prefs.timeZone),
-    prisma.readingGoal.findUnique({
-      where: { userId_year: { userId, year } },
-    }),
+    prisma.readingGoal.findMany({ where: { userId, year } }),
     minutesByDayForUser(userId, prefs.timeZone),
+    prisma.challenge.findMany({ where: { userId, year }, orderBy: { createdAt: "asc" } }),
   ]);
+  const goal = goals.find((g) => g.span === "YEAR") ?? null;
+  const monthGoal = goals.find((g) => g.span === "MONTH") ?? null;
   // Time from the reading timer this year (without audiobooks when they're
   // left out of the stats).
   const minutesByDay = dayMinuteTotals(dayMinutes, prefs.statsAudiobooks === "out");
@@ -148,24 +152,67 @@ export default async function YearInReviewPage({
     .filter(([key]) => key.startsWith(`${year}-`))
     .sort((a, b) => (a[0] < b[0] ? -1 : 1));
 
-  // The goal, with the pace while the year is under way.
-  const goalDone = goal ? goalProgress(counted, goal) : 0;
-  const clock = yearClock(dayKey(new Date(), prefs.timeZone), year);
+  // The goals, with the pace while the year is under way: the year's, how
+  // many months met their own goal, and the year's challenges.
+  const todayKey = dayKey(new Date(), prefs.timeZone);
+  const goalContext = {
+    passes,
+    rules: prefs,
+    readingDays: readingDaySet(pageTotals, dayMinuteTotals(dayMinutes)),
+  };
+  const goalDone = goal ? progressIn(goal, `${year}-01-01`, `${year}-12-31`, goalContext) : 0;
+  const clock = yearClock(todayKey, year);
   const pace = goal ? goalPace(goalDone, goal.target, goal.unit, clock) : null;
   const goalMet = pace?.kind === "reached";
-  const goalLine = goal && pace && (
+  const months = monthGoal && monthsMet(monthlyProgress(monthGoal, year, todayKey, goalContext));
+  const matches = await challengeMatches(userId, challenges, prefs);
+  const challengeLines = challenges.map((c) => {
+    const done = challengeBooks(counted, matches.get(c.id) ?? new Set()).length;
+    return { id: c.id, name: c.name, target: c.target, done, href: challengeHref(c.query, year) };
+  });
+  const goalLine = (goal || months || challengeLines.length > 0) && (
     <Card>
-      <CardContent className="flex flex-wrap items-center gap-4 pt-0">
-        {goalMet && <GoldMedal animate className="h-14 w-[42px] shrink-0" />}
-        <p className="text-sm">
-          <span className="font-semibold tabular-nums">
-            {fmt(goalDone)} of {fmt(goal.target)}
-          </span>{" "}
-          {goal.unit === GoalUnit.PAGES ? "pages" : "books"} toward the {year} goal
-          {!goal.countRereads && " (first reads only)"}.{" "}
-          {describePace(pace, goal.unit, fmt, formatDayKey(`${year}-01-01`, prefs.dateFormat))}
-          {goalMet && " 🎉"}
-        </p>
+      <CardContent className="grid gap-3 pt-0">
+        {goal && pace && (
+          <div className="flex flex-wrap items-center gap-4">
+            {goalMet && <GoldMedal animate className="h-14 w-[42px] shrink-0" />}
+            <p className="text-sm">
+              <span className="font-semibold tabular-nums">
+                {fmt(goalDone)} of {fmt(goal.target)}
+              </span>{" "}
+              {goal.unit === GoalUnit.DAYS ? "reading days" : unitWord(goal.unit, goal.target)}{" "}
+              toward the {year} goal
+              {!goal.countRereads && goal.unit !== GoalUnit.DAYS && " (first reads only)"}.{" "}
+              {describePace(pace, goal.unit, fmt, formatDayKey(`${year}-01-01`, prefs.dateFormat))}
+              {goalMet && " 🎉"}
+            </p>
+          </div>
+        )}
+        {monthGoal && months && months.of > 0 && (
+          <p className="text-sm">
+            <span className="font-semibold tabular-nums">
+              {fmt(months.met)} of {fmt(months.of)}
+            </span>{" "}
+            {months.of === 1 ? "month" : "months"} met the monthly goal of{" "}
+            {fmt(monthGoal.target)} {unitWord(monthGoal.unit, monthGoal.target)}.
+            {months.met === 12 && " Every single one. 🎉"}
+          </p>
+        )}
+        {challengeLines.length > 0 && (
+          <ul className="grid gap-1 text-sm">
+            {challengeLines.map((c) => (
+              <li key={c.id} className="flex flex-wrap items-center gap-x-2">
+                <Link href={c.href} className="font-medium hover:underline">
+                  {c.name}
+                </Link>
+                <span className="tabular-nums text-muted-foreground">
+                  {fmt(c.done)} of {fmt(c.target)} {c.target === 1 ? "book" : "books"}
+                </span>
+                {c.done >= c.target && <GoldMedal className="h-5 w-[15px]" />}
+              </li>
+            ))}
+          </ul>
+        )}
       </CardContent>
     </Card>
   );

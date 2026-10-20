@@ -67,14 +67,15 @@ export function goalProgress(
   );
 }
 
-/** "book" or "books", "page" or "pages". */
+/** "book" or "books", "page" or "pages", "day" or "days". */
 export function unitWord(unit: GoalUnit, n: number): string {
   if (unit === "PAGES") return n === 1 ? "page" : "pages";
+  if (unit === "DAYS") return n === 1 ? "day" : "days";
   return n === 1 ? "book" : "books";
 }
 
-/** How far through a goal's year today is. Today counts as gone and as
- *  left: 12 Oct 2026 is day 285 of 365, with 81 days to go. */
+/** How far through a goal's year (or month) today is. Today counts as gone
+ *  and as left: 12 Oct 2026 is day 285 of 365, with 81 days to go. */
 export interface YearClock {
   when: "past" | "current" | "future";
   elapsed: number;
@@ -84,14 +85,15 @@ export interface YearClock {
   fraction: number;
 }
 
-export function yearClock(todayKey: string, year: number): YearClock {
-  const leap = (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
-  const total = leap ? 366 : 365;
-  const thisYear = Number(todayKey.slice(0, 4));
-  if (year < thisYear) return { when: "past", elapsed: total, total, daysLeft: 0, fraction: 1 };
-  if (year > thisYear) return { when: "future", elapsed: 0, total, daysLeft: total, fraction: 0 };
-  const elapsed =
-    Math.round((keyToUtcDate(todayKey).getTime() - Date.UTC(year, 0, 1)) / 86_400_000) + 1;
+const DAY_MS = 86_400_000;
+
+/** The clock for any run of days, `from` to `to` (day keys, both in). */
+export function spanClock(todayKey: string, from: string, to: string): YearClock {
+  const start = keyToUtcDate(from).getTime();
+  const total = Math.round((keyToUtcDate(to).getTime() - start) / DAY_MS) + 1;
+  if (todayKey > to) return { when: "past", elapsed: total, total, daysLeft: 0, fraction: 1 };
+  if (todayKey < from) return { when: "future", elapsed: 0, total, daysLeft: total, fraction: 0 };
+  const elapsed = Math.round((keyToUtcDate(todayKey).getTime() - start) / DAY_MS) + 1;
   return {
     when: "current",
     elapsed,
@@ -101,20 +103,50 @@ export function yearClock(todayKey: string, year: number): YearClock {
   };
 }
 
+export function yearClock(todayKey: string, year: number): YearClock {
+  return spanClock(todayKey, `${year}-01-01`, `${year}-12-31`);
+}
+
+/** The last day of a month (1–12), as a key. */
+export function monthEnd(year: number, month: number): string {
+  const last = new Date(Date.UTC(year, month, 0)).getUTCDate();
+  return `${year}-${String(month).padStart(2, "0")}-${String(last).padStart(2, "0")}`;
+}
+
+/** The month's first and last days as keys. */
+export function monthSpan(year: number, month: number): { from: string; to: string } {
+  return { from: `${year}-${String(month).padStart(2, "0")}-01`, to: monthEnd(year, month) };
+}
+
+export function monthClock(todayKey: string, year: number, month: number): YearClock {
+  const { from, to } = monthSpan(year, month);
+  return spanClock(todayKey, from, to);
+}
+
+/** How many of `days` (day keys with reading logged) fall from `from` to
+ *  `to`: progress toward a reading-days goal. */
+export function readingDaysIn(days: Iterable<string>, from: string, to: string): number {
+  let n = 0;
+  for (const d of days) if (d >= from && d <= to) n++;
+  return n;
+}
+
 export type GoalPace =
   | { kind: "reached"; over: number }
   | { kind: "upcoming" }
   | { kind: "missed"; short: number }
   | { kind: "on-schedule" }
   | { kind: "ahead"; by: number }
-  /** Behind, and what catching up takes: a book every few days, or so many
-   *  books or pages a day. */
-  | { kind: "behind"; by: number; everyDays?: number; perDay?: number };
+  /** Behind, and what catching up takes: a book every few days, so many
+   *  books or pages a day, or reading on so many of the days left. */
+  | { kind: "behind"; by: number; everyDays?: number; perDay?: number; daysOf?: [number, number] }
+  /** A reading-days goal that needs more days than are left. */
+  | { kind: "out-of-reach"; short: number };
 
 /**
  * Where a goal stands against the calendar. "On schedule" is within half a
- * book (or half a percent of a pages goal) of an even pace through the
- * year.
+ * book or day (or half a percent of a pages goal) of an even pace through
+ * the year or month.
  */
 export function goalPace(
   done: number,
@@ -133,6 +165,11 @@ export function goalPace(
   if (diff > 0) return { kind: "ahead", by };
 
   const remaining = target - done;
+  if (unit === "DAYS") {
+    return remaining > clock.daysLeft
+      ? { kind: "out-of-reach", short: remaining - clock.daysLeft }
+      : { kind: "behind", by, daysOf: [remaining, clock.daysLeft] };
+  }
   if (unit === "BOOKS" && remaining <= clock.daysLeft) {
     return { kind: "behind", by, everyDays: Math.floor(clock.daysLeft / remaining) };
   }
@@ -159,9 +196,17 @@ export function describePace(
       return `Ended ${amount(pace.short)} short.`;
     case "on-schedule":
       return "Right on schedule.";
+    case "out-of-reach":
+      return `Out of reach: reading every day left still ends ${amount(pace.short)} short.`;
     case "ahead":
       return `${amount(pace.by)} ahead of schedule.`;
     case "behind": {
+      if (pace.daysOf) {
+        const [need, left] = pace.daysOf;
+        return need === left
+          ? `${amount(pace.by)} behind. Read every day left to get there.`
+          : `${amount(pace.by)} behind. Reading on ${fmt(need)} of the ${fmt(left)} days left gets you there.`;
+      }
       const needed =
         pace.everyDays === undefined
           ? `About ${amount(pace.perDay ?? 0)} a day`
