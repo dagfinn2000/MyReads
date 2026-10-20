@@ -96,7 +96,10 @@ page by page.
   audiobook) and ownership (owned, wishlist, borrowed from someone, no
   longer have it).
 - Keep track of the books you've lent out, who has them and since when,
-  on each book's Lending card.
+  on each book's Lending card. Give a loan a day it's due back (Preferences
+  can fill one in, say a month after you lend it). Past that day the book
+  turns red, shows under the Overdue filter, and a note on the Library and
+  Now reading pages reminds you who has it.
 - Search, filter, sort and group the library. Authors sort by surname, the
   way a bookshelf is filed.
 - "Pick for me" opens a random book from the ones on screen, keeping to
@@ -296,6 +299,8 @@ On the Account page:
 - The rating style, and what counts in your stats.
 - Which status tabs the library shows, what its search also looks in
   (tags, ISBN, your review), and what Pick for me leaves out.
+- How long you usually lend books for, and whether overdue books remind
+  you.
 - The accent colour, text size, a serif font for reviews and quotes, the
   font for headings, how round the corners are, flat, raised or frosted
   cards, the background texture, and a wash of the cover's colours behind

@@ -156,6 +156,8 @@ export type BookCardBook = Pick<
   /** True when an unreturned loan exists. Passed as a flag rather than the
    *  loan rows so the grid payload stays the card's fields only. */
   lentOut?: boolean;
+  /** Lent out and past the day it was due back. */
+  overdue?: boolean;
   /** For the details the View menu can add: an ownership badge, and a list
    *  row's date. */
   ownership?: BookOwnership;
@@ -185,8 +187,17 @@ function readingProgress(book: BookCardBook): number | null {
     : null;
 }
 
-function LentBadge() {
-  return (
+function LentBadge({ overdue }: { overdue?: boolean }) {
+  return overdue ? (
+    <Badge
+      variant="outline"
+      className="border-red-400 text-[10px] text-red-700 dark:border-red-700 dark:text-red-300"
+      title="Lent out, and past the day it was due back"
+    >
+      <HandHeart className="size-3" />
+      Overdue
+    </Badge>
+  ) : (
     <Badge
       variant="outline"
       className="border-amber-400 text-[10px] text-amber-700 dark:text-amber-300"
@@ -293,7 +304,7 @@ export function BookRow({
       <div className="flex shrink-0 flex-wrap items-center justify-end gap-1.5">
         {details.showRating && book.rating ? <Stars value={book.rating} /> : null}
         {details.showOwnership && book.ownership && <OwnershipBadge ownership={book.ownership} />}
-        {book.lentOut && <LentBadge />}
+        {book.lentOut && <LentBadge overdue={book.overdue} />}
         {details.showStatus && (
           <Badge className={`${STATUS_BADGE_CLASS[book.status]} hidden text-[10px] sm:inline-flex`}>
             {STATUS_LABELS[book.status]}
@@ -364,7 +375,7 @@ export function BookCard({
             {details.showOwnership && book.ownership && (
               <OwnershipBadge ownership={book.ownership} />
             )}
-            {book.lentOut && <LentBadge />}
+            {book.lentOut && <LentBadge overdue={book.overdue} />}
             {details.showStatus && (
               <Badge className={`${STATUS_BADGE_CLASS[book.status]} text-[10px]`}>
                 {STATUS_LABELS[book.status]}

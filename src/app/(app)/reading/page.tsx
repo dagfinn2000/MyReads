@@ -10,6 +10,7 @@ import { dayKey } from "@/lib/dates";
 import { formatWeekdayDay } from "@/lib/display";
 import { onThisDay } from "@/lib/on-this-day";
 import { onThisDayCandidates } from "@/lib/on-this-day-query";
+import { overdueReminder } from "@/lib/overdue-query";
 import {
   bookDayPageTotalsForUser,
   dayMinuteTotals,
@@ -22,6 +23,7 @@ import { BookLink } from "@/components/book-link";
 import { DailyGoalRing } from "@/components/daily-goal-ring";
 import { NowReading } from "@/components/now-reading";
 import { OnThisDayCard } from "@/components/on-this-day-card";
+import { OverdueNotice } from "@/components/overdue-notice";
 import { UpNextEditor } from "@/components/up-next-editor";
 import { Button } from "@/components/ui/button";
 
@@ -45,7 +47,7 @@ export default async function NowReadingPage() {
   const goal = dailyGoalTarget(prefs);
   const todayKey = dayKey(new Date(), prefs.timeZone);
 
-  const [reading, wantToRead, seriesBooks, goalByDay, memories] = await Promise.all([
+  const [reading, wantToRead, seriesBooks, goalByDay, memories, overdueNote] = await Promise.all([
     prisma.book.findMany({
       where: { userId, status: ReadingStatus.READING },
       select: {
@@ -95,6 +97,7 @@ export default async function NowReadingPage() {
         ? bookDayPageTotalsForUser(userId, prefs.timeZone).then(dayPageTotals)
         : minutesByDayForUser(userId, prefs.timeZone).then((rows) => dayMinuteTotals(rows)),
     onThisDayCandidates(userId, todayKey),
+    overdueReminder(userId, prefs),
   ]);
   const goalStatus = goal && goalByDay && dailyGoalStatus(goalByDay, goal, todayKey);
 
@@ -120,6 +123,13 @@ export default async function NowReadingPage() {
 
   return (
     <div className="grid gap-6">
+      {overdueNote && (
+        <OverdueNotice
+          message={overdueNote.message}
+          href={overdueNote.href}
+          several={overdueNote.href.startsWith("/books?")}
+        />
+      )}
       <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
         <h1 className="text-2xl font-semibold tracking-tight">Now reading</h1>
         <span className="text-sm text-muted-foreground">{formatWeekdayDay(new Date(), prefs)}</span>

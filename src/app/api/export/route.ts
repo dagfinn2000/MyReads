@@ -19,9 +19,10 @@ import { parsePreferences } from "@/lib/preferences";
  * The JSON inside is still the version-1 export format — quotes, reads,
  * progress, loans, settings, saved views and pages goals are additive
  * fields (as are a goal's `countRereads`, a book's `lengthMinutes` and
- * `upNextRank`, a past read's `note` and a log entry's `minutes`), and
- * `owned` is still written alongside the newer `ownership` — so unzipping
- * and feeding `library.json` to an older instance keeps working.
+ * `upNextRank`, a past read's `note`, a log entry's `minutes` and a
+ * loan's `dueAt`), and `owned` is still written alongside the newer
+ * `ownership` — so unzipping and feeding `library.json` to an older
+ * instance keeps working.
  *
  * Once the client has read the whole zip, the account's `lastBackupAt` is
  * set, so the Backup card can say when the newest copy was made. A download
@@ -63,6 +64,7 @@ export async function GET() {
             borrower: true,
             lentAt: true,
             returnedAt: true,
+            dueAt: true,
             note: true,
             createdAt: true,
           },

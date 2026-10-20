@@ -1,6 +1,7 @@
 import type { Prisma } from "@prisma/client";
 import { BookFormat, BookOwnership, ReadingStatus } from "@/lib/enums";
 import { isbnVariants, looksLikeIsbn, normalizeIsbn } from "@/lib/isbn";
+import { overdueCutoff } from "@/lib/loans";
 import type { SearchField } from "@/lib/preferences";
 import { searchTerms } from "@/lib/utils";
 
@@ -42,8 +43,9 @@ function param(v: string | string[] | undefined): string {
 }
 
 /** The `owned` param's values. "lent" is not an ownership state at all (a
- *  lent book is still owned), so it is handled separately below. */
-const OWNED_FILTERS = ["all", "owned", "wishlist", "borrowed", "given_away", "lent"] as const;
+ *  lent book is still owned), so it is handled separately below, and so is
+ *  "overdue": lent, and past the day it was due back. */
+const OWNED_FILTERS = ["all", "owned", "wishlist", "borrowed", "given_away", "lent", "overdue"] as const;
 
 /** Filter value -> ownership state. */
 const OWNERSHIP_FILTERS: Partial<Record<string, BookOwnership>> = {
@@ -147,6 +149,9 @@ export interface WhereContext {
   /** Books finished in the `finished` year close to New Year, by the
    *  reader's clock. */
   finishedEdgeIds?: string[];
+  /** For "Overdue": loans due before this are overdue (lib/loans.ts
+   *  overdueCutoff, in the reader's zone). */
+  overdueBefore?: Date;
 }
 
 /**
@@ -253,6 +258,11 @@ export function buildBookWhere(
     ...(format && { format }),
     ...(ownership && { ownership }),
     ...(filters.owned === "lent" && { loans: { some: { returnedAt: null } } }),
+    ...(filters.owned === "overdue" && {
+      loans: {
+        some: { returnedAt: null, dueAt: { lt: ctx.overdueBefore ?? overdueCutoff(new Date()) } },
+      },
+    }),
     ...(minRating >= 1 && { rating: { gte: minRating } }),
     ...(include.length > 0 && {
       tags:

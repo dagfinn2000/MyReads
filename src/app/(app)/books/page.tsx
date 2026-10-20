@@ -20,9 +20,12 @@ import { parseFilters } from "@/lib/library-filters";
 import { resolveBookWhere } from "@/lib/library-where";
 import { naturalDir, parseLibraryView } from "@/lib/library-view";
 import { seriesKey } from "@/lib/series";
+import { isOverdue } from "@/lib/loans";
+import { overdueReminder } from "@/lib/overdue-query";
 import { canonicalViewQuery } from "@/lib/saved-views";
 import { FilterBar, type FilterValues } from "@/components/filter-bar";
 import { LibraryView } from "@/components/library-view";
+import { OverdueNotice } from "@/components/overdue-notice";
 import { SavedViewChips } from "@/components/saved-view-chips";
 import { ShelfChips } from "@/components/shelf-chips";
 import { ShelfTabs } from "@/components/shelf-tabs";
@@ -72,6 +75,7 @@ const librarySelect = {
  *  copy is lent out. */
 type LibraryBook = Prisma.BookGetPayload<{ select: typeof librarySelect }> & {
   lentOut: boolean;
+  overdue: boolean;
 };
 
 /** A book as its card gets it: the fields only sorting and grouping read
@@ -141,7 +145,7 @@ export default async function BooksPage({
     // query after the first, listing every book's id.
     prisma.loan.findMany({
       where: { returnedAt: null, book: { userId } },
-      select: { bookId: true },
+      select: { bookId: true, borrower: true, lentAt: true, dueAt: true },
     }),
     prisma.book.groupBy({
       by: ["status"],
@@ -229,11 +233,17 @@ export default async function BooksPage({
   // renders. Passing all of them was the page's real cost: a 20k-book library
   // serialized ~6.7 MB of props to draw two hundred cards.
   const lent = new Set(openLoans.map((l) => l.bookId));
+  const now = new Date();
+  const late = new Set(
+    openLoans.filter((l) => isOverdue(l.dueAt, now, prefs.timeZone)).map((l) => l.bookId),
+  );
   const withLoanFlag = books.map((b) => ({
     ...b,
     lentOut: lent.has(b.id),
+    overdue: late.has(b.id),
     shelves: shelvesOf.get(b.id) ?? [],
   }));
+  const overdueNote = await overdueReminder(userId, prefs, openLoans);
 
   const sortOptions: SortOptions = {
     ignoreArticles: prefs.ignoreArticles,
@@ -310,6 +320,13 @@ export default async function BooksPage({
 
   return (
     <div className="grid gap-4">
+      {overdueNote && (
+        <OverdueNotice
+          message={overdueNote.message}
+          href={overdueNote.href}
+          several={overdueNote.href.startsWith("/books?")}
+        />
+      )}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold tracking-tight">Library</h1>
         <Button asChild>

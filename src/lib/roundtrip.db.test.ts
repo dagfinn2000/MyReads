@@ -105,7 +105,11 @@ describe("export -> import round trip", () => {
               lentAt: new Date("2026-02-01T00:00:00.000Z"),
               returnedAt: new Date("2026-02-20T00:00:00.000Z"),
             },
-            { borrower: "Ola", lentAt: new Date("2026-03-01T00:00:00.000Z") },
+            {
+              borrower: "Ola",
+              lentAt: new Date("2026-03-01T00:00:00.000Z"),
+              dueAt: new Date("2026-04-01T00:00:00.000Z"),
+            },
           ],
         },
       },
@@ -171,6 +175,8 @@ describe("export -> import round trip", () => {
     expect(restored.loans).toHaveLength(2);
     const stillOut = restored.loans.filter((l) => l.returnedAt === null);
     expect(stillOut.map((l) => l.borrower)).toEqual(["Ola"]);
+    // And when it's due back.
+    expect(stillOut[0].dueAt?.toISOString()).toBe("2026-04-01T00:00:00.000Z");
 
     const goal = await prisma.readingGoal.findFirstOrThrow({
       where: { userId: targetUserId, year: 2026 },

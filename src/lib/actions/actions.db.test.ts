@@ -32,7 +32,7 @@ const { readAgain, addPastRead, deletePastRead, updatePastRead } = await import(
 );
 const { bulkUpdateBooks } = await import("@/lib/actions/bulk");
 const { renameTag, deleteTag, removeTagRule } = await import("@/lib/actions/tags");
-const { lendBook, returnLoan, deleteLoan } = await import("@/lib/actions/loans");
+const { lendBook, returnLoan, deleteLoan, setLoanDue } = await import("@/lib/actions/loans");
 const { createShelf } = await import("@/lib/actions/shelves");
 
 let userId: string;
@@ -418,6 +418,69 @@ describe("lending", () => {
     expect(loans[0].borrower).toBe("Kari");
     expect(loans[0].returnedAt).toBeNull();
     expect(loans[0].note).toBe("back by June");
+  });
+
+  it("saves the day it's due back", async () => {
+    const bk = await makeBook();
+    const res = await lendBook(
+      bk.id,
+      {},
+      form({ borrower: "Kari", lentAt: "2026-10-01", dueAt: "2026-11-01" }),
+    );
+    expect(res).toEqual({ success: true });
+    const loan = await prisma.loan.findFirstOrThrow({ where: { bookId: bk.id } });
+    expect(loan.dueAt?.toISOString()).toBe("2026-11-01T00:00:00.000Z");
+  });
+
+  it("refuses a due date before the day it was lent", async () => {
+    const bk = await makeBook();
+    const res = await lendBook(
+      bk.id,
+      {},
+      form({ borrower: "Kari", lentAt: "2026-10-10", dueAt: "2026-10-01" }),
+    );
+    expect(res.error).toBe("It can't be due back before you lent it.");
+    // Lent "now" (no date given): yesterday can't be the due date either.
+    const yesterday = new Date(Date.now() - 2 * 86_400_000).toISOString().slice(0, 10);
+    const res2 = await lendBook(bk.id, {}, form({ borrower: "Kari", lentAt: "", dueAt: yesterday }));
+    expect(res2.error).toBe("It can't be due back before you lent it.");
+    expect(await prisma.loan.count({ where: { bookId: bk.id } })).toBe(0);
+  });
+
+  it("changes and clears the due date of an open loan", async () => {
+    const bk = await makeBook();
+    await lendBook(bk.id, {}, form({ borrower: "Kari", lentAt: "2026-10-01" }));
+    const loan = await prisma.loan.findFirstOrThrow({ where: { bookId: bk.id } });
+    expect(loan.dueAt).toBeNull();
+
+    expect(await setLoanDue(loan.id, "2026-12-24")).toBeUndefined();
+    let saved = await prisma.loan.findUniqueOrThrow({ where: { id: loan.id } });
+    expect(saved.dueAt?.toISOString()).toBe("2026-12-24T00:00:00.000Z");
+
+    expect(await setLoanDue(loan.id, "2026-09-30")).toBe("It can't be due back before you lent it.");
+    expect(await setLoanDue(loan.id, "next week")).toBe("That isn't a date.");
+
+    expect(await setLoanDue(loan.id, "")).toBeUndefined();
+    saved = await prisma.loan.findUniqueOrThrow({ where: { id: loan.id } });
+    expect(saved.dueAt).toBeNull();
+  });
+
+  it("only changes the due date of your own open loans", async () => {
+    const theirs = await makeBook({}, otherUserId);
+    const theirLoan = await prisma.loan.create({ data: { bookId: theirs.id, borrower: "Kari" } });
+    expect(await setLoanDue(theirLoan.id, "2027-01-01")).toBe("Loan not found");
+
+    const mine = await makeBook();
+    const back = await prisma.loan.create({
+      data: { bookId: mine.id, borrower: "Ola", returnedAt: new Date() },
+    });
+    expect(await setLoanDue(back.id, "2027-01-01")).toBe("Loan not found");
+    // A server action's arguments come from the client: an object as the id
+    // must never reach the query.
+    expect(await setLoanDue({ not: "" } as unknown as string, "2027-01-01")).toBe("Loan not found");
+
+    const rows = await prisma.loan.findMany({ where: { id: { in: [theirLoan.id, back.id] } } });
+    expect(rows.every((l) => l.dueAt === null)).toBe(true);
   });
 
   it("refuses a second loan while the book is still out", async () => {

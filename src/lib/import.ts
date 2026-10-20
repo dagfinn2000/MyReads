@@ -88,6 +88,8 @@ const importedLoanSchema = z.object({
   borrower: z.string().trim().min(1).max(100),
   lentAt: dateField,
   returnedAt: dateField,
+  /** Additive: when it was due back. */
+  dueAt: dateField,
   note: z.string().trim().max(500).nullable().optional(),
   createdAt: dateField,
 });
@@ -578,6 +580,7 @@ export async function importLibrary(
             borrower: l.borrower,
             lentAt: l.lentAt ?? l.createdAt ?? new Date(),
             returnedAt: l.returnedAt,
+            dueAt: l.dueAt,
             note: l.note ?? null,
             ...(l.createdAt && { createdAt: l.createdAt }),
           })),

@@ -308,6 +308,12 @@ export const loanSchema = z.object({
     .transform(parseDateOrNull)
     .nullable()
     .optional(),
+  /** When it's due back; empty = no date agreed. */
+  dueAt: z
+    .string()
+    .transform(parseDateOrNull)
+    .nullable()
+    .optional(),
   note: z
     .string()
     .trim()
@@ -315,7 +321,19 @@ export const loanSchema = z.object({
     .transform((s) => s || null)
     .nullable()
     .optional(),
+}).superRefine((d, ctx) => {
+  // Same calendar-day comparison as the read dates: both are midnight UTC.
+  if (d.dueAt && d.lentAt && d.dueAt < d.lentAt) {
+    ctx.addIssue({ code: "custom", path: ["dueAt"], message: "It can't be due back before you lent it." });
+  }
 });
+
+/** A new due date for an open loan: a date field's "2026-11-30", or "" to
+ *  clear it. */
+export const loanDueSchema = z.union([
+  z.literal("").transform(() => null),
+  z.iso.date().transform((s) => new Date(s)),
+]);
 
 export const shelfNameSchema = z
   .string()
