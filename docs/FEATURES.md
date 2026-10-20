@@ -105,8 +105,8 @@ page by page.
 - **The Series page** shows every series you have, the series you're in
   the middle of first: how much of each you've read, which book is next,
   and an empty place for each number you have no book for. Open it from a
-  series heading in the library, or from "What's next in the series" on a
-  book's page.
+  series heading in the library or "What's next in the series" on a
+  book's page, or put it in the top bar from Preferences.
 - "Pick for me" opens a random book from the ones on screen, keeping to
   your filters. On the All tab it picks from Want to Read first. In
   Preferences you can have it pick only books you have, or only the next
@@ -322,8 +322,10 @@ On the Account page:
 - Animations on or off, and whether the moving backgrounds move.
 - The book page: which cards show and in what order, long descriptions in
   full or cut short, and your own "Find it at" links.
-- Which page opens first, whether Now reading, Check and Quotes are in the
-  top bar, and which cards show on the Stats page.
+- Which page opens first, and the top bar: its links in your own order,
+  with Now reading, Check and Quotes left out or Series added if you like
+  (phones get the same links, as icons). Also which cards show on the
+  Stats page.
 - The reading room and your avatar, on or off.
 
 ## Backups

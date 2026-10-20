@@ -602,6 +602,44 @@ describe("book-page settings", () => {
   });
 });
 
+describe("top-bar settings", () => {
+  const restore = (preferences: unknown) =>
+    importLibrary(
+      userId,
+      payload([], { settings: { theme: null, defaultViewName: null, preferences } }),
+    );
+
+  it("restores the order and Series, cleaned the way a save is", async () => {
+    await restore({
+      navOrder: ["series", "stats", "nope", "stats", 3, "library"],
+      shownNav: ["series", "series", "room"],
+      hiddenNav: ["check", "series"],
+    });
+    const user = await prisma.user.findUniqueOrThrow({ where: { id: userId } });
+    expect(user.preferences).toEqual({
+      navOrder: ["series", "stats", "library", "reading", "add", "check", "quotes", "room"],
+      shownNav: ["series"],
+      hiddenNav: ["check"],
+    });
+  });
+
+  it("leaves an older backup's bar as it was, with Series off", async () => {
+    await restore({ hiddenNav: ["quotes"] });
+    const user = await prisma.user.findUniqueOrThrow({ where: { id: userId } });
+    expect(user.preferences).toEqual({ hiddenNav: ["quotes"] });
+  });
+
+  it("keeps the order this account already has", async () => {
+    await prisma.user.update({
+      where: { id: userId },
+      data: { preferences: { navOrder: ["quotes", "library"] } },
+    });
+    await restore({ navOrder: ["stats"], shownNav: ["series"] });
+    const user = await prisma.user.findUniqueOrThrow({ where: { id: userId } });
+    expect(user.preferences).toEqual({ navOrder: ["quotes", "library"], shownNav: ["series"] });
+  });
+});
+
 describe("saved views kept to one shelf", () => {
   const query = (shelfId: string) => `shelfId=${shelfId}&group=none&sort=title&dir=asc`;
   const restoredShelfId = async () =>
