@@ -80,6 +80,15 @@ describe("onThisDay", () => {
     expect(nearbyMonthDays("2027-01-01")).toEqual(["12-31", "01-01", "01-02"]);
     expect(nearbyMonthDays("2028-03-01")).toEqual(["02-29", "03-01", "03-02"]);
   });
+
+  it("still looks for 29 Feb when today is near it in a non-leap year", () => {
+    // A book finished on 29 Feb (stored UTC 02-29) must still surface when
+    // today is 28 Feb or 1 Mar of a year that has no 29 Feb.
+    expect(nearbyMonthDays("2027-02-28")).toEqual(["02-27", "02-28", "03-01", "02-29"]);
+    expect(nearbyMonthDays("2027-03-01")).toEqual(["02-28", "03-01", "03-02", "02-29"]);
+    // A normal day is unchanged.
+    expect(nearbyMonthDays("2027-06-15")).toEqual(["06-14", "06-15", "06-16"]);
+  });
 });
 
 describe("lastReadText", () => {

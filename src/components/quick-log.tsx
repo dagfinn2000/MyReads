@@ -92,7 +92,7 @@ export function QuickLog({
   // The page just logged when it was the last one: asks "Mark as Read?".
   const [lastPage, setLastPage] = useState<number | null>(null);
   const [pending, startTransition] = useTransition();
-  const timer = useReadingTimer(book.id);
+  const timer = useReadingTimer(book.id, book.dateStarted ? book.dateStarted.getTime() : null);
 
   const text = draft ?? positionText(book.currentPage, info);
   const today = dayKey(new Date(), prefs.timeZone);
