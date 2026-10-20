@@ -50,7 +50,7 @@ export interface FormatPrefs {
   timeZone?: string;
 }
 
-const MONTHS_SHORT = [
+export const MONTHS_SHORT = [
   "Jan", "Feb", "Mar", "Apr", "May", "Jun",
   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
 ];
@@ -110,7 +110,7 @@ export function toDateInputValue(d: Date | null | undefined, timeZone?: string):
 }
 
 const WEEKDAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-const MONTHS_LONG = [
+export const MONTHS_LONG = [
   "January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December",
 ];

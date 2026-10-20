@@ -10,14 +10,14 @@ import { parsePreferences } from "@/lib/preferences";
 /**
  * GET /api/export — downloads the signed-in user's entire library as a zip:
  * `library.json` (every book with its shelf names, quotes, read history,
- * reading log and lending records, every shelf, reading goals, saved views,
- * and the account's theme, library view and preferences) plus
- * `covers/<file>` for each
- * locally cached cover image, so a restore into a fresh instance brings the
- * covers back too.
+ * reading log and lending records, every shelf, reading goals, challenges,
+ * saved views, and the account's theme, library view and preferences) plus
+ * `covers/<file>` for each locally cached cover image, so a restore into a
+ * fresh instance brings the covers back too.
  *
  * The JSON inside is still the version-1 export format — quotes, reads,
- * progress, loans, settings, saved views and pages goals are additive
+ * progress, loans, settings, saved views, pages goals, reading-days and
+ * monthly goals (`moreGoals`) and challenges are additive
  * fields (as are a goal's `countRereads`, a book's `lengthMinutes` and
  * `upNextRank`, a past read's `note`, a log entry's `minutes` and a
  * loan's `dueAt`), and `owned` is still written alongside the newer
@@ -35,7 +35,7 @@ export async function GET() {
   }
   const userId = session.user.id;
 
-  const [books, shelves, readingGoals, user, savedViews] = await Promise.all([
+  const [books, shelves, readingGoals, user, savedViews, challenges] = await Promise.all([
     prisma.book.findMany({
       where: { userId },
       orderBy: { createdAt: "asc" },
@@ -80,7 +80,7 @@ export async function GET() {
     prisma.readingGoal.findMany({
       where: { userId },
       orderBy: { year: "asc" },
-      select: { year: true, target: true, unit: true, countRereads: true },
+      select: { year: true, span: true, target: true, unit: true, countRereads: true },
     }),
     prisma.user.findUnique({
       where: { id: userId },
@@ -90,6 +90,11 @@ export async function GET() {
       where: { userId },
       orderBy: { name: "asc" },
       select: { id: true, name: true, query: true },
+    }),
+    prisma.challenge.findMany({
+      where: { userId },
+      orderBy: [{ year: "asc" }, { createdAt: "asc" }],
+      select: { name: true, year: true, target: true, query: true },
     }),
   ]);
 
@@ -109,13 +114,20 @@ export async function GET() {
     counts: { books: books.length, shelves: shelves.length },
     shelves: shelves.map(({ id: _id, ...shelf }) => shelf),
     // Pages goals get a list of their own: an older MyReads reads every
-    // entry of readingGoals as a number of books.
+    // entry of readingGoals as a number of books. Reading-days and monthly
+    // goals go in a third, which an older MyReads leaves alone.
     readingGoals: readingGoals
-      .filter((g) => g.unit === "BOOKS")
-      .map(({ unit: _unit, ...goal }) => goal),
+      .filter((g) => g.unit === "BOOKS" && g.span === "YEAR")
+      .map(({ unit: _unit, span: _span, ...goal }) => goal),
     pageGoals: readingGoals
-      .filter((g) => g.unit === "PAGES")
-      .map(({ unit: _unit, ...goal }) => goal),
+      .filter((g) => g.unit === "PAGES" && g.span === "YEAR")
+      .map(({ unit: _unit, span: _span, ...goal }) => goal),
+    moreGoals: readingGoals.filter((g) => g.unit === "DAYS" || g.span !== "YEAR"),
+    // Challenges, with the shelf named like a saved view's.
+    challenges: challenges.map((c) => {
+      const shelfName = shelfNames.get(new URLSearchParams(c.query).get("shelfId") ?? "");
+      return shelfName ? { ...c, shelfName } : c;
+    }),
     // The account's own settings: theme, library view and Preferences. A
     // restore fills these in only where the account has none yet. The
     // default saved view, and the shelf and view orders, are kept by name.

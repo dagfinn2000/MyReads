@@ -1,7 +1,8 @@
 import Link from "next/link";
 import type { GoalUnit } from "@/lib/enums";
-import { formatDayKey, formatNumber } from "@/lib/display";
+import { MONTHS_LONG, MONTHS_SHORT, formatDayKey, formatNumber } from "@/lib/display";
 import { describePace, unitWord, type GoalPace, type YearClock } from "@/lib/goals";
+import { monthsMet, type MonthProgress } from "@/lib/goal-progress";
 import type { DateFormat, NumberFormat } from "@/lib/preferences";
 import { cn } from "@/lib/utils";
 import { GoalForm } from "@/components/goal-form";
@@ -19,7 +20,8 @@ interface Goal {
 /**
  * The reading goal on the stats page, for one year at a time: this year
  * with a "today" tick on the bar and how the pace is going, next year to
- * set ahead, or a past year opened from its Edit link.
+ * set ahead, or a past year opened from its Edit link. Under it, the
+ * year's monthly goal, if any, month by month.
  */
 export function GoalCard({
   year,
@@ -32,6 +34,7 @@ export function GoalCard({
   past,
   yearOptions,
   ruleLine,
+  monthly,
   prefs,
 }: {
   year: number;
@@ -43,21 +46,26 @@ export function GoalCard({
   clock: YearClock;
   /** Next year's goal, when one is set, with the link that opens it. */
   nextYear: (Goal & { href: string }) | null;
-  past: (Omit<Goal, "countRereads"> & {
+  /** Earlier years with a goal for the year, for each month, or both. */
+  past: {
     year: number;
-    done: number;
-    met: boolean;
+    yearly: (Omit<Goal, "countRereads"> & { done: number; met: boolean }) | null;
+    monthly: (Omit<Goal, "countRereads"> & { met: number; of: number }) | null;
     editHref: string;
-  })[];
+  }[];
   yearOptions: { year: number; href: string }[];
   /** What a pages goal counts, by the "What counts" preferences. */
   ruleLine: string;
+  /** The year's goal for each month, and how each month went. */
+  monthly: { goal: Goal | null; months: MonthProgress[] };
   prefs: { dateFormat: DateFormat; numberFormat: NumberFormat };
 }) {
   const fmt = (n: number) => formatNumber(n, prefs);
   const amount = (n: number, unit: GoalUnit) => `${fmt(n)} ${unitWord(unit, n)}`;
   const startsOn = formatDayKey(`${year}-01-01`, prefs.dateFormat);
   const met = goal !== null && clock.when !== "future" && done >= goal.target;
+  // Re-reads mean nothing to a reading-days goal.
+  const leavesOutRereads = goal !== null && !goal.countRereads && goal.unit !== "DAYS";
 
   return (
     <Card id="goal">
@@ -114,7 +122,7 @@ export function GoalCard({
               >
                 {describePace(pace, goal.unit, fmt, startsOn)}
               </p>
-              {((clock.when === "current" && !met) || !goal.countRereads) && (
+              {((clock.when === "current" && !met) || leavesOutRereads) && (
                 <p className="mt-1 text-sm text-muted-foreground">
                   {clock.when === "current" && !met && (
                     <>
@@ -122,14 +130,15 @@ export function GoalCard({
                       go.
                     </>
                   )}
-                  {!goal.countRereads && " Re-reads don't count toward this goal."}
+                  {leavesOutRereads && " Re-reads don't count toward this goal."}
                 </p>
               )}
             </div>
           </div>
         ) : (
           <p className="text-sm text-muted-foreground">
-            Set a goal for the year: finish that many books (or pages) and earn a gold medal.
+            Set a goal for the year: finish that many books (or pages, or read on that many
+            days) and earn a gold medal.
           </p>
         )}
 
@@ -165,16 +174,30 @@ export function GoalCard({
           </Link>
         </p>
 
+        <MonthlyGoal year={year} currentYear={currentYear} monthly={monthly} prefs={prefs} />
+
         {past.length > 0 && (
           <div className="grid gap-1.5 border-t pt-3">
             <p className="text-xs font-medium text-muted-foreground">Past goals</p>
             {past.map((g) => (
-              <div key={g.year} className="flex items-center gap-3 text-sm">
+              <div key={g.year} className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-sm">
                 <span className="w-12 text-muted-foreground">{g.year}</span>
-                <span className="tabular-nums">
-                  {amount(g.target, g.unit)} · read {fmt(g.done)}
-                </span>
-                {g.met && <GoldMedal className="h-6 w-[18px]" />}
+                {g.yearly && (
+                  <span className="flex items-center gap-3">
+                    <span className="tabular-nums">
+                      {amount(g.yearly.target, g.yearly.unit)} · read{" "}
+                      {g.yearly.unit === "DAYS" && "on "}
+                      {fmt(g.yearly.done)}
+                    </span>
+                    {g.yearly.met && <GoldMedal className="h-6 w-[18px]" />}
+                  </span>
+                )}
+                {g.monthly && (
+                  <span className="tabular-nums text-muted-foreground">
+                    {amount(g.monthly.target, g.monthly.unit)} a month · met in{" "}
+                    {fmt(g.monthly.met)} of {fmt(g.monthly.of)}
+                  </span>
+                )}
                 <Link
                   href={g.editHref}
                   aria-label={`Edit the ${g.year} goal`}
@@ -241,5 +264,127 @@ function GoalBar({
         </>
       )}
     </div>
+  );
+}
+
+/** The monthly goal: a cell for each month, how this month is going, and
+ *  the form that sets it. */
+function MonthlyGoal({
+  year,
+  currentYear,
+  monthly,
+  prefs,
+}: {
+  year: number;
+  currentYear: number;
+  monthly: { goal: Goal | null; months: MonthProgress[] };
+  prefs: { dateFormat: DateFormat; numberFormat: NumberFormat };
+}) {
+  const fmt = (n: number) => formatNumber(n, prefs);
+  const { goal, months } = monthly;
+  const current = months.find((m) => m.clock.when === "current");
+  const tally = monthsMet(months);
+
+  return (
+    <div className="grid gap-3 border-t pt-4">
+      <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+        <p className="text-sm font-medium">
+          Every month
+          {goal && (
+            <span className="font-normal text-muted-foreground">
+              {" "}
+              · {fmt(goal.target)} {unitWord(goal.unit, goal.target)}
+            </span>
+          )}
+        </p>
+        {goal && tally.of > 0 && (
+          <p className="text-sm text-muted-foreground tabular-nums">
+            Met in {fmt(tally.met)} of {fmt(tally.of)} {tally.of === 1 ? "month" : "months"}
+          </p>
+        )}
+      </div>
+
+      {goal ? (
+        <>
+          <ol className="grid grid-cols-6 gap-1.5 sm:grid-cols-12">
+            {months.map((m) => (
+              <MonthCell key={m.month} m={m} unit={goal.unit} fmt={fmt} />
+            ))}
+          </ol>
+          {current && (
+            <p className="text-sm text-muted-foreground">
+              <span className="text-foreground">
+                {MONTHS_LONG[current.month - 1]}: {fmt(current.done)} of {fmt(goal.target)}{" "}
+                {unitWord(goal.unit, goal.target)}.
+              </span>{" "}
+              {describePace(
+                current.pace,
+                goal.unit,
+                fmt,
+                formatDayKey(`${year}-${String(current.month).padStart(2, "0")}-01`, prefs.dateFormat),
+              )}
+            </p>
+          )}
+        </>
+      ) : (
+        <p className="text-sm text-muted-foreground">
+          A goal for each month keeps the year going a little at a time: say 2 books, or
+          reading on 20 days.
+        </p>
+      )}
+
+      <GoalForm
+        key={`${year}-month`}
+        year={year}
+        currentYear={currentYear}
+        span="MONTH"
+        goal={goal && { target: goal.target, unit: goal.unit, countRereads: goal.countRereads }}
+      />
+    </div>
+  );
+}
+
+/** One month: its name, how far it got, a little bar, and amber once met. */
+function MonthCell({
+  m,
+  unit,
+  fmt,
+}: {
+  m: MonthProgress;
+  unit: GoalUnit;
+  fmt: (n: number) => string;
+}) {
+  const name = MONTHS_SHORT[m.month - 1];
+  const future = m.clock.when === "future";
+  const share = Math.min(m.done / m.target, 1);
+  const label = future
+    ? `${MONTHS_LONG[m.month - 1]}: still to come`
+    : `${MONTHS_LONG[m.month - 1]}: ${fmt(m.done)} of ${fmt(m.target)} ${unitWord(unit, m.target)}${
+        m.met ? ", goal met" : ""
+      }`;
+  return (
+    <li
+      aria-label={label}
+      title={label}
+      className={cn(
+        "grid gap-1 rounded-md border px-1 py-1.5 text-center",
+        m.met && "border-amber-400/70 bg-amber-50/60 dark:border-amber-700/70 dark:bg-amber-950/30",
+        m.clock.when === "current" && "ring-2 ring-primary/40",
+        future && "opacity-50",
+      )}
+    >
+      <span className="text-[11px] leading-none text-muted-foreground">{name}</span>
+      <span className="text-sm font-medium leading-none tabular-nums">
+        {future ? "–" : fmt(m.done)}
+      </span>
+      <span aria-hidden="true" className="mx-1 h-1 rounded-full bg-muted">
+        {!future && (
+          <span
+            className={cn("bar-grow block h-full rounded-full", m.met ? "bg-amber-500" : "bg-primary/70")}
+            style={{ width: `${share * 100}%` }}
+          />
+        )}
+      </span>
+    </li>
   );
 }

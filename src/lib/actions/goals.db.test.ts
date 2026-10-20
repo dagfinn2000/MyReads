@@ -118,6 +118,39 @@ describe("setReadingGoal", () => {
     expect((await goals())[0].target).toBe(30);
   });
 
+  it("keeps a monthly goal apart from the year's goal", async () => {
+    await setReadingGoal(goalForm({ year: "2026", target: "24", unit: "BOOKS", countRereads: "on" }));
+    expect(
+      await setReadingGoal(goalForm({ year: "2026", span: "MONTH", target: "20", unit: "DAYS" })),
+    ).toEqual({ saved: { year: 2026, removed: false } });
+
+    const rows = await prisma.readingGoal.findMany({
+      where: { userId },
+      orderBy: { span: "asc" },
+      select: { span: true, target: true, unit: true },
+    });
+    expect(rows).toEqual([
+      { span: "YEAR", target: 24, unit: "BOOKS" },
+      { span: "MONTH", target: 20, unit: "DAYS" },
+    ]);
+
+    // Removing the monthly goal leaves the year's.
+    await setReadingGoal(goalForm({ year: "2026", span: "MONTH", target: "0" }));
+    expect(await goals()).toEqual([{ year: 2026, target: 24, unit: "BOOKS", countRereads: true }]);
+  });
+
+  it("caps a reading-days goal at the days there are", async () => {
+    expect(
+      await setReadingGoal(goalForm({ year: "2026", span: "MONTH", target: "32", unit: "DAYS" })),
+    ).toEqual({ error: "A month has at most 31 days." });
+    expect(await setReadingGoal(goalForm({ year: "2026", target: "366", unit: "DAYS" }))).toEqual({
+      error: "2026 has 365 days.",
+    });
+    expect(await goals()).toEqual([]);
+    await setReadingGoal(goalForm({ year: "2028", target: "366", unit: "DAYS", countRereads: "on" }));
+    expect(await goals()).toEqual([{ year: 2028, target: 366, unit: "DAYS", countRereads: true }]);
+  });
+
   it("refuses without a session", async () => {
     currentUserId = null;
     await expect(setReadingGoal(goalForm({ year: "2026", target: "12" }))).rejects.toThrow(

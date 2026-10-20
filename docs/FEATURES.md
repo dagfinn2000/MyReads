@@ -132,9 +132,15 @@ page by page.
   pages when you finish it, or the pages you log as you go. You also
   choose whether books you stop reading count, and how audiobooks count.
 - A "year in review" page for every year.
-- Yearly reading goals in books or pages, with or without re-reads. The
-  goal shows whether you're on track, and next year's can be set ahead of
-  time.
+- Yearly reading goals in books, pages or days you read, with or without
+  re-reads. The goal shows whether you're on track, and next year's can be
+  set ahead of time.
+- **Monthly goals:** a goal for every month of the year, such as 2 books or
+  reading on 20 days. Twelve month cells show which months made it, and
+  this month says how to catch up.
+- **Challenges:** a goal for part of your library, such as "6 classics in
+  2026". Make one from a tag, a shelf or a saved view; it shows the covers
+  of the books that count so far, and a medal once it's done.
 
 ## The reading room
 

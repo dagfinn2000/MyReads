@@ -416,6 +416,114 @@ describe("export -> import round trip", () => {
     expect(new URLSearchParams(view.query).get("shelfId")).toBe(restoredShelf.id);
   });
 
+  it("restores goals of every kind and challenges, pointed at the restored shelf", async () => {
+    const shelf = await prisma.shelf.create({ data: { userId: sourceUserId, name: "Bedside" } });
+    await prisma.readingGoal.createMany({
+      data: [
+        { userId: sourceUserId, year: 2026, target: 24 },
+        { userId: sourceUserId, year: 2026, span: "MONTH", target: 2 },
+        { userId: sourceUserId, year: 2025, target: 200, unit: "DAYS" },
+        { userId: sourceUserId, year: 2025, span: "MONTH", target: 3000, unit: "PAGES" },
+      ],
+    });
+    await prisma.challenge.createMany({
+      data: [
+        { userId: sourceUserId, name: "Classics", year: 2026, target: 6, query: "tag=classics" },
+        {
+          userId: sourceUserId,
+          name: "Clear the bedside",
+          year: 2026,
+          target: 4,
+          query: `shelfId=${shelf.id}`,
+        },
+      ],
+    });
+
+    const payload = await exportLibrary();
+    // An older MyReads only reads yearly book and page goals, so only those
+    // go in the old lists.
+    expect(payload.readingGoals).toEqual([{ year: 2026, target: 24, countRereads: true }]);
+    expect(payload.pageGoals).toEqual([]);
+    expect(payload.moreGoals).toHaveLength(3);
+    expect(payload.challenges).toEqual([
+      { name: "Classics", year: 2026, target: 6, query: "tag=classics" },
+      {
+        name: "Clear the bedside",
+        year: 2026,
+        target: 4,
+        query: expect.any(String),
+        shelfName: "Bedside",
+      },
+    ]);
+
+    const summary = await importLibrary(targetUserId, payload);
+    expect(summary).toMatchObject({ goalsRestored: 4, challengesRestored: 2 });
+
+    const goals = await prisma.readingGoal.findMany({
+      where: { userId: targetUserId },
+      orderBy: [{ year: "asc" }, { span: "asc" }],
+      select: { year: true, span: true, target: true, unit: true },
+    });
+    expect(goals).toEqual([
+      { year: 2025, span: "YEAR", target: 200, unit: "DAYS" },
+      { year: 2025, span: "MONTH", target: 3000, unit: "PAGES" },
+      { year: 2026, span: "YEAR", target: 24, unit: "BOOKS" },
+      { year: 2026, span: "MONTH", target: 2, unit: "BOOKS" },
+    ]);
+
+    const [restoredShelf, challenges] = await Promise.all([
+      prisma.shelf.findFirstOrThrow({ where: { userId: targetUserId, name: "Bedside" } }),
+      prisma.challenge.findMany({ where: { userId: targetUserId }, orderBy: { name: "asc" } }),
+    ]);
+    expect(challenges.map((c) => [c.name, c.target, c.query])).toEqual([
+      ["Classics", 6, "tag=classics"],
+      ["Clear the bedside", 4, `shelfId=${restoredShelf.id}`],
+    ]);
+
+    // Restoring the same backup again adds no second copy.
+    expect(await importLibrary(targetUserId, payload)).toMatchObject({ challengesRestored: 0 });
+    expect(await prisma.challenge.count({ where: { userId: targetUserId } })).toBe(2);
+  });
+
+  it("drops a bad goal or challenge without losing the rest", async () => {
+    const summary = await importLibrary(targetUserId, {
+      format: "myreads-export",
+      version: 1,
+      shelves: [],
+      readingGoals: [],
+      pageGoals: [],
+      moreGoals: [
+        { year: 2026, target: 20, unit: "DAYS", span: "MONTH" },
+        // A month can't have 40 reading days.
+        { year: 2027, target: 40, unit: "DAYS", span: "MONTH" },
+        { year: 2027, target: 2, unit: "WEEKS", span: "MONTH" },
+      ],
+      challenges: [
+        { name: "Classics", year: 2026, target: 6, query: "tag=classics&sort=title&limit=9" },
+        // Same name, other books: a challenge of its own.
+        { name: "Classics", year: 2026, target: 2, query: "tag=classics&format=EBOOK" },
+        { name: "", year: 2026, target: 6, query: "" },
+        { name: "Too many", year: 2026, target: 5000, query: "" },
+        // Its shelf isn't in the backup, and without it every book would count.
+        { name: "Bedside", year: 2026, target: 3, query: "shelfId=gone", shelfName: "Gone" },
+        { name: "Nightstand", year: 2026, target: 3, query: "shelfId=gone" },
+      ],
+      books: [],
+    });
+    expect(summary).toMatchObject({ goalsRestored: 1, challengesRestored: 2 });
+    const challenges = await prisma.challenge.findMany({
+      where: { userId: targetUserId },
+      orderBy: { target: "asc" },
+    });
+    // Only filters that pick books survive.
+    expect(challenges.map((c) => [c.name, c.query])).toEqual([
+      ["Classics", "tag=classics&format=EBOOK"],
+      ["Classics", "tag=classics"],
+    ]);
+    const goal = await prisma.readingGoal.findFirstOrThrow({ where: { userId: targetUserId } });
+    expect(goal).toMatchObject({ year: 2026, span: "MONTH", target: 20, unit: "DAYS" });
+  });
+
   it("leaves a theme the account already chose alone", async () => {
     await prisma.user.update({ where: { id: sourceUserId }, data: { theme: "dracula" } });
     await prisma.user.update({ where: { id: targetUserId }, data: { theme: "sage" } });

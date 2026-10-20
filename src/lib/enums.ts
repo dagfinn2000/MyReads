@@ -37,5 +37,12 @@ export type BookOwnership = (typeof BookOwnership)[keyof typeof BookOwnership];
 export const GoalUnit = {
   BOOKS: "BOOKS",
   PAGES: "PAGES",
+  DAYS: "DAYS",
 } as const;
 export type GoalUnit = (typeof GoalUnit)[keyof typeof GoalUnit];
+
+export const GoalSpan = {
+  YEAR: "YEAR",
+  MONTH: "MONTH",
+} as const;
+export type GoalSpan = (typeof GoalSpan)[keyof typeof GoalSpan];

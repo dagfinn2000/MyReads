@@ -1,7 +1,14 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { Prisma } from "@prisma/client";
-import { BookFormat, BookOwnership, GoalUnit, ReadingStatus } from "@/lib/enums";
+import { BookFormat, BookOwnership, GoalSpan, GoalUnit, ReadingStatus } from "@/lib/enums";
+import { maxGoalDays } from "@/lib/goals";
+import {
+  CHALLENGE_NAME_MAX,
+  CHALLENGE_TARGET_MAX,
+  MAX_CHALLENGES,
+  challengeQuery,
+} from "@/lib/challenges";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { coverFilePath, coversDir } from "@/lib/covers";
@@ -152,6 +159,42 @@ const goalSchema = z.object({
   countRereads: z.boolean().catch(true),
 });
 
+/** Goals counted in reading days, or set for each month: a list of their
+ *  own, since an older MyReads knows neither. Each is checked on its own,
+ *  so one bad entry doesn't lose the rest. */
+const moreGoalSchema = z
+  .object({
+    year: z.number().int().min(1900).max(2200),
+    target: z.number().int().min(1).max(1_000_000),
+    unit: z.enum([GoalUnit.BOOKS, GoalUnit.PAGES, GoalUnit.DAYS]),
+    span: z.enum([GoalSpan.YEAR, GoalSpan.MONTH]),
+    countRereads: z.boolean().catch(true),
+  })
+  .refine((g) => g.unit !== GoalUnit.DAYS || g.target <= maxGoalDays(g.year, g.span));
+
+const challengeSchema = z.object({
+  name: z.string().trim().min(1).max(CHALLENGE_NAME_MAX),
+  year: z.number().int().min(1900).max(2200),
+  target: z.number().int().min(1).max(CHALLENGE_TARGET_MAX),
+  query: z.string().max(4000),
+  /** The shelf the query's `shelfId` named, as for saved views. */
+  shelfName: z.string().trim().min(1).max(50).optional().catch(undefined),
+});
+
+/** A list whose entries are checked one by one, dropping the bad ones. */
+function eachOf<T extends z.ZodType>(schema: T) {
+  return z
+    .array(z.unknown())
+    .max(1000)
+    .catch([])
+    .transform((list) =>
+      list.flatMap((item) => {
+        const parsed = schema.safeParse(item);
+        return parsed.success ? [parsed.data as z.infer<T>] : [];
+      }),
+    );
+}
+
 /** Shelf or saved-view names in a preference, as exported. */
 const nameList = z.array(z.string().max(100)).max(500).optional().catch([]);
 
@@ -167,6 +210,10 @@ const exportPayloadSchema = z.object({
   /** Goals counted in pages. Additive, and kept apart so an older MyReads
    *  doesn't read them as book counts. */
   pageGoals: z.array(goalSchema).catch([]),
+  /** Reading-days and monthly goals. Additive. */
+  moreGoals: eachOf(moreGoalSchema),
+  /** Challenges. Additive. */
+  challenges: eachOf(challengeSchema),
   /** Additive, like everything after `books` was in version 1. */
   settings: z
     .object({
@@ -203,6 +250,7 @@ export interface ImportSummary {
   booksInvalid: number;
   shelvesCreated: number;
   goalsRestored: number;
+  challengesRestored: number;
   savedViewsRestored: number;
   /** True when the backup's theme, library view or preferences were applied
    *  (only ever to an account that had none). */
@@ -380,17 +428,24 @@ export async function importLibrary(
     for (const s of refreshed) shelfIdByName.set(shelfKey(s.name), s.id);
   }
 
-  // Reading goals: upsert per year, concurrently — they're independent.
-  const goals = [
-    ...data.readingGoals.map((g) => ({ ...g, unit: GoalUnit.BOOKS })),
-    ...data.pageGoals.map((g) => ({ ...g, unit: GoalUnit.PAGES })),
-  ];
+  // Reading goals: upsert per year and span, concurrently — they're
+  // independent. A year has one goal for the year and one for each month;
+  // where a backup lists two for the same, the last wins.
+  const goalsBySlot = new Map(
+    [
+      ...data.readingGoals.map((g) => ({ ...g, unit: GoalUnit.BOOKS, span: GoalSpan.YEAR })),
+      ...data.pageGoals.map((g) => ({ ...g, unit: GoalUnit.PAGES, span: GoalSpan.YEAR })),
+      ...data.moreGoals,
+    ].map((g) => [`${g.year}|${g.span}`, g]),
+  );
+  const goals = [...goalsBySlot.values()];
   await mapWithConcurrency(goals, IMPORT_CONCURRENCY, (goal) =>
     prisma.readingGoal.upsert({
-      where: { userId_year: { userId, year: goal.year } },
+      where: { userId_year_span: { userId, year: goal.year, span: goal.span } },
       create: {
         userId,
         year: goal.year,
+        span: goal.span,
         target: goal.target,
         unit: goal.unit,
         countRereads: goal.countRereads,
@@ -420,6 +475,47 @@ export async function importLibrary(
     }
     return canonicalViewQueryFromString(params.toString());
   };
+  // Challenges: the ones not here yet, up to the cap, each pointed at its
+  // shelf found by name.
+  // A challenge kept to a shelf that can't be found here is left out:
+  // dropping the shelf, as a saved view does, would count every book.
+  const restoredChallengeQuery = (c: { query: string; shelfName?: string }) => {
+    const params = new URLSearchParams(c.query);
+    const oldId = params.get("shelfId");
+    if (oldId) {
+      const id = c.shelfName
+        ? shelfIdByName.get(shelfKey(c.shelfName))
+        : ownShelfIds.has(oldId)
+          ? oldId
+          : undefined;
+      if (!id) return null;
+      params.set("shelfId", id);
+    }
+    return challengeQuery(params.toString());
+  };
+  // The same challenge is one already here with the same name, year and
+  // books; two that only share a name both come back.
+  const challengeKey = (c: { name: string; year: number; query: string }) =>
+    `${c.year}|${c.name.toLowerCase()}|${c.query}`;
+  const existingChallenges = await prisma.challenge.findMany({
+    where: { userId },
+    select: { name: true, year: true, query: true },
+  });
+  const haveChallenge = new Set(existingChallenges.map(challengeKey));
+  const newChallenges = data.challenges
+    .flatMap((c) => {
+      const query = restoredChallengeQuery(c);
+      if (query === null) return [];
+      const restored = { name: c.name, year: c.year, target: c.target, query };
+      if (haveChallenge.has(challengeKey(restored))) return [];
+      haveChallenge.add(challengeKey(restored));
+      return [restored];
+    })
+    .slice(0, Math.max(0, MAX_CHALLENGES - existingChallenges.length));
+  const challengesCreated = await prisma.challenge.createMany({
+    data: newChallenges.map((c) => ({ userId, ...c })),
+  });
+
   const existingViewCount = await prisma.savedView.count({ where: { userId } });
   const viewsCreated = await prisma.savedView.createMany({
     data: data.savedViews
@@ -618,6 +714,7 @@ export async function importLibrary(
     booksInvalid,
     shelvesCreated,
     goalsRestored: goals.length,
+    challengesRestored: challengesCreated.count,
     savedViewsRestored: viewsCreated.count,
     settingsRestored,
     coversRestored,
