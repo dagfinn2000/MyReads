@@ -1,4 +1,4 @@
-import type { GoalUnit } from "@/lib/enums";
+import type { GoalSpan, GoalUnit } from "@/lib/enums";
 import { keyToUtcDate } from "@/lib/dates";
 
 /**
@@ -113,6 +113,13 @@ export function monthEnd(year: number, month: number): string {
   return `${year}-${String(month).padStart(2, "0")}-${String(last).padStart(2, "0")}`;
 }
 
+/** The most reading days a goal can ask for: the days in the year, or in
+ *  the longest month for a goal set for each month. */
+export function maxGoalDays(year: number, span: GoalSpan): number {
+  if (span === "MONTH") return 31;
+  return new Date(Date.UTC(year, 1, 29)).getUTCMonth() === 1 ? 366 : 365;
+}
+
 /** The month's first and last days as keys. */
 export function monthSpan(year: number, month: number): { from: string; to: string } {
   return { from: `${year}-${String(month).padStart(2, "0")}-01`, to: monthEnd(year, month) };
@@ -147,12 +154,16 @@ export type GoalPace =
  * Where a goal stands against the calendar. "On schedule" is within half a
  * book or day (or half a percent of a pages goal) of an even pace through
  * the year or month.
+ *
+ * `todayRead` says today is already among a reading-days goal's days: it
+ * can't add a second one, so it isn't a day left for that goal.
  */
 export function goalPace(
   done: number,
   target: number,
   unit: GoalUnit,
   clock: YearClock,
+  todayRead = false,
 ): GoalPace {
   if (clock.when === "future") return { kind: "upcoming" };
   if (done >= target) return { kind: "reached", over: done - target };
@@ -166,9 +177,10 @@ export function goalPace(
 
   const remaining = target - done;
   if (unit === "DAYS") {
-    return remaining > clock.daysLeft
-      ? { kind: "out-of-reach", short: remaining - clock.daysLeft }
-      : { kind: "behind", by, daysOf: [remaining, clock.daysLeft] };
+    const left = clock.daysLeft - (todayRead ? 1 : 0);
+    return remaining > left
+      ? { kind: "out-of-reach", short: remaining - left }
+      : { kind: "behind", by, daysOf: [remaining, left] };
   }
   if (unit === "BOOKS" && remaining <= clock.daysLeft) {
     return { kind: "behind", by, everyDays: Math.floor(clock.daysLeft / remaining) };

@@ -1,14 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
-  challengeBooks,
   challengeHref,
   challengePaceText,
   challengeQuery,
   challengeSources,
+  orderByFirstFinish,
 } from "@/lib/challenges";
 import { goalPace, yearClock } from "@/lib/goals";
-import { buildPasses, countWindow, type CountBook, type CountRules } from "@/lib/stats-count";
-import { yearWindow } from "@/lib/stats-period";
 
 describe("challengeQuery", () => {
   it("keeps the filters that pick books, canonical, and drops the rest", () => {
@@ -51,47 +49,48 @@ describe("challengeSources", () => {
   });
 });
 
-describe("challengeBooks", () => {
-  const RULES: CountRules = {
-    statsPagesRead: "finished",
-    statsStoppedBooks: "none",
-    statsAudiobooks: "full",
-  };
+describe("orderByFirstFinish", () => {
   const d = (day: string) => new Date(`${day}T00:00:00Z`);
-  const book = (id: string, finished: string | null, over: Partial<CountBook> = {}): CountBook => ({
+  const book = (
+    id: string,
+    status: string,
+    dateFinished: string | null,
+    reads: string[] = [],
+  ) => ({
     id,
-    status: "READ",
-    format: "PHYSICAL",
-    pageCount: 300,
-    currentPage: null,
-    dateStarted: null,
-    dateFinished: finished ? d(finished) : null,
-    rating: null,
-    ...over,
+    title: id,
+    authors: [],
+    coverUrl: null,
+    status,
+    dateFinished: dateFinished ? d(dateFinished) : null,
+    reads: reads.map((r) => ({ dateFinished: d(r) })),
   });
 
-  it("counts each matching book finished in the year once, first finished first", () => {
-    const passes = buildPasses(
-      {
-        books: [
-          book("late", "2026-09-01"),
-          // Finished twice in 2026: counts once, by the first finish.
-          book("twice", "2026-08-01"),
-          book("early", "2026-02-01"),
-          book("other", "2026-03-01"),
-          book("lastYear", "2025-12-31"),
-          book("reading", null, { status: "READING", currentPage: 40 }),
-        ],
-        reads: [{ bookId: "twice", dateStarted: null, dateFinished: d("2026-01-15"), rating: null }],
-        logDays: [],
-        lastLogDates: new Map(),
-      },
-      RULES,
-      "UTC",
-    );
-    const items = countWindow(passes, yearWindow(2026), RULES);
-    const matching = new Set(["late", "twice", "early", "lastYear", "reading"]);
-    expect(challengeBooks(items, matching).map((b) => b.id)).toEqual(["twice", "early", "late"]);
+  it("puts the books in order of their first finish in the year", () => {
+    const books = [
+      book("late", "READ", "2026-09-01"),
+      // Finished twice in 2026: placed by the first.
+      book("twice", "READ", "2026-08-01", ["2026-01-15", "2025-03-01"]),
+      book("early", "READ", "2026-02-01", ["2024-05-05"]),
+      // Being re-read: its current finish date doesn't count, its 2026 read does.
+      book("rereading", "READING", "2025-12-30", ["2026-03-03"]),
+    ];
+    expect(orderByFirstFinish(books, 2026, "UTC").map((b) => b.id)).toEqual([
+      "twice",
+      "early",
+      "rereading",
+      "late",
+    ]);
+  });
+
+  it("reads finish dates in the reader's zone", () => {
+    // 23:30 on 31 December in UTC is already 1 January in Oslo.
+    const nye = { ...book("nye", "READ", null), dateFinished: new Date("2025-12-31T23:30:00Z") };
+    const jan = book("jan", "READ", "2026-01-01");
+    expect(orderByFirstFinish([jan, nye], 2026, "Europe/Oslo").map((b) => b.id)).toEqual([
+      "jan",
+      "nye",
+    ]);
   });
 });
 

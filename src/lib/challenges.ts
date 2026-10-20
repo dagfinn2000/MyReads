@@ -1,6 +1,6 @@
+import { calendarDay } from "@/lib/dates";
 import { describePace, type GoalPace } from "@/lib/goals";
 import { canonicalViewQueryFromString } from "@/lib/saved-views";
-import type { Counted, CountBook } from "@/lib/stats-count";
 
 /**
  * Challenges: a goal for a slice of the library, such as "6 classics in
@@ -64,24 +64,39 @@ export function challengeSources(o: {
   ].filter((g) => g.sources.length > 0);
 }
 
+/** A book that counts toward a challenge, with what ordering needs. */
+export interface ChallengeBook {
+  id: string;
+  title: string;
+  authors: string[];
+  coverUrl: string | null;
+  status: string;
+  dateFinished: Date | null;
+  reads: { dateFinished: Date | null }[];
+}
+
 /**
- * The books that count toward a challenge: those matching its slice with a
- * finish in the year, each once, in the order they were finished.
+ * The books in a challenge's slice finished in its year, first finished
+ * first: the same books its "See the books" link lists (the library's
+ * Finished filter), so the count and the list always agree. A book read
+ * twice that year is there once, by its first finish.
  */
-export function challengeBooks<B extends CountBook>(
-  yearItems: Counted<B>[],
-  matching: ReadonlySet<string>,
+export function orderByFirstFinish<B extends ChallengeBook>(
+  books: B[],
+  year: number,
+  timeZone: string,
 ): B[] {
-  const seen = new Map<string, { book: B; day: string }>();
-  for (const i of yearItems) {
-    if (i.books === 0 || !matching.has(i.pass.book.id)) continue;
-    const day = i.pass.day ?? "";
-    const prev = seen.get(i.pass.book.id);
-    if (!prev || day < prev.day) seen.set(i.pass.book.id, { book: i.pass.book, day });
-  }
-  return [...seen.values()]
-    .sort((a, b) => (a.day < b.day ? -1 : a.day > b.day ? 1 : 0))
-    .map((e) => e.book);
+  const first = (b: B) => {
+    const days = [b.status === "READ" ? b.dateFinished : null, ...b.reads.map((r) => r.dateFinished)]
+      .flatMap((d) => (d ? [calendarDay(d, timeZone)] : []))
+      .filter((day) => day.startsWith(`${year}-`))
+      .sort();
+    return days[0] ?? `${year}-99`;
+  };
+  return books
+    .map((b) => ({ b, day: first(b) }))
+    .sort((x, y) => (x.day < y.day ? -1 : x.day > y.day ? 1 : x.b.title.localeCompare(y.b.title)))
+    .map((e) => e.b);
 }
 
 /** How a challenge is going, as a sentence: the goal card's pace, in a

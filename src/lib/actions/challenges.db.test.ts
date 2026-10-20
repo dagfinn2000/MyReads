@@ -19,7 +19,8 @@ vi.mock("next/cache", () => ({ revalidatePath: () => {} }));
 const { createChallenge, deleteChallenge, updateChallenge } = await import(
   "@/lib/actions/challenges"
 );
-const { challengeMatches } = await import("@/lib/challenges-query");
+const { deleteShelf, renameShelf } = await import("@/lib/actions/shelves");
+const { challengeBooksFor } = await import("@/lib/challenges-query");
 const { DEFAULT_PREFERENCES } = await import("@/lib/preferences");
 
 let userId: string;
@@ -93,7 +94,17 @@ describe("createChallenge", () => {
     const view = await prisma.savedView.create({
       data: { userId: otherUserId, name: "Theirs", query: "tag=x" },
     });
-    const sources = [`shelf:${shelf.id}`, `view:${view.id}`, "tag:", "tag:a,b", "nope:1", ""];
+    const sources = [
+      `shelf:${shelf.id}`,
+      `view:${view.id}`,
+      "tag:",
+      "tag:a,b",
+      // The library reads "all" as no tag at all, so it would count every book.
+      "tag:all",
+      `tag:${"x".repeat(101)}`,
+      "nope:1",
+      "",
+    ];
     for (const source of sources) {
       expect(
         await createChallenge({}, form({ source, target: "4", year: "2026" })),
@@ -159,47 +170,93 @@ describe("updateChallenge and deleteChallenge", () => {
   });
 });
 
-describe("challengeMatches", () => {
-  it("finds the books in each slice, only ever the reader's own", async () => {
+describe("shelves and challenges", () => {
+  it("merging a shelf into another moves its challenges along", async () => {
+    const [bedside, nightstand] = await Promise.all([
+      prisma.shelf.create({ data: { userId, name: "Bedside" } }),
+      prisma.shelf.create({ data: { userId, name: "Nightstand" } }),
+    ]);
+    await createChallenge({}, form({ source: `shelf:${bedside.id}`, target: "4", year: "2026" }));
+    await createChallenge({}, form({ source: "tag:classics", target: "4", year: "2026" }));
+    expect(await renameShelf(bedside.id, "Nightstand")).toMatchObject({ merged: true });
+    expect((await challenges()).map((c) => c.query)).toEqual([
+      `shelfId=${nightstand.id}`,
+      "tag=classics",
+    ]);
+  });
+
+  it("deleting a shelf deletes the challenges counting it, and only those", async () => {
+    const [bedside, other] = await Promise.all([
+      prisma.shelf.create({ data: { userId, name: "Bedside" } }),
+      prisma.shelf.create({ data: { userId, name: "Other" } }),
+    ]);
+    await createChallenge({}, form({ source: `shelf:${bedside.id}`, target: "4", year: "2026" }));
+    await createChallenge({}, form({ source: `shelf:${other.id}`, target: "4", year: "2026" }));
+    // Someone else can't delete it, or its challenges.
+    currentUserId = otherUserId;
+    await deleteShelf(bedside.id);
+    expect(await challenges()).toHaveLength(2);
+    currentUserId = userId;
+    await deleteShelf(bedside.id);
+    expect((await challenges()).map((c) => c.query)).toEqual([`shelfId=${other.id}`]);
+    // Nonsense ids are ignored.
+    await deleteShelf({ not: "" } as never);
+    expect(await challenges()).toHaveLength(1);
+  });
+});
+
+describe("challengeBooksFor", () => {
+  it("finds the books in each slice finished in its year, only ever the reader's own", async () => {
     const shelf = await prisma.shelf.create({ data: { userId, name: "Bedside" } });
-    const [classic, onShelf] = await Promise.all([
+    const d = (day: string) => new Date(`${day}T00:00:00Z`);
+    const make = (data: Record<string, unknown>) =>
       prisma.book.create({
-        data: {
-          userId,
-          title: "Persuasion",
-          authors: ["Austen"],
-          tags: ["classics"],
-          searchText: "persuasion austen",
-        },
+        data: { userId, authors: ["X"], searchText: "x", ...data } as never,
+      });
+    const [classic, onShelf, rereadClassic] = await Promise.all([
+      make({ title: "Persuasion", tags: ["classics"], status: "READ", dateFinished: d("2026-03-01") }),
+      make({
+        title: "Piranesi",
+        status: "READ",
+        dateFinished: d("2026-02-01"),
+        shelves: { connect: { id: shelf.id } },
       }),
-      prisma.book.create({
-        data: {
-          userId,
-          title: "Piranesi",
-          authors: ["Clarke"],
-          searchText: "piranesi clarke",
-          shelves: { connect: { id: shelf.id } },
-        },
+      // Being re-read now; its 2026 finish is in the read history.
+      make({
+        title: "Emma",
+        tags: ["classics"],
+        status: "READING",
+        reads: { create: [{ dateFinished: d("2026-01-10") }] },
       }),
+      // Not finished in 2026, or put down: not counted.
+      make({ title: "Middlemarch", tags: ["classics"], status: "READ", dateFinished: d("2025-06-01") }),
+      make({ title: "Bleak House", tags: ["classics"], status: "DNF", dateFinished: d("2026-04-01") }),
+      make({ title: "Ulysses", tags: ["classics"], status: "WANT_TO_READ" }),
       prisma.book.create({
         data: {
           userId: otherUserId,
-          title: "Emma",
-          authors: ["Austen"],
+          title: "Theirs",
+          authors: ["Y"],
           tags: ["classics"],
-          searchText: "emma austen",
+          status: "READ",
+          dateFinished: d("2026-03-01"),
+          searchText: "theirs",
         },
       }),
     ]);
-    const matches = await challengeMatches(
+    const found = await challengeBooksFor(
       userId,
       [
-        { id: "a", query: "tag=classics" },
-        { id: "b", query: `shelfId=${shelf.id}` },
+        { id: "a", query: "tag=classics", year: 2026 },
+        { id: "b", query: `shelfId=${shelf.id}`, year: 2026 },
+        { id: "next", query: "tag=classics", year: 2027 },
       ],
       DEFAULT_PREFERENCES,
+      2026,
     );
-    expect([...matches.get("a")!]).toEqual([classic.id]);
-    expect([...matches.get("b")!]).toEqual([onShelf.id]);
+    expect(found.get("a")!.map((b) => b.id)).toEqual([rereadClassic.id, classic.id]);
+    expect(found.get("b")!.map((b) => b.id)).toEqual([onShelf.id]);
+    // Next year's challenge counts nothing yet.
+    expect(found.get("next")).toEqual([]);
   });
 });

@@ -5,6 +5,7 @@ import { GoalSpan, GoalUnit } from "@/lib/enums";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/actions/helpers";
+import { maxGoalDays } from "@/lib/goals";
 
 const goalSchema = z.object({
   year: z.coerce.number().int().min(1900).max(2200),
@@ -43,10 +44,15 @@ export async function setReadingGoal(formData: FormData): Promise<GoalFormState>
   });
   if (!parsed.success) return { error: "Enter a whole number from 0 to 1,000,000." };
   const { year, target, unit, span, countRereads } = parsed.data;
-  // A month has at most 31 reading days, and a year 366.
-  const maxDays = span === GoalSpan.MONTH ? 31 : 366;
+  // A month has at most 31 reading days, and a year 365 or 366.
+  const maxDays = maxGoalDays(year, span);
   if (unit === GoalUnit.DAYS && target > maxDays) {
-    return { error: `A ${span === GoalSpan.MONTH ? "month" : "year"} has at most ${maxDays} days.` };
+    return {
+      error:
+        span === GoalSpan.MONTH
+          ? `A month has at most ${maxDays} days.`
+          : `${year} has ${maxDays} days.`,
+    };
   }
 
   if (target === 0) {

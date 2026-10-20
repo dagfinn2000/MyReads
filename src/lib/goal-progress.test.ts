@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { monthlyProgress, monthsMet, progressIn, readingDaySet } from "@/lib/goal-progress";
+import {
+  goalReadingDays,
+  monthlyProgress,
+  monthsMet,
+  progressIn,
+  todayRead,
+} from "@/lib/goal-progress";
 import { buildPasses, type CountBook, type CountRules } from "@/lib/stats-count";
 
 const RULES: CountRules = {
@@ -23,18 +29,27 @@ function finishes(...list: [id: string, day: string, pageCount?: number][]) {
   return buildPasses({ books, reads: [], logDays: [], lastLogDates: new Map() }, RULES, "UTC");
 }
 
-describe("readingDaySet", () => {
-  it("joins days from pages and minutes, leaving out zeroes", () => {
-    const pages = new Map([
-      ["2026-10-01", 20],
-      ["2026-10-02", 0],
-    ]);
-    const minutes = new Map([
-      ["2026-10-02", 0],
-      ["2026-10-03", 15],
-      ["2026-10-01", 5],
-    ]);
-    expect([...readingDaySet(pages, minutes)].sort()).toEqual(["2026-10-01", "2026-10-03"]);
+describe("goalReadingDays", () => {
+  const logDays = [
+    { bookId: "paper", day: "2026-10-01", pages: 20, current: true },
+    { bookId: "paper", day: "2026-10-02", pages: 0, current: true },
+    { bookId: "audio", day: "2026-10-04", pages: 30, current: true },
+  ];
+  const minutes = [
+    { day: "2026-10-02", audiobook: false, minutes: 0 },
+    { day: "2026-10-03", audiobook: false, minutes: 15 },
+    { day: "2026-10-05", audiobook: true, minutes: 40 },
+  ];
+  const audio = new Set(["audio"]);
+
+  it("joins days with pages logged or minutes timed, leaving out zeroes", () => {
+    const days = goalReadingDays(logDays, minutes, audio, { statsAudiobooks: "full" });
+    expect([...days].sort()).toEqual(["2026-10-01", "2026-10-03", "2026-10-04", "2026-10-05"]);
+  });
+
+  it("leaves out audiobooks when What counts leaves them out", () => {
+    const days = goalReadingDays(logDays, minutes, audio, { statsAudiobooks: "out" });
+    expect([...days].sort()).toEqual(["2026-10-01", "2026-10-03"]);
   });
 });
 
@@ -82,6 +97,21 @@ describe("monthlyProgress", () => {
     expect(months[1].pace).toEqual({ kind: "missed", short: 1 });
     expect(months[2].clock.when).toBe("current");
     expect(months[3].pace).toEqual({ kind: "upcoming" });
+  });
+
+  it("asks a days goal for no more days than the month has", () => {
+    const days = { target: 31, unit: "DAYS" as const, countRereads: true };
+    const february = Array.from({ length: 28 }, (_, i) => `2026-02-${String(i + 1).padStart(2, "0")}`);
+    const months = monthlyProgress(days, 2026, "2026-03-20", { ...ctx, readingDays: new Set(february) });
+    expect(months[1]).toMatchObject({ done: 28, target: 28, met: true });
+    expect(months[0]).toMatchObject({ done: 0, target: 31, met: false });
+  });
+
+  it("knows when today already counts toward a days goal", () => {
+    const read = { ...ctx, readingDays: new Set(["2026-03-20"]) };
+    expect(todayRead({ unit: "DAYS" }, "2026-03-20", read)).toBe(true);
+    expect(todayRead({ unit: "DAYS" }, "2026-03-21", read)).toBe(false);
+    expect(todayRead({ unit: "BOOKS" }, "2026-03-20", read)).toBe(false);
   });
 
   it("tallies the months met out of those begun", () => {

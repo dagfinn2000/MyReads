@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState, useTransition } from "react";
+import { useActionState, useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Pencil, Plus } from "lucide-react";
 import {
@@ -45,44 +45,57 @@ export function ChallengeForm({
 }) {
   const [open, setOpen] = useState(false);
   const [started, setStarted] = useState(false);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  // Back to the button once the form folds away, so a keyboard user keeps
+  // their place.
+  const refocus = useRef(false);
+  useEffect(() => {
+    if (!open && refocus.current) {
+      refocus.current = false;
+      buttonRef.current?.focus();
+    }
+  }, [open]);
 
-  if (!open) {
-    return (
-      <div className="flex flex-wrap items-center gap-3">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => {
-            setOpen(true);
-            setStarted(false);
-          }}
-        >
-          <Plus /> New challenge
-        </Button>
-        <p aria-live="polite" className="text-sm text-muted-foreground">
-          {started ? "Challenge started." : ""}
-        </p>
-      </div>
-    );
-  }
-  if (sources.length === 0) {
-    return (
-      <p className="text-sm text-muted-foreground">
-        A challenge counts the books in a saved view, on a shelf or with a tag. Tag a few books,
-        make a shelf or save a view in the library first.
-      </p>
-    );
-  }
+  const close = (saved: boolean) => {
+    refocus.current = true;
+    setStarted(saved);
+    setOpen(false);
+  };
+
   return (
-    <ChallengeFields
-      sources={sources}
-      currentYear={currentYear}
-      onSaved={() => {
-        setStarted(true);
-        setOpen(false);
-      }}
-      onCancel={() => setOpen(false)}
-    />
+    <div className="grid gap-2">
+      {!open ? (
+        <div>
+          <Button
+            ref={buttonRef}
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setOpen(true);
+              setStarted(false);
+            }}
+          >
+            <Plus /> New challenge
+          </Button>
+        </div>
+      ) : sources.length === 0 ? (
+        <p className="text-sm text-muted-foreground">
+          A challenge counts the books in a saved view, on a shelf or with a tag. Tag a few books,
+          make a shelf or save a view in the library first.
+        </p>
+      ) : (
+        <ChallengeFields
+          sources={sources}
+          currentYear={currentYear}
+          onSaved={() => close(true)}
+          onCancel={() => close(false)}
+        />
+      )}
+      {/* Always in the page, so screen readers hear it change. */}
+      <p aria-live="polite" className="text-sm text-muted-foreground empty:hidden">
+        {started ? "Challenge started." : ""}
+      </p>
+    </div>
   );
 }
 
@@ -97,7 +110,12 @@ function ChallengeFields({
   onSaved: () => void;
   onCancel: () => void;
 }) {
+  // Every field controlled: React clears a form's own fields after its
+  // action, and a refused save should leave what was typed in place.
   const [source, setSource] = useState("");
+  const [target, setTarget] = useState("");
+  const [year, setYear] = useState(String(currentYear));
+  const [name, setName] = useState("");
   const [state, formAction, pending] = useActionState(
     async (prev: ChallengeFormState, formData: FormData) => {
       const res = await createChallenge(prev, formData);
@@ -145,12 +163,14 @@ function ChallengeFields({
             max={CHALLENGE_TARGET_MAX}
             placeholder="6"
             required
+            value={target}
+            onChange={(e) => setTarget(e.target.value)}
             className="w-20"
           />
         </div>
         <div className="grid gap-1">
           <span className="text-xs text-muted-foreground">In</span>
-          <Select name="year" defaultValue={String(currentYear)}>
+          <Select name="year" value={year} onValueChange={setYear}>
             <SelectTrigger className="w-24" aria-label="Year">
               <SelectValue />
             </SelectTrigger>
@@ -171,6 +191,8 @@ function ChallengeFields({
             name="name"
             maxLength={CHALLENGE_NAME_MAX}
             placeholder={picked?.name ?? "Classics"}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
             className="w-56"
           />
         </div>

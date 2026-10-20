@@ -3,6 +3,7 @@
 import { useActionState, useState } from "react";
 import type { GoalSpan, GoalUnit } from "@/lib/enums";
 import { setReadingGoal, type GoalFormState } from "@/lib/actions/goals";
+import { maxGoalDays } from "@/lib/goals";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -105,7 +106,7 @@ function GoalFields({
           name="target"
           type="number"
           min={0}
-          max={unit === "DAYS" ? (monthly ? 31 : 366) : 1000000}
+          max={unit === "DAYS" ? maxGoalDays(year, span) : 1000000}
           defaultValue={goal?.target}
           placeholder={monthly ? "2" : "24"}
           className="w-28"
@@ -114,7 +115,10 @@ function GoalFields({
       <div className="grid gap-1">
         <span className="text-xs text-muted-foreground">Counting</span>
         <Select name="unit" value={unit} onValueChange={(v) => setUnit(v as GoalUnit)}>
-          <SelectTrigger className="w-36" aria-label="What the goal counts">
+          <SelectTrigger
+            className="w-36"
+            aria-label={monthly ? "What the monthly goal counts" : "What the goal counts"}
+          >
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -124,7 +128,10 @@ function GoalFields({
           </SelectContent>
         </Select>
       </div>
-      {unit !== "DAYS" && (
+      {unit === "DAYS" ? (
+        // Kept as it was, so switching back to books finds it unchanged.
+        goal?.countRereads !== false && <input type="hidden" name="countRereads" value="on" />
+      ) : (
         <label className="flex h-9 items-center gap-2 text-sm">
           <input
             type="checkbox"
@@ -136,7 +143,9 @@ function GoalFields({
         </label>
       )}
       <Button type="submit" variant="outline" size="sm" disabled={pending}>
-        {pending ? "Saving…" : goal ? "Update goal" : "Set goal"}
+        {pending
+          ? "Saving…"
+          : `${goal ? "Update" : "Set"} ${monthly ? "monthly goal" : "goal"}`}
       </Button>
       {goal && (
         <span className="pb-2 text-xs text-muted-foreground">Set to 0 to remove the goal.</span>

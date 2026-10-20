@@ -2,6 +2,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { Prisma } from "@prisma/client";
 import { BookFormat, BookOwnership, GoalSpan, GoalUnit, ReadingStatus } from "@/lib/enums";
+import { maxGoalDays } from "@/lib/goals";
 import {
   CHALLENGE_NAME_MAX,
   CHALLENGE_TARGET_MAX,
@@ -169,7 +170,7 @@ const moreGoalSchema = z
     span: z.enum([GoalSpan.YEAR, GoalSpan.MONTH]),
     countRereads: z.boolean().catch(true),
   })
-  .refine((g) => g.unit !== GoalUnit.DAYS || g.target <= (g.span === GoalSpan.MONTH ? 31 : 366));
+  .refine((g) => g.unit !== GoalUnit.DAYS || g.target <= maxGoalDays(g.year, g.span));
 
 const challengeSchema = z.object({
   name: z.string().trim().min(1).max(CHALLENGE_NAME_MAX),
@@ -474,29 +475,45 @@ export async function importLibrary(
     }
     return canonicalViewQueryFromString(params.toString());
   };
-  // Challenges: the ones not here yet (by name and year), up to the cap,
-  // each pointed at its shelf the same way.
+  // Challenges: the ones not here yet, up to the cap, each pointed at its
+  // shelf found by name.
+  // A challenge kept to a shelf that can't be found here is left out:
+  // dropping the shelf, as a saved view does, would count every book.
+  const restoredChallengeQuery = (c: { query: string; shelfName?: string }) => {
+    const params = new URLSearchParams(c.query);
+    const oldId = params.get("shelfId");
+    if (oldId) {
+      const id = c.shelfName
+        ? shelfIdByName.get(shelfKey(c.shelfName))
+        : ownShelfIds.has(oldId)
+          ? oldId
+          : undefined;
+      if (!id) return null;
+      params.set("shelfId", id);
+    }
+    return challengeQuery(params.toString());
+  };
+  // The same challenge is one already here with the same name, year and
+  // books; two that only share a name both come back.
+  const challengeKey = (c: { name: string; year: number; query: string }) =>
+    `${c.year}|${c.name.toLowerCase()}|${c.query}`;
   const existingChallenges = await prisma.challenge.findMany({
     where: { userId },
-    select: { name: true, year: true },
+    select: { name: true, year: true, query: true },
   });
-  const challengeKey = (c: { name: string; year: number }) => `${c.year}|${c.name.toLowerCase()}`;
   const haveChallenge = new Set(existingChallenges.map(challengeKey));
   const newChallenges = data.challenges
-    .filter((c) => {
-      if (haveChallenge.has(challengeKey(c))) return false;
-      haveChallenge.add(challengeKey(c));
-      return true;
+    .flatMap((c) => {
+      const query = restoredChallengeQuery(c);
+      if (query === null) return [];
+      const restored = { name: c.name, year: c.year, target: c.target, query };
+      if (haveChallenge.has(challengeKey(restored))) return [];
+      haveChallenge.add(challengeKey(restored));
+      return [restored];
     })
     .slice(0, Math.max(0, MAX_CHALLENGES - existingChallenges.length));
   const challengesCreated = await prisma.challenge.createMany({
-    data: newChallenges.map((c) => ({
-      userId,
-      name: c.name,
-      year: c.year,
-      target: c.target,
-      query: challengeQuery(restoredQuery(c)),
-    })),
+    data: newChallenges.map((c) => ({ userId, ...c })),
   });
 
   const existingViewCount = await prisma.savedView.count({ where: { userId } });

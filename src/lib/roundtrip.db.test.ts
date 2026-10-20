@@ -500,15 +500,26 @@ describe("export -> import round trip", () => {
       ],
       challenges: [
         { name: "Classics", year: 2026, target: 6, query: "tag=classics&sort=title&limit=9" },
+        // Same name, other books: a challenge of its own.
+        { name: "Classics", year: 2026, target: 2, query: "tag=classics&format=EBOOK" },
         { name: "", year: 2026, target: 6, query: "" },
         { name: "Too many", year: 2026, target: 5000, query: "" },
+        // Its shelf isn't in the backup, and without it every book would count.
+        { name: "Bedside", year: 2026, target: 3, query: "shelfId=gone", shelfName: "Gone" },
+        { name: "Nightstand", year: 2026, target: 3, query: "shelfId=gone" },
       ],
       books: [],
     });
-    expect(summary).toMatchObject({ goalsRestored: 1, challengesRestored: 1 });
-    const challenge = await prisma.challenge.findFirstOrThrow({ where: { userId: targetUserId } });
+    expect(summary).toMatchObject({ goalsRestored: 1, challengesRestored: 2 });
+    const challenges = await prisma.challenge.findMany({
+      where: { userId: targetUserId },
+      orderBy: { target: "asc" },
+    });
     // Only filters that pick books survive.
-    expect(challenge.query).toBe("tag=classics");
+    expect(challenges.map((c) => [c.name, c.query])).toEqual([
+      ["Classics", "tag=classics&format=EBOOK"],
+      ["Classics", "tag=classics"],
+    ]);
     const goal = await prisma.readingGoal.findFirstOrThrow({ where: { userId: targetUserId } });
     expect(goal).toMatchObject({ year: 2026, span: "MONTH", target: 20, unit: "DAYS" });
   });

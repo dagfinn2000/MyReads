@@ -16,9 +16,15 @@ import { dayKey } from "@/lib/dates";
 import { formatDate, formatDayKey, formatNumber } from "@/lib/display";
 import { formatLength } from "@/lib/progress-units";
 import { describePace, goalPace, unitWord, yearClock } from "@/lib/goals";
-import { monthlyProgress, monthsMet, progressIn, readingDaySet } from "@/lib/goal-progress";
-import { challengeBooks, challengeHref } from "@/lib/challenges";
-import { challengeMatches } from "@/lib/challenges-query";
+import {
+  goalReadingDays,
+  monthlyProgress,
+  monthsMet,
+  progressIn,
+  todayRead,
+} from "@/lib/goal-progress";
+import { challengeHref } from "@/lib/challenges";
+import { challengeBooksFor } from "@/lib/challenges-query";
 import { readingStreaks } from "@/lib/progress";
 import { minutesInWindow } from "@/lib/reading-time";
 import { buildPasses, countWindow, ruleNotes, tally } from "@/lib/stats-count";
@@ -158,16 +164,34 @@ export default async function YearInReviewPage({
   const goalContext = {
     passes,
     rules: prefs,
-    readingDays: readingDaySet(pageTotals, dayMinuteTotals(dayMinutes)),
+    readingDays: goalReadingDays(
+      inputs.logDays,
+      dayMinutes,
+      new Set(inputs.books.filter((b) => b.format === "AUDIOBOOK").map((b) => b.id)),
+      prefs,
+    ),
   };
   const goalDone = goal ? progressIn(goal, `${year}-01-01`, `${year}-12-31`, goalContext) : 0;
   const clock = yearClock(todayKey, year);
-  const pace = goal ? goalPace(goalDone, goal.target, goal.unit, clock) : null;
+  const pace = goal
+    ? goalPace(
+        goalDone,
+        goal.target,
+        goal.unit,
+        clock,
+        clock.when === "current" && todayRead(goal, todayKey, goalContext),
+      )
+    : null;
   const goalMet = pace?.kind === "reached";
   const months = monthGoal && monthsMet(monthlyProgress(monthGoal, year, todayKey, goalContext));
-  const matches = await challengeMatches(userId, challenges, prefs);
+  const challengeBooks = await challengeBooksFor(
+    userId,
+    challenges,
+    prefs,
+    Number(todayKey.slice(0, 4)),
+  );
   const challengeLines = challenges.map((c) => {
-    const done = challengeBooks(counted, matches.get(c.id) ?? new Set()).length;
+    const done = challengeBooks.get(c.id)?.length ?? 0;
     return { id: c.id, name: c.name, target: c.target, done, href: challengeHref(c.query, year) };
   });
   const goalLine = (goal || months || challengeLines.length > 0) && (

@@ -42,8 +42,12 @@ async function sourceQuery(userId: string, source: string): Promise<string | nul
     const shelf = await prisma.shelf.findFirst({ where: { id: value, userId }, select: { id: true } });
     return shelf ? challengeQuery(new URLSearchParams({ shelfId: shelf.id }).toString()) : null;
   }
-  if (kind === "tag" && value.trim() && value.length <= 100 && !value.includes(",")) {
-    return challengeQuery(new URLSearchParams({ tag: value.trim() }).toString());
+  if (kind === "tag") {
+    // One tag, and only one the library's filter keeps ("all" means no
+    // filter there, and would count every book; a comma separates tags).
+    if (!value.trim() || value.includes(",")) return null;
+    const query = challengeQuery(new URLSearchParams({ tag: value }).toString());
+    return new URLSearchParams(query).get("tag") === value.trim() ? query : null;
   }
   return null;
 }
@@ -68,13 +72,18 @@ export async function createChallenge(
 
   const sourceName = String(formData.get("sourceName") ?? "").trim().slice(0, CHALLENGE_NAME_MAX);
   const name = fields.data.name || sourceName || "Challenge";
-  if ((await prisma.challenge.count({ where: { userId } })) >= MAX_CHALLENGES) {
-    return { error: `You can keep up to ${MAX_CHALLENGES} challenges.` };
-  }
 
-  await prisma.challenge.create({
-    data: { userId, name, target: fields.data.target, year: fields.data.year, query },
+  // Counted and added under a lock on the account, so requests sent all at
+  // once can't each see room under the cap.
+  const added = await prisma.$transaction(async (tx) => {
+    await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`challenges:${userId}`}))`;
+    if ((await tx.challenge.count({ where: { userId } })) >= MAX_CHALLENGES) return false;
+    await tx.challenge.create({
+      data: { userId, name, target: fields.data.target, year: fields.data.year, query },
+    });
+    return true;
   });
+  if (!added) return { error: `You can keep up to ${MAX_CHALLENGES} challenges.` };
   revalidatePath("/stats");
   return { saved: true };
 }

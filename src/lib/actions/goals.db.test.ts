@@ -143,12 +143,12 @@ describe("setReadingGoal", () => {
     expect(
       await setReadingGoal(goalForm({ year: "2026", span: "MONTH", target: "32", unit: "DAYS" })),
     ).toEqual({ error: "A month has at most 31 days." });
-    expect(await setReadingGoal(goalForm({ year: "2026", target: "367", unit: "DAYS" }))).toEqual({
-      error: "A year has at most 366 days.",
+    expect(await setReadingGoal(goalForm({ year: "2026", target: "366", unit: "DAYS" }))).toEqual({
+      error: "2026 has 365 days.",
     });
     expect(await goals()).toEqual([]);
-    await setReadingGoal(goalForm({ year: "2026", target: "366", unit: "DAYS" }));
-    expect(await goals()).toEqual([{ year: 2026, target: 366, unit: "DAYS", countRereads: false }]);
+    await setReadingGoal(goalForm({ year: "2028", target: "366", unit: "DAYS", countRereads: "on" }));
+    expect(await goals()).toEqual([{ year: 2028, target: 366, unit: "DAYS", countRereads: true }]);
   });
 
   it("refuses without a session", async () => {

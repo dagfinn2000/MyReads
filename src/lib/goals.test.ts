@@ -5,6 +5,7 @@ import {
   goalPace,
   goalProgress,
   markRereads,
+  maxGoalDays,
   monthClock,
   monthEnd,
   readingDaysIn,
@@ -217,6 +218,23 @@ describe("reading-days goals", () => {
   it("is on schedule within half a day", () => {
     expect(goalPace(8, 20, "DAYS", oct12)).toEqual({ kind: "on-schedule" });
     expect(describePace(goalPace(20, 20, "DAYS", oct12), "DAYS", fmt)).toBe("Goal reached.");
+  });
+
+  it("doesn't count today twice once it's read", () => {
+    // 20 days left from the 12th. Read today, today is already in `done`,
+    // so 19 days are left to read on.
+    expect(describePace(goalPace(5, 25, "DAYS", oct12, false), "DAYS", fmt)).toBe(
+      "5 days behind. Read every day left to get there.",
+    );
+    expect(goalPace(5, 25, "DAYS", oct12, true)).toEqual({ kind: "out-of-reach", short: 1 });
+    expect(goalPace(6, 25, "DAYS", oct12, true)).toEqual({ kind: "behind", by: 4, daysOf: [19, 19] });
+  });
+
+  it("caps a goal at the days there are", () => {
+    expect(maxGoalDays(2026, "MONTH")).toBe(31);
+    expect(maxGoalDays(2026, "YEAR")).toBe(365);
+    expect(maxGoalDays(2028, "YEAR")).toBe(366);
+    expect(maxGoalDays(2100, "YEAR")).toBe(365);
   });
 });
 

@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { Prisma } from "@prisma/client";
 import { z } from "zod";
 import { BULK_CHUNK, chunk } from "@/lib/bulk";
+import { challengeQuery } from "@/lib/challenges";
 import { prisma } from "@/lib/prisma";
 import { canonicalViewQueryFromString } from "@/lib/saved-views";
 import { shelfNameSchema } from "@/lib/validation";
@@ -67,7 +68,8 @@ export interface ShelfRenameResult {
 /**
  * Rename a shelf. A name another of the reader's shelves already has (in
  * any case) merges the two: the books join that shelf, this one goes, and
- * saved views that filtered on it follow the books. Changing only the case
+ * saved views and challenges that filtered on it follow the books.
+ * Changing only the case
  * of a shelf's own name just renames it.
  */
 export async function renameShelf(shelfId: string, name: string): Promise<ShelfRenameResult> {
@@ -143,6 +145,15 @@ export async function renameShelf(shelfId: string, name: string): Promise<ShelfR
           data: { query: canonicalViewQueryFromString(params.toString()) },
         });
       }
+      // So do challenges counting its books.
+      for (const c of await challengesOnShelf(tx, userId, source.id)) {
+        const params = new URLSearchParams(c.query);
+        params.set("shelfId", target.id);
+        await tx.challenge.update({
+          where: { id: c.id },
+          data: { query: challengeQuery(params.toString()) },
+        });
+      }
 
       return tx.book.count({ where: { userId, shelves: { some: { id: target.id } } } });
     },
@@ -151,14 +162,42 @@ export async function renameShelf(shelfId: string, name: string): Promise<ShelfR
 
   revalidatePath("/books");
   revalidatePath("/account");
+  revalidatePath("/stats");
   return { merged: true, shelfId: target.id, name: target.name, count };
 }
 
-/** Delete a shelf. Books on it are untouched — only the grouping goes. */
+/** Challenges whose books are the ones on `shelfId`. */
+async function challengesOnShelf(
+  tx: Prisma.TransactionClient,
+  userId: string,
+  shelfId: string,
+): Promise<{ id: string; query: string }[]> {
+  const found = await tx.challenge.findMany({
+    where: { userId, query: { contains: `shelfId=${shelfId}` } },
+    select: { id: true, query: true },
+  });
+  // `contains` would also match an id that only starts with this one.
+  return found.filter((c) => new URLSearchParams(c.query).get("shelfId") === shelfId);
+}
+
+/**
+ * Delete a shelf. Books on it are untouched — only the grouping goes, and
+ * with it any challenge to read the books on it, which has nothing left to
+ * count.
+ */
 export async function deleteShelf(shelfId: string): Promise<void> {
   const userId = await requireUserId();
-  await prisma.shelf.deleteMany({ where: { id: shelfId, userId } });
+  if (!z.string().min(1).max(64).safeParse(shelfId).success) return;
+  await prisma.$transaction(async (tx) => {
+    const { count } = await tx.shelf.deleteMany({ where: { id: shelfId, userId } });
+    if (count === 0) return;
+    const gone = await challengesOnShelf(tx, userId, shelfId);
+    if (gone.length > 0) {
+      await tx.challenge.deleteMany({ where: { id: { in: gone.map((c) => c.id) }, userId } });
+    }
+  });
   revalidatePath("/books");
+  revalidatePath("/stats");
 }
 
 /** Put a book on / take it off a shelf (ownership-checked on both sides). */

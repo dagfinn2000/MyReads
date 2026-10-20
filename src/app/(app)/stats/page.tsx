@@ -7,14 +7,20 @@ import { getPreferences, getSession } from "@/lib/current-user";
 import { dayKey } from "@/lib/dates";
 import { FORMAT_LABELS, formatDayKey, formatNumber } from "@/lib/display";
 import { goalPace, splitGoals, yearClock } from "@/lib/goals";
-import { monthlyProgress, monthsMet, progressIn, readingDaySet } from "@/lib/goal-progress";
 import {
-  challengeBooks,
+  goalReadingDays,
+  monthlyProgress,
+  monthsMet,
+  progressIn,
+  todayRead,
+} from "@/lib/goal-progress";
+import {
   challengeHref,
   challengePaceText,
   challengeSources,
+  type ChallengeBook,
 } from "@/lib/challenges";
-import { challengeMatches } from "@/lib/challenges-query";
+import { challengeBooksFor } from "@/lib/challenges-query";
 import { dailyGoalTarget, goalMetDays } from "@/lib/daily-goal";
 import { minutesInWindow } from "@/lib/reading-time";
 import { readingHabits } from "@/lib/reading-habits";
@@ -33,7 +39,6 @@ import {
   parsePeriod,
   periodWindow,
   statsHref,
-  yearWindow,
 } from "@/lib/stats-period";
 import {
   dayMinuteTotals,
@@ -226,7 +231,12 @@ export default async function StatsPage({
   const goalContext = {
     passes,
     rules: prefs,
-    readingDays: readingDaySet(pageTotals, dayMinuteTotals(dayMinutes)),
+    readingDays: goalReadingDays(
+      inputs.logDays,
+      dayMinutes,
+      new Set(books.filter((b) => b.format === "AUDIOBOOK").map((b) => b.id)),
+      prefs,
+    ),
   };
   const yearGoals = goals.filter((g) => g.span === "YEAR");
   const monthGoals = goals.filter((g) => g.span === "MONTH");
@@ -247,22 +257,12 @@ export default async function StatsPage({
     monthlyProgress(g, g.year, todayKey, goalContext);
 
   // Challenges: books from a slice of the library finished in the year,
-  // counted by the same rules as the cards (an audiobook left out of the
-  // stats is left out here too).
-  const matches = showChallenges
-    ? await challengeMatches(userId, challenges, prefs)
-    : new Map<string, Set<string>>();
-  const yearItems = new Map<number, typeof allTime>();
-  const itemsIn = (year: number) => {
-    let items = yearItems.get(year);
-    if (!items) {
-      items = countWindow(passes, yearWindow(year), prefs);
-      yearItems.set(year, items);
-    }
-    return items;
-  };
+  // the same books each one's "See the books" link lists.
+  const challengeBooks = showChallenges
+    ? await challengeBooksFor(userId, challenges, prefs, currentYear)
+    : new Map<string, ChallengeBook[]>();
   const challengeViews = challenges.map((c) => {
-    const counted = challengeBooks(itemsIn(c.year), matches.get(c.id) ?? new Set());
+    const counted = challengeBooks.get(c.id) ?? [];
     const done = counted.length;
     const pace = goalPace(done, c.target, "BOOKS", yearClock(todayKey, c.year));
     return {
@@ -274,10 +274,13 @@ export default async function StatsPage({
       met: done >= c.target,
       paceText: challengePaceText(pace, fmt, formatDayKey(`${c.year}-01-01`, prefs.dateFormat)),
       href: challengeHref(c.query, c.year),
-      books: counted,
+      books: counted.map(({ id, title, authors, coverUrl }) => ({ id, title, authors, coverUrl })),
     };
   });
-  const tags = [...new Set(books.flatMap((b) => b.tags))].sort((a, b) => a.localeCompare(b));
+  // Tags a library filter can hold (tagList drops "all" and very long ones).
+  const tags = [...new Set(books.flatMap((b) => b.tags))]
+    .filter((t) => t !== "all" && t.length <= 100)
+    .sort((a, b) => a.localeCompare(b));
 
   // Genres and formats: every book in the library, or (Preferences) the
   // books read in the period, each once however many times it was read.
@@ -394,7 +397,15 @@ export default async function StatsPage({
           goal={shownGoal}
           done={goalDone}
           pace={
-            shownGoal ? goalPace(goalDone, shownGoal.target, shownGoal.unit, clock) : null
+            shownGoal
+              ? goalPace(
+                  goalDone,
+                  shownGoal.target,
+                  shownGoal.unit,
+                  clock,
+                  clock.when === "current" && todayRead(shownGoal, todayKey, goalContext),
+                )
+              : null
           }
           clock={clock}
           nextYear={
