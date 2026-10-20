@@ -2,6 +2,7 @@ import type { Prisma } from "@prisma/client";
 import { ReadingStatus } from "@/lib/enums";
 import { prisma } from "@/lib/prisma";
 import { calendarDay } from "@/lib/dates";
+import { overdueCutoff } from "@/lib/loans";
 import {
   buildBookWhere,
   finishedYearRanges,
@@ -27,7 +28,11 @@ export async function resolveBookWhere(
     searchContext(userId, filters.q, prefs.searchAlsoIn),
     finishedNearNewYear(userId, filters.finished, prefs.timeZone),
   ]);
-  return buildBookWhere(userId, filters, { ...search, finishedEdgeIds });
+  return buildBookWhere(userId, filters, {
+    ...search,
+    finishedEdgeIds,
+    overdueBefore: overdueCutoff(new Date(), prefs.timeZone),
+  });
 }
 
 /**

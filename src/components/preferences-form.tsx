@@ -698,6 +698,30 @@ export function PreferencesForm({
         </p>
       </Section>
 
+      <Section title="Lending" id="lending">
+        <Choice
+          label="Lend books for"
+          hint="Fills in the date a lent book is due back."
+          value={prefs.loanPeriod}
+          options={[
+            { value: "none", label: "No set time" },
+            { value: "14", label: "2 weeks" },
+            { value: "30", label: "A month" },
+            { value: "60", label: "2 months" },
+            { value: "90", label: "3 months" },
+          ]}
+          onChange={(v) => update({ loanPeriod: v })}
+        />
+        <Toggle
+          label="Remind me when a lent book is overdue"
+          checked={prefs.overdueReminder}
+          onChange={(c) => update({ overdueReminder: c })}
+        />
+        <p className="text-xs text-muted-foreground">
+          The reminder shows on the Library and Now reading pages.
+        </p>
+      </Section>
+
       <Section title="Ratings">
         <Choice
           label="Rate books with"

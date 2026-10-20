@@ -45,7 +45,8 @@ export interface FilterValues {
   notTag: string;
   format: string;
   /** Ownership filter: "all" | "owned" | "wishlist" | "borrowed" |
-   *  "given_away" | "lent". Keeps the `owned` name so old links still work. */
+   *  "given_away" | "lent" | "overdue". Keeps the `owned` name so old links
+   *  still work. */
   owned: string;
   minRating: string;
   finished: string;
@@ -128,6 +129,7 @@ const OWNED_OPTIONS = [
   { value: "borrowed", label: "Borrowed" },
   { value: "given_away", label: "No longer have" },
   { value: "lent", label: "Lent out" },
+  { value: "overdue", label: "Overdue" },
   { value: "wishlist", label: "Wishlist" },
 ];
 

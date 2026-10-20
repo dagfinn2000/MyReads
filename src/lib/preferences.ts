@@ -272,6 +272,10 @@ export const QUOTE_ORDERS = ["newest", "oldest", "book", "shuffle"] as const;
 /** A reminder on the account page when the last backup is old. */
 export const BACKUP_REMINDERS = ["off", "monthly"] as const;
 
+/** How long a book is lent for, in days: fills in the lend form's due date.
+ *  "none" leaves it empty. */
+export const LOAN_PERIODS = ["none", "14", "30", "60", "90"] as const;
+
 /** "Find it at" links on a book's page: a name and an https:// address in
  *  which {isbn}, {title} and {author} are filled in. */
 export type FindLink = { name: string; url: string };
@@ -333,6 +337,7 @@ export type StatsPeriod = (typeof STATS_PERIODS)[number];
 export type StatsBreakdown = (typeof STATS_BREAKDOWNS)[number];
 export type QuoteOrder = (typeof QUOTE_ORDERS)[number];
 export type BackupReminder = (typeof BACKUP_REMINDERS)[number];
+export type LoanPeriod = (typeof LOAN_PERIODS)[number];
 
 // A type alias (not an interface) so it satisfies Prisma's Json input type,
 // same as LibraryView.
@@ -443,6 +448,10 @@ export type Preferences = {
   quotesOrder: QuoteOrder;
   quotesGroupByBook: boolean;
   backupReminder: BackupReminder;
+  // Lending
+  loanPeriod: LoanPeriod;
+  /** A note on the Library and Now reading when a lent book is overdue. */
+  overdueReminder: boolean;
 
   // The reading room (Decorate on the Room page; lib/room-styles.ts)
   roomStyle: RoomStyle;
@@ -562,6 +571,8 @@ export const DEFAULT_PREFERENCES: Preferences = {
   quotesOrder: "newest",
   quotesGroupByBook: false,
   backupReminder: "off",
+  loanPeriod: "none",
+  overdueReminder: true,
   roomStyle: "cottage",
   roomWalls: "style",
   roomWood: "style",
@@ -877,6 +888,8 @@ export function parsePreferences(raw: unknown): Preferences {
     quotesOrder: pick(QUOTE_ORDERS, obj.quotesOrder, d.quotesOrder),
     quotesGroupByBook: bool(obj.quotesGroupByBook, d.quotesGroupByBook),
     backupReminder: pick(BACKUP_REMINDERS, obj.backupReminder, d.backupReminder),
+    loanPeriod: pick(LOAN_PERIODS, obj.loanPeriod, d.loanPeriod),
+    overdueReminder: bool(obj.overdueReminder, d.overdueReminder),
     roomStyle: pick(ROOM_STYLES, obj.roomStyle, d.roomStyle),
     roomWalls: pick(ROOM_WALLS, obj.roomWalls, d.roomWalls),
     roomWood: pick(ROOM_WOODS, obj.roomWood, d.roomWood),

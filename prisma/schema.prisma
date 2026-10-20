@@ -278,6 +278,10 @@ model Loan {
   lentAt     DateTime  @default(now())
   /// Null while the book is still out.
   returnedAt DateTime?
+  /// When you'd like it back: a calendar day, saved as midnight UTC like
+  /// every date typed into a date field. Null = no date agreed. An open
+  /// loan past it is overdue (lib/loans.ts).
+  dueAt      DateTime?
   note       String?
 
   createdAt DateTime @default(now())

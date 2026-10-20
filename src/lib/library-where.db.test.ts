@@ -137,3 +137,30 @@ describe("tags, author, rating and missing details", () => {
     expect(await titles({ owned: "wishlist" })).toEqual(["Horror"]);
   });
 });
+
+describe("Overdue", () => {
+  it("lists lent books past their due day, by the reader's day", async () => {
+    const late = await add("Late");
+    const today = await add("Due today");
+    const undated = await add("No due date");
+    const returned = await add("Back already");
+    await add("Never lent");
+    const now = Date.now();
+    const day = (offset: number) =>
+      new Date(new Date(now + offset * 86_400_000).toISOString().slice(0, 10));
+    await prisma.loan.createMany({
+      data: [
+        { bookId: late.id, borrower: "Kari", dueAt: day(-3) },
+        { bookId: today.id, borrower: "Ola", dueAt: day(0) },
+        { bookId: undated.id, borrower: "Per" },
+        { bookId: returned.id, borrower: "Liv", dueAt: day(-9), returnedAt: day(-1) },
+      ],
+    });
+    // Another reader's overdue loan never shows.
+    const theirs = await add("Theirs", {}, otherUserId);
+    await prisma.loan.create({ data: { bookId: theirs.id, borrower: "Kari", dueAt: day(-3) } });
+
+    expect(await titles({ owned: "overdue" })).toEqual(["Late"]);
+    expect(await titles({ owned: "lent" })).toEqual(["Due today", "Late", "No due date"]);
+  });
+});
