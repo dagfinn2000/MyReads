@@ -722,10 +722,17 @@ function parseTagRenames(value: unknown): TagRename[] {
 
 function parseTagSkips(value: unknown): string[] {
   if (!Array.isArray(value)) return [];
+  // A Set for the "seen" check, not out.includes: a hostile or broken
+  // backup can carry tens of thousands of skips, and the linear scan made
+  // this O(n^2) — enough to freeze the event loop for seconds.
+  const seen = new Set<string>();
   const out: string[] = [];
   for (const v of value) {
     const tag = normalizeRuleTag(v);
-    if (tag && !out.includes(tag)) out.push(tag);
+    if (tag && !seen.has(tag)) {
+      seen.add(tag);
+      out.push(tag);
+    }
   }
   return out.slice(-MAX_TAG_RULES);
 }

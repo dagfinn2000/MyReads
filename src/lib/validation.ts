@@ -278,7 +278,14 @@ export const quoteSchema = z.object({
 export const kindleQuotesSchema = z
   .array(
     z.object({
-      text: quoteSchema.shape.text,
+      // A single highlight over 5,000 characters (a long passage from a
+      // sideloaded PDF, say) is truncated rather than rejected, so it never
+      // fails the whole book's import.
+      text: z
+        .string()
+        .trim()
+        .min(1)
+        .transform((s) => (s.length > 5000 ? s.slice(0, 5000) : s)),
       page: z.number().int().min(1).max(100000).nullable().catch(null),
       note: z.string().trim().max(2000).nullable().catch(null).transform((s) => s || null),
       /** When it was highlighted; anything unreadable dates from the import. */

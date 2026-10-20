@@ -120,13 +120,22 @@ export interface ReadingTimerControl {
   consumed: () => void;
 }
 
-export function useReadingTimer(bookId: string): ReadingTimerControl {
+export function useReadingTimer(bookId: string, readStartedAt?: number | null): ReadingTimerControl {
   const raw = useSyncExternalStore(
     subscribe,
     () => readRaw(bookId),
     () => null,
   );
-  const timer = parseTimer(raw);
+  const parsed = parseTimer(raw);
+  // A running timer whose clock predates this reading pass was left behind by
+  // an earlier read of the book (finished elsewhere, then "Read again"). It
+  // isn't this session's time, so ignore it and clear it, rather than letting
+  // the next log silently bank up to a day of reading that never happened.
+  const stale = parsed?.runningSince != null && readStartedAt != null && parsed.runningSince < readStartedAt;
+  const timer = stale ? null : parsed;
+  useEffect(() => {
+    if (stale) writeTimer(bookId, null);
+  }, [stale, bookId]);
   const [typed, setTyped] = useState<string | null>(null);
   const now = useNow(timer?.runningSince != null);
   // A stopped timer shows its minutes in the box until they're logged, also
@@ -155,7 +164,15 @@ export function useReadingTimer(bookId: string): ReadingTimerControl {
       writeTimer(bookId, null);
     },
     minutesForLog: () => {
-      if (timer && !timer.stopped) return { minutes: timerMinutes(elapsedMs(timer, Date.now())) };
+      if (timer && !timer.stopped) {
+        const ms = elapsedMs(timer, Date.now());
+        // A timer running for over a day is almost always one left going by
+        // mistake; don't silently cap it at a day and bank it.
+        if (ms > MAX_ENTRY_MINUTES * 60_000) {
+          return { error: "The timer's been running over a day. Stop it and check the time first." };
+        }
+        return { minutes: timerMinutes(ms) };
+      }
       if (box === null || box.trim() === "") return {};
       const minutes = parseDuration(box);
       if (minutes === null) return { error: "Type the time read in minutes, like 25 or 1:10." };

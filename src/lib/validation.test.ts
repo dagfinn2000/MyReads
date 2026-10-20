@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { bookSchema, isAllowedCoverUrl, pastReadSchema, readingSchema } from "@/lib/validation";
+import {
+  bookSchema,
+  isAllowedCoverUrl,
+  kindleQuotesSchema,
+  pastReadSchema,
+  readingSchema,
+} from "@/lib/validation";
 
 const minimalForm = {
   title: "T",
@@ -139,6 +145,30 @@ describe("pastReadSchema note", () => {
       dateFinished: "2020-01-01",
       note: "Second time round",
     });
+    expect(res.success).toBe(false);
+  });
+});
+
+describe("kindleQuotesSchema", () => {
+  const one = (text: string) => ({ text, page: null, note: null, addedAt: null });
+
+  it("truncates a highlight over 5000 characters instead of rejecting the batch", () => {
+    const res = kindleQuotesSchema.safeParse([one("a".repeat(6000)), one("short one")]);
+    expect(res.success).toBe(true);
+    if (res.success) {
+      expect(res.data[0].text).toHaveLength(5000);
+      expect(res.data[1].text).toBe("short one");
+    }
+  });
+
+  it("keeps a normal highlight as-is", () => {
+    const res = kindleQuotesSchema.safeParse([one("  Fear is the mind-killer.  ")]);
+    expect(res.success).toBe(true);
+    if (res.success) expect(res.data[0].text).toBe("Fear is the mind-killer.");
+  });
+
+  it("still rejects an empty highlight", () => {
+    const res = kindleQuotesSchema.safeParse([one("   ")]);
     expect(res.success).toBe(false);
   });
 });

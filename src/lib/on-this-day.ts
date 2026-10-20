@@ -94,11 +94,19 @@ export function yearsAgoToday(years: number): string {
  *  today in some zone: the query's first, rough cut. */
 export function nearbyMonthDays(todayKey: string): string[] {
   const today = keyToUtcDate(todayKey);
-  return [-1, 0, 1].map((shift) => {
+  const days = [-1, 0, 1].map((shift) => {
     const d = new Date(today);
     d.setUTCDate(d.getUTCDate() + shift);
     return d.toISOString().slice(5, 10);
   });
+  // A date stored at UTC 02-29 has no matching month-day in a non-leap
+  // year, so when today brushes the end of February this rough cut would
+  // drop it. Add 02-29 then; onThisDay() still keeps only what truly falls
+  // on today in the reader's zone.
+  if ((days.includes("02-28") || days.includes("03-01")) && !days.includes("02-29")) {
+    days.push("02-29");
+  }
+  return days;
 }
 
 /** After this many days without a log, a book being read says so. */

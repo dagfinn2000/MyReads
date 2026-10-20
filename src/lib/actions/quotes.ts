@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import type { Prisma } from "@prisma/client";
 import { quoteKey, type LibraryBookRef } from "@/lib/kindle-clippings";
 import { prisma } from "@/lib/prisma";
+import { idSchema } from "@/lib/reading-log-input";
 import { kindleQuotesSchema, quoteSchema } from "@/lib/validation";
 import { requireUserId } from "@/lib/actions/helpers";
 import type { ActionState } from "@/lib/actions/helpers";
@@ -134,8 +135,14 @@ export async function importKindleQuotes(
 ): Promise<KindleImportResult> {
   const userId = await requireUserId();
 
+  // Server-action arguments are decoded from the client, so the string type
+  // isn't enforced at runtime: validate before it reaches a Prisma `where`,
+  // or an object like { not: "" } slips through as a filter.
+  const id = idSchema.safeParse(bookId);
+  if (!id.success) return { error: "Book not found" };
+
   const book = await prisma.book.findFirst({
-    where: { id: bookId, userId },
+    where: { id: id.data, userId },
     select: { id: true, pageCount: true },
   });
   if (!book) return { error: "Book not found" };
@@ -143,7 +150,7 @@ export async function importKindleQuotes(
   const parsed = kindleQuotesSchema.safeParse(highlights);
   if (!parsed.success) return { error: "Those highlights couldn't be read" };
 
-  const existing = await prisma.quote.findMany({ where: { bookId }, select: { text: true } });
+  const existing = await prisma.quote.findMany({ where: { bookId: id.data }, select: { text: true } });
   const seen = new Set(existing.map((q) => quoteKey(q.text)));
   const now = Date.now();
   const rows: Prisma.QuoteCreateManyInput[] = [];
@@ -157,7 +164,7 @@ export async function importKindleQuotes(
     seen.add(key);
     const at = h.addedAt ? new Date(h.addedAt).getTime() : NaN;
     rows.push({
-      bookId,
+      bookId: id.data,
       text: h.text,
       page: h.page && !pastTheEnd(h.page, book.pageCount) ? h.page : null,
       note: h.note,
@@ -166,7 +173,7 @@ export async function importKindleQuotes(
   }
   if (rows.length > 0) await prisma.quote.createMany({ data: rows });
 
-  revalidatePath(`/books/${bookId}`);
+  revalidatePath(`/books/${id.data}`);
   revalidatePath("/quotes");
   return { added: rows.length, already };
 }
