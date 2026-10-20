@@ -280,9 +280,12 @@ tab goes away. You can also keep the house and leave the avatar out.
 
 ## Look and feel
 
-- 26 colour themes, or a light and a dark one that switch with your
-  device, with an accent colour of your own on top if you like. Your
-  choice follows you to every device you sign in on.
+- 30 colour themes, or a light and a dark one that switch with your
+  device, with an accent colour of your own on top if you like. Four of
+  them pair colours you rarely see together: Bordeaux (wine red and
+  sea-glass green), Riviera (ultramarine and peach), Rhubarb (pink and
+  green) and Majorelle (lemon yellow and cobalt). Your choice follows you
+  to every device you sign in on.
 - 26 background textures. Five of them move: rain falls on Rain, snow
   drifts on Snow, and stars twinkle on Starry night (on dark themes, a
   star now and then shoots across the sky). The light shifts on Aurora,

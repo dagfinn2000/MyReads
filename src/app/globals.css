@@ -388,6 +388,58 @@
     --ring: #7ee787;
 }
 
+/* Bordeaux, Riviera, Rhubarb and Majorelle pair a page with an accent
+   from across the colour wheel, where the other themes keep the accent
+   close to the page's own hue (or neutral). Each pairing is one that works
+   in rooms and on book jackets but is rare on a screen. */
+
+/* Wine-dark red with sea-glass green. No other dark is red at all. Danger
+   is coral, as a red would vanish into the page. */
+[data-theme="bordeaux"] {
+    --background: #2c0d14;
+    --foreground: #f8e6e7;
+    --card: #3c1620;
+    --card-foreground: #f8e6e7;
+    --popover: #3c1620;
+    --popover-foreground: #f8e6e7;
+    --primary: #6fd6c6;
+    --primary-foreground: #2c0d14;
+    --secondary: #4d1f2a;
+    --secondary-foreground: #f8e6e7;
+    --muted: #4d1f2a;
+    --muted-foreground: #d9adb3;
+    --accent: #4d1f2a;
+    --accent-foreground: #f8e6e7;
+    --destructive: #ffa385;
+    --border: #5c2834;
+    --input: #5c2834;
+    --ring: #6fd6c6;
+}
+
+/* Ultramarine with peach, like the sea below a sunlit villa. The blue-grey
+   darks (Catppuccin, Kanagawa, Rosé Pine) are nearly grey; this blue is
+   saturated, and warmed by the accent rather than cooled. */
+[data-theme="riviera"] {
+    --background: #0f1640;
+    --foreground: #e7eaff;
+    --card: #172055;
+    --card-foreground: #e7eaff;
+    --popover: #172055;
+    --popover-foreground: #e7eaff;
+    --primary: #ffb38a;
+    --primary-foreground: #0f1640;
+    --secondary: #212c6b;
+    --secondary-foreground: #e7eaff;
+    --muted: #212c6b;
+    --muted-foreground: #b0b8ea;
+    --accent: #212c6b;
+    --accent-foreground: #e7eaff;
+    --destructive: #ff7d93;
+    --border: #2a3678;
+    --input: #2a3678;
+    --ring: #ffb38a;
+}
+
 [data-theme="everforest-light"] {
     --background: #fdf6e3;
     --foreground: #5c6a72;
@@ -648,6 +700,53 @@
     --border: #f3d6c3;
     --input: #f3d6c3;
     --ring: #b8502d;
+}
+
+/* Dusty pink paper with green ink, like rhubarb stalks and leaves. The text
+   itself is green-black, not just the accent. */
+[data-theme="rhubarb"] {
+    --background: #f7e8e6;
+    --foreground: #1f3328;
+    --card: #fdf6f5;
+    --card-foreground: #1f3328;
+    --popover: #fdf6f5;
+    --popover-foreground: #1f3328;
+    --primary: #2d6a4a;
+    --primary-foreground: #ffffff;
+    --secondary: #efd8d5;
+    --secondary-foreground: #1f3328;
+    --muted: #efd8d5;
+    --muted-foreground: #6a4f51;
+    --accent: #efd8d5;
+    --accent-foreground: #1f3328;
+    --destructive: #b3261e;
+    --border: #e6cac6;
+    --input: #e6cac6;
+    --ring: #2d6a4a;
+}
+
+/* Lemon paper with cobalt, after the blue walls and yellow pots of the
+   Majorelle garden in Marrakech. A clear yellow, where the creams above
+   lean beige. */
+[data-theme="majorelle"] {
+    --background: #fbf5d2;
+    --foreground: #1b1f4a;
+    --card: #fffcec;
+    --card-foreground: #1b1f4a;
+    --popover: #fffcec;
+    --popover-foreground: #1b1f4a;
+    --primary: #3a3fc8;
+    --primary-foreground: #ffffff;
+    --secondary: #f3e9b5;
+    --secondary-foreground: #1b1f4a;
+    --muted: #f3e9b5;
+    --muted-foreground: #53577d;
+    --accent: #f3e9b5;
+    --accent-foreground: #1b1f4a;
+    --destructive: #b3261e;
+    --border: #e6d89a;
+    --input: #e6d89a;
+    --ring: #3a3fc8;
 }
 
 @layer base {

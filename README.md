@@ -53,7 +53,7 @@ server.
 
 **Make it yours**
 
-- 26 colour themes and 26 background textures. On some of the textures
+- 30 colour themes and 26 background textures. On some of the textures
   rain falls, snow drifts or stars twinkle.
 - Preferences for date formats, time zone, sorting, fonts and much more.
   Your settings follow you to every device.
