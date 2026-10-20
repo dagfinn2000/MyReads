@@ -20,6 +20,7 @@ import { parseFilters } from "@/lib/library-filters";
 import { resolveBookWhere } from "@/lib/library-where";
 import { naturalDir, parseLibraryView } from "@/lib/library-view";
 import { seriesKey } from "@/lib/series";
+import { seriesAnchor } from "@/lib/series-list";
 import { isOverdue } from "@/lib/loans";
 import { overdueReminder } from "@/lib/overdue-query";
 import { canonicalViewQuery } from "@/lib/saved-views";
@@ -278,7 +279,11 @@ export default async function BooksPage({
     }
     for (const g of sliced.groups) {
       const series = g.key === "series:none" ? undefined : bySeries.get(seriesKey(g.title));
-      if (series) Object.assign(g, seriesHeading(seriesProgress(series), g.total));
+      if (series) {
+        Object.assign(g, seriesHeading(seriesProgress(series), g.total), {
+          href: `/series#${seriesAnchor(g.title)}`,
+        });
+      }
     }
   }
 

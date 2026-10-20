@@ -51,6 +51,8 @@ export interface LibraryGroup {
   detail?: string;
   /** A warning after it: "#3 missing". */
   note?: string;
+  /** Where the title links: a series' card on the Series page. */
+  href?: string;
 }
 
 /** How many more cards each "Show more" asks the server for. */
@@ -444,7 +446,17 @@ export function LibraryView({
           {groups.map((g) => (
             <section key={g.key} className="grid gap-3">
               <h2 className="flex flex-wrap items-baseline gap-x-2 border-b pb-1 font-heading text-lg font-medium">
-                <span className="min-w-0 break-words">{g.title}</span>
+                {g.href ? (
+                  <Link
+                    href={g.href}
+                    className="min-w-0 break-words hover:underline"
+                    title={`${g.title} on the Series page`}
+                  >
+                    {g.title}
+                  </Link>
+                ) : (
+                  <span className="min-w-0 break-words">{g.title}</span>
+                )}
                 <span className="text-sm font-normal text-muted-foreground tabular-nums">
                   {/* The group's real size, even when only part of it is
                       rendered — the heading describes the shelf, not the

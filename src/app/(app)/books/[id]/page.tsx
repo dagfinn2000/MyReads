@@ -4,6 +4,7 @@ import { notFound, redirect } from "next/navigation";
 import { BookFormat, ReadingStatus } from "@/lib/enums";
 import { Library, Pencil, Repeat } from "lucide-react";
 import { prisma } from "@/lib/prisma";
+import { seriesAnchor } from "@/lib/series-list";
 import { getPreferences, getSession } from "@/lib/current-user";
 import { arrangeBookCards, FORCED_CARD_NOTES } from "@/lib/book-page";
 import { orderByIds } from "@/lib/library-order";
@@ -279,10 +280,18 @@ export default async function BookDetailPage({
 
           {seriesBooks.length > 0 && seriesHref && (
             <section className="grid gap-2">
-              <h2 className="text-sm font-medium text-muted-foreground">
-                More in{" "}
-                <Link href={seriesHref} className="italic hover:underline">
-                  {book.seriesName}
+              <h2 className="flex flex-wrap items-baseline gap-x-2 text-sm font-medium text-muted-foreground">
+                <span>
+                  More in{" "}
+                  <Link href={seriesHref} className="italic hover:underline">
+                    {book.seriesName}
+                  </Link>
+                </span>
+                <Link
+                  href={`/series#${seriesAnchor(book.seriesName!)}`}
+                  className="text-xs font-normal underline-offset-2 hover:text-foreground hover:underline"
+                >
+                  What&apos;s next in the series
                 </Link>
               </h2>
               {/* One row that scrolls, so a long series doesn't push the rest down. */}

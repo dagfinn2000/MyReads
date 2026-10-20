@@ -102,6 +102,11 @@ page by page.
   Now reading pages reminds you who has it.
 - Search, filter, sort and group the library. Authors sort by surname, the
   way a bookshelf is filed.
+- **The Series page** shows every series you have, the series you're in
+  the middle of first: how much of each you've read, which book is next,
+  and an empty place for each number you have no book for. Open it from a
+  series heading in the library, or from "What's next in the series" on a
+  book's page.
 - "Pick for me" opens a random book from the ones on screen, keeping to
   your filters. On the All tab it picks from Want to Read first. In
   Preferences you can have it pick only books you have, or only the next
