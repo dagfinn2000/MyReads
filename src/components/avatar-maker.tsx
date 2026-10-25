@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { Dices, Plus, RotateCcw, X } from "lucide-react";
-import { FIGURE_ORIGIN, SEAT_OFFSET, avatarPose, seatedTop, type AvatarPose } from "@/components/avatar-art";
+import { AVATAR_W, FIGURE_ORIGIN, avatarBack, avatarPose, seatedTop, type AvatarPose } from "@/components/avatar-art";
 import { PET_ART } from "@/components/pet-art";
 import { Rects, Sprite } from "@/components/room-art";
 import { CHAIRS } from "@/components/room-fireside";
@@ -14,6 +14,7 @@ import {
   ACCENT_SWATCHES,
   AVATAR_ACCENTS,
   AVATAR_ACCESSORIES,
+  AVATAR_BODIES,
   AVATAR_BOTTOMS,
   AVATAR_CHEEKS,
   AVATAR_CLOTH_COLOURS,
@@ -316,6 +317,16 @@ export function AvatarMaker({
                 {(height) => <Figure look={{ ...bare, mobility: look.mobility, height }} />}
               </Tiles>
               <Tiles
+                label="Body shape"
+                tall
+                options={AVATAR_BODIES}
+                labels={AVATAR_LABELS}
+                chosen={(body) => look.body === body}
+                onPick={(body) => set({ body })}
+              >
+                {(body) => <Figure look={{ ...bare, mobility: look.mobility, body }} />}
+              </Tiles>
+              <Tiles
                 label="Getting about"
                 tall
                 hint="Everyone sits in the armchair to read."
@@ -502,7 +513,7 @@ function Stage({
       <AvatarPortrait avatar={avatar} pose="stand" scale={s} walking />
       <div className="relative" style={{ width: armchair.w * s, height: (armchair.h - seatedTop(avatar.art.sit)) * s }}>
         <Sprite art={armchair} scale={s} className="room-abs" style={{ left: 0, bottom: 0 }} />
-        <div className="room-abs" style={{ left: SEAT_OFFSET.x * s, top: 0 }}>
+        <div className="room-abs" style={{ left: avatar.seat.left * s, top: 0 }}>
           <AvatarPortrait avatar={avatar} pose="sit" scale={s} />
         </div>
       </div>
@@ -517,17 +528,20 @@ const PARTS = {
   face: { pose: "sit", x: [1, 12], y: [1, 13], scale: 4 },
   bust: { pose: "sit", x: [-1, 14], y: [-7, 16], scale: 2 },
   scarf: { pose: "sit", x: [-1, 14], y: [-3, 14], scale: 3 },
-  hand: { pose: "stand", x: [7, 14], y: [16, 28], scale: 4 },
+  hand: { pose: "stand", x: [7, 14], y: [16, 28], scale: 4, wide: true },
   hair: { pose: "sit", x: [-1, 14], y: [-4, 13], scale: 3 },
   hat: { pose: "stand", x: [-1, 14], y: [-9, 8], scale: 3 },
   tallHat: { pose: "stand", x: [-1, 14], y: [-14, 11], scale: 2 },
   neck: { pose: "sit", x: [-1, 14], y: [4, 19], scale: 3 },
-  top: { pose: "stand", x: [-1, 14], y: [11, 28], scale: 3 },
-  bottom: { pose: "stand", x: [-1, 14], y: [22, 38], scale: 3 },
-  feet: { pose: "stand", x: [1, 12], y: [31, 38], scale: 4 },
-  back: { pose: "stand", x: [-1, 14], y: [6, 33], scale: 2 },
-  wings: { pose: "stand", x: [-1, 14], y: [3, 29], scale: 2 },
-} satisfies Record<string, { pose: AvatarPose; x: [number, number]; y: [number, number]; scale: number }>;
+  top: { pose: "stand", x: [-1, 14], y: [11, 28], scale: 3, wide: true },
+  bottom: { pose: "stand", x: [-1, 14], y: [22, 38], scale: 3, wide: true },
+  feet: { pose: "stand", x: [1, 12], y: [31, 38], scale: 4, wide: true },
+  back: { pose: "stand", x: [-1, 14], y: [6, 33], scale: 2, wide: true },
+  wings: { pose: "stand", x: [-1, 14], y: [3, 29], scale: 2, wide: true },
+} satisfies Record<
+  string,
+  { pose: AvatarPose; x: [number, number]; y: [number, number]; scale: number; wide?: boolean }
+>;
 
 /** Hats too tall for a close up. */
 const TALL_HATS: readonly AvatarHat[] = ["tophat", "wizard", "witch", "bunnyears", "chef", "headwrap", "turban"];
@@ -559,12 +573,14 @@ function Figure({ look }: { look: AvatarLook }) {
   const a = useMemo(() => avatarPose(look, "stand"), [look]);
   const top = Math.min(...a.rects.map((r) => r[1])) - 1;
   const h = a.h - top;
+  // Without the room a fuller figure has behind it.
+  const back = avatarBack(a);
   const s = 2;
   return (
     <svg
-      width={a.w * s}
+      width={(a.w - back) * s}
       height={h * s}
-      viewBox={`0 ${top} ${a.w} ${h}`}
+      viewBox={`${back} ${top} ${a.w - back} ${h}`}
       shapeRendering="crispEdges"
       className="room-avatar"
       style={avatarColours(look) as React.CSSProperties}
@@ -578,15 +594,18 @@ function Figure({ look }: { look: AvatarLook }) {
 
 /** Part of a look, as the picture on an option. */
 function Part({ look, part }: { look: AvatarLook; part: keyof typeof PARTS }) {
-  const { pose, x, y, scale: s } = PARTS[part];
+  const { pose, x, y, scale: s, ...more } = PARTS[part];
   const a = useMemo(() => avatarPose(look, pose), [look, pose]);
-  const w = x[1] - x[0] + 1;
+  // A fuller figure is drawn further in (avatarBack), and its body
+  // reaches further out in front.
+  const back = avatarBack(a);
+  const w = x[1] - x[0] + 1 + ("wide" in more ? a.w - AVATAR_W - back : 0);
   const h = y[1] - y[0] + 1;
   return (
     <svg
       width={w * s}
       height={h * s}
-      viewBox={`${x[0] + FIGURE_ORIGIN.x} ${y[0] + FIGURE_ORIGIN.y} ${w} ${h}`}
+      viewBox={`${x[0] + FIGURE_ORIGIN.x + back} ${y[0] + FIGURE_ORIGIN.y} ${w} ${h}`}
       shapeRendering="crispEdges"
       className="room-avatar"
       style={{ ...avatarColours(look), "--spine": "#7a3b4a" } as React.CSSProperties}

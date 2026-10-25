@@ -24,6 +24,7 @@ describe("parseAvatar", () => {
         accessories: ["cape", "cravat", "glasses"],
         top: "robe",
         topColour: "plum",
+        body: "round",
       }),
     ).toEqual({
       ...DEFAULT_AVATAR,
@@ -35,7 +36,14 @@ describe("parseAvatar", () => {
       accessories: ["glasses", "cape"],
       top: "robe",
       topColour: "plum",
+      body: "round",
     });
+  });
+
+  it("gives looks saved before there were builds the average one", () => {
+    expect(parseAvatar({ hair: "afro" }).body).toBe("average");
+    expect(parseAvatar({ hair: "afro", body: "willowy" }).body).toBe("average");
+    expect(parseAvatar({ body: "slim" }).body).toBe("slim");
   });
 
   it("brings the first avatars into the wardrobe", () => {

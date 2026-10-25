@@ -34,6 +34,11 @@ export type AvatarEars = (typeof AVATAR_EARS)[number];
 export const AVATAR_HEIGHTS = ["short", "medium", "tall"] as const;
 export type AvatarHeight = (typeof AVATAR_HEIGHTS)[number];
 
+/** The build of the body below the neck; "average" is how avatars were
+ *  drawn before there was a choice. */
+export const AVATAR_BODIES = ["slim", "average", "broad", "round"] as const;
+export type AvatarBody = (typeof AVATAR_BODIES)[number];
+
 /** How they get about the house: on foot, with a walking stick, or in a
  *  wheelchair. In the armchair, reading, everyone sits the same. */
 export const AVATAR_MOBILITY = ["walk", "stick", "wheelchair"] as const;
@@ -212,6 +217,7 @@ export type AvatarAccent = (typeof AVATAR_ACCENTS)[number];
 export interface AvatarLook {
   skin: AvatarSkin;
   height: AvatarHeight;
+  body: AvatarBody;
   mobility: AvatarMobility;
   eyes: AvatarEyes;
   eyeColour: AvatarEyeColour;
@@ -235,6 +241,7 @@ export interface AvatarLook {
 export const DEFAULT_AVATAR: AvatarLook = {
   skin: "light",
   height: "medium",
+  body: "average",
   mobility: "walk",
   eyes: "round",
   eyeColour: "dark",
@@ -280,6 +287,7 @@ export function parseAvatar(value: unknown): AvatarLook {
   return {
     skin: pick(AVATAR_SKINS, o.skin, d.skin),
     height: pick(AVATAR_HEIGHTS, o.height, d.height),
+    body: pick(AVATAR_BODIES, o.body, d.body),
     mobility: pick(AVATAR_MOBILITY, o.mobility, d.mobility),
     eyes: pick(AVATAR_EYES, o.eyes, d.eyes),
     eyeColour: pick(AVATAR_EYE_COLOURS, o.eyeColour, d.eyeColour),
@@ -350,6 +358,7 @@ export function randomLook(random: () => number = Math.random, mobility: AvatarM
     accessories: some(AVATAR_ACCESSORIES, 0.14, 3),
     held: random() < 0.6 ? "nothing" : any(AVATAR_HELD.slice(1)),
     accent: any(AVATAR_ACCENTS),
+    body: random() < 0.4 ? "average" : any(AVATAR_BODIES),
   };
 }
 
@@ -440,9 +449,13 @@ export const AVATAR_LABELS: Record<string, string> = {
   deep: "Deep brown",
   mint: "Elf green",
   lilac: "Lilac",
-  // Height, getting about, ears ("short" is the hairstyle's too)
+  // Height, build, getting about, ears ("short" is the hairstyle's too,
+  // "round" the eyes')
   medium: "Medium",
   tall: "Tall",
+  slim: "Slim",
+  average: "Average",
+  broad: "Broad",
   walk: "On foot",
   stick: "Walking stick",
   wheelchair: "Wheelchair",
