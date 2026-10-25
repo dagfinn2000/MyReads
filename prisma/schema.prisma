@@ -7,14 +7,12 @@
 
 generator client {
   provider = "prisma-client-js"
-  // "native" covers local dev (Windows/macOS/Linux glibc); the musl target is
-  // what the Alpine-based Docker image needs at runtime.
-  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
+// The connection comes from DATABASE_URL: prisma.config.ts gives it to the
+// command-line tool, and src/lib/prisma.ts to the app.
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 enum ReadingStatus {

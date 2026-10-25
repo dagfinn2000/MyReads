@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import { BookOwnership, ReadingStatus } from "@/lib/enums";
 
 /**
@@ -9,8 +9,6 @@ import { BookOwnership, ReadingStatus } from "@/lib/enums";
  * preferences, the whole series from the library, and nothing from another
  * account.
  */
-
-const prisma = new PrismaClient();
 
 let currentUserId: string | null = null;
 vi.mock("@/auth", () => ({

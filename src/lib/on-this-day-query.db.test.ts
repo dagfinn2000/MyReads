@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import { onThisDay } from "@/lib/on-this-day";
 import { onThisDayCandidates } from "@/lib/on-this-day-query";
 
@@ -8,7 +8,6 @@ import { onThisDayCandidates } from "@/lib/on-this-day-query";
  * let through everything that falls on today in the reader's zone, and
  * leave out other readers' books and books not started.
  */
-const prisma = new PrismaClient();
 const OSLO = "Europe/Oslo";
 const TODAY = "2026-10-19";
 

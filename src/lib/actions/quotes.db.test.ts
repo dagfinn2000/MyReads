@@ -1,11 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 
 /**
  * The quote actions, now that the quotes page edits and deletes too: each
  * one only ever touches the signed-in reader's own quotes.
  */
-const prisma = new PrismaClient();
 
 let currentUserId: string | null = null;
 vi.mock("@/auth", () => ({

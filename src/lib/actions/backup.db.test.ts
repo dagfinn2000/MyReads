@@ -1,9 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 
 /** The two backup actions: reading the last download date (polled after a
  *  download) and snoozing the reminder. */
-const prisma = new PrismaClient();
 
 let currentUserId: string | null = null;
 vi.mock("@/auth", () => ({

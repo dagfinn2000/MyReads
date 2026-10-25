@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import { ReadingStatus } from "@/lib/enums";
 import type { CustomStatus } from "@/lib/statuses";
 
@@ -11,8 +11,6 @@ import type { CustomStatus } from "@/lib/statuses";
  * the status itself goes away. A stale key would be ignored on screen, but
  * would come back to life if the reader later moved the book back.
  */
-
-const prisma = new PrismaClient();
 
 let currentUserId: string | null = null;
 vi.mock("@/auth", () => ({

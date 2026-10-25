@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 
 /**
  * The settings actions against a real database. Each one merges a few keys
@@ -7,8 +7,6 @@ import { PrismaClient } from "@prisma/client";
  * save leaves the other keys alone, that only real settings get written,
  * and that saved views stay with their owner.
  */
-
-const prisma = new PrismaClient();
 
 let currentUserId: string | null = null;
 vi.mock("@/auth", () => ({

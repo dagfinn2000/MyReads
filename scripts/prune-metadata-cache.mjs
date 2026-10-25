@@ -11,9 +11,10 @@
  * `npm run db:prune`. Safe to run at any time: a stale row is only ever a
  * cached third-party lookup, re-fetched on next use.
  */
+import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@prisma/client";
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }) });
 
 try {
   const { count } = await prisma.metadataCache.deleteMany({

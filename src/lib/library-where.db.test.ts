@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { PrismaClient, type Prisma } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import { BookOwnership, ReadingStatus } from "@/lib/enums";
 import { parseFilters } from "@/lib/library-filters";
 import { resolveBookWhere } from "@/lib/library-where";
@@ -10,7 +11,6 @@ import type { Preferences } from "@/lib/preferences";
  * a year's finishes across time zones and archived reads, and every lookup
  * kept to the reader's own books.
  */
-const prisma = new PrismaClient();
 
 let userId: string;
 let otherUserId: string;

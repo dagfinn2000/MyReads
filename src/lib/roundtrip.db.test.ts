@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import JSZip from "jszip";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import { BookOwnership, ReadingStatus } from "@/lib/enums";
 
 /**
@@ -13,7 +13,6 @@ import { BookOwnership, ReadingStatus } from "@/lib/enums";
  * shape change on one side, would go unnoticed until someone actually needed
  * their backup.
  */
-const prisma = new PrismaClient();
 
 let sourceUserId: string;
 let targetUserId: string;

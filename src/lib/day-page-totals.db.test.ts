@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import { dailyPageTotals } from "@/lib/progress";
 import { serverTimeZone } from "@/lib/preferences";
 import { bookDayPageTotalsForUser, dayPageTotals } from "@/lib/stats-query";
@@ -14,7 +14,6 @@ import { bookDayPageTotalsForUser, dayPageTotals } from "@/lib/stats-query";
  * Deliberately includes times that fall on different calendar days in UTC
  * than in a non-UTC local zone, which is where a naive rewrite goes wrong.
  */
-const prisma = new PrismaClient();
 const USER = "tz-diff-user";
 
 /** Local wall-clock time -> Date, so the fixtures mean what they read as. */

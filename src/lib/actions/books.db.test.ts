@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import { ReadingStatus } from "@/lib/enums";
 
 /**
@@ -15,8 +15,6 @@ import { ReadingStatus } from "@/lib/enums";
  * closing entry written where none should be, quietly shifts pages between
  * days and years without anything looking broken.
  */
-
-const prisma = new PrismaClient();
 
 let currentUserId: string | null = null;
 vi.mock("@/auth", () => ({

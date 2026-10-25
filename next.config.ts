@@ -4,6 +4,9 @@ const nextConfig: NextConfig = {
   // Standalone output produces a self-contained server bundle that the
   // Dockerfile copies into a minimal runtime image (no full node_modules).
   output: "standalone",
+  // Shipped as a package in that bundle rather than folded into the
+  // server's code, so the housekeeping scripts in scripts/ can import it.
+  serverExternalPackages: ["@prisma/adapter-pg"],
   // No "X-Powered-By: Next.js" on every response.
   poweredByHeader: false,
   async headers() {

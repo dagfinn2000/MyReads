@@ -19,13 +19,14 @@
  */
 import fs from "node:fs/promises";
 import path from "node:path";
+import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@prisma/client";
 
 const GRACE_MS = 24 * 60 * 60 * 1000; // 24h
 const apply = process.argv.includes("--yes");
 const dir = process.env.COVERS_DIR || path.join(process.cwd(), "data", "covers");
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }) });
 
 try {
   let files;

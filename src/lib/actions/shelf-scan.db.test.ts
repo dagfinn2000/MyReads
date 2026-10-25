@@ -2,7 +2,8 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import { PrismaClient, type Prisma } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import { BookFormat, BookOwnership, ReadingStatus } from "@/lib/enums";
 import type { BookDetails, BookMetadata } from "@/lib/metadata/types";
 
@@ -12,8 +13,6 @@ import type { BookDetails, BookMetadata } from "@/lib/metadata/types";
  * the reader's New books settings and tag rules), what is reported instead
  * of added, and that the lookup budget is respected.
  */
-
-const prisma = new PrismaClient();
 
 let currentUserId: string | null = null;
 vi.mock("@/auth", () => ({

@@ -15,6 +15,13 @@ import { defineConfig } from "vitest/config";
  * Postgres to hand. Kept out of the default `npm test` so that stays fast and
  * dependency-free.
  */
+// DATABASE_URL from .env when it isn't set already, as Prisma 6 read it.
+try {
+  process.loadEnvFile();
+} catch {
+  // No .env file.
+}
+
 export default defineConfig({
   test: {
     include: ["src/**/*.db.test.ts"],
