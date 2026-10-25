@@ -1257,8 +1257,16 @@ function MovingPart({ part, scale: s }: { part: Moving; scale: number }) {
       className={`room-abs room-${part.motion}`}
       style={{ left: part.x * s, top: part.y * s, animationDelay: part.delay ? `${part.delay}s` : undefined }}
     >
-      {part.motion === "burst" ? (
+      {part.motion === "burst" || part.motion === "sweep" ? (
         <Rects rects={first} />
+      ) : part.motion === "spin" ? (
+        // Each frame in turn: frame i is shown i quarters of the way through
+        // room-spin.
+        part.frames.map((frame, i) => (
+          <g key={i} className="room-spin-frame" style={{ animationDelay: `${(-((part.frames.length - i) % part.frames.length) * 0.35).toFixed(2)}s` }}>
+            <Rects rects={frame} />
+          </g>
+        ))
       ) : second ? (
         <>
           <Rects className="room-frame-a" rects={first} />

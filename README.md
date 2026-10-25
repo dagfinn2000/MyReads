@@ -46,7 +46,7 @@ server.
 
 - Your library drawn as a pixel-art house, with every book a spine on a
   shelf. The house grows as your library does.
-- Decorate it: ten house styles, colours, furniture, more rooms, a garden
+- Decorate it: thirteen house styles, colours, furniture, more rooms, a garden
   and the seasons.
 - Make a little you who lives there and sits down to read the book you're
   reading. Or turn the room off.

@@ -572,6 +572,126 @@ function riveted(): Parts {
   return d;
 }
 
+/** A door painted red under a fanlight, in a round-arched surround of
+ *  whitewashed stone: the lighthouse's. */
+function keeper(): Parts {
+  const spring = 13;
+  const d = canvases("round", 2, P - 2, spring);
+  const { frame, shut, open } = d;
+  const [x0, x1] = d.opening;
+  stoneSurround(frame, "round", x0, x1, spring, 2, ["outer-hi", "outer", "outer-lo", "outer-lo"]);
+  // The fanlight: glass filling the arch, its white bars fanning out from
+  // the middle of the transom.
+  const cx = (x0 + x1) / 2;
+  for (let y = 0; y <= spring; y++) {
+    for (let x = x0; x < x1; x++) {
+      if (!inside("round", x0, x1, spring, x, y)) continue;
+      const dx = x + 0.5 - cx;
+      const up = spring + 0.5 - y;
+      const bar = y === spring || Math.abs(dx) < 0.6 || Math.abs(Math.abs(dx) - up) < 0.6;
+      frame.dot(x, y, bar ? "outer" : dx < 0 && up > 2 ? "glass-hi" : "glass");
+    }
+  }
+  const top = spring + 1;
+  boards(shut, "flat", x0, x1, top, 3, ["red-hi", "red", "red-lo"]);
+  shut.fill(x0, top, x1 - x0, 1, "red-lo");
+  for (const y of [22, 44]) {
+    shut.fill(x0, y, x1 - x0, 1, "red-lo");
+    shut.fill(x0, y + 1, x1 - x0, 1, "red-hi");
+  }
+  knob(shut, x1 - 3, 32, ["brass-hi", "brass", "brass-lo"]);
+
+  swung(open, x0, top, 3, ["red-hi", "red", "red-lo"], "brass");
+  return d;
+}
+
+/** A stable door in two halves, painted like the boards outside, the top
+ *  one glazed and the bottom one braced, in a white frame: the
+ *  windmill's. */
+function stable(): Parts {
+  const top = 5;
+  const d = canvases("flat", 2, P - 2, top);
+  const { frame, shut, open } = d;
+  const [x0, x1] = d.opening;
+  frame.fill(-2, 0, P + 4, 2, "trim");
+  frame.fill(-2, 2, P + 4, 1, "outer-lo");
+  frame.fill(-1, 3, P + 2, top - 3, "trim");
+  frame.fill(-1, top, x0 + 1, DOOR_H - top, "trim");
+  frame.fill(x1, top, P + 1 - x1, DOOR_H - top, "trim");
+  frame.fill(x1, top, 1, DOOR_H - top, "outer-lo");
+
+  const split = 29;
+  boards(shut, "flat", x0, x1, top, 3, ["outer-hi", "outer", "outer-lo"]);
+  shut.fill(x0, top, x1 - x0, 1, "outer-lo");
+  // The top half's window: four panes in white bars.
+  shut.fill(x0 + 1, top + 4, x1 - x0 - 2, 14, "trim");
+  for (const [px, py] of [[x0 + 2, top + 5], [x0 + 6, top + 5], [x0 + 2, top + 11], [x0 + 6, top + 11]]) {
+    shut.fill(px, py, 3, 5, "glass");
+    shut.dot(px, py, "glass-hi");
+  }
+  // The ledge where the halves meet, and the bottom half's brace.
+  shut.fill(x0, split, x1 - x0, 1, "outer-lo");
+  shut.fill(x0 - 1, split + 1, x1 - x0 + 2, 2, "trim");
+  for (const y of [split + 6, DOOR_H - 5]) {
+    shut.fill(x0, y, x1 - x0, 2, "outer-lo");
+    shut.fill(x0, y, x1 - x0, 1, "outer-hi");
+  }
+  for (let y = split + 8; y < DOOR_H - 5; y++) {
+    const x = Math.round(x0 + ((DOOR_H - 6 - y) / (DOOR_H - split - 14)) * (x1 - x0 - 2));
+    shut.fill(Math.max(x0, Math.min(x1 - 2, x)), y, 2, 1, "outer-lo");
+  }
+  knob(shut, x1 - 3, split + 3, ["brass-hi", "brass", "brass-lo"]);
+
+  swung(open, x0, top, 3, ["outer-hi", "outer", "outer-lo"], "brass");
+  return d;
+}
+
+/** A carved door of thick boards, studded with iron, under a log lintel
+ *  in a doorway of soft plaster; open, a striped blanket hangs in it:
+ *  the adobe's. */
+function carved(): Parts {
+  const top = 6;
+  const d = canvases("flat", 2, P - 2, top);
+  const { frame, shut, open } = d;
+  const [x0, x1] = d.opening;
+  // The plaster either side, rounded into the doorway.
+  for (const [x, lit] of [[-1, true], [x1, false]] as const) {
+    frame.fill(x, top, x0 + 1, DOOR_H - top, "outer");
+    frame.fill(lit ? x0 - 1 : x1, top, 1, DOOR_H - top, lit ? "outer-lo" : "outer-hi");
+    for (let y = top + 3; y < DOOR_H - 2; y += 5) if (noise(x, y, 71) < 0.5) frame.dot(x + (lit ? 1 : 0), y, "outer-hi");
+  }
+  // The lintel, a peeled log, its ends showing their rings.
+  frame.fill(-2, 1, P + 4, 5, "trunk");
+  frame.fill(-2, 1, P + 4, 1, "trunk-hi");
+  frame.fill(-2, 5, P + 4, 1, "trunk-lo");
+  for (let x = 0; x < P; x += 4) frame.dot(x + (x % 8 ? 1 : 0), 3, "trunk-lo");
+  for (const x of [-2, P + 1]) {
+    frame.fill(x, 2, 1, 3, "trunk-lo");
+  }
+  frame.fill(-1, 0, P + 2, 1, "outer");
+
+  boards(shut, "flat", x0, x1, top, 5, ["wood-hi", "wood", "wood-lo"]);
+  shut.fill(x0, top, x1 - x0, 1, "wood-deep");
+  // Two carved panels, and studs in rows.
+  for (const [py, ph] of [[top + 4, 18], [top + 27, 18]]) {
+    shut.fill(x0 + 2, py, x1 - x0 - 4, ph, "wood-lo");
+    shut.fill(x0 + 3, py + 1, x1 - x0 - 6, ph - 2, "wood");
+    shut.fill(x0 + 3, py + ph - 2, x1 - x0 - 6, 1, "wood-hi");
+    shut.fill((x0 + x1) / 2 - 1, py + 4, 2, ph - 8, "wood-lo");
+  }
+  for (const y of [top + 2, top + 24, DOOR_H - 3]) for (let x = x0 + 1; x < x1 - 1; x += 3) shut.dot(x, y, "metal-lo");
+  shut.fill(x1 - 3, 30, 1, 3, "metal-lo");
+  shut.dot(x1 - 4, 31, "metal-lo");
+
+  // Open: the blanket, in stripes of the rug's colours, with a fringe.
+  const stripes: Paint[] = ["rug", "rug", "rug-2", "rug-3", "rug-3", "rug-fringe", "rug", "rug", "rug", "rug-2", "rug-2"];
+  for (let y = top; y < DOOR_H - 9; y++) open.fill(x0, y, x1 - x0, 1, stripes[(y - top) % stripes.length]);
+  for (let x = x0; x < x1; x += 2) open.fill(x, DOOR_H - 9, 1, 3, "rug-fringe");
+  open.fill(x0, top, x1 - x0, 1, "trunk-lo");
+  open.fill(x1 - 1, top + 1, 1, DOOR_H - top - 10, "rug-3");
+  return d;
+}
+
 const DOORS: Record<RoomStyle, () => Parts> = {
   cottage: panelled,
   medieval: () => arched("medieval"),
@@ -583,6 +703,9 @@ const DOORS: Record<RoomStyle, () => Parts> = {
   cabin: ledged,
   japanese: shoji,
   steampunk: riveted,
+  lighthouse: keeper,
+  windmill: stable,
+  adobe: carved,
 };
 
 /** The door in a style, in a box from (-DOOR_REACH, 0) to (PARTITION +

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { HouseGeometry, Rect } from "@/components/room-art";
 import {
   CHIMNEY_FOOT,
+  SAIL_FRAMES,
   ceilingSample,
   chimneyFoot,
   chimneyRise,
@@ -265,5 +266,36 @@ describe("shellArt", () => {
     // Earth all the way down the sides.
     const left = shell.over.filter(([x, , w, , p]) => p === "soil" && x === 0 && w > 0);
     expect(Math.max(...left.map(([, y, , h]) => y + h))).toBe(sceneH(g));
+  });
+
+  it("turns the windmill's sails over its roof, clear of the walls", () => {
+    for (const [w, floors, yard] of SIZES) {
+      const g = house("windmill", w, floors, yard);
+      const sails = shellArt(g, "windmill").moving.filter((m) => m.motion === "spin");
+      expect(sails).toHaveLength(1);
+      const [s] = sails;
+      expect(s.frames).toHaveLength(SAIL_FRAMES);
+      for (const frame of s.frames) {
+        expect(frame.length).toBeGreaterThan(20);
+        // Nothing reaches down past the eaves.
+        expect(Math.max(...frame.map(([, y, , h]) => s.y + y + h))).toBeLessThanOrEqual(g.floorsTop);
+      }
+      // Each frame turns the sails a little further.
+      expect(new Set(s.frames.map((f) => JSON.stringify(f))).size).toBe(SAIL_FRAMES);
+    }
+  });
+
+  it("gives the lighthouse a tower on its roof and a beam inside the scene", () => {
+    for (const [w, floors, yard] of SIZES) {
+      const g = house("lighthouse", w, floors, yard);
+      const shell = shellArt(g, "lighthouse");
+      const beams = shell.moving.filter((m) => m.motion === "sweep");
+      expect(beams).toHaveLength(1);
+      expect(beams[0].x).toBeGreaterThanOrEqual(0);
+      expect(beams[0].x + beams[0].art.w).toBeLessThanOrEqual(g.sceneW);
+      // The lantern stands well clear of the roof, above the chimney's spot.
+      expect(beams[0].y).toBeLessThan(g.roofTop);
+      expect(shellArt(g, "lighthouse").smoke).toBeFalsy();
+    }
   });
 });

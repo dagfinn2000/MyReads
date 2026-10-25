@@ -22,6 +22,9 @@ export const ROOM_STYLES = [
   "cabin",
   "japanese",
   "steampunk",
+  "lighthouse",
+  "windmill",
+  "adobe",
 ] as const;
 export type RoomStyle = (typeof ROOM_STYLES)[number];
 
@@ -36,6 +39,9 @@ export const ROOM_STYLE_LABELS: Record<RoomStyle, { name: string; blurb: string 
   cabin: { name: "Log cabin", blurb: "Round logs, a turf roof and pine trees." },
   japanese: { name: "Tea house", blurb: "Paper screens, dark timber and a stone lantern." },
   steampunk: { name: "Workshop", blurb: "Copper, brass, pipes and turning gears." },
+  lighthouse: { name: "Lighthouse", blurb: "Whitewash, a red lantern and a beam at night." },
+  windmill: { name: "Windmill", blurb: "Thatch, turning sails, Delft tiles and tulips." },
+  adobe: { name: "Adobe", blurb: "Sun-baked walls, log beams and cacti." },
 };
 
 /** Wall colours: the style's own, or a paint of your choosing. */
@@ -173,6 +179,9 @@ export const ROOM_PAPERS = [
   "tiles",
   "shoji",
   "pipes",
+  "beadboard",
+  "delft",
+  "frieze",
   "plain",
 ] as const;
 export type RoomPaper = (typeof ROOM_PAPERS)[number];
@@ -192,6 +201,9 @@ export const ROOM_PAPER_LABELS: Record<RoomPaper, string> = {
   tiles: "Tiles",
   shoji: "Paper screens",
   pipes: "Rivets",
+  beadboard: "Painted boards",
+  delft: "Delft tiles",
+  frieze: "Painted band",
   plain: "Plain",
 };
 

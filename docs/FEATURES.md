@@ -167,15 +167,17 @@ Everything below is under **Decorate** on the Room page.
 
 ### The house
 
-- Ten house styles, each with its own roof, walls and garden: a cottage,
-  a castle (with a banner on the battlements), a wizard's house, an elven
-  hall (fireflies among the birches at night), a cave in a hill, a space
-  station (with a blinking beacon), a modern house, a log cabin, a tea
-  house and a workshop (a gear turning on the gable). Most have smoke
-  rising from the chimney.
+- Thirteen house styles, each with its own roof, walls, door and garden:
+  a cottage, a castle (with a banner on the battlements), a wizard's
+  house, an elven hall (fireflies among the birches at night), a cave in
+  a hill, a space station (with a blinking beacon), a modern house, a log
+  cabin, a tea house, a workshop (a gear turning on the gable), a
+  lighthouse (its beam sweeping round at night), a windmill (its sails
+  turning over the thatch) and an adobe house with cacti in the garden.
+  Most have smoke rising from the chimney.
 - The colour of the walls, the wood and the fabrics.
-- Wallpaper (stripes, damask, flowers, trellis, stars, stone, tiles, paper
-  screens and more) and floors (boards, wide planks, parquet, flagstones,
+- Wallpaper (stripes, damask, flowers, trellis, stars, stone, tiles, Delft
+  tiles, paper screens and more) and floors (boards, wide planks, parquet, flagstones,
   chequered tiles, carpet, tatami or a metal grate).
 - Fairy lights, bunting, paper lanterns or ivy along the ceilings. At
   night the fairy lights twinkle.
