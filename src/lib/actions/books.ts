@@ -19,6 +19,8 @@ import { settleReadingState } from "@/lib/reading-state";
 import { buildSearchText, foldForSearch } from "@/lib/utils";
 import { AFTER_ADD } from "@/lib/preferences";
 import { parseStatusChoice } from "@/lib/statuses";
+import { cleanFieldValues, fieldValuesFromForm } from "@/lib/book-fields";
+import { fieldColumns } from "@/lib/field-values";
 
 /** Create a book from the add form (manual or import-prefilled). */
 export async function createBook(
@@ -47,6 +49,8 @@ export async function createBook(
     return { error: readingParsed.error.issues[0]?.message ?? "Invalid input" };
   }
   const r = readingParsed.data;
+  const fieldValues = fieldValuesFromForm(formData, prefs.customFields);
+  if (fieldValues.error) return { error: fieldValues.error };
   // Which submit button was pressed; a form without one follows Preferences.
   const afterAdd = z.enum(AFTER_ADD).catch(prefs.afterAdd).parse(formData.get("afterAdd"));
 
@@ -104,6 +108,7 @@ export async function createBook(
       timesRead: reading.timesRead,
       currentPage: reading.currentPage,
       searchText: buildSearchText(data.title, data.authors, data.seriesName),
+      ...fieldColumns(fieldValues.values, prefs.customFields),
       // A book added mid-read starts its log at the page given: one entry
       // and no page-0 anchor before it, so no day is credited with the pages
       // read before the book was added (see logProgress). Dated now, not
@@ -146,7 +151,7 @@ export async function updateBook(
 
   const existing = await prisma.book.findFirst({
     where: { id: bookId, userId },
-    select: { coverUrl: true },
+    select: { coverUrl: true, fields: true },
   });
   if (!existing) return { error: "Book not found" };
 
@@ -155,6 +160,13 @@ export async function updateBook(
     return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
   }
   const data = parsed.data;
+  const { customFields } = await getPreferences();
+  const fieldValues = fieldValuesFromForm(
+    formData,
+    customFields,
+    cleanFieldValues(existing.fields, customFields),
+  );
+  if (fieldValues.error) return { error: fieldValues.error };
   const newCover = data.coverUrl ?? null;
 
   await prisma.book.update({
@@ -177,6 +189,7 @@ export async function updateBook(
       // dropped here — the only field of the schema the update ignored.
       openLibraryId: data.openLibraryId ?? null,
       searchText: buildSearchText(data.title, data.authors, data.seriesName),
+      ...fieldColumns(fieldValues.values, customFields),
     },
   });
 

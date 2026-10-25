@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { updateBook } from "@/lib/actions/books";
 import { getPreferences, getSession } from "@/lib/current-user";
 import { tagImportFor } from "@/lib/user-tags";
+import { cleanFieldValues } from "@/lib/book-fields";
 import { BookForm } from "@/components/book-form";
 
 export const dynamic = "force-dynamic";
@@ -37,7 +38,8 @@ export default async function EditBookPage({
   // Bind the id server-side so the client form can't target another row.
   const action = updateBook.bind(null, book.id);
   // How "Look up details" turns catalogue subjects into tags.
-  const lookup = await tagImportFor(session.user.id, await getPreferences());
+  const prefs = await getPreferences();
+  const lookup = await tagImportFor(session.user.id, prefs);
 
   return (
     <div className="mx-auto grid max-w-3xl gap-4">
@@ -64,6 +66,7 @@ export default async function EditBookPage({
           format: book.format,
           ownership: book.ownership,
           openLibraryId: book.openLibraryId ?? "",
+          fields: cleanFieldValues(book.fields, prefs.customFields),
         }}
       />
     </div>

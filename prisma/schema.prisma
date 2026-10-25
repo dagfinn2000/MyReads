@@ -217,6 +217,10 @@ model Book {
   /// null when it isn't on it. Only Want to Read books show there, and
   /// starting a book takes it off.
   upNextRank   Int?
+  /// Values of the reader's own book fields (Preferences › Book fields), by
+  /// field id: a string, number, "YYYY-MM-DD" date or boolean, checked
+  /// against the fields as they stand (lib/book-fields.ts). Null for none.
+  fields       Json?
 
   /// Denormalized lowercase "title + authors" so search can be a single
   /// case-insensitive `contains` (Prisma can't substring-search String[]).
@@ -225,6 +229,10 @@ model Book {
   /// reviews too; "" without one. Written wherever review is, never sent to
   /// the browser or into a backup.
   reviewSearchText String @default("")
+  /// The text and choice values of `fields`, folded the same way, so the
+  /// library search finds them; "" without any. Never sent to the browser
+  /// or into a backup.
+  fieldSearchText String @default("")
 
   quotes   Quote[]
   reads    Read[]

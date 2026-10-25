@@ -16,7 +16,7 @@ import type { Preferences } from "@/lib/preferences";
 export async function challengeBooksFor(
   userId: string,
   challenges: { id: string; query: string; year: number }[],
-  prefs: Pick<Preferences, "searchAlsoIn" | "timeZone">,
+  prefs: Pick<Preferences, "searchAlsoIn" | "timeZone"> & Partial<Pick<Preferences, "customFields">>,
   currentYear: number,
 ): Promise<Map<string, ChallengeBook[]>> {
   const entries = await Promise.all(

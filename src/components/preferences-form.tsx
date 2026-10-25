@@ -50,6 +50,7 @@ import { OrderList } from "@/components/order-list";
 import { PartThemesForm } from "@/components/part-themes-form";
 import { playSample } from "@/components/sounds";
 import { StatusSettings } from "@/components/status-settings";
+import { FieldSettings } from "@/components/field-settings";
 import { TagRulesList } from "@/components/tag-rules-list";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -693,6 +694,10 @@ export function PreferencesForm({
 
       <Section title="Reading statuses" id="statuses">
         <StatusSettings prefs={prefs} update={update} />
+      </Section>
+
+      <Section title="Book fields" id="fields">
+        <FieldSettings prefs={prefs} update={update} />
       </Section>
 
       {savedViews.length > 0 && (

@@ -102,6 +102,20 @@ export function formatNumber(n: number, prefs?: FormatPrefs): string {
   return f.format(n);
 }
 
+const decimalFormatters = new Map<NumberFormat, Intl.NumberFormat>();
+
+/** A number that may have a fraction ("1,234.5"), up to two decimals, in
+ *  the chosen number style. */
+export function formatDecimal(n: number, prefs?: FormatPrefs): string {
+  const format = prefs?.numberFormat ?? "comma";
+  let f = decimalFormatters.get(format);
+  if (!f) {
+    f = new Intl.NumberFormat(NUMBER_LOCALES[format], { maximumFractionDigits: 2 });
+    decimalFormatters.set(format, f);
+  }
+  return f.format(n);
+}
+
 const sizeFormatters = new Map<NumberFormat, Intl.NumberFormat>();
 
 const SIZE_UNITS = ["KB", "MB", "GB", "TB"];

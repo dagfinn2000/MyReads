@@ -7,11 +7,13 @@ import { BookOpen } from "lucide-react";
 import type { ActionState } from "@/lib/actions/helpers";
 import type { CatalogueDiffRow, CatalogueValues } from "@/lib/catalogue-values";
 import { FORMAT_LABELS, OWNERSHIP_LABELS, toDateInputValue } from "@/lib/display";
+import type { FieldValues } from "@/lib/book-fields";
 import type { AfterAdd } from "@/lib/preferences";
 import type { SoundEvent } from "@/lib/sounds";
 import type { TagImportSettings } from "@/lib/tag-rules";
 import { submitKeepingInput } from "@/lib/submit-form";
 import { AudiobookLengthField } from "@/components/audiobook-length-field";
+import { BookFieldInputs } from "@/components/book-field-inputs";
 import { CoverPicker } from "@/components/cover-picker";
 import { FinishedDateField } from "@/components/finished-date-field";
 import { LookupDetails } from "@/components/lookup-details";
@@ -48,6 +50,8 @@ export interface BookFormValues {
   ownership?: BookOwnership;
   status?: ReadingStatus;
   openLibraryId?: string;
+  /** Values of the reader's own fields (lib/book-fields.ts). */
+  fields?: FieldValues;
 }
 
 /** The add form's submit buttons, by where each goes afterwards. */
@@ -306,6 +310,7 @@ export function BookForm({
             defaultValue={initial.description ?? ""}
           />
         </div>
+        <BookFieldInputs values={initial.fields} />
         <div className="flex flex-wrap items-end gap-4">
           <div className="grid gap-2">
             <Label htmlFor="format">Format</Label>

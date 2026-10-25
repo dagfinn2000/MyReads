@@ -101,6 +101,13 @@ page by page.
 - Custom shelves, tags, series in reading order, format (physical, ebook,
   audiobook) and ownership (owned, wishlist, borrowed from someone, no
   longer have it).
+- **Your own fields.** Add up to 20 fields of your own to every book:
+  text, a number, a date, yes or no, or a choice from your own list
+  ("Where it lives", "Price paid", "Signed", "Edition"). Fill them in on
+  the add and edit forms; they show with the book's details on its page.
+  The library's search finds text and choices, and More filters finds
+  books with or without a value, with a given choice or yes/no, or with a
+  number or date in a range.
 - Keep track of the books you've lent out, who has them and since when,
   on each book's Lending card. Give a loan a day it's due back (Preferences
   can fill one in, say a month after you lend it). Past that day the book
@@ -332,6 +339,7 @@ On the Account page:
   daily goal.
 - The rating style, and what counts in your stats.
 - Names for the statuses, and statuses of your own.
+- Fields of your own on every book, and the choices a choice field offers.
 - Which status tabs the library shows, what its search also looks in
   (tags, ISBN, your review), and what Pick for me leaves out.
 - How long you usually lend books for, and whether overdue books remind

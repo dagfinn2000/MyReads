@@ -18,6 +18,8 @@ import { isAllowedCoverUrl, shelfNameSchema } from "@/lib/validation";
 import { cleanLibraryViewPatch } from "@/lib/library-view";
 import { cleanPreferencesPatch, parsePreferences } from "@/lib/preferences";
 import { customStatusOf } from "@/lib/statuses";
+import { cleanFieldValues } from "@/lib/book-fields";
+import { fieldColumns } from "@/lib/field-values";
 import { MAX_ENTRY_MINUTES } from "@/lib/reading-time";
 import {
   MAX_SAVED_VIEWS,
@@ -147,6 +149,9 @@ const importedBookSchema = z.object({
   currentPage: z.number().int().min(0).max(100000).nullable().optional().catch(null),
   /** Additive: the book's place on the reader's own Up next list. */
   upNextRank: z.number().int().min(1).max(1_000_000).nullable().optional().catch(null),
+  /** Additive: values of the reader's own fields, by field id, checked
+   *  against the account's fields once its settings are restored. */
+  fields: z.unknown().optional(),
   shelves: shelfNames,
   quotes: z.array(importedQuoteSchema).catch([]),
   reads: z.array(importedReadSchema).catch([]),
@@ -528,10 +533,11 @@ export async function importLibrary(
   });
 
   const settingsRestored = data.settings ? await restoreSettings(userId, data.settings) : false;
-  // The account's own statuses as they now stand: a book keeps its status
-  // of the reader's own only if the account has it (the backup's statuses
-  // came with its settings unless the account already had some).
-  const statuses = parsePreferences(
+  // The account's own statuses and fields as they now stand: a book keeps
+  // its status of the reader's own, and its fields' values, only where the
+  // account has them (the backup's came with its settings unless the
+  // account already had some).
+  const account = parsePreferences(
     (await prisma.user.findUnique({ where: { id: userId }, select: { preferences: true } }))?.preferences,
   );
 
@@ -635,7 +641,7 @@ export async function importLibrary(
         seriesNumber: b.seriesNumber ?? null,
         openLibraryId: b.openLibraryId ?? null,
         status: b.status,
-        statusKey: customStatusOf(b, statuses)?.key ?? null,
+        statusKey: customStatusOf(b, account)?.key ?? null,
         rating: b.rating ?? null,
         review: b.review ?? null,
         reviewSearchText: foldForSearch(b.review ?? ""),
@@ -645,6 +651,7 @@ export async function importLibrary(
         currentPage: b.currentPage ?? null,
         upNextRank: b.status === ReadingStatus.WANT_TO_READ ? (b.upNextRank ?? null) : null,
         searchText: buildSearchText(b.title, b.authors, b.seriesName),
+        ...fieldColumns(cleanFieldValues(b.fields, account.customFields), account.customFields),
         // Preserve "date added" ordering from the original library.
         ...(b.createdAt && { createdAt: b.createdAt }),
         shelves: {

@@ -10,6 +10,11 @@ import { arrangeBookCards, FORCED_CARD_NOTES } from "@/lib/book-page";
 import { orderByIds } from "@/lib/library-order";
 import type { BookPageCard } from "@/lib/preferences";
 import {
+  cleanFieldValues,
+  formatFieldValue,
+  serializeFieldFilter,
+} from "@/lib/book-fields";
+import {
   formatDate,
   FORMAT_LABELS,
   OWNERSHIP_BADGE_LABELS,
@@ -61,7 +66,7 @@ export default async function BookDetailPage({
     where: { id, userId },
     // Search's folded copies of title, authors, series and review: the
     // reading card is a client component and would carry them to the page.
-    omit: { searchText: true, reviewSearchText: true },
+    omit: { searchText: true, reviewSearchText: true, fieldSearchText: true },
     include: {
       shelves: { select: { id: true } },
       quotes: {
@@ -110,6 +115,14 @@ export default async function BookDetailPage({
           .then((ahead) => ahead + 1)
       : null,
   ]);
+
+  // The reader's own fields that this book has a value for, in their order.
+  const values = cleanFieldValues(book.fields, prefs.customFields);
+  const details = prefs.customFields.flatMap((field) =>
+    field.id in values
+      ? [{ field, value: values[field.id], shown: formatFieldValue(field, values[field.id], prefs) }]
+      : [],
+  );
 
   const seriesHref = book.seriesName
     ? `/books?series=${encodeURIComponent(book.seriesName)}&group=series`
@@ -261,6 +274,39 @@ export default async function BookDetailPage({
               </div>
             )}
           </dl>
+
+          {/* The reader's own fields, in the same style. A choice or yes/no
+              links to the library's books with the same value. */}
+          {details.length > 0 && (
+            <dl
+              aria-label="Details"
+              className="book-facts grid grid-cols-2 gap-x-6 gap-y-3 text-sm sm:grid-cols-4"
+            >
+              {details.map(({ field, value, shown }) => (
+                <div key={field.id} className={shown.length > 28 ? "col-span-2 sm:col-span-4" : undefined}>
+                  <dt className="text-muted-foreground">{field.name}</dt>
+                  <dd className="break-words">
+                    {field.type === "choice" || field.type === "yesno" ? (
+                      <Link
+                        href={`/books?field=${encodeURIComponent(
+                          serializeFieldFilter({
+                            id: field.id,
+                            op: "is",
+                            value: field.type === "yesno" ? (value ? "yes" : "no") : String(value),
+                          }),
+                        )}`}
+                        className="underline-offset-4 hover:underline"
+                      >
+                        {shown}
+                      </Link>
+                    ) : (
+                      shown
+                    )}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          )}
 
           <FindItAt book={book} links={prefs.findLinks} />
 
