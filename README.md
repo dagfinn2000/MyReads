@@ -21,17 +21,20 @@ server.
 
 **Track your reading**
 
-- Status, ratings, notes, start and finish dates, and re-reads.
+- Status, ratings, notes, start and finish dates, and re-reads. Rename
+  the statuses, or add your own, such as Paused.
 - Log the page you're on and see your pace and when you'll finish.
   Ebooks can also go by percent, and audiobooks by time listened.
-- Time your reading, set a daily goal in pages or minutes, and keep your
-  own list of what to read next.
+- Time your reading, set a daily goal in pages or minutes, get a reminder
+  at a time you choose, and keep your own list of what to read next.
 - Save quotes, or import your Kindle highlights.
 
 **Organise your library**
 
 - Shelves, tags, series in reading order, formats, what you own or wish
-  for, and which books you've lent to whom.
+  for, and which books you've lent to whom and when they're due back.
+- Fields of your own, such as where a book lives or what it cost.
+- A Series page with how far you are in each series and what's next.
 - Search, filter, sort and group, and save the views you use often.
 - Show the library as cards, covers, a bookshelf or a list, and edit many
   books at once.
@@ -40,14 +43,16 @@ server.
 
 - Books and pages per year, ratings, genres, a calendar of the days you
   read, and your reading habits.
-- Yearly goals in books or pages, and a year in review for every year.
+- Goals for the year or every month, in books, pages or days you read,
+  and challenges such as "6 classics in 2026".
+- A year in review for every year.
 
 **The reading room**
 
 - Your library drawn as a pixel-art house, with every book a spine on a
   shelf. The house grows as your library does.
-- Decorate it: thirteen house styles, colours, furniture, more rooms, a garden
-  and the seasons.
+- Decorate it: thirteen house styles, colours, furniture, more rooms, a
+  garden, the seasons and holiday decorations.
 - Make a little you who lives there and sits down to read the book you're
   reading. Or turn the room off.
 
@@ -55,14 +60,18 @@ server.
 
 - 30 colour themes and 26 background textures. On some of the textures
   rain falls, snow drifts or stars twinkle.
+- A theme for one device or one part of the app, and your own CSS.
 - Preferences for date formats, time zone, sorting, fonts and much more.
   Your settings follow you to every device.
+- The top bar in your own order, keyboard shortcuts, and sounds if you
+  want them.
 - Install it on your phone's home screen like an app.
 
 **Keep it safe**
 
 - Download everything as one zip, covers and settings included, and
   restore it on any MyReads server.
+- With Docker, the server also saves a copy of every library each night.
 
 Every feature is described in [docs/FEATURES.md](docs/FEATURES.md).
 
@@ -154,12 +163,13 @@ automatically.
 - **Close registration.** Once you have your account, set
   `DISABLE_REGISTRATION=true` in `.env` and run `docker compose up -d` again
   so nobody else can sign up.
-- **Use HTTPS for the phone features.** Browsers only allow the barcode
-  camera and installing the app on HTTPS or `localhost`, so on a plain
-  `http://192.168.x.x` address they won't work. Put MyReads behind a web
-  server that adds HTTPS (a reverse proxy, such as Caddy, nginx or
-  Traefik). Barcode scanning only works in Chrome and Edge, including
-  Chrome on Android. In other browsers, type the ISBN instead.
+- **Use HTTPS for the phone features and reminders.** Browsers only allow
+  the barcode camera, reading reminders and installing the app on HTTPS or
+  `localhost`, so on a plain `http://192.168.x.x` address they won't work.
+  Put MyReads behind a web server that adds HTTPS (a reverse proxy, such
+  as Caddy, nginx or Traefik). Barcode scanning only works in Chrome and
+  Edge, including Chrome on Android. In other browsers, type the ISBN
+  instead.
 - **If you use nginx, let it accept big uploads.** nginx refuses uploads
   over 1 MB unless you change it, which stops most backups from being
   restored and most phone photos from being uploaded as covers. Add
@@ -170,8 +180,13 @@ automatically.
   safe. The Backup card also shows when you last downloaded one. Set its
   **Remind me to back up** to Every month, and a note on the Library and
   Stats pages reminds you when your last backup is over a month old.
-- **Know where your data is.** The library lives in two Docker volumes:
-  `pgdata` (the database) and `covers` (cover images).
+  With Docker, the server also saves a copy of every account each night
+  and keeps the newest 7, listed on the Backup card. Those copies are on
+  the same machine as the library, so still download one now and then and
+  keep it somewhere else.
+- **Know where your data is.** It lives in three Docker volumes: `pgdata`
+  (the database), `covers` (cover images) and `backups` (the nightly
+  copies).
 - **Update.** Run `git pull`, then `docker compose up -d --build`. Database
   changes are applied automatically when the app starts. What changed in
   each version is on the
