@@ -4,6 +4,7 @@ import {
   DEFAULT_PREFERENCES,
   MAX_FIND_LINKS,
   MAX_TAG_RULES,
+  NAV_ITEMS,
   START_PAGES,
   START_PAGE_PATHS,
   cleanPreferencesPatch,
@@ -97,6 +98,8 @@ describe("parsePreferences: the newer settings", () => {
       ebookUnit: "page",
       audiobookUnit: "page",
       paceFrom: "read",
+      navOrder: [...NAV_ITEMS],
+      shownNav: [],
       bookPageCards: [...BOOK_PAGE_CARDS],
       hiddenBookPageCards: [],
       bookDescription: "full",
@@ -210,6 +213,45 @@ describe("parsePreferences: the newer settings", () => {
     expect(parsePreferences({ hiddenBookPageCards: ["quotes", "nope"] }).hiddenBookPageCards).toEqual(
       ["quotes"],
     );
+  });
+
+  it("always lists every top-bar link once, in the order saved", () => {
+    expect(parsePreferences({}).navOrder).toEqual([...NAV_ITEMS]);
+    expect(parsePreferences({ navOrder: "stats" }).navOrder).toEqual([...NAV_ITEMS]);
+    // Unknown links go, a repeat keeps its first place, and the links the
+    // order leaves out follow in the bar's own order.
+    expect(
+      parsePreferences({ navOrder: ["stats", "bogus", 7, "library", "stats", "series"] }).navOrder,
+    ).toEqual(["stats", "library", "series", "reading", "add", "check", "quotes", "room"]);
+    const reversed = [...NAV_ITEMS].reverse();
+    expect(parsePreferences({ navOrder: reversed }).navOrder).toEqual(reversed);
+  });
+
+  it("has keyboard shortcuts on unless they were turned off", () => {
+    expect(parsePreferences({}).keyboardShortcuts).toBe(true);
+    expect(parsePreferences({ keyboardShortcuts: false }).keyboardShortcuts).toBe(false);
+    expect(parsePreferences({ keyboardShortcuts: "no" }).keyboardShortcuts).toBe(true);
+  });
+
+  it("leaves Series out of the bar until it is turned on", () => {
+    expect(parsePreferences({}).shownNav).toEqual([]);
+    expect(parsePreferences({ shownNav: ["series", "series", "room", "x"] }).shownNav).toEqual([
+      "series",
+    ]);
+    // Nor can a link that always shows be hidden.
+    expect(parsePreferences({ hiddenNav: ["series", "library", "check"] }).hiddenNav).toEqual([
+      "check",
+    ]);
+  });
+
+  it("reads a huge restored link list in one pass", () => {
+    const junk = Array.from({ length: 200_000 }, (_, i) => (i % 2 ? "quotes" : `x${i}`));
+    const started = performance.now();
+    const prefs = parsePreferences({ navOrder: junk, hiddenNav: junk, shownNav: junk });
+    expect(performance.now() - started).toBeLessThan(1000);
+    expect(prefs.navOrder[0]).toBe("quotes");
+    expect(prefs.hiddenNav).toEqual(["quotes"]);
+    expect(prefs.shownNav).toEqual([]);
   });
 
   it("keeps known search fields", () => {

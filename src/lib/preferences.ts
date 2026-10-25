@@ -179,9 +179,38 @@ export const HEATMAP_SCALES = ["standard", "gentle", "heavy", "auto"] as const;
 
 export const START_PAGES = ["library", "stats", "add", "reading"] as const;
 
-/** Top-bar links that can be hidden, in top-bar order. The rest are always
+/** Every top-bar link, in the bar's own order. The reader can put them in
+ *  another (Preferences › Pages and navigation); lib/nav.ts has where each
+ *  one goes. */
+export const NAV_ITEMS = [
+  "library",
+  "reading",
+  "add",
+  "check",
+  "quotes",
+  "stats",
+  "room",
+  "series",
+] as const;
+
+export const NAV_ITEM_LABELS: Record<(typeof NAV_ITEMS)[number], string> = {
+  library: "Library",
+  reading: "Now reading",
+  add: "Add book",
+  check: "Check (“Do I own this?”)",
+  quotes: "Quotes",
+  stats: "Stats",
+  room: "Reading room",
+  series: "Series",
+};
+
+/** Top-bar links that can be hidden. Library, Add book and Stats are always
  *  shown. */
 export const HIDEABLE_NAV = ["reading", "check", "quotes", "room"] as const;
+
+/** Top-bar links that stay out of the bar until they're turned on, so the
+ *  bar is what it always was for anyone who never does. */
+export const OPTIONAL_NAV = ["series"] as const;
 
 /** Cards on the stats page that can be hidden. */
 export const HIDEABLE_STATS = [
@@ -317,7 +346,9 @@ export type Background = (typeof BACKGROUNDS)[number];
 export type BackgroundMotion = (typeof BACKGROUND_MOTIONS)[number];
 export type HeatmapScale = (typeof HEATMAP_SCALES)[number];
 export type StartPage = (typeof START_PAGES)[number];
+export type NavItem = (typeof NAV_ITEMS)[number];
 export type HideableNav = (typeof HIDEABLE_NAV)[number];
+export type OptionalNav = (typeof OPTIONAL_NAV)[number];
 export type HideableStat = (typeof HIDEABLE_STATS)[number];
 export type ImportTagsMode = (typeof IMPORT_TAGS_MODES)[number];
 export type AddedAsReadFinished = (typeof ADDED_AS_READ_FINISHED)[number];
@@ -393,7 +424,16 @@ export type Preferences = {
 
   heatmapScale: HeatmapScale;
   startPage: StartPage;
+  /** Every top-bar link, in the order shown. Always a full list (see
+   *  parse); whether a link shows is hiddenNav's and shownNav's say. */
+  navOrder: NavItem[];
   hiddenNav: HideableNav[];
+  /** The OPTIONAL_NAV links turned on. */
+  shownNav: OptionalNav[];
+  /** ? for the list, / to search, g and a letter to go places
+   *  (lib/shortcuts.ts). On unless turned off: they change nothing on
+   *  screen. */
+  keyboardShortcuts: boolean;
   hiddenStats: HideableStat[];
   /** SavedView id the library opens on. Empty = the plain library. */
   defaultViewId: string;
@@ -542,7 +582,10 @@ export const DEFAULT_PREFERENCES: Preferences = {
   bookBackdrop: "cover",
   heatmapScale: "standard",
   startPage: "library",
+  navOrder: [...NAV_ITEMS],
   hiddenNav: [],
+  shownNav: [],
+  keyboardShortcuts: true,
   hiddenStats: [],
   defaultViewId: "",
   pickOnlyHave: false,
@@ -628,16 +671,16 @@ function pick<T extends readonly string[]>(
     : fallback;
 }
 
-/** Known values only, each once, in the order given. */
+/** Known values only, each once, in the order given. Sets for both checks,
+ *  so a restored list of any length takes one pass (see parseTagSkips). */
 function pickList<T extends readonly string[]>(allowed: T, value: unknown): T[number][] {
   if (!Array.isArray(value)) return [];
-  const out: T[number][] = [];
+  const known = new Set<string>(allowed);
+  const out = new Set<T[number]>();
   for (const v of value) {
-    if (typeof v === "string" && (allowed as readonly string[]).includes(v) && !out.includes(v)) {
-      out.push(v as T[number]);
-    }
+    if (typeof v === "string" && known.has(v)) out.add(v as T[number]);
   }
-  return out;
+  return [...out];
 }
 
 /** A number from a menu of amounts (kept as strings, like every other
@@ -793,6 +836,13 @@ function parseBookPageCards(value: unknown): BookPageCard[] {
   return [...listed, ...BOOK_PAGE_CARDS.filter((c) => !listed.includes(c))];
 }
 
+/** Every top-bar link once, the same way: the stored order first, then any
+ *  link it leaves out (one added in a later version, say) in default order. */
+function parseNavOrder(value: unknown): NavItem[] {
+  const listed = pickList(NAV_ITEMS, value);
+  return [...listed, ...NAV_ITEMS.filter((item) => !listed.includes(item))];
+}
+
 /** Stored JSON (or anything else) → a complete, safe Preferences. */
 export function parsePreferences(raw: unknown): Preferences {
   const obj = (raw && typeof raw === "object" ? raw : {}) as Record<string, unknown>;
@@ -854,7 +904,10 @@ export function parsePreferences(raw: unknown): Preferences {
     bookBackdrop: pick(BOOK_BACKDROPS, obj.bookBackdrop, d.bookBackdrop),
     heatmapScale: pick(HEATMAP_SCALES, obj.heatmapScale, d.heatmapScale),
     startPage: pick(START_PAGES, obj.startPage, d.startPage),
+    navOrder: parseNavOrder(obj.navOrder),
     hiddenNav: pickList(HIDEABLE_NAV, obj.hiddenNav),
+    shownNav: pickList(OPTIONAL_NAV, obj.shownNav),
+    keyboardShortcuts: bool(obj.keyboardShortcuts, d.keyboardShortcuts),
     hiddenStats: pickList(HIDEABLE_STATS, obj.hiddenStats),
     defaultViewId:
       typeof obj.defaultViewId === "string" && obj.defaultViewId.length <= 64

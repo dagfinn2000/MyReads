@@ -1,6 +1,7 @@
 import Link from "next/link";
 import {
   Armchair,
+  BookCopy,
   BookOpen,
   BookOpenText,
   ChartColumn,
@@ -11,20 +12,37 @@ import {
   Quote,
   ScanSearch,
   UserRound,
+  type LucideIcon,
 } from "lucide-react";
 import { signOut } from "@/auth";
 import { getPreferences, getSession } from "@/lib/current-user";
+import { NAV_LINKS, ROOMY_NAV_LINKS, topBarLinks } from "@/lib/nav";
+import type { NavItem } from "@/lib/preferences";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { NavLink } from "@/components/nav-link";
 import { ThemePicker } from "@/components/theme-picker";
 
+const NAV_ICONS: Record<NavItem, LucideIcon> = {
+  library: LibraryBig,
+  reading: BookOpenText,
+  add: Plus,
+  check: ScanSearch,
+  quotes: Quote,
+  stats: ChartColumn,
+  room: Armchair,
+  series: BookCopy,
+};
+
 /** Top navigation for authenticated pages. Server component — reads the
- *  session directly and signs out via a server action. The Now reading,
- *  Check, Quotes and Reading room links can be hidden in Preferences; the
- *  logo goes to the start page chosen there. */
+ *  session directly and signs out via a server action. The links come in
+ *  the order chosen in Preferences, where Now reading, Check, Quotes and
+ *  Reading room can be hidden and Series added; the logo goes to the start
+ *  page chosen there. */
 export async function Nav() {
   const [session, prefs] = await Promise.all([getSession(), getPreferences()]);
-  const hidden = new Set(prefs.hiddenNav);
+  const links = topBarLinks(prefs);
+  const crowded = links.length > ROOMY_NAV_LINKS;
 
   return (
     <header className="top-bar sticky top-0 z-40 border-b bg-background/75 backdrop-blur-md backdrop-saturate-150">
@@ -32,8 +50,20 @@ export async function Nav() {
           links plus the right-hand group the bar needs about 1000px, so
           labels from sm (640px) overflowed tablets and narrow windows.
           On phones the icons sit closer together and the wordmark waits
-          for room, so the bar fits from 360px up with every link shown. */}
-      <div className="mx-auto flex h-14 max-w-6xl items-center gap-0.5 px-3 max-sm:[&_[data-slot=button]]:px-[5px] sm:gap-1 sm:px-4">
+          for room, so the bar fits from 360px up with every link shown.
+          An eighth link (Series) needs another 80px or so with its label
+          and 28px as an icon, so then the labels wait for 1120px and,
+          below 400px, the icons close up by a pixel each side. The phone
+          paddings are two ranges, not one overriding the other: Tailwind
+          puts max-[400px] ahead of max-sm, so max-sm would win. */}
+      <div
+        className={cn(
+          "mx-auto flex h-14 max-w-6xl items-center gap-0.5 px-3 sm:gap-1 sm:px-4",
+          crowded
+            ? "max-[400px]:[&_[data-slot=button]]:px-1 min-[400px]:max-sm:[&_[data-slot=button]]:px-[5px]"
+            : "max-sm:[&_[data-slot=button]]:px-[5px]",
+        )}
+      >
         <Link
           href="/"
           className="wordmark mr-1 flex items-center gap-2 text-lg sm:mr-4"
@@ -41,42 +71,18 @@ export async function Nav() {
           <BookOpen className="size-5" />
           <span className="hidden min-[480px]:inline">MyReads</span>
         </Link>
-        <NavLink href="/books" title="Library">
-          <LibraryBig data-slot="icon" />
-          <span className="hidden lg:inline">Library</span>
-        </NavLink>
-        {!hidden.has("reading") && (
-          <NavLink href="/reading" title="Now reading">
-            <BookOpenText data-slot="icon" />
-            <span className="hidden lg:inline">Now reading</span>
-          </NavLink>
-        )}
-        <NavLink href="/books/new" title="Add book">
-          <Plus data-slot="icon" />
-          <span className="hidden lg:inline">Add book</span>
-        </NavLink>
-        {!hidden.has("check") && (
-          <NavLink href="/books/check" title="Do I own this?">
-            <ScanSearch data-slot="icon" />
-            <span className="hidden lg:inline">Check</span>
-          </NavLink>
-        )}
-        {!hidden.has("quotes") && (
-          <NavLink href="/quotes" title="Quotes">
-            <Quote data-slot="icon" />
-            <span className="hidden lg:inline">Quotes</span>
-          </NavLink>
-        )}
-        <NavLink href="/stats" title="Stats">
-          <ChartColumn data-slot="icon" />
-          <span className="hidden lg:inline">Stats</span>
-        </NavLink>
-        {!hidden.has("room") && (
-          <NavLink href="/room" title="Reading room">
-            <Armchair data-slot="icon" />
-            <span className="hidden lg:inline">Room</span>
-          </NavLink>
-        )}
+        {links.map((item) => {
+          const { href, label, title } = NAV_LINKS[item];
+          const Icon = NAV_ICONS[item];
+          return (
+            <NavLink key={item} href={href} title={title}>
+              <Icon data-slot="icon" />
+              <span className={crowded ? "hidden min-[1120px]:inline" : "hidden lg:inline"}>
+                {label}
+              </span>
+            </NavLink>
+          );
+        })}
         <div className="ml-auto flex items-center gap-0.5 sm:gap-3">
           <Button
             asChild

@@ -7,6 +7,7 @@ import { ArrowDown, ArrowUp, Pencil, Trash2 } from "lucide-react";
 import { savePreferences } from "@/lib/actions/preferences";
 import { deleteView, renameView } from "@/lib/actions/saved-views";
 import { moveId, orderByIds } from "@/lib/library-order";
+import { topBarLinks } from "@/lib/nav";
 import { SAVED_VIEW_NAME_MAX } from "@/lib/saved-views";
 import {
   FORMAT_LABELS,
@@ -24,7 +25,9 @@ import {
   DATE_FORMATS,
   HIDEABLE_NAV,
   HIDEABLE_STATS,
+  NAV_ITEM_LABELS,
   NUMBER_FORMATS,
+  OPTIONAL_NAV,
   STATS_PERIODS,
   SEARCH_FIELDS,
   type Accent,
@@ -32,12 +35,16 @@ import {
   type Catalogue,
   type HideableNav,
   type HideableStat,
+  type NavItem,
+  type OptionalNav,
   type Preferences,
   type SearchField,
 } from "@/lib/preferences";
 import { PERIOD_LABELS } from "@/lib/stats-period";
 import { cn } from "@/lib/utils";
 import { BookPageCardList, FindLinksEditor } from "@/components/book-page-preferences";
+import { ShortcutsDialog } from "@/components/keyboard-shortcuts";
+import { OrderList } from "@/components/order-list";
 import { TagRulesList } from "@/components/tag-rules-list";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -61,12 +68,13 @@ const SEARCH_FIELD_LABELS: Record<SearchField, string> = {
   review: "My review",
 };
 
-const NAV_LABELS: Record<HideableNav, string> = {
-  reading: "Now reading",
-  check: "Check (“Do I own this?”)",
-  quotes: "Quotes",
-  room: "Reading room",
-};
+function isHideableNav(item: NavItem): item is HideableNav {
+  return (HIDEABLE_NAV as readonly NavItem[]).includes(item);
+}
+
+function isOptionalNav(item: NavItem): item is OptionalNav {
+  return (OPTIONAL_NAV as readonly NavItem[]).includes(item);
+}
 
 const ACCENT_LABELS: Record<Accent, string> = {
   theme: "Theme default",
@@ -375,6 +383,7 @@ export function PreferencesForm({
   const shownStatusTabs = Object.values(ReadingStatus).filter(
     (s) => !prefs.hiddenStatusTabs.includes(s),
   ).length;
+  const inBar = new Set(topBarLinks(prefs));
 
   return (
     <div className="grid gap-5">
@@ -845,7 +854,7 @@ export function PreferencesForm({
         />
       </Section>
 
-      <Section title="Pages and navigation">
+      <Section title="Pages and navigation" id="navigation">
         <Choice
           label="Start page"
           hint="Where the app opens, and where the logo goes."
@@ -871,22 +880,57 @@ export function PreferencesForm({
             onChange={(v) => update({ defaultViewId: v === "none" ? "" : v })}
           />
         )}
-        <div className="grid gap-1.5">
-          <p className="text-sm font-medium">Show in the top bar</p>
-          {/* The reading room has its own section, below. */}
-          {HIDEABLE_NAV.filter((item) => item !== "room").map((item) => (
-            <Toggle
-              key={item}
-              label={NAV_LABELS[item]}
-              checked={!prefs.hiddenNav.includes(item)}
-              onChange={(shown) => update({ hiddenNav: toggleIn(prefs.hiddenNav, item, !shown) })}
-            />
-          ))}
+        <OrderList
+          heading="Top bar links, in order"
+          order={prefs.navOrder}
+          labels={NAV_ITEM_LABELS}
+          shown={(item) => inBar.has(item)}
+          locked={(item) =>
+            // The reading room has its own section, below: turning it off
+            // is what takes Room out of the bar.
+            item === "room"
+              ? "Comes and goes with the reading room, below"
+              : isHideableNav(item) || isOptionalNav(item)
+                ? undefined
+                : "Always in the top bar"
+          }
+          onShow={(item, shown) => {
+            if (isOptionalNav(item)) {
+              update({ shownNav: toggleIn(prefs.shownNav, item, shown) });
+            } else if (isHideableNav(item)) {
+              update({ hiddenNav: toggleIn(prefs.hiddenNav, item, !shown) });
+            }
+          }}
+          onReorder={(navOrder) => update({ navOrder })}
+        >
+          <p className="text-xs text-muted-foreground">
+            Library, Add book and Stats always show, and Room shows while the
+            reading room is on. Phones show the same links, in the same order.
+          </p>
           {prefs.hiddenNav.includes("quotes") && !prefs.hiddenBookPageCards.includes("quotes") && (
             <p className="text-xs text-muted-foreground">
               The Quotes card still shows on book pages. You can hide it under Book page below.
             </p>
           )}
+        </OrderList>
+        <div className="grid gap-1">
+          <Toggle
+            label="Keyboard shortcuts"
+            checked={prefs.keyboardShortcuts}
+            onChange={(keyboardShortcuts) => update({ keyboardShortcuts })}
+          />
+          <p className="pl-6 text-xs text-muted-foreground">
+            On a computer: <kbd className="font-mono">/</kbd> searches the library,{" "}
+            <kbd className="font-mono">g</kbd> and a letter goes to a page.{" "}
+            <ShortcutsDialog
+              links={[...inBar]}
+              trigger={
+                <button type="button" className="underline underline-offset-2 hover:text-foreground">
+                  See them all
+                </button>
+              }
+            />
+          </p>
         </div>
       </Section>
 

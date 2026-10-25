@@ -74,6 +74,17 @@ describe("savePreferences", () => {
     });
   });
 
+  it("stores every top-bar link once, and only Series as a link to add", async () => {
+    await savePreferences({
+      navOrder: ["room", "admin", "room", { href: "javascript:alert(1)" }],
+      shownNav: ["series", "library"],
+    } as unknown as Parameters<typeof savePreferences>[0]);
+    expect(await storedPreferences()).toEqual({
+      navOrder: ["room", "library", "reading", "add", "check", "quotes", "stats", "series"],
+      shownNav: ["series"],
+    });
+  });
+
   it("changes only the signed-in account", async () => {
     await savePreferences({ weekStart: "sunday" });
     expect(await storedPreferences(otherUserId)).toBeNull();
