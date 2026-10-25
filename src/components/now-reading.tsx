@@ -15,6 +15,7 @@ import { BookCover } from "@/components/book-card";
 import { BookLink } from "@/components/book-link";
 import { RecentEntries, type LogBook } from "@/components/progress-log";
 import { QuickLog, type MovedResult, type QuickLogBook } from "@/components/quick-log";
+import { giveBackTime } from "@/components/reading-timer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -199,8 +200,9 @@ function MovedRow({ moved, onUndone }: { moved: Moved; onUndone: () => void }) {
         onClick={() =>
           startTransition(async () => {
             const result = await undoMoveFromReading(moved.book.id, moved.undo);
-            if (result.error) setError(result.error);
-            else onUndone();
+            if (result.error) return setError(result.error);
+            if (result.minutes) giveBackTime(moved.book.id, result.minutes);
+            onUndone();
           })
         }
       >

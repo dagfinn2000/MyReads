@@ -498,12 +498,17 @@ export async function moveFromReading(
  * Undo Finished or Stopped: back to Currently Reading as it was. Worked out
  * from the book itself, not the client: only while the book is still where
  * the move put it (for Read, finished at that same moment), and the only
- * entry removed is the closing one that move wrote.
+ * entry touched is the closing one that move wrote.
+ *
+ * Time read is never thrown away. A closing entry that carried the timer's
+ * minutes stays as time on the page the book was at, the way Stopped keeps
+ * it. A read with no page logged yet has nowhere to keep it, so the
+ * minutes come back for the reading timer to hold until the next log.
  */
 export async function undoMoveFromReading(
   bookId: string,
   undo: UndoMove,
-): Promise<{ error?: string }> {
+): Promise<{ error?: string; minutes?: number }> {
   const userId = await requireUserId();
   const id = idSchema.safeParse(bookId);
   if (!id.success) return { error: "Book not found" };
@@ -529,13 +534,14 @@ export async function undoMoveFromReading(
   }
   const tz = (await readerPrefs(userId)).timeZone;
 
-  await prisma.$transaction(async (tx) => {
+  const minutes = await prisma.$transaction(async (tx) => {
     let currentPage = book.currentPage;
+    let returned: number | undefined;
     if (from === "READ") {
       const all = await tx.progressEntry.findMany({
         where: { bookId: id.data },
         orderBy: LOG_ORDER,
-        select: LOG_FIELDS,
+        select: { ...LOG_FIELDS, minutes: true },
       });
       let pass = currentPassEntries(all, book.dateStarted, tz);
       const last = pass.at(-1);
@@ -546,8 +552,17 @@ export async function undoMoveFromReading(
         last.page === book.pageCount &&
         last.date.getTime() === book.dateFinished!.getTime()
       ) {
-        await tx.progressEntry.delete({ where: { id: last.id } });
         pass = pass.slice(0, -1);
+        const before = lastLogged(pass);
+        if (last.minutes && before) {
+          // Its time stays, on the page before it: time read without
+          // getting further, which credits no pages.
+          await tx.progressEntry.update({ where: { id: last.id }, data: { page: before.page } });
+          pass.push({ ...last, page: before.page });
+        } else {
+          await tx.progressEntry.delete({ where: { id: last.id } });
+          returned = last.minutes ?? undefined;
+        }
       }
       // A tracked read goes back to its newest entry. An untracked one has
       // only the page it had, which Finished cleared; it can't be past the
@@ -564,8 +579,9 @@ export async function undoMoveFromReading(
         timesRead: book._count.reads,
       },
     });
+    return returned;
   });
 
   revalidateReading(id.data);
-  return {};
+  return minutes ? { minutes } : {};
 }

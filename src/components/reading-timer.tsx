@@ -58,6 +58,19 @@ function writeTimer(bookId: string, timer: TimerState | null) {
   window.dispatchEvent(new Event(CHANGED));
 }
 
+/**
+ * Minutes a log gave back (an undone Finished on a read with no page logged
+ * yet): onto this book's timer, so they go with the next log.
+ */
+export function giveBackTime(bookId: string, minutes: number) {
+  const ms = minutes * 60_000;
+  const timer = parseTimer(readRaw(bookId));
+  writeTimer(
+    bookId,
+    timer ? { ...timer, banked: timer.banked + ms } : { runningSince: null, banked: ms, stopped: true },
+  );
+}
+
 function subscribe(onChange: () => void): () => void {
   window.addEventListener("storage", onChange);
   window.addEventListener(CHANGED, onChange);
