@@ -6,6 +6,7 @@ import { Pencil } from "lucide-react";
 import { formatDate } from "@/lib/display";
 import { BookCover } from "@/components/book-card";
 import { usePreferences } from "@/components/preferences-provider";
+import { QuoteCardButton } from "@/components/quote-card-dialog";
 import { DeleteQuoteButton, QuoteForm } from "@/components/quotes-card";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -20,8 +21,8 @@ export interface QuoteItemQuote {
 }
 
 /**
- * One quote on the quotes page, with the same pencil and trash as the book
- * page. Under a book heading (`showBook` off) the book line gives way to the
+ * One quote on the quotes page, with the same pencil, picture and trash as
+ * the book page. Under a book heading (`showBook` off) the book line gives way to the
  * page and the date it was added.
  */
 export function QuoteItem({ quote, showBook }: { quote: QuoteItemQuote; showBook: boolean }) {
@@ -95,6 +96,7 @@ export function QuoteItem({ quote, showBook }: { quote: QuoteItemQuote; showBook
                 >
                   <Pencil className="size-3.5" />
                 </Button>
+                <QuoteCardButton quote={quote} book={quote.book} />
                 <DeleteQuoteButton quoteId={quote.id} />
               </span>
             </div>

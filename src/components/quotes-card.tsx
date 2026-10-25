@@ -5,6 +5,7 @@ import type { Quote } from "@prisma/client";
 import { Pencil, Trash2, X } from "lucide-react";
 import { addQuote, deleteQuote, updateQuote } from "@/lib/actions/quotes";
 import { submitKeepingInput } from "@/lib/submit-form";
+import { QuoteCardButton } from "@/components/quote-card-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -21,10 +22,11 @@ import {
  * page order (unpaged ones last), with inline edit and delete.
  */
 export function QuotesCard({
-  bookId,
+  book,
   quotes,
 }: {
-  bookId: string;
+  /** The book, for the pictures of its quotes. */
+  book: { id: string; title: string; authors: string[]; coverUrl: string | null };
   quotes: Quote[];
 }) {
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -88,6 +90,7 @@ export function QuotesCard({
                         >
                           <Pencil className="size-3.5" />
                         </Button>
+                        <QuoteCardButton quote={quote} book={book} />
                         <DeleteQuoteButton quoteId={quote.id} />
                       </span>
                     </div>
@@ -97,7 +100,7 @@ export function QuotesCard({
             ))}
           </ul>
         )}
-        <QuoteForm bookId={bookId} />
+        <QuoteForm bookId={book.id} />
       </CardContent>
     </Card>
   );

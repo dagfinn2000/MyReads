@@ -10,11 +10,16 @@ import { cn } from "@/lib/utils";
 import { DARK_THEME_IDS, THEME_INIT_SCRIPT, parseThemeSetting } from "@/lib/themes";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
-// A book face for the titles on drawn covers and the serif heading choice,
-// and a rounded face for the other heading choice (Preferences). Not
-// preloaded: the browser only fetches a face once something on the page
-// uses it.
-const literata = Literata({ subsets: ["latin"], variable: "--font-literata", preload: false });
+// A book face for the titles on drawn covers, the serif heading choice and
+// the pictures of quotes (in italic), and a rounded face for the other
+// heading choice (Preferences). Not preloaded: the browser only fetches a
+// face once something on the page uses it.
+const literata = Literata({
+  subsets: ["latin"],
+  style: ["normal", "italic"],
+  variable: "--font-literata",
+  preload: false,
+});
 const nunito = Nunito({ subsets: ["latin"], variable: "--font-nunito", preload: false });
 
 export const metadata: Metadata = {

@@ -106,6 +106,12 @@ page by page.
 
 - Save favourite quotes with page numbers, and search all of them on the
   Quotes page.
+- **Quote pictures.** The picture button by a quote sets it large with the
+  book's title and author under it, to download or, on a phone, share
+  straight to another app. Four looks (Paper, Night, the cover's colours
+  with the cover beside the title, or typed on an index card) and two
+  shapes, square or tall for a story. It's made on your device, and the
+  look you chose last is ready next time.
 - **Import from Kindle.** On the Quotes page, bring in your highlights.
   Connect your Kindle to a computer and pick `My Clippings.txt` from its
   documents folder. Before anything is saved, you check which book in
