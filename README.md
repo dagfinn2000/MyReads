@@ -113,7 +113,7 @@ lamplight, each with a room added upstairs.
 
 ![The reading room as a castle in winter, in a dark theme](docs/room-dark.png)
 
-**Themes**: a dark theme, and the theme picker.
+**Themes**: a dark theme, and the theme picker (here on Majorelle).
 
 ![Library in a dark theme](docs/library-dark.png)
 
