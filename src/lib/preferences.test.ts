@@ -62,6 +62,8 @@ describe("parsePreferences", () => {
     expect(parsePreferences({ accent: "teal" }).accent).toBe("teal");
     expect(parsePreferences({ accent: "#ff0000" }).accent).toBe("theme");
     expect(parsePreferences({ headingFont: "serif" }).headingFont).toBe("serif");
+    expect(parsePreferences({ typography: "bookish" }).typography).toBe("bookish");
+    expect(parsePreferences({ typography: "fancy" }).typography).toBe("plain");
     expect(parsePreferences({ headingFont: "Comic Sans" }).headingFont).toBe("sans");
     expect(parsePreferences({ corners: "square" }).corners).toBe("square");
     expect(parsePreferences({ corners: "0px" }).corners).toBe("rounded");

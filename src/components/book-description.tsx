@@ -1,7 +1,7 @@
 "use client";
 
 import { useId, useLayoutEffect, useRef, useState } from "react";
-import { descriptionMayOverflow } from "@/lib/book-page";
+import { descriptionMayOverflow, takesDropCap } from "@/lib/book-page";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
@@ -37,8 +37,9 @@ export function BookDescription({ text }: { text: string }) {
       <p
         ref={ref}
         id={id}
+        data-drop-cap={takesDropCap(text) ? "" : undefined}
         className={cn(
-          "long-text max-w-prose whitespace-pre-line break-words text-sm leading-relaxed text-muted-foreground",
+          "long-text book-prose max-w-prose whitespace-pre-line break-words text-sm leading-relaxed text-muted-foreground",
           !expanded && "line-clamp-4",
         )}
       >
