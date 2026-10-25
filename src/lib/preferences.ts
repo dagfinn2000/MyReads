@@ -52,6 +52,8 @@ import {
 } from "@/lib/room-styles";
 import { DEFAULT_AVATAR, parseAvatar, parseSavedLooks, type AvatarLook } from "@/lib/avatar";
 import { parseCatCoat, parseDogCoat, parsePet, type CatCoat, type DogCoat, type Pet } from "@/lib/pets";
+import { parseOwnCss } from "@/lib/own-css";
+import { parsePartThemes, type PartThemes } from "@/lib/themes";
 
 /**
  * Per-account preferences — everything on the Account page's Preferences
@@ -421,6 +423,11 @@ export type Preferences = {
   background: Background;
   backgroundMotion: BackgroundMotion;
   bookBackdrop: BookBackdrop;
+  /** Themes for parts of the app (lib/themes.ts THEME_PARTS), as stored
+   *  theme settings. A part left out shows the theme used everywhere. */
+  partThemes: PartThemes;
+  /** CSS of the reader's own, added after the app's (lib/own-css.ts). */
+  ownCss: string;
 
   heatmapScale: HeatmapScale;
   startPage: StartPage;
@@ -580,6 +587,8 @@ export const DEFAULT_PREFERENCES: Preferences = {
   background: "plain",
   backgroundMotion: "moving",
   bookBackdrop: "cover",
+  partThemes: {},
+  ownCss: "",
   heatmapScale: "standard",
   startPage: "library",
   navOrder: [...NAV_ITEMS],
@@ -902,6 +911,8 @@ export function parsePreferences(raw: unknown): Preferences {
     background: pick(BACKGROUNDS, obj.background, d.background),
     backgroundMotion: pick(BACKGROUND_MOTIONS, obj.backgroundMotion, d.backgroundMotion),
     bookBackdrop: pick(BOOK_BACKDROPS, obj.bookBackdrop, d.bookBackdrop),
+    partThemes: parsePartThemes(obj.partThemes),
+    ownCss: parseOwnCss(obj.ownCss),
     heatmapScale: pick(HEATMAP_SCALES, obj.heatmapScale, d.heatmapScale),
     startPage: pick(START_PAGES, obj.startPage, d.startPage),
     navOrder: parseNavOrder(obj.navOrder),

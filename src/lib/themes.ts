@@ -25,6 +25,11 @@ export interface ThemeDef {
 
 export const THEME_STORAGE_KEY = "myreads-theme";
 
+/** A theme for this browser only ("Only on this device" in the picker):
+ *  while one is stored it wins over the account's theme here, and the
+ *  account's theme, which other devices keep, is left alone. */
+export const DEVICE_THEME_STORAGE_KEY = "myreads-device-theme";
+
 export const THEMES: ThemeDef[] = [
   // Built-in shadcn bases (no data-theme CSS block needed).
   { id: "light", name: "Light", mode: "light", swatch: ["#ffffff", "#343434"] },
@@ -102,6 +107,79 @@ export function serializeThemeSetting(setting: ThemeSetting): string {
   return setting.kind === "auto" ? `auto:${setting.light}:${setting.dark}` : setting.id;
 }
 
+/** Where a page is in the app, as `data-section` on <html>: for the
+ *  reader's own CSS to aim at, and to find the page's own theme. */
+export const SECTIONS = [
+  "library",
+  "book",
+  "series",
+  "stats",
+  "reading",
+  "quotes",
+  "room",
+  "account",
+] as const;
+
+/**
+ * The section a path is in, or "" outside them (the sign-in pages). Add
+ * book and Check count as the library; a book's page and its edit page as
+ * "book". Self-contained, like applyThemeSetting below: the pre-paint
+ * script runs its source.
+ */
+export function sectionOf(pathname: string): string {
+  const parts = pathname.split("/");
+  if (parts[1] === "books") {
+    return parts[2] && parts[2] !== "new" && parts[2] !== "check" ? "book" : "library";
+  }
+  return ["series", "stats", "reading", "quotes", "room", "account"].indexOf(parts[1]) > -1
+    ? parts[1]
+    : "";
+}
+
+/** The parts of the app that can have a theme of their own (Preferences). */
+export const THEME_PARTS = ["library", "stats", "reading", "quotes", "room", "account"] as const;
+export type ThemePart = (typeof THEME_PARTS)[number];
+export type PartThemes = Partial<Record<ThemePart, string>>;
+
+/** Which part's theme each section shows: the library's covers its books
+ *  and the Series page too. */
+export const PART_OF_SECTION: Record<(typeof SECTIONS)[number], ThemePart> = {
+  library: "library",
+  book: "library",
+  series: "library",
+  stats: "stats",
+  reading: "reading",
+  quotes: "quotes",
+  room: "room",
+  account: "account",
+};
+
+/**
+ * The theme setting a page shows: its part's own theme, or else this
+ * device's theme, or else the account's. `parts` is the reader's part
+ * themes as JSON (`data-theme-parts` on <html>, from Preferences); the
+ * device's and the account's settings are read from <html>, where the
+ * pre-paint script and the picker keep them. Self-contained, for the
+ * pre-paint script.
+ */
+export function pageThemeSetting(
+  section: string,
+  parts: string | null,
+  partOf: Record<string, string>,
+): string {
+  const root = document.documentElement;
+  let own = "";
+  try {
+    own = (JSON.parse(parts || "{}") as Record<string, string>)[partOf[section]] || "";
+  } catch {}
+  return (
+    own ||
+    root.getAttribute("data-theme-device") ||
+    root.getAttribute("data-theme-account") ||
+    "light"
+  );
+}
+
 /**
  * Puts a stored theme setting on <html>: the `data-theme` palette, the
  * `dark` class Tailwind's `dark:` variants key on, the browser title bar
@@ -146,29 +224,49 @@ export function applyThemeSetting(
 /**
  * Body of the pre-paint script. The server puts the signed-in user's saved
  * setting on <html> (`data-theme`, or `data-theme-auto` for automatic mode);
- * that wins and is mirrored into localStorage so signed-out pages keep the
- * look. Without one, the localStorage copy applies. Also listens for the
- * system switching between light and dark, which only matters while
- * automatic mode is on. Same self-contained rule as applyThemeSetting.
+ * that is the account's theme, mirrored into localStorage so signed-out
+ * pages keep the look. Without one, the localStorage copy is. It goes on
+ * <html> as `data-theme-account`, this device's own theme (if it has one)
+ * as `data-theme-device`, and the page's section as `data-section`; then
+ * the page's theme (pageThemeSetting) is applied. Also listens for the
+ * system switching between light and dark, which only matters while an
+ * automatic pair is showing. Same self-contained rule as applyThemeSetting.
  */
 function themeInit(
   storageKey: string,
+  deviceKey: string,
+  partOf: Record<string, string>,
   darkIds: string[],
   backgrounds: Record<string, string>,
   apply: typeof applyThemeSetting,
+  sectionFor: typeof sectionOf,
+  pageTheme: typeof pageThemeSetting,
 ): void {
   try {
     const root = document.documentElement;
     const auto = root.getAttribute("data-theme-auto");
-    let setting = auto ? "auto:" + auto : root.getAttribute("data-theme");
+    let account = auto ? "auto:" + auto : root.getAttribute("data-theme");
+    let device: string | null = null;
     try {
       // localStorage can throw in some privacy modes.
-      if (setting) localStorage.setItem(storageKey, setting);
-      else setting = localStorage.getItem(storageKey);
+      if (account) localStorage.setItem(storageKey, account);
+      else account = localStorage.getItem(storageKey);
+      device = localStorage.getItem(deviceKey);
     } catch {}
     // Nothing stored anywhere means the default theme, applied all the
     // same so the title bar gets its colour.
-    apply(setting || "light", darkIds, backgrounds);
+    root.setAttribute("data-theme-account", account || "light");
+    // A device theme naming a theme that no longer exists is ignored.
+    const known = function (setting: string) {
+      const ids = setting.indexOf("auto:") === 0 ? setting.slice(5).split(":") : [setting];
+      return ids.every(function (id) {
+        return Object.prototype.hasOwnProperty.call(backgrounds, id);
+      });
+    };
+    if (device && known(device)) root.setAttribute("data-theme-device", device);
+    const section = sectionFor(location.pathname);
+    if (section) root.setAttribute("data-section", section);
+    apply(pageTheme(section, root.getAttribute("data-theme-parts"), partOf), darkIds, backgrounds);
     window
       .matchMedia("(prefers-color-scheme: dark)")
       .addEventListener("change", function () {
@@ -184,8 +282,37 @@ function themeInit(
  * above, so the picker and the first paint can never disagree about what a
  * setting means.
  */
-export const THEME_INIT_SCRIPT = `(${themeInit.toString()})(${JSON.stringify(
+export const THEME_INIT_SCRIPT = `(${themeInit.toString()})(${[
   THEME_STORAGE_KEY,
-)},${JSON.stringify(DARK_THEME_IDS)},${JSON.stringify(
+  DEVICE_THEME_STORAGE_KEY,
+  PART_OF_SECTION,
+  DARK_THEME_IDS,
   THEME_BACKGROUNDS,
-)},${applyThemeSetting.toString()});`;
+]
+  .map((value) => JSON.stringify(value))
+  .join(",")},${applyThemeSetting.toString()},${sectionOf.toString()},${pageThemeSetting.toString()});`;
+
+/**
+ * The theme setting the page in `section` should show now
+ * (pageThemeSetting), or null when it already shows it. For after
+ * something it depends on changed: the page, the picker, Preferences.
+ */
+export function pageThemeChange(section: string): string | null {
+  const root = document.documentElement;
+  const next = pageThemeSetting(section, root.getAttribute("data-theme-parts"), PART_OF_SECTION);
+  const auto = root.getAttribute("data-theme-auto");
+  return next === (auto ? "auto:" + auto : root.getAttribute("data-theme")) ? null : next;
+}
+
+/** The reader's part themes, checked: a part's setting that doesn't parse
+ *  (a theme since removed) is dropped, so the part follows the rest. */
+export function parsePartThemes(raw: unknown): PartThemes {
+  const out: PartThemes = {};
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return out;
+  for (const part of THEME_PARTS) {
+    const value = (raw as Record<string, unknown>)[part];
+    const setting = typeof value === "string" ? parseThemeSetting(value) : null;
+    if (setting) out[part] = serializeThemeSetting(setting);
+  }
+  return out;
+}

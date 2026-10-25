@@ -1,15 +1,20 @@
 import { BackupReminder } from "@/components/backup-reminder";
 import { KeyboardShortcuts } from "@/components/keyboard-shortcuts";
 import { Nav } from "@/components/nav";
+import { OwnCss } from "@/components/own-css";
 import { PreferencesProvider } from "@/components/preferences-provider";
+import { ThemeSync } from "@/components/theme-sync";
 import { getCurrentUser, getPreferences } from "@/lib/current-user";
+import { parseThemeSetting, serializeThemeSetting } from "@/lib/themes";
 
 /** Shared shell for all authenticated pages: top nav + centered content,
- *  and the keyboard shortcuts, which only show when ? asks for them. */
+ *  and the keyboard shortcuts, which only show when ? asks for them. Last,
+ *  the reader's own CSS, after everything else. */
 export default async function AppLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   const [user, prefs] = await Promise.all([getCurrentUser(), getPreferences()]);
+  const theme = parseThemeSetting(user?.theme);
 
   return (
     <PreferencesProvider
@@ -22,6 +27,11 @@ export default async function AppLayout({
         {children}
       </main>
       <KeyboardShortcuts />
+      <ThemeSync
+        account={theme ? serializeThemeSetting(theme) : null}
+        parts={JSON.stringify(prefs.partThemes)}
+      />
+      <OwnCss css={prefs.ownCss} />
     </PreferencesProvider>
   );
 }

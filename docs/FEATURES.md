@@ -285,7 +285,14 @@ tab goes away. You can also keep the house and leave the avatar out.
   them pair colours you rarely see together: Bordeaux (wine red and
   sea-glass green), Riviera (ultramarine and peach), Rhubarb (pink and
   green) and Majorelle (lemon yellow and cobalt). Your choice follows you
-  to every device you sign in on.
+  to every device you sign in on, unless you give one phone or computer a
+  theme of its own ("Only on this device" in the palette menu).
+- A theme for each part of the app if you like: Stats in one theme, the
+  reading room in another, the rest in your usual one (Preferences).
+- Your own CSS, added after the app's styles on every page but the
+  Account page, where you edit it. Each page says which part it is
+  (`data-section` on the `html` element), so a rule can aim at one part.
+  Add `?css=off` to any address to see that page without it.
 - 26 background textures. Five of them move: rain falls on Rain, snow
   drifts on Snow, and stars twinkle on Starry night (on dark themes, a
   star now and then shoots across the sky). The light shifts on Aurora,

@@ -233,6 +233,17 @@ describe("parsePreferences: the newer settings", () => {
     expect(parsePreferences({ keyboardShortcuts: "no" }).keyboardShortcuts).toBe(true);
   });
 
+  it("keeps part themes that exist, and the reader's own CSS", () => {
+    const prefs = parsePreferences({
+      partThemes: { stats: "dracula", room: "no-such-theme" },
+      ownCss: "h1 { color: teal; }",
+    });
+    expect(prefs.partThemes).toEqual({ stats: "dracula" });
+    expect(prefs.ownCss).toBe("h1 { color: teal; }");
+    expect(parsePreferences({}).partThemes).toEqual({});
+    expect(parsePreferences({ ownCss: { evil: true } }).ownCss).toBe("");
+  });
+
   it("leaves Series out of the bar until it is turned on", () => {
     expect(parsePreferences({}).shownNav).toEqual([]);
     expect(parsePreferences({ shownNav: ["series", "series", "room", "x"] }).shownNav).toEqual([
