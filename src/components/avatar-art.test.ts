@@ -89,6 +89,15 @@ const cells = (a: Art) => {
   return seen;
 };
 
+/** The paint of each dot, row by row (a sprite's rects all lie inside it). */
+const paintGrid = (a: Art) => {
+  const out: (string | undefined)[] = new Array(a.w * a.h);
+  for (const [x, y, w, h, paint] of a.rects) {
+    for (let j = y; j < y + h; j++) for (let i = x; i < x + w; i++) out[j * a.w + i] = paint;
+  }
+  return out;
+};
+
 /** The looks drawn in every build; the default (average) build draws
  *  them all. */
 const BUILD_LOOKS = LOOKS.filter((_, i) => i % 3 === 0);
@@ -121,19 +130,15 @@ describe("avatarArt", () => {
     const gaps: string[] = [];
     for (const [look, art] of drawn) {
       for (const [pose, a] of Object.entries(art)) {
-        const dots = cells(a);
-        for (const [key, paint] of dots) {
-          if (paint === "av-line") continue;
-          const [x, y] = key.split(",").map(Number);
-          if (
-            ![
-              [1, 0],
-              [-1, 0],
-              [0, 1],
-              [0, -1],
-            ].every(([dx, dy]) => dots.has(`${x + dx},${y + dy}`))
-          ) {
-            gaps.push(`${name(look)} ${pose} at ${x},${y}`);
+        const dots = paintGrid(a);
+        const filled = (x: number, y: number) => x >= 0 && y >= 0 && x < a.w && y < a.h && dots[y * a.w + x] !== undefined;
+        for (let y = 0; y < a.h; y++) {
+          for (let x = 0; x < a.w; x++) {
+            const paint = dots[y * a.w + x];
+            if (paint === undefined || paint === "av-line") continue;
+            if (!(filled(x + 1, y) && filled(x - 1, y) && filled(x, y + 1) && filled(x, y - 1))) {
+              gaps.push(`${name(look)} ${pose} at ${x},${y}`);
+            }
           }
         }
       }
