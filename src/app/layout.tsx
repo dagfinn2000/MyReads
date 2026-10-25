@@ -85,6 +85,7 @@ export default async function RootLayout({
       data-cards={prefs?.cardStyle}
       data-background={prefs?.background}
       data-background-motion={prefs?.backgroundMotion}
+      data-cover-tilt={prefs?.coverTilt}
       data-book-backdrop={prefs?.bookBackdrop}
       // Themes for parts of the app, which the pre-paint script picks from.
       data-theme-parts={

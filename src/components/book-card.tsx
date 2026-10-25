@@ -32,6 +32,7 @@ export function BookCover({
   className,
   loading = "lazy",
   flightTarget,
+  tilt = false,
 }: {
   book: Pick<Book, "title" | "coverUrl"> & { authors?: string[] };
   className?: string;
@@ -39,11 +40,15 @@ export function BookCover({
   /** The book's id, on the book page's own cover: where a cover clicked
    *  elsewhere flies to (lib/cover-flight.ts). */
   flightTarget?: string;
+  /** Tilts toward the pointer and catches the light
+   *  (components/cover-tilt.tsx). */
+  tilt?: boolean;
 }) {
   return (
     <div
       className={cn("book-cover relative overflow-hidden rounded-md bg-muted", className)}
       data-cover-for={flightTarget}
+      data-tilt={tilt ? "" : undefined}
     >
       {book.coverUrl ? (
         // eslint-disable-next-line @next/next/no-img-element
@@ -335,7 +340,7 @@ export function BookCard({
         compact ? "gap-1.5 p-2" : "gap-2 p-3",
       )}
     >
-      <BookCover book={book} className="aspect-[2/3] w-full" />
+      <BookCover book={book} className="aspect-[2/3] w-full" tilt />
       {progress !== null && (
         <div
           className="-mt-1 h-1.5 rounded-full bg-muted"
@@ -390,7 +395,7 @@ export function BookCoverTile({ book, compact = false }: { book: BookCardBook; c
   const progress = readingProgress(book);
   return (
     <BookLink bookId={book.id} className="lift-cover group flex flex-col gap-1.5">
-      <BookCover book={book} className="cover-shadow aspect-[2/3] w-full" />
+      <BookCover book={book} className="cover-shadow aspect-[2/3] w-full" tilt />
       {progress !== null && (
         <div
           className="h-1 rounded-full bg-muted"
@@ -420,7 +425,7 @@ export function BookOnShelf({ book }: { book: BookCardBook }) {
   const byline = book.authors.length ? ` by ${book.authors.join(", ")}` : "";
   return (
     <BookLink bookId={book.id} className="lift-cover block" title={`${book.title}${byline}`}>
-      <BookCover book={book} className="cover-shadow aspect-[2/3] w-full" />
+      <BookCover book={book} className="cover-shadow aspect-[2/3] w-full" tilt />
       <span className="sr-only">{book.title}</span>
     </BookLink>
   );

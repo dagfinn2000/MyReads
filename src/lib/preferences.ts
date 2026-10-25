@@ -192,6 +192,11 @@ export const BACKGROUNDS = [
  *  the app's animations play. */
 export const BACKGROUND_MOTIONS = ["moving", "still"] as const;
 
+/** Whether covers in the library and a book's own cover tilt toward the
+ *  pointer and catch the light (components/cover-tilt.tsx). Only with a
+ *  mouse or trackpad, and never when animations are off. */
+export const COVER_TILTS = ["on", "off"] as const;
+
 /** Colour steps for the reading calendar (see lib/heatmap.ts). */
 export const HEATMAP_SCALES = ["standard", "gentle", "heavy", "auto"] as const;
 
@@ -364,6 +369,7 @@ export type CardStyle = (typeof CARD_STYLES)[number];
 export type BookBackdrop = (typeof BOOK_BACKDROPS)[number];
 export type Background = (typeof BACKGROUNDS)[number];
 export type BackgroundMotion = (typeof BACKGROUND_MOTIONS)[number];
+export type CoverTilt = (typeof COVER_TILTS)[number];
 export type HeatmapScale = (typeof HEATMAP_SCALES)[number];
 export type StartPage = (typeof START_PAGES)[number];
 export type NavItem = (typeof NAV_ITEMS)[number];
@@ -442,6 +448,7 @@ export type Preferences = {
   cardStyle: CardStyle;
   background: Background;
   backgroundMotion: BackgroundMotion;
+  coverTilt: CoverTilt;
   bookBackdrop: BookBackdrop;
   /** Themes for parts of the app (lib/themes.ts THEME_PARTS), as stored
    *  theme settings. A part left out shows the theme used everywhere. */
@@ -628,6 +635,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
   cardStyle: "raised",
   background: "plain",
   backgroundMotion: "moving",
+  coverTilt: "on",
   bookBackdrop: "cover",
   partThemes: {},
   ownCss: "",
@@ -963,6 +971,7 @@ export function parsePreferences(raw: unknown): Preferences {
     cardStyle: pick(CARD_STYLES, obj.cardStyle, d.cardStyle),
     background: pick(BACKGROUNDS, obj.background, d.background),
     backgroundMotion: pick(BACKGROUND_MOTIONS, obj.backgroundMotion, d.backgroundMotion),
+    coverTilt: pick(COVER_TILTS, obj.coverTilt, d.coverTilt),
     bookBackdrop: pick(BOOK_BACKDROPS, obj.bookBackdrop, d.bookBackdrop),
     partThemes: parsePartThemes(obj.partThemes),
     ownCss: parseOwnCss(obj.ownCss),

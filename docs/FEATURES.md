@@ -151,6 +151,11 @@ page by page.
 - Show the library as cards, bare covers or a bookshelf, in three sizes, or
   as a list, and choose what each book shows. Covers can look like little
   hardbacks, and books without a cover get one drawn with their title.
+- **Covers that follow the pointer.** With a mouse or trackpad, a cover in
+  the library or on a book's page leans back where the pointer rests on
+  it, as if pressed, and catches a soft light under the pointer, then eases
+  back flat when you move away. It can be turned off in Preferences >
+  Motion.
 - **Spines.** Or stand the books spine out in a bookcase, coloured from
   their covers, with the title running down each spine and the author's
   surname at the foot. Thick books are wider, heights and bindings vary
@@ -456,8 +461,8 @@ On the Account page:
   them: a few themes have their own), flat, raised or frosted
   cards, the background texture, and a wash of the cover's colours behind
   the top of each book's page.
-- Animations on or off, how a finished book is celebrated, and whether
-  the moving backgrounds move.
+- Animations on or off, how a finished book is celebrated, whether the
+  moving backgrounds move, and whether covers follow the pointer.
 - The book page: which cards show and in what order, long descriptions in
   full or cut short, and your own "Find it at" links.
 - Which page opens first, and the top bar: its links in your own order,

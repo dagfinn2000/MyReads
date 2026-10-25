@@ -2843,6 +2843,44 @@ html[data-covers="plain"] .drawn-cover {
   }
 }
 
+/* Covers that follow the pointer (components/cover-tilt.tsx, which sets
+   the angles and where the light falls as the pointer moves): a cover leans
+   back where the pointer rests on it, as if pressed, and a soft light sits
+   under the pointer. Eases back flat when the pointer leaves. Only with a
+   mouse or trackpad, and not with Animations off, reduced motion or
+   "Covers follow the pointer: Off". */
+@media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
+  html:not([data-motion="off"]):not([data-cover-tilt="off"]) [data-tilt] {
+    transform: perspective(40rem) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
+    transition:
+      transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1),
+      translate 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  html:not([data-motion="off"]):not([data-cover-tilt="off"]) [data-tilt][data-tilting] {
+    transition:
+      transform 0.12s ease-out,
+      translate 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  html:not([data-motion="off"]):not([data-cover-tilt="off"]) [data-tilt]::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background: radial-gradient(
+      circle at var(--sheen-x, 50%) var(--sheen-y, 50%),
+      rgb(255 255 255 / 0.32),
+      rgb(255 255 255 / 0.08) 30%,
+      rgb(255 255 255 / 0) 60%
+    );
+    opacity: 0;
+    transition: opacity 0.4s;
+  }
+  html:not([data-motion="off"]):not([data-cover-tilt="off"]) [data-tilt][data-tilting]::before {
+    opacity: 1;
+  }
+}
+
 /* 3D covers (the View menu's switch, data-cover-3d on <html>): every cover
    in the app becomes a little hardback, with a squarer spine edge, a crease
    and shine down the spine, a few page edges peeking out on the right and a

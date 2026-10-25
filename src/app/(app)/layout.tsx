@@ -1,4 +1,5 @@
 import { BackupReminder } from "@/components/backup-reminder";
+import { CoverTilt } from "@/components/cover-tilt";
 import { KeyboardShortcuts } from "@/components/keyboard-shortcuts";
 import { Nav } from "@/components/nav";
 import { OwnCss } from "@/components/own-css";
@@ -29,6 +30,7 @@ export default async function AppLayout({
       </main>
       <KeyboardShortcuts />
       <SoundUnlock />
+      <CoverTilt />
       <ThemeSync
         account={theme ? serializeThemeSetting(theme) : null}
         parts={JSON.stringify(prefs.partThemes)}
