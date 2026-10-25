@@ -44,6 +44,9 @@ import {
  * over the account's theme here, and other devices keep the account's.
  * A part of the app with a theme of its own (Preferences) keeps showing
  * that; the picker then chooses for everywhere else.
+ *
+ * The themes come in three groups, each under its heading: light, dark,
+ * and the Silly set.
  */
 /**
  * The picker reads <html>, where the theme lives: `data-theme-account` and
@@ -60,6 +63,13 @@ const WATCHED = [
   "data-theme-device",
   "data-theme-parts",
   "data-section",
+];
+
+/** The palette menu's groups of themes, each under its heading. */
+const THEME_GROUPS: { label: string; hint?: string; has: (t: ThemeDef) => boolean }[] = [
+  { label: "Light", has: (t) => t.mode === "light" && !t.silly },
+  { label: "Dark", has: (t) => t.mode === "dark" && !t.silly },
+  { label: "Silly", hint: "not recommended", has: (t) => !!t.silly },
 ];
 
 function subscribeToTheme(onChange: () => void): () => void {
@@ -272,6 +282,31 @@ export function ThemePicker() {
   const isSelected = (t: ThemeDef) =>
     auto ? auto[t.mode] === t.id : current?.kind === "fixed" && current.id === t.id;
 
+  const themeButton = (t: ThemeDef) => (
+    <button
+      key={t.id}
+      type="button"
+      onClick={() => pick(t)}
+      title={t.silly}
+      className={cn(
+        "flex items-center gap-2 rounded-md border p-1.5 text-left text-xs transition-colors hover:border-ring/60",
+        isSelected(t) && "border-primary ring-1 ring-primary",
+      )}
+    >
+      <span
+        className="flex h-6 w-8 shrink-0 items-center justify-center rounded border border-black/10"
+        style={{ backgroundColor: t.swatch[0] }}
+      >
+        <span
+          className="size-2.5 rounded-full"
+          style={{ backgroundColor: t.swatch[1] }}
+        />
+      </span>
+      <span className="line-clamp-2 min-w-0 flex-1 leading-tight">{t.name}</span>
+      {isSelected(t) && <Check className="size-3.5 shrink-0" />}
+    </button>
+  );
+
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
@@ -280,7 +315,7 @@ export function ThemePicker() {
           <span className="sr-only">Choose theme</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-72 p-2">
+      <DropdownMenuContent align="end" className="w-76 p-2">
         <div className="mb-2 grid gap-1.5">
           <SwitchRow
             icon={SunMoon}
@@ -310,31 +345,17 @@ export function ThemePicker() {
             </p>
           )}
         </div>
-        <div className="grid grid-cols-2 gap-1.5">
-          {THEMES.map((t) => (
-            <button
-              key={t.id}
-              type="button"
-              onClick={() => pick(t)}
-              className={cn(
-                "flex items-center gap-2 rounded-md border p-1.5 text-left text-xs transition-colors hover:border-ring/60",
-                isSelected(t) && "border-primary ring-1 ring-primary",
-              )}
-            >
-              <span
-                className="flex h-6 w-8 shrink-0 items-center justify-center rounded border border-black/10"
-                style={{ backgroundColor: t.swatch[0] }}
-              >
-                <span
-                  className="size-2.5 rounded-full"
-                  style={{ backgroundColor: t.swatch[1] }}
-                />
-              </span>
-              <span className="line-clamp-2 min-w-0 flex-1 leading-tight">{t.name}</span>
-              {isSelected(t) && <Check className="size-3.5 shrink-0" />}
-            </button>
-          ))}
-        </div>
+        {THEME_GROUPS.map((group) => (
+          <div key={group.label}>
+            <p className="mt-3 mb-1.5 px-1 text-xs text-muted-foreground">
+              <span className="font-medium text-foreground">{group.label}</span>
+              {group.hint && ` · ${group.hint}`}
+            </p>
+            <div className="grid grid-cols-2 gap-1.5">
+              {THEMES.filter(group.has).map(themeButton)}
+            </div>
+          </div>
+        ))}
       </DropdownMenuContent>
     </DropdownMenu>
   );

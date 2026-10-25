@@ -63,6 +63,51 @@ describe("THEMES", () => {
       expect([token(body, "background"), token(body, "primary")], t.id).toEqual(t.swatch);
     }
   });
+
+  it("keeps its own themes, the Silly set too, easy to read", () => {
+    // Ported from dagfinn2000/dashify as they are there.
+    const ported = new Set([
+      "dracula",
+      "catppuccin-mocha",
+      "gruvbox",
+      "everforest",
+      "kanagawa",
+      "rose-pine",
+      "zenburn",
+      "everforest-light",
+      "gruvbox-light",
+      "kanagawa-lotus",
+      "selenized-light",
+      "solarized-light",
+      "catppuccin-latte",
+      "rose-pine-dawn",
+    ]);
+    const luminance = (hex: string) => {
+      const [r, g, b] = [1, 3, 5].map((i) => {
+        const c = parseInt(hex.slice(i, i + 2), 16) / 255;
+        return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+      });
+      return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    };
+    const contrast = (body: string, a: string, b: string) => {
+      const [x, y] = [token(body, a)!, token(body, b)!].map(luminance).sort((p, q) => q - p);
+      return (x + 0.05) / (y + 0.05);
+    };
+    for (const [id, body] of blocks) {
+      if (ported.has(id)) continue;
+      expect(contrast(body, "foreground", "background"), `${id} text`).toBeGreaterThanOrEqual(11);
+      expect(contrast(body, "muted-foreground", "muted"), `${id} muted text`).toBeGreaterThanOrEqual(4.5);
+      expect(contrast(body, "primary-foreground", "primary"), `${id} buttons`).toBeGreaterThanOrEqual(4.5);
+      expect(contrast(body, "primary", "background"), `${id} accent`).toBeGreaterThanOrEqual(4.5);
+      expect(contrast(body, "destructive", "card"), `${id} danger`).toBeGreaterThanOrEqual(4.5);
+    }
+  });
+
+  it("lists the Silly set last, each with a line about it", () => {
+    const first = THEMES.findIndex((t) => t.silly);
+    expect(first).toBeGreaterThan(0);
+    expect(THEMES.slice(first).every((t) => t.silly)).toBe(true);
+  });
 });
 
 describe("sectionOf", () => {

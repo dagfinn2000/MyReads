@@ -14,7 +14,10 @@
  * with cobalt. The seven after them do the same on grounds no other theme
  * uses: olive with lavender, clay with sky blue, magenta with lime, royal
  * purple with saffron, aqua with red, chartreuse with aubergine, orange
- * with magenta.
+ * with magenta. Then come ten of other kinds: duotones, monochromes, high
+ * contrast in both modes, greyscale with one red, mixed pastels, brown
+ * paper and blue-ink text. Last is the Silly set, absurd on purpose, which
+ * the palette menu lists apart.
  * Dark-mode themes additionally get the `dark` class on <html> so Tailwind
  * `dark:` variants (status badges etc.) follow along.
  */
@@ -24,6 +27,8 @@ export interface ThemeDef {
   mode: "light" | "dark";
   /** [background, accent] — used to draw the picker swatch. */
   swatch: [string, string];
+  /** Only on the Silly set: a line about the theme, shown on hover. */
+  silly?: string;
 }
 
 export const THEME_STORAGE_KEY = "myreads-theme";
@@ -57,6 +62,16 @@ export const THEMES: ThemeDef[] = [
   { id: "terracotta", name: "Terracotta", mode: "dark", swatch: ["#3d1a0c", "#8fd3ff"] },
   { id: "dragonfruit", name: "Dragonfruit", mode: "dark", swatch: ["#3a0a31", "#bff25c"] },
   { id: "iris", name: "Iris", mode: "dark", swatch: ["#2a0c47", "#ffd24d"] },
+  { id: "blueprint", name: "Blueprint", mode: "dark", swatch: ["#143668", "#ffffff"] },
+  { id: "terminal", name: "Terminal", mode: "dark", swatch: ["#040d07", "#b6ffc8"] },
+  {
+    id: "high-contrast-dark",
+    name: "High Contrast Dark",
+    mode: "dark",
+    swatch: ["#000000", "#ffe500"],
+  },
+  { id: "art-deco", name: "Art Deco", mode: "dark", swatch: ["#0d0b07", "#e6be5a"] },
+  { id: "chalkboard", name: "Chalkboard", mode: "dark", swatch: ["#223a2e", "#f4e07a"] },
 
   // Light palettes
   { id: "everforest-light", name: "Everforest Light", mode: "light", swatch: ["#fdf6e3", "#35a77c"] },
@@ -76,6 +91,53 @@ export const THEMES: ThemeDef[] = [
   { id: "lido", name: "Lido", mode: "light", swatch: ["#d3f2ee", "#b8321a"] },
   { id: "absinthe", name: "Absinthe", mode: "light", swatch: ["#e8f4ac", "#6a2c9e"] },
   { id: "marigold", name: "Marigold", mode: "light", swatch: ["#ffd9a8", "#ad0f68"] },
+  {
+    id: "high-contrast-light",
+    name: "High Contrast Light",
+    mode: "light",
+    swatch: ["#ffffff", "#0033b3"],
+  },
+  { id: "newsprint", name: "Newsprint", mode: "light", swatch: ["#dcdcd7", "#b30d29"] },
+  { id: "macaron", name: "Macaron", mode: "light", swatch: ["#e2f4e9", "#a8336e"] },
+  { id: "kraft", name: "Kraft", mode: "light", swatch: ["#dcc6a0", "#9a1f18"] },
+  { id: "notebook", name: "Notebook", mode: "light", swatch: ["#fbfaf5", "#c41e3a"] },
+
+  // The Silly set
+  {
+    id: "blue-screen",
+    name: "Blue Screen",
+    mode: "dark",
+    swatch: ["#0000aa", "#aaaaaa"],
+    silly: "Your library ran into a problem and needs to restart.",
+  },
+  {
+    id: "glowstick",
+    name: "Glowstick",
+    mode: "dark",
+    swatch: ["#0a0012", "#b6ff00"],
+    silly: "Every colour at the party, all at once.",
+  },
+  {
+    id: "hot-dog-stand",
+    name: "Hot Dog Stand",
+    mode: "light",
+    swatch: ["#ffd800", "#b30000"],
+    silly: "Ketchup and mustard. Fries not included.",
+  },
+  {
+    id: "toxic",
+    name: "Toxic",
+    mode: "light",
+    swatch: ["#39ff14", "#6a00b8"],
+    silly: "Glows in the dark. Do not lick.",
+  },
+  {
+    id: "desktop-95",
+    name: "Desktop 95",
+    mode: "light",
+    swatch: ["#c0c0c0", "#000080"],
+    silly: "It is now safe to turn off your library.",
+  },
 ];
 
 export const DARK_THEME_IDS = THEMES.filter((t) => t.mode === "dark").map(

@@ -198,9 +198,13 @@ The reading room's files:
   block's background and accent, as it also colours the browser's title
   bar, and a test fails if the two files disagree. Dark themes get the
   `dark` class too, so textures, the reading room at night and Tailwind's
-  `dark:` colours follow with nothing else to change. The newer themes aim
-  for 11:1 contrast for text on the page and at least 4.5:1 for muted
-  text, buttons, the accent on the page and the danger colour on cards.
+  `dark:` colours follow with nothing else to change. Themes of our own
+  (not the ones ported from other apps) must reach 11:1 contrast for text
+  on the page and at least 4.5:1 for muted text, buttons, the accent on
+  the page and the danger colour on cards, and the same test checks it.
+  An entry with a `silly` line joins the Silly set: it goes last in
+  `THEMES`, and the palette menu and Preferences list it under its own
+  heading, below Light and Dark.
 - **Motion always has an off switch.** One CSS rule stops every animation
   and transition when the device asks for reduced motion or Animations is
   off, and animations started from script (confetti, the theme reveal, the

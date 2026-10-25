@@ -332,7 +332,7 @@ tab goes away. You can also keep the house and leave the avatar out.
 
 ## Look and feel
 
-- 37 colour themes, or a light and a dark one that switch with your
+- 52 colour themes, or a light and a dark one that switch with your
   device, with an accent colour of your own on top if you like. Your
   choice follows you to every device you sign in on, unless you give one
   phone or computer a theme of its own ("Only on this device" in the
@@ -345,6 +345,20 @@ tab goes away. You can also keep the house and leave the avatar out.
   - Light: Rhubarb (pink and green), Majorelle (lemon yellow and cobalt),
     Lido (aqua and red), Absinthe (chartreuse and aubergine) and Marigold
     (orange and magenta).
+- Ten more are different kinds of theme rather than new colours:
+  - Blueprint (white lines on blueprint blue) and Chalkboard (chalk and
+    yellow on a green board), each in just two colours.
+  - Terminal (green on black) and Art Deco (gold on black), each in one
+    colour.
+  - High Contrast Dark (white and yellow on black) and High Contrast Light
+    (black and blue on white), with the strongest contrast of any theme.
+  - Newsprint, all greys with one red; Macaron, mint, pink, lilac and
+    lemon together; Kraft, brown parcel paper with red; and Notebook,
+    ruled-paper white with the text in blue ink.
+- The Silly set, listed apart at the bottom of the palette menu as "not
+  recommended": Blue Screen, Glowstick, Hot Dog Stand, Toxic and
+  Desktop 95. They are as easy to read as the rest, only nobody should
+  want them. Hover over one in the menu for a word about it.
 - A theme for each part of the app if you like: Stats in one theme, the
   reading room in another, the rest in your usual one (Preferences).
 - Your own CSS, added after the app's styles on every page but the
