@@ -3056,6 +3056,35 @@ html[data-cover-3d] .book-cover::after {
   background: var(--primary);
   box-shadow: inset -1px 0 0 rgb(0 0 0 / 0.15);
 }
+/* The year's shelf (components/year-shelf.tsx): a little room between
+   months, and a brass plate on the board under each month's first book. */
+.year-shelf {
+  --board: 0.875rem;
+}
+.year-shelf .spine-slot[data-month]:not(:first-child) {
+  margin-left: 0.5rem;
+}
+.year-shelf .spine-slot[data-month]::after {
+  content: attr(data-month);
+  position: absolute;
+  top: calc(100% + 2px);
+  left: 0;
+  z-index: 1;
+  padding: 0 0.3125rem;
+  border-radius: 1px;
+  background: linear-gradient(#efdc9c, #c49c4a);
+  box-shadow:
+    inset 0 0 0 1px rgb(92 66 18 / 0.35),
+    0 1px 1px rgb(0 0 0 / 0.25);
+  color: #3d2c0c;
+  font-size: 0.5625rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  line-height: calc(var(--board) - 4px);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
 /* Picking books for bulk edit: the chosen spines get a ring. */
 .spine-slot[data-selected] .spine-link {
   outline: 2px solid var(--primary);

@@ -174,7 +174,10 @@ page by page.
 - Decide what counts in your stats. Pages read can mean a whole book's
   pages when you finish it, or the pages you log as you go. You also
   choose whether books you stop reading count, and how audiobooks count.
-- A "year in review" page for every year.
+- A "year in review" page for every year. It opens with the year on a
+  shelf: every book you finished standing spine out in the order you
+  finished it, coloured from its cover, with a little brass plate on the
+  shelf where each month begins.
 - Yearly reading goals in books, pages or days you read, with or without
   re-reads. The goal shows whether you're on track, and next year's can be
   set ahead of time.
