@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useEffectEvent, useRef } from "react";
 import Link from "next/link";
 import { Check } from "lucide-react";
 import { celebrate } from "@/lib/confetti";
 import { goalUnitWord, type DailyGoalTarget } from "@/lib/daily-goal";
+import { useSound } from "@/components/sounds";
 import { Card, CardContent } from "@/components/ui/card";
 
 const SIZE = 72;
@@ -34,11 +35,16 @@ export function DailyGoalRing({
 }) {
   const ringRef = useRef<SVGSVGElement>(null);
   const wasMet = useRef(met);
+  const sound = useSound();
+  const reached = useEffectEvent(() => {
+    celebrate(ringRef.current);
+    sound("goal");
+  });
 
   // Only a goal reached while the page is open celebrates, not one already
   // met when the page opened.
   useEffect(() => {
-    if (met && !wasMet.current) celebrate(ringRef.current);
+    if (met && !wasMet.current) reached();
     wasMet.current = met;
   }, [met]);
 

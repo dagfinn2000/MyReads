@@ -8,6 +8,7 @@ import type { ActionState } from "@/lib/actions/helpers";
 import type { CatalogueDiffRow, CatalogueValues } from "@/lib/catalogue-values";
 import { FORMAT_LABELS, OWNERSHIP_LABELS, STATUS_LABELS, toDateInputValue } from "@/lib/display";
 import type { AfterAdd } from "@/lib/preferences";
+import type { SoundEvent } from "@/lib/sounds";
 import type { TagImportSettings } from "@/lib/tag-rules";
 import { submitKeepingInput } from "@/lib/submit-form";
 import { AudiobookLengthField } from "@/components/audiobook-length-field";
@@ -15,6 +16,7 @@ import { CoverPicker } from "@/components/cover-picker";
 import { FinishedDateField } from "@/components/finished-date-field";
 import { LookupDetails } from "@/components/lookup-details";
 import { usePreferences } from "@/components/preferences-provider";
+import { useSaveSound } from "@/components/sounds";
 import { StarRatingInput } from "@/components/star-rating-input";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -72,6 +74,7 @@ export function BookForm({
   onAdded,
   autoFocusTitle = false,
   lookup,
+  soundOnSave,
 }: {
   action: (prev: ActionState, formData: FormData) => Promise<ActionState>;
   initial?: BookFormValues;
@@ -82,12 +85,24 @@ export function BookForm({
   seriesNames?: string[];
   /** Called with the new book after "Add and add another". */
   onAdded?: (book: { id: string; title: string }) => void;
+  /** The sound for a save that worked (the add form's "added"), with
+   *  sounds on. */
+  soundOnSave?: SoundEvent;
   autoFocusTitle?: boolean;
   /** Offers "Look up details" (the edit page), with the reader's settings
    *  for catalogue subjects. */
   lookup?: TagImportSettings;
 }) {
-  const [state, formAction, pending] = useActionState(action, {});
+  const saveSound = useSaveSound(soundOnSave);
+  const [state, formAction, pending] = useActionState(
+    async (prev: ActionState, formData: FormData) => {
+      saveSound.start();
+      const result = await action(prev, formData);
+      saveSound.done(!result.error);
+      return result;
+    },
+    {},
+  );
   const formRef = useRef<HTMLFormElement>(null);
   // Controlled so the cover picker and upload can set it programmatically.
   const [coverUrl, setCoverUrl] = useState(initial.coverUrl ?? "");

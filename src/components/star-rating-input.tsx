@@ -5,6 +5,7 @@ import { X } from "lucide-react";
 import { motionAllowed } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 import { usePreferences } from "@/components/preferences-provider";
+import { useSound } from "@/components/sounds";
 import { StarGraphic } from "@/components/stars";
 import { Button } from "@/components/ui/button";
 
@@ -62,6 +63,7 @@ function StarInput({
 }) {
   const [value, setValue] = useState(defaultValue);
   const [hover, setHover] = useState<number | null>(null);
+  const sound = useSound();
   const rowRef = useRef<HTMLDivElement>(null);
   const scrubbing = useRef(false);
   // Pointer capture retargets the post-gesture click to the row, but some
@@ -107,6 +109,7 @@ function StarInput({
     setValue(valueAt(e.clientX));
     setHover(null);
     pop(rowRef.current);
+    sound("rated");
   }
 
   function onPointerCancel() {
@@ -149,6 +152,7 @@ function StarInput({
                   if (suppressClick.current) return;
                   setValue(v);
                   pop(rowRef.current);
+                  sound("rated");
                 }}
               />
             );
@@ -176,6 +180,7 @@ function StarInput({
 /** "Out of 10": ten numbered buttons, the chosen one highlighted. */
 function TenPointInput({ name, defaultValue }: { name: string; defaultValue: number }) {
   const [value, setValue] = useState(defaultValue);
+  const sound = useSound();
   return (
     <div className="flex flex-wrap items-center gap-1">
       <input type="hidden" name={name} value={value} />
@@ -188,6 +193,7 @@ function TenPointInput({ name, defaultValue }: { name: string; defaultValue: num
           onClick={(e) => {
             setValue(v);
             pop(e.currentTarget);
+            sound("rated");
           }}
           className={cn(
             "size-8 rounded-md border text-sm tabular-nums transition-colors hover:border-ring/60 sm:size-7",

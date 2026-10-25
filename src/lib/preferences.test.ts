@@ -244,6 +244,14 @@ describe("parsePreferences: the newer settings", () => {
     expect(parsePreferences({ ownCss: { evil: true } }).ownCss).toBe("");
   });
 
+  it("has sounds off, and quiet, until chosen", () => {
+    expect(parsePreferences({}).sounds).toBe("off");
+    expect(parsePreferences({}).soundVolume).toBe("quiet");
+    const prefs = parsePreferences({ sounds: "on", soundVolume: "loud" });
+    expect([prefs.sounds, prefs.soundVolume]).toEqual(["on", "loud"]);
+    expect(parsePreferences({ sounds: true, soundVolume: 11 }).sounds).toBe("off");
+  });
+
   it("leaves Series out of the bar until it is turned on", () => {
     expect(parsePreferences({}).shownNav).toEqual([]);
     expect(parsePreferences({ shownNav: ["series", "series", "room", "x"] }).shownNav).toEqual([

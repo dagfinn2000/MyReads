@@ -1,12 +1,13 @@
 "use client";
 
-import { useActionState, useEffect, useRef } from "react";
+import { useActionState, useEffect, useEffectEvent, useRef } from "react";
 import type { Book, ProgressEntry } from "@prisma/client";
 import { ReadingStatus } from "@/lib/enums";
 import { updateReading } from "@/lib/actions/books";
 import { celebrate } from "@/lib/confetti";
 import { STATUS_LABELS, toDateInputValue } from "@/lib/display";
 import { usePreferences } from "@/components/preferences-provider";
+import { useSound } from "@/components/sounds";
 import { currentPassEntries } from "@/lib/progress";
 import { progressFigure, unitFor } from "@/lib/progress-units";
 import { submitKeepingInput } from "@/lib/submit-form";
@@ -58,13 +59,19 @@ export function ReadingCard({
   const [state, formAction, pending] = useActionState(action, {});
   const prefs = usePreferences();
   const saveButton = useRef<HTMLButtonElement>(null);
+  const sound = useSound();
   const info = unitFor(book, prefs);
   const reading = book.status === ReadingStatus.READING;
 
-  // Finishing a book gets a burst of confetti from the save button. Each
-  // save returns a new state object, so this runs once per save.
+  // Finishing a book gets a burst of confetti from the save button, and
+  // the chime with sounds on. Each save returns a new state object, so this
+  // runs once per save.
+  const finished = useEffectEvent(() => {
+    celebrate(saveButton.current);
+    sound("finished");
+  });
   useEffect(() => {
-    if (state.finished) celebrate(saveButton.current);
+    if (state.finished) finished();
   }, [state]);
 
   // Remount the form whenever the server-side reading data changes. A save

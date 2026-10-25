@@ -53,6 +53,7 @@ import {
 import { DEFAULT_AVATAR, parseAvatar, parseSavedLooks, type AvatarLook } from "@/lib/avatar";
 import { parseCatCoat, parseDogCoat, parsePet, type CatCoat, type DogCoat, type Pet } from "@/lib/pets";
 import { parseOwnCss } from "@/lib/own-css";
+import { SOUND_SETTINGS, SOUND_VOLUMES, type SoundSetting, type SoundVolume } from "@/lib/sounds";
 import { parsePartThemes, type PartThemes } from "@/lib/themes";
 
 /**
@@ -428,6 +429,10 @@ export type Preferences = {
   partThemes: PartThemes;
   /** CSS of the reader's own, added after the app's (lib/own-css.ts). */
   ownCss: string;
+  /** Soft sounds for what the reader does (lib/sounds.ts). Off unless
+   *  turned on. */
+  sounds: SoundSetting;
+  soundVolume: SoundVolume;
 
   heatmapScale: HeatmapScale;
   startPage: StartPage;
@@ -589,6 +594,8 @@ export const DEFAULT_PREFERENCES: Preferences = {
   bookBackdrop: "cover",
   partThemes: {},
   ownCss: "",
+  sounds: "off",
+  soundVolume: "quiet",
   heatmapScale: "standard",
   startPage: "library",
   navOrder: [...NAV_ITEMS],
@@ -913,6 +920,8 @@ export function parsePreferences(raw: unknown): Preferences {
     bookBackdrop: pick(BOOK_BACKDROPS, obj.bookBackdrop, d.bookBackdrop),
     partThemes: parsePartThemes(obj.partThemes),
     ownCss: parseOwnCss(obj.ownCss),
+    sounds: pick(SOUND_SETTINGS, obj.sounds, d.sounds),
+    soundVolume: pick(SOUND_VOLUMES, obj.soundVolume, d.soundVolume),
     heatmapScale: pick(HEATMAP_SCALES, obj.heatmapScale, d.heatmapScale),
     startPage: pick(START_PAGES, obj.startPage, d.startPage),
     navOrder: parseNavOrder(obj.navOrder),

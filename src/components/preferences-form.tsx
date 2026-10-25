@@ -3,12 +3,13 @@
 import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { BookFormat, BookOwnership, ReadingStatus } from "@/lib/enums";
-import { ArrowDown, ArrowUp, Pencil, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, Pencil, Trash2, Volume2 } from "lucide-react";
 import { savePreferences } from "@/lib/actions/preferences";
 import { deleteView, renameView } from "@/lib/actions/saved-views";
 import { moveId, orderByIds } from "@/lib/library-order";
 import { topBarLinks } from "@/lib/nav";
 import { SAVED_VIEW_NAME_MAX } from "@/lib/saved-views";
+import type { SoundVolume } from "@/lib/sounds";
 import {
   FORMAT_LABELS,
   OWNERSHIP_LABELS,
@@ -47,6 +48,7 @@ import { ShortcutsDialog } from "@/components/keyboard-shortcuts";
 import { OwnCssForm } from "@/components/own-css-form";
 import { OrderList } from "@/components/order-list";
 import { PartThemesForm } from "@/components/part-themes-form";
+import { playSample } from "@/components/sounds";
 import { TagRulesList } from "@/components/tag-rules-list";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -823,6 +825,41 @@ export function PreferencesForm({
           ]}
           onChange={(v) => update({ backgroundMotion: v })}
         />
+      </Section>
+
+      <Section title="Sound" id="sound">
+        <Choice
+          label="Sounds"
+          hint="Soft sounds when you log pages, finish a book, reach your daily goal, add a book or rate one. Only for what you do, never on their own."
+          value={prefs.sounds}
+          options={[
+            { value: "off", label: "Off" },
+            { value: "on", label: "On" },
+          ]}
+          onChange={(v) => update({ sounds: v })}
+        />
+        <div className="grid gap-1.5 sm:grid-cols-[14rem_1fr] sm:items-center sm:gap-4">
+          <p className="text-sm font-medium">Volume</p>
+          <div className="flex flex-wrap items-center gap-2">
+            <Select
+              value={prefs.soundVolume}
+              onValueChange={(v) => update({ soundVolume: v as SoundVolume })}
+            >
+              <SelectTrigger className="w-full sm:w-48" aria-label="Volume">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="quiet">Quiet</SelectItem>
+                <SelectItem value="medium">Medium</SelectItem>
+                <SelectItem value="loud">Loud</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button type="button" variant="outline" onClick={() => playSample(prefs.soundVolume)}>
+              <Volume2 data-slot="icon" />
+              Play a sample
+            </Button>
+          </div>
+        </div>
       </Section>
 
       <Section title="Text">

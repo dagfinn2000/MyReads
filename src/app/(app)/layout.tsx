@@ -3,6 +3,7 @@ import { KeyboardShortcuts } from "@/components/keyboard-shortcuts";
 import { Nav } from "@/components/nav";
 import { OwnCss } from "@/components/own-css";
 import { PreferencesProvider } from "@/components/preferences-provider";
+import { SoundUnlock } from "@/components/sounds";
 import { ThemeSync } from "@/components/theme-sync";
 import { getCurrentUser, getPreferences } from "@/lib/current-user";
 import { parseThemeSetting, serializeThemeSetting } from "@/lib/themes";
@@ -27,6 +28,7 @@ export default async function AppLayout({
         {children}
       </main>
       <KeyboardShortcuts />
+      <SoundUnlock />
       <ThemeSync
         account={theme ? serializeThemeSetting(theme) : null}
         parts={JSON.stringify(prefs.partThemes)}

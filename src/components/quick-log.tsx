@@ -20,6 +20,7 @@ import { cn } from "@/lib/utils";
 import { usePreferences } from "@/components/preferences-provider";
 import { ProgressField, ProgressNotes, unitLabel } from "@/components/progress-input";
 import { ReadingTimer, useReadingTimer } from "@/components/reading-timer";
+import { useSound } from "@/components/sounds";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -93,6 +94,7 @@ export function QuickLog({
   const [lastPage, setLastPage] = useState<number | null>(null);
   const [pending, startTransition] = useTransition();
   const timer = useReadingTimer(book.id, book.dateStarted ? book.dateStarted.getTime() : null);
+  const sound = useSound();
 
   const text = draft ?? positionText(book.currentPage, info);
   const today = dayKey(new Date(), prefs.timeZone);
@@ -146,6 +148,7 @@ export function QuickLog({
       });
       if ("error" in result) return fail(result.error);
       if (timed.minutes) timer.consumed();
+      sound("logged");
       setDraft(null);
       setDay("today");
       if (result.lastPage) {
@@ -166,7 +169,10 @@ export function QuickLog({
       if ("error" in result) return fail(result.error);
       if (timed.minutes) timer.consumed();
       // Before the row goes away with the move.
-      if (result.finished) celebrate(origin);
+      if (result.finished) {
+        celebrate(origin);
+        sound("finished");
+      }
       onMoved?.(result);
     });
   }
