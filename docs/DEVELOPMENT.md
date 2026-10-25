@@ -191,6 +191,16 @@ The reading room's files:
   [globals.css](../src/app/globals.css) does the rest, so server and client
   components never pass them down. Preferences sets the attribute at once
   as well as saving, so a change shows without waiting for the server.
+- **A colour theme is one CSS block and one line.** Each theme is a
+  `[data-theme="…"]` block of colours in
+  [globals.css](../src/app/globals.css) and an entry in `THEMES` in
+  [themes.ts](../src/lib/themes.ts). The entry's swatch repeats the
+  block's background and accent, as it also colours the browser's title
+  bar, and a test fails if the two files disagree. Dark themes get the
+  `dark` class too, so textures, the reading room at night and Tailwind's
+  `dark:` colours follow with nothing else to change. The newer themes aim
+  for 11:1 contrast for text on the page and at least 4.5:1 for muted
+  text, buttons, the accent on the page and the danger colour on cards.
 - **Motion always has an off switch.** One CSS rule stops every animation
   and transition when the device asks for reduced motion or Animations is
   off, and animations started from script (confetti, the theme reveal, the

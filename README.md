@@ -58,7 +58,7 @@ server.
 
 **Make it yours**
 
-- 30 colour themes and 26 background textures. On some of the textures
+- 37 colour themes and 26 background textures. On some of the textures
   rain falls, snow drifts or stars twinkle.
 - A theme for one device or one part of the app, and your own CSS.
 - Preferences for date formats, time zone, sorting, fonts and much more.
@@ -122,7 +122,7 @@ lamplight, each with a room added upstairs.
 
 ![The reading room as a castle in winter, in a dark theme](docs/room-dark.png)
 
-**Themes**: a dark theme, and the theme picker (here on Majorelle).
+**Themes**: a dark theme, and the theme picker (here on Marigold).
 
 ![Library in a dark theme](docs/library-dark.png)
 

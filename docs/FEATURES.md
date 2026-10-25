@@ -332,13 +332,19 @@ tab goes away. You can also keep the house and leave the avatar out.
 
 ## Look and feel
 
-- 30 colour themes, or a light and a dark one that switch with your
-  device, with an accent colour of your own on top if you like. Four of
-  them pair colours you rarely see together: Bordeaux (wine red and
-  sea-glass green), Riviera (ultramarine and peach), Rhubarb (pink and
-  green) and Majorelle (lemon yellow and cobalt). Your choice follows you
-  to every device you sign in on, unless you give one phone or computer a
-  theme of its own ("Only on this device" in the palette menu).
+- 37 colour themes, or a light and a dark one that switch with your
+  device, with an accent colour of your own on top if you like. Your
+  choice follows you to every device you sign in on, unless you give one
+  phone or computer a theme of its own ("Only on this device" in the
+  palette menu).
+- Eleven of the themes put together colours you rarely see side by side:
+  - Dark: Bordeaux (wine red and sea-glass green), Riviera (ultramarine
+    and peach), Provence (olive and lavender), Terracotta (clay and sky
+    blue), Dragonfruit (magenta and lime) and Iris (royal purple and
+    saffron).
+  - Light: Rhubarb (pink and green), Majorelle (lemon yellow and cobalt),
+    Lido (aqua and red), Absinthe (chartreuse and aubergine) and Marigold
+    (orange and magenta).
 - A theme for each part of the app if you like: Stats in one theme, the
   reading room in another, the rest in your usual one (Preferences).
 - Your own CSS, added after the app's styles on every page but the
