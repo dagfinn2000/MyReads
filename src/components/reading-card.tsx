@@ -53,7 +53,7 @@ export function ReadingCard({
   progress,
 }: {
   /** Without the folded search copies, which have no business in the page. */
-  book: Omit<Book, "searchText" | "reviewSearchText">;
+  book: Omit<Book, "searchText" | "reviewSearchText" | "fieldSearchText">;
   progress: ProgressEntry[];
 }) {
   const action = updateReading.bind(null, book.id);

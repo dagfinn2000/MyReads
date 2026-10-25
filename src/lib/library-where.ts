@@ -1,4 +1,4 @@
-import type { Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { ReadingStatus } from "@/lib/enums";
 import { prisma } from "@/lib/prisma";
 import { calendarDay } from "@/lib/dates";
@@ -11,6 +11,7 @@ import {
 } from "@/lib/library-filters";
 import type { Preferences } from "@/lib/preferences";
 import { foldForSearch, searchWords } from "@/lib/utils";
+import { parseFieldFilter, resolveFieldFilter, type BookField } from "@/lib/book-fields";
 
 /**
  * The Prisma `where` for a library view, for every place that has to agree
@@ -22,8 +23,9 @@ import { foldForSearch, searchWords } from "@/lib/utils";
 export async function resolveBookWhere(
   userId: string,
   filters: LibraryFilters,
-  prefs: Pick<Preferences, "searchAlsoIn" | "timeZone">,
+  prefs: Pick<Preferences, "searchAlsoIn" | "timeZone"> & Partial<Pick<Preferences, "customFields">>,
 ): Promise<Prisma.BookWhereInput> {
+  const fields = prefs.customFields ?? [];
   const [search, finishedEdgeIds] = await Promise.all([
     searchContext(userId, filters.q, prefs.searchAlsoIn),
     finishedNearNewYear(userId, filters.finished, prefs.timeZone),
@@ -32,7 +34,42 @@ export async function resolveBookWhere(
     ...search,
     finishedEdgeIds,
     overdueBefore: overdueCutoff(new Date(), prefs.timeZone),
+    searchFields: fields.some((f) => f.type === "text" || f.type === "choice"),
+    fieldWhere: fieldFilterWhere(filters.field, fields),
   });
+}
+
+/**
+ * The library's filter on one of the reader's own fields, as a `where` on
+ * the book's values (Book.fields). Undefined when there is none, or it
+ * doesn't fit the field (lib/book-fields.ts resolveFieldFilter), so a
+ * filter on a field since removed filters nothing.
+ */
+export function fieldFilterWhere(
+  filter: string,
+  fields: readonly BookField[],
+): Prisma.BookWhereInput | undefined {
+  const parsed = parseFieldFilter(filter);
+  const r = parsed && resolveFieldFilter(parsed, fields);
+  if (!r) return undefined;
+  const path = [r.field.id];
+  switch (r.op) {
+    // A book stores only the values it has, never a JSON null.
+    case "any":
+      return { fields: { path, not: Prisma.AnyNull } };
+    case "none":
+      return { fields: { path, equals: Prisma.DbNull } };
+    case "is":
+      return { fields: { path, equals: r.value } };
+    case "range":
+      // Dates are stored "YYYY-MM-DD", which sort as they read.
+      return {
+        AND: [
+          ...(r.min !== null ? [{ fields: { path, gte: r.min } }] : []),
+          ...(r.max !== null ? [{ fields: { path, lte: r.max } }] : []),
+        ],
+      };
+  }
 }
 
 /**

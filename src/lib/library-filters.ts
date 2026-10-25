@@ -4,6 +4,7 @@ import { isbnVariants, looksLikeIsbn, normalizeIsbn } from "@/lib/isbn";
 import { overdueCutoff } from "@/lib/loans";
 import type { SearchField } from "@/lib/preferences";
 import { isStatusKey } from "@/lib/statuses";
+import { parseFieldFilter } from "@/lib/book-fields";
 import { searchTerms } from "@/lib/utils";
 
 /**
@@ -37,6 +38,9 @@ export interface LibraryFilters {
   /** One of MISSING_FILTERS: books lacking that detail. */
   missing: string;
   series: string;
+  /** One of the reader's own fields (lib/book-fields.ts parseFieldFilter):
+   *  "id" has a value, "id!" none, "id=value", or "id:min..max". */
+  field: string;
 }
 
 /** A URL parameter as a string. Null bytes are dropped: Postgres refuses
@@ -117,6 +121,7 @@ export function parseFilters(
     finished: /^[1-9]\d{3}$/.test(finished) ? finished : "",
     missing: (MISSING_FILTERS as readonly string[]).includes(missing) ? missing : "",
     series: param(sp.series),
+    field: parseFieldFilter(param(sp.field)) ? param(sp.field) : "",
   };
 }
 
@@ -156,6 +161,11 @@ export interface WhereContext {
   /** For "Overdue": loans due before this are overdue (lib/loans.ts
    *  overdueCutoff, in the reader's zone). */
   overdueBefore?: Date;
+  /** Search looks in the reader's own text and choice fields too. */
+  searchFields?: boolean;
+  /** The field filter as a `where` (library-where.ts fieldFilterWhere),
+   *  which needs the reader's fields to read. */
+  fieldWhere?: Prisma.BookWhereInput;
 }
 
 /**
@@ -184,6 +194,7 @@ export function searchTermWhere(
   // Insensitive: stored ISBNs can end in a lowercase x.
   if (isbn) or.push({ isbn: { contains: isbn, mode: "insensitive" } });
   if (ctx.searchIn?.includes("review")) or.push({ reviewSearchText: { contains: term } });
+  if (ctx.searchFields) or.push({ fieldSearchText: { contains: term } });
   return or.length === 1 ? or[0] : { OR: or };
 }
 
@@ -241,6 +252,8 @@ export function buildBookWhere(
   if (filters.missing === "pages") and.push({ OR: [{ pageCount: null }, { pageCount: { lte: 0 } }] });
   if (filters.missing === "isbn") and.push({ OR: [{ isbn: null }, { isbn: "" }] });
   if (filters.missing === "tags") and.push({ tags: { isEmpty: true } });
+
+  if (filters.field && ctx.fieldWhere) and.push(ctx.fieldWhere);
 
   if (filters.finished) {
     // The current pass counts once the book is Read; archived passes
@@ -306,11 +319,14 @@ const MISSING_CHIP_LABELS: Record<MissingFilter, string> = {
 /**
  * The active filters that have no control of their own on the bar, as
  * chips: author, each tag in or out, finished year, rating, missing detail
- * and series. `ratingLabel` words a minimum rating in the reader's style.
+ * series and one of the reader's own fields. `ratingLabel` words a minimum
+ * rating in the reader's style; `fieldLabel` a field filter, or null when
+ * the field it names is gone (and so filters nothing).
  */
 export function activeFilterChips(
   filters: LibraryFilters,
   ratingLabel: (minRating: string) => string,
+  fieldLabel: (field: string) => string | null = () => null,
 ): FilterChip[] {
   const chips: FilterChip[] = [];
   if (filters.author) {
@@ -353,6 +369,8 @@ export function activeFilterChips(
   if (filters.series) {
     chips.push({ id: "series", label: `Series: ${filters.series}`, clear: { series: "" } });
   }
+  const field = filters.field ? fieldLabel(filters.field) : null;
+  if (field) chips.push({ id: "field", label: field, clear: { field: "" } });
   return chips;
 }
 

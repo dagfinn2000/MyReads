@@ -17,6 +17,7 @@ import { activeFilterChips, searchPlaceholder } from "@/lib/library-filters";
 import { naturalDir, type LibraryDisplay } from "@/lib/library-view";
 import type { RatingStyle } from "@/lib/preferences";
 import { canonicalViewQuery } from "@/lib/saved-views";
+import { fieldFilterLabel } from "@/lib/book-fields";
 import { ActiveFilterChips } from "@/components/active-filter-chips";
 import { LibraryViewMenu } from "@/components/library-view-menu";
 import { ManageTagsDialog } from "@/components/manage-tags-dialog";
@@ -53,6 +54,8 @@ export interface FilterValues {
   finished: string;
   missing: string;
   series: string;
+  /** One of the reader's own fields (lib/book-fields.ts parseFieldFilter). */
+  field: string;
   group: string;
   sort: string;
   dir: string;
@@ -162,7 +165,8 @@ export function FilterBar({
   finishedYears: number[];
 }) {
   const router = useRouter();
-  const { searchAlsoIn } = usePreferences();
+  const prefs = usePreferences();
+  const { searchAlsoIn } = prefs;
   const [search, setSearch] = useState(values.q);
   // The search the URL holds, or was last sent. The box follows the URL when
   // it changes from elsewhere (a saved view opened, Back), compared during
@@ -208,6 +212,7 @@ export function FilterBar({
     if (next.finished) params.set("finished", next.finished);
     if (next.missing) params.set("missing", next.missing);
     if (next.series) params.set("series", next.series);
+    if (next.field) params.set("field", next.field);
     // View params are always explicit in the URL, so the page never has to
     // guess between "reset to default" and "no preference stated" — the
     // account-saved view only fills in on param-less visits (the nav link).
@@ -238,7 +243,11 @@ export function FilterBar({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search]);
 
-  const chips = activeFilterChips(current, (v) => minRatingLabel(v, ratingStyle));
+  const chips = activeFilterChips(
+    current,
+    (v) => minRatingLabel(v, ratingStyle),
+    (field) => fieldFilterLabel(field, prefs.customFields, prefs),
+  );
   const group = GROUP_OPTIONS.find((o) => o.value === current.group);
   const asc = current.dir === "asc";
 
@@ -315,6 +324,7 @@ export function FilterBar({
           values={current}
           finishedYears={finishedYears}
           ratingStyle={ratingStyle}
+          fields={prefs.customFields}
           onChange={navigate}
           triggerRef={moreFiltersRef}
           className={`${HALF_ROW} sm:w-40`}
@@ -398,6 +408,7 @@ export function FilterBar({
             minRating: "",
             missing: "",
             series: "",
+            field: "",
           })
         }
         fallbackFocus={moreFiltersRef}

@@ -92,6 +92,22 @@ describe("buildBookWhere", () => {
     expect(parseFilters({ shelf: "READING", statusKey: "Not A Key" }).statusKey).toBe("");
   });
 
+  it("adds a field filter worked out ahead, and searches field values when asked", () => {
+    const fieldWhere = { fields: { path: ["si"], equals: true } };
+    expect(parseFilters({ field: "si=yes" }).field).toBe("si=yes");
+    expect(parseFilters({ field: "Not a filter" }).field).toBe("");
+    expect(buildBookWhere("u1", parseFilters({ field: "si=yes" }), { fieldWhere })).toEqual({
+      userId: "u1",
+      AND: [fieldWhere],
+    });
+    // Without the field filter in the URL, nothing worked out ahead applies.
+    expect(buildBookWhere("u1", parseFilters({}), { fieldWhere })).toEqual({ userId: "u1" });
+    expect(buildBookWhere("u1", parseFilters({ q: "hall" }), { searchFields: true })).toEqual({
+      userId: "u1",
+      AND: [{ OR: [{ searchText: { contains: "hall" } }, { fieldSearchText: { contains: "hall" } }] }],
+    });
+  });
+
   it("builds exactly the old shape for the old filters", () => {
     expect(where({ shelf: "READ", tag: "fantasy", q: "dune", minRating: "8", series: "Dune" })).toEqual({
       userId: "u1",

@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/actions/helpers";
 import { cleanPreferencesPatch, type Preferences } from "@/lib/preferences";
 import { forgetLostStatuses } from "@/lib/status-keys";
+import { forgetLostFieldValues } from "@/lib/field-values";
 
 /**
  * Saves some preferences on the account. Only the keys in `patch` change.
@@ -26,6 +27,9 @@ export async function savePreferences(patch: Partial<Preferences>): Promise<void
   // A status of the reader's own that was removed takes its books back to
   // their built-in status.
   if (clean.customStatuses) await forgetLostStatuses(prisma, userId, clean.customStatuses);
+  // Likewise a field removed, or an option taken off a choice field, takes
+  // those values off the books.
+  if (clean.customFields) await forgetLostFieldValues(prisma, userId, clean.customFields);
 
   // Preferences show up on every page (dates, ratings, the nav, text size),
   // so the whole app is stale after a change.

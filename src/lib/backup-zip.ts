@@ -153,6 +153,7 @@ export async function buildBackupZip(userId: string): Promise<BackupZip> {
       userId: _userId,
       searchText: _searchText,
       reviewSearchText: _reviewSearchText,
+      fieldSearchText: _fieldSearchText,
       ...book
     }) => ({
       ...book,

@@ -58,6 +58,7 @@ import { parseOwnCss } from "@/lib/own-css";
 import { SOUND_SETTINGS, SOUND_VOLUMES, type SoundSetting, type SoundVolume } from "@/lib/sounds";
 import { parsePartThemes, type PartThemes } from "@/lib/themes";
 import { parseCustomStatuses, parseStatusNames, type CustomStatus, type StatusNames } from "@/lib/statuses";
+import { parseBookFields, type BookField } from "@/lib/book-fields";
 
 /**
  * Per-account preferences — everything on the Account page's Preferences
@@ -496,6 +497,8 @@ export type Preferences = {
    *  their own built on them (lib/statuses.ts). */
   statusNames: StatusNames;
   customStatuses: CustomStatus[];
+  /** The reader's own book fields (lib/book-fields.ts). */
+  customFields: BookField[];
 
   // Stats
   statsPagesRead: StatsPagesRead;
@@ -634,6 +637,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
   hiddenStatusTabs: [],
   statusNames: {},
   customStatuses: [],
+  customFields: [],
   statsPagesRead: "finished",
   statsStoppedBooks: "none",
   statsAudiobooks: "full",
@@ -968,6 +972,7 @@ export function parsePreferences(raw: unknown): Preferences {
     hiddenStatusTabs: hiddenStatusTabs.length < statuses.length ? hiddenStatusTabs : [],
     statusNames: parseStatusNames(obj.statusNames),
     customStatuses: parseCustomStatuses(obj.customStatuses),
+    customFields: parseBookFields(obj.customFields),
     statsPagesRead: pick(STATS_PAGES_READ, obj.statsPagesRead, d.statsPagesRead),
     statsStoppedBooks: pick(STATS_STOPPED_BOOKS, obj.statsStoppedBooks, d.statsStoppedBooks),
     statsAudiobooks: pick(STATS_AUDIOBOOKS, obj.statsAudiobooks, d.statsAudiobooks),
