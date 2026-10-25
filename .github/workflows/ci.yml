@@ -95,6 +95,23 @@ jobs:
       - name: Sign-in page answers
         run: curl --fail --silent --show-error --output /dev/null http://localhost:3000/login
 
+      # The sign-in page needs no database; making an account does, through
+      # the same Prisma client every page uses.
+      - name: The app reaches its database
+        run: >-
+          curl --fail --silent --show-error --output /dev/null
+          -H 'Content-Type: application/json'
+          -d '{"username":"ci-check","password":"ci-check-password-123"}'
+          http://localhost:3000/api/register
+
+      # The entrypoint runs this on every start but never stops for it, so
+      # a script that can't load or reach the database only shows up here.
+      - name: Housekeeping scripts run in the image
+        run: docker compose exec -T app node scripts/prune-metadata-cache.mjs | grep 'pruned'
+        env:
+          POSTGRES_PASSWORD: ci
+          AUTH_SECRET: ci-secret-for-the-compose-check
+
       - name: Container logs
         if: failure()
         run: docker compose logs
