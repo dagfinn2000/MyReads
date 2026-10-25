@@ -541,6 +541,128 @@
     --ring: #ffd24d;
 }
 
+/* The next ten differ in kind rather than hue: two duotones (Blueprint,
+   Chalkboard), two monochromes (Terminal, Art Deco), High Contrast in both
+   modes, a greyscale with one colour (Newsprint), a mix of pastels
+   (Macaron), brown paper (Kraft) and coloured ink for the text
+   (Notebook). */
+
+/* White lines on architect's blue: the only mid-blue page, and the accent
+   is plain white, so the whole theme is two colours. */
+[data-theme="blueprint"] {
+    --background: #143668;
+    --foreground: #f4f8ff;
+    --card: #183d74;
+    --card-foreground: #f4f8ff;
+    --popover: #183d74;
+    --popover-foreground: #f4f8ff;
+    --primary: #ffffff;
+    --primary-foreground: #143668;
+    --secondary: #1f4a88;
+    --secondary-foreground: #f4f8ff;
+    --muted: #1f4a88;
+    --muted-foreground: #c4d6f2;
+    --accent: #1f4a88;
+    --accent-foreground: #f4f8ff;
+    --destructive: #ffc0a8;
+    --border: #5f86bf;
+    --input: #5f86bf;
+    --ring: #ffffff;
+}
+
+/* Green phosphor on black, like an old terminal. The text itself is
+   green, not just the accent; everything but danger is one hue. */
+[data-theme="terminal"] {
+    --background: #040d07;
+    --foreground: #86f5a2;
+    --card: #08170d;
+    --card-foreground: #86f5a2;
+    --popover: #08170d;
+    --popover-foreground: #86f5a2;
+    --primary: #b6ffc8;
+    --primary-foreground: #040d07;
+    --secondary: #0f2618;
+    --secondary-foreground: #86f5a2;
+    --muted: #0f2618;
+    --muted-foreground: #56c274;
+    --accent: #0f2618;
+    --accent-foreground: #86f5a2;
+    --destructive: #ff7468;
+    --border: #1d4a2c;
+    --input: #1d4a2c;
+    --ring: #b6ffc8;
+}
+
+/* White on black with white outlines and a yellow accent, for when the
+   softer darks are hard to make out. Text is 21:1. */
+[data-theme="high-contrast-dark"] {
+    --background: #000000;
+    --foreground: #ffffff;
+    --card: #000000;
+    --card-foreground: #ffffff;
+    --popover: #000000;
+    --popover-foreground: #ffffff;
+    --primary: #ffe500;
+    --primary-foreground: #000000;
+    --secondary: #1f1f1f;
+    --secondary-foreground: #ffffff;
+    --muted: #1f1f1f;
+    --muted-foreground: #e6e6e6;
+    --accent: #1f1f1f;
+    --accent-foreground: #ffffff;
+    --destructive: #ff7b7b;
+    --border: #ffffff;
+    /* Dark fields are filled with --input at 30%: grey keeps them dark. */
+    --input: #a3a3a3;
+    --ring: #ffe500;
+}
+
+/* Gold leaf on black lacquer, like a 1920s cinema foyer. Text, accent and
+   outlines are all gold. */
+[data-theme="art-deco"] {
+    --background: #0d0b07;
+    --foreground: #f2d78c;
+    --card: #17140c;
+    --card-foreground: #f2d78c;
+    --popover: #17140c;
+    --popover-foreground: #f2d78c;
+    --primary: #e6be5a;
+    --primary-foreground: #0d0b07;
+    --secondary: #2a2414;
+    --secondary-foreground: #f2d78c;
+    --muted: #2a2414;
+    --muted-foreground: #c9a85a;
+    --accent: #2a2414;
+    --accent-foreground: #f2d78c;
+    --destructive: #ff8a6b;
+    --border: #7a6128;
+    --input: #7a6128;
+    --ring: #e6be5a;
+}
+
+/* Chalk on a green slate board: chalk-white text and a yellow chalk
+   accent. Greyer and lighter than Evergreen, greener than Everforest. */
+[data-theme="chalkboard"] {
+    --background: #223a2e;
+    --foreground: #f6f6ef;
+    --card: #263f32;
+    --card-foreground: #f6f6ef;
+    --popover: #263f32;
+    --popover-foreground: #f6f6ef;
+    --primary: #f4e07a;
+    --primary-foreground: #223a2e;
+    --secondary: #305040;
+    --secondary-foreground: #f6f6ef;
+    --muted: #305040;
+    --muted-foreground: #c8d8cb;
+    --accent: #305040;
+    --accent-foreground: #f6f6ef;
+    --destructive: #ffb3a6;
+    --border: #56735f;
+    --input: #56735f;
+    --ring: #f4e07a;
+}
+
 [data-theme="everforest-light"] {
     --background: #fdf6e3;
     --foreground: #5c6a72;
@@ -725,7 +847,7 @@
     --secondary: #dbe7f5;
     --secondary-foreground: #16304d;
     --muted: #dbe7f5;
-    --muted-foreground: #4b6a8c;
+    --muted-foreground: #496889;
     --accent: #dbe7f5;
     --accent-foreground: #16304d;
     --destructive: #b3261e;
@@ -917,6 +1039,244 @@
     --border: #f0bd7e;
     --input: #f0bd7e;
     --ring: #ad0f68;
+}
+
+/* Black on white with black outlines on every card, field and chip: High
+   Contrast Dark turned over. Text is 21:1. */
+[data-theme="high-contrast-light"] {
+    --background: #ffffff;
+    --foreground: #000000;
+    --card: #ffffff;
+    --card-foreground: #000000;
+    --popover: #ffffff;
+    --popover-foreground: #000000;
+    --primary: #0033b3;
+    --primary-foreground: #ffffff;
+    --secondary: #ebebeb;
+    --secondary-foreground: #000000;
+    --muted: #ebebeb;
+    --muted-foreground: #1f1f1f;
+    --accent: #ebebeb;
+    --accent-foreground: #000000;
+    --destructive: #b00020;
+    --border: #000000;
+    --input: #000000;
+    --ring: #0033b3;
+}
+
+/* Grey paper, black type and one red, like a newspaper's masthead. The
+   only grey light page; the cards are a whiter stock. */
+[data-theme="newsprint"] {
+    --background: #dcdcd7;
+    --foreground: #121212;
+    --card: #f2f2ee;
+    --card-foreground: #121212;
+    --popover: #f2f2ee;
+    --popover-foreground: #121212;
+    --primary: #b30d29;
+    --primary-foreground: #ffffff;
+    --secondary: #cfcfc9;
+    --secondary-foreground: #121212;
+    --muted: #cfcfc9;
+    --muted-foreground: #45453f;
+    --accent: #cfcfc9;
+    --accent-foreground: #121212;
+    --destructive: #8f0a1f;
+    --border: #bdbdb6;
+    --input: #bdbdb6;
+    --ring: #b30d29;
+}
+
+/* A box of pastels: mint page, pink cards, lavender chips and a lemon
+   hover, with raspberry to press. The only theme whose surfaces are all
+   different hues. */
+[data-theme="macaron"] {
+    --background: #e2f4e9;
+    --foreground: #3a2440;
+    --card: #fdedf3;
+    --card-foreground: #3a2440;
+    --popover: #fdedf3;
+    --popover-foreground: #3a2440;
+    --primary: #a8336e;
+    --primary-foreground: #ffffff;
+    --secondary: #ebe4fa;
+    --secondary-foreground: #3a2440;
+    --muted: #ebe4fa;
+    --muted-foreground: #5f4a68;
+    --accent: #fff2c9;
+    --accent-foreground: #3a2440;
+    --destructive: #b3261e;
+    --border: #e7cfe0;
+    --input: #e7cfe0;
+    --ring: #a8336e;
+}
+
+/* Brown parcel paper with a red rubber stamp. Darker and browner than the
+   cream themes, which are all pale. */
+[data-theme="kraft"] {
+    --background: #dcc6a0;
+    --foreground: #150e06;
+    --card: #e9dbc0;
+    --card-foreground: #150e06;
+    --popover: #e9dbc0;
+    --popover-foreground: #150e06;
+    --primary: #9a1f18;
+    --primary-foreground: #ffffff;
+    --secondary: #cfb78f;
+    --secondary-foreground: #150e06;
+    --muted: #cfb78f;
+    --muted-foreground: #4d3b24;
+    --accent: #cfb78f;
+    --accent-foreground: #150e06;
+    --destructive: #8a1c14;
+    --border: #c1a77d;
+    --input: #c1a77d;
+    --ring: #9a1f18;
+}
+
+/* A school exercise book: blue ballpoint for the text itself, pale blue
+   ruled lines for the outlines and a red margin for the accent. */
+[data-theme="notebook"] {
+    --background: #fbfaf5;
+    --foreground: #0f2a80;
+    --card: #ffffff;
+    --card-foreground: #0f2a80;
+    --popover: #ffffff;
+    --popover-foreground: #0f2a80;
+    --primary: #c41e3a;
+    --primary-foreground: #ffffff;
+    --secondary: #eaeef8;
+    --secondary-foreground: #0f2a80;
+    --muted: #eaeef8;
+    --muted-foreground: #3d4f8a;
+    --accent: #eaeef8;
+    --accent-foreground: #0f2a80;
+    --destructive: #9b1230;
+    --border: #c3cdea;
+    --input: #c3cdea;
+    --ring: #c41e3a;
+}
+
+/* ── The Silly set ─────────────────────────────────────────────────────────
+   Themes nobody should pick, listed apart in the palette menu. They are
+   absurd on purpose but hold the same contrast as the rest, so the app
+   still works in them. */
+
+/* The blue screen of a crashed computer, grey highlight and all. */
+[data-theme="blue-screen"] {
+    --background: #0000aa;
+    --foreground: #ffffff;
+    --card: #0000b8;
+    --card-foreground: #ffffff;
+    --popover: #0000b8;
+    --popover-foreground: #ffffff;
+    --primary: #aaaaaa;
+    --primary-foreground: #0000aa;
+    --secondary: #0000cc;
+    --secondary-foreground: #ffffff;
+    --muted: #0000cc;
+    --muted-foreground: #b4b4b4;
+    --accent: #0000cc;
+    --accent-foreground: #ffffff;
+    --destructive: #ff8080;
+    --border: #aaaaaa;
+    --input: #aaaaaa;
+    --ring: #ffffff;
+}
+
+/* Pink text, lime buttons, hot pink outlines, cyan small print and
+   orange danger: every glowstick at the party at once. */
+[data-theme="glowstick"] {
+    --background: #0a0012;
+    --foreground: #ffa8dc;
+    --card: #1a0030;
+    --card-foreground: #ffa8dc;
+    --popover: #1a0030;
+    --popover-foreground: #ffa8dc;
+    --primary: #b6ff00;
+    --primary-foreground: #0a0012;
+    --secondary: #2a0047;
+    --secondary-foreground: #ffa8dc;
+    --muted: #2a0047;
+    --muted-foreground: #5ffbf1;
+    --accent: #2a0047;
+    --accent-foreground: #ffa8dc;
+    --destructive: #ff6b00;
+    --border: #ff1493;
+    --input: #ff1493;
+    --ring: #00f0ff;
+}
+
+/* Mustard page, ketchup tabs, ketchup buttons with mustard writing, after
+   the most famous bad colour scheme on early desktop computers. */
+[data-theme="hot-dog-stand"] {
+    --background: #ffd800;
+    --foreground: #000000;
+    --card: #ffe74c;
+    --card-foreground: #000000;
+    --popover: #ffe74c;
+    --popover-foreground: #000000;
+    --primary: #b30000;
+    --primary-foreground: #ffff00;
+    --secondary: #ff2a1f;
+    --secondary-foreground: #000000;
+    --muted: #ff2a1f;
+    --muted-foreground: #1f0000;
+    --accent: #ff2a1f;
+    --accent-foreground: #000000;
+    --destructive: #7a0000;
+    --border: #b30000;
+    --input: #b30000;
+    --ring: #b30000;
+    /* Stars and met goals are amber, which vanishes on mustard: brown
+       mustard instead. */
+    --color-amber-500: #a35c00;
+}
+
+/* Radioactive green with purple, and a magenta focus ring for good
+   measure. */
+[data-theme="toxic"] {
+    --background: #39ff14;
+    --foreground: #0b0014;
+    --card: #c8ffb8;
+    --card-foreground: #0b0014;
+    --popover: #c8ffb8;
+    --popover-foreground: #0b0014;
+    --primary: #6a00b8;
+    --primary-foreground: #ffffff;
+    --secondary: #c58bff;
+    --secondary-foreground: #0b0014;
+    --muted: #c58bff;
+    --muted-foreground: #2a0047;
+    --accent: #c58bff;
+    --accent-foreground: #0b0014;
+    --destructive: #b00020;
+    --border: #6a00b8;
+    --input: #6a00b8;
+    --ring: #ff00d4;
+}
+
+/* Silver windows, navy buttons and teal counters, straight off a
+   mid-90s desktop. Hovered menu items go navy with white text. */
+[data-theme="desktop-95"] {
+    --background: #c0c0c0;
+    --foreground: #000000;
+    --card: #d4d0c8;
+    --card-foreground: #000000;
+    --popover: #d4d0c8;
+    --popover-foreground: #000000;
+    --primary: #000080;
+    --primary-foreground: #ffffff;
+    --secondary: #009090;
+    --secondary-foreground: #000000;
+    --muted: #009090;
+    --muted-foreground: #000000;
+    --accent: #000080;
+    --accent-foreground: #ffffff;
+    --destructive: #800000;
+    --border: #808080;
+    --input: #808080;
+    --ring: #000080;
 }
 
 @layer base {

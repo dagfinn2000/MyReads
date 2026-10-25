@@ -50,11 +50,14 @@ function Swatch({ theme }: { theme: ThemeDef }) {
   );
 }
 
-function ThemeItems({ mode }: { mode: ThemeDef["mode"] }) {
+/** The light or dark themes; with `silly`, the Silly set (of one kind, if
+ *  `mode` is given), which the palette menu lists apart too. */
+function ThemeItems({ mode, silly }: { mode?: ThemeDef["mode"]; silly?: boolean }) {
+  const themes = THEMES.filter((t) => !t.silly === !silly && (!mode || t.mode === mode));
   return (
     <SelectGroup>
-      <SelectLabel>{mode === "light" ? "Light" : "Dark"}</SelectLabel>
-      {THEMES.filter((t) => t.mode === mode).map((t) => (
+      <SelectLabel>{silly ? "Silly" : mode === "light" ? "Light" : "Dark"}</SelectLabel>
+      {themes.map((t) => (
         <SelectItem key={t.id} value={t.id}>
           <Swatch theme={t} />
           {t.name}
@@ -120,6 +123,7 @@ function PartTheme({
             <SelectItem value={SAME}>Same as everywhere</SelectItem>
             <ThemeItems mode="light" />
             <ThemeItems mode="dark" />
+            <ThemeItems silly />
           </SelectContent>
         </Select>
         {firstMode && (
@@ -134,6 +138,7 @@ function PartTheme({
             <SelectContent>
               <SelectItem value={ONE}>Same in {otherMode} mode</SelectItem>
               <ThemeItems mode={otherMode} />
+              <ThemeItems mode={otherMode} silly />
             </SelectContent>
           </Select>
         )}
