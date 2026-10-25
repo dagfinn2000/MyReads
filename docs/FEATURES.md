@@ -77,7 +77,7 @@ page by page.
   browser you started it in.
 - **Daily goal.** Set one in pages or minutes in Preferences > Reading,
   and a ring on Now reading fills as you read through the day, with a
-  little confetti when you reach it. Minutes come from the reading timer
+  little celebration when you reach it. Minutes come from the reading timer
   or the time you type in. The ring counts the days in a row you've met
   the goal, and the Reading days calendar on Stats says how many days you
   met it in the last year.
@@ -408,8 +408,14 @@ tab goes away. You can also keep the house and leave the avatar out.
   of day where you are.
 - A little motion: pages fade in, a book's cover flies to its page and
   back into its place in the library when you close it, bars fill up,
-  finishing a book or reaching your goal sets off confetti, and the
+  finishing a book or reaching your goal sets off a celebration, and the
   reading room's fire flickers.
+- **Celebrations.** Choose how finishing a book or reaching a goal is
+  marked, in Preferences > Motion: a burst of confetti, three fireworks
+  going up and bursting into rings of glittering sparks, gold sparkles
+  twinkling out from where you clicked, blossom petals drifting down, or
+  nothing at all. Picking one plays it, so you can see it before your next
+  finished book.
 - Animations can be turned off, or only the backgrounds kept still. They
   stay off when your device asks for reduced motion.
 - Sounds, if you turn them on: a rustle of paper when you log pages, a
@@ -443,7 +449,8 @@ On the Account page:
   them: a few themes have their own), flat, raised or frosted
   cards, the background texture, and a wash of the cover's colours behind
   the top of each book's page.
-- Animations on or off, and whether the moving backgrounds move.
+- Animations on or off, how a finished book is celebrated, and whether
+  the moving backgrounds move.
 - The book page: which cards show and in what order, long descriptions in
   full or cut short, and your own "Find it at" links.
 - Which page opens first, and the top bar: its links in your own order,

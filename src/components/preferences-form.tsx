@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { BookFormat, BookOwnership, ReadingStatus } from "@/lib/enums";
 import { ArrowDown, ArrowUp, Pencil, Trash2, Volume2 } from "lucide-react";
 import { savePreferences } from "@/lib/actions/preferences";
+import { previewCelebration } from "@/lib/celebrate";
 import { deleteView, renameView } from "@/lib/actions/saved-views";
 import { moveId, orderByIds } from "@/lib/library-order";
 import { topBarLinks } from "@/lib/nav";
@@ -106,6 +107,7 @@ const ACCENT_LABELS: Record<Accent, string> = {
 const HTML_ATTRIBUTES: Partial<Record<keyof Preferences, string>> = {
   headingFont: "data-heading-font",
   motion: "data-motion",
+  celebration: "data-celebration",
   coverArt: "data-covers",
   accent: "data-accent",
   corners: "data-corners",
@@ -895,6 +897,22 @@ export function PreferencesForm({
             { value: "off", label: "Off" },
           ]}
           onChange={(v) => update({ motion: v })}
+        />
+        <Choice
+          label="Celebrations"
+          hint="When you finish a book or reach a goal."
+          value={prefs.celebration}
+          options={[
+            { value: "confetti", label: "Confetti" },
+            { value: "fireworks", label: "Fireworks" },
+            { value: "sparkles", label: "Gold sparkles" },
+            { value: "petals", label: "Petals falling" },
+            { value: "off", label: "Nothing" },
+          ]}
+          onChange={(v) => {
+            update({ celebration: v });
+            previewCelebration(v);
+          }}
         />
         <Choice
           label="Moving backgrounds"

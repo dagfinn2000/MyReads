@@ -4,7 +4,7 @@ import { useActionState, useEffect, useEffectEvent, useRef } from "react";
 import type { Book, ProgressEntry } from "@prisma/client";
 import { ReadingStatus } from "@/lib/enums";
 import { updateReading } from "@/lib/actions/books";
-import { celebrate } from "@/lib/confetti";
+import { celebrate } from "@/lib/celebrate";
 import { toDateInputValue } from "@/lib/display";
 import { customStatusOf, statusChoice } from "@/lib/statuses";
 import { usePreferences } from "@/components/preferences-provider";
@@ -64,7 +64,7 @@ export function ReadingCard({
   const info = unitFor(book, prefs);
   const reading = book.status === ReadingStatus.READING;
 
-  // Finishing a book gets a burst of confetti from the save button, and
+  // Finishing a book sets off a celebration from the save button, and
   // the chime with sounds on. Each save returns a new state object, so this
   // runs once per save.
   const finished = useEffectEvent(() => {

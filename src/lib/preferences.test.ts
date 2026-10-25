@@ -53,6 +53,10 @@ describe("parsePreferences", () => {
   it("keeps the appearance settings and defaults unknown ones", () => {
     expect(parsePreferences({ motion: "off" }).motion).toBe("off");
     expect(parsePreferences({ motion: "wobbly" }).motion).toBe("on");
+    expect(parsePreferences({ celebration: "fireworks" }).celebration).toBe("fireworks");
+    expect(parsePreferences({ celebration: "off" }).celebration).toBe("off");
+    expect(parsePreferences({ celebration: "balloons" }).celebration).toBe("confetti");
+    expect(parsePreferences({}).celebration).toBe("confetti");
     expect(parsePreferences({ coverArt: "plain" }).coverArt).toBe("plain");
     expect(parsePreferences({ coverArt: 3 }).coverArt).toBe("drawn");
     expect(parsePreferences({ accent: "teal" }).accent).toBe("teal");

@@ -112,6 +112,11 @@ export const HEADING_FONTS = ["sans", "serif", "rounded"] as const;
  *  reduced motion, whatever this says (see globals.css and lib/motion.ts). */
 export const MOTIONS = ["on", "off"] as const;
 
+/** What happens on screen when you finish a book or reach a goal
+ *  (lib/celebrate.ts): a burst of confetti, fireworks, gold sparkles,
+ *  petals falling, or nothing. Only while animations are allowed. */
+export const CELEBRATIONS = ["confetti", "fireworks", "sparkles", "petals", "off"] as const;
+
 /** What a book without a cover image shows: a drawn cover with its title,
  *  or the plain grey box. */
 export const COVER_ARTS = ["drawn", "plain"] as const;
@@ -345,6 +350,7 @@ export type TextSize = (typeof TEXT_SIZES)[number];
 export type LongTextFont = (typeof LONG_TEXT_FONTS)[number];
 export type HeadingFont = (typeof HEADING_FONTS)[number];
 export type Motion = (typeof MOTIONS)[number];
+export type Celebration = (typeof CELEBRATIONS)[number];
 export type CoverArtStyle = (typeof COVER_ARTS)[number];
 export type Accent = (typeof ACCENTS)[number];
 export type Corners = (typeof CORNERS)[number];
@@ -422,6 +428,7 @@ export type Preferences = {
 
   // Appearance
   motion: Motion;
+  celebration: Celebration;
   coverArt: CoverArtStyle;
   accent: Accent;
   corners: Corners;
@@ -606,6 +613,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
   longTextFont: "sans",
   headingFont: "sans",
   motion: "on",
+  celebration: "confetti",
   coverArt: "drawn",
   accent: "theme",
   corners: "rounded",
@@ -939,6 +947,7 @@ export function parsePreferences(raw: unknown): Preferences {
     longTextFont: pick(LONG_TEXT_FONTS, obj.longTextFont, d.longTextFont),
     headingFont: pick(HEADING_FONTS, obj.headingFont, d.headingFont),
     motion: pick(MOTIONS, obj.motion, d.motion),
+    celebration: pick(CELEBRATIONS, obj.celebration, d.celebration),
     coverArt: pick(COVER_ARTS, obj.coverArt, d.coverArt),
     accent: pick(ACCENTS, obj.accent, d.accent),
     corners: pick(CORNERS, obj.corners, d.corners),

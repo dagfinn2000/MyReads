@@ -77,6 +77,7 @@ export default async function RootLayout({
       data-heading-font={prefs?.headingFont}
       // Appearance (Preferences); see globals.css.
       data-motion={prefs?.motion}
+      data-celebration={prefs?.celebration}
       data-covers={prefs?.coverArt}
       data-accent={prefs?.accent}
       data-corners={prefs?.corners}
