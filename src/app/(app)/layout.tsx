@@ -1,9 +1,11 @@
 import { BackupReminder } from "@/components/backup-reminder";
+import { KeyboardShortcuts } from "@/components/keyboard-shortcuts";
 import { Nav } from "@/components/nav";
 import { PreferencesProvider } from "@/components/preferences-provider";
 import { getCurrentUser, getPreferences } from "@/lib/current-user";
 
-/** Shared shell for all authenticated pages: top nav + centered content. */
+/** Shared shell for all authenticated pages: top nav + centered content,
+ *  and the keyboard shortcuts, which only show when ? asks for them. */
 export default async function AppLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
@@ -19,6 +21,7 @@ export default async function AppLayout({
         <BackupReminder />
         {children}
       </main>
+      <KeyboardShortcuts />
     </PreferencesProvider>
   );
 }

@@ -430,6 +430,10 @@ export type Preferences = {
   hiddenNav: HideableNav[];
   /** The OPTIONAL_NAV links turned on. */
   shownNav: OptionalNav[];
+  /** ? for the list, / to search, g and a letter to go places
+   *  (lib/shortcuts.ts). On unless turned off: they change nothing on
+   *  screen. */
+  keyboardShortcuts: boolean;
   hiddenStats: HideableStat[];
   /** SavedView id the library opens on. Empty = the plain library. */
   defaultViewId: string;
@@ -581,6 +585,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
   navOrder: [...NAV_ITEMS],
   hiddenNav: [],
   shownNav: [],
+  keyboardShortcuts: true,
   hiddenStats: [],
   defaultViewId: "",
   pickOnlyHave: false,
@@ -902,6 +907,7 @@ export function parsePreferences(raw: unknown): Preferences {
     navOrder: parseNavOrder(obj.navOrder),
     hiddenNav: pickList(HIDEABLE_NAV, obj.hiddenNav),
     shownNav: pickList(OPTIONAL_NAV, obj.shownNav),
+    keyboardShortcuts: bool(obj.keyboardShortcuts, d.keyboardShortcuts),
     hiddenStats: pickList(HIDEABLE_STATS, obj.hiddenStats),
     defaultViewId:
       typeof obj.defaultViewId === "string" && obj.defaultViewId.length <= 64

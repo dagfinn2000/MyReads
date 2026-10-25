@@ -255,6 +255,8 @@ export function FilterBar({
             onChange={(e) => setSearch(e.target.value)}
             placeholder={searchPlaceholder(searchAlsoIn)}
             aria-label="Search the library"
+            // The / shortcut's target (components/keyboard-shortcuts.tsx).
+            data-library-search=""
             className="w-full pl-8 sm:w-56"
           />
         </div>

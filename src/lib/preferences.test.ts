@@ -227,6 +227,12 @@ describe("parsePreferences: the newer settings", () => {
     expect(parsePreferences({ navOrder: reversed }).navOrder).toEqual(reversed);
   });
 
+  it("has keyboard shortcuts on unless they were turned off", () => {
+    expect(parsePreferences({}).keyboardShortcuts).toBe(true);
+    expect(parsePreferences({ keyboardShortcuts: false }).keyboardShortcuts).toBe(false);
+    expect(parsePreferences({ keyboardShortcuts: "no" }).keyboardShortcuts).toBe(true);
+  });
+
   it("leaves Series out of the bar until it is turned on", () => {
     expect(parsePreferences({}).shownNav).toEqual([]);
     expect(parsePreferences({ shownNav: ["series", "series", "room", "x"] }).shownNav).toEqual([

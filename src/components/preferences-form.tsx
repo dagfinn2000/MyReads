@@ -43,6 +43,7 @@ import {
 import { PERIOD_LABELS } from "@/lib/stats-period";
 import { cn } from "@/lib/utils";
 import { BookPageCardList, FindLinksEditor } from "@/components/book-page-preferences";
+import { ShortcutsDialog } from "@/components/keyboard-shortcuts";
 import { OrderList } from "@/components/order-list";
 import { TagRulesList } from "@/components/tag-rules-list";
 import { Button } from "@/components/ui/button";
@@ -912,6 +913,25 @@ export function PreferencesForm({
             </p>
           )}
         </OrderList>
+        <div className="grid gap-1">
+          <Toggle
+            label="Keyboard shortcuts"
+            checked={prefs.keyboardShortcuts}
+            onChange={(keyboardShortcuts) => update({ keyboardShortcuts })}
+          />
+          <p className="pl-6 text-xs text-muted-foreground">
+            On a computer: <kbd className="font-mono">/</kbd> searches the library,{" "}
+            <kbd className="font-mono">g</kbd> and a letter goes to a page.{" "}
+            <ShortcutsDialog
+              links={[...inBar]}
+              trigger={
+                <button type="button" className="underline underline-offset-2 hover:text-foreground">
+                  See them all
+                </button>
+              }
+            />
+          </p>
+        </div>
       </Section>
 
       <Section title="Reading room" id="reading-room">

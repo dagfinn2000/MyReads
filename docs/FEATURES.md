@@ -327,6 +327,9 @@ On the Account page:
   (phones get the same links, as icons). Also which cards show on the
   Stats page.
 - The reading room and your avatar, on or off.
+- Keyboard shortcuts on a computer, on unless you turn them off: `?` lists
+  them, `/` searches the library, `n` adds a book, `g` and a letter goes to
+  a page in your top bar, and `e` edits the book whose page you're on.
 
 ## Backups
 
