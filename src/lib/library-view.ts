@@ -75,8 +75,9 @@ export const CARD_SIZES = ["small", "medium", "large"] as const;
 export const LIBRARY_LAYOUTS = ["grid", "list"] as const;
 
 /** How the grid draws each book: a framed card with its details, the bare
- *  cover and title, or covers standing on a shelf. */
-export const CARD_STYLES = ["cards", "covers", "shelf"] as const;
+ *  cover and title, covers standing on a shelf, or books standing spine
+ *  out in a bookcase (components/book-spine.tsx). */
+export const CARD_STYLES = ["cards", "covers", "shelf", "spines"] as const;
 
 // A type alias (not an interface) so it satisfies Prisma's Json input type —
 // aliases get an implicit index signature for assignability, interfaces don't.

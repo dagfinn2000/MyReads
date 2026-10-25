@@ -34,7 +34,8 @@ export function LibraryViewMenu({
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
-  // Covers only and Bookshelf draw no details, so there is nothing to show.
+  // Covers only, Bookshelf and Spines draw no details, so there is nothing
+  // to show.
   const showsDetails = display.layout === "list" || display.cardStyle === "cards";
 
   function save(patch: Partial<LibraryDisplay>) {
@@ -93,6 +94,7 @@ export function LibraryViewMenu({
               <DropdownMenuRadioItem value="cards">Cards</DropdownMenuRadioItem>
               <DropdownMenuRadioItem value="covers">Covers only</DropdownMenuRadioItem>
               <DropdownMenuRadioItem value="shelf">Bookshelf</DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="spines">Spines</DropdownMenuRadioItem>
             </DropdownMenuRadioGroup>
           </>
         )}

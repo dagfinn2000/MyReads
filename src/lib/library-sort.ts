@@ -6,6 +6,7 @@
 
 import { BookFormat, BookOwnership, ReadingStatus } from "@/lib/enums";
 import { calendarDay } from "@/lib/dates";
+import { NAME_SUFFIXES, SURNAME_PARTICLES } from "@/lib/names";
 import { FORMAT_LABELS, OWNERSHIP_LABELS } from "@/lib/display";
 import type { RatingStyle } from "@/lib/preferences";
 import { nextInSeries, seriesKey, type SeriesMember } from "@/lib/series";
@@ -90,17 +91,6 @@ export function titleSortKey(title: string, opts: SortOptions = {}): string {
   if (match && articles.has(match[1].toLowerCase())) return match[2];
   return trimmed;
 }
-
-/** Surname particles that travel with the last name: "Le Guin" sorts under
- *  L, "van der Berg" under V. (Anglo-American shelving convention — Dutch
- *  libraries would file "van" under the bare surname instead.) */
-const SURNAME_PARTICLES = new Set([
-  "da", "de", "del", "della", "den", "der", "di", "du", "la", "le",
-  "mac", "mc", "st", "st.", "ten", "ter", "van", "von",
-]);
-
-/** Name suffixes that never lead a sort key. */
-const NAME_SUFFIXES = new Set(["jr", "jr.", "sr", "sr.", "ii", "iii", "iv"]);
 
 /**
  * "Ursula K. Le Guin" → "le guin ursula k." — authors sort the way a
