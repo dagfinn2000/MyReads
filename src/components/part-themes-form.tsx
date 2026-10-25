@@ -1,6 +1,7 @@
 "use client";
 
-import { Moon, Sun } from "lucide-react";
+import { useState, type ReactNode } from "react";
+import { Check, ChevronDown, Moon, Sun } from "lucide-react";
 import {
   DARK_THEME_IDS,
   THEME_BACKGROUNDS,
@@ -14,15 +15,8 @@ import {
   type ThemeDef,
   type ThemePart,
 } from "@/lib/themes";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { ThemeSwatches } from "@/components/theme-swatches";
 
 const PARTS: Record<ThemePart, { label: string; hint?: string }> = {
   library: { label: "Library", hint: "The book list, book pages, Add book and Series." },
@@ -50,20 +44,69 @@ function Swatch({ theme }: { theme: ThemeDef }) {
   );
 }
 
-/** The light or dark themes; with `silly`, the Silly set (of one kind, if
- *  `mode` is given), which the palette menu lists apart too. */
-function ThemeItems({ mode, silly }: { mode?: ThemeDef["mode"]; silly?: boolean }) {
-  const themes = THEMES.filter((t) => !t.silly === !silly && (!mode || t.mode === mode));
+/**
+ * A field that opens the same swatches as the palette menu: `themes`, and
+ * above them `none` (no theme of its own, or no second theme), which the
+ * line over the swatches then explains in `none.caption`.
+ */
+function ThemeChoice({
+  value,
+  themes,
+  none,
+  label,
+  icon,
+  onChange,
+}: {
+  value: string;
+  themes: ThemeDef[];
+  none: { value: string; label: string; caption: string };
+  label: string;
+  icon?: ReactNode;
+  onChange: (value: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const theme = THEMES.find((t) => t.id === value);
+  const name = theme?.name ?? none.label;
+
+  function choose(next: string) {
+    setOpen(false);
+    onChange(next);
+  }
+
   return (
-    <SelectGroup>
-      <SelectLabel>{silly ? "Silly" : mode === "light" ? "Light" : "Dark"}</SelectLabel>
-      {themes.map((t) => (
-        <SelectItem key={t.id} value={t.id}>
-          <Swatch theme={t} />
-          {t.name}
-        </SelectItem>
-      ))}
-    </SelectGroup>
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <button
+          type="button"
+          aria-label={`${label}: ${name}`}
+          className="flex h-8 w-full items-center gap-1.5 rounded-lg border border-input bg-transparent py-2 pr-2 pl-2.5 text-sm whitespace-nowrap transition-colors outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 sm:w-56 dark:bg-input/30 dark:hover:bg-input/50"
+        >
+          {icon}
+          {theme && <Swatch theme={theme} />}
+          <span className="min-w-0 flex-1 truncate text-left">{name}</span>
+          <ChevronDown className="size-4 shrink-0 text-muted-foreground" />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent
+        align="start"
+        className="max-h-(--radix-popover-content-available-height) overflow-y-auto"
+      >
+        <button
+          type="button"
+          onClick={() => choose(none.value)}
+          className="-mx-1.5 -mt-1.5 mb-2 flex w-[calc(100%+0.75rem)] items-center gap-2 rounded-md px-1.5 py-1.5 text-left text-sm transition-colors hover:bg-accent hover:text-accent-foreground"
+        >
+          <span className="flex-1">{none.label}</span>
+          {!theme && <Check className="size-3.5 shrink-0" />}
+        </button>
+        <ThemeSwatches
+          themes={themes}
+          isSelected={(t) => t.id === value}
+          onPick={(t) => choose(t.id)}
+          caption={theme?.name ?? none.caption}
+        />
+      </PopoverContent>
+    </Popover>
   );
 }
 
@@ -115,32 +158,26 @@ function PartTheme({
         {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
       </div>
       <div className="flex flex-wrap gap-2">
-        <Select value={first} onValueChange={pickFirst}>
-          <SelectTrigger className="w-full sm:w-56" aria-label={`Theme for ${label}`}>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={SAME}>Same as everywhere</SelectItem>
-            <ThemeItems mode="light" />
-            <ThemeItems mode="dark" />
-            <ThemeItems silly />
-          </SelectContent>
-        </Select>
+        <ThemeChoice
+          value={first}
+          themes={THEMES}
+          none={{ value: SAME, label: "Same as everywhere", caption: "No theme of its own" }}
+          label={`Theme for ${label}`}
+          onChange={pickFirst}
+        />
         {firstMode && (
-          <Select value={second} onValueChange={pickSecond}>
-            <SelectTrigger
-              className="w-full justify-start sm:w-56 [&>svg:last-child]:ml-auto"
-              aria-label={`Theme for ${label} when your device is ${otherMode}`}
-            >
-              <OtherIcon className="size-3.5 text-muted-foreground" aria-hidden />
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={ONE}>Same in {otherMode} mode</SelectItem>
-              <ThemeItems mode={otherMode} />
-              <ThemeItems mode={otherMode} silly />
-            </SelectContent>
-          </Select>
+          <ThemeChoice
+            value={second}
+            themes={THEMES.filter((t) => t.mode === otherMode)}
+            none={{
+              value: ONE,
+              label: `Same in ${otherMode} mode`,
+              caption: `No second theme for ${otherMode} mode`,
+            }}
+            label={`Theme for ${label} when your device is ${otherMode}`}
+            icon={<OtherIcon className="size-3.5 shrink-0 text-muted-foreground" aria-hidden />}
+            onChange={pickSecond}
+          />
         )}
       </div>
     </div>

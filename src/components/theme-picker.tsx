@@ -2,7 +2,7 @@
 
 import { useRef, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
-import { Check, MonitorSmartphone, Palette, SunMoon } from "lucide-react";
+import { MonitorSmartphone, Palette, SunMoon } from "lucide-react";
 import { saveTheme } from "@/lib/actions/theme";
 import { motionAllowed } from "@/lib/motion";
 import {
@@ -22,14 +22,11 @@ import {
 } from "@/lib/themes";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { ThemeSwatches } from "@/components/theme-swatches";
 
 /**
- * Dashify-style theme picker: a grid of palette swatches in a dropdown.
+ * Dashify-style theme picker: a grid of palette swatches in a popover.
  * Selection is applied to <html> (data-theme attribute + dark class),
  * persisted in localStorage for this browser, and saved on the account so
  * signing in elsewhere brings the theme along (the root layout server-
@@ -45,8 +42,8 @@ import {
  * A part of the app with a theme of its own (Preferences) keeps showing
  * that; the picker then chooses for everywhere else.
  *
- * The themes come in three groups, each under its heading: light, dark,
- * and the Silly set.
+ * The themes are small round swatches (ThemeSwatches), so all of them fit
+ * in a menu not much taller than the two switches used to make it.
  */
 /**
  * The picker reads <html>, where the theme lives: `data-theme-account` and
@@ -63,13 +60,6 @@ const WATCHED = [
   "data-theme-device",
   "data-theme-parts",
   "data-section",
-];
-
-/** The palette menu's groups of themes, each under its heading. */
-const THEME_GROUPS: { label: string; hint?: string; has: (t: ThemeDef) => boolean }[] = [
-  { label: "Light", has: (t) => t.mode === "light" && !t.silly },
-  { label: "Dark", has: (t) => t.mode === "dark" && !t.silly },
-  { label: "Silly", hint: "not recommended", has: (t) => !!t.silly },
 ];
 
 function subscribeToTheme(onChange: () => void): () => void {
@@ -181,7 +171,7 @@ function SwitchRow({
       role="switch"
       aria-checked={checked}
       onClick={onClick}
-      className="flex w-full items-center gap-2 rounded-md border p-2 text-left text-sm transition-colors hover:border-ring/60"
+      className="flex w-full items-center gap-2 rounded-md px-1.5 py-1.5 text-left text-sm transition-colors hover:bg-accent hover:text-accent-foreground"
     >
       <Icon className="size-4 shrink-0 text-muted-foreground" />
       <span className="min-w-0 flex-1">
@@ -282,41 +272,26 @@ export function ThemePicker() {
   const isSelected = (t: ThemeDef) =>
     auto ? auto[t.mode] === t.id : current?.kind === "fixed" && current.id === t.id;
 
-  const themeButton = (t: ThemeDef) => (
-    <button
-      key={t.id}
-      type="button"
-      onClick={() => pick(t)}
-      title={t.silly}
-      className={cn(
-        "flex items-center gap-2 rounded-md border p-1.5 text-left text-xs transition-colors hover:border-ring/60",
-        isSelected(t) && "border-primary ring-1 ring-primary",
-      )}
-    >
-      <span
-        className="flex h-6 w-8 shrink-0 items-center justify-center rounded border border-black/10"
-        style={{ backgroundColor: t.swatch[0] }}
-      >
-        <span
-          className="size-2.5 rounded-full"
-          style={{ backgroundColor: t.swatch[1] }}
-        />
-      </span>
-      <span className="line-clamp-2 min-w-0 flex-1 leading-tight">{t.name}</span>
-      {isSelected(t) && <Check className="size-3.5 shrink-0" />}
-    </button>
-  );
+  const nameOf = (id: string) => THEMES.find((t) => t.id === id)?.name ?? id;
+  const caption = !current
+    ? ""
+    : current.kind === "auto"
+      ? `${nameOf(current.light)} and ${nameOf(current.dark)}`
+      : nameOf(current.id);
 
   return (
-    <DropdownMenu open={open} onOpenChange={setOpen}>
-      <DropdownMenuTrigger asChild>
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
         <Button ref={triggerRef} variant="ghost" size="icon" title="Theme">
           <Palette />
           <span className="sr-only">Choose theme</span>
         </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-76 p-2">
-        <div className="mb-2 grid gap-1.5">
+      </PopoverTrigger>
+      <PopoverContent
+        align="end"
+        className="max-h-(--radix-popover-content-available-height) overflow-y-auto"
+      >
+        <div className="-mx-1.5 -mt-1.5 mb-2 grid gap-0.5 border-b pb-2">
           <SwitchRow
             icon={SunMoon}
             label="Match system light/dark"
@@ -345,18 +320,8 @@ export function ThemePicker() {
             </p>
           )}
         </div>
-        {THEME_GROUPS.map((group) => (
-          <div key={group.label}>
-            <p className="mt-3 mb-1.5 px-1 text-xs text-muted-foreground">
-              <span className="font-medium text-foreground">{group.label}</span>
-              {group.hint && ` · ${group.hint}`}
-            </p>
-            <div className="grid grid-cols-2 gap-1.5">
-              {THEMES.filter(group.has).map(themeButton)}
-            </div>
-          </div>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
+        <ThemeSwatches isSelected={isSelected} onPick={pick} caption={caption} />
+      </PopoverContent>
+    </Popover>
   );
 }

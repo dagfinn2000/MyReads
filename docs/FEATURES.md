@@ -336,7 +336,9 @@ tab goes away. You can also keep the house and leave the avatar out.
   device, with an accent colour of your own on top if you like. Your
   choice follows you to every device you sign in on, unless you give one
   phone or computer a theme of its own ("Only on this device" in the
-  palette menu).
+  palette menu). The palette menu shows each theme as a small round
+  swatch, the page colour with the accent as a dot: point at one to see
+  its name, or tap it to try it.
 - Eleven of the themes put together colours you rarely see side by side:
   - Dark: Bordeaux (wine red and sea-glass green), Riviera (ultramarine
     and peach), Provence (olive and lavender), Terracotta (clay and sky
