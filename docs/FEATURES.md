@@ -72,6 +72,13 @@ page by page.
   or the time you type in. The ring counts the days in a row you've met
   the goal, and the Reading days calendar on Stats says how many days you
   met it in the last year.
+- **Reading reminders.** A notification on your phone or computer at the
+  time you choose, on the days you choose, naming the book you read last
+  and what's left of your daily goal. By default none comes on a day
+  you've already read. Turn them on in each browser you want them in
+  under Preferences > Reading reminders, which lists them all with a
+  Test button. They need MyReads opened over https, and on an iPhone or
+  iPad, MyReads added to the Home Screen.
 - **Up next.** Add Want to Read books to your own list, from their page or
   from Now reading, and put them in order. They come first in Up next on
   Now reading, before the suggestions (the next book of a series you're
@@ -337,6 +344,7 @@ On the Account page:
 - How you log reading: the step buttons, page or percent for ebooks, page,
   percent or time for audiobooks, where your pace comes from, and the
   daily goal.
+- When reading reminders come, and the browsers they come to.
 - The rating style, and what counts in your stats.
 - Names for the statuses, and statuses of your own.
 - Fields of your own on every book, and the choices a choice field offers.

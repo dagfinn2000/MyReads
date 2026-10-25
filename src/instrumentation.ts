@@ -2,9 +2,9 @@ import { PHASE_PRODUCTION_BUILD } from "next/constants";
 
 /**
  * Runs once when the server starts (Next's instrumentation hook), to start
- * the server's own timer for the jobs that are turned on: today only the
- * nightly backup (BACKUP_DIR). With none on, no timer runs and no job's
- * code is loaded, which is how development, the tests and CI start.
+ * the server's own timer for the jobs that are turned on: the nightly
+ * backup (BACKUP_DIR) and reading reminders (on unless READING_REMINDERS
+ * is off). With none on, no timer runs and no job's code is loaded.
  *
  * Only on the Node.js runtime, where the jobs' file and database access
  * work, and not while `next build` prerenders pages, which can load this

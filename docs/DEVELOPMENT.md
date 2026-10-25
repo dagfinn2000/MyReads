@@ -292,14 +292,27 @@ src/
 - **Nightly backups run inside the app server.** With `BACKUP_DIR` set,
   [instrumentation.ts](../src/instrumentation.ts) starts one timer for the
   server's own jobs ([server-jobs.ts](../src/lib/server-jobs.ts)). It ticks
-  once a minute and looks at each job as often as the job asks, so a later
-  job (reading reminders, say) joins the same timer. The backup looks every
+  once a minute and looks at each job as often as the job asks, so reading
+  reminders join the same timer. The backup looks every
   15 minutes and runs once a day from `BACKUP_HOUR`, one account at a time,
   through the same `buildBackupZip` as the Download button
   ([backup-zip.ts](../src/lib/backup-zip.ts)), so both make the same file.
   Each copy is written under a temporary name and renamed once it's whole,
   and only files named like a copy are ever deleted. The timer lives on
   `globalThis`, so a hot reload doesn't start a second one.
+- **Reading reminders are Web Push, with nothing but `node:crypto`.**
+  [web-push.ts](../src/lib/web-push.ts) encrypts each message for the
+  browser (RFC 8291, checked against the RFC's own example in the tests)
+  and signs the request with a VAPID key the server makes on first use and
+  keeps in `ServerSetting`. The reminder job
+  ([reminders-run.ts](../src/lib/reminders-run.ts)) looks every 5 minutes;
+  when a reader's time has come in their zone, it claims the day in
+  `User.lastReminderDay` before sending, so a reminder never goes twice.
+  The browsers are `PushDevice` rows, and
+  [public/push-sw.js](../public/push-sw.js) is a service worker that only
+  shows the notification: it caches nothing and handles no page loads.
+  Push addresses come from the browser, so they go through the same
+  network guard as cover downloads.
 - **Migrations run when the container starts** (`prisma migrate deploy` in
   [docker-entrypoint.sh](../docker-entrypoint.sh)). The first start creates
   the tables, later starts apply anything new, and an up-to-date database is

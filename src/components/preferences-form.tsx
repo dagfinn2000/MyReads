@@ -9,6 +9,7 @@ import { deleteView, renameView } from "@/lib/actions/saved-views";
 import { moveId, orderByIds } from "@/lib/library-order";
 import { topBarLinks } from "@/lib/nav";
 import { SAVED_VIEW_NAME_MAX } from "@/lib/saved-views";
+import { REMINDER_TIMES, WEEKDAY_SHORT, formatClock, weekdaysInOrder } from "@/lib/reminders";
 import type { SoundVolume } from "@/lib/sounds";
 import {
   FORMAT_LABELS,
@@ -51,6 +52,7 @@ import { PartThemesForm } from "@/components/part-themes-form";
 import { playSample } from "@/components/sounds";
 import { StatusSettings } from "@/components/status-settings";
 import { FieldSettings } from "@/components/field-settings";
+import { ReminderDevices, type ReminderDevice } from "@/components/reminder-settings";
 import { TagRulesList } from "@/components/tag-rules-list";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -327,6 +329,7 @@ export function PreferencesForm({
   timeZones,
   googleAvailable,
   savedViews,
+  reminders,
 }: {
   /** As stored: `timeZone` is "" while the server's zone is in use. */
   initial: Preferences;
@@ -337,6 +340,9 @@ export function PreferencesForm({
    *  isn't searched whatever the setting says, so it isn't offered. */
   googleAvailable: boolean;
   savedViews: { id: string; name: string }[];
+  /** Whether this server sends reading reminders, and the account's
+   *  browsers that take them. */
+  reminders: { available: boolean; devices: ReminderDevice[] };
 }) {
   const router = useRouter();
   const [prefs, setPrefs] = useState(initial);
@@ -582,6 +588,70 @@ export function PreferencesForm({
             options={DAILY_GOAL_MINUTES.map((n) => ({ value: n, label: `${n} minutes` }))}
             onChange={(v) => update({ dailyGoalMinutes: Number(v) })}
           />
+        )}
+      </Section>
+
+      <Section title="Reading reminders" id="reminders">
+        <p className="text-xs text-muted-foreground">
+          A notification at the time you choose, to pick your book up again. It names the book
+          you read last and what&apos;s left of your daily goal. Turn them on in each browser
+          you want them in, such as your phone&apos;s. The time and days are the same for all.
+        </p>
+        {reminders.available ? (
+          <>
+            <ReminderDevices devices={reminders.devices} prefs={prefs} />
+            <Choice
+              label="Time"
+              hint={`In your time zone, ${prefs.timeZone || serverTimeZone}.`}
+              value={prefs.reminderTime}
+              options={REMINDER_TIMES.map((t) => ({ value: t, label: formatClock(t, prefs.dateFormat) }))}
+              onChange={(v) => update({ reminderTime: v })}
+            />
+            <div className="grid gap-1.5 sm:grid-cols-[14rem_1fr] sm:items-center sm:gap-4">
+              <p className="text-sm font-medium" id="reminder-days">
+                Days
+              </p>
+              <div role="group" aria-labelledby="reminder-days" className="flex flex-wrap gap-1.5">
+                {weekdaysInOrder(prefs.weekStart).map((d) => {
+                  const on = prefs.reminderDays.includes(d);
+                  const last = on && prefs.reminderDays.length === 1;
+                  return (
+                    <button
+                      key={d}
+                      type="button"
+                      aria-pressed={on}
+                      disabled={last}
+                      title={last ? "Reminders need at least one day" : undefined}
+                      onClick={() =>
+                        update({
+                          reminderDays: on
+                            ? prefs.reminderDays.filter((x) => x !== d)
+                            : [...prefs.reminderDays, d].sort((a, b) => a - b),
+                        })
+                      }
+                      className={cn(
+                        "h-8 w-10 rounded-full border text-xs font-medium transition-colors disabled:cursor-not-allowed sm:w-12",
+                        on
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                      )}
+                    >
+                      {WEEKDAY_SHORT[d]}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            <Toggle
+              label="Not on a day I've already read"
+              checked={prefs.reminderSkipIfRead}
+              onChange={(v) => update({ reminderSkipIfRead: v })}
+            />
+          </>
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            Reading reminders are turned off on this server (READING_REMINDERS=off).
+          </p>
         )}
       </Section>
 
