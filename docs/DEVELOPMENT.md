@@ -160,6 +160,7 @@ The reading room's files:
 | [lib/room.ts](../src/lib/room.ts) | The layout: spine sizes, shelves, floors, and where furniture goes |
 | [lib/room-styles.ts](../src/lib/room-styles.ts) | Everything Decorate offers, and its colours |
 | [reading-room.tsx](../src/components/reading-room.tsx) | The Room page's picture of the house |
+| [lib/cover-colours.ts](../src/lib/cover-colours.ts) | Each cover's main colour, read in the browser, for the spines here and in the library's Spines view |
 | [room-art.tsx](../src/components/room-art.tsx) | The pixel art: bookcases and furniture as rows of rectangles |
 | [reading-room.css](../src/components/reading-room.css) | The paints, by day and by night |
 | [room-shells.ts](../src/components/room-shells.ts) | Each house style's roof, walls, floors and garden ground |

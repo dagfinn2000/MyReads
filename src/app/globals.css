@@ -2820,6 +2820,259 @@ html[data-cover-3d] .book-cover::after {
   );
 }
 
+/* ── Spines ────────────────────────────────────────────────────────────────
+   The library's Spines view and the shelf on a Year in review
+   (components/book-spine.tsx): books standing spine out in a bookcase.
+   Every row is the same height, so one repeating gradient draws all the
+   shelf boards: a board above each row (in the row gap), a soft shadow
+   under it on the back of the case, and the bottom board in the padding.
+   A spine's width and height come from --spine-w and --spine-tall
+   (lib/book-spine.ts), scaled by the case's size; its colour is --spine. */
+.spine-shelf {
+  --spine-h: 12rem;
+  --spine-scale: 1;
+  --board: 0.75rem;
+  --slot: calc(var(--spine-h) + 1.5rem);
+  --shelf-back: color-mix(in oklab, var(--foreground) 5%, var(--background));
+  --shelf-top: color-mix(in oklab, var(--foreground) 10%, var(--background));
+  --shelf-front: color-mix(in oklab, var(--foreground) 20%, var(--background));
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  column-gap: 2px;
+  row-gap: var(--board);
+  /* A case only as wide as its books need, up to the page's width: a few
+     books (a group of the library, a quiet year) get a small case. */
+  width: fit-content;
+  min-width: min(100%, 10rem);
+  max-width: 100%;
+  padding: var(--board) 0.625rem;
+  border-inline: 0.5rem solid var(--shelf-front);
+  border-radius: 3px;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      var(--shelf-top) 0 3px,
+      var(--shelf-front) 3px var(--board),
+      rgb(0 0 0 / 0.14) var(--board),
+      transparent calc(var(--board) + 0.75rem) calc(var(--slot) + var(--board))
+    ),
+    var(--shelf-back);
+  box-shadow: 0 12px 24px -18px rgb(0 0 0 / 0.5);
+}
+.dark .spine-shelf {
+  --shelf-back: color-mix(in oklab, var(--foreground) 4%, var(--background));
+  --shelf-front: color-mix(in oklab, var(--foreground) 16%, var(--background));
+}
+.spine-shelf[data-size="small"] {
+  --spine-h: 9rem;
+  --spine-scale: 0.75;
+}
+.spine-shelf[data-size="large"] {
+  --spine-h: 15rem;
+  --spine-scale: 1.25;
+}
+.spine-slot {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  height: var(--slot);
+}
+.spine-link {
+  --h: calc(var(--spine-h) * var(--spine-tall, 1));
+  --w: calc(var(--spine-w, 1.9rem) * var(--spine-scale));
+  position: relative;
+  isolation: isolate;
+  display: block;
+  flex: none;
+  width: var(--w);
+  height: var(--h);
+  border-radius: 2px;
+}
+.spine-link:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+.book-spine {
+  --ink: #f7f2e8;
+  --gilt: #e2c27a;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  overflow: hidden;
+  padding-block: calc(var(--h) * 0.12) calc(var(--h) * 0.06);
+  border-radius: 2px 2px 1px 1px;
+  background-color: var(--spine);
+  color: var(--ink);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.18),
+    inset 0 0 0 1px rgb(0 0 0 / 0.14);
+  transition: background-color 0.4s;
+}
+.book-spine[data-ink="dark"] {
+  --ink: #221b12;
+  --gilt: rgb(40 28 10 / 0.6);
+}
+/* The roundness of the spine, over everything but the lettering. On a
+   dark page it is a shade dimmer too, so pale covers don't glare. */
+.book-spine::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      90deg,
+      rgb(0 0 0 / 0.32),
+      rgb(255 255 255 / 0.16) 18%,
+      rgb(255 255 255 / 0.05) 40%,
+      transparent 60%,
+      rgb(0 0 0 / 0.1) 84%,
+      rgb(0 0 0 / 0.34)
+    ),
+    linear-gradient(var(--spine-dim, transparent) 0 0);
+}
+.dark .book-spine {
+  --spine-dim: rgb(0 0 0 / 0.12);
+}
+.spine-title,
+.spine-author {
+  position: relative;
+  z-index: 1;
+  writing-mode: vertical-rl;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.spine-title {
+  flex: 1 1 0;
+  min-height: 0;
+  font-family: var(--font-literata), ui-serif, Georgia, serif;
+  font-size: clamp(0.5rem, calc(var(--w) * 0.34), 0.8125rem);
+  font-weight: 600;
+  line-height: 1.15;
+  text-align: center;
+}
+/* A thick book's title can take two lines down its spine, where one would
+   be cut short. Not on the small size, where there is no room. */
+.spine-shelf:not([data-size="small"]) .book-spine[data-lines="2"] .spine-title {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  font-size: clamp(0.5rem, calc(var(--w) * 0.24), 0.8125rem);
+  white-space: normal;
+  text-wrap: balance;
+}
+.spine-author {
+  flex: none;
+  max-height: calc(var(--h) * 0.3);
+  margin-top: calc(var(--h) * 0.04);
+  font-size: clamp(0.4375rem, calc(var(--w) * 0.25), 0.6875rem);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+/* The bindings. Bands: two gilt lines at the head and two at the foot. */
+.book-spine[data-design="bands"] {
+  background-image: linear-gradient(
+    to bottom,
+    transparent 5%,
+    var(--gilt) 5% calc(5% + 1.5px),
+    transparent 0 7.5%,
+    var(--gilt) 7.5% calc(7.5% + 1.5px),
+    transparent 0 calc(92.5% - 1.5px),
+    var(--gilt) 0 92.5%,
+    transparent 0 calc(95% - 1.5px),
+    var(--gilt) 0 95%,
+    transparent 0
+  );
+  padding-bottom: calc(var(--h) * 0.1);
+}
+/* Label: the title on a darker panel with a fine gilt edge. */
+.book-spine[data-design="label"] .spine-title {
+  flex: 0 1 auto;
+  margin: auto 0;
+  padding: 0.6em 0.2em;
+  border-radius: 1px;
+  background: rgb(0 0 0 / 0.26);
+  box-shadow: inset 0 0 0 1px var(--gilt);
+}
+.book-spine[data-design="label"][data-ink="dark"] .spine-title {
+  background: rgb(255 255 255 / 0.32);
+}
+/* Leather: a darker head and foot, each edged with a gilt line. */
+.book-spine[data-design="leather"] {
+  background-image: linear-gradient(
+    to bottom,
+    rgb(0 0 0 / 0.3) 0 9%,
+    var(--gilt) 9% calc(9% + 1px),
+    transparent 0 calc(94% - 1px),
+    var(--gilt) 0 94%,
+    rgb(0 0 0 / 0.3) 0
+  );
+  padding-bottom: calc(var(--h) * 0.09);
+}
+/* Cloth: plain, with a small ornament at the head. */
+.book-spine[data-design="cloth"]::after {
+  content: "";
+  position: absolute;
+  top: calc(var(--h) * 0.05);
+  left: 50%;
+  width: min(0.4rem, 30%);
+  aspect-ratio: 1;
+  translate: -50% 0;
+  rotate: 45deg;
+  border: 1px solid var(--gilt);
+}
+/* Wished for, lent out or given away: the place kept as an outline. */
+.book-spine[data-away] {
+  background: transparent;
+  color: var(--muted-foreground);
+  box-shadow: none;
+  outline: 1.5px dashed color-mix(in oklab, var(--foreground) 32%, transparent);
+  outline-offset: -1.5px;
+}
+.book-spine[data-away]::before,
+.book-spine[data-away]::after {
+  display: none;
+}
+.book-spine[data-away] .spine-title {
+  background: none;
+  box-shadow: none;
+}
+/* A book being read: a bookmark peeking out of the top. */
+.spine-bookmark {
+  position: absolute;
+  bottom: calc(100% - 0.5rem);
+  left: 50%;
+  z-index: -1;
+  width: min(0.75rem, 46%);
+  height: 1.375rem;
+  translate: -50% 0;
+  border-radius: 2px 2px 0 0;
+  background: var(--primary);
+  box-shadow: inset -1px 0 0 rgb(0 0 0 / 0.15);
+}
+/* Picking books for bulk edit: the chosen spines get a ring. */
+.spine-slot[data-selected] .spine-link {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-motion="off"]) .spine-link {
+    transition: translate 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  html:not([data-motion="off"]) .spine-link:hover {
+    translate: 0 -0.5rem;
+  }
+  html:not([data-motion="off"]) .no-lift .spine-link:hover {
+    translate: none;
+  }
+}
+
 /* Theme switch: the new theme grows out of the palette button as a circle
    (revealTheme in components/theme-picker.tsx), so the default cross-fade
    between the two snapshots is turned off while it runs. */

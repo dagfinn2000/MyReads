@@ -145,6 +145,13 @@ page by page.
 - Show the library as cards, bare covers or a bookshelf, in three sizes, or
   as a list, and choose what each book shows. Covers can look like little
   hardbacks, and books without a cover get one drawn with their title.
+- **Spines.** Or stand the books spine out in a bookcase, coloured from
+  their covers, with the title running down each spine and the author's
+  surname at the foot. Thick books are wider, heights and bindings vary
+  (gilt bands, a label, leather, plain cloth), a bookmark peeks out of the
+  books you're reading, and books on your wishlist, lent out or given away
+  keep their place as an outline. Point at a spine and it slides out a
+  little.
 - Save the searches and filters you use often as views, and open the
   library on one of them if you like.
 - A book opened from the library has an X in its corner (or press Esc)

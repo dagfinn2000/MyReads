@@ -8,6 +8,7 @@ import { Check, Dices, SquareCheckBig, X } from "lucide-react";
 import { bulkDeleteBooks, bulkUpdateBooks } from "@/lib/actions/bulk";
 import { pickRandomBook } from "@/lib/actions/pick";
 import { cascadeSteps } from "@/lib/card-cascade";
+import { useCoverColours } from "@/lib/cover-colours";
 import { isClosingBook } from "@/lib/cover-flight";
 import { FORMAT_LABELS, OWNERSHIP_LABELS, formatNumber } from "@/lib/display";
 import { orderByIds } from "@/lib/library-order";
@@ -24,6 +25,7 @@ import {
   BookRow,
   type BookCardBook,
 } from "@/components/book-card";
+import { BookSpine, spineColourOf } from "@/components/book-spine";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -334,17 +336,24 @@ export function LibraryView({
 
   const list = display.layout === "list";
   const style = list ? null : display.cardStyle;
+  const spines = style === "spines";
+  // Spines take their colour from the covers, read in the browser and kept
+  // there (lib/cover-colours.ts).
+  const coverColours = useCoverColours(
+    spines ? books.flatMap((b) => (b.coverUrl ? [b.coverUrl] : [])) : [],
+  );
   const renderGrid = (items: BookCardBook[], section?: string) => (
     // no-lift: cards stay put on hover while picking, so the selection ring
     // keeps lining up with the card.
     <div
       className={cn(
-        "grid",
+        spines ? "spine-shelf" : "grid",
         list && "gap-2",
-        !list && GRID_COLUMNS[display.cardSize],
-        style === "shelf" ? "bookshelf gap-y-6" : !list && GRID_GAPS[display.cardSize],
+        !list && !spines && GRID_COLUMNS[display.cardSize],
+        style === "shelf" ? "bookshelf gap-y-6" : !list && !spines && GRID_GAPS[display.cardSize],
         selectMode && "no-lift",
       )}
+      data-size={spines ? display.cardSize : undefined}
     >
       {items.map((book) => {
         const isSelected = selected.has(book.id);
@@ -352,15 +361,18 @@ export function LibraryView({
           <div
             key={book.id}
             className={cn(
-              "relative rounded-lg",
+              spines ? "spine-slot" : "relative rounded-lg",
               !returning && "card-in",
               style === "shelf" && "shelf-slot",
-              selectMode && isSelected && "ring-2 ring-primary",
+              selectMode && isSelected && !spines && "ring-2 ring-primary",
             )}
+            data-selected={spines && selectMode && isSelected ? "" : undefined}
             style={{ "--i": steps.get(cardKey(book.id, section)) ?? 0 } as React.CSSProperties}
           >
             {list ? (
               <BookRow book={book} details={display} formatPrefs={prefs} />
+            ) : spines ? (
+              <BookSpine book={book} colour={spineColourOf(book, coverColours)} />
             ) : style === "shelf" ? (
               <BookOnShelf book={book} />
             ) : style === "covers" ? (
@@ -382,7 +394,9 @@ export function LibraryView({
               >
                 <span
                   className={cn(
-                    "absolute left-2 top-2 flex size-6 items-center justify-center rounded-md border bg-background/90 shadow-sm",
+                    "absolute flex items-center justify-center rounded-md border bg-background/90 shadow-sm",
+                    // Above a spine, in the head room of its shelf.
+                    spines ? "left-1/2 top-0 size-5 -translate-x-1/2" : "left-2 top-2 size-6",
                     isSelected &&
                       "border-primary bg-primary text-primary-foreground",
                   )}
