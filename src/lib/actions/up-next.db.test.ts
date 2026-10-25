@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import { ReadingStatus } from "@/lib/enums";
 
 /**
@@ -7,7 +7,6 @@ import { ReadingStatus } from "@/lib/enums";
  * taking off, and starting a book taking it off by itself. Each only ever
  * touches the signed-in reader's own books.
  */
-const prisma = new PrismaClient();
 
 let currentUserId: string | null = null;
 vi.mock("@/auth", () => ({

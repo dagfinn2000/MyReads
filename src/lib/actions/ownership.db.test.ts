@@ -1,13 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import { BookOwnership } from "@/lib/enums";
 
 /**
  * setOwnership ("I bought it" on the Do I own this? page) against a real
  * database: it changes the one field, and only on the signed-in user's book.
  */
-
-const prisma = new PrismaClient();
 
 let currentUserId: string | null = null;
 vi.mock("@/auth", () => ({

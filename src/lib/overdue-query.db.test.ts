@@ -1,12 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 
 /**
  * The overdue reminder against a real database: only the reader's own open
  * loans past their day, named in order, and quiet when snoozed or switched
  * off.
  */
-const prisma = new PrismaClient();
 
 let snoozedBy: string | undefined;
 vi.mock("next/headers", () => ({

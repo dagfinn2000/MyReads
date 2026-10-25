@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import { ReadingStatus } from "@/lib/enums";
 
 /**
@@ -13,8 +13,6 @@ import { ReadingStatus } from "@/lib/enums";
  * scope its writes to the signed-in user; that promise is only worth anything
  * if something checks it.
  */
-
-const prisma = new PrismaClient();
 
 // The actions resolve identity through auth(); the session itself is not what
 // is under test here, so it's stubbed and swapped per-test.

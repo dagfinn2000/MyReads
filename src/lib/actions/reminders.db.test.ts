@@ -1,6 +1,6 @@
 import crypto from "node:crypto";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import type { ReminderMessage } from "@/lib/reminders";
 import type { PushTarget } from "@/lib/reminders-run";
 
@@ -10,8 +10,6 @@ import type { PushTarget } from "@/lib/reminders-run";
  * readers whose time has come (claiming the day, skipping a day already
  * read, forgetting a browser that's gone, and what the reminder says).
  */
-
-const prisma = new PrismaClient();
 
 let currentUserId: string | null = null;
 vi.mock("@/auth", () => ({

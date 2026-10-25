@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import { ReadingStatus } from "@/lib/enums";
 import { importLibrary } from "@/lib/import";
 
@@ -11,7 +11,6 @@ import { importLibrary } from "@/lib/import";
  * are exactly the ones a hand-written fake would reproduce faithfully and
  * wrongly.
  */
-const prisma = new PrismaClient();
 
 let userId: string;
 

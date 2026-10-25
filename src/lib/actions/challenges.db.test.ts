@@ -1,13 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 
 /**
  * Challenges against a real database: made from a tag, a shelf or a saved
  * view in the reader's own account, renamed, retargeted and deleted, and
  * never anyone else's. Also which books each one's slice holds.
  */
-
-const prisma = new PrismaClient();
 
 let currentUserId: string | null = null;
 vi.mock("@/auth", () => ({

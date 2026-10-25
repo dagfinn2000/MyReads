@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import { buildBookWhere, parseFilters } from "@/lib/library-filters";
 import { resolveBookWhere } from "@/lib/library-where";
 import type { SearchField } from "@/lib/preferences";
@@ -12,7 +12,6 @@ import { buildSearchText, foldForSearch } from "@/lib/utils";
  * wildcards are all about what Postgres does with the pattern, which a fake
  * would only guess at.
  */
-const prisma = new PrismaClient();
 
 let userId: string;
 

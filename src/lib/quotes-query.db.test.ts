@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import { parseQuotesParams, type QuotesParams } from "@/lib/quote-order";
 import { loadQuotes, quoteSources } from "@/lib/quotes-query";
 
@@ -8,7 +8,6 @@ import { loadQuotes, quoteSources } from "@/lib/quotes-query";
  * inside the reader's own library, the From filter and search match what
  * they say, and Show more and shuffle agree with each other.
  */
-const prisma = new PrismaClient();
 
 let userId: string;
 let otherUserId: string;

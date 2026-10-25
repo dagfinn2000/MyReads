@@ -4,7 +4,7 @@ import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import bcrypt from "bcryptjs";
 import JSZip from "jszip";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 
 /**
  * The nightly backups on the server, against a real database and a real
@@ -13,7 +13,6 @@ import { PrismaClient } from "@prisma/client";
  * old copies are pruned to BACKUP_KEEP by their names only, one account's
  * failure doesn't stop the rest, and deleting an account takes its copies.
  */
-const prisma = new PrismaClient();
 
 let currentUserId: string | null = null;
 vi.mock("@/auth", () => ({

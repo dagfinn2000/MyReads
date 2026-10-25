@@ -6,7 +6,7 @@
 set -e
 
 echo "[myreads] applying database migrations…"
-prisma migrate deploy --schema /app/prisma/schema.prisma
+prisma migrate deploy --config /app/prisma.config.ts
 
 # Housekeeping: drop expired third-party metadata lookups. Cheap, and the
 # only thing that ever removes them. Never fatal — the script swallows its

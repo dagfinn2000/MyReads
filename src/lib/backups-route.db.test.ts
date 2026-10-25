@@ -3,7 +3,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 
 /**
  * GET /api/backups/[name] serves the signed-in account's own nightly
@@ -12,7 +12,6 @@ import { PrismaClient } from "@prisma/client";
  * a copy that isn't there. A download read to the end counts as a backup,
  * like the Download backup button's.
  */
-const prisma = new PrismaClient();
 
 let currentUserId: string | null = null;
 vi.mock("@/auth", () => ({

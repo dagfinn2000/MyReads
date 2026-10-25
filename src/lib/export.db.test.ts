@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import JSZip from "jszip";
 
 /**
@@ -7,7 +7,6 @@ import JSZip from "jszip";
  * card and the monthly reminder. Only a download that went out in full
  * counts, and only for the account that made it.
  */
-const prisma = new PrismaClient();
 
 let currentUserId: string | null = null;
 vi.mock("@/auth", () => ({

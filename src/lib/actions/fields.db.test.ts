@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import type { BookField } from "@/lib/book-fields";
 import { parseFilters } from "@/lib/library-filters";
 import { resolveBookWhere } from "@/lib/library-where";
@@ -10,8 +10,6 @@ import { resolveBookWhere } from "@/lib/library-where";
  * when a field or option goes, the library's filters on them (Prisma's
  * JSON path filters, which only a real Postgres can vouch for), and backups.
  */
-
-const prisma = new PrismaClient();
 
 let currentUserId: string | null = null;
 vi.mock("@/auth", () => ({

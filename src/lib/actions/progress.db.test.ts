@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { type Prisma, PrismaClient } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import { BookFormat, ReadingStatus } from "@/lib/enums";
 import { dailyPageTotals } from "@/lib/progress";
 import type { MoveResult, UndoMove } from "@/lib/reading-log";
@@ -12,8 +13,6 @@ import type { MoveResult, UndoMove } from "@/lib/reading-log";
  * entry's day, so these pin down the exact moments entries get and what
  * the book's page does, as well as what is refused.
  */
-
-const prisma = new PrismaClient();
 
 let currentUserId: string | null = null;
 vi.mock("@/auth", () => ({

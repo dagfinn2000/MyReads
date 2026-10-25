@@ -7,7 +7,7 @@
 # ---------------------------------------------------------------------------
 
 FROM node:22-alpine AS base
-# openssl is required by Prisma's linux-musl engines
+# openssl is required by Prisma's migration engine on linux-musl
 RUN apk add --no-cache openssl
 
 FROM base AS deps
@@ -44,7 +44,7 @@ ENV NODE_ENV=production \
 # both `prisma` and `@prisma`. Copying the full closure would break silently
 # on any Prisma release that adds a dependency, and only a container run would
 # reveal it. Not worth ~50 MB.
-RUN npm install -g --no-audit --no-fund prisma@6
+RUN npm install -g --no-audit --no-fund prisma@7.10.1
 
 RUN addgroup -S nodejs -g 1001 && adduser -S nextjs -u 1001 -G nodejs
 
@@ -54,9 +54,10 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 # icons 404 in production and Android silently ignores the manifest.
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
+COPY --from=builder --chown=nextjs:nodejs /app/prisma.config.ts ./
 # Housekeeping scripts run by the entrypoint (metadata cache prune) and by
-# hand (orphaned cover prune). They resolve @prisma/client out of the
-# standalone bundle's node_modules.
+# hand (orphaned cover prune). They resolve @prisma/client and
+# @prisma/adapter-pg out of the standalone bundle's node_modules.
 COPY --from=builder --chown=nextjs:nodejs /app/scripts ./scripts
 COPY --chown=nextjs:nodejs docker-entrypoint.sh ./
 # The covers and backups volumes start out as copies of these folders,

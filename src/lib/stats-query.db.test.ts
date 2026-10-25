@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import { dailyPageTotals } from "@/lib/progress";
 import {
   bookDayPageTotalsForUser,
@@ -16,7 +16,6 @@ import {
  * dailyPageTotals on that book's entries, and summed per day they equal it
  * on all of them. If the rule changes there and not in the SQL, this fails.
  */
-const prisma = new PrismaClient();
 const USER = "stats-query-user";
 const OTHER = "stats-query-other";
 const ZONES = ["UTC", "Europe/Oslo", "America/New_York", "Asia/Tokyo"];
