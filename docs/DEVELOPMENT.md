@@ -224,9 +224,9 @@ The reading room's files:
   then read as the replacement, before the first paint too.
 - **Motion always has an off switch.** One CSS rule stops every animation
   and transition when the device asks for reduced motion or Animations is
-  off, and animations started from script (confetti, the theme reveal, the
-  cover flying to a book's page and back) check the same two things through
-  `motionAllowed()` in [motion.ts](../src/lib/motion.ts).
+  off, and animations started from script (celebrations, the theme reveal,
+  the cover flying to a book's page and back) check the same two things
+  through `motionAllowed()` in [motion.ts](../src/lib/motion.ts).
 - **Moving backgrounds slide pictures, they don't redraw them.**
   [background-scene.tsx](../src/components/background-scene.tsx) puts one
   fixed layer under the page, and everything in it moves by `transform` or

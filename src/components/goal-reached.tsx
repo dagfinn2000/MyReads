@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { celebrate } from "@/lib/confetti";
+import { celebrate } from "@/lib/celebrate";
 
 /**
  * Wraps the gold medal on the stats page. The first time this browser sees
- * a year's goal reached, confetti bursts from the medal; after that the
+ * a year's goal reached, a celebration bursts from the medal; after that the
  * medal just shines, so the stats page doesn't throw a party on every visit.
  */
 export function GoalReached({ year, children }: { year: number; children: React.ReactNode }) {
@@ -16,7 +16,7 @@ export function GoalReached({ year, children }: { year: number; children: React.
     try {
       if (localStorage.getItem(key)) return;
     } catch {
-      // No storage (some private modes): skip the confetti rather than
+      // No storage (some private modes): skip the celebration rather than
       // repeat it on every visit.
       return;
     }

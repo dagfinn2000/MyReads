@@ -3,7 +3,7 @@
 import { useEffect, useEffectEvent, useRef } from "react";
 import Link from "next/link";
 import { Check } from "lucide-react";
-import { celebrate } from "@/lib/confetti";
+import { celebrate } from "@/lib/celebrate";
 import { goalUnitWord, type DailyGoalTarget } from "@/lib/daily-goal";
 import { useSound } from "@/components/sounds";
 import { Card, CardContent } from "@/components/ui/card";
@@ -17,7 +17,7 @@ const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
  * The daily goal on Now reading: a ring that fills as the day's pages (or
  * minutes) are logged, with what's left and how the goal has gone lately.
  * Logging refreshes the page, so the ring moves on by itself; crossing the
- * goal sets off a little confetti from the ring (when motion is allowed),
+ * goal sets off a little celebration from the ring (when motion is allowed),
  * and a met goal keeps a soft glow.
  */
 export function DailyGoalRing({

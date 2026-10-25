@@ -3,7 +3,7 @@
 import { useEffect, useId, useRef, useState, useTransition } from "react";
 import type { BookFormat } from "@/lib/enums";
 import { logPage, moveFromReading } from "@/lib/actions/progress";
-import { celebrate } from "@/lib/confetti";
+import { celebrate } from "@/lib/celebrate";
 import { calendarDay, dayKey, shiftDayKey } from "@/lib/dates";
 import {
   addStep,
