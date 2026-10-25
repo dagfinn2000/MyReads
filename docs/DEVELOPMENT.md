@@ -16,13 +16,18 @@ cp .env.example .env       # set POSTGRES_PASSWORD and AUTH_SECRET
 # file publishes the port; the main compose file keeps Postgres private.
 docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d db
 npm install
-npx prisma migrate deploy  # create the tables (uses DATABASE_URL from .env)
+npm run db:generate        # make the database client from the schema
+npm run db:migrate         # create the tables (uses DATABASE_URL from .env)
 npm run dev                # http://localhost:3000
 ```
 
 Outside Docker the app reads `DATABASE_URL` from `.env`. Make sure its
 password matches `POSTGRES_PASSWORD`. Every setting is described in
 [.env.example](../.env.example).
+
+Run `npm run db:generate` again whenever `prisma/schema.prisma` changes,
+for example after a `git pull`. Without it the app stops with "Cannot
+find module '.prisma/client/default'".
 
 ## Scripts
 
@@ -34,6 +39,7 @@ password matches `POSTGRES_PASSWORD`. Every setting is described in
 | `npm test` | Unit tests (no database needed) |
 | `npm run test:db:docker` | Database tests against a throwaway Postgres container |
 | `npm run test:db` | Database tests against the database in `DATABASE_URL` |
+| `npm run db:generate` | Make the database client from `prisma/schema.prisma` |
 | `npm run db:migrate` | Apply database migrations |
 | `npm run db:studio` | Browse the database in Prisma Studio |
 | `npm run db:prune` | Delete expired search-cache rows (also runs on every container start) |
@@ -41,35 +47,49 @@ password matches `POSTGRES_PASSWORD`. Every setting is described in
 
 ## Tests
 
-- **`npm test`** covers the pure logic that is easiest to break without
-  noticing: ISBN-10/13 conversion, reading pace and streaks, the reading
-  timer and reading speed, which day a date
-  falls on in each time zone, sorting authors by surname and series in
-  order, the sorting rules and alphabets, saved library views, reading
-  goals, On this day, reading habits, reading preferences and themes,
-  reading a Kindle's clippings file and matching its books to the library,
-  the colours of drawn covers, the reading room's shelves and spine
-  colours, lending, the rate
-  limiter, the
-  guard that stops cover downloads from reaching private addresses, image
-  type detection, the size limits on uploads and backup files, and when
-  the nightly backup on the server is due and which old copies it deletes.
-- **`npm run test:db:docker`** starts a `postgres:16-alpine` container, runs
-  the database tests, and removes it. They cover backup and restore (the
-  round trip, merging, duplicates, and settings), the nightly backups on
-  the server and downloading them, re-read counts, the book
-  form and the reading log it writes (with the reading timer's time),
-  importing Kindle highlights, the Up next list, On this day, library
-  search, bulk edit, saving
-  preferences and saved views, and the checks that stop one user from
+- **`npm test`** runs the unit tests. They need no database and cover the
+  logic that is easy to break without noticing: ISBNs, reading pace and
+  streaks, which day a date falls on in each time zone, sorting, goals and
+  challenges, own statuses and fields, themes, lending, the reading room
+  and the avatar, the encryption of reading reminders, and the limits and
+  guards on uploads, backups and cover downloads.
+- **`npm run test:db:docker`** starts a throwaway `postgres:16-alpine`
+  container, runs the database tests and removes it. They cover what
+  depends on real queries: backup and restore, the nightly backups, the
+  reading log and timer, Kindle import, library search and filters, bulk
+  edit, saving preferences, and the checks that stop one user from
   touching another user's books.
 
-These run against a real database because a stand-in would copy Postgres's
-behaviour wrongly in exactly the places that matter, and because restore is
+The database tests use a real Postgres because a stand-in would get its
+behaviour wrong in exactly the places that matter, and because restore is
 the one feature whose failure loses data you can't get back.
 
-CI ([.github/workflows/ci.yml](../.github/workflows/ci.yml)) runs lint, the
-type check, both test suites and a production build on every pull request.
+CI ([.github/workflows/ci.yml](../.github/workflows/ci.yml)) runs on every
+pull request and every push to `main`. One job runs lint, the type check,
+both test suites and a production build. A second builds the Docker image,
+starts it with Docker Compose, and checks that the sign-in page answers
+and the app reaches its database.
+
+## Changing the database
+
+1. Change [prisma/schema.prisma](../prisma/schema.prisma).
+2. Add a migration that makes the same change: a new folder in
+   `prisma/migrations`, named like the others (date and time, then what
+   it does), with a `migration.sql` inside.
+3. Check that the two agree. Set `SHADOW_DATABASE_URL` to an empty
+   database that Prisma may wipe, then run
+
+   ```bash
+   npx prisma migrate diff --from-migrations prisma/migrations \
+     --to-schema prisma/schema.prisma --script
+   ```
+
+   It should print an empty migration. Anything else is what your
+   migration still misses.
+4. Run `npm run db:generate` and `npm run db:migrate`.
+
+A new setting usually needs no migration: settings are JSON (see
+[Design decisions](#design-decisions)).
 
 ## Keeping the docs current
 
@@ -101,67 +121,52 @@ src/
 │  ├─ (auth)/          login and register pages
 │  ├─ (app)/           pages behind login: books (the library), books/new,
 │  │                   books/[id], books/[id]/edit, books/check, reading
-│  │                   (Now reading), quotes, room (the reading room),
-│  │                   stats, stats/year/[year], account
-│  └─ api/             Auth.js, register, metadata search/details/covers,
-│                      library check, cover upload and serving,
-│                      backup export and import, and the server's
-│                      nightly copies (backups/[name])
-├─ components/         UI components (shadcn/ui primitives in components/ui);
-│                      reading-room.tsx, room-art.tsx, room-shells.ts,
-│                      room-rooms.tsx (the added rooms' furniture),
-│                      room-fireside.ts (the fireplaces, armchairs, rugs
-│                      and lamps to choose from), room-bookcases.ts (the
-│                      bookcases' designs), room-pictures.ts (the
-│                      pictures on the walls), room-seasons.ts (snow,
-│                      and what falls through the air in each season)
-│                      and room-extras.tsx (the furniture catalogue) draw the
-│                      reading room, with its colours in
-│                      reading-room.css; room-view.tsx is its Decorate panel;
-│                      avatar-art.ts draws the reader's avatar,
-│                      room-avatar.tsx walks it about and avatar-maker.tsx
-│                      is its maker
-├─ lib/
+│  │                   (Now reading), quotes, series, room (the reading
+│  │                   room), stats, stats/year/[year], account
+│  └─ api/             what the browser calls directly: sign-in and
+│                      registration, catalogue search and covers, the
+│                      library check, cover upload and serving, backups,
+│                      and a browser's new address for reading reminders
+├─ components/         UI components; shadcn/ui primitives are in
+│                      components/ui, and the reading room's files are
+│                      listed below
+├─ lib/                one file per feature or rule, named after it
+│  │                   (goals.ts, loans.ts, series.ts, statuses.ts and so
+│  │                   on), with its tests beside it: name.test.ts, and
+│  │                   name.db.test.ts when it needs a database
 │  ├─ actions/         server actions for every change, each checking that
 │  │                   the data belongs to the signed-in user
 │  ├─ metadata/        Open Library, Google Books and nb.no clients, plus
 │  │                   the database cache
-│  ├─ cover-art.ts     colours and layout of drawn covers
-│  ├─ cover-flight.ts  a book's cover flying to its page, and back to the
-│  │                   library when the page is closed
-│  ├─ covers.ts        downloading and caching cover images
-│  ├─ dates.ts         which calendar day a date falls on, by time zone
-│  ├─ enums.ts         the database's enums (status, format, ownership,
-│  │                   goal unit), safe to import in the browser
-│  ├─ library-return.ts
-│  │                   where a book page's X goes back to: the library
-│  │                   page it was opened from, and how far down it was
-│  ├─ avatar.ts        the avatar's choices and their colours
-│  ├─ backup-zip.ts    the backup zip, for downloads and the nightly copies
-│  ├─ motion.ts        whether animations may run right now
-│  ├─ net-guard.ts     blocks cover downloads from private addresses
+│  ├─ prisma.ts        the database client
 │  ├─ preferences.ts   the Preferences settings and their defaults
-│  ├─ rate-limit.ts    in-memory limits for sign-in, registration,
-│  │                   catalogue lookups and cover uploads
-│  ├─ room.ts          the reading room's layout: spine sizes, shelves,
-│  │                   and where bookcases and furniture go as it grows
-│  │                   or as the reader moves it
-│  ├─ room-styles.ts   the reading room's house styles and colours
-│  ├─ scene-motion.ts  runs the moving backgrounds' animations cheaply
-│  ├─ server-backups.ts
-│  │                   the nightly backups' rules: when, names, which to
-│  │                   keep (server-backups-run.ts does the work on disk)
-│  ├─ server-jobs.ts   the server's own timer, for jobs like the backups
-│  ├─ sky.ts           the Sky background: how high the sun is where
-│  │                   the reader's time zone is, as colours
-│  ├─ spine-colour.ts  a spine's colour, picked from its cover
-│  └─ validation.ts    Zod schemas shared by actions and API routes
+│  ├─ validation.ts    Zod schemas shared by actions and API routes
+│  ├─ dates.ts         which calendar day a date falls on, by time zone
+│  ├─ enums.ts         the database's enums, safe to import in the browser
+│  ├─ net-guard.ts     stops the server fetching private addresses
+│  └─ server-jobs.ts   the server's own timer, for nightly backups and
+│                      reading reminders
 ├─ auth.config.ts      Auth.js config that is safe to run in proxy.ts
 ├─ auth.ts             full Auth.js config (credentials, Prisma, bcrypt)
 ├─ instrumentation.ts  starts the server's own jobs when it starts
 └─ proxy.ts            sends signed-out visitors to the login page
                        (Next 16's new name for middleware.ts)
 ```
+
+The reading room's files:
+
+| File | What it does |
+| --- | --- |
+| [lib/room.ts](../src/lib/room.ts) | The layout: spine sizes, shelves, floors, and where furniture goes |
+| [lib/room-styles.ts](../src/lib/room-styles.ts) | Everything Decorate offers, and its colours |
+| [reading-room.tsx](../src/components/reading-room.tsx) | The Room page's picture of the house |
+| [room-art.tsx](../src/components/room-art.tsx) | The pixel art: bookcases and furniture as rows of rectangles |
+| [reading-room.css](../src/components/reading-room.css) | The paints, by day and by night |
+| [room-shells.ts](../src/components/room-shells.ts) | Each house style's roof, walls, floors and garden ground |
+| `room-*.ts` | One part each: [fireside](../src/components/room-fireside.ts), [bookcases](../src/components/room-bookcases.ts), [pictures](../src/components/room-pictures.ts), [windows](../src/components/room-windows.ts), [doors](../src/components/room-doors.ts), [garden](../src/components/room-garden.ts), [seasons](../src/components/room-seasons.ts), [holidays](../src/components/room-holidays.ts) |
+| [room-rooms.tsx](../src/components/room-rooms.tsx), [room-extras.tsx](../src/components/room-extras.tsx) | The added rooms' furniture, and the furniture catalogue |
+| [room-view.tsx](../src/components/room-view.tsx), [room-interior.tsx](../src/components/room-interior.tsx) | The Decorate panel |
+| [avatar-art.ts](../src/components/avatar-art.ts), [room-avatar.tsx](../src/components/room-avatar.tsx), [avatar-maker.tsx](../src/components/avatar-maker.tsx) | The avatar: drawing it, walking it about, and its maker |
 
 ## Design decisions
 
@@ -215,42 +220,48 @@ src/
   aurora drifting) also step together a few times a second rather than
   every frame, so in between the browser has nothing to redraw. By day the
   Sky background doesn't draw its stars at all.
-- **The reading room is drawn in code**, with no image files. Its pixel art
-  is rectangles ([room-art.tsx](../src/components/room-art.tsx)), each
-  naming a paint whose colour lives in
-  [reading-room.css](../src/components/reading-room.css), which has a day
-  palette for light themes and a night one for dark themes. Spine colours
-  are read from the covers in the browser as each floor scrolls into view,
-  and kept in localStorage by cover address, which changes whenever the
-  image does. The house's shell (roof, walls, floors, garden) is drawn per
-  style in [room-shells.ts](../src/components/room-shells.ts); the cottage
-  keeps a hand-picked palette, and every other style gives a few base
-  colours per part (`--s-*`) that the shades and the night version are
-  worked out from, so a Decorate colour pick repaints any style. The
-  decoration and where the furniture stands are Preferences
-  (`roomStyle`, `roomLayout` and the rest); placements name a floor and a
-  place among the pieces there, so they survive a different screen width,
-  falling back to where a piece would go by itself when it doesn't fit.
-  Added rooms (`roomRooms`) go over the library's own floors, in the
-  order they were added. A room in `roomBeside` shares the floor of the
-  one before it (or the library's top floor) when all its furniture fits
-  there, and takes a floor of its own when it doesn't. A piece moved into
-  a room names the room rather than a floor number, so it stays put as
-  the library grows underneath.
-  Furniture added from the catalogue (`roomExtras`) goes wherever there
-  is space, like the library's own; no floor is added just to hold it, so
-  on a narrow screen a piece may wait for space, and Decorate says so.
-  The avatar is painted dot by dot and outlined in code
-  ([avatar-art.ts](../src/components/avatar-art.ts)) in layers, from a
-  cape behind to a hat on top, and coloured from six `--av-*` colours, so
-  a colour pick redraws nothing. Its look is one Preferences value
-  (`avatar`), checked by `parseAvatar` in [avatar.ts](../src/lib/avatar.ts),
-  which also reads the looks saved before the wardrobe. The tests draw
-  every hairstyle under every hat and every outfit, and check each stays
-  outlined and fits the armchair. Its walk is the
-  one piece of the room moved by script rather than CSS, so it checks
-  [motion.ts](../src/lib/motion.ts) and stands still when animations are
-  off.
+- **The reading room is drawn in code**, with no image files.
+  - Its pixel art is rectangles, each naming a paint whose colour lives in
+    [reading-room.css](../src/components/reading-room.css): a day palette
+    for light themes and a night one for dark themes.
+  - Spine colours are read from the covers in the browser as each floor
+    scrolls into view, and kept in localStorage by cover address, which
+    changes whenever the image does.
+  - The cottage has a hand-picked palette. Every other house style gives a
+    few base colours per part (`--s-*`), and the shades and the night
+    version are worked out from them, so a colour picked in Decorate
+    repaints any style.
+  - The decoration and where furniture stands are Preferences
+    (`roomStyle`, `roomLayout` and the rest). A moved piece is saved as a
+    floor and a place among the pieces there, so it survives a different
+    screen width. If it no longer fits, it goes where it would go by
+    itself.
+  - Added rooms (`roomRooms`) go above the library's floors in the order
+    they were added. A room in `roomBeside` shares the floor of the one
+    before it when all its furniture fits there, and gets a floor of its
+    own when it doesn't. A piece moved into a room is saved by room, not
+    floor number, so it stays put as the library grows underneath.
+  - Catalogue furniture (`roomExtras`) goes wherever there is space. No
+    floor is added just to hold it, so on a narrow screen a piece may
+    wait for space, and Decorate says so.
+  - The avatar is painted dot by dot in layers, from a cape behind to a
+    hat on top, and coloured from six `--av-*` colours, so a colour pick
+    redraws nothing. Its look is one preference (`avatar`), checked by
+    `parseAvatar` in [avatar.ts](../src/lib/avatar.ts). The tests draw
+    every hairstyle under every hat and every outfit, and check each stays
+    outlined and fits the armchair.
+  - The avatar's walk is the one part of the room moved by script rather
+    than CSS, so it checks [motion.ts](../src/lib/motion.ts) and stands
+    still when animations are off.
+- **Own statuses and fields sit on top of the built-in ones.** A book's
+  `status` is always one of the four built-in statuses, and `statusKey`
+  names the reader's own status built on it, if any, so stats, goals and
+  every query keep counting by the four
+  ([statuses.ts](../src/lib/statuses.ts)). Own fields are defined in
+  Preferences and a book's values are one JSON column, `Book.fields`,
+  checked against the fields as they stand
+  ([book-fields.ts](../src/lib/book-fields.ts)). Their text and choices
+  are copied into `fieldSearchText` so the library search finds them.
 - **Typed dates and moments are read differently.** A date typed into a date
   field is stored as midnight UTC and means that day everywhere. Anything
   else, like "finished today" or a reading-log entry, is a moment, and
@@ -271,7 +282,8 @@ src/
   are server components that query Prisma directly. API routes are used
   only where the browser has to call the server itself: sign-in and
   registration, metadata search, the "Do I own this?" check, cover upload
-  and serving, and backup download and restore.
+  and serving, backup download and restore, and the reminders' service
+  worker passing on a browser's new push address.
 - **The browser only downloads what it runs.** Three habits keep pages
   light. Enum values come from [enums.ts](../src/lib/enums.ts), not
   `@prisma/client`, whose browser build is 40 KB of code nothing here uses;
