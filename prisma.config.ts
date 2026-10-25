@@ -20,5 +20,12 @@ try {
 export default {
   schema: "prisma/schema.prisma",
   migrations: { path: "prisma/migrations" },
-  datasource: { url: process.env.DATABASE_URL },
+  datasource: {
+    url: process.env.DATABASE_URL,
+    // Only for checking a hand-written migration against the schema:
+    // `prisma migrate diff --from-migrations prisma/migrations
+    // --to-schema prisma/schema.prisma --script` builds the migrations in
+    // this empty database and must print an empty migration.
+    shadowDatabaseUrl: process.env.SHADOW_DATABASE_URL,
+  },
 } satisfies PrismaConfig;

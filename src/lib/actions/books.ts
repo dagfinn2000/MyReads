@@ -6,6 +6,7 @@ import type { Prisma } from "@prisma/client";
 import { BookFormat, ReadingStatus } from "@/lib/enums";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { idSchema } from "@/lib/reading-log-input";
 import { bookSchema, readingSchema } from "@/lib/validation";
 import { deleteCachedCover } from "@/lib/covers";
 import { localizeCoverAfterResponse } from "@/lib/cover-localize";
@@ -398,6 +399,7 @@ async function logProgress(
 /** Delete a book and its cached cover image. */
 export async function deleteBook(bookId: string): Promise<void> {
   const userId = await requireUserId();
+  if (!idSchema.safeParse(bookId).success) return;
 
   const existing = await prisma.book.findFirst({
     where: { id: bookId, userId },

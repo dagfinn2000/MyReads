@@ -8,7 +8,8 @@ import { STATUS_COLOR_DOT, bookStatusBadge, bookStatusName, statusOptions } from
 import { cn } from "@/lib/utils";
 
 /** A book's status as a tinted badge, by the reader's own names
- *  (lib/statuses.ts). */
+ *  (lib/statuses.ts). A long name of the reader's own is cut short with an
+ *  ellipsis where the badge would otherwise run out of a narrow card. */
 export function StatusBadge({
   status,
   statusKey,
@@ -20,7 +21,12 @@ export function StatusBadge({
 }) {
   const prefs = usePreferences();
   const book = { status, statusKey };
-  return <Badge className={cn(bookStatusBadge(book, prefs), className)}>{bookStatusName(book, prefs)}</Badge>;
+  const name = bookStatusName(book, prefs);
+  return (
+    <Badge className={cn(bookStatusBadge(book, prefs), "min-w-0 max-w-full shrink", className)} title={name}>
+      <span className="truncate">{name}</span>
+    </Badge>
+  );
 }
 
 /** The items of a status menu: each built-in status, with the reader's own

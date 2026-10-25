@@ -93,6 +93,7 @@ export async function updateQuote(
 /** Delete a quote (ownership checked through the book). */
 export async function deleteQuote(quoteId: string): Promise<void> {
   const userId = await requireUserId();
+  if (!idSchema.safeParse(quoteId).success) return;
 
   const existing = await prisma.quote.findFirst({
     where: { id: quoteId, book: { userId } },

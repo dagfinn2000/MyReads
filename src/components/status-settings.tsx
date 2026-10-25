@@ -38,14 +38,17 @@ function freshKey(taken: CustomStatus[]): string {
   }
 }
 
-/** Why `name` can't be a new name for a status, or null when it can.
- *  `except` is the status being renamed. */
-function nameError(name: string | null, statuses: CustomStatus[], except?: string): string | null {
+/** Why `name` can't be a status's name, or null when it can. Every status,
+ *  built-in or the reader's own, needs a name of its own, or a status menu
+ *  would offer two "Read"s. `except` is the status being renamed: a
+ *  built-in one, or the key of one of the reader's. */
+function nameError(name: string | null, prefs: Preferences, except?: string): string | null {
   if (!name) return `Give it a name of up to ${STATUS_NAME_MAX} characters.`;
-  if (statuses.some((c) => c.key !== except && c.name.toLowerCase() === name.toLowerCase())) {
-    return `There is already a status called “${name}”.`;
-  }
-  return null;
+  const taken = [
+    ...BASES.filter((s) => s !== except).map((s) => statusName(s, prefs)),
+    ...prefs.customStatuses.filter((c) => c.key !== except).map((c) => c.name),
+  ].find((n) => n.toLowerCase() === name.toLowerCase());
+  return taken ? `There is already a status called “${taken}”.` : null;
 }
 
 /**
@@ -67,12 +70,21 @@ export function StatusSettings({
   const [error, setError] = useState<string | null>(null);
   const [removing, setRemoving] = useState<string | null>(null);
 
-  function rename(status: ReadingStatus, raw: string) {
-    const name = cleanStatusName(raw);
+  function rename(status: ReadingStatus, field: HTMLInputElement) {
+    const name = cleanStatusName(field.value);
     const names = { ...prefs.statusNames };
     if (name && name !== STATUS_LABELS[status]) names[status] = name;
     else delete names[status];
-    if ((prefs.statusNames[status] ?? "") !== (names[status] ?? "")) update({ statusNames: names });
+    if ((prefs.statusNames[status] ?? "") === (names[status] ?? "")) return;
+    // Left empty, it goes back to its own name, which has to be free too.
+    const problem = nameError(names[status] ?? STATUS_LABELS[status], prefs, status);
+    if (problem) {
+      setError(problem);
+      field.value = prefs.statusNames[status] ?? "";
+      return;
+    }
+    setError(null);
+    update({ statusNames: names });
   }
 
   function change(key: string, patch: Partial<CustomStatus>) {
@@ -82,7 +94,7 @@ export function StatusSettings({
   function add(e: React.FormEvent) {
     e.preventDefault();
     const name = cleanStatusName(newName);
-    const problem = nameError(name, customs);
+    const problem = nameError(name, prefs);
     if (problem) {
       setError(problem);
       return;
@@ -113,7 +125,7 @@ export function StatusSettings({
               defaultValue={prefs.statusNames[s] ?? ""}
               placeholder={STATUS_LABELS[s]}
               maxLength={STATUS_NAME_MAX}
-              onBlur={(e) => rename(s, e.currentTarget.value)}
+              onBlur={(e) => rename(s, e.currentTarget)}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
                   e.preventDefault();
@@ -179,7 +191,7 @@ export function StatusSettings({
                       onBlur={(e) => {
                         const name = cleanStatusName(e.currentTarget.value);
                         if (name === c.name) return;
-                        const problem = nameError(name, customs, c.key);
+                        const problem = nameError(name, prefs, c.key);
                         if (problem) {
                           setError(problem);
                           e.currentTarget.value = c.name;

@@ -370,7 +370,7 @@ export function BookCard({
             instead of overflowing the card. */}
         <div className="mt-auto flex flex-wrap items-center justify-between gap-1 pt-1">
           {details.showRating && book.rating ? <Stars value={book.rating} /> : <span />}
-          <span className="flex flex-wrap items-center gap-1">
+          <span className="flex min-w-0 max-w-full flex-wrap items-center gap-1">
             {details.showOwnership && book.ownership && (
               <OwnershipBadge ownership={book.ownership} />
             )}
