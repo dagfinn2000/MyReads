@@ -6,7 +6,8 @@ import { requireUserId } from "@/lib/actions/helpers";
 import { BACKUP_SNOOZE_COOKIE, BACKUP_SNOOZE_DAYS } from "@/lib/backup";
 
 /** When the signed-in account last downloaded a backup (ISO), or null.
- *  Polled by the Download backup button until the new date lands. */
+ *  Polled by the Download backup button, and the server copies' Download
+ *  links, until the new date lands. */
 export async function getLastBackupAt(): Promise<string | null> {
   const userId = await requireUserId();
   const user = await prisma.user.findUnique({

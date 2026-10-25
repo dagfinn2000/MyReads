@@ -3,11 +3,17 @@ import { HardDriveDownload } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser, getPreferences, getSession } from "@/lib/current-user";
 import { backupStatusText } from "@/lib/backup";
-import { formatDate, formatNumber } from "@/lib/display";
+import { formatDate, formatDayKey, formatFileSize, formatNumber } from "@/lib/display";
 import { orderByIds } from "@/lib/library-order";
 import { googleBooksEnabled } from "@/lib/metadata/googlebooks";
 import { DEFAULT_PREFERENCES, serverTimeZone } from "@/lib/preferences";
-import { BackupDownloadButton, BackupReminderSetting } from "@/components/backup-download";
+import { serverBackupConfig, serverBackupNote } from "@/lib/server-backups";
+import { listServerBackups } from "@/lib/server-backups-run";
+import {
+  BackupDownloadButton,
+  BackupReminderSetting,
+  ServerBackupList,
+} from "@/components/backup-download";
 import { ChangePasswordForm } from "@/components/change-password-form";
 import { DeleteAccount } from "@/components/delete-account";
 import { PreferencesForm } from "@/components/preferences-form";
@@ -28,7 +34,10 @@ export default async function AccountPage() {
   if (!session?.user?.id) redirect("/login"); // revoked session (see auth.ts)
   const userId = session.user.id;
 
-  const [user, bookCount, current, prefs, savedViews] = await Promise.all([
+  // Null with server backups off, and then the card is as it always was.
+  const serverBackups = serverBackupConfig();
+
+  const [user, bookCount, current, prefs, savedViews, copies] = await Promise.all([
     prisma.user.findUnique({
       where: { id: userId },
       select: { username: true, createdAt: true, lastBackupAt: true },
@@ -41,6 +50,7 @@ export default async function AccountPage() {
       select: { id: true, name: true },
       orderBy: { name: "asc" },
     }),
+    serverBackups ? listServerBackups(serverBackups, userId) : [],
   ]);
   if (!user) return null;
   // As stored, so the form can tell "never set" from a chosen zone.
@@ -111,6 +121,17 @@ export default async function AccountPage() {
             <BackupDownloadButton lastBackupAt={user.lastBackupAt?.toISOString() ?? null} />
             <RestoreBackup />
           </div>
+          {serverBackups && (
+            <ServerBackupList
+              note={serverBackupNote(serverBackups, new Date(), prefs.timeZone, serverTimeZone())}
+              copies={copies.map((copy) => ({
+                name: copy.name,
+                date: formatDayKey(copy.day, prefs.dateFormat),
+                size: formatFileSize(copy.bytes, prefs),
+              }))}
+              lastBackupAt={user.lastBackupAt?.toISOString() ?? null}
+            />
+          )}
           <BackupReminderSetting initial={stored.backupReminder} />
         </CardContent>
       </Card>
