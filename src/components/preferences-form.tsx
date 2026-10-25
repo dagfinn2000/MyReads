@@ -44,7 +44,9 @@ import { PERIOD_LABELS } from "@/lib/stats-period";
 import { cn } from "@/lib/utils";
 import { BookPageCardList, FindLinksEditor } from "@/components/book-page-preferences";
 import { ShortcutsDialog } from "@/components/keyboard-shortcuts";
+import { OwnCssForm } from "@/components/own-css-form";
 import { OrderList } from "@/components/order-list";
+import { PartThemesForm } from "@/components/part-themes-form";
 import { TagRulesList } from "@/components/tag-rules-list";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -746,11 +748,14 @@ export function PreferencesForm({
         />
       </Section>
 
-      <Section title="Theme">
+      <Section title="Theme" id="themes">
         <p className="text-sm text-muted-foreground">
           Choose a theme from the palette button in the top bar. Turn on
-          “Match system light/dark” there to have it follow your device.
+          “Match system light/dark” there to have it follow your device, or
+          “Only on this device” to give this phone or computer a theme of
+          its own.
         </p>
+        <PartThemesForm value={prefs.partThemes} onChange={(p) => update({ partThemes: p })} />
       </Section>
 
       <Section title="Appearance">
@@ -852,6 +857,10 @@ export function PreferencesForm({
           ]}
           onChange={(v) => update({ headingFont: v })}
         />
+      </Section>
+
+      <Section title="Your own CSS" id="own-css">
+        <OwnCssForm value={prefs.ownCss} onSave={(css) => update({ ownCss: css })} />
       </Section>
 
       <Section title="Pages and navigation" id="navigation">

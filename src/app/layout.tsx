@@ -79,6 +79,12 @@ export default async function RootLayout({
       data-background={prefs?.background}
       data-background-motion={prefs?.backgroundMotion}
       data-book-backdrop={prefs?.bookBackdrop}
+      // Themes for parts of the app, which the pre-paint script picks from.
+      data-theme-parts={
+        prefs && Object.keys(prefs.partThemes).length > 0
+          ? JSON.stringify(prefs.partThemes)
+          : undefined
+      }
       // 3D covers, from the library's View menu.
       data-cover-3d={user?.libraryView.cover3d ? "" : undefined}
       suppressHydrationWarning
