@@ -164,26 +164,20 @@ automatically.
   `DISABLE_REGISTRATION=true` in `.env` and run `docker compose up -d` again
   so nobody else can sign up.
 - **Use HTTPS for the phone features and reminders.** Browsers only allow
-  the barcode camera, reading reminders and installing the app on HTTPS or
-  `localhost`, so on a plain `http://192.168.x.x` address they won't work.
-  Put MyReads behind a web server that adds HTTPS (a reverse proxy, such
-  as Caddy, nginx or Traefik). Barcode scanning only works in Chrome and
-  Edge, including Chrome on Android. In other browsers, type the ISBN
-  instead.
+  the barcode camera, reading reminders and installing the app over HTTPS
+  or on `localhost`, so they won't work on a plain `http://192.168.x.x`
+  address. Put MyReads behind a reverse proxy that adds HTTPS, such as
+  Caddy, nginx or Traefik. The barcode camera also needs Chrome or Edge
+  (Chrome on Android works). In other browsers, type the ISBN instead.
 - **If you use nginx, let it accept big uploads.** nginx refuses uploads
   over 1 MB unless you change it, which stops most backups from being
   restored and most phone photos from being uploaded as covers. Add
   `client_max_body_size 200m;` to its settings for MyReads.
-- **Make backups.** On the Account page, **Download backup** saves
-  everything as a zip. **Restore backup** on the same page loads one into any
-  MyReads server. Books you already have are skipped, so restoring twice is
-  safe. The Backup card also shows when you last downloaded one. Set its
-  **Remind me to back up** to Every month, and a note on the Library and
-  Stats pages reminds you when your last backup is over a month old.
-  With Docker, the server also saves a copy of every account each night
-  and keeps the newest 7, listed on the Backup card. Those copies are on
-  the same machine as the library, so still download one now and then and
-  keep it somewhere else.
+- **Keep a backup somewhere else.** On the Account page, **Download
+  backup** saves everything as one zip, and **Restore backup** loads it
+  into any MyReads server. The server's own nightly copies sit on the same
+  machine as your library, so download one now and then and keep it
+  elsewhere. More in [Backups](docs/FEATURES.md#backups).
 - **Know where your data is.** It lives in three Docker volumes: `pgdata`
   (the database), `covers` (cover images) and `backups` (the nightly
   copies).

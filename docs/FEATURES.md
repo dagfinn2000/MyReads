@@ -43,6 +43,8 @@ page by page.
 
 ## Reading
 
+### Statuses and ratings
+
 - Each book has a status (Want to Read, Currently Reading, Read, Did Not
   Finish), a rating, notes, and start and finish dates. Rate in half
   stars, whole stars or out of 10, or switch ratings off.
@@ -51,15 +53,22 @@ page by page.
   under Want to Read. Each has its own colour, shows in every status
   menu and on the book's badge, and gets its own chip under its tab in
   the library. Stats, goals and challenges count a book on one of your
-  own as the status it is a kind of.
+  own as the status it is a kind of. No two statuses can share a name.
 - Re-reads are kept as history and count in your stats.
+
+### Logging your reading
+
 - **Now reading** lists the books you're reading. Log the page you're on,
   for today or an earlier day. Each book shows your pace and when you're
-  likely to finish.
+  likely to finish. A book you haven't logged for two weeks says when
+  you last read it.
 - In Preferences you can log ebooks in percent, and audiobooks in percent
   or in hours and minutes listened. Percent needs the book's page count,
   and time needs the audiobook's length too. Both go on the book's Edit
   page.
+
+### Timer, daily goal and reminders
+
 - **Reading timer.** Press Start timer when you sit down with a book, and
   the time goes with the next page you log (or type the minutes in). Once
   a book has some timed reading, it shows how many pages you read an hour
@@ -79,6 +88,9 @@ page by page.
   under Preferences > Reading reminders, which lists them all with a
   Test button. They need MyReads opened over https, and on an iPhone or
   iPad, MyReads added to the Home Screen.
+
+### Up next and On this day
+
 - **Up next.** Add Want to Read books to your own list, from their page or
   from Now reading, and put them in order. They come first in Up next on
   Now reading, before the suggestions (the next book of a series you're
@@ -87,7 +99,6 @@ page by page.
   list.
 - **On this day.** Now reading remembers what you finished or started on
   today's date in earlier years, and a quote you saved on it.
-- A book you haven't logged for two weeks says when you last read it.
 
 ![Now reading, with the daily goal met, a timer running and the Up next list](now-reading.png)
 
