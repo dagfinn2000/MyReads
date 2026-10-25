@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import type { Prisma } from "@prisma/client";
 import { ReadingStatus } from "@/lib/enums";
 import { prisma } from "@/lib/prisma";
+import { idSchema } from "@/lib/reading-log-input";
 import { pastReadSchema } from "@/lib/validation";
 import { requireUserId } from "@/lib/actions/helpers";
 import type { ActionState } from "@/lib/actions/helpers";
@@ -43,6 +44,7 @@ function revalidateBook(bookId: string) {
  */
 export async function readAgain(bookId: string): Promise<void> {
   const userId = await requireUserId();
+  if (!idSchema.safeParse(bookId).success) return;
 
   const book = await prisma.book.findFirst({
     where: { id: bookId, userId },
@@ -161,6 +163,7 @@ export async function updatePastRead(
 /** Delete a past read (ownership checked through the book). */
 export async function deletePastRead(readId: string): Promise<void> {
   const userId = await requireUserId();
+  if (!idSchema.safeParse(readId).success) return;
 
   const existing = await prisma.read.findFirst({
     where: { id: readId, book: { userId } },

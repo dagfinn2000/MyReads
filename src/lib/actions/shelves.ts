@@ -2,10 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 import { Prisma } from "@prisma/client";
-import { z } from "zod";
 import { BULK_CHUNK, chunk } from "@/lib/bulk";
 import { challengeQuery } from "@/lib/challenges";
 import { prisma } from "@/lib/prisma";
+import { idSchema } from "@/lib/reading-log-input";
 import { canonicalViewQueryFromString } from "@/lib/saved-views";
 import { shelfNameSchema } from "@/lib/validation";
 import { requireUserId } from "@/lib/actions/helpers";
@@ -74,7 +74,7 @@ export interface ShelfRenameResult {
  */
 export async function renameShelf(shelfId: string, name: string): Promise<ShelfRenameResult> {
   const userId = await requireUserId();
-  if (!z.string().min(1).max(64).safeParse(shelfId).success) return { error: "Shelf not found" };
+  if (!idSchema.safeParse(shelfId).success) return { error: "Shelf not found" };
 
   const parsed = shelfNameSchema.safeParse(name);
   if (!parsed.success) {
@@ -187,7 +187,7 @@ async function challengesOnShelf(
  */
 export async function deleteShelf(shelfId: string): Promise<void> {
   const userId = await requireUserId();
-  if (!z.string().min(1).max(64).safeParse(shelfId).success) return;
+  if (!idSchema.safeParse(shelfId).success) return;
   await prisma.$transaction(async (tx) => {
     const { count } = await tx.shelf.deleteMany({ where: { id: shelfId, userId } });
     if (count === 0) return;
@@ -207,6 +207,7 @@ export async function toggleBookShelf(
   member: boolean,
 ): Promise<void> {
   const userId = await requireUserId();
+  if (!idSchema.safeParse(bookId).success || !idSchema.safeParse(shelfId).success) return;
 
   const [book, shelf] = await Promise.all([
     prisma.book.findFirst({ where: { id: bookId, userId }, select: { id: true } }),

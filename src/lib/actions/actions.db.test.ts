@@ -24,6 +24,7 @@ vi.mock("@/auth", () => ({
 
 // Server actions call revalidatePath, which needs a request scope.
 vi.mock("next/cache", () => ({ revalidatePath: () => {} }));
+vi.mock("next/navigation", () => ({ redirect: () => {} }));
 
 const { readAgain, addPastRead, deletePastRead, updatePastRead } = await import(
   "@/lib/actions/reads"
@@ -31,7 +32,9 @@ const { readAgain, addPastRead, deletePastRead, updatePastRead } = await import(
 const { bulkUpdateBooks } = await import("@/lib/actions/bulk");
 const { renameTag, deleteTag, removeTagRule } = await import("@/lib/actions/tags");
 const { lendBook, returnLoan, deleteLoan, setLoanDue } = await import("@/lib/actions/loans");
-const { createShelf } = await import("@/lib/actions/shelves");
+const { createShelf, toggleBookShelf } = await import("@/lib/actions/shelves");
+const { deleteBook } = await import("@/lib/actions/books");
+const { deleteQuote } = await import("@/lib/actions/quotes");
 
 let userId: string;
 let otherUserId: string;
@@ -669,5 +672,32 @@ describe("bulk Set status: Read and the finish-date preference", () => {
     await bulkUpdateBooks({ bookIds: [bk.id], status: ReadingStatus.READ });
     const after = await prisma.book.findUniqueOrThrow({ where: { id: bk.id } });
     expect(after.dateFinished?.toDateString()).toBe(new Date().toDateString());
+  });
+});
+
+describe("ids that aren't ids", () => {
+  // A server action's arguments come from the browser and aren't checked
+  // against their types, so an object can arrive where an id should. It
+  // must be turned away, not handed to Prisma to fail on.
+  it("are turned away without an error or a change", async () => {
+    const bk = await makeBook({ status: ReadingStatus.READ });
+    const shelf = await prisma.shelf.create({ data: { userId, name: "Keep" } });
+    await prisma.quote.create({ data: { bookId: bk.id, text: "A line" } });
+    await prisma.read.create({ data: { bookId: bk.id } });
+    const notAnId = { not: "" } as unknown as string;
+
+    await deleteBook(notAnId);
+    await deleteQuote(notAnId);
+    await readAgain(notAnId);
+    await deletePastRead(notAnId);
+    await toggleBookShelf(notAnId, shelf.id, true);
+    await toggleBookShelf(bk.id, notAnId, true);
+
+    const after = await prisma.book.findUniqueOrThrow({
+      where: { id: bk.id },
+      include: { quotes: true, reads: true, shelves: true },
+    });
+    expect(after.status).toBe(ReadingStatus.READ);
+    expect([after.quotes.length, after.reads.length, after.shelves.length]).toEqual([1, 1, 0]);
   });
 });
