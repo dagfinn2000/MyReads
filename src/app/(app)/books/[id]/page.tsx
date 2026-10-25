@@ -146,7 +146,7 @@ export default async function BookDetailPage({
     lending: showsLendingCard(book.ownership, book.loans.length) ? (
       <LendingCard bookId={book.id} ownership={book.ownership} loans={book.loans} />
     ) : null,
-    quotes: <QuotesCard bookId={book.id} quotes={book.quotes} />,
+    quotes: <QuotesCard book={book} quotes={book.quotes} />,
   };
   const arranged = arrangeBookCards(prefs, {
     reading: book.status === ReadingStatus.READING || !!book.review?.trim(),
