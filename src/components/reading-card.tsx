@@ -5,7 +5,8 @@ import type { Book, ProgressEntry } from "@prisma/client";
 import { ReadingStatus } from "@/lib/enums";
 import { updateReading } from "@/lib/actions/books";
 import { celebrate } from "@/lib/confetti";
-import { STATUS_LABELS, toDateInputValue } from "@/lib/display";
+import { toDateInputValue } from "@/lib/display";
+import { customStatusOf, statusChoice } from "@/lib/statuses";
 import { usePreferences } from "@/components/preferences-provider";
 import { useSound } from "@/components/sounds";
 import { currentPassEntries } from "@/lib/progress";
@@ -16,6 +17,7 @@ import { FinishedDateField } from "@/components/finished-date-field";
 import { CurrentPageField } from "@/components/progress-input";
 import { QuickLog } from "@/components/quick-log";
 import { StarRatingInput } from "@/components/star-rating-input";
+import { StatusSelectItems } from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -29,7 +31,6 @@ import {
 import {
   Select,
   SelectContent,
-  SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -86,6 +87,7 @@ export function ReadingCard({
   // remount the form and throw away a review being typed.
   const formKey = [
     book.status,
+    book.statusKey ?? "",
     book.rating ?? 0,
     book.dateStarted?.getTime() ?? 0,
     book.dateFinished?.getTime() ?? 0,
@@ -135,16 +137,12 @@ export function ReadingCard({
           <div className="flex flex-wrap items-end gap-4">
             <div className="grid gap-2">
               <Label htmlFor="status">Status</Label>
-              <Select name="status" defaultValue={book.status}>
+              <Select name="status" defaultValue={statusChoice(book.status, customStatusOf(book, prefs)?.key)}>
                 <SelectTrigger id="status" className="w-44">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {Object.values(ReadingStatus).map((s) => (
-                    <SelectItem key={s} value={s}>
-                      {STATUS_LABELS[s]}
-                    </SelectItem>
-                  ))}
+                  <StatusSelectItems />
                 </SelectContent>
               </Select>
             </div>

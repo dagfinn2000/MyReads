@@ -8,13 +8,14 @@ import { Check, Dices, SquareCheckBig, X } from "lucide-react";
 import { bulkDeleteBooks, bulkUpdateBooks } from "@/lib/actions/bulk";
 import { pickRandomBook } from "@/lib/actions/pick";
 import { isClosingBook } from "@/lib/cover-flight";
-import { FORMAT_LABELS, OWNERSHIP_LABELS, STATUS_LABELS, formatNumber } from "@/lib/display";
+import { FORMAT_LABELS, OWNERSHIP_LABELS, formatNumber } from "@/lib/display";
 import { orderByIds } from "@/lib/library-order";
 import { cn } from "@/lib/utils";
 import type { LibraryDisplay } from "@/lib/library-view";
 import { pickButtonTitle, tabStatus } from "@/lib/pick";
 import { usePreferences } from "@/components/preferences-provider";
 import { useSound } from "@/components/sounds";
+import { StatusSelectItems } from "@/components/status-badge";
 import {
   BookCard,
   BookCoverTile,
@@ -251,7 +252,9 @@ export function LibraryView({
     startTransition(async () => {
       const res = await bulkUpdateBooks({
         ...target(),
-        status: status === "keep" ? undefined : (status as ReadingStatus),
+        // A status of the reader's own comes as "READING:k3f9".
+        status: status === "keep" ? undefined : (status.split(":")[0] as ReadingStatus),
+        statusKey: status === "keep" ? undefined : status.split(":")[1],
         format: format === "keep" ? undefined : (format as BookFormat),
         ownership: ownership === "keep" ? undefined : (ownership as BookOwnership),
         addShelfId: shelfAction === "add" ? shelfTarget : undefined,
@@ -263,7 +266,7 @@ export function LibraryView({
         setMessage(res.error);
       } else {
         setMessage(`Updated ${booksLabel(res.count ?? 0)}.`);
-        if (status === ReadingStatus.READ && res.count) sound("finished");
+        if (status.split(":")[0] === ReadingStatus.READ && res.count) sound("finished");
         clearSelection();
         // Apply is disabled with nothing selected; focus goes to how it went
         // rather than falling to the page.
@@ -532,11 +535,7 @@ export function LibraryView({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="keep">Status: don&apos;t change</SelectItem>
-                {Object.values(ReadingStatus).map((s) => (
-                  <SelectItem key={s} value={s}>
-                    {STATUS_LABELS[s]}
-                  </SelectItem>
-                ))}
+                <StatusSelectItems />
               </SelectContent>
             </Select>
             {shelves.length > 0 && (

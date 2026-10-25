@@ -36,6 +36,7 @@ import {
 
 export interface FilterValues {
   shelf: string;
+  statusKey: string;
   shelfId: string;
   q: string;
   author: string;
@@ -193,6 +194,7 @@ export function FilterBar({
     // Same order as a saved view's address (saved-views.ts).
     const params = new URLSearchParams();
     if (next.shelf && next.shelf !== "all") params.set("shelf", next.shelf);
+    if (next.shelf && next.shelf !== "all" && next.statusKey) params.set("statusKey", next.statusKey);
     if (next.shelfId) params.set("shelfId", next.shelfId);
     if (next.q) params.set("q", next.q);
     if (next.author) params.set("author", next.author);

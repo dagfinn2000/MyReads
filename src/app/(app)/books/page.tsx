@@ -20,6 +20,7 @@ import { parseFilters } from "@/lib/library-filters";
 import { resolveBookWhere } from "@/lib/library-where";
 import { naturalDir, parseLibraryView } from "@/lib/library-view";
 import { seriesKey } from "@/lib/series";
+import { customStatusOf } from "@/lib/statuses";
 import { seriesAnchor } from "@/lib/series-list";
 import { isOverdue } from "@/lib/loans";
 import { overdueReminder } from "@/lib/overdue-query";
@@ -56,6 +57,7 @@ const librarySelect = {
   authors: true,
   coverUrl: true,
   status: true,
+  statusKey: true,
   rating: true,
   currentPage: true,
   pageCount: true,
@@ -149,7 +151,7 @@ export default async function BooksPage({
       select: { bookId: true, borrower: true, lentAt: true, dueAt: true },
     }),
     prisma.book.groupBy({
-      by: ["status"],
+      by: ["status", "statusKey"],
       where: { userId },
       _count: { _all: true },
     }),
@@ -253,6 +255,7 @@ export default async function BooksPage({
     timeZone: prefs.timeZone,
     ratingStyle: prefs.ratingStyle,
     shelfOrder: prefs.shelfOrder,
+    statusNames: prefs.statusNames,
   };
   const sorted = sortBooks(withLoanFlag, values.sort, values.dir, sortOptions);
   const groups = groupBooks(sorted, values.group, sortOptions);
@@ -288,9 +291,13 @@ export default async function BooksPage({
   }
 
   const counts: Record<string, number> = { all: 0 };
+  // Books on each of the reader's own statuses, counted only on their base.
+  const keyCounts: Record<string, number> = {};
   for (const row of statusCounts) {
-    counts[row.status] = row._count._all;
+    counts[row.status] = (counts[row.status] ?? 0) + row._count._all;
     counts.all += row._count._all;
+    const custom = customStatusOf(row, prefs);
+    if (custom) keyCounts[custom.key] = (keyCounts[custom.key] ?? 0) + row._count._all;
   }
   // Sorted in JS (not ORDER BY) so tag ordering stays exactly what the
   // previous [...new Set(...)].sort() produced, independent of DB collation.
@@ -344,9 +351,12 @@ export default async function BooksPage({
 
       <ShelfTabs
         current={values.shelf}
+        currentKey={values.statusKey}
         counts={counts}
+        keyCounts={keyCounts}
         searchParams={flatParams}
         hidden={prefs.hiddenStatusTabs}
+        statuses={prefs}
       />
       <ShelfChips
         shelves={shelves.map((s) => ({

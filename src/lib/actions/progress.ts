@@ -439,6 +439,8 @@ export async function moveFromReading(
       where: { id: id.data },
       data: {
         status: next.status,
+        // A status of the reader's own was one kind of Currently Reading.
+        statusKey: null,
         dateStarted: next.dateStarted,
         dateFinished: next.dateFinished,
         timesRead: next.timesRead,

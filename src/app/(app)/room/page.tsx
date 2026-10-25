@@ -2,9 +2,10 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getPreferences, getSession } from "@/lib/current-user";
-import { formatNumber } from "@/lib/display";
+import { STATUS_LABELS, formatNumber } from "@/lib/display";
 import { sortBooks } from "@/lib/library-sort";
 import { caseCount, shelve, spineFor, type RoomBook } from "@/lib/room";
+import { bookStatusName } from "@/lib/statuses";
 import { RoomView } from "@/components/room-view";
 import { RoomSwitch } from "@/components/room-switch";
 
@@ -47,6 +48,7 @@ export default async function ReadingRoomPage() {
         pageCount: true,
         currentPage: true,
         status: true,
+        statusKey: true,
         ownership: true,
         seriesName: true,
         seriesNumber: true,
@@ -84,6 +86,11 @@ export default async function ReadingRoomPage() {
     pageCount: b.pageCount,
     currentPage: b.currentPage,
     status: b.status,
+    // Only when the reader calls it something else: the room's markup
+    // stays as it was for everyone else.
+    ...(bookStatusName(b, prefs) !== STATUS_LABELS[b.status] && {
+      statusName: bookStatusName(b, prefs),
+    }),
     ownership: b.ownership,
     lentTo: lentTo.get(b.id) ?? null,
   }));

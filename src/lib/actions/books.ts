@@ -18,8 +18,7 @@ import { anchorMoment } from "@/lib/reading-log";
 import { settleReadingState } from "@/lib/reading-state";
 import { buildSearchText, foldForSearch } from "@/lib/utils";
 import { AFTER_ADD } from "@/lib/preferences";
-
-const statusField = z.enum(ReadingStatus).catch(ReadingStatus.WANT_TO_READ);
+import { parseStatusChoice } from "@/lib/statuses";
 
 /** Create a book from the add form (manual or import-prefilled). */
 export async function createBook(
@@ -33,16 +32,21 @@ export async function createBook(
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
   }
+  const prefs = await getPreferences();
   // The shelf's own fields: Finished, Don't remember and Rating for Read;
   // Started and Current page for Currently Reading. Same checks as the
-  // reading card (no dates in the future, none backwards).
-  const status = statusField.parse(formData.get("status"));
+  // reading card (no dates in the future, none backwards). The shelf can be
+  // one of the reader's own statuses, which goes with its built-in one.
+  const choice = parseStatusChoice(formData.get("status"), prefs) ?? {
+    status: ReadingStatus.WANT_TO_READ,
+    statusKey: null,
+  };
+  const status = choice.status;
   const readingParsed = readingSchema.safeParse({ ...fields, status });
   if (!readingParsed.success) {
     return { error: readingParsed.error.issues[0]?.message ?? "Invalid input" };
   }
   const r = readingParsed.data;
-  const prefs = await getPreferences();
   // Which submit button was pressed; a form without one follows Preferences.
   const afterAdd = z.enum(AFTER_ADD).catch(prefs.afterAdd).parse(formData.get("afterAdd"));
 
@@ -93,6 +97,7 @@ export async function createBook(
       ownership: data.ownership,
       openLibraryId: data.openLibraryId ?? null,
       status: reading.status,
+      statusKey: reading.status === status ? choice.statusKey : null,
       rating: r.rating || null, // 0 = unrated
       dateStarted: reading.dateStarted,
       dateFinished: reading.dateFinished,
@@ -208,12 +213,15 @@ export async function updateReading(
   });
   if (!existing) return { error: "Book not found" };
 
-  const parsed = readingSchema.safeParse(Object.fromEntries(formData));
+  const prefs = await getPreferences();
+  // The status menu can name one of the reader's own statuses too
+  // ("READING:k3f9"); the form's status is its built-in one.
+  const choice = parseStatusChoice(formData.get("status"), prefs);
+  const parsed = readingSchema.safeParse({ ...Object.fromEntries(formData), status: choice?.status });
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
   }
   const data = parsed.data;
-  const prefs = await getPreferences();
 
   // Fills in "finished today" / "started today" when the dates were left
   // empty, derives timesRead, and drops the page once the book is finished
@@ -249,6 +257,7 @@ export async function updateReading(
       where: { id: bookId },
       data: {
         status: data.status,
+        statusKey: choice?.statusKey ?? null,
         rating: data.rating || null, // 0 = cleared
         review: data.review ?? null,
         reviewSearchText: foldForSearch(data.review ?? ""),

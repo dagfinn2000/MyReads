@@ -84,6 +84,8 @@ export const bulkSchema = z
   .object({
     ...targetFields,
     status: z.enum(ReadingStatus).optional(),
+    /** One of the reader's own statuses on `status` (lib/statuses.ts). */
+    statusKey: z.string().max(16).optional(),
     format: z.enum(BookFormat).optional(),
     ownership: z.enum(BookOwnership).optional(),
     addShelfId: z.string().max(64).optional(),

@@ -1,5 +1,5 @@
 import { BookOwnership, ReadingStatus } from "@/lib/enums";
-import { STATUS_LABELS } from "@/lib/display";
+import { statusName, type StatusNames } from "@/lib/statuses";
 import { isNextInSeries, seriesKey, type SeriesMember } from "@/lib/series";
 
 /**
@@ -96,10 +96,10 @@ function joinList(items: string[]): string {
 /** The Pick for me button's tooltip: where it picks from and what it obeys. */
 export function pickButtonTitle(
   tab: ReadingStatus | null,
-  prefs: { pickOnlyHave: boolean; pickNextInSeries: boolean },
+  prefs: { pickOnlyHave: boolean; pickNextInSeries: boolean; statusNames?: StatusNames },
 ): string {
   const base = tab
-    ? `Open a random book from ${STATUS_LABELS[tab]}`
+    ? `Open a random book from ${statusName(tab, { statusNames: prefs.statusNames ?? {} })}`
     : "Open a random book, from Want to Read when there is one";
   const rules = ["your filters"];
   if (prefs.pickOnlyHave) rules.push("only books you have");

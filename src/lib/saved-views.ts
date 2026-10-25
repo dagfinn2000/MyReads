@@ -29,6 +29,7 @@ export function canonicalViewQuery(sp: Params): string {
 
   const params = new URLSearchParams();
   if (f.shelf && f.shelf !== "all") params.set("shelf", f.shelf);
+  if (f.shelf && f.shelf !== "all" && f.statusKey) params.set("statusKey", f.statusKey);
   if (f.shelfId) params.set("shelfId", f.shelfId);
   if (f.q) params.set("q", f.q);
   if (f.author) params.set("author", f.author);

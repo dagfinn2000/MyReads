@@ -200,6 +200,10 @@ model Book {
 
   // --- personal reading data ---
   status       ReadingStatus @default(WANT_TO_READ)
+  /// The reader's own status this book is on (a key of
+  /// Preferences.customStatuses, lib/statuses.ts), built on `status`, which
+  /// stays the built-in one everything counts by. Null = just `status`.
+  statusKey    String?
   /// 1–10 in half-star units: 7 = 3.5 stars. Null = unrated.
   rating       Int?
   review       String?

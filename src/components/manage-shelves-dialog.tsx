@@ -6,7 +6,8 @@ import { ReadingStatus } from "@/lib/enums";
 import { ArrowDown, ArrowUp, Eye, EyeOff, Pencil, Settings2, Trash2 } from "lucide-react";
 import { savePreferences } from "@/lib/actions/preferences";
 import { deleteShelf, renameShelf } from "@/lib/actions/shelves";
-import { STATUS_LABELS, formatNumber } from "@/lib/display";
+import { formatNumber } from "@/lib/display";
+import { statusName } from "@/lib/statuses";
 import { moveId, orderByIds } from "@/lib/library-order";
 import { cn } from "@/lib/utils";
 import { usePreferences } from "@/components/preferences-provider";
@@ -424,7 +425,7 @@ export function ManageShelvesDialog({
                     last && "cursor-not-allowed",
                   )}
                 >
-                  {STATUS_LABELS[s]}
+                  {statusName(s, prefs)}
                 </button>
               );
             })}

@@ -13,7 +13,6 @@ import type { SoundVolume } from "@/lib/sounds";
 import {
   FORMAT_LABELS,
   OWNERSHIP_LABELS,
-  STATUS_LABELS,
   formatDayKey,
   formatNumber,
 } from "@/lib/display";
@@ -42,6 +41,7 @@ import {
   type SearchField,
 } from "@/lib/preferences";
 import { PERIOD_LABELS } from "@/lib/stats-period";
+import { statusName } from "@/lib/statuses";
 import { cn } from "@/lib/utils";
 import { BookPageCardList, FindLinksEditor } from "@/components/book-page-preferences";
 import { ShortcutsDialog } from "@/components/keyboard-shortcuts";
@@ -49,6 +49,7 @@ import { OwnCssForm } from "@/components/own-css-form";
 import { OrderList } from "@/components/order-list";
 import { PartThemesForm } from "@/components/part-themes-form";
 import { playSample } from "@/components/sounds";
+import { StatusSettings } from "@/components/status-settings";
 import { TagRulesList } from "@/components/tag-rules-list";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -411,7 +412,7 @@ export function PreferencesForm({
         <Choice
           label="Status"
           value={prefs.newBookStatus}
-          options={Object.values(ReadingStatus).map((s) => ({ value: s, label: STATUS_LABELS[s] }))}
+          options={Object.values(ReadingStatus).map((s) => ({ value: s, label: statusName(s, prefs) }))}
           onChange={(v) => update({ newBookStatus: v })}
         />
         <Choice
@@ -658,7 +659,7 @@ export function PreferencesForm({
             return (
               <Toggle
                 key={s}
-                label={STATUS_LABELS[s]}
+                label={statusName(s, prefs)}
                 checked={shown}
                 // At least one status tab stays.
                 disabled={shown && shownStatusTabs === 1}
@@ -688,6 +689,10 @@ export function PreferencesForm({
         <p className="text-xs text-muted-foreground">
           Order and hide shelf chips from Manage shelves in the library.
         </p>
+      </Section>
+
+      <Section title="Reading statuses" id="statuses">
+        <StatusSettings prefs={prefs} update={update} />
       </Section>
 
       {savedViews.length > 0 && (
