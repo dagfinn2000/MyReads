@@ -53,7 +53,7 @@ server.
 
 **Make it yours**
 
-- 26 colour themes and 26 background textures. On some of the textures
+- 30 colour themes and 26 background textures. On some of the textures
   rain falls, snow drifts or stars twinkle.
 - Preferences for date formats, time zone, sorting, fonts and much more.
   Your settings follow you to every device.
@@ -113,7 +113,7 @@ lamplight, each with a room added upstairs.
 
 ![The reading room as a castle in winter, in a dark theme](docs/room-dark.png)
 
-**Themes**: a dark theme, and the theme picker.
+**Themes**: a dark theme, and the theme picker (here on Majorelle).
 
 ![Library in a dark theme](docs/library-dark.png)
 

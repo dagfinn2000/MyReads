@@ -9,7 +9,9 @@
  * warm cream and every dark a low-saturation grey or violet. Each addition
  * claims a hue or character the set didn't have: neon, deep water, true
  * black, brown, forest green, and tinted papers in pink, blue, green, violet
- * and peach.
+ * and peach. The last four put the accent across the colour wheel from the
+ * page: wine with sea-glass, ultramarine with peach, pink with green, lemon
+ * with cobalt.
  * Dark-mode themes additionally get the `dark` class on <html> so Tailwind
  * `dark:` variants (status badges etc.) follow along.
  */
@@ -41,6 +43,8 @@ export const THEMES: ThemeDef[] = [
   { id: "obsidian", name: "Obsidian", mode: "dark", swatch: ["#000000", "#4c8dff"] },
   { id: "sepia", name: "Sepia", mode: "dark", swatch: ["#241a15", "#d9a066"] },
   { id: "evergreen", name: "Evergreen", mode: "dark", swatch: ["#0d1f16", "#7ee787"] },
+  { id: "bordeaux", name: "Bordeaux", mode: "dark", swatch: ["#2c0d14", "#6fd6c6"] },
+  { id: "riviera", name: "Riviera", mode: "dark", swatch: ["#0f1640", "#ffb38a"] },
 
   // Light palettes
   { id: "everforest-light", name: "Everforest Light", mode: "light", swatch: ["#fdf6e3", "#35a77c"] },
@@ -55,6 +59,8 @@ export const THEMES: ThemeDef[] = [
   { id: "sage", name: "Sage", mode: "light", swatch: ["#f0f5f0", "#2f6b46"] },
   { id: "lilac", name: "Lilac", mode: "light", swatch: ["#f5f2fc", "#6d40c4"] },
   { id: "apricot", name: "Apricot", mode: "light", swatch: ["#fff2e8", "#b8502d"] },
+  { id: "rhubarb", name: "Rhubarb", mode: "light", swatch: ["#f7e8e6", "#2d6a4a"] },
+  { id: "majorelle", name: "Majorelle", mode: "light", swatch: ["#fbf5d2", "#3a3fc8"] },
 ];
 
 export const DARK_THEME_IDS = THEMES.filter((t) => t.mode === "dark").map(
