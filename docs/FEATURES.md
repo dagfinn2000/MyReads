@@ -337,8 +337,11 @@ tab goes away. You can also keep the house and leave the avatar out.
   choice follows you to every device you sign in on, unless you give one
   phone or computer a theme of its own ("Only on this device" in the
   palette menu). The palette menu shows each theme as a small round
-  swatch, the page colour with the accent as a dot: point at one to see
-  its name, or tap it to try it.
+  swatch, the page colour with the accent as a dot (and the theme's
+  picture or outline, if it has one): point at one to see its name, or
+  tap it to try it. No two themes look alike: fourteen that were too
+  close to others were retired, and if you had one of them you now have
+  the theme nearest to it.
 - Eleven of the themes put together colours you rarely see side by side:
   - Dark: Bordeaux (wine red and sea-glass green), Riviera (ultramarine
     and peach), Provence (olive and lavender), Terracotta (clay and sky
@@ -354,13 +357,28 @@ tab goes away. You can also keep the house and leave the avatar out.
     colour.
   - High Contrast Dark (white and yellow on black) and High Contrast Light
     (black and blue on white), with the strongest contrast of any theme.
-  - Newsprint, all greys with one red; Macaron, mint, pink, lilac and
-    lemon together; Kraft, brown parcel paper with red; and Notebook,
-    ruled-paper white with the text in blue ink.
+  - Newsprint, all greys with one red and serif headings; Macaron, mint,
+    pink, lilac and lemon with very round corners; Kraft, brown parcel
+    paper with red and typewriter headings; and Notebook, ruled paper
+    with the text in blue ink.
+- Nine are set apart by more than their colours:
+  - Light: Sunset (peach to rose to lilac down the page), Opal (pastel
+    colours playing across the page, very round corners), Brutalist (hot
+    pink, cards outlined in black with hard shadows) and Mondrian (white,
+    a black top bar, black lines with red, yellow and blue, and square
+    corners).
+  - Dark: Ember (a red glow rising from the foot of the page, serif
+    headings), Northern Lights (green and violet light over a night sky),
+    Lacquer (red cards on a black page, with gold), Arcade (cards
+    outlined in cyan with magenta shadows, typewriter headings and square
+    corners) and Darkroom (everything in safelight red, the text too).
 - The Silly set, listed apart at the bottom of the palette menu as "not
-  recommended": Blue Screen, Glowstick, Hot Dog Stand, Toxic and
-  Desktop 95. They are as easy to read as the rest, only nobody should
-  want them. Hover over one in the menu for a word about it.
+  recommended": Blue Screen, Glowstick, Hot Dog Stand, Toxic, Desktop 95,
+  Under Construction (a hazard-striped top bar and Comic Sans), Ugly
+  Sweater (green cards on knitted red), Spreadsheet (gridlines and a
+  green ribbon), Party (confetti) and Camouflage. They are as easy to
+  read as the rest, only nobody should want them. Hover over one in the
+  menu for a word about it.
 - A theme for each part of the app if you like: Stats in one theme, the
   reading room in another, the rest in your usual one (Preferences).
 - Your own CSS, added after the app's styles on every page but the
@@ -405,7 +423,8 @@ On the Account page:
 - How long you usually lend books for, and whether overdue books remind
   you.
 - The accent colour, text size, a serif font for reviews and quotes, the
-  font for headings, how round the corners are, flat, raised or frosted
+  font for headings and how round the corners are (or as the theme has
+  them: a few themes have their own), flat, raised or frosted
   cards, the background texture, and a wash of the cover's colours behind
   the top of each book's page.
 - Animations on or off, and whether the moving backgrounds move.

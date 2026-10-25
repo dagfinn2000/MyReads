@@ -42,12 +42,12 @@ function move(e: KeyboardEvent<HTMLDivElement>) {
 
 /**
  * Themes as small round swatches, eight to a row, under Light, Dark and
- * Silly headings: the theme's page colour with its accent as a dot. Names
- * don't fit under swatches this small, so the lines above them name the
- * swatch under the pointer or the keyboard (and tell a silly one's joke),
- * and otherwise show `caption`, what's chosen now. On a phone a tap picks
- * the theme, and the lines then name it. Screen readers get each name as
- * its button's label.
+ * Silly headings: the theme's page colour (and pattern, if it has one)
+ * with its accent as a dot. Names don't fit under swatches this small, so
+ * the lines above them name the swatch under the pointer or the keyboard
+ * (and tell a silly one's joke), and otherwise show `caption`, what's
+ * chosen now. On a phone a tap picks the theme, and the lines then name
+ * it. Screen readers get each name as its button's label.
  */
 export function ThemeSwatches({
   themes = THEMES,
@@ -107,7 +107,7 @@ export function ThemeSwatches({
                     "flex aspect-square items-center justify-center rounded-full border border-foreground/15 ring-offset-2 ring-offset-popover outline-none transition-transform hover:scale-110 focus-visible:ring-2 focus-visible:ring-ring",
                     isSelected(t) && "ring-2 ring-primary",
                   )}
-                  style={{ backgroundColor: t.swatch[0] }}
+                  style={{ backgroundColor: t.swatch[0], backgroundImage: t.pattern }}
                 >
                   <span
                     className="size-2.5 rounded-full"

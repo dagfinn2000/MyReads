@@ -853,10 +853,11 @@ export function PreferencesForm({
         />
         <Choice
           label="Corners"
+          hint="Most themes are rounded; a few, like Terminal and Mondrian, are square."
           value={prefs.corners}
           options={[
             { value: "square", label: "Square" },
-            { value: "rounded", label: "Rounded" },
+            { value: "rounded", label: "As the theme has them" },
             { value: "round", label: "Round" },
           ]}
           onChange={(v) => update({ corners: v })}
@@ -965,10 +966,10 @@ export function PreferencesForm({
         />
         <Choice
           label="Headings"
-          hint="Page titles, book titles and card titles."
+          hint="Page titles, book titles and card titles. Most themes use the same face as everything else; a few have their own, like Newsprint’s serif."
           value={prefs.headingFont}
           options={[
-            { value: "sans", label: "Same as everything else" },
+            { value: "sans", label: "As the theme has them" },
             { value: "serif", label: "Book-style serif" },
             { value: "rounded", label: "Rounded" },
           ]}

@@ -3,6 +3,7 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   DEVICE_THEME_STORAGE_KEY,
+  RETIRED_THEMES,
   THEME_INIT_SCRIPT,
   THEME_STORAGE_KEY,
   THEMES,
@@ -18,16 +19,28 @@ describe("parseThemeSetting", () => {
   });
 
   it("reads an automatic light/dark pair", () => {
-    expect(parseThemeSetting("auto:sage:obsidian")).toEqual({
+    expect(parseThemeSetting("auto:sage:terminal")).toEqual({
       kind: "auto",
       light: "sage",
-      dark: "obsidian",
+      dark: "terminal",
     });
+  });
+
+  it("reads a retired theme as the one that replaced it", () => {
+    expect(parseThemeSetting("gruvbox")).toEqual({ kind: "fixed", id: "dark" });
+    expect(parseThemeSetting("auto:catppuccin-latte:catppuccin-mocha")).toEqual({
+      kind: "auto",
+      light: "lilac",
+      dark: "dracula",
+    });
+    // Only the map's own keys: an id that happens to name an Object
+    // property is still unknown.
+    expect(parseThemeSetting("constructor")).toBeNull();
   });
 
   it("refuses a pair that isn't one light and one dark theme", () => {
     expect(parseThemeSetting("auto:dark:dracula")).toBeNull();
-    expect(parseThemeSetting("auto:obsidian:sage")).toBeNull();
+    expect(parseThemeSetting("auto:terminal:sage")).toBeNull();
     expect(parseThemeSetting("auto:light")).toBeNull();
   });
 
@@ -66,22 +79,7 @@ describe("THEMES", () => {
 
   it("keeps its own themes, the Silly set too, easy to read", () => {
     // Ported from dagfinn2000/dashify as they are there.
-    const ported = new Set([
-      "dracula",
-      "catppuccin-mocha",
-      "gruvbox",
-      "everforest",
-      "kanagawa",
-      "rose-pine",
-      "zenburn",
-      "everforest-light",
-      "gruvbox-light",
-      "kanagawa-lotus",
-      "selenized-light",
-      "solarized-light",
-      "catppuccin-latte",
-      "rose-pine-dawn",
-    ]);
+    const ported = new Set(["dracula", "everforest", "solarized-light"]);
     const luminance = (hex: string) => {
       const [r, g, b] = [1, 3, 5].map((i) => {
         const c = parseInt(hex.slice(i, i + 2), 16) / 255;
@@ -100,6 +98,31 @@ describe("THEMES", () => {
       expect(contrast(body, "primary-foreground", "primary"), `${id} buttons`).toBeGreaterThanOrEqual(4.5);
       expect(contrast(body, "primary", "background"), `${id} accent`).toBeGreaterThanOrEqual(4.5);
       expect(contrast(body, "destructive", "card"), `${id} danger`).toBeGreaterThanOrEqual(4.5);
+    }
+  });
+
+  it("shows a theme's page picture in its swatch too", () => {
+    for (const [id, body] of blocks) {
+      if (!body.includes("--page-gradient")) continue;
+      expect(THEMES.find((t) => t.id === id)?.pattern, id).toBeTruthy();
+    }
+  });
+
+  it("replaces each retired theme with one of its own kind that exists", () => {
+    const retiredLights = new Set([
+      "catppuccin-latte",
+      "rose-pine-dawn",
+      "selenized-light",
+      "everforest-light",
+      "kanagawa-lotus",
+      "gruvbox-light",
+      "apricot",
+    ]);
+    for (const [old, replacement] of Object.entries(RETIRED_THEMES)) {
+      expect(THEMES.some((t) => t.id === old), old).toBe(false);
+      expect(blocks.has(old), old).toBe(false);
+      const mode = THEMES.find((t) => t.id === replacement)?.mode;
+      expect(mode, old).toBe(retiredLights.has(old) ? "light" : "dark");
     }
   });
 
@@ -129,8 +152,15 @@ describe("sectionOf", () => {
 describe("parsePartThemes", () => {
   it("keeps the parts' themes that exist", () => {
     expect(
-      parsePartThemes({ stats: "dracula", room: "auto:sage:obsidian", quotes: "neon", nope: "dark" }),
-    ).toEqual({ stats: "dracula", room: "auto:sage:obsidian" });
+      parsePartThemes({ stats: "dracula", room: "auto:sage:terminal", quotes: "neon", nope: "dark" }),
+    ).toEqual({ stats: "dracula", room: "auto:sage:terminal" });
+  });
+
+  it("moves a part on a retired theme to its replacement", () => {
+    expect(parsePartThemes({ library: "kanagawa-lotus", room: "auto:apricot:obsidian" })).toEqual({
+      library: "kraft",
+      room: "auto:solarized-light:high-contrast-dark",
+    });
   });
 
   it("reads anything else as no part themes", () => {
@@ -223,19 +253,19 @@ describe("THEME_INIT_SCRIPT", () => {
   it("shows a part's own theme on its pages, over the device's", () => {
     const attrs = {
       "data-theme": "dracula",
-      "data-theme-parts": JSON.stringify({ stats: "auto:blossom:obsidian", library: "gruvbox" }),
+      "data-theme-parts": JSON.stringify({ stats: "auto:blossom:terminal", library: "lacquer" }),
     };
     const stored = { [DEVICE_THEME_STORAGE_KEY]: "sage" };
 
     const stats = fakePage({ attrs, stored, path: "/stats/year/2025" });
     runInitScript(stats);
     expect(stats.html.get("data-theme")).toBe("blossom");
-    expect(stats.html.get("data-theme-auto")).toBe("blossom:obsidian");
+    expect(stats.html.get("data-theme-auto")).toBe("blossom:terminal");
 
     const book = fakePage({ attrs, stored, path: "/books/cm123" });
     runInitScript(book);
     expect(book.html.get("data-section")).toBe("book");
-    expect(book.html.get("data-theme")).toBe("gruvbox");
+    expect(book.html.get("data-theme")).toBe("lacquer");
 
     const quotes = fakePage({ attrs, stored, path: "/quotes" });
     runInitScript(quotes);
@@ -243,9 +273,23 @@ describe("THEME_INIT_SCRIPT", () => {
   });
 
   it("uses the remembered theme when signed out", () => {
-    const page = fakePage({ stored: { [THEME_STORAGE_KEY]: "gruvbox" }, path: "/login" });
+    const page = fakePage({ stored: { [THEME_STORAGE_KEY]: "ember" }, path: "/login" });
     runInitScript(page);
-    expect(page.html.get("data-theme")).toBe("gruvbox");
+    expect(page.html.get("data-theme")).toBe("ember");
     expect(page.html.has("data-section")).toBe(false);
+  });
+
+  it("reads a retired theme kept in this browser as its replacement", () => {
+    const signedOut = fakePage({ stored: { [THEME_STORAGE_KEY]: "gruvbox" }, path: "/login" });
+    runInitScript(signedOut);
+    expect(signedOut.html.get("data-theme")).toBe("dark");
+
+    const device = fakePage({
+      attrs: { "data-theme": "dracula" },
+      stored: { [DEVICE_THEME_STORAGE_KEY]: "auto:apricot:obsidian" },
+    });
+    runInitScript(device);
+    expect(device.html.get("data-theme-device")).toBe("auto:solarized-light:high-contrast-dark");
+    expect(device.html.get("data-theme")).toBe("solarized-light");
   });
 });
