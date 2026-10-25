@@ -265,6 +265,25 @@ Everything below is under **Decorate** on the Room page.
   snow on the roof and in the garden, icicles under the eaves and snow
   falling. The view from the windows changes with it.
 
+### Holidays
+
+- Decorate for Christmas, Halloween, Easter, Midsummer or New Year's Eve,
+  all year round, or let "Follow the calendar" put each up in its own
+  days: Christmas from 1 December to 6 January, Halloween from 24
+  October, Easter from Palm Sunday to Easter Monday, Midsummer from 20 to
+  24 June, and New Year's Eve and Day.
+- **Christmas:** a tree with twinkling lights, a star, baubles and parcels
+  beside the hearth, or on another floor with room (with no room
+  anywhere, a little tree on the mantelpiece), a garland along the mantel,
+  coloured lights along the eaves and a wreath on the doors between rooms.
+- **Halloween:** carved pumpkins flickering on the mantel and by the
+  house, and cobwebs in the corners of every room.
+- **Easter:** birch twigs hung with eggs and feathers on the mantel, and
+  painted eggs hidden in the grass.
+- **Midsummer:** a garland of flowers along the eaves and a bonfire in the
+  garden.
+- **New Year's Eve:** streamers in every room and fireworks in the sky.
+
 ### Your avatar and pet
 
 Make a little you who lives in the house. They potter about and stop by
@@ -276,8 +295,8 @@ fire.
   colours, round or pointed ears, a mouth, blush, freckles or a beauty
   spot (or all three), and a beard.
 - **Hair:** 23 hairstyles in 14 colours.
-- **Body:** three heights. Get about on foot, with a walking stick or in a
-  wheelchair.
+- **Body:** three heights, and four body shapes: slim, average, broad or
+  round. Get about on foot, with a walking stick or in a wheelchair.
 - **Clothes:** jumpers, T-shirts, shirts, cardigans, hoodies, a waistcoat,
   a long coat, a dress or a robe; trousers, jeans, shorts, skirts or
   dungarees, in colours of your choosing; and six kinds of shoes.
