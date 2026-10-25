@@ -20,6 +20,7 @@ import { climberArt, gardenArt } from "@/components/room-garden";
 import { smooth, snowCaps, snowGround, type Fall } from "@/components/room-seasons";
 import { WINDOW_DROP, WINDOW_W, windowFor } from "@/components/room-windows";
 import { PICTURE_W, pictureAt, pictureFor } from "@/components/room-pictures";
+import { dressHouse } from "@/components/room-holidays";
 import { PARTITION, type RoomKind } from "@/lib/room";
 import type {
   RoomCeiling,
@@ -33,6 +34,7 @@ import type {
   RoomPictures,
   RoomWindow,
   Season,
+  Holiday,
 } from "@/lib/room-styles";
 
 /** Something on the house that moves: frames shown in turn (or one that
@@ -42,7 +44,10 @@ export interface Moving {
   y: number;
   art: Art;
   frames: Rect[][];
-  motion: "flicker" | "wave" | "turn" | "blink";
+  /** A burst of fireworks blooms and fades, `delay` seconds into its
+   *  turn. */
+  motion: "flicker" | "wave" | "turn" | "blink" | "burst";
+  delay?: number;
 }
 
 export interface Light {
@@ -1126,6 +1131,8 @@ export interface Interior {
   garden?: readonly RoomGarden[];
   /** The time of year outside; summer if not said. */
   season?: Season;
+  /** Holiday decorations up (room-holidays.ts); none if not said. */
+  holidays?: readonly Holiday[];
 }
 
 export const PLAIN_INTERIOR: Interior = { paper: "style", floor: "style", ceiling: "none", rooms: [], own: {} };
@@ -1828,6 +1835,22 @@ export function shellArt(g: HouseGeometry, style: RoomStyle, interior: Interior 
     shell.yard = shell.yard.map((y) => (y.art === TORCH ? y : { art: snowOn(y.art), x: y.x, y: y.y - SNOW_ON }));
   }
   shell.fall = fallFor(season, style, g, earth, interior.garden ?? [], shell);
+  if (interior.holidays?.length) {
+    dressHouse(shell, interior.holidays, g, {
+      rooms: parts.flatMap((row, f) => row.map((p) => ({ x: hx + g.wall + p.x, w: p.w, top: g.floorsTop + f * g.storey + g.beam }))),
+      ground: style === "cave" ? (x) => Math.min(earth, roofTopAt(style, g, x)) : () => earth,
+      // Behind a parapet the battlements rise to the top of the roof; over
+      // the chimney its smoke rises.
+      sky: (x) =>
+        x < hx - 6 || x >= hx + hw + 6
+          ? g.floorsTop
+          : shell.smoke && x >= g.chimneyX - 4 && x < g.chimneyX + CHIMNEY_FOOT + 4
+            ? 0
+            : ROOFS[style] === "battlements"
+              ? g.roofTop
+              : roofTopAt(style, g, x),
+    });
+  }
   return shell;
 }
 

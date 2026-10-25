@@ -85,6 +85,7 @@ const PREFERENCE: Record<keyof RoomDecor, keyof Preferences> = {
   climber: "roomClimber",
   garden: "roomGarden",
   season: "roomSeason",
+  holiday: "roomHoliday",
   cat: "roomCat",
   dog: "roomDog",
 };
@@ -111,6 +112,7 @@ const HOUSE: (keyof RoomDecor)[] = [
   "climber",
   "garden",
   "season",
+  "holiday",
 ];
 const sameHouse = (a: RoomDecor, b: RoomDecor) => HOUSE.every((k) => a[k] === b[k]);
 

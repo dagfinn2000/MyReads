@@ -298,6 +298,72 @@ export function seasonOn(date: Date): Season {
   return m < 2 || m === 11 ? "winter" : m < 5 ? "spring" : m < 8 ? "summer" : "autumn";
 }
 
+/** A date's day where it is, as "2026-12-31". */
+export function localDay(date: Date): string {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
+
+/** Holiday decorations (components/room-holidays.ts), none unless chosen:
+ *  one holiday all the time, or each in its days of the year. */
+export const ROOM_HOLIDAYS = ["off", "calendar", "christmas", "halloween", "easter", "midsummer", "newyear"] as const;
+export type RoomHoliday = (typeof ROOM_HOLIDAYS)[number];
+export type Holiday = Exclude<RoomHoliday, "off" | "calendar">;
+
+export const ROOM_HOLIDAY_LABELS: Record<RoomHoliday, string> = {
+  off: "None",
+  calendar: "Follow the calendar",
+  christmas: "Christmas",
+  halloween: "Halloween",
+  easter: "Easter",
+  midsummer: "Midsummer",
+  newyear: "New Year's Eve",
+};
+
+/** Easter Sunday in `year` (Gregorian), as [month, day]: the anonymous
+ *  Gregorian algorithm (Meeus, Jones and Butcher). */
+export function easterSunday(year: number): [month: number, day: number] {
+  const a = year % 19;
+  const b = Math.floor(year / 100);
+  const c = year % 100;
+  const d = Math.floor(b / 4);
+  const e = b % 4;
+  const f = Math.floor((b + 8) / 25);
+  const g = Math.floor((b - f + 1) / 3);
+  const h = (19 * a + b - d - g + 15) % 30;
+  const i = Math.floor(c / 4);
+  const k = c % 4;
+  const l = (32 + 2 * e + 2 * i - h - k) % 7;
+  const m = Math.floor((a + 11 * h + 22 * l) / 451);
+  const n = h + l - 7 * m + 114;
+  return [Math.floor(n / 31), (n % 31) + 1];
+}
+
+/** The holidays on a day ("2026-12-31"), the later layered over the
+ *  earlier: Christmas from 1 December to Twelfth Night, Halloween from 24
+ *  October, Easter from Palm Sunday to Easter Monday, Midsummer from 20 to
+ *  24 June, and New Year's Eve and Day. */
+export function holidaysOn(day: string): Holiday[] {
+  const [y, m, d] = day.split("-").map(Number);
+  if (!y || !m || !d) return [];
+  const md = m * 100 + d;
+  const out: Holiday[] = [];
+  if (md >= 1201 || md <= 106) out.push("christmas");
+  if (md >= 1024 && md <= 1031) out.push("halloween");
+  if (md >= 620 && md <= 624) out.push("midsummer");
+  if (md === 1231 || md === 101) out.push("newyear");
+  const [em, ed] = easterSunday(y);
+  const fromEaster = (Date.UTC(y, m - 1, d) - Date.UTC(y, em - 1, ed)) / 86_400_000;
+  if (fromEaster >= -7 && fromEaster <= 1) out.push("easter");
+  return out;
+}
+
+/** What a holiday setting puts up on `day`. */
+export function holidaysFor(setting: RoomHoliday, day: string): Holiday[] {
+  if (setting === "off") return [];
+  return setting === "calendar" ? holidaysOn(day) : [setting];
+}
+
 /** An added room's own walls and floor; "style" in each is the house's. */
 export interface RoomOwn {
   walls: RoomWalls;

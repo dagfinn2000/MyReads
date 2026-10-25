@@ -114,6 +114,7 @@ export default async function ReadingRoomPage() {
           climber: prefs.roomClimber,
           garden: prefs.roomGarden,
           season: prefs.roomSeason,
+          holiday: prefs.roomHoliday,
           cat: prefs.roomCat,
           dog: prefs.roomDog,
         }}

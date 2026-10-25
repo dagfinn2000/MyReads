@@ -20,6 +20,7 @@ import {
   ROOM_RUGS,
   ROOM_GARDEN,
   ROOM_SEASONS,
+  ROOM_HOLIDAYS,
   ROOM_WINDOWS,
   ROOM_PICTURES,
   ROOM_FABRICS,
@@ -39,6 +40,7 @@ import {
   type RoomRug,
   type RoomGarden,
   type RoomSeason,
+  type RoomHoliday,
   type RoomWindow,
   type RoomPictures,
   type RoomFabric,
@@ -537,6 +539,8 @@ export type Preferences = {
   roomGarden: RoomGarden[];
   /** The time of year in the garden and on the roof. */
   roomSeason: RoomSeason;
+  /** Holiday decorations: none, one always, or each in its days. */
+  roomHoliday: RoomHoliday;
   /** The coat of every cat in the house, and of the dog in its basket
    *  (lib/pets.ts). */
   roomCat: CatCoat;
@@ -653,6 +657,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
   roomClimber: "none",
   roomGarden: [],
   roomSeason: "summer",
+  roomHoliday: "off",
   roomCat: "ginger",
   roomDog: "brown",
   roomLayout: [],
@@ -984,6 +989,7 @@ export function parsePreferences(raw: unknown): Preferences {
     roomClimber: pick(ROOM_CLIMBERS, obj.roomClimber, d.roomClimber),
     roomGarden: pickList(ROOM_GARDEN, obj.roomGarden),
     roomSeason: pick(ROOM_SEASONS, obj.roomSeason, d.roomSeason),
+    roomHoliday: pick(ROOM_HOLIDAYS, obj.roomHoliday, d.roomHoliday),
     roomCat: parseCatCoat(obj.roomCat),
     roomDog: parseDogCoat(obj.roomDog),
     roomLayout: parseRoomLayout(obj.roomLayout),

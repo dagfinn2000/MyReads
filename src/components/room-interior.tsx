@@ -16,6 +16,7 @@ import { ceilingSample, floorSample, styleFloor, stylePaper, wallSample } from "
 import { climberSample, gardenSample, seasonSample } from "@/components/room-garden";
 import { windowSample } from "@/components/room-windows";
 import { pictureSample } from "@/components/room-pictures";
+import { holidaySample } from "@/components/room-holidays";
 import { Row, Swatches, Tiles } from "@/components/decorate-controls";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { HangingPreview, decorData, type RoomDecor } from "@/components/reading-room";
@@ -47,6 +48,8 @@ import {
   ROOM_GARDEN_LABELS,
   ROOM_SEASONS,
   ROOM_SEASON_LABELS,
+  ROOM_HOLIDAYS,
+  ROOM_HOLIDAY_LABELS,
   ROOM_WINDOWS,
   ROOM_WINDOW_LABELS,
   ROOM_FLOORS,
@@ -282,6 +285,7 @@ export function OutsideControls({ decor, onChange }: { decor: RoomDecor; onChang
   const climbers = useMemo(() => new Map(ROOM_CLIMBERS.map((c) => [c, climberSample(c, 27, 44, season)])), [season]);
   const garden = useMemo(() => new Map(ROOM_GARDEN.map((g) => [g, gardenSample(g, 27, 27, season)])), [season]);
   const seasons = useMemo(() => new Map(ROOM_SEASONS.map((s) => [s, seasonSample(s, 27, 27)])), []);
+  const holidays = useMemo(() => new Map(ROOM_HOLIDAYS.map((h) => [h, holidaySample(h, 27, 44)])), []);
   const cave = decor.style === "cave";
   return (
     <>
@@ -333,6 +337,17 @@ export function OutsideControls({ decor, onChange }: { decor: RoomDecor; onChang
         onPick={(s) => onChange({ season: s })}
       >
         {(s) => <Sample art={seasons.get(s)!} decor={decor} />}
+      </Tiles>
+      <Tiles
+        label="Holiday decorations"
+        hint="Following the calendar: Christmas from 1 December to 6 January, Halloween from 24 October, Easter from Palm Sunday to Easter Monday, Midsummer from 20 to 24 June, and New Year's Eve and Day."
+        options={ROOM_HOLIDAYS}
+        labels={ROOM_HOLIDAY_LABELS}
+        chosen={(h) => decor.holiday === h}
+        onPick={(holiday) => onChange({ holiday })}
+        tall
+      >
+        {(h) => <Sample art={holidays.get(h)!} decor={decor} />}
       </Tiles>
     </>
   );

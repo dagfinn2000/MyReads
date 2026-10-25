@@ -270,6 +270,25 @@
   --room-bulb-2: #e8bf4f;
   --room-bulb-3: #62a861;
   --room-bulb-4: #5a8bcb;
+  /* Holiday decorations (room-holidays.ts): pumpkins and the candlelight
+     through their faces, which glows at night; cobwebs, dark on a light
+     wall by day and silver by night; fireworks, deep enough to show on a
+     light page and bright on a dark one. */
+  --room-pine-hi: #5f8f5a;
+  --room-pumpkin-hi: color-mix(in oklab, #f6a04a, var(--dusk) calc(var(--night) * 35%));
+  --room-pumpkin: color-mix(in oklab, #df7a22, var(--dusk) calc(var(--night) * 35%));
+  --room-pumpkin-lo: color-mix(in oklab, #ad5418, var(--dusk) calc(var(--night) * 35%));
+  --room-pumpkin-deep: color-mix(in oklab, #5e2c0e, var(--dusk) calc(var(--night) * 35%));
+  --room-lantern-hi: #ffd76e;
+  --room-lantern: #f2a93a;
+  --room-lantern-lo: #c9772a;
+  --room-web: rgb(92 86 80 / 0.42);
+  --room-spark-gold: #e09a12;
+  --room-spark-red: #d9433d;
+  --room-spark-blue: #3f7fd9;
+  --room-spark-green: #2f9e57;
+  --room-spark-white: #f0b43a;
+  --room-spark-lo: #c27a4a;
   --room-pet-nose: color-mix(in oklab, #e79a9a, var(--dusk) calc(var(--night) * 30%));
   --room-bun-hi: color-mix(in oklab, #d8c8b0, var(--dusk) calc(var(--night) * 40%));
   --room-bun: color-mix(in oklab, #b8a48c, var(--dusk) calc(var(--night) * 40%));
@@ -420,6 +439,17 @@
   --room-cap: #93342f;
   --room-pine: #2a4a33;
   --room-pine-lo: #1b3224;
+  --room-pine-hi: #3d6646;
+  --room-lantern-hi: #fff4be;
+  --room-lantern: #ffc85a;
+  --room-lantern-lo: #f5932e;
+  --room-web: rgb(214 214 232 / 0.4);
+  --room-spark-gold: #ffd25e;
+  --room-spark-red: #ff7a6b;
+  --room-spark-blue: #8ec2ff;
+  --room-spark-green: #8ff0a2;
+  --room-spark-white: #ffffff;
+  --room-spark-lo: #ffbf7a;
   --night: 1;
 }
 
@@ -620,6 +650,21 @@
 .rp-bulb-2 { fill: var(--room-bulb-2); }
 .rp-bulb-3 { fill: var(--room-bulb-3); }
 .rp-bulb-4 { fill: var(--room-bulb-4); }
+.rp-pine-hi { fill: var(--room-pine-hi); }
+.rp-pumpkin-hi { fill: var(--room-pumpkin-hi); }
+.rp-pumpkin { fill: var(--room-pumpkin); }
+.rp-pumpkin-lo { fill: var(--room-pumpkin-lo); }
+.rp-pumpkin-deep { fill: var(--room-pumpkin-deep); }
+.rp-lantern-hi { fill: var(--room-lantern-hi); }
+.rp-lantern { fill: var(--room-lantern); }
+.rp-lantern-lo { fill: var(--room-lantern-lo); }
+.rp-web { fill: var(--room-web); }
+.rp-spark-gold { fill: var(--room-spark-gold); }
+.rp-spark-red { fill: var(--room-spark-red); }
+.rp-spark-blue { fill: var(--room-spark-blue); }
+.rp-spark-green { fill: var(--room-spark-green); }
+.rp-spark-white { fill: var(--room-spark-white); }
+.rp-spark-lo { fill: var(--room-spark-lo); }
 .rp-pet-nose { fill: var(--room-pet-nose); }
 .rp-bun-hi { fill: var(--room-bun-hi); }
 .rp-bun { fill: var(--room-bun); }
@@ -1783,6 +1828,39 @@
   }
   85% {
     opacity: 1;
+  }
+}
+/* New Year's fireworks (room-holidays.ts): each burst blooms, glitters and
+   fades, one after another. Still, they hang in the sky. */
+.room-burst {
+  transform-origin: center;
+  animation: room-burst 5.2s steps(1, end) infinite;
+}
+:where(.dark) .room-burst {
+  filter: drop-shadow(0 0 1.5px rgb(255 240 200 / 0.8));
+}
+@keyframes room-burst {
+  0% {
+    opacity: 0;
+    transform: scale(0.35);
+  }
+  4% {
+    opacity: 1;
+    transform: scale(0.65);
+  }
+  8% {
+    transform: none;
+  }
+  24% {
+    opacity: 0.65;
+  }
+  32% {
+    opacity: 0.3;
+    transform: translateY(4%);
+  }
+  40%,
+  100% {
+    opacity: 0;
   }
 }
 

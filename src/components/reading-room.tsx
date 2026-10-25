@@ -1,7 +1,7 @@
 "use client";
 
 import "./reading-room.css";
-import { memo, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { Fragment, memo, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import type {
   RoomBookcase,
   RoomCeiling,
@@ -16,6 +16,7 @@ import type {
   RoomFloor,
   RoomGarden,
   RoomHanging,
+  RoomHoliday,
   RoomOwn,
   RoomPaper,
   RoomSeason,
@@ -24,7 +25,7 @@ import type {
   RoomWindow,
   RoomWood,
 } from "@/lib/room-styles";
-import { seasonOn } from "@/lib/room-styles";
+import { holidaysFor, localDay, seasonOn } from "@/lib/room-styles";
 import { ReadingStatus } from "@/lib/enums";
 import { BookLink } from "@/components/book-link";
 import {
@@ -73,6 +74,7 @@ import { chimneyFoot, chimneyRise, roofCrown, roofHeight, shellArt, type Moving,
 import { WINDOW_W } from "@/components/room-windows";
 import { flakesFor, type Box, type Fall } from "@/components/room-seasons";
 import { PICTURE_W } from "@/components/room-pictures";
+import { EASTER_TWIGS, MANTEL_TREE, SMALL_LANTERN, TREE, mantelGarland } from "@/components/room-holidays";
 import { isClosingBook } from "@/lib/cover-flight";
 import { OWNERSHIP_LABELS, STATUS_LABELS } from "@/lib/display";
 import {
@@ -318,7 +320,7 @@ function houseGeometry(
 
 const sceneHeight = (geo: HouseGeometry) => geo.floorsTop + geo.floorCount * STOREY + BEAM + FOUNDATION + GROUND;
 
-function layoutRoom(books: RoomBook[], width: number, style: RoomStyle, arrangement: Arrangement): Layout {
+function layoutRoom(books: RoomBook[], width: number, style: RoomStyle, arrangement: Arrangement, tree: boolean): Layout {
   const scale = scaleFor(width);
   const shelves = shelve(books.map((b) => spineFor(b).width));
   const count = caseCount(shelves.length);
@@ -327,7 +329,7 @@ function layoutRoom(books: RoomBook[], width: number, style: RoomStyle, arrangem
   );
   const yard = yardFor(scale);
   const maxInner = Math.floor(width / scale) - 2 * yard - 2 * WALL;
-  const plan = planHouse(count, books.length, maxInner, arrangement);
+  const plan = planHouse(count, books.length, maxInner, arrangement, { tree });
   // The chimney stands over the fireplace, on whichever floor that is.
   const hearth = plan.floors.flat().find((p) => p.kind === "hearth");
   const geo = houseGeometry(style, yard, plan.inner + 2 * WALL, plan.floors.length, hearth ? hearth.x : null);
@@ -407,6 +409,8 @@ export interface RoomDecor {
   garden: RoomGarden[];
   /** The time of year outside (room-seasons.ts). */
   season: RoomSeason;
+  /** Holiday decorations (room-holidays.ts). */
+  holiday: RoomHoliday;
   /** The coat of every cat in the house, and of the dog in its basket. */
   cat: CatCoat;
   dog: DogCoat;
@@ -433,6 +437,7 @@ export const PLAIN_DECOR: RoomDecor = {
   climber: "none",
   garden: [],
   season: "summer",
+  holiday: "off",
   cat: "ginger",
   dog: "brown",
 };
@@ -441,6 +446,14 @@ export const PLAIN_DECOR: RoomDecor = {
 type Fireside = Pick<RoomDecor, "fireplace" | "chair" | "rug" | "lamp">;
 /** What the house's preview shows of the furniture. */
 type Furnishings = Fireside & Pick<RoomDecor, "bookcase">;
+/** What stands on the mantelpiece between the candles (the clock, or a
+ *  holiday's), whether pumpkins stand in for the candles, and whether a
+ *  garland hangs along it. */
+interface Mantel {
+  middle: Art;
+  lanterns: boolean;
+  garland: boolean;
+}
 
 const FLOOR_NAMES = ["ground floor", "first floor", "second floor", "third floor", "fourth floor", "fifth floor"];
 const floorName = (fromGround: number) => FLOOR_NAMES[fromGround] ?? `floor ${fromGround}`;
@@ -513,9 +526,13 @@ export function ReadingRoom({
   }, []);
 
   const style = decor.style;
+  // The holidays up today, if any. There's no tree to move while the
+  // furniture is being arranged.
+  const holidays = useMemo(() => holidaysFor(decor.holiday, localDay(new Date())), [decor.holiday]);
+  const tree = holidays.includes("christmas") && !arranging;
   const layout = useMemo(
-    () => (width ? layoutRoom(books, width, style, arrangement) : null),
-    [books, width, style, arrangement],
+    () => (width ? layoutRoom(books, width, style, arrangement, tree) : null),
+    [books, width, style, arrangement, tree],
   );
   const { paper, floor, ceiling, own, windows, pictures, climber, garden } = decor;
   // Following the calendar, the season it is now.
@@ -542,8 +559,23 @@ export function ReadingRoom({
       climber,
       garden,
       season,
+      holidays,
     });
-  }, [layout, style, paper, floor, ceiling, own, windows, pictures, climber, garden, season]);
+  }, [layout, style, paper, floor, ceiling, own, windows, pictures, climber, garden, season, holidays]);
+  // A tree on the mantelpiece at Christmas if there isn't room for one on
+  // the floor, and twigs hung with eggs at Easter.
+  const mantel = useMemo<Mantel>(() => {
+    const standing = layout?.plan.floors.some((f) => f.some((p) => p.kind === "tree"));
+    return {
+      middle: holidays.includes("easter")
+        ? EASTER_TWIGS
+        : holidays.includes("christmas") && !standing
+          ? MANTEL_TREE
+          : MANTEL_CLOCK,
+      lanterns: holidays.includes("halloween"),
+      garland: holidays.includes("christmas"),
+    };
+  }, [layout, holidays]);
   // The doors between rooms side by side, floor by floor (as the shell
   // draws them, after each room but the last).
   const doors = useMemo(() => layout?.plan.spans.map((spans) => spans.slice(0, -1).map((sp) => sp.x + sp.w)) ?? [], [layout]);
@@ -778,6 +810,7 @@ export function ReadingRoom({
             openBook={openBook}
             hanging={decor.hanging}
             fireside={fireside}
+            mantel={mantel}
             bookcase={decor.bookcase}
             ornaments={decor.ornaments}
             arranging={arranging}
@@ -1006,6 +1039,7 @@ const Floor = memo(function Floor({
   openBook,
   hanging,
   fireside,
+  mantel,
   bookcase,
   ornaments,
   arranging,
@@ -1027,6 +1061,7 @@ const Floor = memo(function Floor({
   openBook: OpenBook | null;
   hanging: RoomHanging;
   fireside: Fireside;
+  mantel: Mantel;
   bookcase: RoomBookcase;
   ornaments: RoomOrnaments;
   /** While the furniture is being moved, the books stay put. */
@@ -1079,6 +1114,7 @@ const Floor = memo(function Floor({
             openBook={openBook}
             hanging={hanging}
             fireside={fireside}
+            mantel={mantel}
             avatar={avatar}
           />
         );
@@ -1215,8 +1251,15 @@ function Smoke({ x, y, steam, scale: s }: { x: number; y: number; steam: boolean
 function MovingPart({ part, scale: s }: { part: Moving; scale: number }) {
   const [first, second] = part.frames;
   return (
-    <Sprite art={part.art} scale={s} className={`room-abs room-${part.motion}`} style={{ left: part.x * s, top: part.y * s }}>
-      {second ? (
+    <Sprite
+      art={part.art}
+      scale={s}
+      className={`room-abs room-${part.motion}`}
+      style={{ left: part.x * s, top: part.y * s, animationDelay: part.delay ? `${part.delay}s` : undefined }}
+    >
+      {part.motion === "burst" ? (
+        <Rects rects={first} />
+      ) : second ? (
         <>
           <Rects className="room-frame-a" rects={first} />
           <Rects className="room-frame-b" rects={second} />
@@ -1312,6 +1355,7 @@ function Furniture({
   openBook,
   hanging,
   fireside,
+  mantel,
   avatar,
 }: {
   kind: Piece["kind"];
@@ -1323,6 +1367,7 @@ function Furniture({
   openBook: OpenBook | null;
   hanging: RoomHanging;
   fireside: Fireside;
+  mantel: Mantel;
   avatar: Avatar | null;
 }) {
   const stand = (a: Art, dx: number, extra?: { className?: string; children?: React.ReactNode; lift?: number }) => (
@@ -1370,9 +1415,29 @@ function Furniture({
             )),
           })}
           <Glow x={x + place.glow.x} y={fireTop + place.glow.y} r={44} scale={s} className="room-glow-fire" />
-          {stand(CANDLESTICK, 4, { lift: place.art.h })}
-          {stand(CANDLESTICK, 37, { lift: place.art.h })}
-          {stand(MANTEL_CLOCK, 18, { lift: place.art.h })}
+          {mantel.lanterns
+            ? [2, 35].map((dx) => (
+                <Fragment key={dx}>
+                  {stand(SMALL_LANTERN.art, dx, {
+                    lift: place.art.h,
+                    children: (
+                      <>
+                        <Rects className="room-frame-a" rects={SMALL_LANTERN.frames[0]} />
+                        <Rects className="room-frame-b" rects={SMALL_LANTERN.frames[1]} />
+                      </>
+                    ),
+                  })}
+                  <Glow
+                    x={x + dx + SMALL_LANTERN.light.x}
+                    y={fireTop - SMALL_LANTERN.art.h + SMALL_LANTERN.light.y}
+                    r={9}
+                    scale={s}
+                  />
+                </Fragment>
+              ))
+            : [stand(CANDLESTICK, 4, { lift: place.art.h }), stand(CANDLESTICK, 37, { lift: place.art.h })]}
+          {stand(mantel.middle, 22 - Math.floor(mantel.middle.w / 2), { lift: place.art.h })}
+          {mantel.garland && stand(mantelGarland(place.art.w), 0, { lift: place.art.h - 9 })}
           {stand(chair, 50)}
           {seated && (
             <SeatedAvatar
@@ -1478,6 +1543,16 @@ function Furniture({
       });
     case "plant":
       return stand(PLANT, 0);
+    case "tree":
+      // Its lights twinkle at night, and its star shines.
+      return (
+        <>
+          {stand(TREE.art, 0, {
+            children: TREE.lights.map((set, i) => <Rects key={i} className={`room-twinkle room-twinkle-${i}`} rects={set} />),
+          })}
+          <Glow x={x + TREE.star.x} y={floorLine - TREE.art.h + TREE.star.y} r={8} scale={s} />
+        </>
+      );
     case "ladder":
       // Hooked over the crown of the bookcase on its left.
       return stand(LADDER, -4);
