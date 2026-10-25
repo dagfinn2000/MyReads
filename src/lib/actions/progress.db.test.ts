@@ -628,7 +628,7 @@ describe("time read (the reading timer)", () => {
     ]);
   });
 
-  it("finishes a book already on its last page with the time on a closing entry, undone together", async () => {
+  it("finishes a book already on its last page with the time on a closing entry, kept on undo", async () => {
     const book = await makeBook({ currentPage: 300 });
     await addEntries(book.id, [[0, "2026-10-05T00:00:00.000Z"], [300, "2026-10-11T18:00:00.000Z"]]);
     const moved = await moveFromReading(book.id, "READ", 10);
@@ -637,8 +637,46 @@ describe("time read (the reading timer)", () => {
     expect(await timedLog(book.id)).toEqual([
       [0, null],
       [300, null],
+      [300, 10],
     ]);
     expect((await bookRow(book.id)).currentPage).toBe(300);
+  });
+
+  it("keeps Finished's time when it's undone, on the page the book was at", async () => {
+    const book = await makeBook({ currentPage: 218 });
+    await addEntries(book.id, [[0, "2026-10-05T00:00:00.000Z"], [218, "2026-10-11T18:00:00.000Z"]]);
+    const moved = await moveFromReading(book.id, "READ", 50);
+    expect(await undoMoveFromReading(book.id, undoOf(moved))).toEqual({});
+    expect(await timedLog(book.id)).toEqual([
+      [0, null],
+      [218, null],
+      [218, 50],
+    ]);
+    expect(await bookRow(book.id)).toMatchObject({ status: ReadingStatus.READING, currentPage: 218 });
+    // The page credits nothing new; only the time counts, on the finish day.
+    const rows = await prisma.progressEntry.findMany({
+      where: { bookId: book.id },
+      orderBy: [{ date: "asc" }, { page: "asc" }],
+    });
+    expect(rows.at(-1)?.date.toISOString()).toBe(NOW.toISOString());
+    expect(
+      dailyPageTotals(
+        rows.map((r) => ({ bookId: book.id, page: r.page, date: r.date })),
+        OSLO,
+      ).get("2026-10-12"),
+    ).toBeUndefined();
+    // Logging on from there works as before.
+    expect(await logPage(book.id, { page: 240, day: "today" })).toMatchObject({ ok: true });
+  });
+
+  it("hands back the time of a read with no page logged yet, for the timer to hold", async () => {
+    const book = await makeBook({ currentPage: null });
+    await addEntries(book.id, [[0, "2026-10-05T00:00:00.000Z"]]);
+    const moved = await moveFromReading(book.id, "READ", 25);
+    expect((await timedLog(book.id)).at(-1)).toEqual([300, 25]);
+    expect(await undoMoveFromReading(book.id, undoOf(moved))).toEqual({ minutes: 25 });
+    expect(await timedLog(book.id)).toEqual([[0, null]]);
+    expect((await bookRow(book.id)).currentPage).toBeNull();
   });
 
   it("keeps no time for a read with no log, and never writes it on a start anchor", async () => {
