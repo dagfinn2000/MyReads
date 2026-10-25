@@ -108,7 +108,7 @@ export const THEMES: ThemeDef[] = [
     name: "Blue Screen",
     mode: "dark",
     swatch: ["#0000aa", "#aaaaaa"],
-    silly: "Your library ran into a problem and needs to restart.",
+    silly: "Your library ran into a problem.",
   },
   {
     id: "glowstick",
