@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import type { Art, HouseGeometry, Rect } from "@/components/room-art";
 import { climberArt, climberSample, gardenArt, gardenSample, seasonSample } from "@/components/room-garden";
 import { flakesFor, snowCaps, snowGround, type Fall } from "@/components/room-seasons";
-import { roofHeight, shellArt, type Interior } from "@/components/room-shells";
+import { roofCrown, roofHeight, shellArt, type Interior } from "@/components/room-shells";
 import { windowArt, windowSample } from "@/components/room-windows";
 import { ROOM_CLIMBERS, ROOM_GARDEN, ROOM_SEASONS, ROOM_STYLES, ROOM_WINDOWS, seasonOn, type Season } from "@/lib/room-styles";
 
@@ -105,14 +105,16 @@ describe("what falls", () => {
 
 /** A two-storey house, with a garden either side. */
 function house(style: (typeof ROOM_STYLES)[number], yard = 24): { g: HouseGeometry; earth: number } {
+  // Sky enough over the roof for a lighthouse tower.
+  const roofTop = Math.max(30, roofCrown(style) + 2);
   const roofH = roofHeight(style, 300);
   const g: HouseGeometry = {
     sceneW: 300 + 2 * yard,
     houseX: yard,
     houseW: 300,
-    roofTop: 30,
+    roofTop,
     roofH,
-    floorsTop: 30 + roofH,
+    floorsTop: roofTop + roofH,
     floorCount: 2,
     storey: 144,
     roomH: 139,

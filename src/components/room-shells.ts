@@ -45,8 +45,9 @@ export interface Moving {
   art: Art;
   frames: Rect[][];
   /** A burst of fireworks blooms and fades, `delay` seconds into its
-   *  turn. */
-  motion: "flicker" | "wave" | "turn" | "blink" | "burst";
+   *  turn. Windmill sails spin through their frames in turn; a
+   *  lighthouse's beam sweeps round at night. */
+  motion: "flicker" | "wave" | "turn" | "blink" | "burst" | "spin" | "sweep";
   delay?: number;
 }
 
@@ -98,7 +99,20 @@ const shift = (rects: readonly Rect[], dx: number, dy: number): Rect[] =>
 
 // ── Roofs ────────────────────────────────────────────────────────────────
 
-type RoofShape = "gable" | "steep" | "low" | "metal" | "battlements" | "flat" | "dome" | "hill" | "canopy" | "pagoda";
+type RoofShape =
+  | "gable"
+  | "steep"
+  | "low"
+  | "metal"
+  | "battlements"
+  | "flat"
+  | "dome"
+  | "hill"
+  | "canopy"
+  | "pagoda"
+  | "lantern"
+  | "thatch"
+  | "parapet";
 
 const ROOFS: Record<RoomStyle, RoofShape> = {
   cottage: "gable",
@@ -111,6 +125,9 @@ const ROOFS: Record<RoomStyle, RoofShape> = {
   cabin: "low",
   japanese: "pagoda",
   steampunk: "metal",
+  lighthouse: "lantern",
+  windmill: "thatch",
+  adobe: "parapet",
 };
 
 /** Gables: how many dots across for each one up, and the overhang. */
@@ -145,13 +162,19 @@ export function roofHeight(style: RoomStyle, houseW: number): number {
       return clamp(Math.floor(houseW / 4), 18, 46);
     case "pagoda":
       return clamp(Math.floor(houseW / 6), 14, 30);
+    case "lantern":
+      return 14;
+    case "thatch":
+      return clamp(Math.floor((houseW + 14) / 3), 26, 56);
+    case "parapet":
+      return 14;
   }
 }
 
 /** Room needed over the roof's highest point: a spire, a flag, an
  *  antenna. */
 export function roofCrown(style: RoomStyle): number {
-  return { steep: 22, battlements: 18, dome: 14, pagoda: 4 }[ROOFS[style] as string] ?? 0;
+  return { steep: 22, battlements: 18, dome: 14, pagoda: 4, lantern: LIGHTHOUSE_RISE, thatch: 10 }[ROOFS[style] as string] ?? 0;
 }
 
 type Box = Pick<HouseGeometry, "houseX" | "houseW" | "roofTop" | "roofH">;
@@ -185,6 +208,33 @@ function steepPeaks(g: Box): { c: number; h: number }[] {
   // drawn over them.
   return [...sides.reverse(), { c: mid, h: H }];
 }
+
+/** The lighthouse's tower stands at one end of its flat roof, where a
+ *  chimney would, and rises this far over the roof to the tip of its
+ *  lightning rod. */
+const LIGHTHOUSE_RISE = 58;
+
+/** The lighthouse tower's middle, and the top of the lantern room's cap. */
+function towerAt(g: Pick<HouseGeometry, "chimneyX" | "roofTop">) {
+  return { cx: g.chimneyX + CHIMNEY_FOOT / 2, top: g.roofTop - LIGHTHOUSE_RISE };
+}
+
+/** How far a thatched roof reaches past the walls, and its profile: straight
+ *  slopes rounding over the ridge, `u` 0 at the ridge to 1 at the eaves. */
+const THATCH_EAVES = 7;
+const thatchFall = (u: number) => (u < 0.15 ? (u * u) / 0.3 : u - 0.075) / 0.925;
+
+/** The windmill's sails turn on a hub high in the gable, each this wide,
+ *  long enough to sweep round without reaching the eaves. */
+const SAIL_W = 7;
+function sailsAt(g: Pick<HouseGeometry, "houseX" | "houseW" | "floorsTop" | "roofH">) {
+  const hubY = g.floorsTop - Math.round(g.roofH * 0.6);
+  const reach = g.floorsTop - 2 - hubY;
+  return { cx: g.houseX + Math.floor(g.houseW / 2), cy: hubY, length: Math.floor(Math.sqrt(reach * reach - SAIL_W * SAIL_W)), reach };
+}
+
+/** The adobe's parapet steps up over the middle of the house. */
+const parapetStep = (hw: number) => Math.max(14, Math.round(hw * 0.18));
 
 /** The top of the roof at scene column `x`. */
 export function roofTopAt(style: RoomStyle, g: Box, x: number): number {
@@ -229,6 +279,22 @@ export function roofTopAt(style: RoomStyle, g: Box, x: number): number {
       const u = Math.min(1, (d - half) / PAGODA_EAVES);
       return g.roofTop + 3 + Math.round(fall - 4 * u ** 1.5);
     }
+    case "lantern":
+      // The gallery's railing, round the flat roof.
+      return bottom - 13;
+    case "thatch": {
+      const u = Math.min(1, Math.abs(x + 0.5 - cx) / (g.houseW / 2 + THATCH_EAVES));
+      return g.roofTop + Math.round((g.roofH - 1) * thatchFall(u));
+    }
+    case "parapet": {
+      // Rounded off at the corners, and at the ends of the step.
+      const step = parapetStep(g.houseW);
+      const d = Math.abs(x + 0.5 - cx);
+      const fromEnd = Math.min(x - (g.houseX - 1), g.houseX + g.houseW + 1 - 1 - x);
+      const round = (n: number) => (n <= 0 ? 2 : n === 1 ? 1 : 0);
+      if (d < step) return g.roofTop + round(Math.floor(step - d));
+      return g.roofTop + 3 + round(fromEnd);
+    }
     default:
       return g.roofTop;
   }
@@ -236,7 +302,7 @@ export function roofTopAt(style: RoomStyle, g: Box, x: number): number {
 
 // ── Chimneys ─────────────────────────────────────────────────────────────
 
-type Chimney = "brick" | "stone" | "crooked" | "flue" | "stack";
+type Chimney = "brick" | "stone" | "crooked" | "flue" | "stack" | "clay";
 
 const CHIMNEYS: Record<RoomStyle, Chimney | null> = {
   cottage: "brick",
@@ -249,10 +315,13 @@ const CHIMNEYS: Record<RoomStyle, Chimney | null> = {
   cabin: "stone",
   japanese: null,
   steampunk: "stack",
+  lighthouse: null,
+  windmill: null,
+  adobe: "clay",
 };
 
 /** How far over the roof each chimney's smoke starts. */
-const CHIMNEY_RISE: Record<Chimney, number> = { brick: 16, stone: 13, crooked: 18, flue: 15, stack: 22 };
+const CHIMNEY_RISE: Record<Chimney, number> = { brick: 16, stone: 13, crooked: 18, flue: 15, stack: 22, clay: 13 };
 /** The chimney stands over a footprint this wide at `chimneyX`. */
 export const CHIMNEY_FOOT = 10;
 
@@ -332,6 +401,16 @@ function chimney(R: Rect[], g: HouseGeometry, style: RoomStyle): Shell["smoke"] 
       for (let y = top + 7; y < foot; y += 6) R.push([x + 2, y, 6, 2, "copper"], [x + 2, y, 6, 1, "copper-hi"]);
       R.push([x, top, 10, 1, "copper-hi"], [x, top + 1, 10, 2, "copper"], [x + 1, top + 2, 8, 1, "copper-lo"]);
       return { x: x + 3, y: top - 3, steam: true };
+    case "clay": {
+      // A round-shouldered stack of the same plaster as the walls, a
+      // little lumpy, the smoke coming out of a dark mouth on top.
+      const h = g.floorsTop - top;
+      R.push([x + 1, top + 2, 8, h - 2, "outer"], [x + 2, top + 1, 6, 1, "outer"], [x + 3, top, 4, 1, "outer-hi"]);
+      R.push([x + 1, top + 2, 1, h - 2, "outer-hi"], [x + 2, top + 1, 1, 1, "outer-hi"], [x + 8, top + 2, 1, h - 2, "outer-lo"]);
+      R.push([x + 7, top + 1, 1, 1, "outer-lo"], [x + 4, top, 2, 1, "soot"]);
+      for (let y = top + 4; y < foot; y += 3) if (noise(x, y, 31) < 0.5) R.push([x + 2 + Math.floor(noise(y, x, 32) * 5), y, 2, 1, "outer-hi"]);
+      return { x: x + 3, y: top - 3, steam: false };
+    }
   }
 }
 
@@ -650,7 +729,234 @@ function roof(R: Rect[], over: Rect[], g: HouseGeometry, style: RoomStyle, shell
       }
       return;
     }
+    case "lantern": {
+      // The tower behind, then a gallery round the flat roof: a deck on
+      // brackets, an iron railing along it.
+      tower(R, g, shell);
+      const x0 = hx - 5;
+      const x1 = hx + hw + 5;
+      for (let x = hx - 1; x < hx + hw; x += 8) {
+        R.push([x, floorsTop - 4, 4, 1, "outer"], [x, floorsTop - 3, 3, 1, "outer"], [x, floorsTop - 2, 2, 1, "outer-lo"]);
+        R.push([x + 3, floorsTop - 4, 1, 1, "outer-lo"], [x + 2, floorsTop - 3, 1, 1, "outer-lo"]);
+      }
+      R.push([x0, floorsTop - 7, x1 - x0, 1, "outer-hi"], [x0, floorsTop - 6, x1 - x0, 1, "outer"], [x0, floorsTop - 5, x1 - x0, 1, "outer-lo"]);
+      railing(R, x0 + 1, x1 - 1, floorsTop - 13, 6);
+      R.push([hx, floorsTop - 1, hw, 1, "outer-lo"]);
+      return;
+    }
+    case "thatch": {
+      // Straw, thick and soft at the edges: combed down the slopes in
+      // bundles, lighter where the sun catches it, its cut ends showing
+      // along the eaves; a band of finer straw along the top, pegged
+      // with crossed spars and cut into points. The sails turn over it.
+      const cxf = hx + hw / 2;
+      const half = hw / 2 + THATCH_EAVES;
+      const x0 = Math.floor(cxf - half);
+      const x1 = Math.ceil(cxf + half);
+      const top = (x: number) => roofTopAt(style, g, x);
+      const under = (x: number) => (x >= hx && x < hx + hw ? floorsTop : Math.min(floorsTop, top(x) + 7));
+      columns(R, x0, x1, top, under, "roof");
+      // Drawn a row at a time where they line up (merged), so the roof
+      // stays light to draw.
+      const eaves: Rect[] = [];
+      const band: Rect[] = [];
+      const ridge: Rect[] = [];
+      const spars: Rect[] = [];
+      for (let x = x0; x < x1; x++) {
+        const t = top(x);
+        const b = under(x);
+        const lit = x < cxf;
+        for (let y = t + 7 + ((x * 3) % 5); y < b - 6; y += 6) {
+          const n = noise(x, y, 42);
+          const len = 3 + Math.floor(noise(y, x, 42) * 3);
+          if (n < (lit ? 0.22 : 0.4)) R.push([x, y, 1, len, "roof-lo"]);
+          else if (n > (lit ? 0.62 : 0.85)) R.push([x, y, 1, len, "roof-hi"]);
+        }
+        // The cut ends along the eaves, in shadow underneath.
+        eaves.push([x, b - 2, 1, 1, "roof-lo"], [x, b - 1, 1, 1, "roof-deep"]);
+        // The ridge band, its lower edge cut into points.
+        const depth = 5 + ((x - x0) % 6 < 3 ? (x - x0) % 6 : 6 - ((x - x0) % 6)) - 1;
+        const deep = Math.min(depth, b - 4 - t);
+        if (deep > 0) band.push([x, t, 1, deep, "roof-lo"], [x, t + deep, 1, 1, "roof-deep"]);
+        ridge.push([x, t, 1, 1, "roof-hi"]);
+        if ((x - x0) % 4 === 1 && deep > 3) spars.push([x, t + 2, 1, 1, "trim"], [x + 1, t + 1, 1, 1, "trim"], [x + 1, t + 3, 1, 1, "trim"]);
+      }
+      R.push(...merged(eaves), ...merged(band), ...merged(ridge), ...spars);
+      R.push([hx - 1, floorsTop - 1, hw + 2, 1, "roof-deep"]);
+      const sails = sailsAt(g);
+      shell.moving.push({
+        x: sails.cx - sails.reach,
+        y: sails.cy - sails.reach,
+        art: { w: 2 * sails.reach + 1, h: 2 * sails.reach + 1, rects: [] },
+        frames: sailFrames(sails.length, sails.reach),
+        motion: "spin",
+      });
+      return;
+    }
+    case "parapet": {
+      // A flat roof behind a round-shouldered parapet that steps up in
+      // the middle; the ends of the log beams that hold it up poke
+      // through the wall under it, a wooden spout at each end to shed the
+      // rain, and a string of chillies drying on the left.
+      const x0 = hx - 1;
+      const x1 = hx + hw + 1;
+      const top = (x: number) => roofTopAt(style, g, x);
+      columns(R, x0, x1, top, () => floorsTop, "outer");
+      columns(R, x0, x1, top, (x) => top(x) + 1, "outer-hi");
+      for (let x = x0; x < x1; x += 2) if (noise(x, 2, 44) < 0.3) R.push([x, top(x) + 2 + Math.floor(noise(x, 3, 44) * 4), 2, 1, "outer-hi"]);
+      R.push([x0, floorsTop - 8, x1 - x0, 1, "outer-lo"]);
+      R.push([x1 - 1, roofTop + 4, 1, floorsTop - roofTop - 4, "outer-lo"]);
+      for (let x = hx + 5; x + 4 < hx + hw - 2; x += 13) R.push(...grid(VIGA, x, floorsTop - 7, VIGA_KEY));
+      for (const [sx, dir] of [[x0 - 5, -1], [x1, 1]] as const) {
+        R.push([sx, roofTop + 6, 5, 1, "wood"], [sx, roofTop + 7, 5, 1, "wood-lo"], [dir < 0 ? sx : sx + 4, roofTop + 6, 1, 2, "wood-deep"]);
+      }
+      R.push(...grid(RISTRA, x0 - 5, roofTop + 8, RISTRA_KEY));
+      R.push([hx, floorsTop - 1, hw, 1, "outer-lo"]);
+      return;
+    }
   }
+}
+
+/** A log beam's end, 5 × 5, its rings showing, and its shadow on the wall. */
+const VIGA = [".lll.", "lhmml", "lmlml", "lmmml", ".lll.", "..ooo"];
+const VIGA_KEY: Record<string, Paint> = { l: "trunk-lo", h: "trunk-hi", m: "trunk", o: "outer-lo" };
+/** Chillies on a string, 4 × 18, hung from a spout. */
+const RISTRA = [
+  ".n..",
+  ".n..",
+  "rRr.",
+  "RrRr",
+  "rRRr",
+  "RrRR",
+  ".rRr",
+  "rRrR",
+  "RRr.",
+  "rRRr",
+  ".RrR",
+  "rRr.",
+  "RrRr",
+  ".rR.",
+  "rRr.",
+  ".Rr.",
+  "..r.",
+  "..n.",
+];
+const RISTRA_KEY: Record<string, Paint> = { n: "trunk-lo", r: "red", R: "red-lo" };
+
+/** An iron railing from `x0` to `x1`, `h` tall from `top`: a rail along
+ *  the top and another half way down, on posts. */
+function railing(R: Rect[], x0: number, x1: number, top: number, h: number) {
+  R.push([x0, top, x1 - x0, 1, "metal-lo"], [x0, top + Math.floor(h / 2), x1 - x0, 1, "metal-lo"]);
+  for (let x = x0; x < x1; x += 4) R.push([x, top, 1, h, "metal-lo"], [x, top, 1, 1, "metal"]);
+  R.push([x1 - 1, top, 1, h, "metal-lo"]);
+}
+
+/** The lighthouse's tower, standing at one end of the flat roof behind
+ *  the gallery: white with red bands, narrowing as it rises, slit
+ *  windows lit at night, a gallery of its own round the lantern room,
+ *  and its lamp, which sweeps a beam round at night. */
+function tower(R: Rect[], g: HouseGeometry, shell: Shell) {
+  const { cx, top: T } = towerAt(g);
+  // Down to the gallery's deck, which hides its foot.
+  const base = g.floorsTop - 4;
+  const bodyTop = T + 34;
+  for (let y = bodyTop; y < base; y++) {
+    const t = (y - bodyTop) / (base - bodyTop);
+    const half = Math.round(7 + 2.5 * t);
+    const x0 = cx - half;
+    const w = 2 * half;
+    const red = Math.floor((y - bodyTop) / 7) % 2 === 0;
+    const [hi, mid, lo] = red ? (["red-hi", "red", "red-lo"] as const) : (["outer-hi", "outer", "outer-lo"] as const);
+    R.push([x0, y, w, 1, mid], [x0 + 1, y, 3, 1, hi], [x0 + w - 4, y, 3, 1, lo], [x0, y, 1, 1, lo], [x0 + w - 1, y, 1, 1, "stone-deep"]);
+  }
+  for (let y = bodyTop + 9; y + 4 < base - 3; y += 14) {
+    R.push([cx - 1, y, 2, 4, "attic"], [cx - 1, y - 1, 2, 1, "outer-lo"]);
+    shell.lights.push({ x: cx, y: y + 2, r: 7 });
+  }
+  // Corbels under the gallery, its deck and railing; inside, the lantern
+  // room on its base, glazed, with the lamp's lens in it; over it the cap,
+  // its ventilator and the lightning rod.
+  R.push([cx - 10, T + 31, 20, 1, "outer"], [cx - 9, T + 32, 18, 1, "outer-lo"], [cx - 9, T + 33, 18, 1, "outer"]);
+  for (let x = cx - 9; x < cx + 9; x += 3) R.push([x, T + 32, 1, 1, "outer-hi"]);
+  R.push([cx - 7, T + 26, 14, 3, "outer"], [cx - 7, T + 26, 14, 1, "outer-hi"], [cx + 6, T + 27, 1, 2, "outer-lo"]);
+  R.push([cx - 6, T + 15, 12, 11, "glass"], [cx - 6, T + 15, 12, 1, "metal-lo"]);
+  for (const x of [cx - 6, cx - 2, cx + 2, cx + 5]) R.push([x, T + 15, 1, 11, "metal-lo"]);
+  R.push([cx - 5, T + 16, 1, 4, "glass-hi"], [cx + 3, T + 16, 1, 2, "glass-hi"]);
+  for (let y = T + 17; y < T + 25; y++) R.push([cx - 3, y, 6, 1, (y - T) % 2 ? "light" : "brass-hi"]);
+  R.push([cx - 1, T + 19, 2, 4, "light"]);
+  shell.lights.push({ x: cx, y: T + 21, r: 26 });
+  for (let r = 0; r < 7; r++) {
+    const half = 1 + r;
+    R.push([cx - half, T + 7 + r, 2 * half, 1, "red"], [cx - half, T + 7 + r, Math.max(1, Math.round(half * 0.6)), 1, "red-hi"], [cx + half - 1, T + 7 + r, 1, 1, "red-lo"]);
+  }
+  R.push([cx - 8, T + 14, 16, 1, "metal-lo"]);
+  R.push([cx - 1, T + 4, 2, 3, "brass"], [cx - 2, T + 5, 4, 1, "brass"], [cx - 1, T + 4, 1, 1, "brass-hi"], [cx, T + 6, 1, 1, "brass-lo"]);
+  R.push([cx, T, 1, 4, "metal-lo"]);
+  railing(R, cx - 11, cx + 11, T + 24, 5);
+  R.push([cx - 12, T + 29, 24, 1, "outer-hi"], [cx - 12, T + 30, 24, 1, "outer-lo"]);
+
+  // The beam: a wedge of light out to one side, brightest along its
+  // middle, which turns (room-sweep, which also fades it with distance).
+  const reach = Math.min(72, cx - 1, g.sceneW - cx - 2);
+  const beam: Rect[] = [];
+  for (let d = 1; d <= reach; d++) {
+    const h = Math.round(0.6 + (5 * d) / reach);
+    const core = Math.round(h * 0.4);
+    beam.push([reach + d, 7 - core, 1, 2 * core + 1, "beam-1"]);
+    if (h > core) beam.push([reach + d, 7 - h, 1, h - core, "beam-2"], [reach + d, 8 + core, 1, h - core, "beam-2"]);
+  }
+  shell.moving.push({ x: cx - reach, y: T + 21 - 7, art: { w: 2 * reach + 1, h: 15, rects: [] }, frames: [merged(beam)], motion: "sweep" });
+}
+
+/** Neighbouring columns of the same height and paint, as one rect. */
+function merged(cols: readonly Rect[]): Rect[] {
+  const out: Rect[] = [];
+  const sorted = [...cols].sort((a, b) => a[4].localeCompare(b[4]) || a[1] - b[1] || a[3] - b[3] || a[0] - b[0]);
+  for (const r of sorted) {
+    const last = out[out.length - 1];
+    if (last && last[0] + last[2] === r[0] && last[1] === r[1] && last[3] === r[3] && last[4] === r[4]) {
+      out[out.length - 1] = [last[0], last[1], last[2] + r[2], last[3], last[4]];
+    } else out.push(r);
+  }
+  return out;
+}
+
+/** The windmill's four sails, `length` from the hub, in a box `reach` from
+ *  it every way: each a stock with a frame on its trailing side, canvas
+ *  spread across it. SAIL_FRAMES frames, each turned on a little further,
+ *  for a quarter turn (after which they look the same again). */
+export const SAIL_FRAMES = 4;
+function sailFrames(length: number, reach: number): Rect[][] {
+  const size = 2 * reach + 1;
+  return Array.from({ length: SAIL_FRAMES }, (_, k) => {
+    // Start crossed, like an X: that is how they stand still.
+    const turn = Math.PI / 4 - (k * Math.PI) / (2 * SAIL_FRAMES);
+    const rows: string[] = [];
+    for (let py = 0; py < size; py++) {
+      let row = "";
+      for (let px = 0; px < size; px++) {
+        const dx = px - reach;
+        const dy = py - reach;
+        let ch = ".";
+        for (let arm = 0; arm < 4 && ch === "."; arm++) {
+          const a = turn + (arm * Math.PI) / 2;
+          const along = dx * Math.cos(a) + dy * Math.sin(a);
+          const across = -dx * Math.sin(a) + dy * Math.cos(a);
+          if (along < -0.5 || along > length + 0.5) continue;
+          if (Math.abs(across) <= 0.9) ch = across < 0 ? "S" : "s";
+          else if (across > 0.9 && across <= SAIL_W && along >= length * 0.22) {
+            const edge = across > SAIL_W - 1 || along > length - 0.5 || along < length * 0.22 + 1;
+            // The lattice shows through the canvas as faint bars.
+            const bar = ((Math.round(along) % 5) + 5) % 5 === 0;
+            ch = edge ? "f" : bar ? "C" : "c";
+          }
+        }
+        row += Math.abs(dx) <= 1 && Math.abs(dy) <= 1 ? (dx === 0 && dy === 0 ? "h" : "s") : ch;
+      }
+      rows.push(row);
+    }
+    return grid(rows, 0, 0, { s: "wood", S: "wood-lo", f: "wood-lo", c: "paper", C: "paper-lo", h: "brass" });
+  });
 }
 
 /** A brass gear, 15 × 15, in two frames half a tooth apart. */
@@ -733,11 +1039,14 @@ const PATTERNS: Record<RoomStyle, Pattern> = {
   cabin: "logs",
   japanese: "shoji",
   steampunk: "pipes",
+  lighthouse: "beadboard",
+  windmill: "delft",
+  adobe: "frieze",
 };
 /** Styles with a panelled dado round the bottom of the walls. */
 const WAINSCOT = new Set<RoomStyle>(["cottage", "fantasy", "elven", "steampunk"]);
 
-type Outside = "brick" | "ashlar" | "timber" | "birch" | "rock" | "hull" | "render" | "logs" | "posts";
+type Outside = "brick" | "ashlar" | "timber" | "birch" | "rock" | "hull" | "render" | "logs" | "posts" | "whitewash" | "clapboard" | "adobe";
 const OUTSIDE: Record<RoomStyle, Outside> = {
   cottage: "brick",
   medieval: "ashlar",
@@ -749,6 +1058,9 @@ const OUTSIDE: Record<RoomStyle, Outside> = {
   cabin: "logs",
   japanese: "posts",
   steampunk: "brick",
+  lighthouse: "whitewash",
+  windmill: "clapboard",
+  adobe: "adobe",
 };
 
 type Boards = Exclude<RoomFloor, "style">;
@@ -763,6 +1075,9 @@ const FLOORS: Record<RoomStyle, Boards> = {
   cabin: "boards",
   japanese: "tatami",
   steampunk: "boards",
+  lighthouse: "planks",
+  windmill: "tiles",
+  adobe: "flags",
 };
 
 /** The floor seen from the front, over a joist. The style's own floor is
@@ -975,6 +1290,45 @@ function drawPattern(R: Rect[], pattern: Pattern, x0: number, w: number, y0: num
       for (let x = x0 + 40; x < x1 - 8; x += 70) R.push(...grid([".nBn.", "nyyyn", "nyKyn", "nyyyn", ".nBn."], x, y0 + 12));
       return;
     }
+    case "beadboard":
+      // Narrow boards, tongued and grooved, painted: a groove and a bead
+      // beside it every few dots, under a plate rail.
+      for (let x = x0 + 3; x < x1; x += 6) R.push([x, y0 + 9, 1, h - 9, "wall-2"], [x + 1, y0 + 9, 1, h - 9, "wall-hi"]);
+      R.push([x0, y0 + 6, w, 1, "wall-hi"], [x0, y0 + 7, w, 2, "wall-2"]);
+      return;
+    case "delft": {
+      // Blue-and-white tiles with fine joints, each with a little picture
+      // in the middle: a windmill, a ship, a bird or a flower.
+      const T = 15;
+      const motifs = [
+        ["..K..", "KKKKK", "..K..", ".KKK.", ".K.K."],
+        ["..K..", "..KK.", "..K..", "KKKKK", ".KKK."],
+        ["KK...", ".KKK.", "..KKK", "..K..", ".K..."],
+        [".....", "..K..", ".KKK.", "..K..", "....."],
+      ];
+      for (let row = 0, y = y0; y < y1; row++, y += T) {
+        R.push([x0, y, w, 1, "wall-shadow"]);
+        for (let col = 0, x = x0; x < x1; col++, x += T) {
+          R.push([x, y + 1, 1, Math.min(T, y1 - y) - 1, "wall-shadow"]);
+          if (y + T <= y1 && x + T <= x1) {
+            const m = motifs[Math.floor(noise(col, row, 45) * motifs.length)];
+            R.push(...grid(m, x + 5, y + 5).map((r): Rect => [r[0], r[1], r[2], r[3], "wall-2"]));
+          }
+        }
+      }
+      return;
+    }
+    case "frieze":
+      // Plain lime plaster with a painted band along the top: steps rising
+      // and falling between two lines.
+      R.push([x0, y0 + 4, w, 1, "wall-2"], [x0, y0 + 13, w, 1, "wall-2"]);
+      for (let x = x0; x < x1; x++) {
+        const k = (((x - x0) % 16) + 16) % 16;
+        const up = k < 8 ? Math.floor(k / 2) : Math.floor((15 - k) / 2);
+        R.push([x, y0 + 11 - up, 1, up + 1, "wall-2"]);
+      }
+      for (let x = x0; x < x1; x += 2) if (noise(x, y0, 46) < 0.18) R.push([x, y0 + 16 + Math.floor(noise(y0, x, 46) * (h - 20)), 2, 1, "wall-hi"]);
+      return;
   }
 }
 
@@ -1030,6 +1384,31 @@ function outside(R: Rect[], style: RoomStyle, x: number, top: number, w: number,
       for (let y = top; y < top + h; y += 6) {
         R.push([x, y, w, 1, "outer-hi"], [x, y + 4, w, 2, "outer-lo"]);
         R.push([outer, y + 1, 1, 3, "wood-hi"]);
+      }
+      return;
+    case "whitewash":
+      // Limewashed stone: the courses just showing through.
+      R.push([x, top, w, h, "outer"], [left ? x + w - 1 : x, top, 1, h, "outer-hi"]);
+      for (let row = 0, y = top + 6; y < top + h; row++, y += 7) {
+        R.push([x, y, w, 1, "outer-lo"]);
+        R.push([x + (row % 2 ? 1 : 3), y - 6, 1, 6, "outer-lo"]);
+      }
+      R.push([outer, top, 1, h, "outer-lo"]);
+      return;
+    case "clapboard":
+      // Painted boards lapped one over the next, each casting a line of
+      // shadow on the one below, and white corner boards.
+      R.push([x, top, w, h, "outer"]);
+      for (let y = top; y < top + h; y += 5) R.push([x, y, w, 1, "outer-hi"], [x, y + 4, w, 1, "outer-lo"]);
+      R.push([left ? x : x + w - 2, top, 2, h, "trim"]);
+      return;
+    case "adobe":
+      // Mud plaster, smoothed by hand: soft and uneven, the corner rounded.
+      R.push([x, top, w, h, "outer"], [outer, top, 1, h, "outer-lo"], [left ? x + 1 : x + w - 2, top, 1, h, "outer-hi"]);
+      for (let y = top + 2; y < top + h; y += 4) {
+        const n = noise(x, y, 47);
+        if (n < 0.35) R.push([x + 1 + Math.floor(n * 8), y, 2, 1, "outer-hi"]);
+        else if (n > 0.8) R.push([x + 1 + Math.floor((n - 0.8) * 15), y, 2, 1, "outer-lo"]);
       }
       return;
   }
@@ -1091,6 +1470,27 @@ function partition(R: Rect[], style: RoomStyle, x: number, top: number, h: numbe
     case "logs":
       R.push([x, top, w, h, "outer"]);
       for (let y = top; y < top + h; y += 6) R.push([x, y, w, 1, "outer-hi"], [x, y + 4, w, 2, "outer-lo"]);
+      edges("outer-lo");
+      return;
+    case "whitewash":
+      R.push([x, top, w, h, "outer"], [x + 1, top, 1, h, "outer-hi"]);
+      for (let row = 0, y = top + 6; y < top + h; row++, y += 7) {
+        R.push([x, y, w, 1, "outer-lo"], [x + (row % 2 ? 4 : 9), y - 6, 1, 6, "outer-lo"]);
+      }
+      edges("outer-lo");
+      return;
+    case "clapboard":
+      R.push([x, top, w, h, "outer"]);
+      for (let y = top; y < top + h; y += 5) R.push([x, y, w, 1, "outer-hi"], [x, y + 4, w, 1, "outer-lo"]);
+      R.push([x, top, 2, h, "trim"], [x + w - 2, top, 2, h, "trim"]);
+      return;
+    case "adobe":
+      R.push([x, top, w, h, "outer"], [x + 1, top, 1, h, "outer-hi"]);
+      for (let y = top + 2; y < top + h; y += 3) {
+        const n = noise(x, y, 47);
+        if (n < 0.3) R.push([x + 2 + Math.floor(n * 3 * (w - 5)), y, 2, 1, "outer-hi"]);
+        else if (n > 0.82) R.push([x + 2 + Math.floor((n - 0.82) * 5 * (w - 5)), y, 2, 1, "outer-lo"]);
+      }
       edges("outer-lo");
       return;
   }
@@ -1218,7 +1618,7 @@ function storey(
     const x0 = hx + wall + x;
     R.push([x0, top, w, g.roomH, "wall"]);
     const dado = WAINSCOT.has(style);
-    const kick = style === "japanese" ? 9 : 3;
+    const kick = style === "japanese" ? 9 : style === "adobe" ? 20 : 3;
     const patternEnd = dado ? floorLine - 28 : floorLine - kick;
     wallPattern(R, look.paper, x0, w, top + 3, patternEnd);
     R.push([x0, top, w, 1, "wood-lo"], [x0, top + 1, w, 2, "wall-shadow"]);
@@ -1290,6 +1690,11 @@ function skirting(R: Rect[], style: RoomStyle, x0: number, w: number, floorLine:
     R.push([x0, floorLine - 9, w, 6, "wainscot"], [x0, floorLine - 9, w, 1, "trim"]);
   } else if (style === "scifi") {
     R.push([x0, floorLine - 6, w, 3, "wainscot"], [x0, floorLine - 6, w, 1, "light"]);
+  } else if (style === "adobe") {
+    // The bottom of the walls painted a deeper earth, its top edge as the
+    // brush left it.
+    R.push([x0, floorLine - 19, w, 16, "wainscot"]);
+    for (let x = x0; x < x0 + w; x += 3) R.push([x, floorLine - 20, Math.min(3, x0 + w - x), 1, noise(x, floorLine, 48) < 0.6 ? "wainscot" : "wainscot-lo"]);
   }
   R.push([x0, floorLine - 3, w, 2, "wood"], [x0, floorLine - 3, w, 1, "wood-hi"], [x0, floorLine - 1, w, 1, "wood-deep"]);
 }
@@ -1680,6 +2085,154 @@ const BOILER = art([
   ".==.....==..",
 ]);
 
+/** A garden piece drawn with its own key. */
+const piece = (rows: readonly string[], key: Record<string, Paint>): Art => ({
+  w: Math.max(...rows.map((r) => r.length)),
+  h: rows.length,
+  rects: grid(rows, 0, 0, key),
+});
+
+/** Rocks by the sea, with sea pinks growing out of the cracks. */
+const SEA_ROCKS = piece(
+  [
+    "......pP..........",
+    ".....pPPp...p.....",
+    "......j....pPp....",
+    "......j.....j.....",
+    "....sSSSj..sSj....",
+    "..sSSSSSSttsSSs...",
+    ".sSSSStSSSSSSSSt..",
+    "sSSStSSSSSsSSSStt.",
+    "SSSSSSSSSSSSSSStTt",
+    "tSSStttSSSStttSTTT",
+  ],
+  { p: "rose-hi", P: "rose", j: "leaf-lo", s: "stone-hi", S: "stone", t: "stone-lo", T: "stone-deep" },
+);
+
+/** A lifebuoy hung on a post, red and white, with a coil of rope under it. */
+const LIFEBUOY = (() => {
+  const rows: string[] = [];
+  for (let y = 0; y < 26; y++) {
+    const row = Array<string>(11).fill(".");
+    if (y < 23) row[5] = "W";
+    if (y < 23) row[6] = "d";
+    const dy = y - 7;
+    for (let x = 0; x < 11; x++) {
+      const dx = x - 5.5 + 0.5;
+      const d = Math.hypot(dx, dy);
+      if (d >= 2.4 && d <= 4.9) {
+        const seg = Math.floor((Math.atan2(dy, dx) + Math.PI + Math.PI / 4) / (Math.PI / 2)) % 2;
+        row[x] = seg ? "y" : dx + dy < -2 ? "h" : "r";
+        if (d > 4.3 && dx + dy > 1) row[x] = seg ? "Y" : "R";
+      }
+    }
+    if (y === 2) row[4] = row[7] = "K";
+    if (y >= 21) for (let x = 1; x < 10; x++) if (Math.abs(x - 5) <= (y === 21 ? 2 : y === 22 ? 4 : 5) - (y === 25 ? 1 : 0)) row[x] = (x + y) % 3 ? "8" : "Z";
+    rows.push(row.join(""));
+  }
+  return piece(rows, { W: "wood", d: "wood-lo", y: "paper", Y: "paper-lo", r: "red", h: "red-hi", R: "red-lo", K: "metal-lo", "8": "rug-fringe", Z: "wicker-lo" });
+})();
+
+/** A bed of tulips, red, yellow and pink, in a row in the soil. */
+const TULIPS = (() => {
+  const W = 19;
+  const H = 13;
+  const rows = Array.from({ length: H }, () => Array<string>(W).fill("."));
+  const colours = ["r", "y", "p", "y", "r", "p"];
+  for (let i = 0, x = 1; x + 2 < W; i++, x += 3) {
+    const head = i % 2 ? 3 : 1;
+    const c = colours[i % colours.length];
+    rows[head][x] = rows[head][x + 2] = c;
+    rows[head + 1][x] = c;
+    rows[head + 1][x + 1] = c.toUpperCase();
+    rows[head + 1][x + 2] = c.toUpperCase();
+    rows[head + 2][x + 1] = c.toUpperCase();
+    rows[head][x + 1] = head === 1 ? "." : c;
+    for (let y = head + 3; y < H - 2; y++) rows[y][x + 1] = "j";
+    rows[H - 4][x] = "G";
+    rows[H - 3][x + 2] = "G";
+  }
+  for (let x = 0; x < W; x++) {
+    rows[H - 2][x] = x === 0 || x === W - 1 ? "." : "q";
+    rows[H - 1][x] = "Q";
+  }
+  return piece(
+    rows.map((r) => r.join("")),
+    { r: "red-hi", R: "red", y: "petal-gold", Y: "petal-gold-lo", p: "rose-hi", P: "rose", j: "leaf-lo", G: "leaf", q: "soil", Q: "soil-lo" },
+  );
+})();
+
+/** A millstone stood on its edge, and two sacks of flour. */
+const MILLSTONE = piece(
+  [
+    "....ssss.............",
+    "..sSSSSSSt...........",
+    ".sSSStSSSSt..........",
+    ".SStSSSStSS...yyy....",
+    "sSSSSSSSSSSt.yyyYy...",
+    "SStSSkkSStSt.yYYyy.yy",
+    "SSSSSkkSSSSt.yyyyyyyy",
+    "SStSSSSSStSt.yyyyyYyy",
+    ".SSSSSStSSS..yyEyyyyy",
+    ".tSStSSSSSt..yyyyyyYy",
+    "..tSSSSSSt...yyyyyyyy",
+    "....tttt.....YYYYYYYY",
+  ],
+  { s: "stone-hi", S: "stone", t: "stone-lo", k: "soot", y: "paper", Y: "paper-lo", E: "delft" },
+);
+
+/** A saguaro cactus, its ribs catching the light, with two arms raised
+ *  and a white flower or two on top. */
+const SAGUARO = (() => {
+  const rows: string[] = [];
+  const H = 40;
+  for (let y = 0; y < H; y++) {
+    const row = Array<string>(15).fill(".");
+    const trunk = (x: number, w: number, from: number) => {
+      if (y < from) return;
+      for (let i = 0; i < w; i++) row[x + i] = i === 0 ? "c" : i === w - 1 ? "k" : i % 2 ? "C" : "c";
+      if (y === from) {
+        row[x] = ".";
+        row[x + w - 1] = ".";
+      }
+    };
+    trunk(5, 5, 0);
+    // The arms: out from the trunk, then up.
+    if (y >= 18 && y <= 21) for (let x = 2; x < 5; x++) row[x] = y === 21 ? "k" : "C";
+    if (y >= 8 && y <= 21) for (let x = 1; x < 4; x++) row[x] = y === 8 && x !== 2 ? "." : x === 1 ? "c" : x === 3 ? "k" : "C";
+    if (y >= 23 && y <= 26) for (let x = 10; x < 12; x++) row[x] = y === 26 ? "k" : "C";
+    if (y >= 13 && y <= 26) for (let x = 11; x < 14; x++) row[x] = y === 13 && x !== 12 ? "." : x === 11 ? "c" : x === 13 ? "k" : "C";
+    if (y === 0) {
+      row[6] = "w";
+      row[8] = "w";
+    }
+    if (y === 1) row[7] = "o";
+    if (y === 7) row[2] = "w";
+    rows.push(row.join(""));
+  }
+  rows.push("....qQQQQq.....");
+  return piece(rows, { c: "ivy-hi", C: "ivy", k: "ivy-lo", w: "petal-white", o: "petal-gold", q: "soil", Q: "soil-lo" });
+})();
+
+/** Two clay water jars, painted with a band, and a prickly pear. */
+const OLLAS = piece(
+  [
+    "................gG.....",
+    "...............gGGG.r..",
+    "..........pp...GGGkgG..",
+    "..pPPq....PP.....kgGGr.",
+    "..PPPq...pPPPq...kGGGG.",
+    ".pPPPPq..PPPPq..gGGkGk.",
+    "pPPPPPPq.KKKKK..GGGGk..",
+    "KKKKKKKK.PPPPq...GGk...",
+    "PKPKPKPq.pPPPq...GkG...",
+    "PPPPPPPq..PPq....GGk...",
+    ".PPPPPq...PPq...qQQQq..",
+    "..qqqq.....q....qQQQq..",
+  ],
+  { p: "pot-hi", P: "pot", q: "pot-lo", K: "trunk-lo", g: "ivy-hi", G: "ivy", k: "ivy-lo", r: "rose", Q: "pot" },
+);
+
 function yard(style: RoomStyle, g: HouseGeometry, earth: number, shell: Shell, season: Season) {
   const stand = (a: Art, x: number) => shell.yard.push({ art: a, x, y: earth + 1 - a.h });
   const left = (a: Art) => stand(a, Math.max(0, Math.floor((g.houseX - a.w) / 2)));
@@ -1745,6 +2298,18 @@ function yard(style: RoomStyle, g: HouseGeometry, earth: number, shell: Shell, s
       left(GAS_LAMP);
       shell.lights.push({ x: Math.floor((g.houseX - GAS_LAMP.w) / 2) + 4, y: earth - GAS_LAMP.h + 4, r: 16 });
       right(BOILER);
+      return;
+    case "lighthouse":
+      left(SEA_ROCKS);
+      right(LIFEBUOY);
+      return;
+    case "windmill":
+      left(TULIPS);
+      right(MILLSTONE);
+      return;
+    case "adobe":
+      left(SAGUARO);
+      right(OLLAS);
       return;
   }
 }
@@ -1840,15 +2405,17 @@ export function shellArt(g: HouseGeometry, style: RoomStyle, interior: Interior 
       rooms: parts.flatMap((row, f) => row.map((p) => ({ x: hx + g.wall + p.x, w: p.w, top: g.floorsTop + f * g.storey + g.beam }))),
       ground: style === "cave" ? (x) => Math.min(earth, roofTopAt(style, g, x)) : () => earth,
       // Behind a parapet the battlements rise to the top of the roof; over
-      // the chimney its smoke rises.
+      // the chimney its smoke rises, and there the lighthouse's tower.
       sky: (x) =>
         x < hx - 6 || x >= hx + hw + 6
           ? g.floorsTop
           : shell.smoke && x >= g.chimneyX - 4 && x < g.chimneyX + CHIMNEY_FOOT + 4
             ? 0
-            : ROOFS[style] === "battlements"
-              ? g.roofTop
-              : roofTopAt(style, g, x),
+            : ROOFS[style] === "lantern" && x >= g.chimneyX - 7 && x < g.chimneyX + CHIMNEY_FOOT + 7
+              ? 0
+              : ROOFS[style] === "battlements"
+                ? g.roofTop
+                : roofTopAt(style, g, x),
     });
   }
   return shell;
@@ -1871,7 +2438,7 @@ const leafy = (paint: Paint) => (/^(leaf|ivy|pine)/.test(paint) ? (paint.endsWit
 function roofSnow(style: RoomStyle, g: HouseGeometry, indoors: (x: number, y: number) => boolean): Parameters<typeof snowCaps>[3] {
   const shape = ROOFS[style];
   const shows = (paint: Paint) => /^(light|glass|sky|brass|metal|ink|trim|art-sun|outer|stone)/.test(paint);
-  const flat = shape === "flat" || shape === "battlements";
+  const flat = shape === "flat" || shape === "battlements" || shape === "lantern" || shape === "parapet";
   // Deeper on a bigger roof.
   const depth = Math.max(3, Math.min(8, Math.round(g.roofH * 0.17)));
   return {

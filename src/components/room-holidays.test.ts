@@ -20,7 +20,7 @@ import {
   mantelGarland,
   streamers,
 } from "@/components/room-holidays";
-import { roofHeight, shellArt, type Interior } from "@/components/room-shells";
+import { roofCrown, roofHeight, shellArt, type Interior } from "@/components/room-shells";
 import {
   ROOM_HOLIDAYS,
   ROOM_HOLIDAY_LABELS,
@@ -140,14 +140,16 @@ describe("holiday art", () => {
 /** A house the way the reading room lays one out, two storeys of two rooms
  *  side by side. */
 function house(style: (typeof ROOM_STYLES)[number], houseW = 300, yard = 24): HouseGeometry {
+  // Sky enough over the roof for a lighthouse tower.
+  const roofTop = Math.max(30, roofCrown(style) + 2);
   const roofH = roofHeight(style, houseW);
   return {
     sceneW: houseW + 2 * yard,
     houseX: yard,
     houseW,
-    roofTop: 30,
+    roofTop,
     roofH,
-    floorsTop: 30 + roofH,
+    floorsTop: roofTop + roofH,
     floorCount: 2,
     storey: 144,
     roomH: 139,

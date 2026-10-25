@@ -874,6 +874,11 @@
 .rp-red-hi { fill: var(--room-red-hi); }
 .rp-red { fill: var(--room-red); }
 .rp-red-lo { fill: var(--room-red-lo); }
+/* A lighthouse's beam, seen only at night. */
+.rp-beam-1 { fill: transparent; }
+.rp-beam-2 { fill: transparent; }
+:where(.dark) .rp-beam-1 { fill: rgb(255 242 184 / 0.85); }
+:where(.dark) .rp-beam-2 { fill: rgb(255 230 150 / 0.5); }
 .rp-book { fill: var(--spine); }
 .rp-book-lo { fill: color-mix(in oklab, var(--spine), #000 35%); }
 
@@ -1182,6 +1187,64 @@
   --s-rug: #4a2a2a;
   --s-rug-2: #c9a25a;
 }
+.room-scene[data-style="lighthouse"] {
+  --s-wall: #eef2f2;
+  --s-wall-2: #b4cad4;
+  --s-wainscot: #5d7f95;
+  --s-wood: #8a6a4a;
+  --s-floor: #bfa47e;
+  --s-stone: #9fa4a3;
+  --s-outer: #f3f1ea;
+  --s-roof: #c0403a;
+  --s-grass: #7ba35a;
+  --s-soil: #6b5a46;
+  --s-trim: #2f4a5c;
+  --s-light: #fff0b0;
+  --s-light-night: #ffe58a;
+  --s-chair: #2f4f7a;
+  --s-curtain: #3d6c8c;
+  --s-cushion: #c0403a;
+  --s-rug: #2b3f5c;
+  --s-rug-2: #e9e2d0;
+}
+.room-scene[data-style="windmill"] {
+  --s-wall: #f6f3eb;
+  --s-wall-2: #4a72b4;
+  --s-wainscot: #4a72b4;
+  --s-wood: #7a5232;
+  --s-floor: #d6cebe;
+  --s-stone: #9d978c;
+  --s-outer: #3d5a49;
+  --s-roof: #b9934f;
+  --s-grass: #74a64e;
+  --s-soil: #6b5236;
+  --s-trim: #f1ede3;
+  --s-light: #ffe2a0;
+  --s-chair: #2f5e8f;
+  --s-curtain: #a8393a;
+  --s-cushion: #e0b030;
+  --s-rug: #7a2f2f;
+  --s-rug-2: #e8c860;
+}
+.room-scene[data-style="adobe"] {
+  --s-wall: #f2e3c9;
+  --s-wall-2: #b5523b;
+  --s-wainscot: #c4845a;
+  --s-wood: #8a5a34;
+  --s-floor: #b9683f;
+  --s-stone: #b7a58c;
+  --s-outer: #d8a575;
+  --s-roof: #c8935f;
+  --s-grass: #a4a35e;
+  --s-soil: #9a6a42;
+  --s-trim: #3a8f8a;
+  --s-light: #ffd08a;
+  --s-chair: #a8462e;
+  --s-curtain: #3a8f8a;
+  --s-cushion: #e0a040;
+  --s-rug: #8a3a2a;
+  --s-rug-2: #3a8f8a;
+}
 
 /* The colours chosen in Decorate. */
 .room-scene[data-walls="cream"] { --s-wall: #f1e5cd; }
@@ -1221,7 +1284,14 @@
 .room-scene[data-wood="ebony"] { --s-wood: #3a2c26; }
 .room-scene[data-wood="grey"] { --s-wood: #8d8a85; }
 /* Wooden floors follow the wood; stone, metal and straw ones don't. */
-.room-scene[data-wood]:not([data-style="medieval"], [data-style="cave"], [data-style="scifi"], [data-style="japanese"]) {
+.room-scene[data-wood]:not(
+    [data-style="medieval"],
+    [data-style="cave"],
+    [data-style="scifi"],
+    [data-style="japanese"],
+    [data-style="windmill"],
+    [data-style="adobe"]
+  ) {
   --s-floor: color-mix(in oklab, var(--s-wood), #fff 5%);
 }
 .room-scene[data-fabric="crimson"] { --s-fabric: #9b3a43; }
@@ -1796,6 +1866,56 @@
 }
 .room-blinker {
   animation: room-blink 2.8s steps(1, end) infinite;
+}
+/* A windmill's sails, four frames to a quarter turn (room-shells.ts:
+   SAIL_FRAMES), each shown in turn; still, the first. */
+.room-spin-frame {
+  animation: room-spin 1.4s steps(1, end) infinite;
+}
+.room-spin-frame + .room-spin-frame {
+  opacity: 0;
+}
+@keyframes room-spin {
+  0% {
+    opacity: 1;
+  }
+  25%,
+  100% {
+    opacity: 0;
+  }
+}
+/* A lighthouse's beam, at night: it narrows as it turns towards you and
+   away, and swings out the other side. Still, it shines one way. */
+.room-sweep {
+  display: none;
+  transform-origin: center;
+}
+:where(.dark) .room-sweep {
+  display: block;
+  mix-blend-mode: screen;
+  mask-image: linear-gradient(to right, transparent 50%, #000 51%, rgb(0 0 0 / 0.45) 75%, transparent);
+  animation: room-sweep 9s infinite;
+}
+@keyframes room-sweep {
+  0% {
+    transform: none;
+    animation-timing-function: ease-in;
+  }
+  25% {
+    transform: scaleX(0.04);
+    animation-timing-function: ease-out;
+  }
+  50% {
+    transform: scaleX(-1);
+    animation-timing-function: ease-in;
+  }
+  75% {
+    transform: scaleX(-0.04);
+    animation-timing-function: ease-out;
+  }
+  100% {
+    transform: none;
+  }
 }
 /* The doors between rooms side by side: shut, or open while the avatar
    walks through (room-avatar.tsx: Walker). */
