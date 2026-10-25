@@ -30,9 +30,9 @@ jobs:
           --health-retries 12
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: "22" # newest 22.x; README asks for Node 22.13 or newer
           cache: npm
@@ -73,3 +73,31 @@ jobs:
           DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
           AUTH_SECRET: ci-dummy-secret-not-used-at-build
           AUTH_TRUST_HOST: "true"
+
+  # The deploy path the README gives (`docker compose up -d --build`), which
+  # the checks above never touch: build the image, start it against a fresh
+  # database the way docker-compose.yml does, and wait for both services to
+  # report healthy. A broken Dockerfile, a migration that fails on an empty
+  # database or a server that won't start turns this red before it reaches
+  # anyone's server.
+  docker:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Build and start with Docker Compose
+        run: docker compose up --build --detach --wait --wait-timeout 300
+        env:
+          POSTGRES_PASSWORD: ci
+          AUTH_SECRET: ci-secret-for-the-compose-check
+
+      - name: Sign-in page answers
+        run: curl --fail --silent --show-error --output /dev/null http://localhost:3000/login
+
+      - name: Container logs
+        if: failure()
+        run: docker compose logs
+        env:
+          POSTGRES_PASSWORD: ci
+          AUTH_SECRET: ci-secret-for-the-compose-check
