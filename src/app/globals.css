@@ -440,6 +440,107 @@
     --ring: #ffb38a;
 }
 
+/* Provence, Terracotta, Dragonfruit, Iris, Lido, Absinthe and Marigold go
+   a step further: each page is a colour no other theme has as its ground
+   (olive, clay, magenta, royal purple, aqua, chartreuse and orange), again
+   with an accent from across the wheel. */
+
+/* Olive with lavender, after the olive groves and lavender fields of the
+   south of France. The only yellow-green dark: Everforest is a blue-grey
+   and Evergreen a blue-green. */
+[data-theme="provence"] {
+    --background: #21250d;
+    --foreground: #f1f0dc;
+    --card: #2c3116;
+    --card-foreground: #f1f0dc;
+    --popover: #2c3116;
+    --popover-foreground: #f1f0dc;
+    --primary: #c9b6ff;
+    --primary-foreground: #21250d;
+    --secondary: #393f1e;
+    --secondary-foreground: #f1f0dc;
+    --muted: #393f1e;
+    --muted-foreground: #c5c69c;
+    --accent: #393f1e;
+    --accent-foreground: #f1f0dc;
+    --destructive: #ff9a85;
+    --border: #474e27;
+    --input: #474e27;
+    --ring: #c9b6ff;
+}
+
+/* Fired clay with a summer-sky blue. Lighter and far more orange than
+   Sepia's brown or Bordeaux's wine. Danger is pink, as coral or red would
+   sink into the clay. */
+[data-theme="terracotta"] {
+    --background: #3d1a0c;
+    --foreground: #fbe9df;
+    --card: #4b2213;
+    --card-foreground: #fbe9df;
+    --popover: #4b2213;
+    --popover-foreground: #fbe9df;
+    --primary: #8fd3ff;
+    --primary-foreground: #3d1a0c;
+    --secondary: #5b2c1a;
+    --secondary-foreground: #fbe9df;
+    --muted: #5b2c1a;
+    --muted-foreground: #f0bca3;
+    --accent: #5b2c1a;
+    --accent-foreground: #fbe9df;
+    --destructive: #ff9eb5;
+    --border: #6b3622;
+    --input: #6b3622;
+    --ring: #8fd3ff;
+}
+
+/* Magenta with lime, the skin and scales of a dragon fruit. A true
+   magenta, where the violet darks lean blue and Bordeaux leans red; the
+   loudest theme here, on purpose. */
+[data-theme="dragonfruit"] {
+    --background: #3a0a31;
+    --foreground: #fde7f6;
+    --card: #4a1240;
+    --card-foreground: #fde7f6;
+    --popover: #4a1240;
+    --popover-foreground: #fde7f6;
+    --primary: #bff25c;
+    --primary-foreground: #3a0a31;
+    --secondary: #5a1a4f;
+    --secondary-foreground: #fde7f6;
+    --muted: #5a1a4f;
+    --muted-foreground: #eab0dc;
+    --accent: #5a1a4f;
+    --accent-foreground: #fde7f6;
+    --destructive: #ffa47a;
+    --border: #6b245e;
+    --input: #6b245e;
+    --ring: #bff25c;
+}
+
+/* Royal purple with saffron, the petals of an iris and the flash of
+   yellow on each one. Saturated, where Dracula, Synthwave and Rosé Pine
+   are violet-greys, and bluer than Dragonfruit. */
+[data-theme="iris"] {
+    --background: #2a0c47;
+    --foreground: #f1e6ff;
+    --card: #361459;
+    --card-foreground: #f1e6ff;
+    --popover: #361459;
+    --popover-foreground: #f1e6ff;
+    --primary: #ffd24d;
+    --primary-foreground: #2a0c47;
+    --secondary: #441d6b;
+    --secondary-foreground: #f1e6ff;
+    --muted: #441d6b;
+    --muted-foreground: #cdb3f0;
+    --accent: #441d6b;
+    --accent-foreground: #f1e6ff;
+    --destructive: #ff8fa0;
+    --border: #52267d;
+    --input: #52267d;
+    --ring: #ffd24d;
+}
+
 [data-theme="everforest-light"] {
     --background: #fdf6e3;
     --foreground: #5c6a72;
@@ -747,6 +848,75 @@
     --border: #e6d89a;
     --input: #e6d89a;
     --ring: #3a3fc8;
+}
+
+/* Pool-tile aqua with a lifebuoy red. Bluer and much stronger than Sage,
+   greener than Cyanotype. */
+[data-theme="lido"] {
+    --background: #d3f2ee;
+    --foreground: #0b2b31;
+    --card: #ecfaf8;
+    --card-foreground: #0b2b31;
+    --popover: #ecfaf8;
+    --popover-foreground: #0b2b31;
+    --primary: #b8321a;
+    --primary-foreground: #ffffff;
+    --secondary: #bfe8e2;
+    --secondary-foreground: #0b2b31;
+    --muted: #bfe8e2;
+    --muted-foreground: #2f5a5f;
+    --accent: #bfe8e2;
+    --accent-foreground: #0b2b31;
+    --destructive: #9b1238;
+    --border: #a5dbd3;
+    --input: #a5dbd3;
+    --ring: #b8321a;
+}
+
+/* Chartreuse paper with aubergine ink. Greener than Majorelle's lemon,
+   and the text is purple-black, not just the accent. */
+[data-theme="absinthe"] {
+    --background: #e8f4ac;
+    --foreground: #2a1338;
+    --card: #f7fbdc;
+    --card-foreground: #2a1338;
+    --popover: #f7fbdc;
+    --popover-foreground: #2a1338;
+    --primary: #6a2c9e;
+    --primary-foreground: #ffffff;
+    --secondary: #dbeb9b;
+    --secondary-foreground: #2a1338;
+    --muted: #dbeb9b;
+    --muted-foreground: #58466a;
+    --accent: #dbeb9b;
+    --accent-foreground: #2a1338;
+    --destructive: #b3261e;
+    --border: #cbde86;
+    --input: #cbde86;
+    --ring: #6a2c9e;
+}
+
+/* Marigold orange with hot magenta, the colours of a festival garland.
+   A saturated orange, where Apricot is a pale peach. */
+[data-theme="marigold"] {
+    --background: #ffd9a8;
+    --foreground: #3a0d2a;
+    --card: #ffeccf;
+    --card-foreground: #3a0d2a;
+    --popover: #ffeccf;
+    --popover-foreground: #3a0d2a;
+    --primary: #ad0f68;
+    --primary-foreground: #ffffff;
+    --secondary: #f9c98c;
+    --secondary-foreground: #3a0d2a;
+    --muted: #f9c98c;
+    --muted-foreground: #6e2f4b;
+    --accent: #f9c98c;
+    --accent-foreground: #3a0d2a;
+    --destructive: #9c1c10;
+    --border: #f0bd7e;
+    --input: #f0bd7e;
+    --ring: #ad0f68;
 }
 
 @layer base {

@@ -11,7 +11,10 @@
  * black, brown, forest green, and tinted papers in pink, blue, green, violet
  * and peach. The last four put the accent across the colour wheel from the
  * page: wine with sea-glass, ultramarine with peach, pink with green, lemon
- * with cobalt.
+ * with cobalt. The seven after them do the same on grounds no other theme
+ * uses: olive with lavender, clay with sky blue, magenta with lime, royal
+ * purple with saffron, aqua with red, chartreuse with aubergine, orange
+ * with magenta.
  * Dark-mode themes additionally get the `dark` class on <html> so Tailwind
  * `dark:` variants (status badges etc.) follow along.
  */
@@ -50,6 +53,10 @@ export const THEMES: ThemeDef[] = [
   { id: "evergreen", name: "Evergreen", mode: "dark", swatch: ["#0d1f16", "#7ee787"] },
   { id: "bordeaux", name: "Bordeaux", mode: "dark", swatch: ["#2c0d14", "#6fd6c6"] },
   { id: "riviera", name: "Riviera", mode: "dark", swatch: ["#0f1640", "#ffb38a"] },
+  { id: "provence", name: "Provence", mode: "dark", swatch: ["#21250d", "#c9b6ff"] },
+  { id: "terracotta", name: "Terracotta", mode: "dark", swatch: ["#3d1a0c", "#8fd3ff"] },
+  { id: "dragonfruit", name: "Dragonfruit", mode: "dark", swatch: ["#3a0a31", "#bff25c"] },
+  { id: "iris", name: "Iris", mode: "dark", swatch: ["#2a0c47", "#ffd24d"] },
 
   // Light palettes
   { id: "everforest-light", name: "Everforest Light", mode: "light", swatch: ["#fdf6e3", "#35a77c"] },
@@ -66,6 +73,9 @@ export const THEMES: ThemeDef[] = [
   { id: "apricot", name: "Apricot", mode: "light", swatch: ["#fff2e8", "#b8502d"] },
   { id: "rhubarb", name: "Rhubarb", mode: "light", swatch: ["#f7e8e6", "#2d6a4a"] },
   { id: "majorelle", name: "Majorelle", mode: "light", swatch: ["#fbf5d2", "#3a3fc8"] },
+  { id: "lido", name: "Lido", mode: "light", swatch: ["#d3f2ee", "#b8321a"] },
+  { id: "absinthe", name: "Absinthe", mode: "light", swatch: ["#e8f4ac", "#6a2c9e"] },
+  { id: "marigold", name: "Marigold", mode: "light", swatch: ["#ffd9a8", "#ad0f68"] },
 ];
 
 export const DARK_THEME_IDS = THEMES.filter((t) => t.mode === "dark").map(
