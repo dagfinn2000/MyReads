@@ -115,6 +115,7 @@ const HTML_ATTRIBUTES: Partial<Record<keyof Preferences, string>> = {
   cardStyle: "data-cards",
   background: "data-background",
   backgroundMotion: "data-background-motion",
+  coverTilt: "data-cover-tilt",
   bookBackdrop: "data-book-backdrop",
 };
 
@@ -924,6 +925,16 @@ export function PreferencesForm({
             { value: "still", label: "Off, keep them still" },
           ]}
           onChange={(v) => update({ backgroundMotion: v })}
+        />
+        <Choice
+          label="Covers follow the pointer"
+          hint="Covers in the library and on a book’s page tilt toward the pointer and catch the light. With a mouse or trackpad."
+          value={prefs.coverTilt}
+          options={[
+            { value: "on", label: "On" },
+            { value: "off", label: "Off" },
+          ]}
+          onChange={(v) => update({ coverTilt: v })}
         />
       </Section>
 

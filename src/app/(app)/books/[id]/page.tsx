@@ -172,6 +172,7 @@ export default async function BookDetailPage({
             className="hero-cover aspect-[2/3] w-full max-w-60"
             loading="eager"
             flightTarget={book.id}
+            tilt
           />
           <div className="flex gap-2">
             <Button asChild variant="outline" size="sm">
