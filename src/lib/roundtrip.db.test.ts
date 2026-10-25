@@ -287,7 +287,7 @@ describe("export -> import round trip", () => {
     await prisma.user.update({
       where: { id: sourceUserId },
       data: {
-        theme: "auto:sage:obsidian",
+        theme: "auto:sage:terminal",
         libraryView: { layout: "list", sort: "title", dir: "asc" },
         preferences: {
           dateFormat: "iso",
@@ -328,7 +328,7 @@ describe("export -> import round trip", () => {
       where: { id: targetUserId },
       include: { savedViews: true },
     });
-    expect(target.theme).toBe("auto:sage:obsidian");
+    expect(target.theme).toBe("auto:sage:terminal");
     expect(target.libraryView).toMatchObject({ layout: "list", sort: "title", dir: "asc" });
     const nextUp = target.savedViews.find((v) => v.name === "Next up");
     expect(target.savedViews.map((v) => v.name).sort()).toEqual(["Fantasy", "Next up"]);

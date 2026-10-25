@@ -37,7 +37,7 @@ function Swatch({ theme }: { theme: ThemeDef }) {
   return (
     <span
       className="flex h-3.5 w-5 shrink-0 items-center justify-center rounded-sm border border-black/10"
-      style={{ backgroundColor: theme.swatch[0] }}
+      style={{ backgroundColor: theme.swatch[0], backgroundImage: theme.pattern }}
     >
       <span className="size-1.5 rounded-full" style={{ backgroundColor: theme.swatch[1] }} />
     </span>

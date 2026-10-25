@@ -58,8 +58,9 @@ server.
 
 **Make it yours**
 
-- 52 colour themes and 26 background textures. On some of the textures
-  rain falls, snow drifts or stars twinkle.
+- 52 colour themes, a few with a picture, outlines or a font of their
+  own, and 26 background textures. On some of the textures rain falls,
+  snow drifts or stars twinkle.
 - A theme for one device or one part of the app, and your own CSS.
 - Preferences for date formats, time zone, sorting, fonts and much more.
   Your settings follow you to every device.

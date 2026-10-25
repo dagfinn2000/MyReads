@@ -117,7 +117,8 @@
 }
 
 /* ── Preset themes ─────────────────────────────────────────────────────────
-   Palettes ported from dagfinn2000/dashify. Each block overrides the core
+   Dracula, Everforest and Solarized Light are ported from
+   dagfinn2000/dashify; the rest are MyReads' own. Each block overrides the core
    shadcn tokens; dark palettes are combined with the `dark` class on <html>
    (applied by the theme picker) so Tailwind `dark:` variants activate too.
    These blocks come after `.dark` on purpose: same specificity, later wins. */
@@ -143,48 +144,6 @@
     --ring: #bd93f9;
 }
 
-[data-theme="catppuccin-mocha"] {
-    --background: #1e1e2e;
-    --foreground: #cdd6f4;
-    --card: #313244;
-    --card-foreground: #cdd6f4;
-    --popover: #313244;
-    --popover-foreground: #cdd6f4;
-    --primary: #cba6f7;
-    --primary-foreground: #1e1e2e;
-    --secondary: #45475a;
-    --secondary-foreground: #cdd6f4;
-    --muted: #45475a;
-    --muted-foreground: #a6adc8;
-    --accent: #45475a;
-    --accent-foreground: #cdd6f4;
-    --destructive: #f38ba8;
-    --border: #45475a;
-    --input: #45475a;
-    --ring: #cba6f7;
-}
-
-[data-theme="gruvbox"] {
-    --background: #282828;
-    --foreground: #ebdbb2;
-    --card: #3c3836;
-    --card-foreground: #ebdbb2;
-    --popover: #3c3836;
-    --popover-foreground: #ebdbb2;
-    --primary: #fabd2f;
-    --primary-foreground: #282828;
-    --secondary: #504945;
-    --secondary-foreground: #ebdbb2;
-    --muted: #504945;
-    --muted-foreground: #bdae93;
-    --accent: #504945;
-    --accent-foreground: #ebdbb2;
-    --destructive: #fb4934;
-    --border: #504945;
-    --input: #504945;
-    --ring: #fabd2f;
-}
-
 [data-theme="everforest"] {
     --background: #2d353b;
     --foreground: #d3c6aa;
@@ -204,69 +163,6 @@
     --border: #475258;
     --input: #475258;
     --ring: #83c092;
-}
-
-[data-theme="kanagawa"] {
-    --background: #1f1f28;
-    --foreground: #dcd7ba;
-    --card: #2a2a37;
-    --card-foreground: #dcd7ba;
-    --popover: #2a2a37;
-    --popover-foreground: #dcd7ba;
-    --primary: #e6c384;
-    --primary-foreground: #1f1f28;
-    --secondary: #363646;
-    --secondary-foreground: #dcd7ba;
-    --muted: #363646;
-    --muted-foreground: #c8c093;
-    --accent: #363646;
-    --accent-foreground: #dcd7ba;
-    --destructive: #c34043;
-    --border: #54546d;
-    --input: #54546d;
-    --ring: #e6c384;
-}
-
-[data-theme="rose-pine"] {
-    --background: #191724;
-    --foreground: #e0def4;
-    --card: #1f1d2e;
-    --card-foreground: #e0def4;
-    --popover: #1f1d2e;
-    --popover-foreground: #e0def4;
-    --primary: #ebbcba;
-    --primary-foreground: #191724;
-    --secondary: #26233a;
-    --secondary-foreground: #e0def4;
-    --muted: #26233a;
-    --muted-foreground: #908caa;
-    --accent: #26233a;
-    --accent-foreground: #e0def4;
-    --destructive: #eb6f92;
-    --border: #26233a;
-    --input: #26233a;
-    --ring: #ebbcba;
-}
-
-[data-theme="zenburn"] {
-    --background: #3f3f3f;
-    --foreground: #dcdccc;
-    --card: #4a4a4a;
-    --card-foreground: #dcdccc;
-    --popover: #4a4a4a;
-    --popover-foreground: #dcdccc;
-    --primary: #dfaf8f;
-    --primary-foreground: #3f3f3f;
-    --secondary: #565650;
-    --secondary-foreground: #dcdccc;
-    --muted: #565650;
-    --muted-foreground: #c0c0a8;
-    --accent: #565650;
-    --accent-foreground: #dcdccc;
-    --destructive: #cc9393;
-    --border: #5f5f5f;
-    --input: #5f5f5f;
-    --ring: #dfaf8f;
 }
 
 /* Neon on near-black. Nothing else here is saturated — the whole set is
@@ -317,75 +213,29 @@
     --ring: #2ad4c4;
 }
 
-/* True black, for OLED screens where #000 costs no light at all. Also the
-   only blue-accented dark in the set — every other one runs purple, gold,
-   green, pink or turquoise. */
-[data-theme="obsidian"] {
-    --background: #000000;
-    --foreground: #e8eaed;
-    --card: #0d0f12;
-    --card-foreground: #e8eaed;
-    --popover: #0d0f12;
-    --popover-foreground: #e8eaed;
-    --primary: #4c8dff;
-    --primary-foreground: #041020;
-    --secondary: #1a1d23;
-    --secondary-foreground: #e8eaed;
-    --muted: #1a1d23;
-    --muted-foreground: #9aa3ad;
-    --accent: #1a1d23;
-    --accent-foreground: #e8eaed;
-    --destructive: #ff6b6b;
-    --border: #23272e;
-    --input: #23272e;
-    --ring: #4c8dff;
-}
-
-/* Old paper and leather. The warm darks here (Gruvbox, Zenburn) are really
-   warm greys; this one is actually brown, which for a shelf of books felt
-   like an obvious gap. */
+/* Old paper and leather: a warm mid-brown, the lightest of the darks, with
+   cream text and a tan accent. Greyer and lighter than Terracotta's clay,
+   and the only dark that is plainly brown. */
 [data-theme="sepia"] {
-    --background: #241a15;
-    --foreground: #efe0d0;
-    --card: #32251e;
-    --card-foreground: #efe0d0;
-    --popover: #32251e;
-    --popover-foreground: #efe0d0;
-    --primary: #d9a066;
-    --primary-foreground: #241a15;
-    --secondary: #42332a;
-    --secondary-foreground: #efe0d0;
-    --muted: #42332a;
-    --muted-foreground: #c3ab95;
-    --accent: #42332a;
-    --accent-foreground: #efe0d0;
-    --destructive: #e78f70;
-    --border: #4d3b30;
-    --input: #4d3b30;
-    --ring: #d9a066;
-}
-
-/* Properly green, where Everforest is a grey that leans green and Abyss is
-   blue-teal. Dark canopy with a bright leaf accent. */
-[data-theme="evergreen"] {
-    --background: #0d1f16;
-    --foreground: #dcecdf;
-    --card: #142c20;
-    --card-foreground: #dcecdf;
-    --popover: #142c20;
-    --popover-foreground: #dcecdf;
-    --primary: #7ee787;
-    --primary-foreground: #0d1f16;
-    --secondary: #1d3d2c;
-    --secondary-foreground: #dcecdf;
-    --muted: #1d3d2c;
-    --muted-foreground: #9cbfa8;
-    --accent: #1d3d2c;
-    --accent-foreground: #dcecdf;
-    --destructive: #ff8c8c;
-    --border: #244a35;
-    --input: #244a35;
-    --ring: #7ee787;
+    --background: #3b2c21;
+    --foreground: #f8eedf;
+    --card: #443327;
+    --card-foreground: #f8eedf;
+    --popover: #443327;
+    --popover-foreground: #f8eedf;
+    --primary: #e3b27a;
+    --primary-foreground: #2a1d14;
+    --secondary: #554232;
+    --secondary-foreground: #f8eedf;
+    --muted: #554232;
+    --muted-foreground: #d6c1a6;
+    --accent: #554232;
+    --accent-foreground: #f8eedf;
+    --destructive: #ffa287;
+    --border: #6a5340;
+    --input: #6a5340;
+    --ring: #e3b27a;
+    --heading-font: var(--font-literata), ui-serif, Georgia, serif;
 }
 
 /* Bordeaux, Riviera, Rhubarb and Majorelle pair a page with an accent
@@ -417,7 +267,7 @@
 }
 
 /* Ultramarine with peach, like the sea below a sunlit villa. The blue-grey
-   darks (Catppuccin, Kanagawa, Rosé Pine) are nearly grey; this blue is
+   Dracula is nearly grey and Art Deco nearly black; this blue is
    saturated, and warmed by the accent rather than cooled. */
 [data-theme="riviera"] {
     --background: #0f1640;
@@ -447,7 +297,7 @@
 
 /* Olive with lavender, after the olive groves and lavender fields of the
    south of France. The only yellow-green dark: Everforest is a blue-grey
-   and Evergreen a blue-green. */
+   and Chalkboard a grey-green. */
 [data-theme="provence"] {
     --background: #21250d;
     --foreground: #f1f0dc;
@@ -518,8 +368,8 @@
 }
 
 /* Royal purple with saffron, the petals of an iris and the flash of
-   yellow on each one. Saturated, where Dracula, Synthwave and Rosé Pine
-   are violet-greys, and bluer than Dragonfruit. */
+   yellow on each one. Saturated, where Dracula and Synthwave are
+   violet-greys, and bluer than Dragonfruit. */
 [data-theme="iris"] {
     --background: #2a0c47;
     --foreground: #f1e6ff;
@@ -568,6 +418,8 @@
     --border: #5f86bf;
     --input: #5f86bf;
     --ring: #ffffff;
+    --radius: 0.125rem;
+    --heading-font: ui-monospace, "SF Mono", "Cascadia Mono", "Roboto Mono", Menlo, Consolas, monospace;
 }
 
 /* Green phosphor on black, like an old terminal. The text itself is
@@ -591,6 +443,8 @@
     --border: #1d4a2c;
     --input: #1d4a2c;
     --ring: #b6ffc8;
+    --radius: 0;
+    --heading-font: ui-monospace, "SF Mono", "Cascadia Mono", "Roboto Mono", Menlo, Consolas, monospace;
 }
 
 /* White on black with white outlines and a yellow accent, for when the
@@ -615,33 +469,35 @@
     /* Dark fields are filled with --input at 30%: grey keeps them dark. */
     --input: #a3a3a3;
     --ring: #ffe500;
+    --radius: 0.25rem;
 }
 
-/* Gold leaf on black lacquer, like a 1920s cinema foyer. Text, accent and
-   outlines are all gold. */
+/* Gold leaf on midnight blue, like a 1920s cinema foyer. Text, accent and
+   outlines are all gold. Far darker than Riviera's ultramarine. */
 [data-theme="art-deco"] {
-    --background: #0d0b07;
+    --background: #0b1020;
     --foreground: #f2d78c;
-    --card: #17140c;
+    --card: #121a30;
     --card-foreground: #f2d78c;
-    --popover: #17140c;
+    --popover: #121a30;
     --popover-foreground: #f2d78c;
     --primary: #e6be5a;
-    --primary-foreground: #0d0b07;
-    --secondary: #2a2414;
+    --primary-foreground: #0b1020;
+    --secondary: #1e2843;
     --secondary-foreground: #f2d78c;
-    --muted: #2a2414;
-    --muted-foreground: #c9a85a;
-    --accent: #2a2414;
+    --muted: #1e2843;
+    --muted-foreground: #cfae5f;
+    --accent: #1e2843;
     --accent-foreground: #f2d78c;
     --destructive: #ff8a6b;
-    --border: #7a6128;
-    --input: #7a6128;
+    --border: #6e5a26;
+    --input: #6e5a26;
     --ring: #e6be5a;
+    --radius: 0;
 }
 
 /* Chalk on a green slate board: chalk-white text and a yellow chalk
-   accent. Greyer and lighter than Evergreen, greener than Everforest. */
+   accent. Greener than Everforest, and far lighter than Terminal. */
 [data-theme="chalkboard"] {
     --background: #223a2e;
     --foreground: #f6f6ef;
@@ -661,90 +517,137 @@
     --border: #56735f;
     --input: #56735f;
     --ring: #f4e07a;
+    --heading-font: var(--font-nunito), ui-rounded, ui-sans-serif, system-ui, sans-serif;
 }
 
-[data-theme="everforest-light"] {
-    --background: #fdf6e3;
-    --foreground: #5c6a72;
-    --card: #f4f0d9;
-    --card-foreground: #5c6a72;
-    --popover: #f4f0d9;
-    --popover-foreground: #5c6a72;
-    --primary: #35a77c;
-    --primary-foreground: #ffffff;
-    --secondary: #efebd4;
-    --secondary-foreground: #5c6a72;
-    --muted: #efebd4;
-    --muted-foreground: #829181;
-    --accent: #efebd4;
-    --accent-foreground: #5c6a72;
-    --destructive: #f85552;
-    --border: #e0dcc7;
-    --input: #e0dcc7;
-    --ring: #35a77c;
+/* The next fourteen came in when fourteen lookalikes were retired. Each is
+   set apart by more than its colours, so none can pass for another theme: a
+   picture behind the page (Ember, Northern Lights, Sunset, Opal and, in the
+   Silly set, Ugly Sweater, Spreadsheet, Party and Camouflage), cards in a
+   second colour (Lacquer), outlined cards with hard shadows (Arcade,
+   Brutalist), a top bar of its own (Mondrian), or one colour for
+   everything (Darkroom). Their extra rules are under "Beyond colour". */
+
+/* Embers in a hearth: a red glow rising from the foot of the page into
+   black, ivory text, an orange accent and serif headings. */
+[data-theme="ember"] {
+    --background: #1d0a07;
+    --foreground: #fdeee2;
+    --card: #26110c;
+    --card-foreground: #fdeee2;
+    --popover: #26110c;
+    --popover-foreground: #fdeee2;
+    --primary: #ff8c42;
+    --primary-foreground: #1d0a07;
+    --secondary: #3a1a12;
+    --secondary-foreground: #fdeee2;
+    --muted: #3a1a12;
+    --muted-foreground: #e6b49a;
+    --accent: #3a1a12;
+    --accent-foreground: #fdeee2;
+    --destructive: #ffb3c6;
+    --border: #52261a;
+    --input: #52261a;
+    --ring: #ff8c42;
+    --heading-font: var(--font-literata), ui-serif, Georgia, serif;
+    --page-gradient: radial-gradient(130% 65% at 50% 108%, #5e1c08 0%, #3a0d08 42%, #140806 78%);
 }
 
-[data-theme="gruvbox-light"] {
-    --background: #f2e5bc;
-    --foreground: #3c3836;
-    --card: #fbf1c7;
-    --card-foreground: #3c3836;
-    --popover: #fbf1c7;
-    --popover-foreground: #3c3836;
-    --primary: #af3a03;
-    --primary-foreground: #ffffff;
-    --secondary: #ebdbb2;
-    --secondary-foreground: #3c3836;
-    --muted: #ebdbb2;
-    --muted-foreground: #665c54;
-    --accent: #ebdbb2;
-    --accent-foreground: #3c3836;
-    --destructive: #9d0006;
-    --border: #d5c4a1;
-    --input: #d5c4a1;
-    --ring: #af3a03;
+/* Green and violet light across the top of a night sky, with a mint
+   accent and a violet focus ring. */
+[data-theme="northern-lights"] {
+    --background: #070b14;
+    --foreground: #eaf6f2;
+    --card: #0f1726;
+    --card-foreground: #eaf6f2;
+    --popover: #0f1726;
+    --popover-foreground: #eaf6f2;
+    --primary: #5ef0a8;
+    --primary-foreground: #05070d;
+    --secondary: #18233a;
+    --secondary-foreground: #eaf6f2;
+    --muted: #18233a;
+    --muted-foreground: #a9c4d6;
+    --accent: #18233a;
+    --accent-foreground: #eaf6f2;
+    --destructive: #ff8fa3;
+    --border: #22324d;
+    --input: #22324d;
+    --ring: #c39bff;
+    --page-gradient: radial-gradient(70% 45% at 22% 0%, rgb(46 204 140 / 0.24), transparent 70%), radial-gradient(60% 40% at 78% 4%, rgb(150 90 220 / 0.26), transparent 70%), linear-gradient(#0a1424, #05070d);
 }
 
-[data-theme="kanagawa-lotus"] {
-    --background: #e5ddb0;
-    --foreground: #545464;
-    --card: #f2ecbc;
-    --card-foreground: #545464;
-    --popover: #f2ecbc;
-    --popover-foreground: #545464;
-    --primary: #624c83;
-    --primary-foreground: #ffffff;
-    --secondary: #dcd5ac;
-    --secondary-foreground: #545464;
-    --muted: #dcd5ac;
-    --muted-foreground: #716e61;
-    --accent: #dcd5ac;
-    --accent-foreground: #545464;
-    --destructive: #c84053;
-    --border: #d5cea3;
-    --input: #d5cea3;
-    --ring: #624c83;
+/* A black lacquer box with vermilion panels: black page, red cards, gold
+   accent, serif headings. The only dark whose cards are another colour. */
+[data-theme="lacquer"] {
+    --background: #0b0605;
+    --foreground: #f8ecd9;
+    --card: #6b150f;
+    --card-foreground: #f8ecd9;
+    --popover: #1a0c0a;
+    --popover-foreground: #f8ecd9;
+    --primary: #e8b964;
+    --primary-foreground: #0b0605;
+    --secondary: #2a110e;
+    --secondary-foreground: #f8ecd9;
+    --muted: #2a110e;
+    --muted-foreground: #e4b98a;
+    --accent: #2a110e;
+    --accent-foreground: #f8ecd9;
+    --destructive: #ffb4a8;
+    --border: #8c6a2c;
+    --input: #8c6a2c;
+    --ring: #e8b964;
+    --radius: 0.25rem;
+    --heading-font: var(--font-literata), ui-serif, Georgia, serif;
 }
 
-[data-theme="selenized-light"] {
-    --background: #ece3cc;
-    --foreground: #3a4d53;
-    --card: #fbf3db;
-    --card-foreground: #3a4d53;
-    --popover: #fbf3db;
-    --popover-foreground: #3a4d53;
-    --primary: #c25d1e;
-    --primary-foreground: #ffffff;
-    --secondary: #e0d6ba;
-    --secondary-foreground: #3a4d53;
-    --muted: #e0d6ba;
-    --muted-foreground: #53676d;
-    --accent: #e0d6ba;
-    --accent-foreground: #3a4d53;
-    --destructive: #d2212d;
-    --border: #d5cdb6;
-    --input: #d5cdb6;
-    --ring: #c25d1e;
+/* An arcade cabinet: charcoal, cyan buttons, cards outlined in cyan with
+   a hard magenta shadow, typewriter headings and square corners. */
+[data-theme="arcade"] {
+    --background: #16161d;
+    --foreground: #f5f5f5;
+    --card: #1f1f29;
+    --card-foreground: #f5f5f5;
+    --popover: #1f1f29;
+    --popover-foreground: #f5f5f5;
+    --primary: #00e5ff;
+    --primary-foreground: #001018;
+    --secondary: #262635;
+    --secondary-foreground: #f5f5f5;
+    --muted: #262635;
+    --muted-foreground: #b9b9cc;
+    --accent: #262635;
+    --accent-foreground: #f5f5f5;
+    --destructive: #ff8a5c;
+    --border: #3a3a4e;
+    --input: #3a3a4e;
+    --ring: #ff2bd6;
+    --radius: 0;
+    --heading-font: ui-monospace, "SF Mono", "Cascadia Mono", "Roboto Mono", Menlo, Consolas, monospace;
+}
+
+/* A photographic darkroom under a red safelight: everything is red, which
+   also spares night vision. Danger is amber, the one thing that isn't. */
+[data-theme="darkroom"] {
+    --background: #0a0202;
+    --foreground: #ffab99;
+    --card: #160605;
+    --card-foreground: #ffab99;
+    --popover: #160605;
+    --popover-foreground: #ffab99;
+    --primary: #ff6a52;
+    --primary-foreground: #0a0202;
+    --secondary: #2a0907;
+    --secondary-foreground: #ffab99;
+    --muted: #2a0907;
+    --muted-foreground: #e8806c;
+    --accent: #2a0907;
+    --accent-foreground: #ffab99;
+    --destructive: #ffd166;
+    --border: #4a120d;
+    --input: #4a120d;
+    --ring: #ff6a52;
 }
 
 [data-theme="solarized-light"] {
@@ -768,258 +671,193 @@
     --ring: #b58900;
 }
 
-[data-theme="catppuccin-latte"] {
-    --background: #eff1f5;
-    --foreground: #4c4f69;
-    --card: #ffffff;
-    --card-foreground: #4c4f69;
-    --popover: #ffffff;
-    --popover-foreground: #4c4f69;
-    --primary: #8839ef;
-    --primary-foreground: #ffffff;
-    --secondary: #e6e9ef;
-    --secondary-foreground: #4c4f69;
-    --muted: #e6e9ef;
-    --muted-foreground: #6c6f85;
-    --accent: #e6e9ef;
-    --accent-foreground: #4c4f69;
-    --destructive: #d20f39;
-    --border: #ccd0da;
-    --input: #ccd0da;
-    --ring: #8839ef;
-}
-
-[data-theme="rose-pine-dawn"] {
-    --background: #faf4ed;
-    --foreground: #575279;
-    --card: #fffaf3;
-    --card-foreground: #575279;
-    --popover: #fffaf3;
-    --popover-foreground: #575279;
-    --primary: #907aa9;
-    --primary-foreground: #ffffff;
-    --secondary: #f2e9e1;
-    --secondary-foreground: #575279;
-    --muted: #f2e9e1;
-    --muted-foreground: #797593;
-    --accent: #f2e9e1;
-    --accent-foreground: #575279;
-    --destructive: #b4637a;
-    --border: #dfdad9;
-    --input: #dfdad9;
-    --ring: #907aa9;
-}
-
-/* Pink paper. Every other light here is cream, beige or neutral grey; this
-   is the only tinted-warm-pink background in the set. */
+/* Cherry-blossom pink with a deep raspberry accent. Cooler and pinker
+   than Rhubarb's salmon. */
 [data-theme="blossom"] {
-    --background: #fff5f7;
-    --foreground: #43212c;
-    --card: #fffafb;
-    --card-foreground: #43212c;
-    --popover: #fffafb;
-    --popover-foreground: #43212c;
-    --primary: #c2185b;
+    --background: #f9d7e3;
+    --foreground: #3d1426;
+    --card: #fde9f0;
+    --card-foreground: #3d1426;
+    --popover: #fde9f0;
+    --popover-foreground: #3d1426;
+    --primary: #a8124f;
     --primary-foreground: #ffffff;
-    --secondary: #fbe4ea;
-    --secondary-foreground: #43212c;
-    --muted: #fbe4ea;
-    --muted-foreground: #855667;
-    --accent: #fbe4ea;
-    --accent-foreground: #43212c;
-    --destructive: #b3261e;
-    --border: #f2d3dc;
-    --input: #f2d3dc;
-    --ring: #c2185b;
+    --secondary: #f2c4d4;
+    --secondary-foreground: #3d1426;
+    --muted: #f2c4d4;
+    --muted-foreground: #673548;
+    --accent: #f2c4d4;
+    --accent-foreground: #3d1426;
+    --destructive: #8f1d0e;
+    --border: #ebb3c6;
+    --input: #ebb3c6;
+    --ring: #a8124f;
 }
 
-/* Blueprint paper: cool blue-tinted light with deep navy ink — the cold
-   counterpart to the warm creams, and the only blue-backed light theme. */
+/* Sky-blue paper with Prussian-blue ink, after the old sun prints. Bluer
+   than Lido's aqua and cooler than Lilac. */
 [data-theme="cyanotype"] {
-    --background: #eef4fb;
-    --foreground: #16304d;
-    --card: #f8fbff;
-    --card-foreground: #16304d;
-    --popover: #f8fbff;
-    --popover-foreground: #16304d;
-    --primary: #1b4f9c;
+    --background: #cfe1f6;
+    --foreground: #0e2747;
+    --card: #e6f0fb;
+    --card-foreground: #0e2747;
+    --popover: #e6f0fb;
+    --popover-foreground: #0e2747;
+    --primary: #17468c;
     --primary-foreground: #ffffff;
-    --secondary: #dbe7f5;
-    --secondary-foreground: #16304d;
-    --muted: #dbe7f5;
-    --muted-foreground: #496889;
-    --accent: #dbe7f5;
-    --accent-foreground: #16304d;
-    --destructive: #b3261e;
-    --border: #cbdaea;
-    --input: #cbdaea;
-    --ring: #1b4f9c;
+    --secondary: #bcd3ee;
+    --secondary-foreground: #0e2747;
+    --muted: #bcd3ee;
+    --muted-foreground: #2f5079;
+    --accent: #bcd3ee;
+    --accent-foreground: #0e2747;
+    --destructive: #a3241c;
+    --border: #a9c5e6;
+    --input: #a9c5e6;
+    --ring: #17468c;
 }
 
-/* Green-tinted paper. Everforest Light pairs a green accent with a cream
-   ground; this tints the ground itself, which reads quite differently. */
+/* Sage-green paper with forest-green ink: greyer and yellower than
+   Macaron's mint. */
 [data-theme="sage"] {
-    --background: #f0f5f0;
-    --foreground: #1f3326;
-    --card: #f9fcf9;
-    --card-foreground: #1f3326;
-    --popover: #f9fcf9;
-    --popover-foreground: #1f3326;
-    --primary: #2f6b46;
+    --background: #d4e0cb;
+    --foreground: #122017;
+    --card: #e6eedf;
+    --card-foreground: #122017;
+    --popover: #e6eedf;
+    --popover-foreground: #122017;
+    --primary: #2b5e3c;
     --primary-foreground: #ffffff;
-    --secondary: #dfe9e0;
-    --secondary-foreground: #1f3326;
-    --muted: #dfe9e0;
-    --muted-foreground: #506b58;
-    --accent: #dfe9e0;
-    --accent-foreground: #1f3326;
-    --destructive: #b3261e;
-    --border: #d0ded2;
-    --input: #d0ded2;
-    --ring: #2f6b46;
+    --secondary: #c4d4b9;
+    --secondary-foreground: #122017;
+    --muted: #c4d4b9;
+    --muted-foreground: #3f5444;
+    --accent: #c4d4b9;
+    --accent-foreground: #122017;
+    --destructive: #a3241c;
+    --border: #b2c6a6;
+    --input: #b2c6a6;
+    --ring: #2b5e3c;
 }
 
-/* Violet-tinted paper. The purple-accented lights (Latte, Rosé Pine Dawn,
-   Kanagawa Lotus) all sit on cream or grey; none tints the page itself. */
+/* Lavender paper with deep violet ink: the only purple page among the
+   lights. */
 [data-theme="lilac"] {
-    --background: #f5f2fc;
-    --foreground: #2b2440;
-    --card: #fbf9ff;
-    --card-foreground: #2b2440;
-    --popover: #fbf9ff;
-    --popover-foreground: #2b2440;
-    --primary: #6d40c4;
+    --background: #e2d7fa;
+    --foreground: #24193f;
+    --card: #efe9fd;
+    --card-foreground: #24193f;
+    --popover: #efe9fd;
+    --popover-foreground: #24193f;
+    --primary: #5c2db3;
     --primary-foreground: #ffffff;
-    --secondary: #e7e0f7;
-    --secondary-foreground: #2b2440;
-    --muted: #e7e0f7;
-    --muted-foreground: #5e5378;
-    --accent: #e7e0f7;
-    --accent-foreground: #2b2440;
-    --destructive: #b3261e;
-    --border: #ded5f0;
-    --input: #ded5f0;
-    --ring: #6d40c4;
+    --secondary: #d3c4f5;
+    --secondary-foreground: #24193f;
+    --muted: #d3c4f5;
+    --muted-foreground: #4a3d6b;
+    --accent: #d3c4f5;
+    --accent-foreground: #24193f;
+    --destructive: #a3241c;
+    --border: #c4b2ee;
+    --input: #c4b2ee;
+    --ring: #5c2db3;
 }
 
-/* Peach paper with burnt terracotta. Warmer and pinker than the yellow
-   creams — the sunlit end of the light themes. */
-[data-theme="apricot"] {
-    --background: #fff2e8;
-    --foreground: #45291b;
-    --card: #fffaf5;
-    --card-foreground: #45291b;
-    --popover: #fffaf5;
-    --popover-foreground: #45291b;
-    --primary: #b8502d;
-    --primary-foreground: #ffffff;
-    --secondary: #fbe2d1;
-    --secondary-foreground: #45291b;
-    --muted: #fbe2d1;
-    --muted-foreground: #855b48;
-    --accent: #fbe2d1;
-    --accent-foreground: #45291b;
-    --destructive: #a32318;
-    --border: #f3d6c3;
-    --input: #f3d6c3;
-    --ring: #b8502d;
-}
-
-/* Dusty pink paper with green ink, like rhubarb stalks and leaves. The text
-   itself is green-black, not just the accent. */
+/* Salmon-pink paper with leaf green, like rhubarb stalks and leaves.
+   Warmer than Blossom, and the text is green-black, not just the accent. */
 [data-theme="rhubarb"] {
-    --background: #f7e8e6;
-    --foreground: #1f3328;
-    --card: #fdf6f5;
-    --card-foreground: #1f3328;
-    --popover: #fdf6f5;
-    --popover-foreground: #1f3328;
-    --primary: #2d6a4a;
+    --background: #f6cfc4;
+    --foreground: #0f2117;
+    --card: #fbe4dd;
+    --card-foreground: #0f2117;
+    --popover: #fbe4dd;
+    --popover-foreground: #0f2117;
+    --primary: #225c3d;
     --primary-foreground: #ffffff;
-    --secondary: #efd8d5;
-    --secondary-foreground: #1f3328;
-    --muted: #efd8d5;
-    --muted-foreground: #6a4f51;
-    --accent: #efd8d5;
-    --accent-foreground: #1f3328;
-    --destructive: #b3261e;
-    --border: #e6cac6;
-    --input: #e6cac6;
-    --ring: #2d6a4a;
+    --secondary: #efbdb0;
+    --secondary-foreground: #0f2117;
+    --muted: #efbdb0;
+    --muted-foreground: #5a3832;
+    --accent: #efbdb0;
+    --accent-foreground: #0f2117;
+    --destructive: #8f1446;
+    --border: #e5a999;
+    --input: #e5a999;
+    --ring: #225c3d;
 }
 
 /* Lemon paper with cobalt, after the blue walls and yellow pots of the
-   Majorelle garden in Marrakech. A clear yellow, where the creams above
-   lean beige. */
+   Majorelle garden in Marrakech. A clear lemon, where Solarized Light is
+   cream and Absinthe lime. */
 [data-theme="majorelle"] {
-    --background: #fbf5d2;
-    --foreground: #1b1f4a;
-    --card: #fffcec;
-    --card-foreground: #1b1f4a;
-    --popover: #fffcec;
-    --popover-foreground: #1b1f4a;
-    --primary: #3a3fc8;
+    --background: #fae78a;
+    --foreground: #191c48;
+    --card: #fdf3c4;
+    --card-foreground: #191c48;
+    --popover: #fdf3c4;
+    --popover-foreground: #191c48;
+    --primary: #2f35b8;
     --primary-foreground: #ffffff;
-    --secondary: #f3e9b5;
-    --secondary-foreground: #1b1f4a;
-    --muted: #f3e9b5;
-    --muted-foreground: #53577d;
-    --accent: #f3e9b5;
-    --accent-foreground: #1b1f4a;
-    --destructive: #b3261e;
-    --border: #e6d89a;
-    --input: #e6d89a;
-    --ring: #3a3fc8;
+    --secondary: #f1da6e;
+    --secondary-foreground: #191c48;
+    --muted: #f1da6e;
+    --muted-foreground: #45487a;
+    --accent: #f1da6e;
+    --accent-foreground: #191c48;
+    --destructive: #a3241c;
+    --border: #e3cb57;
+    --input: #e3cb57;
+    --ring: #2f35b8;
 }
 
-/* Pool-tile aqua with a lifebuoy red. Bluer and much stronger than Sage,
-   greener than Cyanotype. */
+/* Pool-tile aqua with a lifebuoy red. Bluer and much stronger than
+   Macaron's mint, greener than Cyanotype. */
 [data-theme="lido"] {
-    --background: #d3f2ee;
+    --background: #bdebe4;
     --foreground: #0b2b31;
-    --card: #ecfaf8;
+    --card: #e0f6f2;
     --card-foreground: #0b2b31;
-    --popover: #ecfaf8;
+    --popover: #e0f6f2;
     --popover-foreground: #0b2b31;
-    --primary: #b8321a;
+    --primary: #b0301a;
     --primary-foreground: #ffffff;
-    --secondary: #bfe8e2;
+    --secondary: #a8e0d7;
     --secondary-foreground: #0b2b31;
-    --muted: #bfe8e2;
-    --muted-foreground: #2f5a5f;
-    --accent: #bfe8e2;
+    --muted: #a8e0d7;
+    --muted-foreground: #2a5357;
+    --accent: #a8e0d7;
     --accent-foreground: #0b2b31;
-    --destructive: #9b1238;
-    --border: #a5dbd3;
-    --input: #a5dbd3;
-    --ring: #b8321a;
+    --destructive: #8f1238;
+    --border: #8fd3c8;
+    --input: #8fd3c8;
+    --ring: #b0301a;
 }
 
 /* Chartreuse paper with aubergine ink. Greener than Majorelle's lemon,
    and the text is purple-black, not just the accent. */
 [data-theme="absinthe"] {
-    --background: #e8f4ac;
+    --background: #d6f28a;
     --foreground: #2a1338;
-    --card: #f7fbdc;
+    --card: #ecf9c4;
     --card-foreground: #2a1338;
-    --popover: #f7fbdc;
+    --popover: #ecf9c4;
     --popover-foreground: #2a1338;
     --primary: #6a2c9e;
     --primary-foreground: #ffffff;
-    --secondary: #dbeb9b;
+    --secondary: #c8e676;
     --secondary-foreground: #2a1338;
-    --muted: #dbeb9b;
-    --muted-foreground: #58466a;
-    --accent: #dbeb9b;
+    --muted: #c8e676;
+    --muted-foreground: #52405f;
+    --accent: #c8e676;
     --accent-foreground: #2a1338;
-    --destructive: #b3261e;
-    --border: #cbde86;
-    --input: #cbde86;
+    --destructive: #a3241c;
+    --border: #b7d861;
+    --input: #b7d861;
     --ring: #6a2c9e;
 }
 
 /* Marigold orange with hot magenta, the colours of a festival garland.
-   A saturated orange, where Apricot is a pale peach. */
+   The only orange page: Kraft is brown and Majorelle lemon. */
 [data-theme="marigold"] {
     --background: #ffd9a8;
     --foreground: #3a0d2a;
@@ -1062,6 +900,7 @@
     --border: #000000;
     --input: #000000;
     --ring: #0033b3;
+    --radius: 0.25rem;
 }
 
 /* Grey paper, black type and one red, like a newspaper's masthead. The
@@ -1085,6 +924,8 @@
     --border: #bdbdb6;
     --input: #bdbdb6;
     --ring: #b30d29;
+    --radius: 0;
+    --heading-font: var(--font-literata), ui-serif, Georgia, serif;
 }
 
 /* A box of pastels: mint page, pink cards, lavender chips and a lemon
@@ -1109,6 +950,8 @@
     --border: #e7cfe0;
     --input: #e7cfe0;
     --ring: #a8336e;
+    --radius: 1.25rem;
+    --heading-font: var(--font-nunito), ui-rounded, ui-sans-serif, system-ui, sans-serif;
 }
 
 /* Brown parcel paper with a red rubber stamp. Darker and browner than the
@@ -1132,10 +975,13 @@
     --border: #c1a77d;
     --input: #c1a77d;
     --ring: #9a1f18;
+    --radius: 0.25rem;
+    --heading-font: ui-monospace, "SF Mono", "Cascadia Mono", "Roboto Mono", Menlo, Consolas, monospace;
 }
 
 /* A school exercise book: blue ballpoint for the text itself, pale blue
-   ruled lines for the outlines and a red margin for the accent. */
+   ruled lines on the page and for the outlines, and a red margin for the
+   accent. */
 [data-theme="notebook"] {
     --background: #fbfaf5;
     --foreground: #0f2a80;
@@ -1155,6 +1001,108 @@
     --border: #c3cdea;
     --input: #c3cdea;
     --ring: #c41e3a;
+    --heading-font: var(--font-nunito), ui-rounded, ui-sans-serif, system-ui, sans-serif;
+    --page-gradient: repeating-linear-gradient(transparent 0 31px, #d3dcf2 31px 32px);
+}
+
+/* Peach to rose to lilac down the page, plum text and a burnt-orange
+   accent, with softer corners. Blossom is the pink one with a pink accent. */
+[data-theme="sunset"] {
+    --background: #ffd3cf;
+    --foreground: #3b1230;
+    --card: #fff6f1;
+    --card-foreground: #3b1230;
+    --popover: #fff6f1;
+    --popover-foreground: #3b1230;
+    --primary: #9c3300;
+    --primary-foreground: #ffffff;
+    --secondary: #fbdcd8;
+    --secondary-foreground: #3b1230;
+    --muted: #fbdcd8;
+    --muted-foreground: #6e3652;
+    --accent: #fbdcd8;
+    --accent-foreground: #3b1230;
+    --destructive: #9b0d3a;
+    --border: #f0bcbc;
+    --input: #f0bcbc;
+    --ring: #9c3300;
+    --radius: 0.9rem;
+    --page-gradient: linear-gradient(170deg, #ffe3c4 0%, #ffc9cf 48%, #e9cdf3 100%);
+}
+
+/* The play of colour in an opal: pink, butter, mint, sky and lavender
+   across the page, ink-navy text, a deep teal accent, round corners and
+   rounded headings. */
+[data-theme="opal"] {
+    --background: #e2ecf2;
+    --foreground: #1b1f3b;
+    --card: #ffffff;
+    --card-foreground: #1b1f3b;
+    --popover: #ffffff;
+    --popover-foreground: #1b1f3b;
+    --primary: #0b5f70;
+    --primary-foreground: #ffffff;
+    --secondary: #eceffa;
+    --secondary-foreground: #1b1f3b;
+    --muted: #eceffa;
+    --muted-foreground: #474d6e;
+    --accent: #eceffa;
+    --accent-foreground: #1b1f3b;
+    --destructive: #a3241c;
+    --border: #d9ddef;
+    --input: #d9ddef;
+    --ring: #0b5f70;
+    --radius: 1.25rem;
+    --heading-font: var(--font-nunito), ui-rounded, ui-sans-serif, system-ui, sans-serif;
+    --page-gradient: linear-gradient(125deg, #ffd9ec 0%, #fff1c7 25%, #d3f5e4 50%, #cfe7ff 75%, #e7dbff 100%);
+}
+
+/* Neo-brutalist: a loud fuchsia page, white cards in thick black outlines
+   with hard black shadows, black buttons and yellow chips. */
+[data-theme="brutalist"] {
+    --background: #f5b8fd;
+    --foreground: #0a0a0a;
+    --card: #ffffff;
+    --card-foreground: #0a0a0a;
+    --popover: #ffffff;
+    --popover-foreground: #0a0a0a;
+    --primary: #0a0a0a;
+    --primary-foreground: #ffffff;
+    --secondary: #ffe14d;
+    --secondary-foreground: #0a0a0a;
+    --muted: #ffe14d;
+    --muted-foreground: #1f1f1f;
+    --accent: #ffe14d;
+    --accent-foreground: #0a0a0a;
+    --destructive: #b00020;
+    --border: #0a0a0a;
+    --input: #0a0a0a;
+    --ring: #2457d6;
+    --radius: 0.25rem;
+}
+
+/* After Mondrian: white page, a black top bar, red buttons, yellow chips,
+   blue focus rings and black rules, all square. */
+[data-theme="mondrian"] {
+    --background: #fbfaf6;
+    --foreground: #111111;
+    --card: #ffffff;
+    --card-foreground: #111111;
+    --popover: #ffffff;
+    --popover-foreground: #111111;
+    --primary: #d6001c;
+    --primary-foreground: #ffffff;
+    --secondary: #fff1a6;
+    --secondary-foreground: #111111;
+    --muted: #fff1a6;
+    --muted-foreground: #3d3d3d;
+    --accent: #fff1a6;
+    --accent-foreground: #111111;
+    --destructive: #8b0000;
+    --border: #111111;
+    --input: #111111;
+    --ring: #1d4ed8;
+    --radius: 0;
 }
 
 /* ── The Silly set ─────────────────────────────────────────────────────────
@@ -1182,6 +1130,8 @@
     --border: #aaaaaa;
     --input: #aaaaaa;
     --ring: #ffffff;
+    --radius: 0;
+    --heading-font: ui-monospace, "SF Mono", "Cascadia Mono", "Roboto Mono", Menlo, Consolas, monospace;
 }
 
 /* Pink text, lime buttons, hot pink outlines, cyan small print and
@@ -1205,6 +1155,8 @@
     --border: #ff1493;
     --input: #ff1493;
     --ring: #00f0ff;
+    --radius: 1.25rem;
+    --heading-font: var(--font-nunito), ui-rounded, ui-sans-serif, system-ui, sans-serif;
 }
 
 /* Mustard page, ketchup tabs, ketchup buttons with mustard writing, after
@@ -1231,6 +1183,7 @@
     /* Stars and met goals are amber, which vanishes on mustard: brown
        mustard instead. */
     --color-amber-500: #a35c00;
+    --radius: 0;
 }
 
 /* Radioactive green with purple, and a magenta focus ring for good
@@ -1254,6 +1207,7 @@
     --border: #6a00b8;
     --input: #6a00b8;
     --ring: #ff00d4;
+    --radius: 1.25rem;
 }
 
 /* Silver windows, navy buttons and teal counters, straight off a
@@ -1277,6 +1231,135 @@
     --border: #808080;
     --input: #808080;
     --ring: #000080;
+    --radius: 0;
+}
+
+/* A home page from 1999: a hazard-yellow top bar with a striped edge, and
+   Comic Sans for everything. */
+[data-theme="under-construction"] {
+    --background: #1c1c1c;
+    --foreground: #f5f5f5;
+    --card: #262626;
+    --card-foreground: #f5f5f5;
+    --popover: #262626;
+    --popover-foreground: #f5f5f5;
+    --primary: #ffd400;
+    --primary-foreground: #111111;
+    --secondary: #333333;
+    --secondary-foreground: #f5f5f5;
+    --muted: #333333;
+    --muted-foreground: #c8c8c8;
+    --accent: #333333;
+    --accent-foreground: #f5f5f5;
+    --destructive: #ff7b5c;
+    --border: #4a4a4a;
+    --input: #4a4a4a;
+    --ring: #ffd400;
+    --radius: 0;
+    --heading-font: "Comic Sans MS", "Comic Sans", "Chalkboard SE", "Comic Neue", var(--font-nunito), ui-rounded, sans-serif;
+}
+
+/* A Christmas jumper: red knit, green cards, gold buttons and rounded
+   everything. */
+[data-theme="ugly-sweater"] {
+    --background: #730d16;
+    --foreground: #ffffff;
+    --card: #0d4a26;
+    --card-foreground: #ffffff;
+    --popover: #0d4a26;
+    --popover-foreground: #ffffff;
+    --primary: #ffd34d;
+    --primary-foreground: #3a0006;
+    --secondary: #5a0910;
+    --secondary-foreground: #ffffff;
+    --muted: #5a0910;
+    --muted-foreground: #ffd6da;
+    --accent: #5a0910;
+    --accent-foreground: #ffffff;
+    --destructive: #a6f0ff;
+    --border: #f2f2f2;
+    --input: #f2f2f2;
+    --ring: #ffd34d;
+    --radius: 1rem;
+    --heading-font: var(--font-nunito), ui-rounded, ui-sans-serif, system-ui, sans-serif;
+    --page-gradient: repeating-linear-gradient(45deg, transparent 0 14px, rgb(255 255 255 / 0.05) 14px 16px), repeating-linear-gradient(-45deg, transparent 0 14px, rgb(255 255 255 / 0.05) 14px 16px);
+}
+
+/* A spreadsheet: gridlines, a green ribbon for a top bar, and Calibri. */
+[data-theme="spreadsheet"] {
+    --background: #ffffff;
+    --foreground: #111111;
+    --card: #ffffff;
+    --card-foreground: #111111;
+    --popover: #ffffff;
+    --popover-foreground: #111111;
+    --primary: #217346;
+    --primary-foreground: #ffffff;
+    --secondary: #f2f2f2;
+    --secondary-foreground: #111111;
+    --muted: #f2f2f2;
+    --muted-foreground: #4f4f4f;
+    --accent: #f2f2f2;
+    --accent-foreground: #111111;
+    --destructive: #c00000;
+    --border: #c6c6c6;
+    --input: #c6c6c6;
+    --ring: #217346;
+    --radius: 0;
+    --heading-font: Calibri, Carlito, "Segoe UI", ui-sans-serif, system-ui, sans-serif;
+    --page-gradient: linear-gradient(#e2e2e2 1px, transparent 1px), linear-gradient(90deg, #e2e2e2 1px, transparent 1px);
+    --page-size: 100% 22px, 72px 100%;
+}
+
+/* Confetti, purple, and the roundest corners and letters there are. */
+[data-theme="party"] {
+    --background: #fffaf0;
+    --foreground: #1f1235;
+    --card: #ffffff;
+    --card-foreground: #1f1235;
+    --popover: #ffffff;
+    --popover-foreground: #1f1235;
+    --primary: #7b2cbf;
+    --primary-foreground: #ffffff;
+    --secondary: #fbe6f3;
+    --secondary-foreground: #1f1235;
+    --muted: #fbe6f3;
+    --muted-foreground: #5a4470;
+    --accent: #fbe6f3;
+    --accent-foreground: #1f1235;
+    --destructive: #b3261e;
+    --border: #efd6ea;
+    --input: #efd6ea;
+    --ring: #7b2cbf;
+    --radius: 1.5rem;
+    --heading-font: var(--font-nunito), ui-rounded, ui-sans-serif, system-ui, sans-serif;
+    --page-gradient: radial-gradient(circle at 12% 18%, #ff5c8a 0 3px, transparent 4px), radial-gradient(circle at 34% 72%, #ffc93c 0 3px, transparent 4px), radial-gradient(circle at 58% 30%, #3ccfcf 0 3px, transparent 4px), radial-gradient(circle at 80% 64%, #7b5cff 0 3px, transparent 4px), radial-gradient(circle at 92% 12%, #5cd65c 0 3px, transparent 4px), radial-gradient(circle at 46% 92%, #ff8a3c 0 3px, transparent 4px);
+    --page-size: 220px 220px;
+}
+
+/* Camouflage with a blaze-orange accent, so hunters can find their
+   books. */
+[data-theme="camouflage"] {
+    --background: #262d19;
+    --foreground: #efe9d2;
+    --card: #1e2414;
+    --card-foreground: #efe9d2;
+    --popover: #1e2414;
+    --popover-foreground: #efe9d2;
+    --primary: #ff7a1a;
+    --primary-foreground: #1a1208;
+    --secondary: #2c3320;
+    --secondary-foreground: #efe9d2;
+    --muted: #2c3320;
+    --muted-foreground: #c2bb98;
+    --accent: #2c3320;
+    --accent-foreground: #efe9d2;
+    --destructive: #ffaaa0;
+    --border: #4a5233;
+    --input: #4a5233;
+    --ring: #ff7a1a;
+    --page-gradient: radial-gradient(48px 30px at 20% 30%, #32281a 98%, transparent), radial-gradient(60px 36px at 70% 20%, #161a0e 98%, transparent), radial-gradient(54px 40px at 55% 70%, #2a3217 98%, transparent), radial-gradient(40px 28px at 15% 80%, #161a0e 98%, transparent), radial-gradient(50px 34px at 88% 75%, #32281a 98%, transparent);
+    --page-size: 260px 220px;
 }
 
 @layer base {
@@ -1303,6 +1386,99 @@
     cursor: pointer;
   }
 }
+/* ── Beyond colour ─────────────────────────────────────────────────────────
+   A theme can bring more than colours. In its block, --radius gives it
+   corners of its own and --heading-font a heading face; the Corners and
+   Headings choices in Preferences win when set to anything but the theme's.
+   --page-gradient puts a picture behind the page, sized by --page-size. It
+   shows while Background is Plain, gives way to a texture, and sits on a
+   fixed layer, so it stays put while the page scrolls (phones included).
+   The rules after it give single themes a top bar in their own colours,
+   outlined cards with hard shadows, or one font for the whole page. */
+html[data-background="plain"] body::before,
+html:not([data-background]) body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: var(--page-gradient, none);
+  background-size: var(--page-size, auto);
+}
+
+/* Top bars in a theme's own colours. The colour tokens are set again inside
+   the bar, so its links, buttons and menus' triggers all follow; the text
+   colour too, as what the bar inherits was worked out from the page's. */
+[data-theme="mondrian"] .top-bar {
+  --background: #111111;
+  --foreground: #ffffff;
+  --muted-foreground: #cfcfcf;
+  --accent: #2e2e2e;
+  --accent-foreground: #ffffff;
+  --border: #111111;
+  --primary: #ffd400;
+  --primary-foreground: #111111;
+  --ring: #ffd400;
+  background-color: var(--background);
+  color: var(--foreground);
+}
+[data-theme="under-construction"] .top-bar {
+  --background: #ffd400;
+  --foreground: #111111;
+  --muted-foreground: #3d3300;
+  --accent: #ffe866;
+  --accent-foreground: #111111;
+  --primary: #111111;
+  --primary-foreground: #ffd400;
+  --ring: #111111;
+  background-color: var(--background);
+  color: var(--foreground);
+  border-bottom: 8px solid transparent;
+  border-image: repeating-linear-gradient(-45deg, #111111 0 10px, #ffd400 10px 20px) 8;
+}
+[data-theme="spreadsheet"] .top-bar {
+  --background: #217346;
+  --foreground: #ffffff;
+  --muted-foreground: #d5eadc;
+  --accent: #185c37;
+  --accent-foreground: #ffffff;
+  --border: #185c37;
+  --primary: #ffffff;
+  --primary-foreground: #217346;
+  --ring: #ffffff;
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+/* Outlined cards with hard shadows. The shadow follows Cards in
+   Preferences: Flat keeps the outline and drops the shadow. :root makes
+   these outrank the soft shadows under "Cards", which come later. */
+[data-theme="brutalist"] .surface {
+  outline: 2px solid #0a0a0a;
+  outline-offset: -1px;
+}
+:root[data-theme="brutalist"]:not([data-cards="flat"]) {
+  --surface-shadow: 5px 5px 0 #0a0a0a;
+}
+[data-theme="arcade"] .surface {
+  outline: 2px solid #00e5ff;
+  outline-offset: -1px;
+}
+:root[data-theme="arcade"]:not([data-cards="flat"]) {
+  --surface-shadow: 5px 5px 0 #ff2bd6;
+}
+
+/* One font for the whole page. */
+[data-theme="under-construction"] body {
+  font-family: "Comic Sans MS", "Comic Sans", "Chalkboard SE", "Comic Neue", var(--font-nunito), ui-rounded, sans-serif;
+}
+[data-theme="party"] body {
+  font-family: var(--font-nunito), ui-rounded, ui-sans-serif, system-ui, sans-serif;
+}
+[data-theme="spreadsheet"] body {
+  font-family: Calibri, Carlito, "Segoe UI", ui-sans-serif, system-ui, sans-serif;
+}
+
 /* ── Reading preferences ───────────────────────────────────────────────────
    Set on <html> by the root layout from the account's Preferences.
    Text size scales the root font size, which every rem-based size in the

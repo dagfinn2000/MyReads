@@ -205,6 +205,22 @@ The reading room's files:
   An entry with a `silly` line joins the Silly set: it goes last in
   `THEMES`, and the palette menu and Preferences list it under its own
   heading, below Light and Dark.
+- **A theme can bring more than colours.** In its block, `--radius` gives
+  it corners of its own and `--heading-font` a heading face (Corners and
+  Headings in Preferences only override them when set to something other
+  than "As the theme has them"), and `--page-gradient` with `--page-size`
+  puts a picture behind the page while Background is Plain. The "Beyond
+  colour" part of globals.css has the rest: a top bar in the theme's own
+  colours, outlined cards with hard shadows, a font for the whole page.
+  Give such a theme a `pattern` in `THEMES` too, so its swatch shows it.
+  Before adding one, check it doesn't look like a theme we already have:
+  the hues are nearly all taken, so a new theme should differ in kind,
+  not shade.
+- **A theme is retired, never just deleted.** Take out its block and
+  entry and add it to `RETIRED_THEMES` in
+  [themes.ts](../src/lib/themes.ts) with the theme that replaces it, of
+  the same mode. Saved settings (the account's, a device's, a part's)
+  then read as the replacement, before the first paint too.
 - **Motion always has an off switch.** One CSS rule stops every animation
   and transition when the device asks for reduced motion or Animations is
   off, and animations started from script (confetti, the theme reveal, the
