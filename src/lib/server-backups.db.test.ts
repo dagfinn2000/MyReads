@@ -230,7 +230,8 @@ describe("runServerBackups", () => {
         coverUrl: i === 0 ? `/api/covers/${coverName}` : null,
       })),
     });
-    // That zip breaks after its first chunk.
+    // That zip breaks after its first chunk: nothing more comes, not even
+    // when asked for, and then the error.
     const real = JSZip.prototype.generateInternalStream;
     vi.spyOn(JSZip.prototype, "generateInternalStream").mockImplementation(function (
       this: JSZip,
@@ -239,23 +240,28 @@ describe("runServerBackups", () => {
       const stream = real.call(this, options);
       if (!this.file(`covers/${coverName}`)) return stream;
       let fail: ((err: Error) => void) | undefined;
+      let failing = false;
       const broken = {
         on(evt: string, fn: (...args: never[]) => void) {
           if (evt === "error") fail = fn as (err: Error) => void;
           else if (evt === "data") {
-            let chunks = 0;
             stream.on("data", (chunk, meta) => {
+              if (failing) return;
               (fn as (c: unknown, m: unknown) => void)(chunk, meta);
-              if (++chunks === 1) {
-                stream.pause();
-                setTimeout(() => fail?.(new Error("disk went away")));
-              }
+              failing = true;
+              stream.pause();
+              setTimeout(() => fail?.(new Error("disk went away")));
             });
+          } else if (evt === "end") {
+            stream.on("end", () => failing || (fn as () => void)());
           } else stream.on(evt as "end", fn as () => void);
           return broken;
         },
         pause: () => (stream.pause(), broken),
-        resume: () => (stream.resume(), broken),
+        resume() {
+          if (!failing) stream.resume();
+          return broken;
+        },
       };
       return broken as never;
     });
