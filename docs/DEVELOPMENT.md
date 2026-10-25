@@ -52,10 +52,12 @@ password matches `POSTGRES_PASSWORD`. Every setting is described in
   colours, lending, the rate
   limiter, the
   guard that stops cover downloads from reaching private addresses, image
-  type detection, and the size limits on uploads and backup files.
+  type detection, the size limits on uploads and backup files, and when
+  the nightly backup on the server is due and which old copies it deletes.
 - **`npm run test:db:docker`** starts a `postgres:16-alpine` container, runs
   the database tests, and removes it. They cover backup and restore (the
-  round trip, merging, duplicates, and settings), re-read counts, the book
+  round trip, merging, duplicates, and settings), the nightly backups on
+  the server and downloading them, re-read counts, the book
   form and the reading log it writes (with the reading timer's time),
   importing Kindle highlights, the Up next list, On this day, library
   search, bulk edit, saving
@@ -105,7 +107,8 @@ src/
 │  │                   stats, stats/year/[year], account
 │  └─ api/             Auth.js, register, metadata search/details/covers,
 │                      library check, cover upload and serving,
-│                      backup export and import
+│                      backup export and import, and the server's
+│                      nightly copies (backups/[name])
 ├─ components/         UI components (shadcn/ui primitives in components/ui);
 │                      reading-room.tsx, room-art.tsx, room-shells.ts,
 │                      room-rooms.tsx (the added rooms' furniture),
@@ -136,6 +139,7 @@ src/
 │  │                   where a book page's X goes back to: the library
 │  │                   page it was opened from, and how far down it was
 │  ├─ avatar.ts        the avatar's choices and their colours
+│  ├─ backup-zip.ts    the backup zip, for downloads and the nightly copies
 │  ├─ motion.ts        whether animations may run right now
 │  ├─ net-guard.ts     blocks cover downloads from private addresses
 │  ├─ preferences.ts   the Preferences settings and their defaults
@@ -146,12 +150,17 @@ src/
 │  │                   or as the reader moves it
 │  ├─ room-styles.ts   the reading room's house styles and colours
 │  ├─ scene-motion.ts  runs the moving backgrounds' animations cheaply
+│  ├─ server-backups.ts
+│  │                   the nightly backups' rules: when, names, which to
+│  │                   keep (server-backups-run.ts does the work on disk)
+│  ├─ server-jobs.ts   the server's own timer, for jobs like the backups
 │  ├─ sky.ts           the Sky background: how high the sun is where
 │  │                   the reader's time zone is, as colours
 │  ├─ spine-colour.ts  a spine's colour, picked from its cover
 │  └─ validation.ts    Zod schemas shared by actions and API routes
 ├─ auth.config.ts      Auth.js config that is safe to run in proxy.ts
 ├─ auth.ts             full Auth.js config (credentials, Prisma, bcrypt)
+├─ instrumentation.ts  starts the server's own jobs when it starts
 └─ proxy.ts            sends signed-out visitors to the login page
                        (Next 16's new name for middleware.ts)
 ```
@@ -280,6 +289,17 @@ src/
   icon's path. The repeated star paths were a quarter of the library's HTML.
   Add an icon there when a page shows it dozens of times; a test checks the
   paths still match lucide's.
+- **Nightly backups run inside the app server.** With `BACKUP_DIR` set,
+  [instrumentation.ts](../src/instrumentation.ts) starts one timer for the
+  server's own jobs ([server-jobs.ts](../src/lib/server-jobs.ts)). It ticks
+  once a minute and looks at each job as often as the job asks, so a later
+  job (reading reminders, say) joins the same timer. The backup looks every
+  15 minutes and runs once a day from `BACKUP_HOUR`, one account at a time,
+  through the same `buildBackupZip` as the Download button
+  ([backup-zip.ts](../src/lib/backup-zip.ts)), so both make the same file.
+  Each copy is written under a temporary name and renamed once it's whole,
+  and only files named like a copy are ever deleted. The timer lives on
+  `globalThis`, so a hot reload doesn't start a second one.
 - **Migrations run when the container starts** (`prisma migrate deploy` in
   [docker-entrypoint.sh](../docker-entrypoint.sh)). The first start creates
   the tables, later starts apply anything new, and an up-to-date database is

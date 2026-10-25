@@ -335,3 +335,7 @@ On the Account page:
 - The Backup card shows when you last made one. Set its "Remind me to
   back up" to Every month, and a note on the Library and Stats pages
   reminds you when your last backup is over a month old.
+- The server saves a copy of every library each night too, and keeps the
+  newest 7 of them (on with Docker; `BACKUP_DIR`, `BACKUP_HOUR` and
+  `BACKUP_KEEP` in [.env.example](../.env.example)). The Backup card lists
+  your copies, newest first, each with its own Download link.

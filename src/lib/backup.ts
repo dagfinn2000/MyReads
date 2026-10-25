@@ -4,8 +4,9 @@ import type { BackupReminder } from "@/lib/preferences";
 
 /**
  * When the last backup was downloaded, and the optional monthly reminder.
- * The date is User.lastBackupAt, set by the export route once a zip has
- * gone out in full. Accounts that downloaded backups before that column
+ * The date is User.lastBackupAt, set once a zip has gone out in full: from
+ * the export route, or one of the server's nightly copies from
+ * /api/backups. Accounts that downloaded backups before that column
  * existed have no date on record, so the wording never claims "never".
  */
 

@@ -34,11 +34,17 @@ services:
       AUTH_TRUST_HOST: "true"
       GOOGLE_BOOKS_API_KEY: ${GOOGLE_BOOKS_API_KEY:-}
       COVERS_DIR: /app/data/covers
+      # A backup zip of every account each night, kept in the `backups`
+      # volume; see .env.example.
+      BACKUP_DIR: /app/data/backups
+      BACKUP_HOUR: ${BACKUP_HOUR:-3}
+      BACKUP_KEEP: ${BACKUP_KEEP:-7}
       DISABLE_REGISTRATION: ${DISABLE_REGISTRATION:-false}
       TRUSTED_PROXY_HOPS: ${TRUSTED_PROXY_HOPS:-1}
       COVER_FETCH_ALLOW_PRIVATE: ${COVER_FETCH_ALLOW_PRIVATE:-false}
     volumes:
       - covers:/app/data/covers
+      - backups:/app/data/backups
     depends_on:
       db:
         condition: service_healthy
@@ -62,3 +68,4 @@ services:
 volumes:
   pgdata: # Postgres data — your entire library lives here
   covers: # locally cached cover images
+  backups: # the nightly backup zips, a folder for each account

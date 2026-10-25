@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import { auth, signOut } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { deleteCachedCover } from "@/lib/covers";
+import { removeServerBackups } from "@/lib/server-backups-run";
 import { loginLimiter } from "@/lib/rate-limit";
 import { changePasswordSchema } from "@/lib/validation";
 import type { ActionState } from "@/lib/actions/helpers";
@@ -84,9 +85,10 @@ export async function changePassword(
 /**
  * Delete the account and everything in it. The database rows cascade from
  * the User delete (books → quotes/reads/progress, shelves, goals); cached
- * cover files don't live in Postgres, so they're cleaned up first. Signs
- * out afterwards — with JWT sessions there's no server-side session row,
- * and a cookie for a deleted user must not linger looking signed-in.
+ * cover files and the server's nightly copies of the library don't live in
+ * Postgres, so they're cleaned up once it has gone. Signs out afterwards —
+ * with JWT sessions there's no server-side session row, and a cookie for a
+ * deleted user must not linger looking signed-in.
  */
 export async function deleteAccount(
   _prev: ActionState,
@@ -116,6 +118,7 @@ export async function deleteAccount(
   for (const b of books) {
     await deleteCachedCover(b.coverUrl); // tolerates already-missing files
   }
+  await removeServerBackups(user.id);
 
   // Throws Next's redirect to /login — never returns.
   await signOut({ redirectTo: "/login" });

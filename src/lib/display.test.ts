@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   formatDate,
+  formatFileSize,
   formatNumber,
   formatShortDay,
   formatWeekdayDay,
@@ -51,6 +52,35 @@ describe("formatNumber", () => {
     expect(formatNumber(12345, { numberFormat: "period" })).toBe("12.345");
     // Norwegian grouping uses a no-break space.
     expect(formatNumber(12345, { numberFormat: "space" }).replace(/\s/g, " ")).toBe("12 345");
+  });
+});
+
+describe("formatFileSize", () => {
+  it("counts bytes, then KB, MB and GB in 1,024s", () => {
+    expect(formatFileSize(0)).toBe("0 bytes");
+    expect(formatFileSize(830)).toBe("830 bytes");
+    expect(formatFileSize(1023)).toBe("1,023 bytes");
+    expect(formatFileSize(1024)).toBe("1 KB");
+    expect(formatFileSize(64 * 1024 + 300)).toBe("64 KB");
+    expect(formatFileSize(1.25 * 1024 * 1024)).toBe("1.3 MB");
+    expect(formatFileSize(3 * 1024 ** 3)).toBe("3 GB");
+  });
+
+  it("moves up a unit rather than show 1,024 of one", () => {
+    expect(formatFileSize(1024 * 1024 - 1)).toBe("1 MB");
+    expect(formatFileSize(1023.4 * 1024)).toBe("1,023 KB");
+  });
+
+  it("keeps one decimal only below 10", () => {
+    expect(formatFileSize(9.94 * 1024)).toBe("9.9 KB");
+    expect(formatFileSize(9.96 * 1024)).toBe("10 KB");
+    expect(formatFileSize(12.6 * 1024 * 1024)).toBe("13 MB");
+  });
+
+  it("writes the decimal mark the chosen way", () => {
+    expect(formatFileSize(1.5 * 1024 * 1024, { numberFormat: "period" })).toBe("1,5 MB");
+    expect(formatFileSize(1.5 * 1024 * 1024, { numberFormat: "space" })).toBe("1,5 MB");
+    expect(formatFileSize(1500, { numberFormat: "period" })).toBe("1,5 KB");
   });
 });
 

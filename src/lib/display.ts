@@ -102,6 +102,31 @@ export function formatNumber(n: number, prefs?: FormatPrefs): string {
   return f.format(n);
 }
 
+const sizeFormatters = new Map<NumberFormat, Intl.NumberFormat>();
+
+const SIZE_UNITS = ["KB", "MB", "GB", "TB"];
+
+/** A file's size: "830 bytes", "64 KB", "1.2 MB" (in 1,024s), with one
+ *  decimal below 10 and the decimal mark of the chosen number style. A
+ *  size that would round up to 1,024 of one unit is shown in the next. */
+export function formatFileSize(bytes: number, prefs?: FormatPrefs): string {
+  if (bytes < 1024) return `${formatNumber(Math.max(0, bytes), prefs)} bytes`;
+  let value = bytes / 1024;
+  let unit = 0;
+  while (Math.round(value) >= 1024 && unit < SIZE_UNITS.length - 1) {
+    value /= 1024;
+    unit++;
+  }
+  const format = prefs?.numberFormat ?? "comma";
+  let f = sizeFormatters.get(format);
+  if (!f) {
+    f = new Intl.NumberFormat(NUMBER_LOCALES[format], { maximumFractionDigits: 1 });
+    sizeFormatters.set(format, f);
+  }
+  const shown = value < 9.95 ? f.format(value) : formatNumber(value, prefs);
+  return `${shown} ${SIZE_UNITS[unit]}`;
+}
+
 /** Date → value usable by <input type="date">: the same calendar day
  *  formatDate shows. */
 export function toDateInputValue(d: Date | null | undefined, timeZone?: string): string {

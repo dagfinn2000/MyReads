@@ -59,8 +59,10 @@ COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
 # standalone bundle's node_modules.
 COPY --from=builder --chown=nextjs:nodejs /app/scripts ./scripts
 COPY --chown=nextjs:nodejs docker-entrypoint.sh ./
+# The covers and backups volumes start out as copies of these folders,
+# owner included, so the app's own user can write to both.
 RUN chmod +x docker-entrypoint.sh && \
-    mkdir -p /app/data/covers && chown -R nextjs:nodejs /app/data
+    mkdir -p /app/data/covers /app/data/backups && chown -R nextjs:nodejs /app/data
 
 USER nextjs
 EXPOSE 3000
