@@ -7,6 +7,7 @@ import { BookFormat, BookOwnership, ReadingStatus } from "@/lib/enums";
 import { Check, Dices, SquareCheckBig, X } from "lucide-react";
 import { bulkDeleteBooks, bulkUpdateBooks } from "@/lib/actions/bulk";
 import { pickRandomBook } from "@/lib/actions/pick";
+import { cascadeSteps } from "@/lib/card-cascade";
 import { isClosingBook } from "@/lib/cover-flight";
 import { FORMAT_LABELS, OWNERSHIP_LABELS, formatNumber } from "@/lib/display";
 import { orderByIds } from "@/lib/library-order";
@@ -60,10 +61,6 @@ export interface LibraryGroup {
 /** How many more cards each "Show more" asks the server for. */
 const PAGE_STEP = 200;
 
-/** Cards that fade in one after another when the library opens. The rest
- *  appear together, so a big library (or "Show more") never waits. */
-const STAGGERED_CARDS = 24;
-
 /** Columns per breakpoint for each cover size (the View menu). */
 const GRID_COLUMNS: Record<LibraryDisplay["cardSize"], string> = {
   small: "grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8",
@@ -78,6 +75,19 @@ const GRID_GAPS: Record<LibraryDisplay["cardSize"], string> = {
   medium: "gap-3 sm:gap-4",
   large: "gap-4",
 };
+
+/** A card's key for the order cards rise in (lib/card-cascade.ts): the
+ *  book, and its section when grouped, where a book can show twice. */
+function cardKey(bookId: string, section?: string): string {
+  return section === undefined ? bookId : `${section}\n${bookId}`;
+}
+
+/** Every card's key in reading order, section by section. */
+function cardKeys(books: BookCardBook[], groups: LibraryGroup[] | null): string[] {
+  return groups
+    ? groups.flatMap((g) => g.books.map((b) => cardKey(b.id, g.key)))
+    : books.map((b) => cardKey(b.id));
+}
 
 /** Comma-separated tags as typed, cleaned the way tags are stored. */
 function splitTags(text: string): string[] {
@@ -140,6 +150,19 @@ export function LibraryView({
   // Back from a book's X: the cards are already in place as the cover flies
   // home, rather than rising in again (lib/cover-flight.ts).
   const [returning] = useState(isClosingBook);
+  // Each card's step as the cards rise in. Worked out again only when the
+  // server sends another set of books, from the last steps, so the cards it
+  // brings rise in turn from the top and the ones already showing stay put.
+  const cardSource = groups ?? books;
+  const [cascade, setCascade] = useState(() => ({
+    source: cardSource,
+    steps: cascadeSteps(cardKeys(books, groups)),
+  }));
+  let steps = cascade.steps;
+  if (cascade.source !== cardSource) {
+    steps = cascadeSteps(cardKeys(books, groups), cascade.steps);
+    setCascade({ source: cardSource, steps });
+  }
   const [selectMode, setSelectMode] = useState(false);
   const [selected, setSelected] = useState<ReadonlySet<string>>(new Set());
   const [status, setStatus] = useState("keep");
@@ -311,7 +334,7 @@ export function LibraryView({
 
   const list = display.layout === "list";
   const style = list ? null : display.cardStyle;
-  const renderGrid = (items: BookCardBook[]) => (
+  const renderGrid = (items: BookCardBook[], section?: string) => (
     // no-lift: cards stay put on hover while picking, so the selection ring
     // keeps lining up with the card.
     <div
@@ -323,7 +346,7 @@ export function LibraryView({
         selectMode && "no-lift",
       )}
     >
-      {items.map((book, i) => {
+      {items.map((book) => {
         const isSelected = selected.has(book.id);
         return (
           <div
@@ -334,7 +357,7 @@ export function LibraryView({
               style === "shelf" && "shelf-slot",
               selectMode && isSelected && "ring-2 ring-primary",
             )}
-            style={{ "--i": i < STAGGERED_CARDS ? i : 0 } as React.CSSProperties}
+            style={{ "--i": steps.get(cardKey(book.id, section)) ?? 0 } as React.CSSProperties}
           >
             {list ? (
               <BookRow book={book} details={display} formatPrefs={prefs} />
@@ -475,7 +498,7 @@ export function LibraryView({
                   </span>
                 )}
               </h2>
-              {renderGrid(g.books)}
+              {renderGrid(g.books, g.key)}
             </section>
           ))}
         </div>
