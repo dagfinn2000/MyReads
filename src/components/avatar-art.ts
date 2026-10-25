@@ -15,7 +15,7 @@
  * reach above it into the headroom.
  */
 import type { Art, Paint, Rect } from "@/components/room-art";
-import { HAIR_HIDING_HATS, LONG_TOPS, type AvatarAccessory, type AvatarLook } from "@/lib/avatar";
+import { HAIR_HIDING_HATS, LONG_TOPS, type AvatarAccessory, type AvatarBody, type AvatarLook } from "@/lib/avatar";
 
 /** Rows over the head for a hat, and a dot each side for the outline. */
 const HEADROOM = 14;
@@ -28,21 +28,35 @@ type Pose = "stand" | "stride" | "sit";
 
 class Canvas {
   private cells: (Paint | null)[][];
+  /** The dots drawn in front of a wheelchair's wheels (the near arm, what
+   *  it carries, the head), so the wheels can go back on behind them after
+   *  the body is given another build. */
+  private front: boolean[][];
   /** How far down the figure is drawn: in a wheelchair, the upper body
    *  sits lower than it stands. */
   dy = 0;
+  /** How far right: once the body's reshaped, it may have moved in. */
+  dx = 0;
+  /** While set, what's drawn is in front of the wheels. */
+  inFront = false;
+  /** While set, what's drawn goes behind what's in front of the wheels. */
+  behindFront = false;
   constructor(rows: number) {
     this.cells = Array.from({ length: HEADROOM + rows }, () => Array<Paint | null>(AVATAR_W).fill(null));
+    this.front = this.cells.map((row) => row.map(() => false));
   }
   get h() {
     return this.cells.length;
   }
   set(x: number, y: number, paint: Paint | null) {
-    const row = this.cells[y + this.dy + HEADROOM];
-    if (row && x + PAD >= 0 && x + PAD < AVATAR_W) row[x + PAD] = paint;
+    const [i, j] = [y + this.dy + HEADROOM, x + this.dx + PAD];
+    const row = this.cells[i];
+    if (!row || j < 0 || j >= row.length || (this.behindFront && this.front[i][j])) return;
+    row[j] = paint;
+    if (this.inFront) this.front[i][j] = true;
   }
   get(x: number, y: number): Paint | null {
-    return this.cells[y + this.dy + HEADROOM]?.[x + PAD] ?? null;
+    return this.cells[y + this.dy + HEADROOM]?.[x + this.dx + PAD] ?? null;
   }
   /** Makes the figure taller by drawing each of `rows` twice, or shorter
    *  by leaving them out: rows of legs or body that look the same a dot
@@ -50,6 +64,47 @@ class Canvas {
   resize(rows: readonly number[], taller: boolean) {
     const at = new Set(rows.map((y) => y + HEADROOM));
     this.cells = this.cells.flatMap((row, i) => (!at.has(i) ? [row] : taller ? [row, [...row]] : []));
+  }
+  /**
+   * Gives the body another build, band by band down from the shoulders
+   * (`dy` lower in a wheelchair): after each column in `add` one is drawn
+   * twice, and of each column in `cut` and the one after it, only one is
+   * kept. What's drawn twice is the more common paint of the two, so a
+   * stripe, a seam or a button stays one dot wide, and a dot rather than
+   * none, so legs fill out; at a `gap`, none rather than a dot, so they
+   * stand further apart. What's kept is the rarer paint, and a dot rather
+   * than none. The rows above the body, and then the body, are set `head`
+   * and `body` dots in.
+   */
+  reshape(build: Build, dy: number, head: number, body: number) {
+    const w0 = this.cells[0].length;
+    const w = Math.max(w0 + head, ...build.map((band) => w0 + widening(band) + body));
+    // Which old dot each new one is, row by row (-1 for none).
+    const sources = this.cells.map((row, y) => {
+      const band = build.findLast((b) => y >= b.from + dy + HEADROOM);
+      const out: number[] = Array(band ? body : head).fill(-1);
+      if (!band) out.push(...row.keys());
+      else {
+        const count = (x: number) => row.filter((q) => q === row[x]).length;
+        for (let x = 0; x < row.length; x++) {
+          const next = Math.min(x + 1, row.length - 1);
+          const [a, b] = [row[x], row[next]];
+          const common = count(x) >= count(next) ? x : next;
+          if (band.cut?.includes(x - PAD)) {
+            out.push(a === null ? next : b === null ? x : common === x ? next : x);
+            x++;
+            continue;
+          }
+          out.push(x);
+          for (const at of band.add ?? []) if (at === x - PAD) out.push(a === null ? next : b === null ? x : common);
+          for (const at of band.gap ?? []) if (at === x - PAD) out.push(a === null || b === null ? -1 : common);
+        }
+      }
+      return [...out, ...Array<number>(Math.max(0, w - out.length)).fill(-1)];
+    });
+    this.cells = sources.map((xs, y) => xs.map((x) => (x < 0 ? null : this.cells[y][x])));
+    this.front = sources.map((xs, y) => xs.map((x) => x >= 0 && this.front[y][x]));
+    this.dx = body;
   }
   /** A row of dots from x0 to x1, either way round. */
   run(x0: number, x1: number, y: number, paint: Paint | null) {
@@ -74,7 +129,7 @@ class Canvas {
   /** Outlines the figure, then turns each row's runs into rectangles. */
   toArt(): Art {
     const { h, cells } = this;
-    const w = AVATAR_W;
+    const w = cells[0].length;
     const filled = (x: number, y: number) => x >= 0 && y >= 0 && x < w && y < h && cells[y][x] !== null;
     const rects: Rect[] = [];
     for (let y = 0; y < h; y++) {
@@ -2208,6 +2263,17 @@ function heldBook(c: Canvas) {
  *  book is laid over it. */
 export const HELD_BOOK = { x: 1 + PAD, y: 15 + HEADROOM, w: 11, h: 3 };
 
+/** HELD_BOOK for a seated figure of any build, whose book is as wide as
+ *  its arms are apart. */
+export function heldBookAt(sit: Art) {
+  const { y, h } = HELD_BOOK;
+  const xs = sit.rects
+    .filter(([, ry, , , paint]) => ry >= y && ry < y + h && /^(book|paper)/.test(paint))
+    .flatMap(([x, , w]) => [x, x + w]);
+  const x = Math.min(...xs);
+  return { x, y, w: Math.max(...xs) - x, h };
+}
+
 // ── Carried things, a walking stick, a wheelchair ───────────────────────
 
 /**
@@ -2391,9 +2457,10 @@ const CHAIR_DROP = 7;
  * Seated in a wheelchair, seen from the side: the chair's back behind
  * them, their lap and shins, the big wheel in front with a hand on its
  * rim, and a little wheel at the front. `rolling` is the second frame,
- * the spokes turned and the hand pushing on.
+ * the spokes turned and the hand pushing on. Without `frame`, the wheels
+ * are left for later (wheelFrame).
  */
-function wheelchair(c: Canvas, look: AvatarLook, rolling: boolean) {
+function wheelchair(c: Canvas, look: AvatarLook, rolling: boolean, frame = true) {
   const long = LONG_TOPS.includes(look.top);
   const b = look.bottom;
   // The back and handles, behind them.
@@ -2444,12 +2511,33 @@ function wheelchair(c: Canvas, look: AvatarLook, rolling: boolean) {
   c.run(10, 13, 26, upper);
   c.run(10, 13, 27, sole);
   c.dy = 0;
+  if (frame) wheelFrame(c, rolling);
 
+  // The near arm, its hand on the rim: pushing, it reaches further on.
+  c.inFront = true;
+  c.dy = CHAIR_DROP;
+  const sl = sleeves(look);
+  const reach = rolling ? 1 : 0;
+  for (let y = 12; y <= 19; y++) {
+    const x = y < 16 ? 6 : 7 + (y >= 18 ? reach : 0);
+    const sleeve = y <= Math.min(sl.to - 2, 17);
+    c.set(x, y, sleeve ? sl.paint : "av-skin");
+    if (y < 16 && sleeve) c.set(x + 1, y, sl.lo);
+  }
+  c.set(7 + reach, 19, "av-skin-lo");
+  if (look.top === "stripes") c.recolour(6, 8, 13, 13, ["av-top", "av-top-lo"], "av-stripe");
+  // Anything carried rests on the lap.
+  held(c, look, 8, 19, 1);
+}
+
+/** A wheelchair's seat edge, footrest and wheels, in front of the legs;
+ *  `forward` moves the footrest out to where the feet are. */
+function wheelFrame(c: Canvas, rolling: boolean, forward = 0) {
   // The seat's edge, the footrest and the little front wheel.
-  c.run(3, 11, 30, "av-rim-lo");
-  c.block(9, 9, 31, 34, "av-rim-lo");
-  c.run(9, 13, 35, "av-rim");
-  c.run(11, 12, 36, "av-tyre");
+  c.run(3, 11 + forward, 30, "av-rim-lo");
+  c.block(9 + forward, 9 + forward, 31, 34, "av-rim-lo");
+  c.run(9 + forward, 13 + forward, 35, "av-rim");
+  c.run(11 + forward, 12 + forward, 36, "av-tyre");
   // The big wheel: tyre, rim, spokes and hub.
   const cx = 5;
   const cy = 31;
@@ -2469,21 +2557,78 @@ function wheelchair(c: Canvas, look: AvatarLook, rolling: boolean) {
     }
   }
   c.set(cx, cy, "av-rim-hi");
+}
 
-  // The near arm, its hand on the rim: pushing, it reaches further on.
-  c.dy = CHAIR_DROP;
-  const sl = sleeves(look);
-  const reach = rolling ? 1 : 0;
-  for (let y = 12; y <= 19; y++) {
-    const x = y < 16 ? 6 : 7 + (y >= 18 ? reach : 0);
-    const sleeve = y <= Math.min(sl.to - 2, 17);
-    c.set(x, y, sleeve ? sl.paint : "av-skin");
-    if (y < 16 && sleeve) c.set(x + 1, y, sl.lo);
+// ── Builds ───────────────────────────────────────────────────────────────
+
+/** Columns drawn twice or left out for a build (Canvas.reshape). */
+interface Band {
+  /** The band's first figure row; it goes down to the next band. */
+  from: number;
+  add?: readonly number[];
+  gap?: readonly number[];
+  cut?: readonly number[];
+}
+type Build = readonly Band[];
+
+/** How many dots wider a band makes the body. */
+const widening = (b: Band) => (b.add?.length ?? 0) + (b.gap?.length ?? 0) - (b.cut?.length ?? 0);
+
+/** The first figure row of the body: the shoulders. */
+const SHOULDERS = 11;
+
+/**
+ * From the side the body fills out or slims down in front, under the
+ * chin, so the back (hair, a cape, wings) stays where it is; a round
+ * tummy fills out a dot more, the near arm resting on it, and the feet
+ * stand a dot further apart. From the front it's even either side.
+ */
+const BUILDS: Record<Exclude<AvatarBody, "average">, Record<View, Build>> = {
+  slim: { side: [{ from: SHOULDERS, cut: [4, 9] }], front: [{ from: SHOULDERS, cut: [4, 8] }] },
+  broad: { side: [{ from: SHOULDERS, add: [4, 9] }], front: [{ from: SHOULDERS, add: [4, 8] }] },
+  round: {
+    side: [
+      { from: SHOULDERS, add: [4, 9] },
+      { from: 15, add: [4, 9, 9] },
+      { from: 23, add: [4, 9], gap: [6] },
+    ],
+    front: [{ from: SHOULDERS, add: [4, 8] }],
+  },
+};
+
+/**
+ * What a build does besides its width, in the reshaped figure's dots and
+ * only where nothing's drawn yet: square shoulders on a broad figure;
+ * sloping shoulders on a round one.
+ */
+function fillOut(c: Canvas, body: AvatarBody, view: View, wheel: boolean) {
+  /** Paints x, y like the dot at fx, fy, if it's empty and that isn't. */
+  const fill = (x: number, y: number, fx: number, fy: number) => {
+    const paint = c.get(fx, fy);
+    if (c.get(x, y) !== null || paint === null) return false;
+    c.set(x, y, paint);
+    return true;
+  };
+  // The body's sides now: its back and front, or from the front, its left
+  // and right.
+  const [back, front] = [3, 12];
+  const top = SHOULDERS + (wheel ? CHAIR_DROP : 0);
+  if (body === "broad") {
+    fill(back, top, back, top + 1);
+    fill(front, top, front, top + 1);
+    return;
   }
-  c.set(7 + reach, 19, "av-skin-lo");
-  if (look.top === "stripes") c.recolour(6, 8, 13, 13, ["av-top", "av-top-lo"], "av-stripe");
-  // Anything carried rests on the lap.
-  held(c, look, 8, 19, 1);
+  if (body !== "round") return;
+  // The arms start a dot lower, off sloping shoulders.
+  const arm = (p: Paint | null) => !!p && /^av-(top|under|skin)/.test(p);
+  if (!wheel) for (const x of [back - 1, front + 1]) if (arm(c.get(x, top + 1))) c.set(x, top + 1, null);
+  // From the front, the tummy fills out the waist under the book.
+  if (view === "front") {
+    for (const y of [18, 19]) {
+      fill(back - 1, y, back, y);
+      fill(front + 1, y, front, y);
+    }
+  }
 }
 
 // ── Poses ────────────────────────────────────────────────────────────────
@@ -2503,6 +2648,14 @@ export type AvatarPose = Pose;
  *  in the seat, between the arms. seatedTop says how far down. */
 export const SEAT_OFFSET = { x: 8 - PAD };
 
+/** SEAT_OFFSET for a seated figure of any build: in the middle of the
+ *  seat. */
+export const seatedLeft = (sit: Art) => SEAT_OFFSET.x - (sit.w - AVATAR_W) / 2;
+
+/** How many empty dots a fuller figure's standing sprite has behind it
+ *  (on the left, facing right), keeping its head in the middle. */
+export const avatarBack = (stand: Art) => (stand.w - AVATAR_W) / 2;
+
 /** Where figure dot 0, 0 (the top left of the head) is in the sprite, for
  *  showing just part of the figure. */
 export const FIGURE_ORIGIN = { x: PAD, y: HEADROOM };
@@ -2520,7 +2673,7 @@ export function avatarPose(look: AvatarLook, pose: Pose): Art {
   const hairless = HAIR_HIDING_HATS.includes(look.hat);
   const c = new Canvas(sit ? 33 : 38);
   if (wheel) {
-    wheelchair(c, look, stride);
+    wheelchair(c, look, stride, look.body === "average");
   } else {
     behind(c, look, pose);
     if (!hairless) hairBack(c, look, view);
@@ -2555,6 +2708,25 @@ export function avatarPose(look: AvatarLook, pose: Pose): Art {
   hat(c, look, view);
   headphones(c, look, view);
   c.dy = 0;
+  if (look.body !== "average") {
+    const build = BUILDS[look.body][view];
+    const k = widening(build[0]);
+    // From the front, the head stays over the middle of the body. From the
+    // side, a fuller figure is set in as far as it fills out in front, so
+    // the head is still in the middle of the sprite, which is mirrored to
+    // face left, and doesn't jump as it turns.
+    const side = view === "side" && k > 0 ? Math.max(...build.map(widening)) : 0;
+    const [head, body] = view === "front" ? (k > 0 ? [k / 2, 0] : [0, -k / 2]) : [side, side];
+    c.inFront = false;
+    c.reshape(build, wheel ? CHAIR_DROP : 0, head, body);
+    fillOut(c, look.body, view, wheel);
+    if (wheel) {
+      // The wheels and footrest go back on, out to where the feet are now.
+      c.behindFront = true;
+      wheelFrame(c, stride, widening(build[build.length - 1]));
+      c.behindFront = false;
+    }
+  }
   if (look.height !== "medium") {
     c.resize(HEIGHT_ROWS[sit ? "sit" : wheel ? "wheel" : "stand"], look.height === "tall");
   }

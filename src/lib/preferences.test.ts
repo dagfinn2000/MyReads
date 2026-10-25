@@ -506,9 +506,12 @@ describe("parsePreferences: the reading room", () => {
 
 describe("parsePreferences: the avatar", () => {
   it("keeps a chosen look and whether it's shown", () => {
-    const prefs = parsePreferences({ avatarShown: false, avatar: { hair: "afro", hat: "crown", eyes: "nope" } });
+    const prefs = parsePreferences({
+      avatarShown: false,
+      avatar: { hair: "afro", hat: "crown", eyes: "nope", body: "broad" },
+    });
     expect(prefs.avatarShown).toBe(false);
-    expect(prefs.avatar).toEqual({ ...parsePreferences({}).avatar, hair: "afro", hat: "crown" });
+    expect(prefs.avatar).toEqual({ ...parsePreferences({}).avatar, hair: "afro", hat: "crown", body: "broad" });
   });
 
   it("starts everyone with the same little reader, shown", () => {

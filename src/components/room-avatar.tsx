@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useSyncExternalStore } from "react";
-import { AVATAR_W, avatarArt, type AvatarArt } from "@/components/avatar-art";
+import { avatarArt, avatarBack, heldBookAt, seatedLeft, type AvatarArt } from "@/components/avatar-art";
 import { petArt, type PetArt } from "@/components/pet-art";
 import { Rects, Sprite, type Art } from "@/components/room-art";
 import { ACCENT_SWATCHES, CLOTH_SWATCHES, EYE_SWATCHES, HAIR_SWATCHES, SKIN_SWATCHES, type AvatarLook } from "@/lib/avatar";
@@ -15,13 +15,18 @@ export interface Avatar {
   art: AvatarArt;
   colours: React.CSSProperties;
   pet: PetArt | null;
+  /** Where it sits in the armchair (from the chair's left), and where the
+   *  book it reads is in its sprite. */
+  seat: { left: number; book: { x: number; y: number; w: number; h: number } };
 }
 
 export function useAvatar(look: AvatarLook | null, pet: Pet = "none"): Avatar | null {
-  return useMemo(
-    () => (look ? { art: avatarArt(look), colours: avatarColours(look), pet: petArt(pet) } : null),
-    [look, pet],
-  );
+  return useMemo(() => {
+    if (!look) return null;
+    const art = avatarArt(look);
+    const seat = { left: seatedLeft(art.sit), book: heldBookAt(art.sit) };
+    return { art, colours: avatarColours(look), pet: petArt(pet), seat };
+  }, [look, pet]);
 }
 
 export function avatarColours(look: AvatarLook): React.CSSProperties {
@@ -101,9 +106,12 @@ export function Walker({
     const node = el.current;
     const petNode = petEl.current;
     if (!node) return;
+    // A fuller figure's sprite is wider, with room behind it (avatarBack)
+    // to keep its head in the middle.
+    const [w, back] = [stand.w, avatarBack(stand)];
     const min = 2;
-    const max = Math.max(min, width - AVATAR_W - 2);
-    const start = Math.min(Math.max(home, min), max);
+    const max = Math.max(min, width - w - 2);
+    const start = Math.min(Math.max(home - back, min), max);
     let x = start;
     let drawn = NaN;
     let facing: "left" | "right" = "left";
@@ -112,7 +120,7 @@ export function Walker({
     // faces, overlapping it a little.
     const petW = pet?.stand.w ?? 0;
     const heel = () =>
-      Math.min(Math.max(facing === "right" ? x - petW + 3 : x + AVATAR_W - 3, 0), Math.max(0, width - petW));
+      Math.min(Math.max(facing === "right" ? x + back - petW + 3 : x + w - back - 3, 0), Math.max(0, width - petW));
     let px = heel();
     let petDrawn = NaN;
     let petFacing: "left" | "right" = facing;
@@ -148,7 +156,7 @@ export function Walker({
     });
     const openDoors = () => {
       for (const { from, to, door } of doorways) {
-        const open = (x < to && x + AVATAR_W > from) || (!!petNode && px < to && px + petW > from);
+        const open = (x + back < to && x + w - back > from) || (!!petNode && px < to && px + petW > from);
         if (open !== door.hasAttribute("data-open")) door.toggleAttribute("data-open", open);
       }
     };
@@ -221,7 +229,7 @@ export function Walker({
       cancelAnimationFrame(frame);
       for (const { door } of doorways) door.removeAttribute("data-open");
     };
-  }, [moving, width, floor, doors, home, s, pet]);
+  }, [moving, width, floor, doors, home, s, pet, stand]);
 
   return (
     <>
@@ -320,7 +328,7 @@ export function AvatarPortrait({
           className="room-pet"
           data-facing="right"
           data-walking={moving ? "" : undefined}
-          style={{ width: pet.stand.w * scale, height: pet.stand.h * scale, marginRight: -3 * scale }}
+          style={{ width: pet.stand.w * scale, height: pet.stand.h * scale, marginRight: -(3 + avatarBack(a)) * scale }}
         >
           <Strider stand={pet.stand} stride={pet.stride} />
         </div>

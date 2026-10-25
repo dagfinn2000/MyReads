@@ -1,9 +1,21 @@
+import { createHash } from "node:crypto";
 import { describe, expect, it } from "vitest";
-import { AVATAR_W, HELD_BOOK, SEAT_OFFSET, avatarArt, seatedTop } from "@/components/avatar-art";
+import {
+  AVATAR_W,
+  HELD_BOOK,
+  SEAT_OFFSET,
+  avatarArt,
+  avatarBack,
+  heldBookAt,
+  seatedLeft,
+  seatedTop,
+} from "@/components/avatar-art";
+import fixture from "@/components/avatar-art.fixture.json";
 import { armchairArt } from "@/components/room-art";
 import type { Art } from "@/components/room-art";
 import {
   AVATAR_ACCESSORIES,
+  AVATAR_BODIES,
   AVATAR_BOTTOMS,
   AVATAR_CHEEKS,
   AVATAR_EARS,
@@ -19,6 +31,7 @@ import {
   AVATAR_TOPS,
   DEFAULT_AVATAR,
   LONG_TOPS,
+  parseAvatar,
   type AvatarLook,
 } from "@/lib/avatar";
 
@@ -66,7 +79,7 @@ const LOOKS: AvatarLook[] = [
 ];
 
 const name = (l: AvatarLook) =>
-  `${l.hair}/${l.hat}/${l.top}/${l.bottom}/${l.shoes}/${l.eyes}/${l.mouth}/${l.facialHair}/${l.ears}/${l.mobility}/${l.height}/${l.held}`;
+  `${l.hair}/${l.hat}/${l.top}/${l.bottom}/${l.shoes}/${l.eyes}/${l.mouth}/${l.facialHair}/${l.ears}/${l.mobility}/${l.height}/${l.body}/${l.held}`;
 
 const cells = (a: Art) => {
   const seen = new Map<string, string>();
@@ -76,8 +89,17 @@ const cells = (a: Art) => {
   return seen;
 };
 
+/** The looks drawn in every build; the default (average) build draws
+ *  them all. */
+const BUILD_LOOKS = LOOKS.filter((_, i) => i % 3 === 0);
+
 describe("avatarArt", () => {
-  const drawn = LOOKS.map((look) => [look, avatarArt(look)] as const);
+  const drawn = [
+    ...LOOKS.map((look) => [look, avatarArt(look)] as const),
+    ...AVATAR_BODIES.filter((body) => body !== "average").flatMap((body) =>
+      BUILD_LOOKS.map((l) => [{ ...l, body }, avatarArt({ ...l, body })] as const),
+    ),
+  ];
 
   it("keeps every pose inside its sprite, with no dot drawn twice", () => {
     const wrong: string[] = [];
@@ -88,8 +110,9 @@ describe("avatarArt", () => {
           if (x < 0 || y < 0 || x + w > a.w || y + h > a.h) wrong.push(`${name(look)} ${pose}`);
           area += w * h;
         }
-        if (a.w !== AVATAR_W || cells(a).size !== area) wrong.push(`${name(look)} ${pose}`);
+        if ((look.body === "average" && a.w !== AVATAR_W) || cells(a).size !== area) wrong.push(`${name(look)} ${pose}`);
       }
+      if (art.stand.w !== art.stride.w) wrong.push(`${name(look)} widths`);
     }
     expect(wrong).toEqual([]);
   });
@@ -130,27 +153,43 @@ describe("avatarArt", () => {
     expect(wrong).toEqual([]);
   });
 
-  it("holds the book where the room puts its link", () => {
-    const { sit } = avatarArt(DEFAULT_AVATAR);
-    const book = [...cells(sit)].filter(([, paint]) => paint.startsWith("book") || paint.startsWith("paper"));
-    expect(book.length).toBeGreaterThan(20);
-    for (const [key] of book) {
-      const [x, y] = key.split(",").map(Number);
-      expect(x).toBeGreaterThanOrEqual(HELD_BOOK.x);
-      expect(x).toBeLessThan(HELD_BOOK.x + HELD_BOOK.w);
-      expect(y).toBeGreaterThanOrEqual(HELD_BOOK.y);
-      expect(y).toBeLessThan(HELD_BOOK.y + HELD_BOOK.h);
+  it("holds the book where the room puts its link, in both hands", () => {
+    expect(heldBookAt(avatarArt(DEFAULT_AVATAR).sit)).toEqual(HELD_BOOK);
+    for (const body of AVATAR_BODIES) {
+      const { sit } = avatarArt({ ...DEFAULT_AVATAR, body });
+      const at = heldBookAt(sit);
+      const dots = [...cells(sit)];
+      const book = dots.filter(([, paint]) => paint.startsWith("book") || paint.startsWith("paper"));
+      expect(book.length).toBeGreaterThan(20);
+      for (const [key] of book) {
+        const [x, y] = key.split(",").map(Number);
+        expect(x).toBeGreaterThanOrEqual(at.x);
+        expect(x).toBeLessThan(at.x + at.w);
+        expect(y).toBeGreaterThanOrEqual(at.y);
+        expect(y).toBeLessThan(at.y + at.h);
+      }
+      // A hand on each half of it.
+      const hands = dots
+        .filter(([key, paint]) => paint.startsWith("av-skin") && Number(key.split(",")[1]) === at.y + 1)
+        .map(([key]) => Number(key.split(",")[0]));
+      expect(hands.filter((x) => x < at.x + at.w / 2)).toHaveLength(1);
+      expect(hands.filter((x) => x >= at.x + at.w / 2)).toHaveLength(1);
     }
   });
 
-  it("sits in the armchair with its feet on the floor, whatever it wears", () => {
+  it("sits in the armchair with its feet on the floor, whatever it wears and its build", () => {
     // The armchair (room-art.tsx) is 29 × 31, its arms 7 dots wide.
+    expect(seatedLeft(avatarArt(DEFAULT_AVATAR).sit)).toBe(SEAT_OFFSET.x);
     const wrong: string[] = [];
     for (const [look, { sit }] of drawn) {
       if (seatedTop(sit) + sit.h !== armchairArt().h) wrong.push(`${name(look)} height`);
-      // Below the top of the arms, 12 dots down the chair.
+      // Below the top of the arms, 12 dots down the chair. A fuller figure's
+      // cape, robe sleeves or skirt may lie a dot over them.
       const xs = sit.rects.filter(([, y]) => y >= -seatedTop(sit) + 12).flatMap(([x, , w]) => [x, x + w]);
-      if (SEAT_OFFSET.x + Math.min(...xs) < 7 || SEAT_OFFSET.x + Math.max(...xs) > 22) wrong.push(name(look));
+      const over = look.body === "broad" || look.body === "round" ? 1 : 0;
+      if (seatedLeft(sit) + Math.min(...xs) < 7 - over || seatedLeft(sit) + Math.max(...xs) > 22 + over) {
+        wrong.push(name(look));
+      }
     }
     expect(wrong).toEqual([]);
   });
@@ -171,6 +210,10 @@ describe("avatarArt", () => {
     expect(differ(AVATAR_ACCESSORIES, (a) => ({ accessories: [a] }))).toBe(AVATAR_ACCESSORIES.length);
     expect(differ(AVATAR_EARS, (ears) => ({ ears }))).toBe(AVATAR_EARS.length);
     expect(differ(AVATAR_HEIGHTS, (height) => ({ height }))).toBe(AVATAR_HEIGHTS.length);
+    expect(differ(AVATAR_BODIES, (body) => ({ body }))).toBe(AVATAR_BODIES.length);
+    for (const mobility of AVATAR_MOBILITY) {
+      expect(differ(AVATAR_BODIES, (body) => ({ body, mobility }))).toBe(AVATAR_BODIES.length);
+    }
     expect(differ(AVATAR_MOBILITY, (mobility) => ({ mobility }))).toBe(AVATAR_MOBILITY.length);
     expect(differ(AVATAR_HELD, (held) => ({ held }))).toBe(AVATAR_HELD.length);
   });
@@ -201,6 +244,52 @@ describe("avatarArt", () => {
     for (const top of LONG_TOPS) {
       const looks = AVATAR_BOTTOMS.map((bottom) => JSON.stringify(avatarArt({ ...DEFAULT_AVATAR, top, bottom })));
       expect(new Set(looks).size).toBe(1);
+    }
+  });
+});
+
+/** How wide the body is: the first and last columns with anything drawn
+ *  below the neck, outline and all. */
+const span = (a: Art) => {
+  const xs = a.rects.filter(([, y]) => y >= 14 + 12).flatMap(([x, , w]) => [x, x + w]);
+  return Math.max(...xs) - Math.min(...xs);
+};
+
+describe("avatar builds", () => {
+  const hash = (look: AvatarLook) => createHash("sha256").update(JSON.stringify(avatarArt(look))).digest("hex");
+
+  it("draws every look saved before there were builds exactly as it did then", () => {
+    // Captured from the drawing code before builds were added. If the
+    // drawing is meant to change, update each "art" with the new hash.
+    const changed = fixture.filter(({ look, art }) => {
+      const saved = parseAvatar({ ...DEFAULT_AVATAR, ...look, body: undefined });
+      return saved.body !== "average" || !hash(saved).startsWith(art);
+    });
+    expect(fixture.length).toBeGreaterThan(150);
+    expect(changed.map(({ look }) => look)).toEqual([]);
+  });
+
+  it("is slimmer, broader or rounder below the neck, in every pose", () => {
+    for (const mobility of AVATAR_MOBILITY) {
+      const w = (body: AvatarLook["body"]) => avatarArt({ ...DEFAULT_AVATAR, mobility, body });
+      for (const pose of ["stand", "stride", "sit"] as const) {
+        expect(span(w("slim")[pose])).toBeLessThan(span(w("average")[pose]));
+        expect(span(w("broad")[pose])).toBeGreaterThan(span(w("average")[pose]));
+        expect(span(w("round")[pose])).toBeGreaterThanOrEqual(span(w("broad")[pose]));
+      }
+    }
+  });
+
+  it("keeps the head in the middle of the standing sprite, so it turns on the spot", () => {
+    const head = (a: Art) => {
+      // The top of the head: the first row below the hat's headroom.
+      const xs = a.rects.filter(([, y, , , p]) => y === 14 + 1 && p === "av-hair").flatMap(([x, , w]) => [x, x + w]);
+      return (Math.min(...xs) + Math.max(...xs)) / 2;
+    };
+    for (const body of AVATAR_BODIES) {
+      const { stand } = avatarArt({ ...DEFAULT_AVATAR, body });
+      expect(head(stand) - stand.w / 2).toBe(head(avatarArt(DEFAULT_AVATAR).stand) - AVATAR_W / 2);
+      expect(avatarBack(stand)).toBe(body === "broad" ? 2 : body === "round" ? 3 : 0);
     }
   });
 });
