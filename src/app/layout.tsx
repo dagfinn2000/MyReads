@@ -74,6 +74,7 @@ export default async function RootLayout({
       // Text size and fonts (Preferences); see globals.css.
       data-text-size={prefs?.textSize}
       data-long-font={prefs?.longTextFont}
+      data-typography={prefs?.typography}
       data-heading-font={prefs?.headingFont}
       // Appearance (Preferences); see globals.css.
       data-motion={prefs?.motion}

@@ -106,6 +106,7 @@ const ACCENT_LABELS: Record<Accent, string> = {
  */
 const HTML_ATTRIBUTES: Partial<Record<keyof Preferences, string>> = {
   headingFont: "data-heading-font",
+  typography: "data-typography",
   motion: "data-motion",
   celebration: "data-celebration",
   coverArt: "data-covers",
@@ -981,6 +982,16 @@ export function PreferencesForm({
             { value: "serif", label: "Book-style serif" },
           ]}
           onChange={(v) => update({ longTextFont: v })}
+        />
+        <Choice
+          label="Book typography"
+          hint="A drop cap opening each book’s description and an ornament closing it, and quotes hung on a large quote mark."
+          value={prefs.typography}
+          options={[
+            { value: "plain", label: "Plain" },
+            { value: "bookish", label: "Like a printed book" },
+          ]}
+          onChange={(v) => update({ typography: v })}
         />
         <Choice
           label="Headings"

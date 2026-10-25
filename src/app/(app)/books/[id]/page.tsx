@@ -6,7 +6,7 @@ import { Library, Pencil, Repeat } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { seriesAnchor } from "@/lib/series-list";
 import { getPreferences, getSession } from "@/lib/current-user";
-import { arrangeBookCards, FORCED_CARD_NOTES } from "@/lib/book-page";
+import { arrangeBookCards, FORCED_CARD_NOTES, takesDropCap } from "@/lib/book-page";
 import { orderByIds } from "@/lib/library-order";
 import type { BookPageCard } from "@/lib/preferences";
 import {
@@ -316,7 +316,10 @@ export default async function BookDetailPage({
             ) : (
               // break-words: imported descriptions can contain long raw URLs,
               // which would otherwise refuse to wrap and overflow on phones.
-              <p className="long-text max-w-prose whitespace-pre-line break-words text-sm leading-relaxed text-muted-foreground">
+              <p
+                className="long-text book-prose max-w-prose whitespace-pre-line break-words text-sm leading-relaxed text-muted-foreground"
+                data-drop-cap={takesDropCap(book.description) ? "" : undefined}
+              >
                 {book.description}
               </p>
             ))}

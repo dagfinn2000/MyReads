@@ -104,6 +104,11 @@ export const TEXT_SIZES = ["normal", "large", "larger"] as const;
 
 export const LONG_TEXT_FONTS = ["sans", "serif"] as const;
 
+/** Plain long text, or set like a printed book (globals.css, "Book
+ *  typography"): a drop cap and an end ornament on a book's description,
+ *  and quotes hung on a large quote mark. */
+export const TYPOGRAPHY_STYLES = ["plain", "bookish"] as const;
+
 /** The face for page titles, book titles and card titles: the app's own
  *  sans (Geist), a book serif (Literata) or a rounded sans (Nunito). */
 export const HEADING_FONTS = ["sans", "serif", "rounded"] as const;
@@ -348,6 +353,7 @@ export type Catalogue = (typeof CATALOGUES)[number];
 export type RatingStyle = (typeof RATING_STYLES)[number];
 export type TextSize = (typeof TEXT_SIZES)[number];
 export type LongTextFont = (typeof LONG_TEXT_FONTS)[number];
+export type Typography = (typeof TYPOGRAPHY_STYLES)[number];
 export type HeadingFont = (typeof HEADING_FONTS)[number];
 export type Motion = (typeof MOTIONS)[number];
 export type Celebration = (typeof CELEBRATIONS)[number];
@@ -424,6 +430,7 @@ export type Preferences = {
 
   textSize: TextSize;
   longTextFont: LongTextFont;
+  typography: Typography;
   headingFont: HeadingFont;
 
   // Appearance
@@ -611,6 +618,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
   ratingStyle: "half",
   textSize: "normal",
   longTextFont: "sans",
+  typography: "plain",
   headingFont: "sans",
   motion: "on",
   celebration: "confetti",
@@ -945,6 +953,7 @@ export function parsePreferences(raw: unknown): Preferences {
     ratingStyle: pick(RATING_STYLES, obj.ratingStyle, d.ratingStyle),
     textSize: pick(TEXT_SIZES, obj.textSize, d.textSize),
     longTextFont: pick(LONG_TEXT_FONTS, obj.longTextFont, d.longTextFont),
+    typography: pick(TYPOGRAPHY_STYLES, obj.typography, d.typography),
     headingFont: pick(HEADING_FONTS, obj.headingFont, d.headingFont),
     motion: pick(MOTIONS, obj.motion, d.motion),
     celebration: pick(CELEBRATIONS, obj.celebration, d.celebration),

@@ -42,3 +42,17 @@ export function arrangeBookCards(
 export function descriptionMayOverflow(text: string): boolean {
   return text.length > 300 || text.split("\n").length > 4;
 }
+
+/** How long a description's first paragraph must be for a drop cap: about
+ *  three lines on a wide screen, so the capital never stands taller than
+ *  the text beside it. */
+const DROP_CAP_MIN = 200;
+
+/** Whether a description opens on a drop cap with "Like a printed book"
+ *  typography (globals.css, "Book typography"): its first paragraph is long
+ *  enough and starts with a letter, since a quote mark or a number three
+ *  lines tall looks clumsy. */
+export function takesDropCap(text: string): boolean {
+  const first = text.trim().split("\n")[0];
+  return first.length >= DROP_CAP_MIN && /^\p{L}/u.test(first);
+}

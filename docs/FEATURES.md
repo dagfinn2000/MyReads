@@ -418,6 +418,13 @@ tab goes away. You can also keep the house and leave the avatar out.
   finished book.
 - Animations can be turned off, or only the backgrounds kept still. They
   stay off when your device asks for reduced motion.
+- **Book typography.** Choose "Like a printed book" in Preferences > Text
+  and long text is set the way a book sets it: a book's description opens
+  on a drop cap three lines tall and closes on an ivy-leaf ornament, both
+  in the accent colour, quotes hang on a large opening quote mark, and
+  lines wrap so a paragraph doesn't end on one short word. Short
+  descriptions, and ones that start with a quote mark or a number, keep
+  their first letter plain.
 - Sounds, if you turn them on: a rustle of paper when you log pages, a
   chime when you finish a book, a little flourish when you reach your
   daily goal, a soft thunk when you add a book and a tick when you rate
@@ -444,8 +451,8 @@ On the Account page:
   (tags, ISBN, your review), and what Pick for me leaves out.
 - How long you usually lend books for, and whether overdue books remind
   you.
-- The accent colour, text size, a serif font for reviews and quotes, the
-  font for headings and how round the corners are (or as the theme has
+- The accent colour, text size, a serif font for reviews and quotes, book
+  typography, the font for headings and how round the corners are (or as the theme has
   them: a few themes have their own), flat, raised or frosted
   cards, the background texture, and a wash of the cover's colours behind
   the top of each book's page.
