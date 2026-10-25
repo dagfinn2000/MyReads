@@ -40,6 +40,7 @@ import { BookCover } from "@/components/book-card";
 import { GoldMedal } from "@/components/gold-medal";
 import { Bar, StatCard } from "@/components/stat-blocks";
 import { Stars } from "@/components/stars";
+import { YearShelf } from "@/components/year-shelf";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -77,6 +78,8 @@ interface Finish {
   book: StatsBook;
   dateStarted: Date | null;
   dateFinished: Date;
+  /** The finish day, "YYYY-MM-DD" in the reader's zone. */
+  day: string;
   rating: number | null;
   isReread: boolean;
 }
@@ -139,6 +142,7 @@ export default async function YearInReviewPage({
       book: i.pass.book,
       dateStarted: i.pass.dateStarted,
       dateFinished: i.pass.date!,
+      day: i.pass.day!,
       rating: i.pass.rating,
       isReread: i.isReread,
     }));
@@ -404,6 +408,34 @@ export default async function YearInReviewPage({
       </div>
 
       {goalLine}
+
+      {finishes.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>{year} on the shelf</CardTitle>
+          </CardHeader>
+          <CardContent className="grid gap-3">
+            <p className="text-sm text-muted-foreground">
+              Every book you finished, in the order you finished it.
+            </p>
+            <YearShelf
+              year={year}
+              finishes={finishes.map((f) => ({
+                book: {
+                  id: f.book.id,
+                  title: f.book.title,
+                  authors: f.book.authors,
+                  coverUrl: f.book.coverUrl,
+                  pageCount: f.book.pageCount,
+                },
+                month: Number(f.day.slice(5, 7)) - 1,
+                finished: formatDate(f.dateFinished, prefs),
+                reread: f.isReread,
+              }))}
+            />
+          </CardContent>
+        </Card>
+      )}
 
       {ratings && topRated.length > 0 && (
         <Card>

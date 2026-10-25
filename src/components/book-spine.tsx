@@ -40,10 +40,14 @@ export function spineColourOf(book: Pick<SpineBook, "title" | "coverUrl">, known
 export function BookSpine({
   book,
   colour,
+  label: ownLabel,
   className,
 }: {
   book: SpineBook;
   colour: string;
+  /** What it says to a screen reader and under the pointer, in place of
+   *  the title, author and status. */
+  label?: string;
   className?: string;
 }) {
   const prefs = usePreferences();
@@ -59,7 +63,7 @@ export function BookSpine({
   if (book.ownership === BookOwnership.WISHLIST) notes.push("on your wishlist");
   else if (book.ownership === BookOwnership.GIVEN_AWAY) notes.push("given away");
   else if (book.lentOut) notes.push("lent out");
-  const label = `${book.title}${byline}. ${notes.join(" · ")}`;
+  const label = ownLabel ?? `${book.title}${byline}. ${notes.join(" · ")}`;
 
   return (
     <BookLink
