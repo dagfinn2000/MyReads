@@ -2067,8 +2067,8 @@ html[data-covers="plain"] .drawn-cover {
 
 /* ── Page and library motion ───────────────────────────────────────────────
    Pages fade up as they open ((app)/template.tsx), library cards rise into
-   place one after another (each card's --i is its position, capped in
-   library-view.tsx), and a card lifts a little under the pointer.
+   place one after another from the top (each card's --i is its step, from
+   lib/card-cascade.ts), and a card lifts a little under the pointer.
    `backwards` fill only holds the start frame during the delay: once an
    animation ends nothing is left applied, so a finished page wrapper never
    becomes the containing block for the fixed bulk-edit bar. */
