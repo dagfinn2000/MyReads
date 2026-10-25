@@ -39,6 +39,9 @@ services:
       BACKUP_DIR: /app/data/backups
       BACKUP_HOUR: ${BACKUP_HOUR:-3}
       BACKUP_KEEP: ${BACKUP_KEEP:-7}
+      # Reading reminders, on unless set to off; see .env.example.
+      READING_REMINDERS: ${READING_REMINDERS:-on}
+      VAPID_SUBJECT: ${VAPID_SUBJECT:-}
       DISABLE_REGISTRATION: ${DISABLE_REGISTRATION:-false}
       TRUSTED_PROXY_HOPS: ${TRUSTED_PROXY_HOPS:-1}
       COVER_FETCH_ALLOW_PRIVATE: ${COVER_FETCH_ALLOW_PRIVATE:-false}

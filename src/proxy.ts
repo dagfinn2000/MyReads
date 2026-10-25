@@ -29,7 +29,9 @@ export const config = {
   //    names begin "upload-", which still need a session.
   //  - Next.js internals and static assets
   //  - the PWA manifest and app icons (fetched without credentials on install)
+  //  - the reading reminders' service worker, which a redirect to /login
+  //    would keep from installing (it holds nothing private)
   matcher: [
-    "/((?!api/auth|api/register|api/import$|api/covers/upload$|_next/static|_next/image|favicon.ico|icon.svg|manifest.webmanifest|apple-icon.png|icons/).*)",
+    "/((?!api/auth|api/register|api/import$|api/covers/upload$|_next/static|_next/image|favicon.ico|icon.svg|manifest.webmanifest|apple-icon.png|icons/|push-sw.js$).*)",
   ],
 };

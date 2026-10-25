@@ -192,6 +192,7 @@ Account page, and the theme with the palette button in the top bar.
 | `GOOGLE_BOOKS_API_KEY` | no | Adds Google Books to search, which often has better descriptions and page counts. |
 | `APP_PORT` | no | Port MyReads runs on (default `3000`). |
 | `BACKUP_HOUR`, `BACKUP_KEEP` | no | Every night the server saves a backup of each account in the `backups` volume: at this hour (UTC, default `3`), keeping the newest `7`. |
+| `READING_REMINDERS` | no | `off` stops the server sending reading reminders. They are on by default and need no setup, but browsers only allow them over https. |
 
 ## Cleaning up cover images
 

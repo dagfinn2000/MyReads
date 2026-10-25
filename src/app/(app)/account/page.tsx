@@ -7,6 +7,7 @@ import { formatDate, formatDayKey, formatFileSize, formatNumber } from "@/lib/di
 import { orderByIds } from "@/lib/library-order";
 import { googleBooksEnabled } from "@/lib/metadata/googlebooks";
 import { DEFAULT_PREFERENCES, serverTimeZone } from "@/lib/preferences";
+import { remindersEnabled } from "@/lib/reminders";
 import { serverBackupConfig, serverBackupNote } from "@/lib/server-backups";
 import { listServerBackups } from "@/lib/server-backups-run";
 import {
@@ -37,7 +38,7 @@ export default async function AccountPage() {
   // Null with server backups off, and then the card is as it always was.
   const serverBackups = serverBackupConfig();
 
-  const [user, bookCount, current, prefs, savedViews, copies] = await Promise.all([
+  const [user, bookCount, current, prefs, savedViews, copies, pushDevices] = await Promise.all([
     prisma.user.findUnique({
       where: { id: userId },
       select: { username: true, createdAt: true, lastBackupAt: true },
@@ -51,6 +52,11 @@ export default async function AccountPage() {
       orderBy: { name: "asc" },
     }),
     serverBackups ? listServerBackups(serverBackups, userId) : [],
+    prisma.pushDevice.findMany({
+      where: { userId },
+      select: { id: true, label: true, endpoint: true, createdAt: true },
+      orderBy: { createdAt: "asc" },
+    }),
   ]);
   if (!user) return null;
   // As stored, so the form can tell "never set" from a chosen zone.
@@ -88,6 +94,10 @@ export default async function AccountPage() {
             timeZones={timeZones}
             googleAvailable={googleBooksEnabled()}
             savedViews={orderByIds(savedViews, prefs.savedViewOrder)}
+            reminders={{
+              available: remindersEnabled(),
+              devices: pushDevices.map((d) => ({ ...d, createdAt: d.createdAt.toISOString() })),
+            }}
           />
         </CardContent>
       </Card>

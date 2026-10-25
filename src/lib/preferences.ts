@@ -55,6 +55,7 @@ import {
 import { DEFAULT_AVATAR, parseAvatar, parseSavedLooks, type AvatarLook } from "@/lib/avatar";
 import { parseCatCoat, parseDogCoat, parsePet, type CatCoat, type DogCoat, type Pet } from "@/lib/pets";
 import { parseOwnCss } from "@/lib/own-css";
+import { REMINDER_TIMES, parseReminderDays } from "@/lib/reminders";
 import { SOUND_SETTINGS, SOUND_VOLUMES, type SoundSetting, type SoundVolume } from "@/lib/sounds";
 import { parsePartThemes, type PartThemes } from "@/lib/themes";
 import { parseCustomStatuses, parseStatusNames, type CustomStatus, type StatusNames } from "@/lib/statuses";
@@ -473,6 +474,14 @@ export type Preferences = {
   dailyGoalPages: number;
   /** Minutes a day for a time goal; one of DAILY_GOAL_MINUTES. */
   dailyGoalMinutes: number;
+  /** Reading reminders (lib/reminders.ts): the time they come, "HH:MM" in
+   *  the reader's zone, one of REMINDER_TIMES. They are on for a browser
+   *  that has turned them on (a PushDevice), so these are only the when. */
+  reminderTime: string;
+  /** The weekdays they come on, 0 = Sunday. Never empty. */
+  reminderDays: number[];
+  /** None on a day the reader has already logged some reading. */
+  reminderSkipIfRead: boolean;
 
   // Book page
   /** Every card, in the order shown. Always a full list (see parse). */
@@ -625,6 +634,9 @@ export const DEFAULT_PREFERENCES: Preferences = {
   dailyGoal: "off",
   dailyGoalPages: 20,
   dailyGoalMinutes: 30,
+  reminderTime: "20:00",
+  reminderDays: [0, 1, 2, 3, 4, 5, 6],
+  reminderSkipIfRead: true,
   bookPageCards: [...BOOK_PAGE_CARDS],
   hiddenBookPageCards: [],
   bookDescription: "full",
@@ -958,6 +970,12 @@ export function parsePreferences(raw: unknown): Preferences {
     dailyGoal: pick(DAILY_GOALS, obj.dailyGoal, d.dailyGoal),
     dailyGoalPages: pickAmount(DAILY_GOAL_PAGES, obj.dailyGoalPages, d.dailyGoalPages),
     dailyGoalMinutes: pickAmount(DAILY_GOAL_MINUTES, obj.dailyGoalMinutes, d.dailyGoalMinutes),
+    reminderTime:
+      typeof obj.reminderTime === "string" && REMINDER_TIMES.includes(obj.reminderTime)
+        ? obj.reminderTime
+        : d.reminderTime,
+    reminderDays: parseReminderDays(obj.reminderDays),
+    reminderSkipIfRead: bool(obj.reminderSkipIfRead, d.reminderSkipIfRead),
     bookPageCards: parseBookPageCards(obj.bookPageCards),
     hiddenBookPageCards: pickList(BOOK_PAGE_CARDS, obj.hiddenBookPageCards),
     bookDescription: pick(BOOK_DESCRIPTIONS, obj.bookDescription, d.bookDescription),

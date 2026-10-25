@@ -45,40 +45,73 @@ enum BookOwnership {
 }
 
 model User {
-  id           String        @id @default(cuid())
-  username     String        @unique
-  passwordHash String // bcrypt
+  id              String        @id @default(cuid())
+  username        String        @unique
+  passwordHash    String // bcrypt
   /// Bumped whenever every existing session should stop working — currently
   /// a password change. Sessions are JWTs with no server-side row to delete,
   /// so the token carries the value it was minted with and `auth.ts` rejects
   /// it once the two disagree. Tokens minted before this column existed have
   /// no value at all and are treated as 0, so upgrading doesn't sign anyone
   /// out; the first password change invalidates them like any other.
-  tokenVersion Int           @default(0)
+  tokenVersion    Int           @default(0)
   /// Chosen UI theme (id from lib/themes.ts), so the look follows the
   /// account across browsers. Null = never picked one on this account;
   /// the client falls back to localStorage, then the default.
-  theme        String?
+  theme           String?
   /// Preferred library view ({ sort, dir, group } — see lib/library-view.ts),
   /// applied when /books is opened without explicit view params so the
   /// chosen sort survives navigating away and back. Null = defaults.
-  libraryView  Json?
+  libraryView     Json?
   /// Everything set in the Preferences card on the Account page (see
   /// lib/preferences.ts): defaults for new books, date and number formats,
   /// time zone, sorting rules, catalogues, rating style and so on. One JSON
   /// column rather than a column per setting, so adding a setting needs no
   /// migration — parsePreferences fills in a default for anything missing.
   /// Null = never changed anything.
-  preferences  Json?
+  preferences     Json?
   /// When this account last downloaded its backup zip (GET /api/export), so
   /// the Backup card can say how old the newest copy is. Null = never.
-  lastBackupAt DateTime?
-  createdAt    DateTime      @default(now())
-  books        Book[]
-  shelves      Shelf[]
-  readingGoals ReadingGoal[]
-  savedViews   SavedView[]
-  challenges   Challenge[]
+  lastBackupAt    DateTime?
+  /// The day (YYYY-MM-DD, in the reader's zone) the last reading reminder
+  /// was sent, or let go because the reader had already read: what keeps
+  /// it to one a day (lib/reminders.ts). Null = never.
+  lastReminderDay String?
+  createdAt       DateTime      @default(now())
+  books           Book[]
+  shelves         Shelf[]
+  readingGoals    ReadingGoal[]
+  savedViews      SavedView[]
+  challenges      Challenge[]
+  pushDevices     PushDevice[]
+}
+
+/// A browser that takes this account's reading reminders (Preferences ›
+/// Reading reminders): the address its push service takes messages at, and
+/// the keys a message is encrypted for (lib/web-push.ts). Removed when the
+/// browser turns them off, or when the push service says it's gone.
+model PushDevice {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// Unique: a browser that subscribes again, or under another account,
+  /// takes its row over rather than getting each reminder twice.
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  /// What the browser said it was when it subscribed ("Firefox on Linux").
+  label     String
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+/// Values the server keeps for itself rather than any account, by name.
+/// Today only the key reading reminders are signed with, made the first
+/// time a browser asks for them so no one has to set one up.
+model ServerSetting {
+  key   String @id
+  value String
 }
 
 /// A library view saved under a name ("Unread fantasy"): the filters, sort
