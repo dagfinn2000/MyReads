@@ -174,6 +174,58 @@ describe("planHouse", () => {
   });
 });
 
+describe("the Christmas tree", () => {
+  const without = (plan: ReturnType<typeof planHouse>) => kinds(plan).map((row) => row.filter((k) => k !== "tree"));
+
+  it("stands beside the hearth when there's room, and moves nothing", () => {
+    const plain = planHouse(1, 5, 400);
+    const plan = planHouse(1, 5, 400, NO_ARRANGEMENT, { tree: true });
+    expect(kinds(plan)).toEqual([["hearth", "tree", "case"]]);
+    expect(planHouse(1, 5, 400, NO_ARRANGEMENT, { tree: false })).toEqual(plain);
+  });
+
+  it("goes to the end of another floor, top first, when the hearth's is full", () => {
+    const plain = planHouse(12, 500, 335);
+    const plan = planHouse(12, 500, 335, NO_ARRANGEMENT, { tree: true });
+    expect(without(plan)).toEqual(kinds(plain));
+    const at = plan.floors.findIndex((f) => f.some((p) => p.kind === "tree"));
+    expect(at).toBeGreaterThanOrEqual(0);
+    expect(plan.floors[at][plan.floors[at].length - 1].kind).toBe("tree");
+    // No floor above it had room for it.
+    for (const f of plan.floors.slice(0, at)) {
+      const row = f.map((p) => p.kind);
+      expect(row.reduce((w, k) => w + PIECE_WIDTH[k], 0) + PIECE_WIDTH.tree).toBeGreaterThan(335 - 2 * PAD - row.length * 4);
+    }
+  });
+
+  it("isn't there at all when no floor has room for it", () => {
+    // Bookcases wall to wall: the hearth and three, at their tightest.
+    const max = 2 * PAD + PIECE_WIDTH.hearth + 4 + 3 * CASE_WIDTH;
+    const plan = planHouse(3, 5, max, NO_ARRANGEMENT, { tree: true });
+    expect(all(plan)).not.toContain("tree");
+    expect(plan).toEqual(planHouse(3, 5, max));
+  });
+
+  it("keeps every piece inside the house", () => {
+    for (const [cases, books, max] of [
+      [1, 5, 180],
+      [4, 160, 300],
+      [17, 700, 335],
+    ] as const) {
+      const plan = planHouse(cases, books, max, NO_ARRANGEMENT, { tree: true });
+      for (const floor of plan.floors) {
+        let end = 0;
+        for (const piece of floor) {
+          expect(piece.x).toBeGreaterThanOrEqual(end);
+          end = piece.x + PIECE_WIDTH[piece.kind];
+        }
+        expect(end).toBeLessThanOrEqual(plan.inner);
+        expect(plan.inner).toBeLessThanOrEqual(max);
+      }
+    }
+  });
+});
+
 describe("arranging the furniture", () => {
   const BOOKS = MILESTONES.gramophone;
 

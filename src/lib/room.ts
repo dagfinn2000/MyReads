@@ -192,6 +192,7 @@ export type PieceKind =
   | "seat"
   | "study"
   | "gramophone"
+  | "tree"
   | RoomPiece
   | Extra;
 
@@ -207,6 +208,7 @@ export const PIECE_WIDTH: Record<PieceKind, number> = {
   seat: 52,
   study: 50,
   gramophone: 24,
+  tree: 36,
   range: 34,
   dresser: 36,
   table: 46,
@@ -276,6 +278,7 @@ export const HIGH_PART: Record<PieceKind, readonly [number, number] | null> = {
   seat: [3, 49],
   study: [2, 32],
   gramophone: null,
+  tree: null,
   range: [0, 34],
   dresser: [0, 36],
   table: null,
@@ -541,12 +544,18 @@ function withPins(row: readonly PieceKind[], pins: readonly { kind: PieceKind; s
  * narrow for that, or with fewer floors than it was put on, it goes
  * wherever it would have gone by itself. No floor is added just to hold
  * furniture.
+ *
+ * At Christmas (`tree`) a tree stands beside the hearth if there is room
+ * there, else at the end of another floor of the library, top first, or
+ * of an added room; with room on none of them there is no tree. It is never moved, and nothing
+ * else moves for it.
  */
 export function planHouse(
   caseCount: number,
   bookCount: number,
   maxInner: number,
   arrangement: Arrangement = NO_ARRANGEMENT,
+  { tree = false }: { tree?: boolean } = {},
 ): HousePlan {
   const away = new Set<string>(arrangement.away);
   const rooms = [...new Set(arrangement.rooms ?? [])];
@@ -698,10 +707,13 @@ export function planHouse(
     // The hearth is never left out: moved to a floor that has no room for
     // it, it goes back where it would be by itself, on the ground floor.
     if (!placed && kind === "hearth") {
-      return planHouse(caseCount, bookCount, maxInner, {
-        ...arrangement,
-        places: arrangement.places.filter((p) => p.kind !== "hearth"),
-      });
+      return planHouse(
+        caseCount,
+        bookCount,
+        maxInner,
+        { ...arrangement, places: arrangement.places.filter((p) => p.kind !== "hearth") },
+        { tree },
+      );
     }
   }
   for (let i = 0; i < rows.length; i++) {
@@ -721,6 +733,18 @@ export function planHouse(
         break;
       }
     }
+  }
+
+  if (tree) {
+    const hearthRow = rows.findIndex((row) => row.includes("hearth"));
+    const tries: [number, PieceKind[]][] = [];
+    if (hearthRow >= 0) {
+      const at = rows[hearthRow].indexOf("hearth") + 1;
+      tries.push([hearthRow, [...rows[hearthRow].slice(0, at), "tree", ...rows[hearthRow].slice(at)]]);
+    }
+    for (const i of [...libraryRows, ...roomRows]) if (i !== hearthRow) tries.push([i, [...rows[i], "tree"]]);
+    const fit = tries.find(([i, next]) => fitsAt(i, next));
+    if (fit) rows[fit[0]] = fit[1];
   }
 
   const storeys = Math.max(...storeyOf) + 1;
