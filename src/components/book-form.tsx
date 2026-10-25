@@ -6,7 +6,7 @@ import { BookFormat, BookOwnership, ReadingStatus } from "@/lib/enums";
 import { BookOpen } from "lucide-react";
 import type { ActionState } from "@/lib/actions/helpers";
 import type { CatalogueDiffRow, CatalogueValues } from "@/lib/catalogue-values";
-import { FORMAT_LABELS, OWNERSHIP_LABELS, STATUS_LABELS, toDateInputValue } from "@/lib/display";
+import { FORMAT_LABELS, OWNERSHIP_LABELS, toDateInputValue } from "@/lib/display";
 import type { AfterAdd } from "@/lib/preferences";
 import type { SoundEvent } from "@/lib/sounds";
 import type { TagImportSettings } from "@/lib/tag-rules";
@@ -18,6 +18,7 @@ import { LookupDetails } from "@/components/lookup-details";
 import { usePreferences } from "@/components/preferences-provider";
 import { useSaveSound } from "@/components/sounds";
 import { StarRatingInput } from "@/components/star-rating-input";
+import { StatusSelectItems } from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -122,7 +123,10 @@ export function BookForm({
   // Kept on every save (editing used to drop it), and filled in by Look up
   // details when the catalogue knows the work.
   const [openLibraryId, setOpenLibraryId] = useState(initial.openLibraryId ?? "");
-  const [status, setStatus] = useState<ReadingStatus>(initial.status ?? ReadingStatus.WANT_TO_READ);
+  // The shelf picked, which can be one of the reader's own statuses
+  // ("READING:k3f9", lib/statuses.ts); `status` is its built-in one.
+  const [choice, setChoice] = useState<string>(initial.status ?? ReadingStatus.WANT_TO_READ);
+  const status = choice.split(":")[0] as ReadingStatus;
 
   // Each save returns a new state object, so this runs once per book added.
   const reportAdded = useEffectEvent((book: { id: string; title: string }) => onAdded?.(book));
@@ -326,17 +330,13 @@ export function BookForm({
           {showStatus && (
             <div className="grid gap-2">
               <Label htmlFor="status">Shelf</Label>
-              <input type="hidden" name="status" value={status} />
-              <Select value={status} onValueChange={(v) => setStatus(v as ReadingStatus)}>
+              <input type="hidden" name="status" value={choice} />
+              <Select value={choice} onValueChange={setChoice}>
                 <SelectTrigger id="status" className="w-44">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {Object.values(ReadingStatus).map((s) => (
-                    <SelectItem key={s} value={s}>
-                      {STATUS_LABELS[s]}
-                    </SelectItem>
-                  ))}
+                  <StatusSelectItems />
                 </SelectContent>
               </Select>
             </div>

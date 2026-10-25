@@ -20,6 +20,7 @@ import { getPreferences } from "@/lib/current-user";
 import { parseFilters } from "@/lib/library-filters";
 import { resolveBookWhere } from "@/lib/library-where";
 import { settleReadingState } from "@/lib/reading-state";
+import { customStatusOf } from "@/lib/statuses";
 
 export interface BulkResult {
   count?: number;
@@ -89,7 +90,7 @@ export async function bulkUpdateBooks(input: BulkInput): Promise<BulkResult> {
 
   const parsed = bulkSchema.safeParse(input);
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
-  const { status, format, ownership, addShelfId, removeShelfId, addTags, removeTags } =
+  const { status, statusKey, format, ownership, addShelfId, removeShelfId, addTags, removeTags } =
     parsed.data;
 
   if (
@@ -113,6 +114,7 @@ export async function bulkUpdateBooks(input: BulkInput): Promise<BulkResult> {
       id: true,
       tags: true,
       status: true,
+      statusKey: true,
       dateStarted: true,
       dateFinished: true,
       currentPage: true,
@@ -147,9 +149,10 @@ export async function bulkUpdateBooks(input: BulkInput): Promise<BulkResult> {
   // as updated. "Apply to 20 books" should either happen or not.
   // Books moved to Read with no finish date follow the "Books I add as Read
   // were finished" preference (New books): today, or no date at all.
-  const undatedFinish = status
-    ? (await getPreferences()).addedAsReadFinished === "undated"
-    : false;
+  const prefs = status ? await getPreferences() : null;
+  const undatedFinish = prefs?.addedAsReadFinished === "undated";
+  // One of the reader's own statuses, when it is one on `status`.
+  const key = status && prefs ? (customStatusOf({ status, statusKey }, prefs)?.key ?? null) : null;
 
   const outcome = await prisma.$transaction(async (tx) => {
     if (status) {
@@ -157,9 +160,12 @@ export async function bulkUpdateBooks(input: BulkInput): Promise<BulkResult> {
       // to Read dates it and counts the read, moving it off Read uncounts
       // it. A bare updateMany of the status left both behind, so bulk-read
       // books were missing from the yearly stats and goal. Books already
-      // in the target status are left alone.
+      // in the target status only take its custom status (or lose theirs).
       for (const b of owned) {
-        if (b.status === status) continue;
+        if (b.status === status) {
+          if (b.statusKey !== key) await tx.book.update({ where: { id: b.id }, data: { statusKey: key } });
+          continue;
+        }
         const next = settleReadingState(
           b.status,
           {
@@ -176,7 +182,11 @@ export async function bulkUpdateBooks(input: BulkInput): Promise<BulkResult> {
         // it off Up next.
         await tx.book.update({
           where: { id: b.id },
-          data: { ...next, ...(status !== ReadingStatus.WANT_TO_READ && { upNextRank: null }) },
+          data: {
+            ...next,
+            statusKey: key,
+            ...(status !== ReadingStatus.WANT_TO_READ && { upNextRank: null }),
+          },
         });
       }
     }

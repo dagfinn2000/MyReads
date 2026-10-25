@@ -357,7 +357,7 @@ function awayReason(book: RoomBook): string | null {
 }
 
 function statusLine(book: RoomBook): string {
-  const parts: string[] = [STATUS_LABELS[book.status]];
+  const parts: string[] = [book.statusName ?? STATUS_LABELS[book.status]];
   if (book.status === ReadingStatus.READING && book.currentPage && book.pageCount) {
     parts[0] += `, page ${book.currentPage} of ${book.pageCount}`;
   }

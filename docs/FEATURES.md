@@ -46,6 +46,12 @@ page by page.
 - Each book has a status (Want to Read, Currently Reading, Read, Did Not
   Finish), a rating, notes, and start and finish dates. Rate in half
   stars, whole stars or out of 10, or switch ratings off.
+- Rename the four statuses, or add up to 12 of your own, each a kind of
+  one of them: "Paused" under Currently Reading, say, or "On my shelf"
+  under Want to Read. Each has its own colour, shows in every status
+  menu and on the book's badge, and gets its own chip under its tab in
+  the library. Stats, goals and challenges count a book on one of your
+  own as the status it is a kind of.
 - Re-reads are kept as history and count in your stats.
 - **Now reading** lists the books you're reading. Log the page you're on,
   for today or an earlier day. Each book shows your pace and when you're
@@ -325,6 +331,7 @@ On the Account page:
   percent or time for audiobooks, where your pace comes from, and the
   daily goal.
 - The rating style, and what counts in your stats.
+- Names for the statuses, and statuses of your own.
 - Which status tabs the library shows, what its search also looks in
   (tags, ISBN, your review), and what Pick for me leaves out.
 - How long you usually lend books for, and whether overdue books remind

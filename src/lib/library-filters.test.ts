@@ -81,6 +81,17 @@ describe("parseFilters", () => {
 });
 
 describe("buildBookWhere", () => {
+  it("narrows a status tab to one of the reader's own statuses", () => {
+    expect(where({ shelf: "READING", statusKey: "p1" })).toEqual({
+      userId: "u1",
+      status: ReadingStatus.READING,
+      statusKey: "p1",
+    });
+    // Never without its tab, and never a key that couldn't be one.
+    expect(where({ statusKey: "p1" })).toEqual({ userId: "u1" });
+    expect(parseFilters({ shelf: "READING", statusKey: "Not A Key" }).statusKey).toBe("");
+  });
+
   it("builds exactly the old shape for the old filters", () => {
     expect(where({ shelf: "READ", tag: "fantasy", q: "dune", minRating: "8", series: "Dune" })).toEqual({
       userId: "u1",

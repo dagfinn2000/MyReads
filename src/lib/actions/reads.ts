@@ -70,6 +70,7 @@ export async function readAgain(bookId: string): Promise<void> {
       where: { id: bookId },
       data: {
         status: ReadingStatus.READING,
+        statusKey: null,
         dateStarted: now,
         dateFinished: null,
         currentPage: null,

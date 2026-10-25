@@ -16,10 +16,11 @@ import {
 import type { LibraryCheckResult } from "@/app/api/library/check/route";
 import { setOwnership } from "@/lib/actions/ownership";
 import { checkVerdict, type CheckVerdict, type VerdictTone } from "@/lib/check-verdict";
-import { OWNERSHIP_BADGE_LABELS, STATUS_BADGE_CLASS, STATUS_LABELS } from "@/lib/display";
+import { OWNERSHIP_BADGE_LABELS } from "@/lib/display";
 import { BarcodeScanner } from "@/components/barcode-scanner";
 import { BookCover } from "@/components/book-card";
 import { Stars } from "@/components/stars";
+import { StatusBadge } from "@/components/status-badge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -314,9 +315,7 @@ function MatchedBook({
           {book.authors.join(", ")}
         </p>
         <div className="flex flex-wrap items-center gap-1.5">
-          <Badge className={`${STATUS_BADGE_CLASS[book.status]} text-[10px]`}>
-            {STATUS_LABELS[book.status]}
-          </Badge>
+          <StatusBadge status={book.status} statusKey={book.statusKey} className="text-[10px]" />
           <Badge variant="outline" className="text-[10px]">
             {OWNERSHIP_BADGE_LABELS[book.ownership]}
           </Badge>

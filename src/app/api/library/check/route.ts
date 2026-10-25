@@ -15,6 +15,7 @@ const bookSelect = {
   authors: true,
   coverUrl: true,
   status: true,
+  statusKey: true,
   rating: true,
   timesRead: true,
   format: true,
@@ -30,6 +31,7 @@ export interface LibraryCheckResult {
     authors: string[];
     coverUrl: string | null;
     status: ReadingStatus;
+    statusKey: string | null;
     rating: number | null;
     timesRead: number;
     format: BookFormat;

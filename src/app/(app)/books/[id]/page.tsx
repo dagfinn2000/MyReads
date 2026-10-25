@@ -13,8 +13,6 @@ import {
   formatDate,
   FORMAT_LABELS,
   OWNERSHIP_BADGE_LABELS,
-  STATUS_BADGE_CLASS,
-  STATUS_LABELS,
 } from "@/lib/display";
 import { AuthorLinks } from "@/components/author-links";
 import { formatLength } from "@/lib/progress-units";
@@ -30,6 +28,7 @@ import { LendingCard } from "@/components/lending-card";
 import { showsLendingCard } from "@/lib/loans";
 import { ReadHistoryCard } from "@/components/read-history-card";
 import { ReadingCard } from "@/components/reading-card";
+import { StatusBadge } from "@/components/status-badge";
 import { UpNextButton } from "@/components/up-next-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -197,9 +196,7 @@ export default async function BookDetailPage({
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            <Badge className={STATUS_BADGE_CLASS[book.status]}>
-              {STATUS_LABELS[book.status]}
-            </Badge>
+            <StatusBadge status={book.status} statusKey={book.statusKey} />
             {book.status === ReadingStatus.WANT_TO_READ && (
               <UpNextButton bookId={book.id} place={upNextPlace} />
             )}

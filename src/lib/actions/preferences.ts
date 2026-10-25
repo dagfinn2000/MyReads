@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/actions/helpers";
 import { cleanPreferencesPatch, type Preferences } from "@/lib/preferences";
+import { forgetLostStatuses } from "@/lib/status-keys";
 
 /**
  * Saves some preferences on the account. Only the keys in `patch` change.
@@ -22,6 +23,9 @@ export async function savePreferences(patch: Partial<Preferences>): Promise<void
     UPDATE "User"
     SET "preferences" = COALESCE("preferences", '{}'::jsonb) || ${JSON.stringify(clean)}::jsonb
     WHERE "id" = ${userId}`;
+  // A status of the reader's own that was removed takes its books back to
+  // their built-in status.
+  if (clean.customStatuses) await forgetLostStatuses(prisma, userId, clean.customStatuses);
 
   // Preferences show up on every page (dates, ratings, the nav, text size),
   // so the whole app is stale after a change.

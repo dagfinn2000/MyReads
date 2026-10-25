@@ -50,6 +50,9 @@ export interface RoomBook {
   pageCount: number | null;
   currentPage: number | null;
   status: ReadingStatus;
+  /** What the reader calls its status, when that isn't the built-in name
+   *  (lib/statuses.ts). */
+  statusName?: string;
   ownership: BookOwnership;
   /** Who has it, while it is lent out. */
   lentTo: string | null;

@@ -11,11 +11,10 @@ import { BookLink } from "@/components/book-link";
 import { SpriteIcon } from "@/components/icon-sprite";
 import { Badge } from "@/components/ui/badge";
 import { Stars } from "@/components/stars";
+import { StatusBadge } from "@/components/status-badge";
 import {
   OWNERSHIP_BADGE_LABELS,
   OWNERSHIP_LABELS,
-  STATUS_BADGE_CLASS,
-  STATUS_LABELS,
   formatDate,
   formatNumber,
   type FormatPrefs,
@@ -153,6 +152,8 @@ export type BookCardBook = Pick<
   | "seriesName"
   | "seriesNumber"
 > & {
+  /** One of the reader's own statuses (lib/statuses.ts). */
+  statusKey?: string | null;
   /** True when an unreturned loan exists. Passed as a flag rather than the
    *  loan rows so the grid payload stays the card's fields only. */
   lentOut?: boolean;
@@ -306,9 +307,7 @@ export function BookRow({
         {details.showOwnership && book.ownership && <OwnershipBadge ownership={book.ownership} />}
         {book.lentOut && <LentBadge overdue={book.overdue} />}
         {details.showStatus && (
-          <Badge className={`${STATUS_BADGE_CLASS[book.status]} hidden text-[10px] sm:inline-flex`}>
-            {STATUS_LABELS[book.status]}
-          </Badge>
+          <StatusBadge status={book.status} statusKey={book.statusKey} className="hidden text-[10px] sm:inline-flex" />
         )}
       </div>
     </BookLink>
@@ -377,9 +376,7 @@ export function BookCard({
             )}
             {book.lentOut && <LentBadge overdue={book.overdue} />}
             {details.showStatus && (
-              <Badge className={`${STATUS_BADGE_CLASS[book.status]} text-[10px]`}>
-                {STATUS_LABELS[book.status]}
-              </Badge>
+              <StatusBadge status={book.status} statusKey={book.statusKey} className="text-[10px]" />
             )}
           </span>
         </div>

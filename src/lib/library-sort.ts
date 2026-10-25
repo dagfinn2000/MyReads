@@ -6,9 +6,10 @@
 
 import { BookFormat, BookOwnership, ReadingStatus } from "@/lib/enums";
 import { calendarDay } from "@/lib/dates";
-import { FORMAT_LABELS, OWNERSHIP_LABELS, STATUS_LABELS } from "@/lib/display";
+import { FORMAT_LABELS, OWNERSHIP_LABELS } from "@/lib/display";
 import type { RatingStyle } from "@/lib/preferences";
 import { nextInSeries, seriesKey, type SeriesMember } from "@/lib/series";
+import { statusName, type StatusNames } from "@/lib/statuses";
 
 /** The fields the sorts read; the page's Prisma select satisfies this
  *  structurally. */
@@ -64,6 +65,8 @@ export interface SortOptions {
   ratingStyle?: RatingStyle;
   /** Shelf ids in the reader's order (group by shelf); the rest by name. */
   shelfOrder?: readonly string[];
+  /** The reader's names for the statuses (group by status). */
+  statusNames?: StatusNames;
 }
 
 /** Leading articles skipped by `ignoreArticles`: English always (most
@@ -339,7 +342,8 @@ export function groupBooks<T extends GroupableBook>(
   }
 
   if (group === "status") {
-    return fixedSections(books, "status", STATUS_ORDER, (b) => b.status, (s) => STATUS_LABELS[s]);
+    const names = { statusNames: opts.statusNames ?? {} };
+    return fixedSections(books, "status", STATUS_ORDER, (b) => b.status, (s) => statusName(s, names));
   }
 
   if (group === "format") {

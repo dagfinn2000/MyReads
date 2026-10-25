@@ -3,6 +3,7 @@ import { BookFormat, BookOwnership, ReadingStatus } from "@/lib/enums";
 import { isbnVariants, looksLikeIsbn, normalizeIsbn } from "@/lib/isbn";
 import { overdueCutoff } from "@/lib/loans";
 import type { SearchField } from "@/lib/preferences";
+import { isStatusKey } from "@/lib/statuses";
 import { searchTerms } from "@/lib/utils";
 
 /**
@@ -14,6 +15,8 @@ import { searchTerms } from "@/lib/utils";
 export interface LibraryFilters {
   /** The status tab: one ReadingStatus, or "all". */
   shelf: string;
+  /** One of the reader's own statuses on that tab (lib/statuses.ts), or "". */
+  statusKey: string;
   shelfId: string;
   q: string;
   /** One author, exactly as written on the book (the book page links here). */
@@ -100,6 +103,7 @@ export function parseFilters(
   const missing = param(sp.missing);
   return {
     shelf: param(sp.shelf) || "all",
+    statusKey: isStatusKey(param(sp.statusKey)) ? param(sp.statusKey) : "",
     shelfId: param(sp.shelfId),
     q: param(sp.q).trim(),
     author: param(sp.author).trim().slice(0, 500),
@@ -255,6 +259,8 @@ export function buildBookWhere(
   return {
     userId,
     ...(shelf && { status: shelf }),
+    // Only ever a kind of the tab's status, so only with one.
+    ...(shelf && filters.statusKey && { statusKey: filters.statusKey }),
     ...(format && { format }),
     ...(ownership && { ownership }),
     ...(filters.owned === "lent" && { loans: { some: { returnedAt: null } } }),

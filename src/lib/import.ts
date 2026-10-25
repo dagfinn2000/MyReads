@@ -16,7 +16,8 @@ import { sniffImageKind } from "@/lib/image-type";
 import { buildSearchText, foldForSearch } from "@/lib/utils";
 import { isAllowedCoverUrl, shelfNameSchema } from "@/lib/validation";
 import { cleanLibraryViewPatch } from "@/lib/library-view";
-import { cleanPreferencesPatch } from "@/lib/preferences";
+import { cleanPreferencesPatch, parsePreferences } from "@/lib/preferences";
+import { customStatusOf } from "@/lib/statuses";
 import { MAX_ENTRY_MINUTES } from "@/lib/reading-time";
 import {
   MAX_SAVED_VIEWS,
@@ -136,6 +137,8 @@ const importedBookSchema = z.object({
   seriesNumber: z.number().min(0).max(10000).nullable().optional().catch(null),
   openLibraryId: z.string().trim().max(50).nullable().optional(),
   status: z.enum(ReadingStatus).catch(ReadingStatus.WANT_TO_READ),
+  /** Additive: one of the reader's own statuses (lib/statuses.ts). */
+  statusKey: z.string().max(16).nullable().optional().catch(null),
   rating: z.number().int().min(1).max(10).nullable().optional().catch(null),
   review: z.string().max(20000).nullable().optional(),
   dateStarted: dateField,
@@ -525,6 +528,12 @@ export async function importLibrary(
   });
 
   const settingsRestored = data.settings ? await restoreSettings(userId, data.settings) : false;
+  // The account's own statuses as they now stand: a book keeps its status
+  // of the reader's own only if the account has it (the backup's statuses
+  // came with its settings unless the account already had some).
+  const statuses = parsePreferences(
+    (await prisma.user.findUnique({ where: { id: userId }, select: { preferences: true } }))?.preferences,
+  );
 
   // Existing books, for duplicate detection.
   const existing = await prisma.book.findMany({
@@ -626,6 +635,7 @@ export async function importLibrary(
         seriesNumber: b.seriesNumber ?? null,
         openLibraryId: b.openLibraryId ?? null,
         status: b.status,
+        statusKey: customStatusOf(b, statuses)?.key ?? null,
         rating: b.rating ?? null,
         review: b.review ?? null,
         reviewSearchText: foldForSearch(b.review ?? ""),
