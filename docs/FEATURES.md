@@ -304,6 +304,11 @@ tab goes away. You can also keep the house and leave the avatar out.
   reading room's fire flickers.
 - Animations can be turned off, or only the backgrounds kept still. They
   stay off when your device asks for reduced motion.
+- Sounds, if you turn them on: a rustle of paper when you log pages, a
+  chime when you finish a book, a little flourish when you reach your
+  daily goal, a soft thunk when you add a book and a tick when you rate
+  one. Quiet, medium or loud. They only ever answer something you just
+  did, and they are made in the browser, with nothing to download.
 - Install MyReads on your phone's home screen like an app.
 
 ## Preferences

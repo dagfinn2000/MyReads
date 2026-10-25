@@ -174,6 +174,7 @@ export function AddBookClient({
             showStatus
             seriesNames={seriesNames}
             onAdded={handleAdded}
+            soundOnSave="added"
             autoFocusTitle={prefill.byHand}
           />
         </>
@@ -209,6 +210,7 @@ export function AddBookClient({
               showStatus
               seriesNames={seriesNames}
               onAdded={handleAdded}
+              soundOnSave="added"
               autoFocusTitle={round > 0}
             />
           </TabsContent>

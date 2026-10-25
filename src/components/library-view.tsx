@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 import type { LibraryDisplay } from "@/lib/library-view";
 import { pickButtonTitle, tabStatus } from "@/lib/pick";
 import { usePreferences } from "@/components/preferences-provider";
+import { useSound } from "@/components/sounds";
 import {
   BookCard,
   BookCoverTile,
@@ -134,6 +135,7 @@ export function LibraryView({
 }) {
   const router = useRouter();
   const prefs = usePreferences();
+  const sound = useSound();
   // Back from a book's X: the cards are already in place as the cover flies
   // home, rather than rising in again (lib/cover-flight.ts).
   const [returning] = useState(isClosingBook);
@@ -261,6 +263,7 @@ export function LibraryView({
         setMessage(res.error);
       } else {
         setMessage(`Updated ${booksLabel(res.count ?? 0)}.`);
+        if (status === ReadingStatus.READ && res.count) sound("finished");
         clearSelection();
         // Apply is disabled with nothing selected; focus goes to how it went
         // rather than falling to the page.
