@@ -243,7 +243,7 @@ function EntryRow({
   const anchor = entry.page === 0;
   const time = entryTime(entry.minutes);
   const position = (
-    <span className={layout === "log" ? "w-20 shrink-0 tabular-nums" : "w-16 shrink-0 tabular-nums text-foreground"}>
+    <span className={layout === "log" ? "min-w-20 shrink-0 tabular-nums whitespace-nowrap" : "min-w-16 shrink-0 tabular-nums whitespace-nowrap text-foreground"}>
       {label}
     </span>
   );

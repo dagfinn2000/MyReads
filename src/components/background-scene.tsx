@@ -32,18 +32,22 @@ import { skyAt, skyStyle } from "@/lib/sky";
  *
  * The background is read from <html> rather than taken as a prop alone, so
  * a change in Preferences (which sets the attribute at once) shows here
- * straight away too.
+ * straight away too. A theme with a picture of its own behind the page
+ * (`data-own-background`) replaces it, and then there is no scene.
  */
 
 const subscribe = (fn: () => void) => {
   const observer = new MutationObserver(fn);
   observer.observe(document.documentElement, {
     attributes: true,
-    attributeFilter: ["data-background"],
+    attributeFilter: ["data-background", "data-own-background"],
   });
   return () => observer.disconnect();
 };
-const readBackground = () => document.documentElement.dataset.background ?? "plain";
+const readBackground = () => {
+  const root = document.documentElement;
+  return root.hasAttribute("data-own-background") ? "plain" : (root.dataset.background ?? "plain");
+};
 
 /** Raindrops on the pond: where each lands, how often, and when first. */
 const DROPS = [

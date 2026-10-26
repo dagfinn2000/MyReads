@@ -353,7 +353,7 @@ tab goes away. You can also keep the house and leave the avatar out.
 
 ## Look and feel
 
-- 52 colour themes, or a light and a dark one that switch with your
+- 54 colour themes, or a light and a dark one that switch with your
   device, with an accent colour of your own on top if you like. Your
   choice follows you to every device you sign in on, unless you give one
   phone or computer a theme of its own ("Only on this device" in the
@@ -397,9 +397,43 @@ tab goes away. You can also keep the house and leave the avatar out.
   recommended": Blue Screen, Glowstick, Hot Dog Stand, Toxic, Desktop 95,
   Under Construction (a hazard-striped top bar and Comic Sans), Ugly
   Sweater (green cards on knitted red), Spreadsheet (gridlines and a
-  green ribbon), Party (confetti) and Camouflage. They are as easy to
+  green ribbon), Party (confetti), Camouflage and Quest. They are as easy to
   read as the rest, only nobody should want them. Hover over one in the
   menu for a word about it.
+- **Seven themes restyle the whole app**, not just its colours: the top
+  bar, cards, buttons, fields, menus, dialogs, tabs, progress bars, type
+  and the picture behind the page all take after what the theme is named
+  for. The rest stay as they were.
+  - Desktop 95: the top bar is a taskbar with the wordmark as its Start
+    button, every page is a grey window with a blue title bar on a teal
+    desktop, cards are group boxes, buttons are bevelled and press in,
+    fields are sunken, and the scrollbars have arrow buttons.
+  - Terminal: a green screen with glowing text and faint scan lines, a
+    prompt and a blinking cursor in each page's title, boxes drawn in
+    double lines and buttons in brackets.
+  - Newsprint: a broadsheet, with the wordmark as a blackletter masthead
+    over a dateline, headlines in a heavy serif, sections under rules,
+    covers printed as halftones until you point at them and dialogs cut
+    out like coupons.
+  - Blueprint: an architect's drawing on squared paper, with hand
+    lettering, dimension lines under the titles, corner marks on cards,
+    cyanotype covers and a title block naming each page.
+  - Notebook: an exercise book, in handwriting, with the red margin and
+    punched holes, freehand boxes, books taped in and menus on sticky
+    notes.
+  - Quest (new, in the Silly set): the menus of an old role-playing game,
+    with blue windows in white frames, pixel letters, a gold pointer on
+    whatever you're choosing and reading progress as an experience bar,
+    under a starry sky.
+  - Pinstripe (new, light): an early-2000s desktop, with grey pinstripes,
+    glossy gel buttons (the main one blue), a menu bar, dialogs as
+    windows with the red, amber and green lights in the corner (the red
+    one closes it), glossy covers and progress bars whose stripes roll
+    along. With an accent colour picked, the gel takes that colour.
+- A theme with a picture of its own (Desktop 95's desktop, Notebook's
+  ruled page, Party's confetti, Quest's night sky and the rest) shows it
+  whatever background you picked, and Preferences says so under
+  Background. Your background comes back when you pick another theme.
 - A theme for each part of the app if you like: Stats in one theme, the
   reading room in another, the rest in your usual one (Preferences).
 - Your own CSS, added after the app's styles on every page but the

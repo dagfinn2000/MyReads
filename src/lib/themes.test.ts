@@ -3,6 +3,7 @@ import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   DEVICE_THEME_STORAGE_KEY,
+  OWN_BACKGROUND_IDS,
   RETIRED_THEMES,
   THEME_INIT_SCRIPT,
   THEME_STORAGE_KEY,
@@ -107,6 +108,11 @@ describe("THEMES", () => {
       if (!body.includes("--page-gradient")) continue;
       expect(THEMES.find((t) => t.id === id)?.pattern, id).toBeTruthy();
     }
+  });
+
+  it("lets exactly the themes with a page picture cover the Background", () => {
+    const pictured = [...blocks].filter(([, body]) => body.includes("--page-gradient"));
+    expect([...OWN_BACKGROUND_IDS].sort()).toEqual(pictured.map(([id]) => id).sort());
   });
 
   it("replaces each retired theme with one of its own kind that exists", () => {
@@ -271,6 +277,16 @@ describe("THEME_INIT_SCRIPT", () => {
     const quotes = fakePage({ attrs, stored, path: "/quotes" });
     runInitScript(quotes);
     expect(quotes.html.get("data-theme")).toBe("sage");
+  });
+
+  it("marks a theme that brings its own background, and only such a theme", () => {
+    const pictured = fakePage({ attrs: { "data-theme": "blueprint" } });
+    runInitScript(pictured);
+    expect(pictured.html.has("data-own-background")).toBe(true);
+
+    const plain = fakePage({ attrs: { "data-theme": "dracula", "data-own-background": "" } });
+    runInitScript(plain);
+    expect(plain.html.has("data-own-background")).toBe(false);
   });
 
   it("uses the remembered theme when signed out", () => {

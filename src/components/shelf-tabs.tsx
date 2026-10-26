@@ -49,13 +49,14 @@ export function ShelfTabs({
   const kinds = statuses.customStatuses.filter((c) => c.base === current);
   return (
     <div className="grid gap-2">
-      <nav className="flex flex-wrap gap-1 border-b">
+      <nav className="shelf-tabs flex flex-wrap gap-1 border-b">
         {tabs.map(({ key, label }) => {
           const active = current === key;
           return (
             <Link
               key={key}
               href={href(key)}
+              aria-current={active ? "page" : undefined}
               className={cn(
                 "-mb-px flex items-center gap-1.5 border-b-2 border-transparent px-3 py-2 text-sm text-muted-foreground transition-colors hover:text-foreground",
                 active && "border-primary font-medium text-foreground",
