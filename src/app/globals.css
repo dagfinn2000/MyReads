@@ -2926,15 +2926,21 @@ html[data-covers="plain"] .drawn-cover {
    back where the pointer rests on it, as if pressed, and a soft light sits
    under the pointer. Eases back flat when the pointer leaves. Only with a
    mouse or trackpad, and not with Animations off, reduced motion or
-   "Covers follow the pointer: Off". */
+   "Covers follow the pointer: Off".
+   A cover at rest has no transform at all, and gets its 3D one only while
+   tilting: even turned by 0deg, a 3D transform puts the element on a
+   compositor layer of its own, and with every cover in the library on one
+   that took more time on each scrolled frame than everything else put
+   together. Easing back flat is a transition to `none`, which the browser
+   reads as the same functions at 0deg. */
 @media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
   html:not([data-motion="off"]):not([data-cover-tilt="off"]) [data-tilt] {
-    transform: perspective(40rem) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
     transition:
       transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1),
       translate 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
   }
   html:not([data-motion="off"]):not([data-cover-tilt="off"]) [data-tilt][data-tilting] {
+    transform: perspective(40rem) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
     transition:
       transform 0.12s ease-out,
       translate 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -3487,6 +3493,21 @@ html {
     color-mix(in oklab, var(--primary) 14%, transparent),
     transparent 70%
   );
+}
+
+/* ── Theme changes ─────────────────────────────────────────────────────────
+   For the frame a theme changes in (data-theme-changing, set by
+   applyThemeSetting in lib/themes.ts), what would ease from the old
+   colours to the new ones changes at once instead. The list names classes
+   rather than every element (`*`): when the attribute goes again, the
+   browser then restyles only what carries one of them, not the whole page
+   a second time. One selector each, not an :is() list, so the browser
+   files each under its class and other elements never look at them. */
+html[data-theme-changing] .transition,
+html[data-theme-changing] .transition-colors,
+html[data-theme-changing] .transition-shadow,
+html[data-theme-changing] .lift {
+  transition: none !important;
 }
 
 /* ── Motion ────────────────────────────────────────────────────────────────

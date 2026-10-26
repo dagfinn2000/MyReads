@@ -21,3 +21,35 @@ describe("the motion off switch (globals.css)", () => {
     }
   });
 });
+
+describe("compositor layers (globals.css)", () => {
+  const rules = [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)].map(([, selector, body]) => ({
+    selector: selector.trim(),
+    body,
+  }));
+
+  it("gives a cover its 3D tilt only while it tilts, not at rest", () => {
+    // A 3D transform, even turned by 0deg, puts each cover on a layer of its
+    // own; with every cover in the library on one, scrolling spent most of
+    // its time sorting the layers.
+    const tilted = rules.filter((r) => r.selector.includes("[data-tilt]") && /transform:\s*perspective/.test(r.body));
+    expect(tilted.length).toBeGreaterThan(0);
+    for (const r of tilted) expect(r.selector).toContain("[data-tilting]");
+  });
+
+  it("names the classes whose transitions a theme change holds off, never every element", () => {
+    const held = rules.filter((r) => r.selector.includes("[data-theme-changing]"));
+    expect(held.length).toBeGreaterThan(0);
+    for (const r of held) expect(r.selector).not.toMatch(/(^|[\s,>])\*/);
+  });
+});
+
+describe("transition-all (components/ui)", () => {
+  it("is used by no component: it animates scrollbar-color too, which Chrome restarts on every restyle of <html>", () => {
+    for (const file of ["badge.tsx", "button.tsx", "tabs.tsx"]) {
+      const source = readFileSync(path.resolve(__dirname, "../components/ui", file), "utf8");
+      expect(source, file).not.toContain("transition-all");
+    }
+  });
+});
+

@@ -2,13 +2,16 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
+  DARK_THEME_IDS,
   DEVICE_THEME_STORAGE_KEY,
   OWN_BACKGROUND_IDS,
   RETIRED_THEMES,
   THEME_CLASS_PREFIX,
   THEME_INIT_SCRIPT,
+  THEME_BACKGROUNDS,
   THEME_STORAGE_KEY,
   THEMES,
+  applyThemeSetting,
   parsePartThemes,
   parseThemeSetting,
   sectionOf,
@@ -346,6 +349,43 @@ describe("THEME_INIT_SCRIPT", () => {
     runInitScript(device);
     expect(device.html.get("data-theme-device")).toBe("auto:solarized-light:high-contrast-dark");
     expect(device.html.get("data-theme")).toBe("solarized-light");
+  });
+});
+
+describe("applyThemeSetting", () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  /** A page showing `attrs`, with the frames still to come kept in a list. */
+  function showing(attrs: Record<string, string>) {
+    const page = fakePage({ attrs });
+    const frames: (() => void)[] = [];
+    vi.stubGlobal("document", page.document);
+    vi.stubGlobal("window", page.window);
+    vi.stubGlobal("requestAnimationFrame", (fn: () => void) => frames.push(fn));
+    const nextFrame = () => frames.splice(0).forEach((fn) => fn());
+    return { page, nextFrame };
+  }
+  const apply = (id: string) => applyThemeSetting(id, DARK_THEME_IDS, THEME_BACKGROUNDS, []);
+
+  it("holds transitions off from one theme to another until the new one is styled", () => {
+    const { page, nextFrame } = showing({ "data-theme": "light" });
+    apply("dracula");
+    expect(page.html.has("data-theme-changing")).toBe(true);
+    nextFrame();
+    // Still there for the frame that styles the new theme.
+    expect(page.html.has("data-theme-changing")).toBe(true);
+    nextFrame();
+    expect(page.html.has("data-theme-changing")).toBe(false);
+  });
+
+  it("leaves transitions be when no theme was showing, or the same one is applied", () => {
+    const first = showing({});
+    apply("dracula");
+    expect(first.page.html.has("data-theme-changing")).toBe(false);
+
+    const same = showing({ "data-theme": "dracula" });
+    apply("dracula");
+    expect(same.page.html.has("data-theme-changing")).toBe(false);
   });
 });
 

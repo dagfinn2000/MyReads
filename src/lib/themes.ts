@@ -491,6 +491,21 @@ export function applyThemeSetting(
   } else {
     root.removeAttribute("data-theme-auto");
   }
+  // A theme showing already, and this is another: nothing eases from the
+  // old colours to the new ones (globals.css, "Theme changes"). Otherwise
+  // every card, badge and button would start a transition for each colour
+  // that changed, two thousand on a big library, each one three events
+  // React handles, for a fade the theme's own reveal already covers. Let
+  // go two frames on, once the new theme has been styled.
+  const before = root.getAttribute("data-theme");
+  if (before && before !== id && typeof requestAnimationFrame === "function") {
+    root.setAttribute("data-theme-changing", "");
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        root.removeAttribute("data-theme-changing");
+      });
+    });
+  }
   // THEME_CLASS_PREFIX, written out: this body runs on its own. Any other
   // theme's class goes, not just the one `data-theme` names, as React may
   // have rewritten the classes from a newer server render.

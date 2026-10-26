@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 // Themes restyled from top to bottom, after the rest so they can reshape it.
 import "./restyles.css";
+import localFont from "next/font/local";
 import {
   Architects_Daughter,
-  DotGothic16,
   Geist,
   Literata,
   Nunito,
@@ -66,9 +66,13 @@ const handwriting = Patrick_Hand({
   variable: "--font-hand",
   preload: false,
 });
-const pixel = DotGothic16({
+// DotGothic16 is a Japanese face, which Google Fonts serves in 120-odd
+// slices; through next/font/google each slice was a rule in the CSS every
+// page loads (94 KB of it, for one theme). This is the Latin slice alone
+// (fonts/, with its licence), which has every letter the app writes.
+const pixel = localFont({
+  src: "./fonts/dotgothic16-latin.woff2",
   weight: "400",
-  subsets: ["latin"],
   variable: "--font-pixel",
   preload: false,
 });
