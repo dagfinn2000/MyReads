@@ -35,8 +35,10 @@ export function SavedViewChips({
               active && "border-primary bg-primary/10 font-medium",
             )}
           >
+            {/* No prefetching, here or below: see BookLink. */}
             <Link
               href={`/books?${view.query}`}
+              prefetch={false}
               className={cn("flex items-center gap-1.5 py-1 pl-3", active ? "pr-1" : "pr-3")}
             >
               <Bookmark className="size-3.5" />
@@ -45,6 +47,7 @@ export function SavedViewChips({
             {active && (
               <Link
                 href={clearHref}
+                prefetch={false}
                 className="mr-1 rounded-full p-0.5 hover:bg-primary/20"
                 title="Clear this view's filters"
               >

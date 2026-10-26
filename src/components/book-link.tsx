@@ -18,17 +18,24 @@ import { noteBookOpened } from "@/lib/library-return";
  * back for the book page's X (lib/library-return.ts), and `data-book-link`
  * is how that X finds the card to fly the cover back into.
  *
+ * It doesn't prefetch unless asked to. Pages here are made fresh for each
+ * request, so a prefetch can only fetch what comes before their data (the
+ * layout and the loading placeholder). That doesn't make the click any
+ * faster (measured), and each link in view costs the server a render: some
+ * thirty on every visit to the library. Links that list pages, like the
+ * library's tabs and chips, leave it off for the same reason.
+ *
  * Other attributes (a label, a tab index, data attributes) go on the link
  * as they are.
  */
 export function BookLink({
   bookId,
   children,
-  prefetch,
+  prefetch = false,
   ...rest
 }: Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, "href"> & {
   bookId: string;
-  /** Next.js prefetching; off for pages with hundreds of links in view. */
+  /** Next.js prefetching; off unless set (see above). */
   prefetch?: boolean;
   [data: `data-${string}`]: string | number | undefined;
 }) {

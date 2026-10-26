@@ -53,9 +53,11 @@ export function ShelfTabs({
         {tabs.map(({ key, label }) => {
           const active = current === key;
           return (
+            // No prefetching, here or below: see BookLink.
             <Link
               key={key}
               href={href(key)}
+              prefetch={false}
               aria-current={active ? "page" : undefined}
               className={cn(
                 "-mb-px flex items-center gap-1.5 border-b-2 border-transparent px-3 py-2 text-sm text-muted-foreground transition-colors hover:text-foreground",
@@ -77,6 +79,7 @@ export function ShelfTabs({
         >
           <Link
             href={href(current)}
+            prefetch={false}
             aria-current={!currentKey ? "page" : undefined}
             className={cn(
               "rounded-full border px-3 py-1 text-sm transition-colors hover:border-ring/60",
@@ -89,6 +92,7 @@ export function ShelfTabs({
             <Link
               key={c.key}
               href={href(current, c.key)}
+              prefetch={false}
               aria-current={currentKey === c.key ? "page" : undefined}
               className={cn(
                 "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-sm transition-colors hover:border-ring/60",
