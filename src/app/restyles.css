@@ -2864,3 +2864,1218 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
   background: #ffffff;
   box-shadow: 0 18px 44px rgb(0 0 0 / 0.3);
 }
+
+/* ── Aero ──────────────────────────────────────────────────────────────────
+   Windows 7. The desktop is deep blue with a burst of light; the top bar is
+   the taskbar, dark glass, its wordmark a glowing Start orb and the open
+   page's link a lit button. Every page is a window: a frame of sky-blue
+   glass with streaks of reflected light, a caption naming the page in
+   glowing letters, the minimise, maximise and red close buttons, and a
+   white pane inside. Buttons are glossy and turn blue under the pointer,
+   fields have their pale bevelled borders, panels are white with blue
+   titles, and progress bars are green with a shine sliding along them.
+   Dialogs and popovers are glass windows too, blurred where they sit over
+   the page. Only the taskbar and those blur what is behind them: the
+   page's own frame lets the desktop through unblurred, which looks the
+   same over a picture this soft and costs nothing as the page scrolls. */
+:root[data-theme="aero"] {
+  --aero-font: "Segoe UI", Frutiger, "Frutiger Linotype", "Helvetica Neue", Arial, sans-serif;
+  /* The glass: a sky-blue tint, lighter along the top as a pane is. */
+  --aero-tint: rgb(116 167 222 / 0.5);
+  --aero-glass: linear-gradient(rgb(255 255 255 / 0.55), rgb(255 255 255 / 0.2) 2.25rem, rgb(255 255 255 / 0.08) 55%, rgb(255 255 255 / 0.22));
+  /* Light caught in the glass, in diagonal streaks. */
+  --aero-streaks: linear-gradient(
+    115deg,
+    transparent 0 9%,
+    rgb(255 255 255 / 0.24) 9% 14%,
+    transparent 14% 16%,
+    rgb(255 255 255 / 0.14) 16% 18%,
+    transparent 18% 61%,
+    rgb(255 255 255 / 0.18) 61% 66%,
+    transparent 66%
+  );
+  --aero-button: linear-gradient(#f2f2f2, #ebebeb 49%, #dddddd 50%, #cfcfcf);
+  --aero-button-hot: linear-gradient(#eaf6fd, #d9f0fc 49%, #bee6fd 50%, #a7d9f5);
+  --aero-button-down: linear-gradient(#e5f4fc, #c4e5f6 49%, #98d1ef 50%, #68b3db);
+  /* An item under the pointer, and a chosen one, as in Explorer. */
+  --aero-hot: linear-gradient(#f5f9fe, #e3effc);
+  --aero-chosen: linear-gradient(#e6f0fc, #c9ddf8);
+  --aero-frame: 8px;
+  --aero-caption: 2rem;
+  --aero-title-glow: 0 0 6px #ffffff, 0 0 10px #ffffff, 0 0 16px rgb(255 255 255 / 0.85);
+  --heading-font: var(--aero-font);
+  --surface-shadow: none;
+  --chart-1: #2c7fd6;
+  --chart-2: #38b03a;
+  --chart-3: #f0a830;
+  --chart-4: #8b5fc7;
+  --chart-5: #7a8794;
+  scrollbar-color: #c2c9d2 #f0f0f0;
+}
+.theme-is-aero body {
+  font-family: var(--aero-font);
+}
+.theme-is-aero ::selection {
+  color: #ffffff;
+  background: #3399ff;
+}
+/* Headings in the deep blue of a Windows 7 dialog's main instruction. */
+.theme-is-aero h1,
+.theme-is-aero [data-slot="card-title"] {
+  color: #1e3287;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.theme-is-aero .book-backdrop {
+  display: none;
+}
+
+/* The taskbar: dark glass, a highlight along its edge. The colour tokens
+   are set again inside it, so its links and buttons write in white. */
+.theme-is-aero .top-bar {
+  --foreground: #ffffff;
+  --muted-foreground: #dce9f7;
+  --accent: rgb(255 255 255 / 0.16);
+  --accent-foreground: #ffffff;
+  --ring: #9fd6ff;
+  border: 0;
+  color: #ffffff;
+  background:
+    linear-gradient(rgb(255 255 255 / 0.2), rgb(255 255 255 / 0.07) 50%, rgb(0 0 0 / 0.06) 50%, rgb(0 0 0 / 0.16)),
+    rgb(22 48 86 / 0.6);
+  box-shadow: inset 0 1px rgb(255 255 255 / 0.3), inset 0 -1px rgb(0 0 0 / 0.45), 0 2px 10px rgb(0 0 0 / 0.3);
+  text-shadow: 0 1px 2px rgb(0 0 0 / 0.55);
+  animation: none;
+}
+.theme-is-aero .top-bar .wordmark {
+  gap: 0.5rem;
+  color: #ffffff;
+  font-family: var(--aero-font);
+  font-weight: 600;
+  letter-spacing: 0;
+}
+/* The Start orb. */
+.theme-is-aero .top-bar .wordmark > svg {
+  box-sizing: content-box;
+  width: 1.125rem;
+  height: 1.125rem;
+  padding: 0.4375rem;
+  border-radius: 50%;
+  color: #ffffff;
+  background:
+    radial-gradient(circle at 50% 28%, rgb(255 255 255 / 0.85) 0 16%, rgb(255 255 255 / 0) 50%),
+    radial-gradient(circle at 50% 108%, #9cecff, #2f98e6 40%, #0f4fa3 66%, #072e66);
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 0.6), inset 0 0 0 1px rgb(255 255 255 / 0.3), 0 0 10px rgb(120 205 255 / 0.55);
+  filter: drop-shadow(0 1px 1px rgb(0 0 0 / 0.4));
+}
+.theme-is-aero .top-bar .wordmark:hover > svg {
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 0.6), inset 0 0 0 1px rgb(255 255 255 / 0.45), 0 0 16px rgb(150 220 255 / 0.95);
+}
+/* The page links: buttons on the taskbar, glowing from below under the
+   pointer, the open page's lit. */
+.theme-is-aero .top-bar .nav-link {
+  border: 1px solid transparent;
+  border-radius: 3px;
+  color: #ffffff;
+}
+.theme-is-aero .top-bar .nav-link:hover {
+  border-color: rgb(0 0 0 / 0.45);
+  background:
+    radial-gradient(80% 90% at 50% 100%, rgb(140 210 255 / 0.55), transparent),
+    linear-gradient(rgb(255 255 255 / 0.22), rgb(255 255 255 / 0.06) 50%, rgb(255 255 255 / 0.02) 50%, rgb(255 255 255 / 0.12));
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.3);
+}
+.theme-is-aero .top-bar .nav-link[aria-current="page"] {
+  border-color: rgb(0 0 0 / 0.55);
+  background:
+    radial-gradient(80% 70% at 50% 100%, rgb(150 215 255 / 0.5), transparent),
+    linear-gradient(rgb(255 255 255 / 0.36), rgb(255 255 255 / 0.14) 50%, rgb(255 255 255 / 0.06) 50%, rgb(255 255 255 / 0.2));
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.4), 0 0 8px rgb(140 210 255 / 0.35);
+}
+.theme-is-aero .top-bar .nav-link[aria-current="page"]::after {
+  display: none;
+}
+.theme-is-aero .top-bar [data-variant="ghost"] {
+  color: #ffffff;
+}
+
+/* The window each page sits in. Its pane is a white rectangle drawn over
+   the glass, with a dark line round it, so the frame needs no element of
+   its own; the caption and its buttons are drawn before and after. */
+.theme-is-aero .top-bar + main {
+  position: relative;
+  width: calc(100% - 2rem);
+  margin-block: 1.25rem;
+  padding: calc(var(--aero-caption) + 1.25rem) calc(var(--aero-frame) + 1.25rem) calc(var(--aero-frame) + 1.5rem);
+  border: 1px solid rgb(0 0 0 / 0.72);
+  border-radius: 7px;
+  background:
+    linear-gradient(#ffffff, #ffffff) var(--aero-frame) var(--aero-caption) / calc(100% - 2 * var(--aero-frame))
+      calc(100% - var(--aero-caption) - var(--aero-frame)) no-repeat,
+    linear-gradient(rgb(36 64 104 / 0.6), rgb(36 64 104 / 0.6)) calc(var(--aero-frame) - 1px)
+      calc(var(--aero-caption) - 1px) / calc(100% - 2 * var(--aero-frame) + 2px)
+      calc(100% - var(--aero-caption) - var(--aero-frame) + 2px) no-repeat,
+    var(--aero-streaks),
+    var(--aero-glass),
+    var(--aero-tint);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.5), 0 8px 32px rgb(0 0 0 / 0.5);
+}
+.theme-is-aero .top-bar + main::before {
+  content: "MyReads";
+  content: "MyReads" / "";
+  position: absolute;
+  inset: 0 7.5rem auto 0;
+  height: var(--aero-caption);
+  padding-left: 0.75rem;
+  overflow: hidden;
+  color: #000000;
+  font-size: 0.8125rem;
+  line-height: var(--aero-caption);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  text-shadow: var(--aero-title-glow);
+}
+.theme-is-aero .top-bar + main::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0.375rem;
+  width: 98px;
+  height: 20px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='98' height='20'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23fff' stop-opacity='.75'/%3E%3Cstop offset='.48' stop-color='%23e3eef9' stop-opacity='.45'/%3E%3Cstop offset='.5' stop-color='%23b9cde3' stop-opacity='.35'/%3E%3Cstop offset='1' stop-color='%23e9f3fd' stop-opacity='.6'/%3E%3C/linearGradient%3E%3ClinearGradient id='r' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23e9a99b'/%3E%3Cstop offset='.48' stop-color='%23d7826c'/%3E%3Cstop offset='.5' stop-color='%23c1452d'/%3E%3Cstop offset='1' stop-color='%23d7683f'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M.5 -1h52v17a3 3 0 0 1-3 3H3.5a3 3 0 0 1-3-3z' fill='url(%23g)' stroke='%231d2b3d' stroke-opacity='.7'/%3E%3Cpath d='M26.5 0v19' stroke='%231d2b3d' stroke-opacity='.55'/%3E%3Cpath d='M1.5 0h50' stroke='%23fff' stroke-opacity='.6'/%3E%3Crect x='9' y='11' width='10' height='3' fill='%23fff' stroke='%231d2b3d' stroke-opacity='.75'/%3E%3Crect x='35' y='5' width='10' height='9' fill='none' stroke='%231d2b3d' stroke-opacity='.75' stroke-width='3'/%3E%3Crect x='35' y='5' width='10' height='9' fill='none' stroke='%23fff' stroke-width='1.5'/%3E%3Cpath d='M52.5 -1h45v17a3 3 0 0 1-3 3h-39a3 3 0 0 1-3-3z' fill='url(%23r)' stroke='%233b0e05' stroke-opacity='.75'/%3E%3Cpath d='M53.5 0h43' stroke='%23fff' stroke-opacity='.45'/%3E%3Cpath d='M71 6l8 7m0-7l-8 7' stroke='%232b1410' stroke-width='3.6' stroke-linecap='round' opacity='.55'/%3E%3Cpath d='M71 6l8 7m0-7l-8 7' stroke='%23fff' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+  pointer-events: none;
+}
+.theme-is-aero[data-section="library"] .top-bar + main::before {
+  content: "Library - MyReads";
+  content: "Library - MyReads" / "";
+}
+.theme-is-aero[data-section="book"] .top-bar + main::before {
+  content: "Book - MyReads";
+  content: "Book - MyReads" / "";
+}
+.theme-is-aero[data-section="series"] .top-bar + main::before {
+  content: "Series - MyReads";
+  content: "Series - MyReads" / "";
+}
+.theme-is-aero[data-section="stats"] .top-bar + main::before {
+  content: "Stats - MyReads";
+  content: "Stats - MyReads" / "";
+}
+.theme-is-aero[data-section="reading"] .top-bar + main::before {
+  content: "Now reading - MyReads";
+  content: "Now reading - MyReads" / "";
+}
+.theme-is-aero[data-section="quotes"] .top-bar + main::before {
+  content: "Quotes - MyReads";
+  content: "Quotes - MyReads" / "";
+}
+.theme-is-aero[data-section="room"] .top-bar + main::before {
+  content: "Reading room - MyReads";
+  content: "Reading room - MyReads" / "";
+}
+.theme-is-aero[data-section="account"] .top-bar + main::before {
+  content: "Account - MyReads";
+  content: "Account - MyReads" / "";
+}
+.theme-is-aero:has(.top-bar .nav-link[href="/books/new"][aria-current="page"]) .top-bar + main::before {
+  content: "Add book - MyReads";
+  content: "Add book - MyReads" / "";
+}
+.theme-is-aero:has(.top-bar .nav-link[href="/books/check"][aria-current="page"]) .top-bar + main::before {
+  content: "Check - MyReads";
+  content: "Check - MyReads" / "";
+}
+@media (width < 40rem) {
+  :root[data-theme="aero"] {
+    --aero-frame: 5px;
+    --aero-caption: 1.75rem;
+  }
+  .theme-is-aero .top-bar + main {
+    width: calc(100% - 0.5rem);
+    margin-block: 0.25rem;
+    padding-inline: calc(var(--aero-frame) + 0.75rem);
+  }
+  .theme-is-aero .top-bar + main::after {
+    width: 74px;
+    height: 15px;
+    background-size: 74px 15px;
+  }
+  .theme-is-aero .top-bar + main::before {
+    right: 5.5rem;
+  }
+}
+
+/* Buttons: glossy grey, blue under the pointer and deeper blue pressed.
+   The main one is blue already. */
+.theme-is-aero [data-size][data-variant] {
+  border: 1px solid #707070;
+  border-radius: 3px;
+  color: #000000;
+  background: var(--aero-button);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.7);
+  text-shadow: none;
+  transition: none;
+}
+.theme-is-aero [data-size][data-variant="default"] {
+  border-color: #3c7fb1;
+  background: var(--aero-button-hot);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.7), 0 0 0 1px rgb(51 153 255 / 0.25);
+}
+.theme-is-aero [data-size][data-variant="destructive"] {
+  color: var(--destructive);
+}
+.theme-is-aero [data-size]:is([data-variant="ghost"], [data-variant="link"]) {
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+}
+.theme-is-aero [data-size][data-variant="link"] {
+  color: var(--primary);
+}
+.theme-is-aero [data-size][data-variant]:hover {
+  border-color: #3c7fb1;
+  background: var(--aero-button-hot);
+  color: #000000;
+}
+.theme-is-aero [data-size][data-variant="default"]:hover {
+  border-color: #2c628b;
+  background: linear-gradient(#dff2fd, #c4e8fc 49%, #a5dbfa 50%, #8cccf0);
+}
+.theme-is-aero [data-size][data-variant="ghost"]:is(:hover, [aria-expanded="true"]) {
+  border-color: #b8d6fb;
+  background: var(--aero-hot);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.7);
+}
+.theme-is-aero .top-bar [data-size][data-variant="ghost"]:is(:hover, [aria-expanded="true"]) {
+  border-color: rgb(0 0 0 / 0.45);
+  color: #ffffff;
+  background: linear-gradient(rgb(255 255 255 / 0.25), rgb(255 255 255 / 0.08) 50%, rgb(255 255 255 / 0.02) 50%, rgb(255 255 255 / 0.14));
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.3);
+}
+.theme-is-aero [data-size][data-variant="link"]:hover {
+  background: transparent;
+  text-decoration: underline;
+}
+.theme-is-aero [data-size]:not([data-variant="ghost"], [data-variant="link"]):is(:active:not(:disabled), [aria-expanded="true"]) {
+  translate: none;
+  border-color: #2c628b;
+  background: var(--aero-button-down);
+  box-shadow: inset 1px 1px 2px rgb(0 0 0 / 0.18);
+}
+.theme-is-aero [data-size][data-variant]:disabled {
+  opacity: 1;
+  color: #838383;
+}
+.theme-is-aero [data-size]:not([data-variant="ghost"], [data-variant="link"]):disabled {
+  border-color: #adb2b5;
+  background: #f4f4f4;
+  box-shadow: none;
+}
+.theme-is-aero :is([data-size][data-variant], [data-slot="select-trigger"], .select-like, [role="tab"], [data-slot="tabs-trigger"]):focus-visible {
+  outline: 1px dotted #000000;
+  outline-offset: -4px;
+  --tw-ring-shadow: 0 0 #0000;
+}
+.theme-is-aero .top-bar :is([data-size][data-variant], .nav-link, .wordmark):focus-visible {
+  outline-color: #ffffff;
+}
+
+/* Fields: white, with the pale bevel of a Windows 7 text box, blue under
+   the pointer and bluer while typed in. */
+.theme-is-aero :is([data-slot="input"], [data-slot="textarea"]),
+.theme-is-aero input:is([type="text"], [type="search"], [type="number"], [type="date"], [type="password"], [type="url"], [type="email"], :not([type])),
+.theme-is-aero textarea {
+  border: 1px solid;
+  border-color: #abadb3 #dbdfe6 #e3e9ef #e2e3ea;
+  border-radius: 2px;
+  background: #ffffff;
+  box-shadow: none;
+}
+.theme-is-aero :is([data-slot="input"], [data-slot="textarea"], input, textarea):hover {
+  border-color: #5794bf #b7d5ea #c7e2f1 #c5daed;
+}
+.theme-is-aero :is([data-slot="input"], [data-slot="textarea"], input, textarea):focus-visible {
+  border-color: #3d7bad #a4c9e3 #b7d9ed #b5cfe7;
+  --tw-ring-shadow: 0 0 #0000;
+  outline: none;
+}
+.theme-is-aero :is([data-slot="input"], [data-slot="textarea"], input, textarea)::placeholder {
+  color: #6d6d6d;
+  font-style: italic;
+}
+/* A drop-down list: a button with its arrow. */
+.theme-is-aero :is([data-slot="select-trigger"], .select-like) {
+  border: 1px solid #707070;
+  border-radius: 3px;
+  color: #000000;
+  background: var(--aero-button);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.7);
+}
+.theme-is-aero :is([data-slot="select-trigger"], .select-like):hover,
+.theme-is-aero :is([data-slot="select-trigger"], .select-like)[data-state="open"] {
+  border-color: #3c7fb1;
+  background: var(--aero-button-hot);
+}
+.theme-is-aero :is([data-slot="select-trigger"], .select-like) > svg:last-child {
+  color: #000000;
+  opacity: 1;
+}
+
+/* Check boxes and radio buttons: a bevelled white square or circle, a
+   blue-black tick or dot. */
+.theme-is-aero input[type="checkbox"],
+.theme-is-aero input[type="radio"] {
+  appearance: none;
+  flex: none;
+  width: 0.8125rem;
+  height: 0.8125rem;
+  margin: 0;
+  border: 1px solid #8e8f8f;
+  border-radius: 0;
+  background: linear-gradient(135deg, #dcdcdc, #fbfbfb) content-box, #f4f4f4;
+  padding: 2px;
+  box-shadow: inset 0 0 0 1px #ffffff;
+}
+.theme-is-aero input[type="radio"] {
+  border-radius: 50%;
+}
+.theme-is-aero input:is([type="checkbox"], [type="radio"]):hover {
+  border-color: #3c7fb1;
+  background: linear-gradient(135deg, #b1dffd, #e9f7fe) content-box, #def3fd;
+}
+.theme-is-aero input[type="checkbox"]:checked {
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 9 9'%3E%3Cpath d='M1 4.5l2.4 2.6L8 1.5' fill='none' stroke='%234a5f97' stroke-width='1.9'/%3E%3C/svg%3E") center / 100% no-repeat,
+    linear-gradient(135deg, #dcdcdc, #fbfbfb) content-box,
+    #f4f4f4;
+}
+.theme-is-aero input[type="radio"]:checked {
+  background: radial-gradient(circle, #4a5f97 0 2.5px, #a9c3eb 3.5px, transparent 4.5px), linear-gradient(135deg, #dcdcdc, #fbfbfb) content-box, #f4f4f4;
+}
+.theme-is-aero input:is([type="checkbox"], [type="radio"]):focus-visible {
+  outline: 1px dotted #000000;
+  outline-offset: 2px;
+}
+.theme-is-aero button[role="switch"] > span:last-child {
+  border: 1px solid #abadb3;
+  background: linear-gradient(#e3e3e3, #f7f7f7);
+  box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.15);
+}
+.theme-is-aero button[role="switch"][aria-checked="true"] > span:last-child {
+  border-color: #3c7fb1;
+  background: var(--aero-button-down);
+}
+.theme-is-aero button[role="switch"] > span:last-child > span {
+  border: 1px solid #707070;
+  background: var(--aero-button);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.7);
+}
+
+/* Panels: white, a pale blue outline, a blue title. Library tiles: an
+   Explorer item, lit blue under the pointer. */
+.theme-is-aero [data-slot="card"] {
+  border: 1px solid #c9d6e5;
+  border-radius: 4px;
+  background: linear-gradient(#ffffff, #f8fafd);
+  box-shadow: 0 1px 2px rgb(20 50 100 / 0.07);
+  --tw-ring-shadow: 0 0 #0000;
+}
+.theme-is-aero [data-slot="card-title"] {
+  font-size: 1rem;
+}
+.theme-is-aero [data-slot="card-footer"] {
+  border-top: 1px solid #dfdfdf;
+  border-radius: 0;
+  background: #f0f0f0;
+}
+.theme-is-aero .surface:not([data-slot="card"]) {
+  border: 1px solid #e6edf5;
+  border-radius: 3px;
+  background: #ffffff;
+  box-shadow: none;
+}
+.theme-is-aero .surface:not([data-slot="card"]):hover {
+  border-color: #b8d6fb;
+  background: var(--aero-hot);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.8);
+  transform: none;
+}
+.theme-is-aero .surface:not([data-slot="card"]):focus-visible {
+  outline: none;
+  border-color: #7da2ce;
+  background: var(--aero-chosen);
+}
+
+/* Tabs: a Windows 7 tab strip, the open tab white and standing taller. */
+.theme-is-aero .shelf-tabs {
+  gap: 0;
+  padding-left: 2px;
+  border-bottom: 1px solid #898c95;
+}
+.theme-is-aero .shelf-tabs > a,
+.theme-is-aero [data-slot="tabs-trigger"] {
+  position: relative;
+  margin: 2px 0 -1px;
+  padding: 0.25rem 0.625rem;
+  border: 1px solid #898c95;
+  border-bottom-color: transparent;
+  border-radius: 3px 3px 0 0;
+  color: #000000;
+  background: var(--aero-button);
+}
+.theme-is-aero .shelf-tabs > a + a,
+.theme-is-aero [data-slot="tabs-trigger"] + [data-slot="tabs-trigger"] {
+  margin-left: -1px;
+}
+.theme-is-aero .shelf-tabs > a:hover,
+.theme-is-aero [data-slot="tabs-trigger"]:hover {
+  border-color: #3c7fb1 #3c7fb1 transparent;
+  background: var(--aero-button-hot);
+}
+.theme-is-aero .shelf-tabs > a[aria-current="page"],
+.theme-is-aero [data-slot="tabs-trigger"][data-state="active"] {
+  z-index: 1;
+  margin-top: 0;
+  padding-bottom: 0.375rem;
+  border-color: #898c95 #898c95 #ffffff;
+  font-weight: 400;
+  background: #ffffff;
+}
+.theme-is-aero .shelf-tabs > a > span {
+  border-radius: 2px;
+  background: rgb(0 0 0 / 0.06);
+}
+.theme-is-aero [data-slot="tabs-list"] {
+  border-radius: 0;
+  background: transparent;
+  box-shadow: inset 0 -1px #898c95;
+}
+.theme-is-aero [data-slot="tabs-trigger"]::after {
+  display: none;
+}
+/* Chips: toolbar buttons, the chosen one lit. */
+.theme-is-aero :is(a, button).rounded-full.border:not(.aspect-square, .border-2) {
+  border-color: #d5e1ee;
+  border-radius: 3px;
+  color: #000000;
+  background: linear-gradient(#ffffff, #f2f6fb);
+}
+.theme-is-aero :is(a, button).rounded-full.border:not(.aspect-square, .border-2):hover {
+  border-color: #b8d6fb;
+  background: var(--aero-hot);
+}
+.theme-is-aero :is(a, button).rounded-full.border:is([class*="border-primary"], [aria-current="page"], [aria-pressed="true"]):not(.aspect-square, .border-2) {
+  border-color: #7da2ce;
+  background: var(--aero-chosen);
+}
+.theme-is-aero kbd {
+  border: 1px solid #707070;
+  border-radius: 3px;
+  color: #000000;
+  background: var(--aero-button);
+}
+
+/* Progress: the green bar. A shine slides along it once as the page opens,
+   once the bar has grown in, and then it rests: forever, every bar would
+   sit on a layer of its own and wake the page each time round. */
+.theme-is-aero :has(> .bar-grow) {
+  border: 1px solid #b2b2b2;
+  border-radius: 3px;
+  background: linear-gradient(#f3f3f3, #e7e7e7 49%, #dadada 50%, #ebebeb);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.7);
+}
+.theme-is-aero .bar-grow {
+  position: relative;
+  overflow: hidden;
+  border-radius: 2px;
+}
+.theme-is-aero .bar-grow[class*="primary"] {
+  background: linear-gradient(#cdf8c4, #78df67 44%, #2bb72b 50%, #4ccb40);
+}
+.theme-is-aero .bar-grow[class*="primary"]::after {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 40%;
+  background: linear-gradient(90deg, rgb(255 255 255 / 0), rgb(255 255 255 / 0.6), rgb(255 255 255 / 0));
+  translate: -100% 0;
+  animation: aero-shine 1.6s 0.9s ease-in-out backwards;
+}
+@keyframes aero-shine {
+  to {
+    translate: 250% 0;
+  }
+}
+
+/* Menus: light, with an outline and a shadow; the item under the pointer
+   lit pale blue. */
+.theme-is-aero :is([data-slot="dropdown-menu-content"], [data-slot="select-content"], [data-slot="dropdown-menu-sub-content"]) {
+  border: 1px solid #979797;
+  border-radius: 0;
+  background: linear-gradient(90deg, #f1f1f1 0 1.75rem, #e2e3e3 1.75rem calc(1.75rem + 1px), #ffffff calc(1.75rem + 1px) calc(1.75rem + 2px), #f5f5f5 calc(1.75rem + 2px));
+  box-shadow: 2px 2px 3px rgb(0 0 0 / 0.3);
+  --tw-ring-shadow: 0 0 #0000;
+}
+.theme-is-aero :is([data-slot="dropdown-menu-item"], [data-slot="select-item"], [data-slot="dropdown-menu-checkbox-item"], [data-slot="dropdown-menu-radio-item"], [data-slot="dropdown-menu-sub-trigger"]) {
+  border: 1px solid transparent;
+  border-radius: 3px;
+}
+.theme-is-aero :is([data-slot="dropdown-menu-item"], [data-slot="select-item"], [data-slot="dropdown-menu-checkbox-item"], [data-slot="dropdown-menu-radio-item"], [data-slot="dropdown-menu-sub-trigger"]):is(:focus, [data-highlighted]) {
+  border-color: #aeccf1;
+  color: #000000;
+  background: linear-gradient(#f3f8fe, #dceafb);
+}
+
+/* Popovers and dialogs: windows of blurred glass round a white pane. */
+.theme-is-aero [data-slot="popover-content"] {
+  border: var(--aero-frame) solid transparent;
+  border-radius: 6px;
+  background:
+    linear-gradient(#ffffff, #ffffff) padding-box,
+    var(--aero-streaks) border-box,
+    var(--aero-glass) border-box,
+    var(--aero-tint) border-box;
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 0.7), inset 0 0 0 1px rgb(36 64 104 / 0.6), 0 8px 24px rgb(0 0 0 / 0.4);
+  backdrop-filter: blur(10px) saturate(1.3);
+  --tw-ring-shadow: 0 0 #0000;
+}
+.theme-is-aero [data-slot="dialog-overlay"] {
+  background: rgb(0 0 0 / 0.18);
+  backdrop-filter: none;
+}
+.theme-is-aero [data-slot="dialog-content"] {
+  padding: calc(var(--aero-caption) + 1rem) calc(var(--aero-frame) + 1.25rem) calc(var(--aero-frame) + 1.25rem);
+  border: 1px solid rgb(0 0 0 / 0.72);
+  border-radius: 7px;
+  background:
+    linear-gradient(#ffffff, #ffffff) var(--aero-frame) var(--aero-caption) / calc(100% - 2 * var(--aero-frame))
+      calc(100% - var(--aero-caption) - var(--aero-frame)) no-repeat,
+    linear-gradient(rgb(36 64 104 / 0.6), rgb(36 64 104 / 0.6)) calc(var(--aero-frame) - 1px)
+      calc(var(--aero-caption) - 1px) / calc(100% - 2 * var(--aero-frame) + 2px)
+      calc(100% - var(--aero-caption) - var(--aero-frame) + 2px) no-repeat,
+    var(--aero-streaks),
+    var(--aero-glass),
+    var(--aero-tint);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.5), 0 12px 44px rgb(0 0 0 / 0.55);
+  backdrop-filter: blur(10px) saturate(1.3);
+  --tw-ring-shadow: 0 0 #0000;
+}
+/* A dialog's title is its caption. */
+.theme-is-aero [data-slot="dialog-content"] > [data-slot="dialog-header"]:first-child > [data-slot="dialog-title"]:first-child {
+  position: absolute;
+  inset: 0 4.5rem auto 0;
+  height: var(--aero-caption);
+  padding-left: 0.75rem;
+  overflow: hidden;
+  color: #000000;
+  font-size: 0.8125rem;
+  font-weight: 400;
+  line-height: var(--aero-caption);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  text-shadow: var(--aero-title-glow);
+}
+.theme-is-aero [data-slot="dialog-content"] > [data-slot="dialog-close"] {
+  top: -1px;
+  right: 0.375rem;
+  width: 45px;
+  height: 20px;
+  min-width: 0;
+  padding: 0;
+  border: 1px solid rgb(59 14 5 / 0.75);
+  border-radius: 0 0 4px 4px;
+  color: #ffffff;
+  background: linear-gradient(#e9a99b, #d7826c 48%, #c1452d 50%, #d7683f);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.35);
+  opacity: 1;
+}
+.theme-is-aero [data-slot="dialog-content"] > [data-slot="dialog-close"]:hover {
+  background: linear-gradient(#f4c3b6, #e8907a 48%, #d9502f 50%, #ea8a5c);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.5), 0 0 10px rgb(255 120 80 / 0.7);
+}
+.theme-is-aero [data-slot="dialog-content"] > [data-slot="dialog-close"] svg {
+  width: 0.75rem;
+  height: 0.75rem;
+  stroke-width: 3.5;
+  filter: drop-shadow(0 0 1px rgb(43 20 16 / 0.8));
+}
+.theme-is-aero [data-slot="dialog-footer"] {
+  border-top: 1px solid #dfdfdf;
+  border-radius: 0;
+  background: #f0f0f0;
+}
+.theme-is-aero .bulk-bar {
+  border: var(--aero-frame) solid transparent;
+  border-radius: 7px;
+  background:
+    linear-gradient(#ffffff, #ffffff) padding-box,
+    var(--aero-streaks) border-box,
+    var(--aero-glass) border-box,
+    var(--aero-tint) border-box;
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 0.7), inset 0 0 0 1px rgb(36 64 104 / 0.6), 0 10px 30px rgb(0 0 0 / 0.45);
+  backdrop-filter: blur(10px) saturate(1.3);
+}
+
+/* Scrollbars: a pale trough, a glossy thumb that turns blue under the
+   pointer. */
+[data-theme="aero"]::-webkit-scrollbar,
+.theme-is-aero ::-webkit-scrollbar {
+  width: 17px;
+  height: 17px;
+}
+[data-theme="aero"]::-webkit-scrollbar-track,
+.theme-is-aero ::-webkit-scrollbar-track {
+  background: linear-gradient(90deg, #e3e3e3, #f6f6f6 30%, #f6f6f6 70%, #e6e6e6);
+}
+[data-theme="aero"]::-webkit-scrollbar-thumb,
+.theme-is-aero ::-webkit-scrollbar-thumb {
+  border: 1px solid #979797;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #f3f3f3, #e8e8e8 49%, #d9d9d9 50%, #ececec);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.7);
+}
+[data-theme="aero"]::-webkit-scrollbar-thumb:hover,
+.theme-is-aero ::-webkit-scrollbar-thumb:hover {
+  border-color: #3c7fb1;
+  background: linear-gradient(90deg, #e3f4fc, #d6eefb 49%, #bfe4f9 50%, #a9d9f6);
+}
+[data-theme="aero"]::-webkit-scrollbar-thumb:horizontal,
+.theme-is-aero ::-webkit-scrollbar-thumb:horizontal {
+  background: linear-gradient(#f3f3f3, #e8e8e8 49%, #d9d9d9 50%, #ececec);
+}
+[data-theme="aero"]::-webkit-scrollbar-corner,
+.theme-is-aero ::-webkit-scrollbar-corner {
+  background: #f0f0f0;
+}
+
+/* The sign-in pages: a glass window on the desktop. */
+.theme-is-aero .auth-backdrop {
+  display: none;
+}
+.theme-is-aero main:has(> .auth-backdrop) .wordmark {
+  color: #ffffff;
+  font-family: var(--aero-font);
+  text-shadow: 0 1px 3px rgb(0 0 0 / 0.7);
+}
+.theme-is-aero main:has(> .auth-backdrop) [data-slot="card"] {
+  border: var(--aero-frame) solid transparent;
+  border-radius: 7px;
+  background:
+    linear-gradient(#ffffff, #ffffff) padding-box,
+    var(--aero-streaks) border-box,
+    var(--aero-glass) border-box,
+    var(--aero-tint) border-box;
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 0.72), inset 0 0 0 1px rgb(36 64 104 / 0.6), 0 12px 40px rgb(0 0 0 / 0.5);
+}
+
+/* ── Golden Gate ───────────────────────────────────────────────────────────
+   macOS Golden Gate: the bridge at sunset, fog rolling under the deck, and
+   the app a window of Liquid Glass in front of it. The window's glass is
+   frosted, lit along its rim and darkened at its edge; a toolbar of glass
+   floats across its top, holding the page links, the open one a lighter
+   pill. Panels are panes of glass inside it, buttons are glass capsules
+   (the main one tinted International Orange, the bridge's colour) that
+   give a little when pressed, menus and dialogs are glass over the page,
+   and a dialog closes from the red of three traffic lights, round and
+   glossy as Aqua's were. The type is the system's, San Francisco on a Mac.
+   The window is drawn on a fixed layer behind the page, from a softened
+   copy of the picture laid exactly over the sharp one, so it looks blurred
+   without blurring anything: the page scrolls over it at no cost. Only the
+   toolbar, menus and dialogs, which sit over the page, blur for real. */
+:root[data-theme="golden-gate"] {
+  --gg-font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro", "Helvetica Neue", "Inter", system-ui, sans-serif;
+  /* Where the window sits, and the picture's size and place, as the page
+     behind draws it (cover, its middle at 70% down): the window repeats
+     them so its softened copy lines up with the picture around it. */
+  --gg-top: 0.625rem;
+  --gg-x: max(0.625rem, calc(50vw - 37.5rem));
+  --gg-w: max(100vw, 160vh);
+  --gg-h: max(62.5vw, 100vh);
+  --gg-radius: 1.75rem;
+  --gg-fill: rgb(255 255 255 / 0.55);
+  /* Light along the rim of a pane, brightest at the top left. */
+  --gg-specular: linear-gradient(
+    140deg,
+    rgb(255 255 255 / 0.95),
+    rgb(255 255 255 / 0.3) 30%,
+    rgb(255 255 255 / 0.08) 55%,
+    rgb(255 255 255 / 0.6) 92%
+  );
+  --gg-edge: 0 0 0 0.5px rgb(50 20 40 / 0.18);
+  --gg-lift: 0 8px 24px -12px rgb(50 20 40 / 0.35);
+  --gg-ring: 0 0 0 3.5px color-mix(in oklab, var(--primary) 32%, transparent);
+  --gg-light: radial-gradient(circle at 50% 28%, rgb(255 255 255 / 0.9) 0 14%, rgb(255 255 255 / 0) 46%);
+  --heading-font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro", "Helvetica Neue", "Inter", system-ui, sans-serif;
+  --surface-shadow: none;
+  --chart-1: #b8361f;
+  --chart-2: #e8902f;
+  --chart-3: #6a4b9c;
+  --chart-4: #2f7fb0;
+  --chart-5: #8a7e86;
+  scrollbar-width: thin;
+  scrollbar-color: rgb(50 20 40 / 0.35) transparent;
+}
+.theme-is-golden-gate body {
+  font-family: var(--gg-font);
+}
+.theme-is-golden-gate body::before {
+  background-position: center 70%;
+}
+/* The window. */
+.theme-is-golden-gate body::after {
+  content: "";
+  position: fixed;
+  inset: var(--gg-top) var(--gg-x);
+  z-index: -1;
+  pointer-events: none;
+  background:
+    linear-gradient(rgb(255 252 251 / 0.78), rgb(255 249 247 / 0.72)),
+    url("/themes/golden-gate-frosted.svg")
+      calc((100vw - var(--gg-w)) * 0.5 - var(--gg-x)) calc((100vh - var(--gg-h)) * 0.7 - var(--gg-top)) /
+      var(--gg-w) var(--gg-h) no-repeat;
+  border-radius: var(--gg-radius);
+  box-shadow:
+    inset 0 0 0 0.5px rgb(40 15 35 / 0.4),
+    inset 0 1.5px 0 0.5px rgb(255 255 255 / 0.9),
+    inset 0 0 0 1.5px rgb(255 255 255 / 0.4);
+}
+/* The picture again around the window, over the page: what scrolls past
+   the window's edge goes behind it rather than over the bridge. The
+   window's shape is cut out of it with a mask (two bands and four round
+   corners, taken away from the whole), and like the window it never
+   moves, so scrolling costs nothing. Under the toolbar, menus and
+   dialogs. */
+.theme-is-golden-gate::after {
+  --gg-r2: calc(2 * var(--gg-radius));
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 35;
+  pointer-events: none;
+  background: var(--page-gradient) center 70% / cover no-repeat, var(--background);
+  mask:
+    linear-gradient(#000 0 0),
+    linear-gradient(#000 0 0) var(--gg-x) calc(var(--gg-top) + var(--gg-radius)) /
+      calc(100% - 2 * var(--gg-x)) calc(100% - 2 * var(--gg-top) - var(--gg-r2)) no-repeat,
+    linear-gradient(#000 0 0) calc(var(--gg-x) + var(--gg-radius)) var(--gg-top) /
+      calc(100% - 2 * var(--gg-x) - var(--gg-r2)) calc(100% - 2 * var(--gg-top)) no-repeat,
+    radial-gradient(closest-side, #000 98%, transparent) left var(--gg-x) top var(--gg-top) / var(--gg-r2) var(--gg-r2) no-repeat,
+    radial-gradient(closest-side, #000 98%, transparent) right var(--gg-x) top var(--gg-top) / var(--gg-r2) var(--gg-r2) no-repeat,
+    radial-gradient(closest-side, #000 98%, transparent) left var(--gg-x) bottom var(--gg-top) / var(--gg-r2) var(--gg-r2) no-repeat,
+    radial-gradient(closest-side, #000 98%, transparent) right var(--gg-x) bottom var(--gg-top) / var(--gg-r2) var(--gg-r2) no-repeat;
+  mask-composite: exclude, add, add, add, add, add, add;
+}
+@media (width < 40rem) {
+  :root[data-theme="golden-gate"] {
+    --gg-top: 0.375rem;
+    --gg-x: 0.375rem;
+    --gg-radius: 1.375rem;
+  }
+}
+.theme-is-golden-gate ::selection {
+  background: color-mix(in oklab, var(--primary) 26%, transparent);
+}
+.theme-is-golden-gate h1 {
+  font-weight: 700;
+  letter-spacing: -0.022em;
+}
+.theme-is-golden-gate .book-backdrop {
+  display: none;
+}
+
+/* The toolbar: a capsule of glass floating over the top of the window,
+   blurring the page as it scrolls under it. */
+.theme-is-golden-gate .top-bar {
+  padding: calc(var(--gg-top) + 0.5rem) calc(var(--gg-x) + 0.75rem) 0;
+  border: 0;
+  background: transparent;
+  backdrop-filter: none;
+  box-shadow: none;
+  animation: none;
+}
+.theme-is-golden-gate .top-bar > div {
+  height: 3rem;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background:
+    linear-gradient(rgb(255 255 255 / 0.5), rgb(255 255 255 / 0.5)) padding-box,
+    var(--gg-specular) border-box;
+  box-shadow: var(--gg-edge), 0 10px 28px -10px rgb(50 20 40 / 0.4);
+  backdrop-filter: blur(18px) saturate(1.8);
+}
+.theme-is-golden-gate .top-bar .wordmark {
+  font-family: var(--heading-font);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.theme-is-golden-gate .top-bar .wordmark > svg {
+  color: var(--primary);
+}
+.theme-is-golden-gate .top-bar .nav-link {
+  border-radius: 999px;
+  color: #1d1d1f;
+}
+.theme-is-golden-gate .top-bar .nav-link:hover {
+  background: rgb(50 20 40 / 0.06);
+}
+.theme-is-golden-gate .top-bar .nav-link[aria-current="page"] {
+  font-weight: 600;
+  background: rgb(255 255 255 / 0.85);
+  box-shadow: var(--gg-edge), 0 1px 4px rgb(50 20 40 / 0.14);
+}
+.theme-is-golden-gate .top-bar .nav-link[aria-current="page"]::after {
+  display: none;
+}
+.theme-is-golden-gate .top-bar .nav-link[aria-current="page"] [data-slot="icon"] {
+  color: var(--primary);
+}
+.theme-is-golden-gate .top-bar + main {
+  padding-top: 1.75rem;
+}
+
+/* Buttons: capsules of glass that give a little when pressed; the main one
+   tinted with the accent. */
+.theme-is-golden-gate [data-size][data-variant] {
+  border: 1px solid transparent;
+  border-radius: 999px;
+  color: #1d1d1f;
+  font-weight: 500;
+  background:
+    linear-gradient(rgb(255 255 255 / 0.65), rgb(255 255 255 / 0.65)) padding-box,
+    var(--gg-specular) border-box;
+  box-shadow: var(--gg-edge), 0 1px 3px rgb(50 20 40 / 0.12);
+  transition: scale 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.theme-is-golden-gate [data-size][data-variant="default"] {
+  color: var(--primary-foreground);
+  background:
+    linear-gradient(rgb(255 255 255 / 0.3), rgb(255 255 255 / 0) 55%) padding-box,
+    linear-gradient(var(--primary), var(--primary)) padding-box,
+    var(--gg-specular) border-box;
+  box-shadow: 0 0 0 0.5px color-mix(in oklab, var(--primary) 70%, #000000), 0 3px 10px -3px color-mix(in oklab, var(--primary) 70%, transparent);
+}
+.theme-is-golden-gate [data-size][data-variant="destructive"] {
+  color: var(--destructive);
+}
+.theme-is-golden-gate [data-size]:is([data-variant="ghost"], [data-variant="link"]) {
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+}
+.theme-is-golden-gate [data-size][data-variant="link"] {
+  color: var(--primary);
+}
+.theme-is-golden-gate [data-size][data-variant]:not([data-variant="default"], [data-variant="ghost"], [data-variant="link"]):hover {
+  background:
+    linear-gradient(rgb(255 255 255 / 0.85), rgb(255 255 255 / 0.85)) padding-box,
+    var(--gg-specular) border-box;
+}
+.theme-is-golden-gate [data-size][data-variant="default"]:hover {
+  background:
+    linear-gradient(rgb(255 255 255 / 0.38), rgb(255 255 255 / 0.06) 55%) padding-box,
+    linear-gradient(var(--primary), var(--primary)) padding-box,
+    var(--gg-specular) border-box;
+}
+.theme-is-golden-gate [data-size][data-variant="ghost"]:is(:hover, [aria-expanded="true"]) {
+  background: rgb(50 20 40 / 0.07);
+}
+.theme-is-golden-gate [data-size][data-variant="link"]:hover {
+  background: transparent;
+}
+.theme-is-golden-gate [data-size][data-variant]:active:not(:disabled) {
+  translate: none;
+  scale: 0.96;
+}
+.theme-is-golden-gate [data-size][data-variant]:disabled {
+  opacity: 0.45;
+}
+.theme-is-golden-gate :is([data-size][data-variant], [data-slot="select-trigger"], .select-like, [role="tab"], [data-slot="tabs-trigger"], .shelf-tabs > a):focus-visible {
+  outline: none;
+  --tw-ring-shadow: 0 0 #0000;
+  box-shadow: var(--gg-edge), var(--gg-ring);
+}
+
+/* Fields: wells of glass, ringed in the accent while typed in; the search
+   field a capsule. */
+.theme-is-golden-gate :is([data-slot="input"], [data-slot="textarea"]),
+.theme-is-golden-gate input:is([type="text"], [type="search"], [type="number"], [type="date"], [type="password"], [type="url"], [type="email"], :not([type])),
+.theme-is-golden-gate textarea {
+  border: 0;
+  border-radius: 0.625rem;
+  background: rgb(255 255 255 / 0.72);
+  box-shadow: inset 0 0 0 0.5px rgb(50 20 40 / 0.22), inset 0 1px 2px rgb(50 20 40 / 0.07);
+}
+.theme-is-golden-gate input[type="search"],
+.theme-is-golden-gate input[placeholder^="Search"] {
+  border-radius: 999px;
+}
+.theme-is-golden-gate :is([data-slot="input"], [data-slot="textarea"], input, textarea):focus-visible {
+  outline: none;
+  --tw-ring-shadow: 0 0 #0000;
+  box-shadow: inset 0 0 0 1px var(--primary), var(--gg-ring);
+}
+.theme-is-golden-gate :is([data-slot="input"], [data-slot="textarea"], input, textarea)::placeholder {
+  color: #7a7078;
+}
+.theme-is-golden-gate :is([data-slot="select-trigger"], .select-like) {
+  border: 1px solid transparent;
+  border-radius: 999px;
+  color: #1d1d1f;
+  background:
+    linear-gradient(rgb(255 255 255 / 0.65), rgb(255 255 255 / 0.65)) padding-box,
+    var(--gg-specular) border-box;
+  box-shadow: var(--gg-edge), 0 1px 3px rgb(50 20 40 / 0.12);
+}
+.theme-is-golden-gate :is([data-slot="select-trigger"], .select-like) > svg:last-child {
+  color: var(--primary);
+  opacity: 1;
+}
+.theme-is-golden-gate input[type="checkbox"],
+.theme-is-golden-gate input[type="radio"] {
+  appearance: none;
+  flex: none;
+  width: 1rem;
+  height: 1rem;
+  margin: 0;
+  border: 0;
+  border-radius: 0.3125rem;
+  background: rgb(255 255 255 / 0.8);
+  box-shadow: inset 0 0 0 0.5px rgb(50 20 40 / 0.3), 0 1px 2px rgb(50 20 40 / 0.1);
+}
+.theme-is-golden-gate input[type="radio"] {
+  border-radius: 50%;
+}
+.theme-is-golden-gate input[type="checkbox"]:checked {
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.6 6.3l2.3 2.3 4.5-5' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 85% no-repeat,
+    linear-gradient(rgb(255 255 255 / 0.25), transparent),
+    var(--primary);
+}
+.theme-is-golden-gate input[type="radio"]:checked {
+  background: radial-gradient(circle, #ffffff 0 22%, transparent 27%), var(--primary);
+}
+.theme-is-golden-gate input:is([type="checkbox"], [type="radio"]):focus-visible {
+  outline: none;
+  box-shadow: var(--gg-ring);
+}
+.theme-is-golden-gate button[role="switch"] > span:last-child {
+  border: 0;
+  background: rgb(50 20 40 / 0.14);
+  box-shadow: inset 0 0 0 0.5px rgb(50 20 40 / 0.12);
+}
+.theme-is-golden-gate button[role="switch"][aria-checked="true"] > span:last-child {
+  background: var(--primary);
+}
+.theme-is-golden-gate button[role="switch"] > span:last-child > span {
+  background: linear-gradient(#ffffff, #f4f1f2);
+  box-shadow: 0 0 0 0.5px rgb(50 20 40 / 0.15), 0 2px 4px rgb(50 20 40 / 0.25);
+}
+
+/* Panels: panes of glass in the window, the rim catching the light. Library
+   tiles too, lighter, and lit up under the pointer. */
+.theme-is-golden-gate [data-slot="card"] {
+  border: 1px solid transparent;
+  border-radius: 1.25rem;
+  background:
+    linear-gradient(var(--gg-fill), var(--gg-fill)) padding-box,
+    var(--gg-specular) border-box;
+  box-shadow: var(--gg-edge), var(--gg-lift);
+  --tw-ring-shadow: 0 0 #0000;
+}
+.theme-is-golden-gate :is([data-slot="card-title"], [data-slot="dialog-title"]) {
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.theme-is-golden-gate [data-slot="card-footer"] {
+  border-top: 0.5px solid rgb(50 20 40 / 0.12);
+  background: rgb(255 255 255 / 0.3);
+}
+.theme-is-golden-gate .surface:not([data-slot="card"]) {
+  border: 1px solid transparent;
+  border-radius: 1rem;
+  background:
+    linear-gradient(rgb(255 255 255 / 0.42), rgb(255 255 255 / 0.42)) padding-box,
+    var(--gg-specular) border-box;
+  box-shadow: var(--gg-edge), 0 4px 14px -8px rgb(50 20 40 / 0.3);
+}
+.theme-is-golden-gate .surface:not([data-slot="card"]):hover {
+  background:
+    linear-gradient(rgb(255 255 255 / 0.72), rgb(255 255 255 / 0.72)) padding-box,
+    var(--gg-specular) border-box;
+}
+.theme-is-golden-gate .surface:not([data-slot="card"]):focus-visible {
+  outline: none;
+  box-shadow: var(--gg-edge), var(--gg-ring);
+}
+.theme-is-golden-gate .surface .book-cover {
+  border-radius: 0.5rem;
+}
+
+/* Tabs and chips: pills, the chosen one a lighter pane of glass. */
+.theme-is-golden-gate .shelf-tabs {
+  gap: 0.25rem;
+  padding-bottom: 0.625rem;
+  border-bottom: 0.5px solid rgb(50 20 40 / 0.14);
+}
+.theme-is-golden-gate .shelf-tabs > a,
+.theme-is-golden-gate [data-slot="tabs-trigger"] {
+  margin: 0;
+  padding-block: 0.3125rem;
+  border: 0;
+  border-radius: 999px;
+  color: #1d1d1f;
+}
+.theme-is-golden-gate .shelf-tabs > a:hover,
+.theme-is-golden-gate [data-slot="tabs-trigger"]:hover {
+  background: rgb(50 20 40 / 0.06);
+}
+.theme-is-golden-gate .shelf-tabs > a[aria-current="page"],
+.theme-is-golden-gate [data-slot="tabs-trigger"][data-state="active"] {
+  font-weight: 600;
+  background: rgb(255 255 255 / 0.85);
+  box-shadow: var(--gg-edge), 0 1px 4px rgb(50 20 40 / 0.14);
+}
+.theme-is-golden-gate .shelf-tabs > a > span {
+  background: rgb(50 20 40 / 0.07);
+}
+.theme-is-golden-gate .shelf-tabs > a[aria-current="page"] > span {
+  color: var(--primary-foreground);
+  background: var(--primary);
+}
+.theme-is-golden-gate [data-slot="tabs-list"] {
+  gap: 0.125rem;
+  border-radius: 999px;
+  background: rgb(50 20 40 / 0.07);
+}
+.theme-is-golden-gate [data-slot="tabs-trigger"]::after {
+  display: none;
+}
+.theme-is-golden-gate :is(a, button).rounded-full.border:not(.aspect-square, .border-2) {
+  border-color: transparent;
+  background:
+    linear-gradient(rgb(255 255 255 / 0.55), rgb(255 255 255 / 0.55)) padding-box,
+    var(--gg-specular) border-box;
+  box-shadow: var(--gg-edge);
+}
+.theme-is-golden-gate :is(a, button).rounded-full.border:is([class*="border-primary"], [aria-current="page"], [aria-pressed="true"]):not(.aspect-square, .border-2) {
+  color: var(--primary-foreground);
+  background:
+    linear-gradient(rgb(255 255 255 / 0.28), rgb(255 255 255 / 0) 55%) padding-box,
+    linear-gradient(var(--primary), var(--primary)) padding-box,
+    var(--gg-specular) border-box;
+}
+.theme-is-golden-gate kbd {
+  border: 0;
+  border-radius: 0.375rem;
+  background: rgb(255 255 255 / 0.7);
+  box-shadow: var(--gg-edge), 0 1px 0 rgb(50 20 40 / 0.18);
+}
+
+/* Progress: a capsule filled with the accent, its top catching the light. */
+.theme-is-golden-gate :has(> .bar-grow) {
+  border-radius: 999px;
+  background: rgb(50 20 40 / 0.1);
+  box-shadow: inset 0 0.5px 1px rgb(50 20 40 / 0.12);
+}
+.theme-is-golden-gate .bar-grow {
+  border-radius: 999px;
+}
+.theme-is-golden-gate .bar-grow[class*="primary"] {
+  background: linear-gradient(rgb(255 255 255 / 0.4), rgb(255 255 255 / 0) 60%), var(--primary);
+}
+
+/* Menus and popovers: glass over the page, blurring it; the item under the
+   pointer in the accent. */
+.theme-is-golden-gate :is([data-slot="dropdown-menu-content"], [data-slot="popover-content"], [data-slot="select-content"], [data-slot="dropdown-menu-sub-content"]) {
+  border: 1px solid transparent;
+  border-radius: 0.875rem;
+  background:
+    linear-gradient(rgb(255 255 255 / 0.7), rgb(255 255 255 / 0.7)) padding-box,
+    var(--gg-specular) border-box;
+  box-shadow: var(--gg-edge), 0 14px 36px -10px rgb(40 15 35 / 0.45);
+  backdrop-filter: blur(24px) saturate(1.8);
+  --tw-ring-shadow: 0 0 #0000;
+}
+.theme-is-golden-gate :is([data-slot="dropdown-menu-item"], [data-slot="select-item"], [data-slot="dropdown-menu-checkbox-item"], [data-slot="dropdown-menu-radio-item"], [data-slot="dropdown-menu-sub-trigger"]) {
+  border-radius: 0.5rem;
+}
+.theme-is-golden-gate :is([data-slot="dropdown-menu-item"], [data-slot="select-item"], [data-slot="dropdown-menu-checkbox-item"], [data-slot="dropdown-menu-radio-item"], [data-slot="dropdown-menu-sub-trigger"]):is(:focus, [data-highlighted]) {
+  color: var(--primary-foreground);
+  background: var(--primary);
+}
+.theme-is-golden-gate :is([data-slot="dropdown-menu-item"], [data-slot="select-item"], [data-slot="dropdown-menu-checkbox-item"], [data-slot="dropdown-menu-radio-item"], [data-slot="dropdown-menu-sub-trigger"]):is(:focus, [data-highlighted]) * {
+  color: inherit;
+}
+
+/* Dialogs: a window of glass with the three lights at its top left: red
+   closes it, amber and green are drawn on. */
+.theme-is-golden-gate [data-slot="dialog-overlay"] {
+  background: rgb(40 15 35 / 0.2);
+  backdrop-filter: none;
+}
+.theme-is-golden-gate [data-slot="dialog-content"] {
+  padding-top: 2.875rem;
+  border: 1px solid transparent;
+  border-radius: 1.5rem;
+  background:
+    var(--gg-light) 2.25rem 1.125rem / 0.8125rem 0.8125rem no-repeat,
+    radial-gradient(circle closest-side, #ffd36b, #febc2e 60%, #c98a0e 92%, transparent) 2.25rem 1.125rem / 0.8125rem 0.8125rem no-repeat,
+    var(--gg-light) 3.5rem 1.125rem / 0.8125rem 0.8125rem no-repeat,
+    radial-gradient(circle closest-side, #6ee07e, #28c840 60%, #138a26 92%, transparent) 3.5rem 1.125rem / 0.8125rem 0.8125rem no-repeat,
+    linear-gradient(rgb(255 255 255 / 0.76), rgb(255 255 255 / 0.76)) padding-box,
+    var(--gg-specular) border-box;
+  box-shadow: var(--gg-edge), 0 24px 64px -16px rgb(30 10 30 / 0.55);
+  backdrop-filter: blur(30px) saturate(1.8);
+  --tw-ring-shadow: 0 0 #0000;
+}
+.theme-is-golden-gate [data-slot="dialog-content"] > [data-slot="dialog-close"] {
+  top: 1.125rem;
+  right: auto;
+  left: 1rem;
+  width: 0.8125rem;
+  height: 0.8125rem;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  color: transparent;
+  background: var(--gg-light), radial-gradient(circle closest-side, #ff8a82, #ff5f57 60%, #c6302a 92%, transparent);
+  box-shadow: none;
+  opacity: 1;
+}
+.theme-is-golden-gate [data-slot="dialog-content"] > [data-slot="dialog-close"] svg {
+  width: 0.5625rem;
+  height: 0.5625rem;
+  stroke-width: 3.5;
+}
+.theme-is-golden-gate [data-slot="dialog-content"] > [data-slot="dialog-close"]:is(:hover, :focus-visible) {
+  color: #6b0d07;
+  background: var(--gg-light), radial-gradient(circle closest-side, #ff8a82, #ff5f57 60%, #c6302a 92%, transparent);
+}
+.theme-is-golden-gate [data-slot="dialog-footer"] {
+  border-top: 0.5px solid rgb(50 20 40 / 0.12);
+  border-radius: 0 0 1.5rem 1.5rem;
+  background: rgb(255 255 255 / 0.35);
+}
+.theme-is-golden-gate .bulk-bar {
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background:
+    linear-gradient(rgb(255 255 255 / 0.7), rgb(255 255 255 / 0.7)) padding-box,
+    var(--gg-specular) border-box;
+  box-shadow: var(--gg-edge), 0 14px 36px -10px rgb(40 15 35 / 0.45);
+  backdrop-filter: blur(24px) saturate(1.8);
+}
+
+/* The sign-in pages: a pane of glass in the window. */
+.theme-is-golden-gate .auth-backdrop {
+  display: none;
+}
+.theme-is-golden-gate main:has(> .auth-backdrop) .wordmark {
+  font-family: var(--heading-font);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.theme-is-aero main:has(> .auth-backdrop) [data-slot="popover-trigger"] {
+  color: #ffffff;
+}

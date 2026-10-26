@@ -221,8 +221,8 @@ The reading room's files:
   the hues are nearly all taken, so a new theme should differ in kind,
   not shade.
 - **A few themes restyle everything.** Desktop 95, Terminal, Newsprint,
-  Blueprint, Notebook, Quest and Pinstripe start from a colour block like
-  any theme, and [restyles.css](../src/app/restyles.css) reshapes the
+  Blueprint, Notebook, Quest, Pinstripe, Aero and Golden Gate start from
+  a colour block like any theme, and [restyles.css](../src/app/restyles.css) reshapes the
   app for them, one section per theme. Its rules aim at shadcn's
   `data-slot` attributes and buttons by `data-size` and `data-variant`:
   a button inside a Radix trigger (`asChild`) wears the trigger's
@@ -239,8 +239,26 @@ The reading room's files:
   test fails on the attribute form. Fonts only these
   themes use are loaded with `preload: false` in
   [layout.tsx](../src/app/layout.tsx), so no one else downloads them.
+  Their `@font-face` rules are in the CSS every page loads, though, so a
+  face with many slices costs everyone: Quest's DotGothic16 is Japanese,
+  and next/font/google wrote 124 of them (94 KB). It is its Latin slice
+  alone, in [fonts](../src/app/fonts) with its licence.
   After changing one, look at every page at phone width too, and check
   the other themes still match main pixel for pixel.
+- **A theme's big picture is a file, and its glass is cheap.** A picture
+  more than a few hundred bytes (Aero's desktop, Golden Gate's bridge)
+  is an SVG in `public/themes`, named by `--page-gradient`, so only a
+  reader on that theme downloads it; the sign-in proxy leaves that
+  folder alone, as the sign-in pages show the theme too. Glass that
+  blurs what is behind it (`backdrop-filter`) is kept to small or
+  passing things: the top bar, menus, popovers, dialogs. A large pane
+  over the page would blur again on every frame of a scroll. Aero's
+  window frame is tinted glass with nothing blurred, which over so soft
+  a desktop looks the same. Golden Gate's window is a fixed layer under
+  the page drawn from a softened copy of the picture
+  (`golden-gate-frosted.svg`), laid exactly over the sharp one; a second
+  fixed layer over the page repeats the picture with the window's shape
+  masked out, so what scrolls past the window's edge goes behind it.
 - **A theme is retired, never just deleted.** Take out its block and
   entry and add it to `RETIRED_THEMES` in
   [themes.ts](../src/lib/themes.ts) with the theme that replaces it, of
@@ -254,6 +272,25 @@ The reading room's files:
   That rule sets transitions to `0s`, never a tiny duration: on every
   element, a duration means a transition of every property, and a theme
   change then took seconds.
+- **Scrolling and theme changes stay cheap.** Three rules, each with a
+  test ([motion-css.test.ts](../src/lib/motion-css.test.ts)):
+  - A cover gets its 3D tilt only while it tilts (`[data-tilting]`).
+    Even turned by 0deg, a 3D transform puts an element on a compositor
+    layer of its own, and with every cover on one, scrolling the library
+    spent most of its time sorting 200 layers.
+  - `applyThemeSetting` marks `<html>` with `data-theme-changing` for the
+    frame a new theme is styled in, and globals.css holds transitions off
+    for the transition classes then. Otherwise every card, badge and
+    button eased each changed colour: two thousand transitions on a big
+    library, each three events through React's root listener.
+  - No component uses `transition-all`. It animates `scrollbar-color`
+    too, which Chrome restarts on every element using it whenever
+    `<html>` restyles, even for a custom property nothing reads.
+  A grid holding a page's content says `grid-cols-1` (or `minmax(0,1fr)`)
+  rather than leaving its one column `auto`: an `auto` column grows to
+  its widest child's longest word, and one long series name, a monospace
+  theme or a large text size then pushed the whole page past a phone's
+  edge.
 - **Moving backgrounds slide pictures, they don't redraw them.**
   [background-scene.tsx](../src/components/background-scene.tsx) puts one
   fixed layer under the page, and everything in it moves by `transform` or

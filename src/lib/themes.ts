@@ -206,6 +206,24 @@ export const THEMES: ThemeDef[] = [
     pattern:
       "linear-gradient(90deg, transparent 27%, #111111 27% 32%, transparent 32%), linear-gradient(transparent 27%, #111111 27% 32%, transparent 32%), conic-gradient(from 0deg at 30% 30%, #ffd400 0 25%, #fbfaf6 0 50%, #1d4ed8 0 75%, #d6001c 0)",
   },
+  {
+    id: "aero",
+    name: "Aero",
+    mode: "light",
+    swatch: ["#ffffff", "#0066cc"],
+    pattern:
+      "linear-gradient(115deg, transparent 30%, rgb(255 255 255 / 0.45) 30% 38%, transparent 38%), radial-gradient(circle, transparent 0 34%, #9cc9f0 36% 52%, #135aad 54%)",
+    ownBackground: true,
+  },
+  {
+    id: "golden-gate",
+    name: "Golden Gate",
+    mode: "light",
+    swatch: ["#f6efef", "#b8361f"],
+    pattern:
+      "linear-gradient(90deg, transparent 20%, #b8361f 20% 28%, transparent 28% 72%, #b8361f 72% 80%, transparent 80%), linear-gradient(#2c2a63, #b75d84 52%, #fbb56b 68%, #ffd791 72%, #6a4b7c 74%, #2c2a5a)",
+    ownBackground: true,
+  },
 
   // The Silly set
   {

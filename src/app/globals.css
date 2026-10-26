@@ -1147,6 +1147,67 @@
     --radius: 0;
 }
 
+/* Windows 7: windows of sky-blue glass on a blue desktop with a burst of
+   light, white panes inside them, near-black text and link blue. Restyled
+   from top to bottom in restyles.css: glass frames and a glass taskbar,
+   glossy buttons, a green progress bar. The desktop is a file of its own
+   (public/themes), so only a reader on this theme downloads it. */
+[data-theme="aero"] {
+    --background: #ffffff;
+    --foreground: #1b1b1b;
+    --card: #ffffff;
+    --card-foreground: #1b1b1b;
+    --popover: #ffffff;
+    --popover-foreground: #1b1b1b;
+    --primary: #0066cc;
+    --primary-foreground: #ffffff;
+    --secondary: #f0f0f0;
+    --secondary-foreground: #1b1b1b;
+    --muted: #f0f0f0;
+    --muted-foreground: #575757;
+    --accent: #e5f3fb;
+    --accent-foreground: #1b1b1b;
+    --destructive: #c42b1c;
+    --border: #ccd7e3;
+    --input: #abadb3;
+    --ring: #3399ff;
+    --radius: 0.25rem;
+    --heading-font: "Segoe UI", Frutiger, "Frutiger Linotype", "Helvetica Neue", Arial, sans-serif;
+    --page-gradient: url("/themes/aero.svg");
+    --page-size: cover;
+}
+
+/* macOS Golden Gate: the bridge at sunset behind a window of frosted
+   Liquid Glass, near-black text and International Orange, the bridge's
+   own colour, for the accent; round corners all the same. Restyled from
+   top to bottom in restyles.css: a floating glass toolbar, capsule
+   buttons, traffic lights. The pictures are files of their own
+   (public/themes). */
+[data-theme="golden-gate"] {
+    --background: #f6efef;
+    --foreground: #1d1d1f;
+    --card: #ffffff;
+    --card-foreground: #1d1d1f;
+    --popover: #ffffff;
+    --popover-foreground: #1d1d1f;
+    --primary: #b8361f;
+    --primary-foreground: #ffffff;
+    --secondary: #efe6e8;
+    --secondary-foreground: #1d1d1f;
+    --muted: #efe6e8;
+    --muted-foreground: #5e5560;
+    --accent: #f3e3df;
+    --accent-foreground: #1d1d1f;
+    --destructive: #a3124a;
+    --border: #e2d6d9;
+    --input: #d6c8cc;
+    --ring: #b8361f;
+    --radius: 0.875rem;
+    --heading-font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro", "Helvetica Neue", "Inter", system-ui, sans-serif;
+    --page-gradient: url("/themes/golden-gate.svg");
+    --page-size: cover;
+}
+
 /* ── The Silly set ─────────────────────────────────────────────────────────
    Themes nobody should pick, listed apart in the palette menu. They are
    absurd on purpose but hold the same contrast as the rest, so the app

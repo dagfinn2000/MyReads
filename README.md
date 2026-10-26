@@ -58,9 +58,10 @@ server.
 
 **Make it yours**
 
-- 54 colour themes, a few with a picture, outlines or a font of their
-  own, and seven that restyle the whole app (Desktop 95 turns it into a
-  1995 desktop). 26 background textures. On some of the textures rain falls,
+- 56 colour themes, a few with a picture, outlines or a font of their
+  own, and nine that restyle the whole app (Desktop 95 turns it into a
+  1995 desktop, Aero into Windows 7's glass, Golden Gate into macOS's
+  Liquid Glass). 26 background textures. On some of the textures rain falls,
   snow drifts or stars twinkle.
 - A theme for one device or one part of the app, and your own CSS.
 - Preferences for date formats, time zone, sorting, fonts and much more.
