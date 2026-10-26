@@ -1569,6 +1569,18 @@ html[data-text-size="large"] {
 html[data-text-size="larger"] {
   font-size: 125%;
 }
+/* On a phone the top bar is a row of icons, sized in rem to fit from 360px
+   up at the usual size; a larger text size grew them past the screen's
+   edge, and every page scrolled sideways. Icons have no text to grow, so
+   there the bar keeps the usual size. */
+@media (width < 40rem) {
+  html[data-text-size="large"] .top-bar > div {
+    zoom: calc(1 / 1.125);
+  }
+  html[data-text-size="larger"] .top-bar > div {
+    zoom: 0.8;
+  }
+}
 html[data-long-font="serif"] .long-text {
   font-family: ui-serif, "Iowan Old Style", "Palatino Linotype", Palatino, Georgia,
     Cambria, "Times New Roman", serif;

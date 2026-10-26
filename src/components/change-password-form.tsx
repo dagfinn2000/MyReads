@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { changePassword } from "@/lib/actions/account";
 import type { ActionState } from "@/lib/actions/helpers";
+import { submitKeepingInput } from "@/lib/submit-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,7 +23,10 @@ export function ChangePasswordForm() {
   );
 
   return (
-    <form action={formAction} className="grid max-w-sm gap-4">
+    // Sent from onSubmit so a wrong password or a typo in the confirm field
+    // leaves what was typed, rather than emptying all three fields. A
+    // change that works signs out and goes to the sign-in page.
+    <form action={formAction} onSubmit={submitKeepingInput(formAction)} className="grid max-w-sm gap-4">
       <div className="grid gap-2">
         <Label htmlFor="current-password">Current password</Label>
         <Input

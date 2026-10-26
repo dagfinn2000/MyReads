@@ -54,10 +54,10 @@ export function SeriesCard({
       id={seriesAnchor(series.name)}
       className="scroll-mt-20 data-[arrived]:ring-2 data-[arrived]:ring-amber-500/60"
     >
-      <CardContent className="grid gap-3">
+      <CardContent className="grid grid-cols-1 gap-3">
         <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
           <div className="min-w-0">
-            <h2 className="text-lg font-semibold leading-tight">
+            <h2 className="text-lg font-semibold leading-tight wrap-anywhere">
               {/* No prefetching, here or below: see BookLink. */}
               <Link href={href} prefetch={false} className="hover:underline">
                 {series.name}

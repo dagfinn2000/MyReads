@@ -15,7 +15,7 @@ export default async function CheckBookPage() {
   if (!session?.user?.id) redirect("/login"); // revoked session (see auth.ts)
 
   return (
-    <div className="mx-auto grid max-w-xl gap-4">
+    <div className="mx-auto grid grid-cols-1 max-w-xl gap-4">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Do I own this?</h1>
         <p className="mt-1 text-sm text-muted-foreground">

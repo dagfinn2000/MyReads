@@ -284,7 +284,7 @@ export function FilterBar({
   const asc = current.dir === "asc";
 
   return (
-    <div className="grid gap-2">
+    <div className="grid grid-cols-1 gap-2">
       {/* On phones the controls stack into tidy full-width rows (search with
           the view buttons, then filters, then grouping/sort); from sm up
           they keep their fixed widths and the view buttons go last. */}

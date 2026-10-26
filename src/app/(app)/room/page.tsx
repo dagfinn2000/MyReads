@@ -97,7 +97,7 @@ export default async function ReadingRoomPage() {
   const cases = caseCount(shelve(books.map((b) => spineFor(b).width)).length);
 
   return (
-    <div className="grid gap-4">
+    <div className="grid grid-cols-1 gap-4">
       <RoomView
         books={books}
         decor={{

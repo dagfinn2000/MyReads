@@ -196,7 +196,7 @@ export function RecentEntries({
   if (recent.length === 0) return null;
 
   return (
-    <ul aria-label="Recent entries" className="grid gap-0.5 text-sm">
+    <ul aria-label="Recent entries" className="grid grid-cols-1 gap-0.5 text-sm">
       {recent.map((e) => (
         <EntryRow
           key={e.id}
@@ -253,7 +253,8 @@ function EntryRow({
     </span>
   );
   const day = (
-    <span className={layout === "log" ? "text-muted-foreground" : "w-24 shrink-0 truncate"}>{dayLabel}</span>
+    // On a narrow card the day gives way, not the pencil after it.
+    <span className={layout === "log" ? "text-muted-foreground" : "w-24 min-w-0 truncate"}>{dayLabel}</span>
   );
 
   return (
@@ -269,7 +270,7 @@ function EntryRow({
           }}
         />
       ) : (
-        <div className="flex min-h-7 items-center gap-3">
+        <div className="flex min-h-7 items-center gap-2 sm:gap-3">
           {layout === "log" ? (
             <>
               {position}

@@ -331,7 +331,7 @@ export default async function StatsPage({
   const maxFormat = Math.max(...formatCounts.values(), 0);
 
   return (
-    <div className="grid gap-6">
+    <div className="grid grid-cols-1 gap-6">
       <div className="grid gap-3">
         <h1 className="text-2xl font-semibold tracking-tight">Stats</h1>
         <StatsPeriodNav period={period} goalYear={goalYear} />
@@ -597,7 +597,9 @@ export default async function StatsPage({
 function AverageRating({ stars, style }: { stars: number; style: string }) {
   if (style === "ten") return <>{(stars * 2).toFixed(1)}/10</>;
   return (
-    <span className="flex items-center gap-2">
+    // Wraps: on a phone with large text the stars don't fit beside the
+    // number in a tile half the screen wide.
+    <span className="flex flex-wrap items-center gap-x-2">
       {stars.toFixed(1)}
       <Stars value={Math.round(stars * 2)} />
     </span>

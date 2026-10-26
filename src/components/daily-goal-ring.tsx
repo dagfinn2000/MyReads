@@ -5,6 +5,8 @@ import Link from "next/link";
 import { Check } from "lucide-react";
 import { celebrate } from "@/lib/celebrate";
 import { goalUnitWord, type DailyGoalTarget } from "@/lib/daily-goal";
+import { formatNumber } from "@/lib/display";
+import { usePreferences } from "@/components/preferences-provider";
 import { useSound } from "@/components/sounds";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -51,6 +53,10 @@ export function DailyGoalRing({
   const fraction = Math.min(today / target.amount, 1);
   const offset = CIRCUMFERENCE * (1 - fraction);
   const word = goalUnitWord(target.unit, target.amount);
+  // In the reader's number style, as Stats writes them ("2.072").
+  const prefs = usePreferences();
+  const done = formatNumber(today, prefs);
+  const goal = formatNumber(target.amount, prefs);
 
   return (
     <Card size="sm">
@@ -62,7 +68,7 @@ export function DailyGoalRing({
             height={SIZE}
             viewBox={`0 0 ${SIZE} ${SIZE}`}
             role="img"
-            aria-label={`${today} of ${target.amount} ${word} today`}
+            aria-label={`${done} of ${goal} ${word} today`}
             className={met ? "goal-ring-met" : undefined}
           >
             <circle
@@ -99,8 +105,8 @@ export function DailyGoalRing({
               <Check className="size-6 text-primary" strokeWidth={2.5} />
             ) : (
               <>
-                <span className="font-heading text-lg font-semibold">{today}</span>
-                <span className="mt-0.5 text-[10px] text-muted-foreground">of {target.amount}</span>
+                <span className="font-heading text-lg font-semibold">{done}</span>
+                <span className="mt-0.5 text-[10px] text-muted-foreground">of {goal}</span>
               </>
             )}
           </span>
@@ -109,8 +115,8 @@ export function DailyGoalRing({
           <p className="font-heading font-medium">{headline}</p>
           <p className="text-sm text-muted-foreground tabular-nums">
             {met
-              ? `${today} of ${target.amount} ${word} today`
-              : `${today} of ${target.amount} ${word} so far`}
+              ? `${done} of ${goal} ${word} today`
+              : `${done} of ${goal} ${word} so far`}
             {detail && ` · ${detail}`}
           </p>
           <Link

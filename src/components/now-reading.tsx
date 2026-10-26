@@ -126,7 +126,10 @@ function NowReadingRow({
         <BookLink bookId={book.id} className="lift-cover self-start" title={book.title}>
           <BookCover book={book} className="cover-shadow aspect-[2/3] w-full" />
         </BookLink>
-        <div className="grid min-w-0 content-start gap-2">
+        {/* grid-cols-1 (minmax(0,1fr)): a bare grid's column grew to fit the
+            widest log row, which pushed the pencils past the card's edge on
+            a phone. */}
+        <div className="grid min-w-0 grid-cols-1 content-start gap-2">
           <div className="min-w-0">
             <h2 className="truncate font-heading text-base font-medium">
               <Link href={`/books/${book.id}`} className="hover:underline">
@@ -156,7 +159,7 @@ function NowReadingRow({
             </span>
           </div>
           <QuickLog book={book} showMoveButtons onMoved={onMoved} autoFocus={autoFocus} />
-          <div className="grid gap-1">
+          <div className="grid grid-cols-1 gap-1">
             <RecentEntries entries={book.progress} book={book} />
             {book.progress.length > 0 && (
               <Link

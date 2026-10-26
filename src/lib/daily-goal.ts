@@ -1,4 +1,5 @@
 import { shiftDayKey } from "@/lib/dates";
+import { formatNumber, type FormatPrefs } from "@/lib/display";
 import type { Preferences } from "@/lib/preferences";
 
 /**
@@ -78,10 +79,11 @@ export function goalUnitWord(unit: DailyGoalTarget["unit"], n: number): string {
 export function dailyGoalLines(
   status: DailyGoalStatus,
   target: DailyGoalTarget,
+  prefs?: FormatPrefs,
 ): { headline: string; detail: string | null } {
   const headline = status.met
     ? "Daily goal met"
-    : `${status.left} ${goalUnitWord(target.unit, status.left)} to go today`;
+    : `${formatNumber(status.left, prefs)} ${goalUnitWord(target.unit, status.left)} to go today`;
   const detail =
     status.streak >= 2
       ? `${status.streak} days in a row`
