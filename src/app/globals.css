@@ -1177,31 +1177,31 @@
     --page-size: cover;
 }
 
-/* macOS Golden Gate: the bridge at sunset behind a window of frosted
-   Liquid Glass, near-black text and International Orange, the bridge's
-   own colour, for the accent; round corners all the same. Restyled from
-   top to bottom in restyles.css: a floating glass toolbar, capsule
-   buttons, traffic lights. The pictures are files of their own
+/* macOS Golden Gate: its Liquid Glass. A window of frosted glass over a
+   desktop of sweeping folded curves, sandy gold into soft grey and indigo;
+   near-black text and the system's blue; round corners all the same.
+   Restyled from top to bottom in restyles.css: a floating glass toolbar,
+   capsule buttons, traffic lights. The pictures are files of their own
    (public/themes). */
 [data-theme="golden-gate"] {
-    --background: #f6efef;
+    --background: #f2f2f5;
     --foreground: #1d1d1f;
     --card: #ffffff;
     --card-foreground: #1d1d1f;
     --popover: #ffffff;
     --popover-foreground: #1d1d1f;
-    --primary: #b8361f;
+    --primary: #0a64d2;
     --primary-foreground: #ffffff;
-    --secondary: #efe6e8;
+    --secondary: #e9e9ee;
     --secondary-foreground: #1d1d1f;
-    --muted: #efe6e8;
-    --muted-foreground: #5e5560;
-    --accent: #f3e3df;
+    --muted: #e9e9ee;
+    --muted-foreground: #5b5b61;
+    --accent: #e5eefb;
     --accent-foreground: #1d1d1f;
-    --destructive: #a3124a;
-    --border: #e2d6d9;
-    --input: #d6c8cc;
-    --ring: #b8361f;
+    --destructive: #c8102e;
+    --border: #dcdce2;
+    --input: #d1d1d8;
+    --ring: #0a64d2;
     --radius: 0.875rem;
     --heading-font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro", "Helvetica Neue", "Inter", system-ui, sans-serif;
     --page-gradient: url("/themes/golden-gate.svg");

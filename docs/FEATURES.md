@@ -439,13 +439,13 @@ tab goes away. You can also keep the house and leave the avatar out.
     have blue titles, tabs stand up like Windows tabs, and progress bars
     are green with a shine that slides along them as the page opens.
     Dialogs and popovers are glass windows that blur what is behind them.
-  - Golden Gate (new, light): macOS Golden Gate. The Golden Gate Bridge
-    at sunset, fog rolling under the deck, behind a window of frosted
-    Liquid Glass with light along its rim. A toolbar of glass floats
-    across the top of the window with the open page as a lighter pill,
-    panels are panes of glass, buttons are glass capsules that give a
-    little when pressed (the main one in International Orange, the
-    bridge's colour), and dialogs are glass windows with round, glossy
+  - Golden Gate (new, light): macOS Golden Gate and its Liquid Glass.
+    The app is a window of frosted glass, lit along its rim, on a desktop
+    of sweeping folded curves in sandy gold, soft grey and indigo. A
+    toolbar of glass floats across the top of the window with the open
+    page as a lighter pill, panels are panes of glass, buttons are glass
+    capsules that give a little when pressed (the main one in the
+    system's blue), and dialogs are glass windows with round, glossy
     traffic lights; the red one closes it. The page scrolls behind the
     window's rounded edges, as in a real window.
 - A theme with a picture of its own (Desktop 95's desktop, Aero's and

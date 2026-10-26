@@ -246,7 +246,7 @@ The reading room's files:
   After changing one, look at every page at phone width too, and check
   the other themes still match main pixel for pixel.
 - **A theme's big picture is a file, and its glass is cheap.** A picture
-  more than a few hundred bytes (Aero's desktop, Golden Gate's bridge)
+  more than a few hundred bytes (Aero's desktop, Golden Gate's)
   is an SVG in `public/themes`, named by `--page-gradient`, so only a
   reader on that theme downloads it; the sign-in proxy leaves that
   folder alone, as the sign-in pages show the theme too. Glass that
