@@ -1,6 +1,11 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+/* shadcn's sheet brings a `shimmer` utility, an endless text sweep. The word
+   turns up in our own code, and the loading placeholders were once called
+   that: their invisible sweep kept the browser two-thirds busy for as long
+   as one showed. Never generate it. */
+@source not inline("shimmer");
 
 @custom-variant dark (&:is(.dark *));
 
@@ -3447,8 +3452,9 @@ html {
 
 /* Loading placeholders (the loading.tsx pages): one band of light sweeps
    across all of them together, instead of each blinking on its own. The
-   band is pinned to the window, so neighbouring blocks share it. */
-@keyframes shimmer {
+   band is pinned to the window, so neighbouring blocks share it. Not called
+   "shimmer": see the top of this file. */
+@keyframes loading-sweep {
   from {
     background-position: -120vw 0;
   }
@@ -3456,7 +3462,7 @@ html {
     background-position: 20vw 0;
   }
 }
-.shimmer :where(.bg-muted, [class*="bg-muted/"]) {
+.loading-sweep :where(.bg-muted, [class*="bg-muted/"]) {
   background-image: linear-gradient(
     100deg,
     transparent 40%,
@@ -3466,7 +3472,7 @@ html {
   background-size: 200vw 100%;
   background-repeat: no-repeat;
   background-attachment: fixed;
-  animation: shimmer 1.8s ease-in-out infinite;
+  animation: loading-sweep 1.8s ease-in-out infinite;
 }
 
 /* The sign-in and register pages: a soft wash of the accent colour from
