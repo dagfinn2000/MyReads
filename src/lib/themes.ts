@@ -534,6 +534,32 @@ export function pageThemeChange(section: string): string | null {
   return next === (auto ? "auto:" + auto : root.getAttribute("data-theme")) ? null : next;
 }
 
+/**
+ * Puts <html> right for the page at `pathname` after a move without a full
+ * load, or after the server rendered the layout again (ThemeSync):
+ * `data-section`, the account's theme and the theme the page shows.
+ *
+ * `account` is the account's theme as the layout was last rendered, and
+ * `before` what it was the last time this ran (undefined the first time).
+ * It's only written when it changed: a move between pages doesn't render
+ * the layout again, so `account` is still the theme from the first load,
+ * and a theme picked since (the picker writes `data-theme-account` itself)
+ * would be put back to it.
+ */
+export function syncPageTheme(
+  pathname: string,
+  account: string | null,
+  before: string | null | undefined,
+): void {
+  const root = document.documentElement;
+  const section = sectionOf(pathname);
+  if (section) root.setAttribute("data-section", section);
+  else root.removeAttribute("data-section");
+  if (account && account !== before) root.setAttribute("data-theme-account", account);
+  const next = pageThemeChange(section);
+  if (next) applyThemeSetting(next, DARK_THEME_IDS, THEME_BACKGROUNDS);
+}
+
 /** The reader's part themes, checked: a part's setting that doesn't parse
  *  (a theme since removed) is dropped, so the part follows the rest. */
 export function parsePartThemes(raw: unknown): PartThemes {
