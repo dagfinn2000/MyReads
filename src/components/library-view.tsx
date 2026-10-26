@@ -485,22 +485,25 @@ export function LibraryView({
       {totalCount === 0 ? (
         empty
       ) : groups ? (
-        <div className="grid gap-6">
+        // grid-cols-1 (minmax(0,1fr)) caps the tracks at the page's width:
+        // a bare `grid` let a group's name with a long word in it (a German
+        // series, say) push the whole library past the edge.
+        <div className="grid grid-cols-1 gap-6">
           {groups.map((g) => (
-            <section key={g.key} className="grid gap-3">
+            <section key={g.key} className="grid grid-cols-1 gap-3">
               <h2 className="flex flex-wrap items-baseline gap-x-2 border-b pb-1 font-heading text-lg font-medium">
                 {g.href ? (
                   // No prefetching: see BookLink.
                   <Link
                     href={g.href}
                     prefetch={false}
-                    className="min-w-0 break-words hover:underline"
+                    className="min-w-0 wrap-anywhere hover:underline"
                     title={`${g.title} on the Series page`}
                   >
                     {g.title}
                   </Link>
                 ) : (
-                  <span className="min-w-0 break-words">{g.title}</span>
+                  <span className="min-w-0 wrap-anywhere">{g.title}</span>
                 )}
                 <span className="text-sm font-normal text-muted-foreground tabular-nums">
                   {/* The group's real size, even when only part of it is

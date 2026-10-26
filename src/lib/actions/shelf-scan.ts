@@ -120,6 +120,8 @@ export async function scanAddBook(
     title: values.title.slice(0, 500),
     description: values.description.slice(0, 10_000),
     publishedDate: values.publishedDate.slice(0, 20),
+    // A count the form would refuse is left out, not the whole book.
+    pageCount: /^[1-9]\d{0,4}$|^100000$/.test(values.pageCount) ? values.pageCount : "",
     coverUrl:
       values.coverUrl.length <= 2000 && isAllowedCoverUrl(values.coverUrl) ? values.coverUrl : "",
     format: prefs.newBookFormat,

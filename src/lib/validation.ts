@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { BookFormat, BookOwnership, ReadingStatus } from "@/lib/enums";
+import { normalizeIsbn } from "@/lib/isbn";
 
 /**
  * What a stored cover URL may be: a local path ("/api/covers/…") or an
@@ -57,11 +58,13 @@ export const bookSchema = z.object({
         .map((a) => a.trim())
         .filter(Boolean),
     ),
+  /** Kept as normalizeIsbn writes it (no spaces or hyphens, a capital X),
+   *  the form every ISBN lookup compares with. */
   isbn: z
     .string()
     .trim()
     .max(20, "ISBN must be at most 20 characters")
-    .transform((s) => s.replace(/[\s-]/g, "") || null)
+    .transform((s) => normalizeIsbn(s) || null)
     .nullable()
     .optional(),
   description: z
@@ -86,14 +89,19 @@ export const bookSchema = z.object({
     .transform((s) => s || null)
     .nullable()
     .optional(),
-  pageCount: z.coerce
-    .number()
-    .int()
-    .min(1)
-    .max(100000)
-    .nullable()
-    .optional()
-    .catch(null),
+  /** Blank is "not known". A number out of range is reported, like the
+   *  audiobook's length below: it used to be dropped without a word, so
+   *  saving a typo emptied the field. */
+  pageCount: z.preprocess(
+    (v) => (typeof v === "string" && v.trim() === "" ? null : v),
+    z.coerce
+      .number("Pages must be a number")
+      .int("Pages must be a whole number")
+      .min(1, "Pages must be at least 1")
+      .max(100000, "Pages must be at most 100,000")
+      .nullable()
+      .optional(),
+  ),
   /** An audiobook's running time in whole minutes (the form's hours and
    *  minutes, added up). Blank is "not known". Same bounds as the backup
    *  import, and a bad value is reported rather than quietly dropped. */
@@ -126,7 +134,11 @@ export const bookSchema = z.object({
           .map((t) => t.trim().toLowerCase())
           .filter(Boolean),
       ),
-    ]),
+    ])
+    // The limit bulk edit and a backup's restore hold tags to. A longer one
+    // saved here couldn't be filtered on or removed in bulk, and a restore
+    // lost it.
+    .refine((tags) => tags.every((t) => t.length <= 50), "Tags can be at most 50 characters."),
   seriesName: z
     .string()
     .trim()
@@ -322,6 +334,11 @@ export const loanSchema = z.object({
     .nullable()
     .optional(),
 }).superRefine((d, ctx) => {
+  // A day's slack, as for the read dates: a date field's day is midnight
+  // UTC, which is already tomorrow east of UTC.
+  if (d.lentAt && d.lentAt.getTime() > Date.now() + 86_400_000) {
+    ctx.addIssue({ code: "custom", path: ["lentAt"], message: "You can't have lent it on a day still to come." });
+  }
   // Same calendar-day comparison as the read dates: both are midnight UTC.
   if (d.dueAt && d.lentAt && d.dueAt < d.lentAt) {
     ctx.addIssue({ code: "custom", path: ["dueAt"], message: "It can't be due back before you lent it." });

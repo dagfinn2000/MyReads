@@ -402,6 +402,13 @@ describe("shelves", () => {
     expect(await prisma.shelf.count({ where: { userId } })).toBe(1);
   });
 
+  it("takes _ and % in a name as themselves, not as wildcards", async () => {
+    expect(await createShelf({}, form({ name: "To lend" }))).toEqual({ success: true });
+    expect(await createShelf({}, form({ name: "To_lend" }))).toEqual({ success: true });
+    expect(await createShelf({}, form({ name: "T%" }))).toEqual({ success: true });
+    expect(await prisma.shelf.count({ where: { userId } })).toBe(3);
+  });
+
   it("doesn't count another account's shelf as a duplicate", async () => {
     await prisma.shelf.create({ data: { userId: otherUserId, name: "Favourites" } });
     expect(await createShelf({}, form({ name: "Favourites" }))).toEqual({ success: true });

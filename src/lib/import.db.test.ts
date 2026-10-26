@@ -101,6 +101,12 @@ describe("importLibrary", () => {
     expect([...saved.tags].sort()).toEqual(["fantasy", "fiction", "science"]);
   });
 
+  it("leaves out a tag too long to be one, and keeps the book's others", async () => {
+    await importLibrary(userId, payload([book({ tags: ["fantasy", "x".repeat(108), "Classics"] })]));
+    const saved = await prisma.book.findFirstOrThrow({ where: { userId } });
+    expect([...saved.tags].sort()).toEqual(["classics", "fantasy"]);
+  });
+
   it("skips a book already present by ISBN, and does not duplicate it", async () => {
     await importLibrary(userId, payload([book()]));
     const second = await importLibrary(userId, payload([book({ title: "Different title" })]));

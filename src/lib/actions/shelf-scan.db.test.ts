@@ -168,6 +168,14 @@ describe("scanAddBook", () => {
     expect(await prisma.book.count({ where: { userId } })).toBe(1);
   });
 
+  it("finds an ISBN saved with a small x, as the form used to keep it", async () => {
+    const mine = await prisma.book.create({
+      data: { userId, title: "Tao Te Ching", searchText: "tao te ching", isbn: "080442957x" },
+    });
+    expect(await scanAddBook("9780804429573")).toMatchObject({ kind: "have", match: "isbn", book: { id: mine.id } });
+    expect(searchBooks).not.toHaveBeenCalled();
+  });
+
   it("says how the library holds the match, so a wishlist copy isn't worded as one you have", async () => {
     const wished = await prisma.book.create({
       data: {

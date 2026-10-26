@@ -48,7 +48,9 @@ export function ShelfTabs({
   };
   const kinds = statuses.customStatuses.filter((c) => c.base === current);
   return (
-    <div className="grid gap-2">
+    // data-keeps-search: followed while the search box holds words not yet
+    // in the address, these links take them along (FilterBar).
+    <div className="grid gap-2" data-keeps-search="">
       <nav className="shelf-tabs flex flex-wrap gap-1 border-b">
         {tabs.map(({ key, label }) => {
           const active = current === key;

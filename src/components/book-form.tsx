@@ -248,6 +248,7 @@ export function BookForm({
               name="pageCount"
               type="number"
               min={1}
+              max={100000}
               defaultValue={initial.pageCount ?? ""}
             />
           </div>

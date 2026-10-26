@@ -7,6 +7,7 @@ import { challengeQuery } from "@/lib/challenges";
 import { prisma } from "@/lib/prisma";
 import { idSchema } from "@/lib/reading-log-input";
 import { canonicalViewQueryFromString } from "@/lib/saved-views";
+import { equalsIgnoringCase } from "@/lib/utils";
 import { shelfNameSchema } from "@/lib/validation";
 import { requireUserId } from "@/lib/actions/helpers";
 import type { ActionState } from "@/lib/actions/helpers";
@@ -31,7 +32,7 @@ export async function createShelf(
   // Case-insensitive: "Favourites" and "favourites" side by side is never
   // what anyone meant.
   const existing = await prisma.shelf.findFirst({
-    where: { userId, name: { equals: name, mode: "insensitive" } },
+    where: { userId, name: equalsIgnoringCase(name) },
     select: { name: true },
   });
   if (existing) return { error: `You already have a shelf called "${existing.name}"` };
@@ -90,7 +91,7 @@ export async function renameShelf(shelfId: string, name: string): Promise<ShelfR
   if (newName === source.name) return { shelfId: source.id, name: source.name };
 
   const target = await prisma.shelf.findFirst({
-    where: { userId, id: { not: source.id }, name: { equals: newName, mode: "insensitive" } },
+    where: { userId, id: { not: source.id }, name: equalsIgnoringCase(newName) },
     select: { id: true, name: true },
   });
 

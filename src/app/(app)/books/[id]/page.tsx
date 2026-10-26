@@ -37,6 +37,7 @@ import { StatusBadge } from "@/components/status-badge";
 import { UpNextButton } from "@/components/up-next-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { equalsIgnoringCase } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -98,7 +99,7 @@ export default async function BookDetailPage({
       ? prisma.book.findMany({
           where: {
             userId,
-            seriesName: { equals: book.seriesName, mode: "insensitive" },
+            seriesName: equalsIgnoringCase(book.seriesName),
             id: { not: book.id },
           },
           // Just what the cover strip renders — not the full rows.

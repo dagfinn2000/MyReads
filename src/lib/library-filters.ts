@@ -5,7 +5,7 @@ import { overdueCutoff } from "@/lib/loans";
 import type { SearchField } from "@/lib/preferences";
 import { isStatusKey } from "@/lib/statuses";
 import { parseFieldFilter } from "@/lib/book-fields";
-import { searchTerms } from "@/lib/utils";
+import { equalsIgnoringCase, searchTerms } from "@/lib/utils";
 
 /**
  * The library view's filter state, as it appears in the URL. Every value is
@@ -234,7 +234,7 @@ export function buildBookWhere(
     // isn't any one word: match it as a whole as well.
     const wholeIsbn =
       ctx.searchIn?.includes("isbn") && looksLikeIsbn(filters.q)
-        ? isbnVariants(filters.q).map((v) => ({ isbn: { equals: v, mode: "insensitive" as const } }))
+        ? isbnVariants(filters.q).map((v) => ({ isbn: equalsIgnoringCase(v) }))
         : [];
     if (wholeIsbn.length > 0) and.push({ OR: [{ AND: words }, ...wholeIsbn] });
     else and.push(...words);
@@ -293,9 +293,7 @@ export function buildBookWhere(
     }),
     ...(filters.author && { authors: { has: filters.author } }),
     ...(filters.shelfId && { shelves: { some: { id: filters.shelfId } } }),
-    ...(filters.series && {
-      seriesName: { equals: filters.series, mode: "insensitive" as const },
-    }),
+    ...(filters.series && { seriesName: equalsIgnoringCase(filters.series) }),
     ...(and.length > 0 && { AND: and }),
   };
 }

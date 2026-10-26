@@ -8,6 +8,7 @@ import { getPreferences } from "@/lib/current-user";
 import { parseFilters } from "@/lib/library-filters";
 import { resolveBookWhere } from "@/lib/library-where";
 import { chooseRandom, pickPool, tabStatus, type PickResult, type SeriesRow } from "@/lib/pick";
+import { equalsIgnoringCase } from "@/lib/utils";
 
 /** Above this many series names, fetch every numbered series book instead
  *  of naming them all in the query. */
@@ -83,7 +84,7 @@ export async function pickRandomBook(
           ...(names.length <= MAX_SERIES_NAMES
             ? {
                 OR: names.map((n) => ({
-                  seriesName: { equals: n, mode: "insensitive" as const },
+                  seriesName: equalsIgnoringCase(n),
                 })),
               }
             : { seriesName: { not: null } }),
