@@ -206,6 +206,24 @@ export const THEMES: ThemeDef[] = [
     pattern:
       "linear-gradient(90deg, transparent 27%, #111111 27% 32%, transparent 32%), linear-gradient(transparent 27%, #111111 27% 32%, transparent 32%), conic-gradient(from 0deg at 30% 30%, #ffd400 0 25%, #fbfaf6 0 50%, #1d4ed8 0 75%, #d6001c 0)",
   },
+  {
+    id: "aero",
+    name: "Aero",
+    mode: "light",
+    swatch: ["#ffffff", "#0066cc"],
+    pattern:
+      "linear-gradient(115deg, transparent 30%, rgb(255 255 255 / 0.45) 30% 38%, transparent 38%), radial-gradient(circle, transparent 0 34%, #9cc9f0 36% 52%, #135aad 54%)",
+    ownBackground: true,
+  },
+  {
+    id: "golden-gate",
+    name: "Golden Gate",
+    mode: "light",
+    swatch: ["#f6efef", "#b8361f"],
+    pattern:
+      "linear-gradient(90deg, transparent 20%, #b8361f 20% 28%, transparent 28% 72%, #b8361f 72% 80%, transparent 80%), linear-gradient(#2c2a63, #b75d84 52%, #fbb56b 68%, #ffd791 72%, #6a4b7c 74%, #2c2a5a)",
+    ownBackground: true,
+  },
 
   // The Silly set
   {
@@ -490,6 +508,21 @@ export function applyThemeSetting(
     id = window.matchMedia("(prefers-color-scheme: dark)").matches ? pair[1] : pair[0];
   } else {
     root.removeAttribute("data-theme-auto");
+  }
+  // A theme showing already, and this is another: nothing eases from the
+  // old colours to the new ones (globals.css, "Theme changes"). Otherwise
+  // every card, badge and button would start a transition for each colour
+  // that changed, two thousand on a big library, each one three events
+  // React handles, for a fade the theme's own reveal already covers. Let
+  // go two frames on, once the new theme has been styled.
+  const before = root.getAttribute("data-theme");
+  if (before && before !== id && typeof requestAnimationFrame === "function") {
+    root.setAttribute("data-theme-changing", "");
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        root.removeAttribute("data-theme-changing");
+      });
+    });
   }
   // THEME_CLASS_PREFIX, written out: this body runs on its own. Any other
   // theme's class goes, not just the one `data-theme` names, as React may

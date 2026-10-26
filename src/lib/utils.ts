@@ -53,6 +53,14 @@ export function escapeLike(s: string): string {
   return s.replace(/[\\%_]/g, "\\$&");
 }
 
+/** A Prisma filter for a string equal to `s` but for case. Prisma writes
+ *  `equals` with `mode: "insensitive"` as an ILIKE, where `%` and `_` are
+ *  wildcards too: unescaped, the series "Wolf_Hall" matched "Wolf Hall",
+ *  and a shelf "To_lend" was refused as a copy of "To lend". */
+export function equalsIgnoringCase(s: string) {
+  return { equals: escapeLike(s), mode: "insensitive" as const };
+}
+
 /** The words of a search query, folded like searchText, each once, at most
  *  ten. For matching in JS; searchTerms is the same list escaped for SQL. */
 export function searchWords(q: string): string[] {

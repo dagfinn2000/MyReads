@@ -35,7 +35,7 @@ export default async function NewBookPage({
   const tagImport = await tagImportFor(session.user.id, prefs);
 
   return (
-    <div className="mx-auto grid max-w-3xl gap-4">
+    <div className="mx-auto grid grid-cols-1 max-w-3xl gap-4">
       <h1 className="text-2xl font-semibold tracking-tight">Add book</h1>
       <AddBookClient
         seriesNames={seriesNames}

@@ -56,9 +56,13 @@ const MONTHS = [
   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
 ];
 
+/** The years a review can be opened for; the arrows stop at them too. */
+const FIRST_YEAR = 1900;
+const LAST_YEAR = 2200;
+
 function parseYear(raw: string): number | null {
   const year = Number(raw);
-  if (!Number.isInteger(year) || year < 1900 || year > 2200) return null;
+  if (!Number.isInteger(year) || year < FIRST_YEAR || year > LAST_YEAR) return null;
   return year;
 }
 
@@ -257,23 +261,27 @@ export default async function YearInReviewPage({
         {year} in books
       </h1>
       <span className="ml-auto flex items-center gap-1">
-        <Button asChild variant="ghost" size="icon-sm" title={`${year - 1} in books`}>
-          <Link href={`/stats/year/${year - 1}`}>
-            <ChevronLeft className="size-4" />
-          </Link>
-        </Button>
-        <Button asChild variant="ghost" size="icon-sm" title={`${year + 1} in books`}>
-          <Link href={`/stats/year/${year + 1}`}>
-            <ChevronRight className="size-4" />
-          </Link>
-        </Button>
+        {year > FIRST_YEAR && (
+          <Button asChild variant="ghost" size="icon-sm" title={`${year - 1} in books`}>
+            <Link href={`/stats/year/${year - 1}`}>
+              <ChevronLeft className="size-4" />
+            </Link>
+          </Button>
+        )}
+        {year < LAST_YEAR && (
+          <Button asChild variant="ghost" size="icon-sm" title={`${year + 1} in books`}>
+            <Link href={`/stats/year/${year + 1}`}>
+              <ChevronRight className="size-4" />
+            </Link>
+          </Button>
+        )}
       </span>
     </div>
   );
 
   if (counted.length === 0 && yearDays.length === 0) {
     return (
-      <div className="grid gap-6">
+      <div className="grid grid-cols-1 gap-6">
         {header}
         <p className="text-sm text-muted-foreground">
           Nothing finished in {year}. No dated reads landed in this year.
@@ -372,7 +380,7 @@ export default async function YearInReviewPage({
     : null;
 
   return (
-    <div className="grid gap-6">
+    <div className="grid grid-cols-1 gap-6">
       {header}
 
       <div className={`grid grid-cols-2 gap-4 max-lg:[&>:last-child:nth-child(odd)]:col-span-2 ${ratings ? "lg:grid-cols-4" : "lg:grid-cols-3"}`}>

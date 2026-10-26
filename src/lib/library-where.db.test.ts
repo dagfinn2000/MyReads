@@ -106,6 +106,15 @@ describe("tags, author, rating and missing details", () => {
     expect(await titles({ notTag: "fantasy,horror" })).toEqual(["Untagged"]);
   });
 
+  it("matches a series exactly but for case, wildcards and all", async () => {
+    await add("Wolf Hall", { seriesName: "Wolf Hall" });
+    await add("Mistborn", { seriesName: "Mistborn" });
+    expect(await titles({ series: "wolf hall" })).toEqual(["Wolf Hall"]);
+    // Prisma writes this as an ILIKE, where _ and % would match anything.
+    expect(await titles({ series: "Wolf_Hall" })).toEqual([]);
+    expect(await titles({ series: "M%" })).toEqual([]);
+  });
+
   it("matches the author exactly", async () => {
     expect(await titles({ author: "Ursula K. Le Guin" })).toEqual(["Untagged"]);
     expect(await titles({ author: "Le Guin" })).toEqual([]);

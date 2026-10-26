@@ -122,7 +122,7 @@ export default async function NowReadingPage() {
   });
 
   return (
-    <div className="grid gap-6">
+    <div className="grid grid-cols-1 gap-6">
       {overdueNote && (
         <OverdueNotice
           message={overdueNote.message}
@@ -140,7 +140,7 @@ export default async function NowReadingPage() {
           target={goal}
           today={goalStatus.today}
           met={goalStatus.met}
-          {...dailyGoalLines(goalStatus, goal)}
+          {...dailyGoalLines(goalStatus, goal, prefs)}
         />
       )}
 

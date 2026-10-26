@@ -87,4 +87,12 @@ describe("dailyGoalLines", () => {
       dailyGoalLines({ ...base, today: 10, left: 20, lastWeek: 3 }, { unit: "minutes", amount: 30 }),
     ).toEqual({ headline: "20 minutes to go today", detail: "met on 3 of the last 7 days" });
   });
+
+  it("writes what's left in the reader's number style", () => {
+    const big = { ...base, left: 1250 };
+    const minutes = { unit: "minutes", amount: 1500 } as const;
+    expect(dailyGoalLines(big, minutes, { dateFormat: "iso", numberFormat: "period" }).headline).toBe(
+      "1.250 minutes to go today",
+    );
+  });
 });

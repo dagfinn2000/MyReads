@@ -353,7 +353,7 @@ tab goes away. You can also keep the house and leave the avatar out.
 
 ## Look and feel
 
-- 54 colour themes, or a light and a dark one that switch with your
+- 56 colour themes, or a light and a dark one that switch with your
   device, with an accent colour of your own on top if you like. Your
   choice follows you to every device you sign in on, unless you give one
   phone or computer a theme of its own ("Only on this device" in the
@@ -400,7 +400,7 @@ tab goes away. You can also keep the house and leave the avatar out.
   green ribbon), Party (confetti), Camouflage and Quest. They are as easy to
   read as the rest, only nobody should want them. Hover over one in the
   menu for a word about it.
-- **Seven themes restyle the whole app**, not just its colours: the top
+- **Nine themes restyle the whole app**, not just its colours: the top
   bar, cards, buttons, fields, menus, dialogs, tabs, progress bars, type
   and the picture behind the page all take after what the theme is named
   for. The rest stay as they were.
@@ -421,19 +421,38 @@ tab goes away. You can also keep the house and leave the avatar out.
   - Notebook: an exercise book, in handwriting, with the red margin and
     punched holes, freehand boxes, books taped in and menus on sticky
     notes.
-  - Quest (new, in the Silly set): the menus of an old role-playing game,
+  - Quest (in the Silly set): the menus of an old role-playing game,
     with blue windows in white frames, pixel letters, a gold pointer on
     whatever you're choosing and reading progress as an experience bar,
     under a starry sky.
-  - Pinstripe (new, light): an early-2000s desktop, with grey pinstripes,
+  - Pinstripe (light): an early-2000s desktop, with grey pinstripes,
     glossy gel buttons (the main one blue), a menu bar, dialogs as
     windows with the red, amber and green lights in the corner (the red
     one closes it), glossy covers and progress bars whose stripes roll
     along. With an accent colour picked, the gel takes that colour.
-- A theme with a picture of its own (Desktop 95's desktop, Notebook's
-  ruled page, Party's confetti, Quest's night sky and the rest) shows it
-  whatever background you picked, and Preferences says so under
-  Background. Your background comes back when you pick another theme.
+  - Aero (new, light): Windows 7. The top bar is a taskbar of dark glass
+    with a glowing Start orb, and every page is a window of sky-blue
+    glass on a blue desktop with a burst of light: light catching in
+    streaks across the frame, the page's name glowing in the caption,
+    the minimise, maximise and red close buttons, and a white pane
+    inside. Buttons are glossy and turn blue under the pointer, panels
+    have blue titles, tabs stand up like Windows tabs, and progress bars
+    are green with a shine that slides along them as the page opens.
+    Dialogs and popovers are glass windows that blur what is behind them.
+  - Golden Gate (new, light): macOS Golden Gate. The Golden Gate Bridge
+    at sunset, fog rolling under the deck, behind a window of frosted
+    Liquid Glass with light along its rim. A toolbar of glass floats
+    across the top of the window with the open page as a lighter pill,
+    panels are panes of glass, buttons are glass capsules that give a
+    little when pressed (the main one in International Orange, the
+    bridge's colour), and dialogs are glass windows with round, glossy
+    traffic lights; the red one closes it. The page scrolls behind the
+    window's rounded edges, as in a real window.
+- A theme with a picture of its own (Desktop 95's desktop, Aero's and
+  Golden Gate's, Notebook's ruled page, Party's confetti, Quest's night
+  sky and the rest) shows it whatever background you picked, and
+  Preferences says so under Background. Your background comes back when
+  you pick another theme.
 - A theme for each part of the app if you like: Stats in one theme, the
   reading room in another, the rest in your usual one (Preferences).
 - Your own CSS, added after the app's styles on every page but the

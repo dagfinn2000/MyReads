@@ -331,7 +331,7 @@ export default async function BooksPage({
     !!values.series;
 
   return (
-    <div className="grid gap-4">
+    <div className="grid grid-cols-1 gap-4">
       {overdueNote && (
         <OverdueNotice
           message={overdueNote.message}

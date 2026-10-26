@@ -62,7 +62,7 @@ export default async function QuotesPage({
   const { limit: _limit, ...toolbarParams } = params;
 
   return (
-    <div className="grid gap-4">
+    <div className="grid grid-cols-1 gap-4">
       <div className="flex flex-wrap items-center gap-3">
         {/* Focusable from script only: where focus lands after deleting
             the last quote on the page. */}

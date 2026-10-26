@@ -64,7 +64,7 @@ export default async function AccountPage() {
   const timeZones = [...new Set(["UTC", ...Intl.supportedValuesOf("timeZone")])];
 
   return (
-    <div className="grid gap-6">
+    <div className="grid grid-cols-1 gap-6">
       <h1 className="text-2xl font-semibold tracking-tight">Account</h1>
 
       <Card>

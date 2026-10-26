@@ -126,10 +126,16 @@ const importedBookSchema = z.object({
   publishedDate: z.string().trim().max(20).nullable().optional(),
   // Split at commas: the library's tag filter lists tags comma-separated,
   // so "science, fiction" from an older backup becomes two tags.
+  // A tag too long to be one is left out alone: checked as a whole list,
+  // one such tag cost the book every other tag it had.
   tags: z
-    .array(z.string().trim().toLowerCase().max(50))
+    .array(z.string())
     .catch([])
-    .transform((tags) => tags.flatMap((t) => t.split(",").map((s) => s.trim())).filter(Boolean)),
+    .transform((tags) =>
+      tags
+        .flatMap((t) => t.toLowerCase().split(",").map((s) => s.trim()))
+        .filter((t) => t && t.length <= 50),
+    ),
   format: z.enum(BookFormat).catch(BookFormat.PHYSICAL),
   /** Legacy field, still written by exports for older instances to read. */
   owned: z.boolean().nullable().optional().catch(null),

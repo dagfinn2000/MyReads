@@ -1147,6 +1147,67 @@
     --radius: 0;
 }
 
+/* Windows 7: windows of sky-blue glass on a blue desktop with a burst of
+   light, white panes inside them, near-black text and link blue. Restyled
+   from top to bottom in restyles.css: glass frames and a glass taskbar,
+   glossy buttons, a green progress bar. The desktop is a file of its own
+   (public/themes), so only a reader on this theme downloads it. */
+[data-theme="aero"] {
+    --background: #ffffff;
+    --foreground: #1b1b1b;
+    --card: #ffffff;
+    --card-foreground: #1b1b1b;
+    --popover: #ffffff;
+    --popover-foreground: #1b1b1b;
+    --primary: #0066cc;
+    --primary-foreground: #ffffff;
+    --secondary: #f0f0f0;
+    --secondary-foreground: #1b1b1b;
+    --muted: #f0f0f0;
+    --muted-foreground: #575757;
+    --accent: #e5f3fb;
+    --accent-foreground: #1b1b1b;
+    --destructive: #c42b1c;
+    --border: #ccd7e3;
+    --input: #abadb3;
+    --ring: #3399ff;
+    --radius: 0.25rem;
+    --heading-font: "Segoe UI", Frutiger, "Frutiger Linotype", "Helvetica Neue", Arial, sans-serif;
+    --page-gradient: url("/themes/aero.svg");
+    --page-size: cover;
+}
+
+/* macOS Golden Gate: the bridge at sunset behind a window of frosted
+   Liquid Glass, near-black text and International Orange, the bridge's
+   own colour, for the accent; round corners all the same. Restyled from
+   top to bottom in restyles.css: a floating glass toolbar, capsule
+   buttons, traffic lights. The pictures are files of their own
+   (public/themes). */
+[data-theme="golden-gate"] {
+    --background: #f6efef;
+    --foreground: #1d1d1f;
+    --card: #ffffff;
+    --card-foreground: #1d1d1f;
+    --popover: #ffffff;
+    --popover-foreground: #1d1d1f;
+    --primary: #b8361f;
+    --primary-foreground: #ffffff;
+    --secondary: #efe6e8;
+    --secondary-foreground: #1d1d1f;
+    --muted: #efe6e8;
+    --muted-foreground: #5e5560;
+    --accent: #f3e3df;
+    --accent-foreground: #1d1d1f;
+    --destructive: #a3124a;
+    --border: #e2d6d9;
+    --input: #d6c8cc;
+    --ring: #b8361f;
+    --radius: 0.875rem;
+    --heading-font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro", "Helvetica Neue", "Inter", system-ui, sans-serif;
+    --page-gradient: url("/themes/golden-gate.svg");
+    --page-size: cover;
+}
+
 /* ── The Silly set ─────────────────────────────────────────────────────────
    Themes nobody should pick, listed apart in the palette menu. They are
    absurd on purpose but hold the same contrast as the rest, so the app
@@ -1568,6 +1629,18 @@ html[data-text-size="large"] {
 }
 html[data-text-size="larger"] {
   font-size: 125%;
+}
+/* On a phone the top bar is a row of icons, sized in rem to fit from 360px
+   up at the usual size; a larger text size grew them past the screen's
+   edge, and every page scrolled sideways. Icons have no text to grow, so
+   there the bar keeps the usual size. */
+@media (width < 40rem) {
+  html[data-text-size="large"] .top-bar > div {
+    zoom: calc(1 / 1.125);
+  }
+  html[data-text-size="larger"] .top-bar > div {
+    zoom: 0.8;
+  }
 }
 html[data-long-font="serif"] .long-text {
   font-family: ui-serif, "Iowan Old Style", "Palatino Linotype", Palatino, Georgia,
@@ -2926,15 +2999,21 @@ html[data-covers="plain"] .drawn-cover {
    back where the pointer rests on it, as if pressed, and a soft light sits
    under the pointer. Eases back flat when the pointer leaves. Only with a
    mouse or trackpad, and not with Animations off, reduced motion or
-   "Covers follow the pointer: Off". */
+   "Covers follow the pointer: Off".
+   A cover at rest has no transform at all, and gets its 3D one only while
+   tilting: even turned by 0deg, a 3D transform puts the element on a
+   compositor layer of its own, and with every cover in the library on one
+   that took more time on each scrolled frame than everything else put
+   together. Easing back flat is a transition to `none`, which the browser
+   reads as the same functions at 0deg. */
 @media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
   html:not([data-motion="off"]):not([data-cover-tilt="off"]) [data-tilt] {
-    transform: perspective(40rem) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
     transition:
       transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1),
       translate 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
   }
   html:not([data-motion="off"]):not([data-cover-tilt="off"]) [data-tilt][data-tilting] {
+    transform: perspective(40rem) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
     transition:
       transform 0.12s ease-out,
       translate 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -3487,6 +3566,21 @@ html {
     color-mix(in oklab, var(--primary) 14%, transparent),
     transparent 70%
   );
+}
+
+/* ── Theme changes ─────────────────────────────────────────────────────────
+   For the frame a theme changes in (data-theme-changing, set by
+   applyThemeSetting in lib/themes.ts), what would ease from the old
+   colours to the new ones changes at once instead. The list names classes
+   rather than every element (`*`): when the attribute goes again, the
+   browser then restyles only what carries one of them, not the whole page
+   a second time. One selector each, not an :is() list, so the browser
+   files each under its class and other elements never look at them. */
+html[data-theme-changing] .transition,
+html[data-theme-changing] .transition-colors,
+html[data-theme-changing] .transition-shadow,
+html[data-theme-changing] .lift {
+  transition: none !important;
 }
 
 /* ── Motion ────────────────────────────────────────────────────────────────

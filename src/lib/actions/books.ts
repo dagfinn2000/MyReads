@@ -152,7 +152,7 @@ export async function updateBook(
 
   const existing = await prisma.book.findFirst({
     where: { id: bookId, userId },
-    select: { coverUrl: true, fields: true },
+    select: { coverUrl: true, fields: true, currentPage: true },
   });
   if (!existing) return { error: "Book not found" };
 
@@ -161,6 +161,13 @@ export async function updateBook(
     return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
   }
   const data = parsed.data;
+  // Fewer pages than the page the reader is on would put them past the end,
+  // which adding a book and logging a page both refuse.
+  if (existing.currentPage != null && data.pageCount != null && existing.currentPage > data.pageCount) {
+    return {
+      error: `You're on page ${existing.currentPage}, past the end of ${data.pageCount} pages. Move your place back first.`,
+    };
+  }
   const { customFields } = await getPreferences();
   const fieldValues = fieldValuesFromForm(
     formData,

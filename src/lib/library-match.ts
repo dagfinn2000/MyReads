@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { isbnVariants } from "@/lib/isbn";
+import { isbnWhere } from "@/lib/isbn";
 import { escapeLike, foldForSearch } from "@/lib/utils";
 
 /**
@@ -16,7 +16,7 @@ const matchSelect = { id: true, title: true, ownership: true, format: true } as 
 /** The user's book with this ISBN, in its 10- or 13-digit form. */
 export function findBookByIsbn(userId: string, isbn: string) {
   return prisma.book.findFirst({
-    where: { userId, isbn: { in: isbnVariants(isbn) } },
+    where: { userId, ...isbnWhere(isbn) },
     select: matchSelect,
   });
 }

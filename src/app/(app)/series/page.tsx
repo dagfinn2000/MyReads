@@ -61,7 +61,7 @@ export default async function SeriesPage({
   );
 
   return (
-    <div className="grid gap-4">
+    <div className="grid grid-cols-1 gap-4">
       <div className="flex flex-wrap items-baseline gap-3">
         <h1 className="text-2xl font-semibold tracking-tight">Series</h1>
         <span className="text-sm text-muted-foreground tabular-nums">
@@ -97,7 +97,7 @@ export default async function SeriesPage({
           {shown.length === 0 ? (
             <p className="text-sm text-muted-foreground">No series here.</p>
           ) : (
-            <div className="grid items-start gap-4 lg:grid-cols-2">
+            <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
               {shown.map((s) => (
                 <SeriesCard key={s.key} series={s} prefs={prefs} />
               ))}

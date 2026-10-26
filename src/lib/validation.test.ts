@@ -3,6 +3,7 @@ import {
   bookSchema,
   isAllowedCoverUrl,
   kindleQuotesSchema,
+  loanSchema,
   pastReadSchema,
   readingSchema,
 } from "@/lib/validation";
@@ -32,6 +33,37 @@ describe("bookSchema tags", () => {
       tags: "Fiction, fiction, FICTION, fantasy",
     });
     expect(parsed.tags).toEqual(["fiction", "fantasy"]);
+  });
+
+  it("refuses a tag longer than bulk edit and a restore allow", () => {
+    const fifty = "a".repeat(50);
+    expect(bookSchema.parse({ ...minimalForm, tags: fifty }).tags).toEqual([fifty]);
+    const long = bookSchema.safeParse({ ...minimalForm, tags: `ok, ${"a".repeat(51)}` });
+    expect(long.error?.issues[0]?.message).toBe("Tags can be at most 50 characters.");
+  });
+});
+
+describe("bookSchema isbn", () => {
+  it("keeps it as the lookups compare it: no spaces or hyphens, a capital X", () => {
+    expect(bookSchema.parse({ ...minimalForm, isbn: "0-8044-2957-x" }).isbn).toBe("080442957X");
+    expect(bookSchema.parse({ ...minimalForm, isbn: " 978 0 13 468599 1 " }).isbn).toBe("9780134685991");
+    expect(bookSchema.parse({ ...minimalForm, isbn: "" }).isbn).toBeNull();
+  });
+});
+
+describe("bookSchema pageCount", () => {
+  it("saves a blank count as not known", () => {
+    expect(bookSchema.parse({ ...minimalForm, pageCount: "" }).pageCount).toBeNull();
+    expect(bookSchema.parse({ ...minimalForm, pageCount: "320" }).pageCount).toBe(320);
+  });
+
+  it("reports a count out of range instead of emptying the field", () => {
+    const huge = bookSchema.safeParse({ ...minimalForm, pageCount: "999999" });
+    expect(huge.error?.issues[0]?.message).toBe("Pages must be at most 100,000");
+    const zero = bookSchema.safeParse({ ...minimalForm, pageCount: "0" });
+    expect(zero.error?.issues[0]?.message).toBe("Pages must be at least 1");
+    const half = bookSchema.safeParse({ ...minimalForm, pageCount: "12.5" });
+    expect(half.error?.issues[0]?.message).toBe("Pages must be a whole number");
   });
 });
 
@@ -170,5 +202,20 @@ describe("kindleQuotesSchema", () => {
   it("still rejects an empty highlight", () => {
     const res = kindleQuotesSchema.safeParse([one("   ")]);
     expect(res.success).toBe(false);
+  });
+});
+
+describe("loanSchema", () => {
+  const day = (offset: number) => new Date(Date.now() + offset * 86_400_000).toISOString().slice(0, 10);
+
+  it("refuses a day it was lent that is still to come", () => {
+    const later = loanSchema.safeParse({ borrower: "Kari", lentAt: day(5) });
+    expect(later.error?.issues[0]?.message).toBe("You can't have lent it on a day still to come.");
+  });
+
+  it("takes today and earlier days", () => {
+    expect(loanSchema.safeParse({ borrower: "Kari", lentAt: day(0) }).success).toBe(true);
+    expect(loanSchema.safeParse({ borrower: "Kari", lentAt: day(-30), dueAt: day(10) }).success).toBe(true);
+    expect(loanSchema.safeParse({ borrower: "Kari", lentAt: "" }).success).toBe(true);
   });
 });

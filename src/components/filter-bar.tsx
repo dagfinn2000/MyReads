@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useEffectEvent, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { BookFormat } from "@/lib/enums";
 import {
@@ -236,12 +236,44 @@ export function FilterBar({
   // Debounced text search. Skips a box that already says what the URL does
   // (on mount, and after following the URL), which would only navigate to
   // the page already showing.
+  const searchTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   useEffect(() => {
     if (search.trim() === urlQ) return;
-    const t = setTimeout(() => navigate({ q: search }), 300);
-    return () => clearTimeout(t);
+    searchTimer.current = setTimeout(() => navigate({ q: search }), 300);
+    return () => clearTimeout(searchTimer.current);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search]);
+
+  // A shelf tab or chip (inside `data-keeps-search`) followed while the box
+  // holds words its link lacks. Those links were drawn by the server before
+  // the words were typed, or before the search they started came back, so
+  // the link dropped the search; or the search, sent a moment later from
+  // the page as it was, undid the click. The link takes the words along.
+  const carrySearch = useEffectEvent((e: MouseEvent) => {
+    if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) {
+      return;
+    }
+    const link =
+      e.target instanceof Element
+        ? e.target.closest<HTMLAnchorElement>("[data-keeps-search] a[href]")
+        : null;
+    if (!link) return;
+    const q = search.trim();
+    const url = new URL(link.href);
+    if ((url.searchParams.get("q") ?? "") === q) return;
+    if (q) url.searchParams.set("q", q);
+    else url.searchParams.delete("q");
+    // Before the link's own click handler, which then leaves it be.
+    e.preventDefault();
+    clearTimeout(searchTimer.current);
+    setUrlQ(q);
+    router.push(`${url.pathname}${url.search}`);
+  });
+  useEffect(() => {
+    const onClick = (e: MouseEvent) => carrySearch(e);
+    document.addEventListener("click", onClick, true);
+    return () => document.removeEventListener("click", onClick, true);
+  }, []);
 
   const chips = activeFilterChips(
     current,
@@ -252,7 +284,7 @@ export function FilterBar({
   const asc = current.dir === "asc";
 
   return (
-    <div className="grid gap-2">
+    <div className="grid grid-cols-1 gap-2">
       {/* On phones the controls stack into tidy full-width rows (search with
           the view buttons, then filters, then grouping/sort); from sm up
           they keep their fixed widths and the view buttons go last. */}

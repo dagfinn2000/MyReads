@@ -5,7 +5,7 @@ import { spendMetadataBudget } from "@/lib/api-guard";
 import { getPreferences } from "@/lib/current-user";
 import { prisma } from "@/lib/prisma";
 import { searchBooks } from "@/lib/metadata";
-import { isbnVariants, looksLikeIsbn, normalizeIsbn } from "@/lib/isbn";
+import { isbnWhere, looksLikeIsbn, normalizeIsbn } from "@/lib/isbn";
 import { escapeLike, foldForSearch } from "@/lib/utils";
 
 /** What the check UI needs to show a hit — no reading data beyond the badge bits. */
@@ -76,7 +76,7 @@ export async function GET(req: Request) {
 
   if (isbnParam) {
     const book = await prisma.book.findFirst({
-      where: { userId, isbn: { in: isbnVariants(isbnParam) } },
+      where: { userId, ...isbnWhere(isbnParam) },
       select: bookSelect,
     });
     if (book) {

@@ -56,3 +56,13 @@ export function isbnVariants(raw: string): string[] {
 
   return [...variants];
 }
+
+/**
+ * A Prisma filter for books whose ISBN is `raw` in either form. Ignores
+ * case, as ISBNs saved before the form wrote a capital X can end in a
+ * small one; the variants are digits and X alone, so nothing needs
+ * escaping for the ILIKE that becomes.
+ */
+export function isbnWhere(raw: string) {
+  return { OR: isbnVariants(raw).map((v) => ({ isbn: { equals: v, mode: "insensitive" as const } })) };
+}

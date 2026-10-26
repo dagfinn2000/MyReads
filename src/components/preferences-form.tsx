@@ -344,7 +344,7 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section id={id} className="grid scroll-mt-20 gap-3 border-t pt-4 first:border-t-0 first:pt-0">
+    <section id={id} className="grid grid-cols-1 scroll-mt-20 gap-3 border-t pt-4 first:border-t-0 first:pt-0">
       <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
         {title}
       </h3>
@@ -433,7 +433,7 @@ export function PreferencesForm({
   const inBar = new Set(topBarLinks(prefs));
 
   return (
-    <div className="grid gap-5">
+    <div className="grid grid-cols-1 gap-5">
       <p className="text-sm text-muted-foreground" aria-live="polite">
         {status === "saving"
           ? "Saving…"
@@ -1223,7 +1223,7 @@ export function PreferencesForm({
           id="what-counts"
           role="group"
           aria-labelledby="what-counts-heading"
-          className="grid scroll-mt-20 gap-3"
+          className="grid grid-cols-1 scroll-mt-20 gap-3"
         >
           <div>
             <p id="what-counts-heading" className="text-sm font-medium">

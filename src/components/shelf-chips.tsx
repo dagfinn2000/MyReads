@@ -84,7 +84,8 @@ export function ShelfChips({
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-1.5">
+    // data-keeps-search: see ShelfTabs.
+    <div className="flex flex-wrap items-center gap-1.5" data-keeps-search="">
       <span className="mr-1 text-sm text-muted-foreground">Shelves:</span>
       {/* No prefetching, here or below: see BookLink. */}
       <Link
