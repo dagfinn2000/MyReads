@@ -1076,7 +1076,6 @@ const Bookcase = memo(function Bookcase({
                 <li key={book.id} className="contents">
                   <BookLink
                     bookId={book.id}
-                    prefetch={false}
                     className="room-spine"
                     data-spine=""
                     data-book={i}
@@ -1369,7 +1368,6 @@ function Furniture({
           {seated && (
             <BookLink
               bookId={openBook.book.id}
-              prefetch={false}
               className="room-abs room-held-book"
               data-book={openBook.index}
               aria-label={`Reading in the armchair: ${spineLabel(openBook.book)}`}
@@ -1384,7 +1382,6 @@ function Furniture({
           {openBook && !seated && (
             <BookLink
               bookId={openBook.book.id}
-              prefetch={false}
               className="room-abs room-open-book"
               data-book={openBook.index}
               aria-label={`On the side table: ${spineLabel(openBook.book)}`}

@@ -68,7 +68,6 @@ export function BookSpine({
   return (
     <BookLink
       bookId={book.id}
-      prefetch={false}
       className={cn("spine-link", className)}
       data-flight-cover=""
       aria-label={label}

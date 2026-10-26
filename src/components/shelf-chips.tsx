@@ -86,8 +86,10 @@ export function ShelfChips({
   return (
     <div className="flex flex-wrap items-center gap-1.5">
       <span className="mr-1 text-sm text-muted-foreground">Shelves:</span>
+      {/* No prefetching, here or below: see BookLink. */}
       <Link
         href={shelfHref(null)}
+        prefetch={false}
         className={cn(
           "rounded-full border px-3 py-1 text-sm transition-colors hover:border-ring/60",
           !active && "border-primary bg-primary/10 font-medium",
@@ -99,6 +101,7 @@ export function ShelfChips({
         <span key={shelf.id} className="inline-flex items-center">
           <Link
             href={shelfHref(shelf.id)}
+            prefetch={false}
             className={cn(
               "rounded-full border px-3 py-1 text-sm transition-colors hover:border-ring/60",
               shelf.id === activeShelfId &&

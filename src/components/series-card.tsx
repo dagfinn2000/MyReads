@@ -58,7 +58,8 @@ export function SeriesCard({
         <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
           <div className="min-w-0">
             <h2 className="text-lg font-semibold leading-tight">
-              <Link href={href} className="hover:underline">
+              {/* No prefetching, here or below: see BookLink. */}
+              <Link href={href} prefetch={false} className="hover:underline">
                 {series.name}
               </Link>
             </h2>
@@ -232,6 +233,7 @@ function Gap({ from, to }: { from: number; to: number }) {
   return (
     <Link
       href="/books/new"
+      prefetch={false}
       className="group grid w-20 gap-1"
       title={from === to ? `No book for ${label}. Add it` : `No books for ${label}. Add one`}
     >

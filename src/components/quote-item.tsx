@@ -63,8 +63,10 @@ export function QuoteItem({ quote, showBook }: { quote: QuoteItemQuote; showBook
             )}
             <div className="flex min-w-0 items-center gap-2">
               {showBook ? (
+                // No prefetching: see BookLink.
                 <Link
                   href={`/books/${quote.book.id}`}
+                  prefetch={false}
                   className="group flex min-w-0 flex-1 items-center gap-2.5 text-sm"
                 >
                   <BookCover book={quote.book} className="aspect-[2/3] w-7 shrink-0" />

@@ -108,7 +108,12 @@ export default async function QuotesPage({
           {groups.map(({ book, quotes, total: count }) => (
             <section key={book.id} aria-labelledby={`qb-${book.id}`} className="grid grid-cols-1 gap-3">
               <h2 id={`qb-${book.id}`} className="flex min-w-0 items-center gap-3 border-b pb-2">
-                <Link href={`/books/${book.id}`} className="group flex min-w-0 items-center gap-3">
+                {/* No prefetching: see BookLink. */}
+                <Link
+                  href={`/books/${book.id}`}
+                  prefetch={false}
+                  className="group flex min-w-0 items-center gap-3"
+                >
                   <BookCover book={book} className="aspect-[2/3] w-10 shrink-0" />
                   <span className="min-w-0">
                     <span className="block truncate font-heading text-lg font-medium group-hover:underline">

@@ -490,8 +490,10 @@ export function LibraryView({
             <section key={g.key} className="grid gap-3">
               <h2 className="flex flex-wrap items-baseline gap-x-2 border-b pb-1 font-heading text-lg font-medium">
                 {g.href ? (
+                  // No prefetching: see BookLink.
                   <Link
                     href={g.href}
+                    prefetch={false}
                     className="min-w-0 break-words hover:underline"
                     title={`${g.title} on the Series page`}
                   >
