@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   DEVICE_THEME_STORAGE_KEY,
   RETIRED_THEMES,
@@ -11,6 +11,7 @@ import {
   parseThemeSetting,
   sectionOf,
   serializeThemeSetting,
+  syncPageTheme,
 } from "@/lib/themes";
 
 describe("parseThemeSetting", () => {
@@ -291,5 +292,58 @@ describe("THEME_INIT_SCRIPT", () => {
     runInitScript(device);
     expect(device.html.get("data-theme-device")).toBe("auto:solarized-light:high-contrast-dark");
     expect(device.html.get("data-theme")).toBe("solarized-light");
+  });
+});
+
+describe("syncPageTheme", () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  /** A page after its first load, which ThemeSync then looks after. */
+  function loaded(attrs: Record<string, string>) {
+    const page = fakePage({ attrs });
+    runInitScript(page);
+    vi.stubGlobal("document", page.document);
+    vi.stubGlobal("window", page.window);
+    syncPageTheme("/books", attrs["data-theme"], undefined);
+    return page;
+  }
+
+  /** What the theme picker does for a theme picked for the account. */
+  function pick(page: ReturnType<typeof fakePage>, id: string) {
+    page.html.set("data-theme-account", id);
+    page.html.set("data-theme", id);
+  }
+
+  it("keeps a theme picked since the first load as the reader moves between pages", () => {
+    const page = loaded({ "data-theme": "blueprint" });
+    pick(page, "dracula");
+    // The layout isn't rendered again on a move, so it still says blueprint.
+    syncPageTheme("/stats", "blueprint", "blueprint");
+    expect(page.html.get("data-section")).toBe("stats");
+    expect(page.html.get("data-theme-account")).toBe("dracula");
+    expect(page.html.get("data-theme")).toBe("dracula");
+    expect(page.classes.has("dark")).toBe(true);
+    syncPageTheme("/books/cm123", "blueprint", "blueprint");
+    expect(page.html.get("data-theme")).toBe("dracula");
+  });
+
+  it("takes the account's theme when the server sends a new one", () => {
+    // Picked on another device, then the layout rendered again here.
+    const page = loaded({ "data-theme": "blueprint" });
+    syncPageTheme("/books", "sage", "blueprint");
+    expect(page.html.get("data-theme-account")).toBe("sage");
+    expect(page.html.get("data-theme")).toBe("sage");
+  });
+
+  it("goes back to the picked theme after a part with a theme of its own", () => {
+    const page = loaded({
+      "data-theme": "blueprint",
+      "data-theme-parts": JSON.stringify({ stats: "lacquer" }),
+    });
+    pick(page, "dracula");
+    syncPageTheme("/stats", "blueprint", "blueprint");
+    expect(page.html.get("data-theme")).toBe("lacquer");
+    syncPageTheme("/quotes", "blueprint", "blueprint");
+    expect(page.html.get("data-theme")).toBe("dracula");
   });
 });

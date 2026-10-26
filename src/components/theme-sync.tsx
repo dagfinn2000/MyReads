@@ -1,14 +1,8 @@
 "use client";
 
-import { useLayoutEffect } from "react";
+import { useLayoutEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
-import {
-  DARK_THEME_IDS,
-  THEME_BACKGROUNDS,
-  applyThemeSetting,
-  pageThemeChange,
-  sectionOf,
-} from "@/lib/themes";
+import { syncPageTheme } from "@/lib/themes";
 
 /**
  * Keeps <html> right as the reader moves around without a full page load:
@@ -19,18 +13,16 @@ import {
  *
  * `account` is the account's theme as the server last rendered it, and
  * `parts` the part themes as JSON: when either changes (Preferences, or the
- * theme picked on another device), the theme is worked out again.
+ * theme picked on another device), the theme is worked out again. The
+ * account's theme is only taken when it changed (syncPageTheme), since a
+ * move to another page leaves it as it was at the first load.
  */
 export function ThemeSync({ account, parts }: { account: string | null; parts: string }) {
   const pathname = usePathname();
+  const before = useRef<string | null | undefined>(undefined);
   useLayoutEffect(() => {
-    const root = document.documentElement;
-    const section = sectionOf(pathname);
-    if (section) root.setAttribute("data-section", section);
-    else root.removeAttribute("data-section");
-    if (account) root.setAttribute("data-theme-account", account);
-    const next = pageThemeChange(section);
-    if (next) applyThemeSetting(next, DARK_THEME_IDS, THEME_BACKGROUNDS);
+    syncPageTheme(pathname, account, before.current);
+    before.current = account;
   }, [pathname, account, parts]);
   return null;
 }
