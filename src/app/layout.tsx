@@ -1,6 +1,18 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { Geist, Literata, Nunito } from "next/font/google";
+// Themes restyled from top to bottom, after the rest so they can reshape it.
+import "./restyles.css";
+import {
+  Architects_Daughter,
+  DotGothic16,
+  Geist,
+  Literata,
+  Nunito,
+  Patrick_Hand,
+  Playfair_Display,
+  UnifrakturMaguntia,
+  VT323,
+} from "next/font/google";
 import { BackgroundScene } from "@/components/background-scene";
 import { IconSprite } from "@/components/icon-sprite";
 import { getCurrentUser } from "@/lib/current-user";
@@ -21,6 +33,40 @@ const literata = Literata({
   preload: false,
 });
 const nunito = Nunito({ subsets: ["latin"], variable: "--font-nunito", preload: false });
+// The faces of the themes restyled from top to bottom (restyles.css): a
+// terminal's, a newspaper's masthead and headlines, an architect's
+// lettering, handwriting and pixels. Not preloaded either, so only a
+// reader on one of those themes ever downloads its face.
+const vt323 = VT323({ weight: "400", subsets: ["latin"], variable: "--font-vt323", preload: false });
+const fraktur = UnifrakturMaguntia({
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-fraktur",
+  preload: false,
+});
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  variable: "--font-playfair",
+  preload: false,
+});
+const architect = Architects_Daughter({
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-architect",
+  preload: false,
+});
+const handwriting = Patrick_Hand({
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-hand",
+  preload: false,
+});
+const pixel = DotGothic16({
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-pixel",
+  preload: false,
+});
 
 export const metadata: Metadata = {
   title: "MyReads",
@@ -68,6 +114,12 @@ export default async function RootLayout({
         geist.variable,
         literata.variable,
         nunito.variable,
+        vt323.variable,
+        fraktur.variable,
+        playfair.variable,
+        architect.variable,
+        handwriting.variable,
+        pixel.variable,
         dark && "dark",
       )}
       {...themeAttrs}

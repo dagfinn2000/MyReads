@@ -210,13 +210,31 @@ The reading room's files:
   it corners of its own and `--heading-font` a heading face (Corners and
   Headings in Preferences only override them when set to something other
   than "As the theme has them"), and `--page-gradient` with `--page-size`
-  puts a picture behind the page while Background is Plain. The "Beyond
-  colour" part of globals.css has the rest: a top bar in the theme's own
+  puts a picture behind the page. Such a theme also needs
+  `ownBackground: true` in `THEMES` (a test checks the two agree): its
+  picture then shows instead of the reader's Background, through
+  `data-own-background` on `<html>`, which the pre-paint script sets. The
+  "Beyond colour" part of globals.css has the rest: a top bar in the theme's own
   colours, outlined cards with hard shadows, a font for the whole page.
   Give such a theme a `pattern` in `THEMES` too, so its swatch shows it.
   Before adding one, check it doesn't look like a theme we already have:
   the hues are nearly all taken, so a new theme should differ in kind,
   not shade.
+- **A few themes restyle everything.** Desktop 95, Terminal, Newsprint,
+  Blueprint, Notebook, Quest and Pinstripe start from a colour block like
+  any theme, and [restyles.css](../src/app/restyles.css) reshapes the
+  app for them, one section per theme. Its rules aim at shadcn's
+  `data-slot` attributes and buttons by `data-size` and `data-variant`:
+  a button inside a Radix trigger (`asChild`) wears the trigger's
+  `data-slot` (`dialog-trigger`, `popover-trigger`) instead of
+  "button". The rules aren't in a layer, so they beat Tailwind's
+  utilities without `!important`, which also means each theme sets its
+  own hover and pressed states. Generated text such as window titles
+  uses `content: "…" / ""` so screen readers skip it. Fonts only these
+  themes use are loaded with `preload: false` in
+  [layout.tsx](../src/app/layout.tsx), so no one else downloads them.
+  After changing one, look at every page at phone width too, and check
+  the other themes still match main pixel for pixel.
 - **A theme is retired, never just deleted.** Take out its block and
   entry and add it to `RETIRED_THEMES` in
   [themes.ts](../src/lib/themes.ts) with the theme that replaces it, of

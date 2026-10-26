@@ -9,6 +9,7 @@ import {
   DARK_THEME_IDS,
   DEFAULT_AUTO_THEMES,
   DEVICE_THEME_STORAGE_KEY,
+  OWN_BACKGROUND_IDS,
   PART_OF_SECTION,
   THEME_BACKGROUNDS,
   THEME_STORAGE_KEY,
@@ -209,7 +210,7 @@ export function ThemePicker() {
     const next = pageThemeChange(document.documentElement.getAttribute("data-section") ?? "");
     if (next) {
       revealTheme(
-        () => applyThemeSetting(next, DARK_THEME_IDS, THEME_BACKGROUNDS),
+        () => applyThemeSetting(next, DARK_THEME_IDS, THEME_BACKGROUNDS, OWN_BACKGROUND_IDS),
         triggerRef.current,
       );
     }

@@ -31,6 +31,10 @@ export interface ThemeDef {
   pattern?: string;
   /** Only on the Silly set: a line about the theme, shown on hover. */
   silly?: string;
+  /** Brings its own picture behind the page (--page-gradient in its CSS
+   *  block), which shows instead of the Background chosen in Preferences
+   *  while this theme is on. */
+  ownBackground?: true;
 }
 
 export const THEME_STORAGE_KEY = "myreads-theme";
@@ -57,13 +61,22 @@ export const THEMES: ThemeDef[] = [
   { id: "terracotta", name: "Terracotta", mode: "dark", swatch: ["#3d1a0c", "#8fd3ff"] },
   { id: "dragonfruit", name: "Dragonfruit", mode: "dark", swatch: ["#3a0a31", "#bff25c"] },
   { id: "iris", name: "Iris", mode: "dark", swatch: ["#2a0c47", "#ffd24d"] },
-  { id: "blueprint", name: "Blueprint", mode: "dark", swatch: ["#143668", "#ffffff"] },
+  {
+    id: "blueprint",
+    name: "Blueprint",
+    mode: "dark",
+    swatch: ["#143668", "#ffffff"],
+    pattern:
+      "repeating-linear-gradient(rgb(255 255 255 / 0.3) 0 1px, transparent 1px 6px), repeating-linear-gradient(90deg, rgb(255 255 255 / 0.3) 0 1px, transparent 1px 6px)",
+    ownBackground: true,
+  },
   {
     id: "terminal",
     name: "Terminal",
     mode: "dark",
     swatch: ["#040d07", "#b6ffc8"],
     pattern: "repeating-linear-gradient(rgb(134 245 162 / 0.22) 0 1px, transparent 1px 3px)",
+    ownBackground: true,
   },
   {
     id: "high-contrast-dark",
@@ -87,6 +100,7 @@ export const THEMES: ThemeDef[] = [
     mode: "dark",
     swatch: ["#1d0a07", "#ff8c42"],
     pattern: "radial-gradient(130% 70% at 50% 108%, #8a2a0a, #3a0d08 50%, #140806 85%)",
+    ownBackground: true,
   },
   {
     id: "northern-lights",
@@ -95,6 +109,7 @@ export const THEMES: ThemeDef[] = [
     swatch: ["#070b14", "#5ef0a8"],
     pattern:
       "radial-gradient(80% 60% at 25% 10%, rgb(46 204 140 / 0.55), transparent 70%), radial-gradient(70% 55% at 80% 15%, rgb(150 90 220 / 0.6), transparent 70%), linear-gradient(#0a1424, #05070d)",
+    ownBackground: true,
   },
   {
     id: "lacquer",
@@ -131,7 +146,14 @@ export const THEMES: ThemeDef[] = [
     swatch: ["#ffffff", "#0033b3"],
     pattern: "radial-gradient(circle, transparent 0 56%, #000000 58% 66%, transparent 68%)",
   },
-  { id: "newsprint", name: "Newsprint", mode: "light", swatch: ["#dcdcd7", "#b30d29"] },
+  {
+    id: "newsprint",
+    name: "Newsprint",
+    mode: "light",
+    swatch: ["#dcdcd7", "#b30d29"],
+    pattern: "linear-gradient(transparent 30%, #121212 30% 36%, transparent 36% 42%, #121212 42% 45%, transparent 45%)",
+    ownBackground: true,
+  },
   { id: "macaron", name: "Macaron", mode: "light", swatch: ["#e2f4e9", "#a8336e"] },
   { id: "kraft", name: "Kraft", mode: "light", swatch: ["#dcc6a0", "#9a1f18"] },
   {
@@ -141,6 +163,16 @@ export const THEMES: ThemeDef[] = [
     swatch: ["#fbfaf5", "#c41e3a"],
     pattern:
       "linear-gradient(90deg, transparent 22%, #e8a0a8 22% 26%, transparent 26%), repeating-linear-gradient(transparent 0 4px, #b9c6ea 4px 5px)",
+    ownBackground: true,
+  },
+  {
+    id: "pinstripe",
+    name: "Pinstripe",
+    mode: "light",
+    swatch: ["#eeeeee", "#1c5fc8"],
+    pattern:
+      "radial-gradient(circle at 50% 50%, #e8f4ff 0 12%, #6aaaf2 30%, #1c5fc8 46%, transparent 48%), repeating-linear-gradient(#f5f5f5 0 1px, #dcdcdc 1px 2px)",
+    ownBackground: true,
   },
   {
     id: "sunset",
@@ -148,6 +180,7 @@ export const THEMES: ThemeDef[] = [
     mode: "light",
     swatch: ["#ffd3cf", "#9c3300"],
     pattern: "linear-gradient(170deg, #ffe3c4, #ffc9cf 48%, #e9cdf3)",
+    ownBackground: true,
   },
   {
     id: "opal",
@@ -155,6 +188,7 @@ export const THEMES: ThemeDef[] = [
     mode: "light",
     swatch: ["#e2ecf2", "#0b5f70"],
     pattern: "linear-gradient(125deg, #ffd9ec, #fff1c7 25%, #d3f5e4 50%, #cfe7ff 75%, #e7dbff)",
+    ownBackground: true,
   },
   {
     id: "brutalist",
@@ -207,7 +241,9 @@ export const THEMES: ThemeDef[] = [
     name: "Desktop 95",
     mode: "light",
     swatch: ["#c0c0c0", "#000080"],
+    pattern: "radial-gradient(circle, transparent 0 50%, #008080 52%)",
     silly: "It is now safe to turn off your library.",
+    ownBackground: true,
   },
   {
     id: "under-construction",
@@ -225,6 +261,7 @@ export const THEMES: ThemeDef[] = [
     swatch: ["#730d16", "#ffd34d"],
     pattern: "radial-gradient(circle, #0d4a26 0 50%, transparent 52%)",
     silly: "Grandma knitted it. You have to wear it.",
+    ownBackground: true,
   },
   {
     id: "spreadsheet",
@@ -234,6 +271,7 @@ export const THEMES: ThemeDef[] = [
     pattern:
       "linear-gradient(#217346 0 30%, transparent 30%), repeating-linear-gradient(#d0d0d0 0 1px, transparent 1px 6px), repeating-linear-gradient(90deg, #d0d0d0 0 1px, transparent 1px 9px)",
     silly: "It’s not a library, it’s a workbook.",
+    ownBackground: true,
   },
   {
     id: "party",
@@ -243,6 +281,7 @@ export const THEMES: ThemeDef[] = [
     pattern:
       "radial-gradient(circle at 25% 28%, #ff5c8a 0 2px, transparent 2.5px), radial-gradient(circle at 74% 26%, #ffc93c 0 2px, transparent 2.5px), radial-gradient(circle at 28% 74%, #3ccfcf 0 2px, transparent 2.5px), radial-gradient(circle at 76% 72%, #5cd65c 0 2px, transparent 2.5px)",
     silly: "Somebody’s birthday, probably.",
+    ownBackground: true,
   },
   {
     id: "camouflage",
@@ -252,6 +291,16 @@ export const THEMES: ThemeDef[] = [
     pattern:
       "radial-gradient(40% 28% at 28% 30%, #32281a 98%, transparent), radial-gradient(38% 26% at 72% 70%, #161a0e 98%, transparent), radial-gradient(30% 22% at 76% 24%, #2a3217 98%, transparent), radial-gradient(30% 22% at 24% 76%, #161a0e 98%, transparent)",
     silly: "Your books can’t see you either.",
+    ownBackground: true,
+  },
+  {
+    id: "quest",
+    name: "Quest",
+    mode: "dark",
+    swatch: ["#080818", "#ffd84a"],
+    pattern: "radial-gradient(circle, #2438b8 0 44%, #f0f0f8 46% 54%, transparent 56%)",
+    silly: "Your library gained a level!",
+    ownBackground: true,
   },
 ];
 
@@ -285,6 +334,10 @@ const currentId = (id: string) =>
 export const DARK_THEME_IDS = THEMES.filter((t) => t.mode === "dark").map(
   (t) => t.id,
 );
+
+/** The themes with a picture of their own behind the page, which wins
+ *  over the Background chosen in Preferences. */
+export const OWN_BACKGROUND_IDS = THEMES.filter((t) => t.ownBackground).map((t) => t.id);
 
 /** Each theme's page background, for the browser's title bar colour
  *  (the installed app's top bar on a phone). */
@@ -398,9 +451,11 @@ export function pageThemeSetting(
 
 /**
  * Puts a stored theme setting on <html>: the `data-theme` palette, the
- * `dark` class Tailwind's `dark:` variants key on, the browser title bar
- * colour, and — for automatic mode — `data-theme-auto`, which remembers the
- * pair so a later system switch can pick the other one.
+ * `dark` class Tailwind's `dark:` variants key on, `data-own-background`
+ * while the theme brings its own picture behind the page (which then
+ * replaces the reader's Background), the browser title bar colour, and —
+ * for automatic mode — `data-theme-auto`, which remembers the pair so a
+ * later system switch can pick the other one.
  *
  * Used both by the theme picker and, as source text, by the pre-paint script
  * below. That second use is why it takes everything as arguments and touches
@@ -411,6 +466,7 @@ export function applyThemeSetting(
   setting: string,
   darkIds: string[],
   backgrounds: Record<string, string>,
+  ownBackgroundIds: string[],
 ): void {
   const root = document.documentElement;
   let id = setting;
@@ -423,6 +479,8 @@ export function applyThemeSetting(
   }
   root.setAttribute("data-theme", id);
   root.classList.toggle("dark", darkIds.indexOf(id) > -1);
+  if (ownBackgroundIds.indexOf(id) > -1) root.setAttribute("data-own-background", "");
+  else root.removeAttribute("data-own-background");
 
   // The title bar colour. This tag is only ever written here: if the server
   // rendered one too, React would manage it and the two would fight.
@@ -456,6 +514,7 @@ function themeInit(
   partOf: Record<string, string>,
   darkIds: string[],
   backgrounds: Record<string, string>,
+  ownBackgroundIds: string[],
   retired: Record<string, string>,
   apply: typeof applyThemeSetting,
   sectionFor: typeof sectionOf,
@@ -495,12 +554,17 @@ function themeInit(
     if (device && known(device)) root.setAttribute("data-theme-device", device);
     const section = sectionFor(location.pathname);
     if (section) root.setAttribute("data-section", section);
-    apply(pageTheme(section, root.getAttribute("data-theme-parts"), partOf), darkIds, backgrounds);
+    apply(
+      pageTheme(section, root.getAttribute("data-theme-parts"), partOf),
+      darkIds,
+      backgrounds,
+      ownBackgroundIds,
+    );
     window
       .matchMedia("(prefers-color-scheme: dark)")
       .addEventListener("change", function () {
         const pair = root.getAttribute("data-theme-auto");
-        if (pair) apply("auto:" + pair, darkIds, backgrounds);
+        if (pair) apply("auto:" + pair, darkIds, backgrounds, ownBackgroundIds);
       });
   } catch {}
 }
@@ -517,6 +581,7 @@ export const THEME_INIT_SCRIPT = `(${themeInit.toString()})(${[
   PART_OF_SECTION,
   DARK_THEME_IDS,
   THEME_BACKGROUNDS,
+  OWN_BACKGROUND_IDS,
   RETIRED_THEMES,
 ]
   .map((value) => JSON.stringify(value))
@@ -557,7 +622,7 @@ export function syncPageTheme(
   else root.removeAttribute("data-section");
   if (account && account !== before) root.setAttribute("data-theme-account", account);
   const next = pageThemeChange(section);
-  if (next) applyThemeSetting(next, DARK_THEME_IDS, THEME_BACKGROUNDS);
+  if (next) applyThemeSetting(next, DARK_THEME_IDS, THEME_BACKGROUNDS, OWN_BACKGROUND_IDS);
 }
 
 /** The reader's part themes, checked: a part's setting that doesn't parse

@@ -537,7 +537,7 @@ export function LibraryView({
         ))}
 
       {selectMode && (
-        <div className="fixed bottom-4 left-1/2 z-50 grid max-h-[min(70dvh,34rem)] w-[min(64rem,calc(100vw-2rem))] -translate-x-1/2 gap-2 overflow-y-auto rounded-xl border bg-card p-3 shadow-lg">
+        <div className="bulk-bar fixed bottom-4 left-1/2 z-50 grid max-h-[min(70dvh,34rem)] w-[min(64rem,calc(100vw-2rem))] -translate-x-1/2 gap-2 overflow-y-auto rounded-xl border bg-card p-3 shadow-lg">
           {/* Rows: the count (and "all that match"), the changes in two
               columns on phones and four from sm up, then Apply, Delete and
               how it went. The bar scrolls if a short screen can't fit it. */}

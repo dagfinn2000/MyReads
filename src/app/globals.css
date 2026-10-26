@@ -397,8 +397,9 @@
    (Macaron), brown paper (Kraft) and coloured ink for the text
    (Notebook). */
 
-/* White lines on architect's blue: the only mid-blue page, and the accent
-   is plain white, so the whole theme is two colours. */
+/* White lines on architect's blue: the only mid-blue page, squared like
+   drawing paper, and the accent is plain white, so the whole theme is two
+   colours. Restyled from top to bottom in restyles.css. */
 [data-theme="blueprint"] {
     --background: #143668;
     --foreground: #f4f8ff;
@@ -420,10 +421,13 @@
     --ring: #ffffff;
     --radius: 0.125rem;
     --heading-font: ui-monospace, "SF Mono", "Cascadia Mono", "Roboto Mono", Menlo, Consolas, monospace;
+    --page-gradient: linear-gradient(rgb(255 255 255 / 0.16) 1px, transparent 1px), linear-gradient(90deg, rgb(255 255 255 / 0.16) 1px, transparent 1px), linear-gradient(rgb(255 255 255 / 0.07) 1px, transparent 1px), linear-gradient(90deg, rgb(255 255 255 / 0.07) 1px, transparent 1px), radial-gradient(110% 80% at 50% 30%, #1a4280, #143668 60%, #0f2b55);
+    --page-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px, 100% 100%;
 }
 
 /* Green phosphor on black, like an old terminal. The text itself is
-   green, not just the accent; everything but danger is one hue. */
+   green, not just the accent; everything but danger is one hue.
+   Restyled from top to bottom in restyles.css. */
 [data-theme="terminal"] {
     --background: #040d07;
     --foreground: #86f5a2;
@@ -445,6 +449,7 @@
     --ring: #b6ffc8;
     --radius: 0;
     --heading-font: ui-monospace, "SF Mono", "Cascadia Mono", "Roboto Mono", Menlo, Consolas, monospace;
+    --page-gradient: radial-gradient(120% 90% at 50% 40%, #082513, #040d07 62%, #010302);
 }
 
 /* White on black with white outlines and a yellow accent, for when the
@@ -904,7 +909,8 @@
 }
 
 /* Grey paper, black type and one red, like a newspaper's masthead. The
-   only grey light page; the cards are a whiter stock. */
+   only grey light page, with a grain of fibres in it. Restyled from top
+   to bottom in restyles.css. */
 [data-theme="newsprint"] {
     --background: #dcdcd7;
     --foreground: #121212;
@@ -926,6 +932,8 @@
     --ring: #b30d29;
     --radius: 0;
     --heading-font: var(--font-literata), ui-serif, Georgia, serif;
+    --page-gradient: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.25 0 0 0 0 0.25 0 0 0 0 0.22 0.5 0 0 0 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    --page-size: 220px 220px;
 }
 
 /* A box of pastels: mint page, pink cards, lavender chips and a lemon
@@ -981,7 +989,8 @@
 
 /* A school exercise book: blue ballpoint for the text itself, pale blue
    ruled lines on the page and for the outlines, and a red margin for the
-   accent. */
+   accent. Restyled from top to bottom in restyles.css, which also adds
+   the margin line and punched holes to the page. */
 [data-theme="notebook"] {
     --background: #fbfaf5;
     --foreground: #0f2a80;
@@ -1003,6 +1012,34 @@
     --ring: #c41e3a;
     --heading-font: var(--font-nunito), ui-rounded, ui-sans-serif, system-ui, sans-serif;
     --page-gradient: repeating-linear-gradient(transparent 0 31px, #d3dcf2 31px 32px);
+}
+
+/* An early-2000s desktop: grey pinstripes down the page, near-black text
+   and a deep gel blue for the accent. Restyled from top to bottom in
+   restyles.css: gel buttons, a menu bar, sheets for dialogs and
+   barber-pole progress bars. */
+[data-theme="pinstripe"] {
+    --background: #eeeeee;
+    --foreground: #111111;
+    --card: #ffffff;
+    --card-foreground: #111111;
+    --popover: #ffffff;
+    --popover-foreground: #111111;
+    --primary: #1c5fc8;
+    --primary-foreground: #ffffff;
+    --secondary: #e4e4e4;
+    --secondary-foreground: #111111;
+    --muted: #e9e9e9;
+    --muted-foreground: #4f4f4f;
+    --accent: #dce8f8;
+    --accent-foreground: #111111;
+    --destructive: #c0211b;
+    --border: #b8b8b8;
+    --input: #a6a6a6;
+    --ring: #5c9ded;
+    --radius: 0.5rem;
+    --heading-font: "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Geneva, Verdana, sans-serif;
+    --page-gradient: repeating-linear-gradient(#f5f5f5 0 2px, #e8e8e8 2px 4px);
 }
 
 /* Peach to rose to lilac down the page, plum text and a burnt-orange
@@ -1210,21 +1247,21 @@
     --radius: 1.25rem;
 }
 
-/* Silver windows, navy buttons and teal counters, straight off a
-   mid-90s desktop. Hovered menu items go navy with white text. */
+/* A mid-90s desktop: a grey program window on teal, navy title bars and
+   menu highlights. Restyled from top to bottom in restyles.css. */
 [data-theme="desktop-95"] {
     --background: #c0c0c0;
     --foreground: #000000;
-    --card: #d4d0c8;
+    --card: #c0c0c0;
     --card-foreground: #000000;
-    --popover: #d4d0c8;
+    --popover: #c0c0c0;
     --popover-foreground: #000000;
     --primary: #000080;
     --primary-foreground: #ffffff;
-    --secondary: #009090;
+    --secondary: #dfdfdf;
     --secondary-foreground: #000000;
-    --muted: #009090;
-    --muted-foreground: #000000;
+    --muted: #c0c0c0;
+    --muted-foreground: #303030;
     --accent: #000080;
     --accent-foreground: #ffffff;
     --destructive: #800000;
@@ -1232,6 +1269,7 @@
     --input: #808080;
     --ring: #000080;
     --radius: 0;
+    --page-gradient: linear-gradient(#008080, #008080);
 }
 
 /* A home page from 1999: a hazard-yellow top bar with a striped edge, and
@@ -1362,6 +1400,34 @@
     --page-size: 260px 220px;
 }
 
+/* The menus of an old role-playing game: blue windows with white frames
+   on a starry night, pixel letters and a gold pointer. Restyled from top
+   to bottom in restyles.css. */
+[data-theme="quest"] {
+    --background: #080818;
+    --foreground: #f4f4ff;
+    --card: #1a2a9c;
+    --card-foreground: #ffffff;
+    --popover: #1a2a9c;
+    --popover-foreground: #ffffff;
+    --primary: #ffd84a;
+    --primary-foreground: #1a1a2e;
+    --secondary: #24349e;
+    --secondary-foreground: #ffffff;
+    --muted: #24349e;
+    --muted-foreground: #c8d0ff;
+    --accent: #2c40c0;
+    --accent-foreground: #ffffff;
+    --destructive: #ff9a9a;
+    --border: #c8c8e0;
+    --input: #c8c8e0;
+    --ring: #ffd84a;
+    --radius: 0.375rem;
+    --heading-font: var(--font-pixel), ui-monospace, monospace;
+    --page-gradient: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='613' height='613' shape-rendering='crispEdges'%3E%3Crect x='333' y='156' width='1' height='1' fill='%23fff'/%3E%3Crect x='76' y='550' width='2' height='2' fill='%23ffe9a8'/%3E%3Crect x='75' y='550' width='4' height='2' fill='%23ffe9a8' fill-opacity='0.45'/%3E%3Crect x='76' y='549' width='2' height='4' fill='%23ffe9a8' fill-opacity='0.45'/%3E%3Crect x='521' y='221' width='2' height='2' fill='%23c8d0ff'/%3E%3Crect x='520' y='221' width='4' height='2' fill='%23c8d0ff' fill-opacity='0.45'/%3E%3Crect x='521' y='220' width='2' height='4' fill='%23c8d0ff' fill-opacity='0.45'/%3E%3Crect x='248' y='94' width='1' height='1' fill='%23fff'/%3E%3Crect x='581' y='128' width='1' height='1' fill='%23ffe9a8'/%3E%3Crect x='65' y='592' width='1' height='1' fill='%23fff'/%3E%3Crect x='228' y='49' width='1' height='1' fill='%23fff'/%3E%3Crect x='298' y='431' width='2' height='2' fill='%23fff'/%3E%3Crect x='575' y='187' width='2' height='2' fill='%23ffe9a8'/%3E%3Crect x='383' y='101' width='1' height='1' fill='%23fff'/%3E%3Crect x='579' y='63' width='1' height='1' fill='%23c8d0ff'/%3E%3Crect x='546' y='439' width='1' height='1' fill='%23c8d0ff'/%3E%3Crect x='601' y='466' width='1' height='1' fill='%23fff'/%3E%3Crect x='186' y='251' width='2' height='2' fill='%23fff'/%3E%3Crect x='353' y='461' width='1' height='1' fill='%23fff'/%3E%3Crect x='122' y='526' width='1' height='1' fill='%23fff'/%3E%3Crect x='157' y='502' width='1' height='1' fill='%23fff'/%3E%3Crect x='573' y='588' width='1' height='1' fill='%23fff'/%3E%3Crect x='350' y='360' width='1' height='1' fill='%23ffe9a8'/%3E%3Crect x='469' y='72' width='1' height='1' fill='%23fff'/%3E%3Crect x='487' y='68' width='2' height='2' fill='%23fff'/%3E%3Crect x='458' y='293' width='1' height='1' fill='%23fff'/%3E%3Crect x='25' y='474' width='1' height='1' fill='%23ffe9a8'/%3E%3Crect x='121' y='507' width='2' height='2' fill='%23fff'/%3E%3Crect x='120' y='507' width='4' height='2' fill='%23fff' fill-opacity='0.45'/%3E%3Crect x='121' y='506' width='2' height='4' fill='%23fff' fill-opacity='0.45'/%3E%3Crect x='255' y='409' width='1' height='1' fill='%23c8d0ff'/%3E%3Crect x='84' y='172' width='1' height='1' fill='%23ffe9a8'/%3E%3Crect x='286' y='142' width='1' height='1' fill='%23ffe9a8'/%3E%3Crect x='287' y='427' width='1' height='1' fill='%23c8d0ff'/%3E%3Crect x='238' y='156' width='2' height='2' fill='%23fff'/%3E%3Crect x='237' y='156' width='4' height='2' fill='%23fff' fill-opacity='0.45'/%3E%3Crect x='238' y='155' width='2' height='4' fill='%23fff' fill-opacity='0.45'/%3E%3Crect x='240' y='14' width='1' height='1' fill='%23ffe9a8'/%3E%3C/svg%3E"), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='431' height='431' shape-rendering='crispEdges'%3E%3Crect x='233' y='288' width='1' height='1' fill='%23c8d0ff'/%3E%3Crect x='233' y='262' width='1' height='1' fill='%23fff'/%3E%3Crect x='96' y='413' width='1' height='1' fill='%23ffe9a8'/%3E%3Crect x='408' y='97' width='2' height='2' fill='%23fff'/%3E%3Crect x='407' y='97' width='4' height='2' fill='%23fff' fill-opacity='0.45'/%3E%3Crect x='408' y='96' width='2' height='4' fill='%23fff' fill-opacity='0.45'/%3E%3Crect x='277' y='416' width='1' height='1' fill='%23fff'/%3E%3Crect x='306' y='204' width='1' height='1' fill='%23ffe9a8'/%3E%3Crect x='334' y='82' width='1' height='1' fill='%23ffe9a8'/%3E%3Crect x='34' y='32' width='2' height='2' fill='%23fff'/%3E%3Crect x='400' y='239' width='1' height='1' fill='%23ffe9a8'/%3E%3Crect x='102' y='267' width='2' height='2' fill='%23fff'/%3E%3Crect x='101' y='267' width='4' height='2' fill='%23fff' fill-opacity='0.45'/%3E%3Crect x='102' y='266' width='2' height='4' fill='%23fff' fill-opacity='0.45'/%3E%3Crect x='341' y='45' width='1' height='1' fill='%23fff'/%3E%3Crect x='210' y='284' width='1' height='1' fill='%23fff'/%3E%3Crect x='364' y='132' width='1' height='1' fill='%23fff'/%3E%3Crect x='264' y='149' width='2' height='2' fill='%23ffe9a8'/%3E%3Crect x='207' y='57' width='1' height='1' fill='%23c8d0ff'/%3E%3Crect x='36' y='10' width='1' height='1' fill='%23fff'/%3E%3C/svg%3E"), linear-gradient(#10103a, #080818 55%, #04040c);
+    --page-size: 613px 613px, 431px 431px, 100% 100%;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -1390,20 +1456,27 @@
    A theme can bring more than colours. In its block, --radius gives it
    corners of its own and --heading-font a heading face; the Corners and
    Headings choices in Preferences win when set to anything but the theme's.
-   --page-gradient puts a picture behind the page, sized by --page-size. It
-   shows while Background is Plain, gives way to a texture, and sits on a
-   fixed layer, so it stays put while the page scrolls (phones included).
-   The rules after it give single themes a top bar in their own colours,
-   outlined cards with hard shadows, or one font for the whole page. */
-html[data-background="plain"] body::before,
-html:not([data-background]) body::before {
+   --page-gradient puts a picture behind the page, sized by --page-size.
+   Such a theme is marked ownBackground in lib/themes.ts, which puts
+   data-own-background on <html> while it shows: its picture then covers
+   the Background chosen in Preferences, texture or scene, since the theme
+   is chosen for it. It sits on a fixed layer, so it stays put while the
+   page scrolls (phones included). The rules after it give single themes
+   a top bar in their own colours, outlined cards with hard shadows, or one
+   font for the whole page. Themes restyled from top to bottom have their
+   own file, restyles.css. */
+html[data-own-background] body::before {
   content: "";
   position: fixed;
   inset: 0;
   z-index: -1;
   pointer-events: none;
+  background-color: var(--background);
   background-image: var(--page-gradient, none);
   background-size: var(--page-size, auto);
+}
+:root[data-own-background] .bg-scene {
+  display: none;
 }
 
 /* Top bars in a theme's own colours. The colour tokens are set again inside

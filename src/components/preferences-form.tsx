@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useTransition } from "react";
+import { useRef, useState, useSyncExternalStore, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { BookFormat, BookOwnership, ReadingStatus } from "@/lib/enums";
 import { ArrowDown, ArrowUp, Pencil, Trash2, Volume2 } from "lucide-react";
@@ -44,6 +44,7 @@ import {
 } from "@/lib/preferences";
 import { PERIOD_LABELS } from "@/lib/stats-period";
 import { statusName } from "@/lib/statuses";
+import { THEMES } from "@/lib/themes";
 import { cn } from "@/lib/utils";
 import { BookPageCardList, FindLinksEditor } from "@/components/book-page-preferences";
 import { ShortcutsDialog } from "@/components/keyboard-shortcuts";
@@ -183,8 +184,31 @@ const BACKGROUND_LABELS: Record<Background, string> = {
   sky: "Sky",
 };
 
+/** The theme on this page while it brings a picture of its own behind
+ *  the page (lib/themes.ts, ownBackground), or null. */
+function useOwnBackgroundTheme() {
+  const id = useSyncExternalStore(
+    (fn) => {
+      const observer = new MutationObserver(fn);
+      observer.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ["data-theme", "data-own-background"],
+      });
+      return () => observer.disconnect();
+    },
+    () => {
+      const root = document.documentElement;
+      return root.hasAttribute("data-own-background") ? root.dataset.theme : undefined;
+    },
+    () => undefined,
+  );
+  return THEMES.find((t) => t.id === id) ?? null;
+}
+
 /** The background textures as small previews of the page, one button
- *  each. A swatch is drawn by the same CSS as the page (globals.css). */
+ *  each. A swatch is drawn by the same CSS as the page (globals.css).
+ *  While the theme brings its own background, that one shows instead,
+ *  and the picker says so. */
 function BackgroundPicker({
   value,
   onChange,
@@ -192,6 +216,7 @@ function BackgroundPicker({
   value: Background;
   onChange: (b: Background) => void;
 }) {
+  const themed = useOwnBackgroundTheme();
   return (
     <div className="grid gap-1.5 sm:grid-cols-[14rem_1fr] sm:items-start sm:gap-4">
       <div>
@@ -200,6 +225,12 @@ function BackgroundPicker({
           Behind the pages, not the cards on them. Rain, snow, stars, aurora and
           ripples move gently. Sky follows the time of day where you are.
         </p>
+        {themed && (
+          <p className="mt-1.5 text-xs font-medium">
+            {themed.name} brings its own background, so it shows instead of this one.
+            Yours comes back with another theme.
+          </p>
+        )}
       </div>
       <div role="radiogroup" aria-label="Background" className="flex flex-wrap gap-2">
         {BACKGROUNDS.map((b) => (

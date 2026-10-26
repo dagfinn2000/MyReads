@@ -4,6 +4,7 @@ import { useState, type ReactNode } from "react";
 import { Check, ChevronDown, Moon, Sun } from "lucide-react";
 import {
   DARK_THEME_IDS,
+  OWN_BACKGROUND_IDS,
   THEME_BACKGROUNDS,
   THEME_PARTS,
   THEMES,
@@ -79,7 +80,7 @@ function ThemeChoice({
         <button
           type="button"
           aria-label={`${label}: ${name}`}
-          className="flex h-8 w-full items-center gap-1.5 rounded-lg border border-input bg-transparent py-2 pr-2 pl-2.5 text-sm whitespace-nowrap transition-colors outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 sm:w-56 dark:bg-input/30 dark:hover:bg-input/50"
+          className="select-like flex h-8 w-full items-center gap-1.5 rounded-lg border border-input bg-transparent py-2 pr-2 pl-2.5 text-sm whitespace-nowrap transition-colors outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 sm:w-56 dark:bg-input/30 dark:hover:bg-input/50"
         >
           {icon}
           {theme && <Swatch theme={theme} />}
@@ -204,7 +205,7 @@ export function PartThemesForm({
     if (Object.keys(next).length > 0) root.setAttribute("data-theme-parts", JSON.stringify(next));
     else root.removeAttribute("data-theme-parts");
     const change = pageThemeChange(root.getAttribute("data-section") ?? "");
-    if (change) applyThemeSetting(change, DARK_THEME_IDS, THEME_BACKGROUNDS);
+    if (change) applyThemeSetting(change, DARK_THEME_IDS, THEME_BACKGROUNDS, OWN_BACKGROUND_IDS);
     onChange(next);
   }
 
