@@ -19,7 +19,12 @@ import { getCurrentUser } from "@/lib/current-user";
 import { serverTimeZone } from "@/lib/preferences";
 import { skyAt, skyStyle } from "@/lib/sky";
 import { cn } from "@/lib/utils";
-import { DARK_THEME_IDS, THEME_INIT_SCRIPT, parseThemeSetting } from "@/lib/themes";
+import {
+  DARK_THEME_IDS,
+  THEME_CLASS_PREFIX,
+  THEME_INIT_SCRIPT,
+  parseThemeSetting,
+} from "@/lib/themes";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 // A book face for the titles on drawn covers, the serif heading choice and
@@ -106,7 +111,7 @@ export default async function RootLayout({
 
   return (
     // suppressHydrationWarning: the theme init script mutates data-theme and
-    // the dark class on <html> before React hydrates.
+    // the theme and dark classes on <html> before React hydrates.
     <html
       lang="en"
       className={cn(
@@ -120,6 +125,7 @@ export default async function RootLayout({
         architect.variable,
         handwriting.variable,
         pixel.variable,
+        setting?.kind === "fixed" && THEME_CLASS_PREFIX + setting.id,
         dark && "dark",
       )}
       {...themeAttrs}

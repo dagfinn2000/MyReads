@@ -1482,7 +1482,7 @@ html[data-own-background] body::before {
 /* Top bars in a theme's own colours. The colour tokens are set again inside
    the bar, so its links, buttons and menus' triggers all follow; the text
    colour too, as what the bar inherits was worked out from the page's. */
-[data-theme="mondrian"] .top-bar {
+.theme-is-mondrian .top-bar {
   --background: #111111;
   --foreground: #ffffff;
   --muted-foreground: #cfcfcf;
@@ -1495,7 +1495,7 @@ html[data-own-background] body::before {
   background-color: var(--background);
   color: var(--foreground);
 }
-[data-theme="under-construction"] .top-bar {
+.theme-is-under-construction .top-bar {
   --background: #ffd400;
   --foreground: #111111;
   --muted-foreground: #3d3300;
@@ -1509,7 +1509,7 @@ html[data-own-background] body::before {
   border-bottom: 8px solid transparent;
   border-image: repeating-linear-gradient(-45deg, #111111 0 10px, #ffd400 10px 20px) 8;
 }
-[data-theme="spreadsheet"] .top-bar {
+.theme-is-spreadsheet .top-bar {
   --background: #217346;
   --foreground: #ffffff;
   --muted-foreground: #d5eadc;
@@ -1526,14 +1526,14 @@ html[data-own-background] body::before {
 /* Outlined cards with hard shadows. The shadow follows Cards in
    Preferences: Flat keeps the outline and drops the shadow. :root makes
    these outrank the soft shadows under "Cards", which come later. */
-[data-theme="brutalist"] .surface {
+.theme-is-brutalist .surface {
   outline: 2px solid #0a0a0a;
   outline-offset: -1px;
 }
 :root[data-theme="brutalist"]:not([data-cards="flat"]) {
   --surface-shadow: 5px 5px 0 #0a0a0a;
 }
-[data-theme="arcade"] .surface {
+.theme-is-arcade .surface {
   outline: 2px solid #00e5ff;
   outline-offset: -1px;
 }
@@ -1542,13 +1542,13 @@ html[data-own-background] body::before {
 }
 
 /* One font for the whole page. */
-[data-theme="under-construction"] body {
+.theme-is-under-construction body {
   font-family: "Comic Sans MS", "Comic Sans", "Chalkboard SE", "Comic Neue", var(--font-nunito), ui-rounded, sans-serif;
 }
-[data-theme="party"] body {
+.theme-is-party body {
   font-family: var(--font-nunito), ui-rounded, ui-sans-serif, system-ui, sans-serif;
 }
-[data-theme="spreadsheet"] body {
+.theme-is-spreadsheet body {
   font-family: Calibri, Carlito, "Segoe UI", ui-sans-serif, system-ui, sans-serif;
 }
 

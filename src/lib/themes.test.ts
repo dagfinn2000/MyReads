@@ -5,6 +5,7 @@ import {
   DEVICE_THEME_STORAGE_KEY,
   OWN_BACKGROUND_IDS,
   RETIRED_THEMES,
+  THEME_CLASS_PREFIX,
   THEME_INIT_SCRIPT,
   THEME_STORAGE_KEY,
   THEMES,
@@ -69,6 +70,28 @@ describe("THEMES", () => {
   it("has a palette in globals.css for every theme, and a theme for every palette", () => {
     const ids = THEMES.map((t) => t.id).filter((id) => id !== "light" && id !== "dark");
     expect([...blocks.keys()].sort()).toEqual([...ids].sort());
+  });
+
+  it("styles what's inside the page from the theme's class, never its attribute", () => {
+    // `[data-theme="x"] .card` makes the browser look up from every element
+    // to <html> for each such rule; `.theme-is-x .card` it skips at once on
+    // every other theme (see THEME_CLASS_PREFIX). Blocks on <html> itself,
+    // like the palettes, can keep the attribute.
+    const reachesIn: string[] = [];
+    for (const file of ["globals.css", "restyles.css"]) {
+      const text = readFileSync(path.resolve(__dirname, "../app", file), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+      for (const [, prelude] of text.matchAll(/([^{};]+)\{/g)) {
+        for (const selector of prelude.split(",")) {
+          const at = selector.indexOf("[data-theme=\"");
+          if (at < 0) continue;
+          // What follows the compound the attribute is in: anything means
+          // the rule styles something inside <html>.
+          const rest = selector.slice(at).replace(/^\[[^\]]*\]/, "").replace(/^(\([^)]*\)|[^\s>+~(])*/, "");
+          if (rest.trim()) reachesIn.push(`${file}: ${selector.trim()}`);
+        }
+      }
+    }
+    expect(reachesIn).toEqual([]);
   });
 
   it("draws each swatch (and the title bar) in the palette's own colours", () => {
@@ -199,6 +222,9 @@ function fakePage({
   const document = {
     documentElement: {
       ...element(html),
+      get className() {
+        return [...classes].join(" ");
+      },
       classList: {
         toggle: (name: string, on: boolean) => void (on ? classes.add(name) : classes.delete(name)),
       },
@@ -245,6 +271,18 @@ describe("THEME_INIT_SCRIPT", () => {
     expect(page.html.get("data-theme-device")).toBe("sage");
     expect(page.storage.get(THEME_STORAGE_KEY)).toBe("dracula");
     expect(page.classes.has("dark")).toBe(false);
+  });
+
+  it("keeps the class of the theme showing on <html>, and only that one", () => {
+    const page = fakePage({
+      attrs: { "data-theme": "dracula" },
+      stored: { [DEVICE_THEME_STORAGE_KEY]: "sage" },
+    });
+    page.classes.add(`${THEME_CLASS_PREFIX}dracula`); // as the server sends it
+    runInitScript(page);
+    expect([...page.classes].filter((c) => c.startsWith(THEME_CLASS_PREFIX))).toEqual([
+      `${THEME_CLASS_PREFIX}sage`,
+    ]);
   });
 
   it("ignores a device theme that no longer exists", () => {
@@ -361,5 +399,33 @@ describe("syncPageTheme", () => {
     expect(page.html.get("data-theme")).toBe("lacquer");
     syncPageTheme("/quotes", "blueprint", "blueprint");
     expect(page.html.get("data-theme")).toBe("dracula");
+  });
+
+  it("moves the theme's class on <html> along with the theme", () => {
+    const page = loaded({
+      "data-theme": "blueprint",
+      "data-theme-parts": JSON.stringify({ stats: "lacquer" }),
+    });
+    const themeClasses = () => [...page.classes].filter((c) => c.startsWith(THEME_CLASS_PREFIX));
+    expect(themeClasses()).toEqual([`${THEME_CLASS_PREFIX}blueprint`]);
+    syncPageTheme("/stats", "blueprint", "blueprint");
+    expect(themeClasses()).toEqual([`${THEME_CLASS_PREFIX}lacquer`]);
+    syncPageTheme("/quotes", "blueprint", "blueprint");
+    expect(themeClasses()).toEqual([`${THEME_CLASS_PREFIX}blueprint`]);
+  });
+
+  it("leaves only the class of the theme it applies, whatever <html> had", () => {
+    const page = loaded({
+      "data-theme": "blueprint",
+      "data-theme-parts": JSON.stringify({ stats: "lacquer" }),
+    });
+    // React writes the layout's classes over the page's when the account's
+    // theme changes, so they needn't match `data-theme`.
+    page.classes.add(`${THEME_CLASS_PREFIX}pinstripe`);
+    page.classes.add(`${THEME_CLASS_PREFIX}sage`);
+    syncPageTheme("/stats", "pinstripe", "blueprint");
+    expect([...page.classes].filter((c) => c.startsWith(THEME_CLASS_PREFIX))).toEqual([
+      `${THEME_CLASS_PREFIX}lacquer`,
+    ]);
   });
 });

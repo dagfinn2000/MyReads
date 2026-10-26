@@ -230,7 +230,13 @@ The reading room's files:
   "button". The rules aren't in a layer, so they beat Tailwind's
   utilities without `!important`, which also means each theme sets its
   own hover and pressed states. Generated text such as window titles
-  uses `content: "…" / ""` so screen readers skip it. Fonts only these
+  uses `content: "…" / ""` so screen readers skip it. A rule that styles
+  something inside the page starts from the theme's class on `<html>`
+  (`.theme-is-quest .card`), never `[data-theme="quest"] .card`: the
+  browser skips a rule whose class isn't there without looking, but it
+  checks an attribute's value up the tree from every element, and with
+  all these rules that was 40% of the time spent styling the library. A
+  test fails on the attribute form. Fonts only these
   themes use are loaded with `preload: false` in
   [layout.tsx](../src/app/layout.tsx), so no one else downloads them.
   After changing one, look at every page at phone width too, and check
