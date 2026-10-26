@@ -1,7 +1,7 @@
 /** Skeleton for Now reading. */
 export default function NowReadingLoading() {
   return (
-    <div className="shimmer grid gap-6">
+    <div className="loading-sweep grid gap-6">
       <div className="h-8 w-40 rounded bg-muted" />
       <div className="grid gap-3">
         {Array.from({ length: 2 }).map((_, i) => (
