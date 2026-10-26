@@ -251,6 +251,9 @@ The reading room's files:
   off, and animations started from script (celebrations, the theme reveal,
   the cover flying to a book's page and back) check the same two things
   through `motionAllowed()` in [motion.ts](../src/lib/motion.ts).
+  That rule sets transitions to `0s`, never a tiny duration: on every
+  element, a duration means a transition of every property, and a theme
+  change then took seconds.
 - **Moving backgrounds slide pictures, they don't redraw them.**
   [background-scene.tsx](../src/components/background-scene.tsx) puts one
   fixed layer under the page, and everything in it moves by `transform` or
