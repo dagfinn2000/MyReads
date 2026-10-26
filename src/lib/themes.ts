@@ -219,9 +219,9 @@ export const THEMES: ThemeDef[] = [
     id: "golden-gate",
     name: "Golden Gate",
     mode: "light",
-    swatch: ["#f6efef", "#b8361f"],
+    swatch: ["#f2f2f5", "#0a64d2"],
     pattern:
-      "linear-gradient(90deg, transparent 20%, #b8361f 20% 28%, transparent 28% 72%, #b8361f 72% 80%, transparent 80%), linear-gradient(#2c2a63, #b75d84 52%, #fbb56b 68%, #ffd791 72%, #6a4b7c 74%, #2c2a5a)",
+      "radial-gradient(120% 90% at 0% 100%, #e9cf9b 0 34%, transparent 35%), radial-gradient(110% 95% at 100% 0%, #3b3f7a 0 30%, transparent 31%), radial-gradient(140% 120% at 20% 110%, #c9c2b8 0 52%, transparent 53%), linear-gradient(120deg, #f1e3c4, #b9b8c4 55%, #4a4e86)",
     ownBackground: true,
   },
 

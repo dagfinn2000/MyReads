@@ -3569,12 +3569,12 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
 }
 
 /* ── Golden Gate ───────────────────────────────────────────────────────────
-   macOS Golden Gate: the bridge at sunset, fog rolling under the deck, and
-   the app a window of Liquid Glass in front of it. The window's glass is
-   frosted, lit along its rim and darkened at its edge; a toolbar of glass
-   floats across its top, holding the page links, the open one a lighter
-   pill. Panels are panes of glass inside it, buttons are glass capsules
-   (the main one tinted International Orange, the bridge's colour) that
+   macOS Golden Gate, its Liquid Glass: the app is a window of frosted glass
+   on a desktop of sweeping folded curves, sandy gold into soft grey and
+   indigo. The window's glass is lit along its rim and darkened at its
+   edge; a toolbar of glass floats across its top, holding the page links,
+   the open one a lighter pill. Panels are panes of glass inside it,
+   buttons are glass capsules (the main one tinted the system's blue) that
    give a little when pressed, menus and dialogs are glass over the page,
    and a dialog closes from the red of three traffic lights, round and
    glossy as Aqua's were. The type is the system's, San Francisco on a Mac.
@@ -3585,8 +3585,8 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
 :root[data-theme="golden-gate"] {
   --gg-font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro", "Helvetica Neue", "Inter", system-ui, sans-serif;
   /* Where the window sits, and the picture's size and place, as the page
-     behind draws it (cover, its middle at 70% down): the window repeats
-     them so its softened copy lines up with the picture around it. */
+     behind draws it (cover, centred): the window repeats them so its
+     softened copy lines up with the picture around it. */
   --gg-top: 0.625rem;
   --gg-x: max(0.625rem, calc(50vw - 37.5rem));
   --gg-w: max(100vw, 160vh);
@@ -3601,25 +3601,25 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
     rgb(255 255 255 / 0.08) 55%,
     rgb(255 255 255 / 0.6) 92%
   );
-  --gg-edge: 0 0 0 0.5px rgb(50 20 40 / 0.18);
-  --gg-lift: 0 8px 24px -12px rgb(50 20 40 / 0.35);
+  --gg-edge: 0 0 0 0.5px rgb(20 20 30 / 0.18);
+  --gg-lift: 0 8px 24px -12px rgb(20 20 30 / 0.35);
   --gg-ring: 0 0 0 3.5px color-mix(in oklab, var(--primary) 32%, transparent);
   --gg-light: radial-gradient(circle at 50% 28%, rgb(255 255 255 / 0.9) 0 14%, rgb(255 255 255 / 0) 46%);
   --heading-font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro", "Helvetica Neue", "Inter", system-ui, sans-serif;
   --surface-shadow: none;
-  --chart-1: #b8361f;
-  --chart-2: #e8902f;
-  --chart-3: #6a4b9c;
-  --chart-4: #2f7fb0;
-  --chart-5: #8a7e86;
+  --chart-1: #0a64d2;
+  --chart-2: #c99a45;
+  --chart-3: #5856d6;
+  --chart-4: #2f9e63;
+  --chart-5: #8e8e93;
   scrollbar-width: thin;
-  scrollbar-color: rgb(50 20 40 / 0.35) transparent;
+  scrollbar-color: rgb(20 20 30 / 0.35) transparent;
 }
 .theme-is-golden-gate body {
   font-family: var(--gg-font);
 }
 .theme-is-golden-gate body::before {
-  background-position: center 70%;
+  background-position: center;
 }
 /* The window. */
 .theme-is-golden-gate body::after {
@@ -3629,18 +3629,18 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
   z-index: -1;
   pointer-events: none;
   background:
-    linear-gradient(rgb(255 252 251 / 0.78), rgb(255 249 247 / 0.72)),
+    linear-gradient(rgb(255 255 255 / 0.76), rgb(250 250 252 / 0.72)),
     url("/themes/golden-gate-frosted.svg")
-      calc((100vw - var(--gg-w)) * 0.5 - var(--gg-x)) calc((100vh - var(--gg-h)) * 0.7 - var(--gg-top)) /
+      calc((100vw - var(--gg-w)) * 0.5 - var(--gg-x)) calc((100vh - var(--gg-h)) * 0.5 - var(--gg-top)) /
       var(--gg-w) var(--gg-h) no-repeat;
   border-radius: var(--gg-radius);
   box-shadow:
-    inset 0 0 0 0.5px rgb(40 15 35 / 0.4),
+    inset 0 0 0 0.5px rgb(15 15 25 / 0.4),
     inset 0 1.5px 0 0.5px rgb(255 255 255 / 0.9),
     inset 0 0 0 1.5px rgb(255 255 255 / 0.4);
 }
 /* The picture again around the window, over the page: what scrolls past
-   the window's edge goes behind it rather than over the bridge. The
+   the window's edge goes behind it rather than over the desktop. The
    window's shape is cut out of it with a mask (two bands and four round
    corners, taken away from the whole), and like the window it never
    moves, so scrolling costs nothing. Under the toolbar, menus and
@@ -3652,7 +3652,7 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
   inset: 0;
   z-index: 35;
   pointer-events: none;
-  background: var(--page-gradient) center 70% / cover no-repeat, var(--background);
+  background: var(--page-gradient) center / cover no-repeat, var(--background);
   mask:
     linear-gradient(#000 0 0),
     linear-gradient(#000 0 0) var(--gg-x) calc(var(--gg-top) + var(--gg-radius)) /
@@ -3700,7 +3700,7 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
   background:
     linear-gradient(rgb(255 255 255 / 0.5), rgb(255 255 255 / 0.5)) padding-box,
     var(--gg-specular) border-box;
-  box-shadow: var(--gg-edge), 0 10px 28px -10px rgb(50 20 40 / 0.4);
+  box-shadow: var(--gg-edge), 0 10px 28px -10px rgb(20 20 30 / 0.4);
   backdrop-filter: blur(18px) saturate(1.8);
 }
 .theme-is-golden-gate .top-bar .wordmark {
@@ -3716,12 +3716,12 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
   color: #1d1d1f;
 }
 .theme-is-golden-gate .top-bar .nav-link:hover {
-  background: rgb(50 20 40 / 0.06);
+  background: rgb(20 20 30 / 0.06);
 }
 .theme-is-golden-gate .top-bar .nav-link[aria-current="page"] {
   font-weight: 600;
   background: rgb(255 255 255 / 0.85);
-  box-shadow: var(--gg-edge), 0 1px 4px rgb(50 20 40 / 0.14);
+  box-shadow: var(--gg-edge), 0 1px 4px rgb(20 20 30 / 0.14);
 }
 .theme-is-golden-gate .top-bar .nav-link[aria-current="page"]::after {
   display: none;
@@ -3743,7 +3743,7 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
   background:
     linear-gradient(rgb(255 255 255 / 0.65), rgb(255 255 255 / 0.65)) padding-box,
     var(--gg-specular) border-box;
-  box-shadow: var(--gg-edge), 0 1px 3px rgb(50 20 40 / 0.12);
+  box-shadow: var(--gg-edge), 0 1px 3px rgb(20 20 30 / 0.12);
   transition: scale 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 .theme-is-golden-gate [data-size][data-variant="default"] {
@@ -3777,7 +3777,7 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
     var(--gg-specular) border-box;
 }
 .theme-is-golden-gate [data-size][data-variant="ghost"]:is(:hover, [aria-expanded="true"]) {
-  background: rgb(50 20 40 / 0.07);
+  background: rgb(20 20 30 / 0.07);
 }
 .theme-is-golden-gate [data-size][data-variant="link"]:hover {
   background: transparent;
@@ -3803,7 +3803,7 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
   border: 0;
   border-radius: 0.625rem;
   background: rgb(255 255 255 / 0.72);
-  box-shadow: inset 0 0 0 0.5px rgb(50 20 40 / 0.22), inset 0 1px 2px rgb(50 20 40 / 0.07);
+  box-shadow: inset 0 0 0 0.5px rgb(20 20 30 / 0.22), inset 0 1px 2px rgb(20 20 30 / 0.07);
 }
 .theme-is-golden-gate input[type="search"],
 .theme-is-golden-gate input[placeholder^="Search"] {
@@ -3815,7 +3815,7 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
   box-shadow: inset 0 0 0 1px var(--primary), var(--gg-ring);
 }
 .theme-is-golden-gate :is([data-slot="input"], [data-slot="textarea"], input, textarea)::placeholder {
-  color: #7a7078;
+  color: #7c7c84;
 }
 .theme-is-golden-gate :is([data-slot="select-trigger"], .select-like) {
   border: 1px solid transparent;
@@ -3824,7 +3824,7 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
   background:
     linear-gradient(rgb(255 255 255 / 0.65), rgb(255 255 255 / 0.65)) padding-box,
     var(--gg-specular) border-box;
-  box-shadow: var(--gg-edge), 0 1px 3px rgb(50 20 40 / 0.12);
+  box-shadow: var(--gg-edge), 0 1px 3px rgb(20 20 30 / 0.12);
 }
 .theme-is-golden-gate :is([data-slot="select-trigger"], .select-like) > svg:last-child {
   color: var(--primary);
@@ -3840,7 +3840,7 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
   border: 0;
   border-radius: 0.3125rem;
   background: rgb(255 255 255 / 0.8);
-  box-shadow: inset 0 0 0 0.5px rgb(50 20 40 / 0.3), 0 1px 2px rgb(50 20 40 / 0.1);
+  box-shadow: inset 0 0 0 0.5px rgb(20 20 30 / 0.3), 0 1px 2px rgb(20 20 30 / 0.1);
 }
 .theme-is-golden-gate input[type="radio"] {
   border-radius: 50%;
@@ -3860,15 +3860,15 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
 }
 .theme-is-golden-gate button[role="switch"] > span:last-child {
   border: 0;
-  background: rgb(50 20 40 / 0.14);
-  box-shadow: inset 0 0 0 0.5px rgb(50 20 40 / 0.12);
+  background: rgb(20 20 30 / 0.14);
+  box-shadow: inset 0 0 0 0.5px rgb(20 20 30 / 0.12);
 }
 .theme-is-golden-gate button[role="switch"][aria-checked="true"] > span:last-child {
   background: var(--primary);
 }
 .theme-is-golden-gate button[role="switch"] > span:last-child > span {
   background: linear-gradient(#ffffff, #f4f1f2);
-  box-shadow: 0 0 0 0.5px rgb(50 20 40 / 0.15), 0 2px 4px rgb(50 20 40 / 0.25);
+  box-shadow: 0 0 0 0.5px rgb(20 20 30 / 0.15), 0 2px 4px rgb(20 20 30 / 0.25);
 }
 
 /* Panels: panes of glass in the window, the rim catching the light. Library
@@ -3887,7 +3887,7 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
   letter-spacing: -0.01em;
 }
 .theme-is-golden-gate [data-slot="card-footer"] {
-  border-top: 0.5px solid rgb(50 20 40 / 0.12);
+  border-top: 0.5px solid rgb(20 20 30 / 0.12);
   background: rgb(255 255 255 / 0.3);
 }
 .theme-is-golden-gate .surface:not([data-slot="card"]) {
@@ -3896,7 +3896,7 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
   background:
     linear-gradient(rgb(255 255 255 / 0.42), rgb(255 255 255 / 0.42)) padding-box,
     var(--gg-specular) border-box;
-  box-shadow: var(--gg-edge), 0 4px 14px -8px rgb(50 20 40 / 0.3);
+  box-shadow: var(--gg-edge), 0 4px 14px -8px rgb(20 20 30 / 0.3);
 }
 .theme-is-golden-gate .surface:not([data-slot="card"]):hover {
   background:
@@ -3915,7 +3915,7 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
 .theme-is-golden-gate .shelf-tabs {
   gap: 0.25rem;
   padding-bottom: 0.625rem;
-  border-bottom: 0.5px solid rgb(50 20 40 / 0.14);
+  border-bottom: 0.5px solid rgb(20 20 30 / 0.14);
 }
 .theme-is-golden-gate .shelf-tabs > a,
 .theme-is-golden-gate [data-slot="tabs-trigger"] {
@@ -3927,16 +3927,16 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
 }
 .theme-is-golden-gate .shelf-tabs > a:hover,
 .theme-is-golden-gate [data-slot="tabs-trigger"]:hover {
-  background: rgb(50 20 40 / 0.06);
+  background: rgb(20 20 30 / 0.06);
 }
 .theme-is-golden-gate .shelf-tabs > a[aria-current="page"],
 .theme-is-golden-gate [data-slot="tabs-trigger"][data-state="active"] {
   font-weight: 600;
   background: rgb(255 255 255 / 0.85);
-  box-shadow: var(--gg-edge), 0 1px 4px rgb(50 20 40 / 0.14);
+  box-shadow: var(--gg-edge), 0 1px 4px rgb(20 20 30 / 0.14);
 }
 .theme-is-golden-gate .shelf-tabs > a > span {
-  background: rgb(50 20 40 / 0.07);
+  background: rgb(20 20 30 / 0.07);
 }
 .theme-is-golden-gate .shelf-tabs > a[aria-current="page"] > span {
   color: var(--primary-foreground);
@@ -3945,7 +3945,7 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
 .theme-is-golden-gate [data-slot="tabs-list"] {
   gap: 0.125rem;
   border-radius: 999px;
-  background: rgb(50 20 40 / 0.07);
+  background: rgb(20 20 30 / 0.07);
 }
 .theme-is-golden-gate [data-slot="tabs-trigger"]::after {
   display: none;
@@ -3968,14 +3968,14 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
   border: 0;
   border-radius: 0.375rem;
   background: rgb(255 255 255 / 0.7);
-  box-shadow: var(--gg-edge), 0 1px 0 rgb(50 20 40 / 0.18);
+  box-shadow: var(--gg-edge), 0 1px 0 rgb(20 20 30 / 0.18);
 }
 
 /* Progress: a capsule filled with the accent, its top catching the light. */
 .theme-is-golden-gate :has(> .bar-grow) {
   border-radius: 999px;
-  background: rgb(50 20 40 / 0.1);
-  box-shadow: inset 0 0.5px 1px rgb(50 20 40 / 0.12);
+  background: rgb(20 20 30 / 0.1);
+  box-shadow: inset 0 0.5px 1px rgb(20 20 30 / 0.12);
 }
 .theme-is-golden-gate .bar-grow {
   border-radius: 999px;
@@ -3992,7 +3992,7 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
   background:
     linear-gradient(rgb(255 255 255 / 0.7), rgb(255 255 255 / 0.7)) padding-box,
     var(--gg-specular) border-box;
-  box-shadow: var(--gg-edge), 0 14px 36px -10px rgb(40 15 35 / 0.45);
+  box-shadow: var(--gg-edge), 0 14px 36px -10px rgb(15 15 25 / 0.45);
   backdrop-filter: blur(24px) saturate(1.8);
   --tw-ring-shadow: 0 0 #0000;
 }
@@ -4010,7 +4010,7 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
 /* Dialogs: a window of glass with the three lights at its top left: red
    closes it, amber and green are drawn on. */
 .theme-is-golden-gate [data-slot="dialog-overlay"] {
-  background: rgb(40 15 35 / 0.2);
+  background: rgb(15 15 25 / 0.2);
   backdrop-filter: none;
 }
 .theme-is-golden-gate [data-slot="dialog-content"] {
@@ -4024,7 +4024,7 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
     radial-gradient(circle closest-side, #6ee07e, #28c840 60%, #138a26 92%, transparent) 3.5rem 1.125rem / 0.8125rem 0.8125rem no-repeat,
     linear-gradient(rgb(255 255 255 / 0.76), rgb(255 255 255 / 0.76)) padding-box,
     var(--gg-specular) border-box;
-  box-shadow: var(--gg-edge), 0 24px 64px -16px rgb(30 10 30 / 0.55);
+  box-shadow: var(--gg-edge), 0 24px 64px -16px rgb(10 10 20 / 0.55);
   backdrop-filter: blur(30px) saturate(1.8);
   --tw-ring-shadow: 0 0 #0000;
 }
@@ -4053,7 +4053,7 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
   background: var(--gg-light), radial-gradient(circle closest-side, #ff8a82, #ff5f57 60%, #c6302a 92%, transparent);
 }
 .theme-is-golden-gate [data-slot="dialog-footer"] {
-  border-top: 0.5px solid rgb(50 20 40 / 0.12);
+  border-top: 0.5px solid rgb(20 20 30 / 0.12);
   border-radius: 0 0 1.5rem 1.5rem;
   background: rgb(255 255 255 / 0.35);
 }
@@ -4063,7 +4063,7 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
   background:
     linear-gradient(rgb(255 255 255 / 0.7), rgb(255 255 255 / 0.7)) padding-box,
     var(--gg-specular) border-box;
-  box-shadow: var(--gg-edge), 0 14px 36px -10px rgb(40 15 35 / 0.45);
+  box-shadow: var(--gg-edge), 0 14px 36px -10px rgb(15 15 25 / 0.45);
   backdrop-filter: blur(24px) saturate(1.8);
 }
 
