@@ -259,6 +259,13 @@ The reading room's files:
   (`golden-gate-frosted.svg`), laid exactly over the sharp one; a second
   fixed layer over the page repeats the picture with the window's shape
   masked out, so what scrolls past the window's edge goes behind it.
+  That copy is frosted as it is drawn, by an SVG filter that lays white
+  over it as opaque as the colour beneath is dark, so the glass is
+  never darker than a set luminance (0.6) and its text keeps AA
+  contrast anywhere on it. The glass over the page does the same with
+  `contrast()` and `brightness()` in its `backdrop-filter`, so black
+  beneath it comes out light enough. Keep both when changing the
+  picture or the glass.
 - **A theme is retired, never just deleted.** Take out its block and
   entry and add it to `RETIRED_THEMES` in
   [themes.ts](../src/lib/themes.ts) with the theme that replaces it, of

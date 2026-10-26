@@ -440,14 +440,18 @@ tab goes away. You can also keep the house and leave the avatar out.
     are green with a shine that slides along them as the page opens.
     Dialogs and popovers are glass windows that blur what is behind them.
   - Golden Gate (new, light): macOS Golden Gate and its Liquid Glass.
-    The app is a window of frosted glass, lit along its rim, on a desktop
-    of sweeping folded curves in sandy gold, soft grey and indigo. A
-    toolbar of glass floats across the top of the window with the open
-    page as a lighter pill, panels are panes of glass, buttons are glass
-    capsules that give a little when pressed (the main one in the
-    system's blue), and dialogs are glass windows with round, glossy
-    traffic lights; the red one closes it. The page scrolls behind the
-    window's rounded edges, as in a real window.
+    The app is a window of clear frosted glass, lit along its rim and
+    casting a shadow, on a desktop of sweeping folded curves in sandy
+    gold, soft grey and indigo; the gold and lavender show through it.
+    A toolbar of glass floats across the top of the window, the covers
+    glowing through it as they scroll under, with the open page as a
+    brighter lens. Panels are panes of glass with a sheen of light
+    across them, buttons are glass capsules that give a little when
+    pressed (the main one in the system's blue), and menus and dialogs
+    are glass over the page, dialogs with round, glossy traffic lights;
+    the red one closes it. The page scrolls behind the window's rounded
+    edges, as in a real window. Text on the glass keeps its contrast
+    over any part of the picture and any cover.
 - A theme with a picture of its own (Desktop 95's desktop, Aero's and
   Golden Gate's, Notebook's ruled page, Party's confetti, Quest's night
   sky and the rest) shows it whatever background you picked, and
