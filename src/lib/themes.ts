@@ -450,8 +450,22 @@ export function pageThemeSetting(
 }
 
 /**
- * Puts a stored theme setting on <html>: the `data-theme` palette, the
- * `dark` class Tailwind's `dark:` variants key on, `data-own-background`
+ * The class on <html> naming the theme showing, alongside `data-theme`.
+ * Rules that style what's inside the page for one theme start from this
+ * class rather than the attribute (`.theme-is-quest .card`, not
+ * `[data-theme="quest"] .card`). The two say the same, but a browser can
+ * rule out a class nobody on the page has without looking, so another
+ * theme's rules cost almost nothing; an attribute's value it has to check
+ * from every element up to <html>, for every rule. With the restyled
+ * themes that came to 40% of the time spent styling the library.
+ */
+export const THEME_CLASS_PREFIX = "theme-is-";
+
+/**
+ * Puts a stored theme setting on <html>: the `data-theme` palette, its
+ * `theme-is-<id>` class (what restyles.css and the theme rules in
+ * globals.css hang off; see THEME_CLASS_PREFIX), the `dark` class
+ * Tailwind's `dark:` variants key on, `data-own-background`
  * while the theme brings its own picture behind the page (which then
  * replaces the reader's Background), the browser title bar colour, and —
  * for automatic mode — `data-theme-auto`, which remembers the pair so a
@@ -477,7 +491,16 @@ export function applyThemeSetting(
   } else {
     root.removeAttribute("data-theme-auto");
   }
+  // THEME_CLASS_PREFIX, written out: this body runs on its own. Any other
+  // theme's class goes, not just the one `data-theme` names, as React may
+  // have rewritten the classes from a newer server render.
+  const themeClass = "theme-is-" + id;
+  const stale = root.className.split(" ").filter(function (name) {
+    return name.indexOf("theme-is-") === 0 && name !== themeClass;
+  });
+  for (let i = 0; i < stale.length; i++) root.classList.toggle(stale[i], false);
   root.setAttribute("data-theme", id);
+  root.classList.toggle(themeClass, true);
   root.classList.toggle("dark", darkIds.indexOf(id) > -1);
   if (ownBackgroundIds.indexOf(id) > -1) root.setAttribute("data-own-background", "");
   else root.removeAttribute("data-own-background");
