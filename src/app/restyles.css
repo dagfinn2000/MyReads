@@ -3570,18 +3570,25 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
 
 /* ── Golden Gate ───────────────────────────────────────────────────────────
    macOS Golden Gate, its Liquid Glass: the app is a window of frosted glass
-   on a desktop of sweeping folded curves, sandy gold into soft grey and
-   indigo. The window's glass is lit along its rim and darkened at its
-   edge; a toolbar of glass floats across its top, holding the page links,
-   the open one a lighter pill. Panels are panes of glass inside it,
+   floating on a desktop of sweeping folded curves, sandy gold into soft
+   grey and indigo, the gold and lavender showing through it. Glass here is
+   clear rather than milky: thin, lit along its rim, brightest at the top
+   lip, glowing inside its edge where light bends through its thickness,
+   and caught by a sheen of reflected light from above. A toolbar of glass
+   floats across the top of the window, holding the page links, the open
+   one a lens of brighter glass. Panels are panes of glass inside it,
    buttons are glass capsules (the main one tinted the system's blue) that
    give a little when pressed, menus and dialogs are glass over the page,
    and a dialog closes from the red of three traffic lights, round and
    glossy as Aqua's were. The type is the system's, San Francisco on a Mac.
    The window is drawn on a fixed layer behind the page, from a softened
    copy of the picture laid exactly over the sharp one, so it looks blurred
-   without blurring anything: the page scrolls over it at no cost. Only the
-   toolbar, menus and dialogs, which sit over the page, blur for real. */
+   without blurring anything: the page scrolls over it at no cost. That
+   copy is frosted as it is drawn, whiter where the picture behind is
+   darker, so text on the glass reads anywhere. Only the toolbar, menus and
+   dialogs, which sit over the page, blur for real, and they pull in and
+   lift what they show, as the frost does, so text on them reads over the
+   darkest cover. */
 :root[data-theme="golden-gate"] {
   --gg-font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro", "Helvetica Neue", "Inter", system-ui, sans-serif;
   /* Where the window sits, and the picture's size and place, as the page
@@ -3592,19 +3599,37 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
   --gg-w: max(100vw, 160vh);
   --gg-h: max(62.5vw, 100vh);
   --gg-radius: 1.75rem;
-  --gg-fill: rgb(255 255 255 / 0.55);
+  /* How far the window's shadow falls on the desktop. */
+  --gg-s: 2rem;
+  --gg-fill: rgb(255 255 255 / 0.3);
   /* Light along the rim of a pane, brightest at the top left. */
   --gg-specular: linear-gradient(
     140deg,
     rgb(255 255 255 / 0.95),
     rgb(255 255 255 / 0.3) 30%,
     rgb(255 255 255 / 0.08) 55%,
-    rgb(255 255 255 / 0.6) 92%
+    rgb(255 255 255 / 0.65) 92%
   );
+  /* The glass's thickness: a bright lip along the top, a fainter one along
+     the bottom, and a glow inside the edge. Smaller for small controls. */
+  --gg-rim:
+    inset 0 1px 0.5px rgb(255 255 255 / 0.9),
+    inset 0 -1px 0.5px rgb(255 255 255 / 0.35),
+    inset 0 0 18px rgb(255 255 255 / 0.32);
+  --gg-rim-sm:
+    inset 0 1px 0.5px rgb(255 255 255 / 0.95),
+    inset 0 -0.5px 0.5px rgb(255 255 255 / 0.5),
+    inset 0 0 6px rgb(255 255 255 / 0.4);
+  /* Light from above, reflected off the face of a pane. */
+  --gg-sheen: linear-gradient(172deg, rgb(255 255 255 / 0.5), rgb(255 255 255 / 0.12) 30%, rgb(255 255 255 / 0) 55%);
   --gg-edge: 0 0 0 0.5px rgb(20 20 30 / 0.18);
-  --gg-lift: 0 8px 24px -12px rgb(20 20 30 / 0.35);
+  --gg-lift: 0 10px 28px -14px rgb(20 20 40 / 0.42);
   --gg-ring: 0 0 0 3.5px color-mix(in oklab, var(--primary) 32%, transparent);
   --gg-light: radial-gradient(circle at 50% 28%, rgb(255 255 255 / 0.9) 0 14%, rgb(255 255 255 / 0) 46%);
+  /* What glass over the page does to it: blurs it, pulls in its range and
+     lifts it, so even black beneath comes out a mid grey that the tint
+     over it lightens enough for text, then heightens its colour. */
+  --gg-frost: blur(12px) contrast(0.6) brightness(1.3) saturate(2);
   --heading-font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro", "Helvetica Neue", "Inter", system-ui, sans-serif;
   --surface-shadow: none;
   --chart-1: #0a64d2;
@@ -3621,7 +3646,8 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
 .theme-is-golden-gate body::before {
   background-position: center;
 }
-/* The window. */
+/* The window: the frosted picture, a sheen of light across it from the top
+   left, and its rim. */
 .theme-is-golden-gate body::after {
   content: "";
   position: fixed;
@@ -3629,30 +3655,56 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
   z-index: -1;
   pointer-events: none;
   background:
-    linear-gradient(rgb(255 255 255 / 0.76), rgb(250 250 252 / 0.72)),
+    linear-gradient(118deg, rgb(255 255 255 / 0.34), rgb(255 255 255 / 0) 32%, rgb(255 255 255 / 0) 72%, rgb(255 255 255 / 0.16)),
     url("/themes/golden-gate-frosted.svg")
       calc((100vw - var(--gg-w)) * 0.5 - var(--gg-x)) calc((100vh - var(--gg-h)) * 0.5 - var(--gg-top)) /
       var(--gg-w) var(--gg-h) no-repeat;
   border-radius: var(--gg-radius);
   box-shadow:
-    inset 0 0 0 0.5px rgb(15 15 25 / 0.4),
-    inset 0 1.5px 0 0.5px rgb(255 255 255 / 0.9),
-    inset 0 0 0 1.5px rgb(255 255 255 / 0.4);
+    inset 0 0 0 0.5px rgb(15 15 25 / 0.35),
+    inset 0 1.5px 0 0.5px rgb(255 255 255 / 0.95),
+    inset 0 -1px 0 0.5px rgb(255 255 255 / 0.45),
+    inset 0 0 0 1.5px rgb(255 255 255 / 0.3),
+    inset 0 0 40px rgb(255 255 255 / 0.4);
 }
 /* The picture again around the window, over the page: what scrolls past
    the window's edge goes behind it rather than over the desktop. The
    window's shape is cut out of it with a mask (two bands and four round
    corners, taken away from the whole), and like the window it never
-   moves, so scrolling costs nothing. Under the toolbar, menus and
-   dialogs. */
+   moves, so scrolling costs nothing. The window's shadow is drawn on it,
+   falling off its four sides and round its corners. Under the toolbar,
+   menus and dialogs. */
 .theme-is-golden-gate::after {
   --gg-r2: calc(2 * var(--gg-radius));
+  --gg-shade: rgb(20 20 45 / 0.3), rgb(20 20 45 / 0.09) 40%, rgb(20 20 45 / 0);
+  --gg-shade-r:
+    rgb(20 20 45 / 0.3) var(--gg-radius), rgb(20 20 45 / 0.09) calc(var(--gg-radius) + 0.4 * var(--gg-s)),
+    rgb(20 20 45 / 0) calc(var(--gg-radius) + var(--gg-s));
+  --gg-corner: calc(var(--gg-radius) + var(--gg-s));
   content: "";
   position: fixed;
   inset: 0;
   z-index: 35;
   pointer-events: none;
-  background: var(--page-gradient) center / cover no-repeat, var(--background);
+  background:
+    linear-gradient(to top, var(--gg-shade)) left calc(var(--gg-x) + var(--gg-radius)) top calc(var(--gg-top) - var(--gg-s)) /
+      calc(100% - 2 * var(--gg-x) - var(--gg-r2)) var(--gg-s) no-repeat,
+    linear-gradient(to bottom, var(--gg-shade)) left calc(var(--gg-x) + var(--gg-radius)) bottom calc(var(--gg-top) - var(--gg-s)) /
+      calc(100% - 2 * var(--gg-x) - var(--gg-r2)) var(--gg-s) no-repeat,
+    linear-gradient(to left, var(--gg-shade)) left calc(var(--gg-x) - var(--gg-s)) top calc(var(--gg-top) + var(--gg-radius)) /
+      var(--gg-s) calc(100% - 2 * var(--gg-top) - var(--gg-r2)) no-repeat,
+    linear-gradient(to right, var(--gg-shade)) right calc(var(--gg-x) - var(--gg-s)) top calc(var(--gg-top) + var(--gg-radius)) /
+      var(--gg-s) calc(100% - 2 * var(--gg-top) - var(--gg-r2)) no-repeat,
+    radial-gradient(circle at 100% 100%, var(--gg-shade-r)) left calc(var(--gg-x) - var(--gg-s)) top calc(var(--gg-top) - var(--gg-s)) /
+      var(--gg-corner) var(--gg-corner) no-repeat,
+    radial-gradient(circle at 0 100%, var(--gg-shade-r)) right calc(var(--gg-x) - var(--gg-s)) top calc(var(--gg-top) - var(--gg-s)) /
+      var(--gg-corner) var(--gg-corner) no-repeat,
+    radial-gradient(circle at 100% 0, var(--gg-shade-r)) left calc(var(--gg-x) - var(--gg-s)) bottom calc(var(--gg-top) - var(--gg-s)) /
+      var(--gg-corner) var(--gg-corner) no-repeat,
+    radial-gradient(circle at 0 0, var(--gg-shade-r)) right calc(var(--gg-x) - var(--gg-s)) bottom calc(var(--gg-top) - var(--gg-s)) /
+      var(--gg-corner) var(--gg-corner) no-repeat,
+    var(--page-gradient) center / cover no-repeat,
+    var(--background);
   mask:
     linear-gradient(#000 0 0),
     linear-gradient(#000 0 0) var(--gg-x) calc(var(--gg-top) + var(--gg-radius)) /
@@ -3683,8 +3735,8 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
   display: none;
 }
 
-/* The toolbar: a capsule of glass floating over the top of the window,
-   blurring the page as it scrolls under it. */
+/* The toolbar: a capsule of clear glass floating over the top of the
+   window, the page showing through it as it scrolls under. */
 .theme-is-golden-gate .top-bar {
   padding: calc(var(--gg-top) + 0.5rem) calc(var(--gg-x) + 0.75rem) 0;
   border: 0;
@@ -3698,10 +3750,11 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
   border: 1px solid transparent;
   border-radius: 999px;
   background:
-    linear-gradient(rgb(255 255 255 / 0.5), rgb(255 255 255 / 0.5)) padding-box,
+    var(--gg-sheen) padding-box,
+    linear-gradient(rgb(255 255 255 / 0.36), rgb(255 255 255 / 0.36)) padding-box,
     var(--gg-specular) border-box;
-  box-shadow: var(--gg-edge), 0 10px 28px -10px rgb(20 20 30 / 0.4);
-  backdrop-filter: blur(18px) saturate(1.8);
+  box-shadow: var(--gg-edge), var(--gg-rim), 0 12px 30px -12px rgb(20 20 40 / 0.45);
+  backdrop-filter: var(--gg-frost);
 }
 .theme-is-golden-gate .top-bar .wordmark {
   font-family: var(--heading-font);
@@ -3716,12 +3769,14 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
   color: #1d1d1f;
 }
 .theme-is-golden-gate .top-bar .nav-link:hover {
-  background: rgb(20 20 30 / 0.06);
+  background: rgb(20 20 40 / 0.07);
 }
-.theme-is-golden-gate .top-bar .nav-link[aria-current="page"] {
+/* The open page's pill, which stays as it is under the pointer. */
+.theme-is-golden-gate .top-bar .nav-link[aria-current="page"],
+.theme-is-golden-gate .top-bar .nav-link[aria-current="page"]:hover {
   font-weight: 600;
-  background: rgb(255 255 255 / 0.85);
-  box-shadow: var(--gg-edge), 0 1px 4px rgb(20 20 30 / 0.14);
+  background: var(--gg-sheen), rgb(255 255 255 / 0.62);
+  box-shadow: var(--gg-edge), var(--gg-rim-sm), 0 2px 8px -2px rgb(20 20 40 / 0.25);
 }
 .theme-is-golden-gate .top-bar .nav-link[aria-current="page"]::after {
   display: none;
@@ -3733,29 +3788,36 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
   padding-top: 1.75rem;
 }
 
-/* Buttons: capsules of glass that give a little when pressed; the main one
-   tinted with the accent. */
+/* Buttons: capsules of clear glass that give a little when pressed; the
+   main one tinted with the accent. */
 .theme-is-golden-gate [data-size][data-variant] {
   border: 1px solid transparent;
   border-radius: 999px;
   color: #1d1d1f;
   font-weight: 500;
   background:
-    linear-gradient(rgb(255 255 255 / 0.65), rgb(255 255 255 / 0.65)) padding-box,
+    var(--gg-sheen) padding-box,
+    linear-gradient(rgb(255 255 255 / 0.4), rgb(255 255 255 / 0.4)) padding-box,
     var(--gg-specular) border-box;
-  box-shadow: var(--gg-edge), 0 1px 3px rgb(20 20 30 / 0.12);
+  box-shadow: var(--gg-edge), var(--gg-rim-sm), 0 2px 6px -2px rgb(20 20 40 / 0.22);
   transition: scale 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 .theme-is-golden-gate [data-size][data-variant="default"] {
   color: var(--primary-foreground);
   background:
-    linear-gradient(rgb(255 255 255 / 0.3), rgb(255 255 255 / 0) 55%) padding-box,
+    linear-gradient(rgb(255 255 255 / 0.32), rgb(255 255 255 / 0) 25%) padding-box,
     linear-gradient(var(--primary), var(--primary)) padding-box,
     var(--gg-specular) border-box;
-  box-shadow: 0 0 0 0.5px color-mix(in oklab, var(--primary) 70%, #000000), 0 3px 10px -3px color-mix(in oklab, var(--primary) 70%, transparent);
+  box-shadow:
+    0 0 0 0.5px color-mix(in oklab, var(--primary) 70%, #000000),
+    inset 0 1px 0.5px rgb(255 255 255 / 0.55),
+    inset 0 -1px 1px rgb(0 0 40 / 0.22),
+    inset 0 0 8px rgb(255 255 255 / 0.16),
+    0 4px 12px -4px color-mix(in oklab, var(--primary) 75%, transparent);
 }
+/* A deeper red than the palette's, as the label sits on clear glass. */
 .theme-is-golden-gate [data-size][data-variant="destructive"] {
-  color: var(--destructive);
+  color: #a30d26;
 }
 .theme-is-golden-gate [data-size]:is([data-variant="ghost"], [data-variant="link"]) {
   border-color: transparent;
@@ -3767,17 +3829,20 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
 }
 .theme-is-golden-gate [data-size][data-variant]:not([data-variant="default"], [data-variant="ghost"], [data-variant="link"]):hover {
   background:
-    linear-gradient(rgb(255 255 255 / 0.85), rgb(255 255 255 / 0.85)) padding-box,
+    var(--gg-sheen) padding-box,
+    linear-gradient(rgb(255 255 255 / 0.66), rgb(255 255 255 / 0.66)) padding-box,
     var(--gg-specular) border-box;
 }
 .theme-is-golden-gate [data-size][data-variant="default"]:hover {
   background:
-    linear-gradient(rgb(255 255 255 / 0.38), rgb(255 255 255 / 0.06) 55%) padding-box,
+    linear-gradient(rgb(255 255 255 / 0.36), rgb(255 255 255 / 0) 26%) padding-box,
     linear-gradient(var(--primary), var(--primary)) padding-box,
     var(--gg-specular) border-box;
 }
+/* A shade on the glass, which shows where white would not. */
 .theme-is-golden-gate [data-size][data-variant="ghost"]:is(:hover, [aria-expanded="true"]) {
-  background: rgb(20 20 30 / 0.07);
+  background: rgb(20 20 40 / 0.07);
+  box-shadow: var(--gg-rim-sm);
 }
 .theme-is-golden-gate [data-size][data-variant="link"]:hover {
   background: transparent;
@@ -3795,15 +3860,18 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
   box-shadow: var(--gg-edge), var(--gg-ring);
 }
 
-/* Fields: wells of glass, ringed in the accent while typed in; the search
-   field a capsule. */
+/* Fields: wells pressed into the glass, ringed in the accent while typed
+   in; the search field a capsule. */
 .theme-is-golden-gate :is([data-slot="input"], [data-slot="textarea"]),
 .theme-is-golden-gate input:is([type="text"], [type="search"], [type="number"], [type="date"], [type="password"], [type="url"], [type="email"], :not([type])),
 .theme-is-golden-gate textarea {
   border: 0;
   border-radius: 0.625rem;
-  background: rgb(255 255 255 / 0.72);
-  box-shadow: inset 0 0 0 0.5px rgb(20 20 30 / 0.22), inset 0 1px 2px rgb(20 20 30 / 0.07);
+  background: rgb(255 255 255 / 0.58);
+  box-shadow:
+    inset 0 0 0 0.5px rgb(20 20 30 / 0.2),
+    inset 0 1.5px 3px rgb(20 20 40 / 0.1),
+    inset 0 -1px 0 rgb(255 255 255 / 0.7);
 }
 .theme-is-golden-gate input[type="search"],
 .theme-is-golden-gate input[placeholder^="Search"] {
@@ -3812,19 +3880,21 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
 .theme-is-golden-gate :is([data-slot="input"], [data-slot="textarea"], input, textarea):focus-visible {
   outline: none;
   --tw-ring-shadow: 0 0 #0000;
+  background: rgb(255 255 255 / 0.78);
   box-shadow: inset 0 0 0 1px var(--primary), var(--gg-ring);
 }
 .theme-is-golden-gate :is([data-slot="input"], [data-slot="textarea"], input, textarea)::placeholder {
-  color: #7c7c84;
+  color: #6c6c73;
 }
 .theme-is-golden-gate :is([data-slot="select-trigger"], .select-like) {
   border: 1px solid transparent;
   border-radius: 999px;
   color: #1d1d1f;
   background:
-    linear-gradient(rgb(255 255 255 / 0.65), rgb(255 255 255 / 0.65)) padding-box,
+    var(--gg-sheen) padding-box,
+    linear-gradient(rgb(255 255 255 / 0.4), rgb(255 255 255 / 0.4)) padding-box,
     var(--gg-specular) border-box;
-  box-shadow: var(--gg-edge), 0 1px 3px rgb(20 20 30 / 0.12);
+  box-shadow: var(--gg-edge), var(--gg-rim-sm), 0 2px 6px -2px rgb(20 20 40 / 0.22);
 }
 .theme-is-golden-gate :is([data-slot="select-trigger"], .select-like) > svg:last-child {
   color: var(--primary);
@@ -3839,8 +3909,8 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
   margin: 0;
   border: 0;
   border-radius: 0.3125rem;
-  background: rgb(255 255 255 / 0.8);
-  box-shadow: inset 0 0 0 0.5px rgb(20 20 30 / 0.3), 0 1px 2px rgb(20 20 30 / 0.1);
+  background: rgb(255 255 255 / 0.6);
+  box-shadow: inset 0 0 0 0.5px rgb(20 20 30 / 0.3), inset 0 1px 2px rgb(20 20 40 / 0.12), 0 1px 0 rgb(255 255 255 / 0.7);
 }
 .theme-is-golden-gate input[type="radio"] {
   border-radius: 50%;
@@ -3848,11 +3918,13 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
 .theme-is-golden-gate input[type="checkbox"]:checked {
   background:
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.6 6.3l2.3 2.3 4.5-5' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 85% no-repeat,
-    linear-gradient(rgb(255 255 255 / 0.25), transparent),
+    linear-gradient(rgb(255 255 255 / 0.32), transparent 60%),
     var(--primary);
+  box-shadow: 0 0 0 0.5px color-mix(in oklab, var(--primary) 70%, #000000), inset 0 1px 0.5px rgb(255 255 255 / 0.5);
 }
 .theme-is-golden-gate input[type="radio"]:checked {
-  background: radial-gradient(circle, #ffffff 0 22%, transparent 27%), var(--primary);
+  background: radial-gradient(circle, #ffffff 0 22%, transparent 27%), linear-gradient(rgb(255 255 255 / 0.32), transparent 60%), var(--primary);
+  box-shadow: 0 0 0 0.5px color-mix(in oklab, var(--primary) 70%, #000000), inset 0 1px 0.5px rgb(255 255 255 / 0.5);
 }
 .theme-is-golden-gate input:is([type="checkbox"], [type="radio"]):focus-visible {
   outline: none;
@@ -3860,27 +3932,37 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
 }
 .theme-is-golden-gate button[role="switch"] > span:last-child {
   border: 0;
-  background: rgb(20 20 30 / 0.14);
-  box-shadow: inset 0 0 0 0.5px rgb(20 20 30 / 0.12);
+  background: rgb(20 20 40 / 0.14);
+  box-shadow: inset 0 0 0 0.5px rgb(20 20 30 / 0.12), inset 0 1px 2px rgb(20 20 40 / 0.12);
 }
 .theme-is-golden-gate button[role="switch"][aria-checked="true"] > span:last-child {
-  background: var(--primary);
+  background: linear-gradient(rgb(255 255 255 / 0.25), transparent 60%), var(--primary);
 }
+/* The knob: a bead of glass. */
 .theme-is-golden-gate button[role="switch"] > span:last-child > span {
-  background: linear-gradient(#ffffff, #f4f1f2);
-  box-shadow: 0 0 0 0.5px rgb(20 20 30 / 0.15), 0 2px 4px rgb(20 20 30 / 0.25);
+  background: radial-gradient(circle at 50% 30%, #ffffff, rgb(255 255 255 / 0.9) 55%, rgb(236 236 244 / 0.95));
+  box-shadow: 0 0 0 0.5px rgb(20 20 30 / 0.15), 0 2px 5px rgb(20 20 40 / 0.28), inset 0 -1px 1px rgb(20 20 40 / 0.08);
 }
 
-/* Panels: panes of glass in the window, the rim catching the light. Library
-   tiles too, lighter, and lit up under the pointer. */
+/* Panels: panes of clear glass in the window, the rim catching the light
+   and a sheen across the face. Library tiles too, clearer still, and
+   brighter under the pointer. */
 .theme-is-golden-gate [data-slot="card"] {
   border: 1px solid transparent;
   border-radius: 1.25rem;
   background:
+    var(--gg-sheen) padding-box,
     linear-gradient(var(--gg-fill), var(--gg-fill)) padding-box,
     var(--gg-specular) border-box;
-  box-shadow: var(--gg-edge), var(--gg-lift);
+  box-shadow: var(--gg-edge), var(--gg-rim), var(--gg-lift);
   --tw-ring-shadow: 0 0 #0000;
+}
+/* A cover's shadow kept short on clear glass, clear of the caption under
+   it. */
+.theme-is-golden-gate [data-slot="card"] .cover-shadow {
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 0.14),
+    0 8px 12px -10px rgb(0 0 0 / 0.5);
 }
 .theme-is-golden-gate :is([data-slot="card-title"], [data-slot="dialog-title"]) {
   font-weight: 600;
@@ -3888,19 +3970,21 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
 }
 .theme-is-golden-gate [data-slot="card-footer"] {
   border-top: 0.5px solid rgb(20 20 30 / 0.12);
-  background: rgb(255 255 255 / 0.3);
+  background: rgb(255 255 255 / 0.18);
 }
+/* No sheen on tiles: it would fall behind the cover, and painting it on
+   two hundred of them shows when scrolling. */
 .theme-is-golden-gate .surface:not([data-slot="card"]) {
   border: 1px solid transparent;
   border-radius: 1rem;
   background:
-    linear-gradient(rgb(255 255 255 / 0.42), rgb(255 255 255 / 0.42)) padding-box,
+    linear-gradient(rgb(255 255 255 / 0.24), rgb(255 255 255 / 0.24)) padding-box,
     var(--gg-specular) border-box;
-  box-shadow: var(--gg-edge), 0 4px 14px -8px rgb(20 20 30 / 0.3);
+  box-shadow: var(--gg-edge), var(--gg-rim), 0 6px 18px -10px rgb(20 20 40 / 0.36);
 }
 .theme-is-golden-gate .surface:not([data-slot="card"]):hover {
   background:
-    linear-gradient(rgb(255 255 255 / 0.72), rgb(255 255 255 / 0.72)) padding-box,
+    linear-gradient(rgb(255 255 255 / 0.5), rgb(255 255 255 / 0.5)) padding-box,
     var(--gg-specular) border-box;
 }
 .theme-is-golden-gate .surface:not([data-slot="card"]):focus-visible {
@@ -3910,8 +3994,35 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
 .theme-is-golden-gate .surface .book-cover {
   border-radius: 0.5rem;
 }
+/* A tile's series line is faded a little, which white allows but clear
+   glass does not. */
+.theme-is-golden-gate .surface .text-muted-foreground\/80 {
+  color: var(--muted-foreground);
+}
+/* Other panels drawn on the card's colour, notices and results among
+   them: panes of glass too, the overdue notice keeping its red edge. */
+.theme-is-golden-gate .bg-card.border:not(.surface, .bulk-bar) {
+  border-color: transparent;
+  background:
+    var(--gg-sheen) padding-box,
+    linear-gradient(var(--gg-fill), var(--gg-fill)) padding-box,
+    var(--gg-specular) border-box;
+  box-shadow: var(--gg-edge), var(--gg-rim), 0 6px 18px -10px rgb(20 20 40 / 0.36);
+}
+/* Results that open something keep the edge they light up with. */
+.theme-is-golden-gate .bg-card.border:not(.surface, .bulk-bar):is(a, button):hover {
+  border-color: color-mix(in oklab, var(--ring) 60%, transparent);
+  background:
+    var(--gg-sheen) padding-box,
+    linear-gradient(rgb(255 255 255 / 0.55), rgb(255 255 255 / 0.55)) padding-box,
+    var(--gg-specular) border-box;
+}
+.theme-is-golden-gate .bg-card.border.border-red-300 {
+  border-color: rgb(200 16 46 / 0.4);
+  background: var(--gg-sheen), linear-gradient(rgb(255 236 238 / 0.42), rgb(255 236 238 / 0.42));
+}
 
-/* Tabs and chips: pills, the chosen one a lighter pane of glass. */
+/* Tabs and chips: pills of glass, the chosen one a brighter lens. */
 .theme-is-golden-gate .shelf-tabs {
   gap: 0.25rem;
   padding-bottom: 0.625rem;
@@ -3927,25 +4038,27 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
 }
 .theme-is-golden-gate .shelf-tabs > a:hover,
 .theme-is-golden-gate [data-slot="tabs-trigger"]:hover {
-  background: rgb(20 20 30 / 0.06);
+  background: rgb(255 255 255 / 0.4);
 }
 .theme-is-golden-gate .shelf-tabs > a[aria-current="page"],
 .theme-is-golden-gate [data-slot="tabs-trigger"][data-state="active"] {
   font-weight: 600;
-  background: rgb(255 255 255 / 0.85);
-  box-shadow: var(--gg-edge), 0 1px 4px rgb(20 20 30 / 0.14);
+  background: var(--gg-sheen), rgb(255 255 255 / 0.66);
+  box-shadow: var(--gg-edge), var(--gg-rim-sm), 0 2px 8px -2px rgb(20 20 40 / 0.25);
 }
 .theme-is-golden-gate .shelf-tabs > a > span {
-  background: rgb(20 20 30 / 0.07);
+  background: rgb(20 20 40 / 0.07);
 }
 .theme-is-golden-gate .shelf-tabs > a[aria-current="page"] > span {
   color: var(--primary-foreground);
   background: var(--primary);
 }
+/* The track the tabs sit in, pressed into the glass. */
 .theme-is-golden-gate [data-slot="tabs-list"] {
   gap: 0.125rem;
   border-radius: 999px;
-  background: rgb(20 20 30 / 0.07);
+  background: rgb(255 255 255 / 0.22);
+  box-shadow: inset 0 0 0 0.5px rgb(20 20 30 / 0.12), inset 0 1px 3px rgb(20 20 40 / 0.1), 0 1px 0 rgb(255 255 255 / 0.6);
 }
 .theme-is-golden-gate [data-slot="tabs-trigger"]::after {
   display: none;
@@ -3953,47 +4066,52 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
 .theme-is-golden-gate :is(a, button).rounded-full.border:not(.aspect-square, .border-2) {
   border-color: transparent;
   background:
-    linear-gradient(rgb(255 255 255 / 0.55), rgb(255 255 255 / 0.55)) padding-box,
+    var(--gg-sheen) padding-box,
+    linear-gradient(rgb(255 255 255 / 0.36), rgb(255 255 255 / 0.36)) padding-box,
     var(--gg-specular) border-box;
-  box-shadow: var(--gg-edge);
+  box-shadow: var(--gg-edge), var(--gg-rim-sm);
 }
 .theme-is-golden-gate :is(a, button).rounded-full.border:is([class*="border-primary"], [aria-current="page"], [aria-pressed="true"]):not(.aspect-square, .border-2) {
   color: var(--primary-foreground);
   background:
-    linear-gradient(rgb(255 255 255 / 0.28), rgb(255 255 255 / 0) 55%) padding-box,
+    linear-gradient(rgb(255 255 255 / 0.3), rgb(255 255 255 / 0) 25%) padding-box,
     linear-gradient(var(--primary), var(--primary)) padding-box,
     var(--gg-specular) border-box;
+  box-shadow: 0 0 0 0.5px color-mix(in oklab, var(--primary) 70%, #000000), inset 0 1px 0.5px rgb(255 255 255 / 0.5), inset 0 -1px 1px rgb(0 0 40 / 0.2);
 }
 .theme-is-golden-gate kbd {
   border: 0;
   border-radius: 0.375rem;
-  background: rgb(255 255 255 / 0.7);
-  box-shadow: var(--gg-edge), 0 1px 0 rgb(20 20 30 / 0.18);
+  background: rgb(255 255 255 / 0.6);
+  box-shadow: var(--gg-edge), var(--gg-rim-sm), 0 1px 0 rgb(20 20 30 / 0.18);
 }
 
-/* Progress: a capsule filled with the accent, its top catching the light. */
+/* Progress: a groove in the glass, filled with the accent, its top
+   catching the light. */
 .theme-is-golden-gate :has(> .bar-grow) {
   border-radius: 999px;
-  background: rgb(20 20 30 / 0.1);
-  box-shadow: inset 0 0.5px 1px rgb(20 20 30 / 0.12);
+  background: rgb(255 255 255 / 0.3);
+  box-shadow: inset 0 0 0 0.5px rgb(20 20 30 / 0.12), inset 0 1px 2px rgb(20 20 40 / 0.14), 0 1px 0 rgb(255 255 255 / 0.6);
 }
 .theme-is-golden-gate .bar-grow {
   border-radius: 999px;
 }
 .theme-is-golden-gate .bar-grow[class*="primary"] {
-  background: linear-gradient(rgb(255 255 255 / 0.4), rgb(255 255 255 / 0) 60%), var(--primary);
+  background: linear-gradient(rgb(255 255 255 / 0.45), rgb(255 255 255 / 0) 60%), var(--primary);
+  box-shadow: inset 0 -0.5px 0.5px rgb(0 0 40 / 0.25);
 }
 
-/* Menus and popovers: glass over the page, blurring it; the item under the
-   pointer in the accent. */
+/* Menus and popovers: glass over the page; the item under the pointer in
+   the accent. */
 .theme-is-golden-gate :is([data-slot="dropdown-menu-content"], [data-slot="popover-content"], [data-slot="select-content"], [data-slot="dropdown-menu-sub-content"]) {
   border: 1px solid transparent;
   border-radius: 0.875rem;
   background:
-    linear-gradient(rgb(255 255 255 / 0.7), rgb(255 255 255 / 0.7)) padding-box,
+    var(--gg-sheen) padding-box,
+    linear-gradient(rgb(255 255 255 / 0.56), rgb(255 255 255 / 0.56)) padding-box,
     var(--gg-specular) border-box;
-  box-shadow: var(--gg-edge), 0 14px 36px -10px rgb(15 15 25 / 0.45);
-  backdrop-filter: blur(24px) saturate(1.8);
+  box-shadow: var(--gg-edge), var(--gg-rim), 0 16px 40px -12px rgb(15 15 35 / 0.5);
+  backdrop-filter: var(--gg-frost);
   --tw-ring-shadow: 0 0 #0000;
 }
 .theme-is-golden-gate :is([data-slot="dropdown-menu-item"], [data-slot="select-item"], [data-slot="dropdown-menu-checkbox-item"], [data-slot="dropdown-menu-radio-item"], [data-slot="dropdown-menu-sub-trigger"]) {
@@ -4001,7 +4119,7 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
 }
 .theme-is-golden-gate :is([data-slot="dropdown-menu-item"], [data-slot="select-item"], [data-slot="dropdown-menu-checkbox-item"], [data-slot="dropdown-menu-radio-item"], [data-slot="dropdown-menu-sub-trigger"]):is(:focus, [data-highlighted]) {
   color: var(--primary-foreground);
-  background: var(--primary);
+  background: linear-gradient(rgb(255 255 255 / 0.2), rgb(255 255 255 / 0) 30%), var(--primary);
 }
 .theme-is-golden-gate :is([data-slot="dropdown-menu-item"], [data-slot="select-item"], [data-slot="dropdown-menu-checkbox-item"], [data-slot="dropdown-menu-radio-item"], [data-slot="dropdown-menu-sub-trigger"]):is(:focus, [data-highlighted]) * {
   color: inherit;
@@ -4022,10 +4140,11 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
     radial-gradient(circle closest-side, #ffd36b, #febc2e 60%, #c98a0e 92%, transparent) 2.25rem 1.125rem / 0.8125rem 0.8125rem no-repeat,
     var(--gg-light) 3.5rem 1.125rem / 0.8125rem 0.8125rem no-repeat,
     radial-gradient(circle closest-side, #6ee07e, #28c840 60%, #138a26 92%, transparent) 3.5rem 1.125rem / 0.8125rem 0.8125rem no-repeat,
-    linear-gradient(rgb(255 255 255 / 0.76), rgb(255 255 255 / 0.76)) padding-box,
+    var(--gg-sheen) padding-box,
+    linear-gradient(rgb(255 255 255 / 0.62), rgb(255 255 255 / 0.62)) padding-box,
     var(--gg-specular) border-box;
-  box-shadow: var(--gg-edge), 0 24px 64px -16px rgb(10 10 20 / 0.55);
-  backdrop-filter: blur(30px) saturate(1.8);
+  box-shadow: var(--gg-edge), var(--gg-rim), 0 24px 64px -16px rgb(10 10 30 / 0.55);
+  backdrop-filter: var(--gg-frost);
   --tw-ring-shadow: 0 0 #0000;
 }
 .theme-is-golden-gate [data-slot="dialog-content"] > [data-slot="dialog-close"] {
@@ -4052,19 +4171,25 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
   color: #6b0d07;
   background: var(--gg-light), radial-gradient(circle closest-side, #ff8a82, #ff5f57 60%, #c6302a 92%, transparent);
 }
+/* No glass rim on the light under the pointer (keyboard focus keeps its
+   ring). */
+.theme-is-golden-gate [data-slot="dialog-content"] > [data-slot="dialog-close"]:hover {
+  box-shadow: none;
+}
 .theme-is-golden-gate [data-slot="dialog-footer"] {
   border-top: 0.5px solid rgb(20 20 30 / 0.12);
   border-radius: 0 0 1.5rem 1.5rem;
-  background: rgb(255 255 255 / 0.35);
+  background: rgb(255 255 255 / 0.22);
 }
 .theme-is-golden-gate .bulk-bar {
   border: 1px solid transparent;
   border-radius: 999px;
   background:
-    linear-gradient(rgb(255 255 255 / 0.7), rgb(255 255 255 / 0.7)) padding-box,
+    var(--gg-sheen) padding-box,
+    linear-gradient(rgb(255 255 255 / 0.5), rgb(255 255 255 / 0.5)) padding-box,
     var(--gg-specular) border-box;
-  box-shadow: var(--gg-edge), 0 14px 36px -10px rgb(15 15 25 / 0.45);
-  backdrop-filter: blur(24px) saturate(1.8);
+  box-shadow: var(--gg-edge), var(--gg-rim), 0 16px 40px -12px rgb(15 15 35 / 0.5);
+  backdrop-filter: var(--gg-frost);
 }
 
 /* The sign-in pages: a pane of glass in the window. */
