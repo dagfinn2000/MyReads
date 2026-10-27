@@ -3769,9 +3769,11 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
   color: #1d1d1f;
 }
 .theme-is-golden-gate .top-bar .nav-link:hover {
-  background: rgb(255 255 255 / 0.4);
+  background: rgb(20 20 40 / 0.07);
 }
-.theme-is-golden-gate .top-bar .nav-link[aria-current="page"] {
+/* The open page's pill, which stays as it is under the pointer. */
+.theme-is-golden-gate .top-bar .nav-link[aria-current="page"],
+.theme-is-golden-gate .top-bar .nav-link[aria-current="page"]:hover {
   font-weight: 600;
   background: var(--gg-sheen), rgb(255 255 255 / 0.62);
   box-shadow: var(--gg-edge), var(--gg-rim-sm), 0 2px 8px -2px rgb(20 20 40 / 0.25);
@@ -3813,8 +3815,9 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
     inset 0 0 8px rgb(255 255 255 / 0.16),
     0 4px 12px -4px color-mix(in oklab, var(--primary) 75%, transparent);
 }
+/* A deeper red than the palette's, as the label sits on clear glass. */
 .theme-is-golden-gate [data-size][data-variant="destructive"] {
-  color: var(--destructive);
+  color: #a30d26;
 }
 .theme-is-golden-gate [data-size]:is([data-variant="ghost"], [data-variant="link"]) {
   border-color: transparent;
@@ -3836,8 +3839,9 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
     linear-gradient(var(--primary), var(--primary)) padding-box,
     var(--gg-specular) border-box;
 }
+/* A shade on the glass, which shows where white would not. */
 .theme-is-golden-gate [data-size][data-variant="ghost"]:is(:hover, [aria-expanded="true"]) {
-  background: rgb(255 255 255 / 0.45);
+  background: rgb(20 20 40 / 0.07);
   box-shadow: var(--gg-rim-sm);
 }
 .theme-is-golden-gate [data-size][data-variant="link"]:hover {
@@ -3953,6 +3957,13 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
   box-shadow: var(--gg-edge), var(--gg-rim), var(--gg-lift);
   --tw-ring-shadow: 0 0 #0000;
 }
+/* A cover's shadow kept short on clear glass, clear of the caption under
+   it. */
+.theme-is-golden-gate [data-slot="card"] .cover-shadow {
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 0.14),
+    0 8px 12px -10px rgb(0 0 0 / 0.5);
+}
 .theme-is-golden-gate :is([data-slot="card-title"], [data-slot="dialog-title"]) {
   font-weight: 600;
   letter-spacing: -0.01em;
@@ -3998,7 +4009,9 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
     var(--gg-specular) border-box;
   box-shadow: var(--gg-edge), var(--gg-rim), 0 6px 18px -10px rgb(20 20 40 / 0.36);
 }
+/* Results that open something keep the edge they light up with. */
 .theme-is-golden-gate .bg-card.border:not(.surface, .bulk-bar):is(a, button):hover {
+  border-color: color-mix(in oklab, var(--ring) 60%, transparent);
   background:
     var(--gg-sheen) padding-box,
     linear-gradient(rgb(255 255 255 / 0.55), rgb(255 255 255 / 0.55)) padding-box,
@@ -4157,6 +4170,11 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
 .theme-is-golden-gate [data-slot="dialog-content"] > [data-slot="dialog-close"]:is(:hover, :focus-visible) {
   color: #6b0d07;
   background: var(--gg-light), radial-gradient(circle closest-side, #ff8a82, #ff5f57 60%, #c6302a 92%, transparent);
+}
+/* No glass rim on the light under the pointer (keyboard focus keeps its
+   ring). */
+.theme-is-golden-gate [data-slot="dialog-content"] > [data-slot="dialog-close"]:hover {
+  box-shadow: none;
 }
 .theme-is-golden-gate [data-slot="dialog-footer"] {
   border-top: 0.5px solid rgb(20 20 30 / 0.12);
