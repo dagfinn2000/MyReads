@@ -67,3 +67,15 @@ describe("skipping what is off screen (globals.css)", () => {
     expect(everywhere).not.toMatch(/\.card-skip[^{]*\{[^}]*content-visibility/);
   });
 });
+
+describe("menus and dialogs opening (globals.css)", () => {
+  it("keeps the scroll lock's property on <body>, so opening one doesn't restyle every element", async () => {
+    // The scroll lock behind Radix's menus, lists and dialogs sets this on
+    // <body>; inherited, it reached every element of the page.
+    const { removedBarSizeVariable } = await import("react-remove-scroll-bar/constants");
+    const rule = new RegExp(`@property\\s+${removedBarSizeVariable}\\s*\\{([^{}]*)\\}`).exec(css);
+    expect(rule).not.toBeNull();
+    expect(rule![1]).toMatch(/inherits:\s*false/);
+    expect(rule![1]).toMatch(/syntax:\s*"\*"/);
+  });
+});

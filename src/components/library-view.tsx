@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useTransition } from "react";
+import { memo, useCallback, useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { BookFormat, BookOwnership, ReadingStatus } from "@/lib/enums";
@@ -13,6 +13,7 @@ import { isClosingBook } from "@/lib/cover-flight";
 import { FORMAT_LABELS, OWNERSHIP_LABELS, formatNumber } from "@/lib/display";
 import { orderByIds } from "@/lib/library-order";
 import { cn } from "@/lib/utils";
+import type { FormatPrefs } from "@/lib/display";
 import type { LibraryDisplay } from "@/lib/library-view";
 import { pickButtonTitle, tabStatus } from "@/lib/pick";
 import { usePreferences } from "@/components/preferences-provider";
@@ -209,7 +210,9 @@ export function LibraryView({
   const target = () =>
     allMatching ? { matching: searchParams } : { bookIds: picked };
 
-  function toggle(id: string) {
+  // The same function every render, so the cards (LibraryCell) can skip
+  // redrawing.
+  const toggle = useCallback((id: string) => {
     setSelected((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
@@ -218,7 +221,7 @@ export function LibraryView({
     });
     setMatchingFor(null);
     setMessage(null);
-  }
+  }, [setSelected, setMatchingFor, setMessage]);
 
   function clearSelection() {
     setSelected(new Set());
@@ -355,65 +358,20 @@ export function LibraryView({
       )}
       data-size={spines ? display.cardSize : undefined}
     >
-      {items.map((book) => {
-        const isSelected = selected.has(book.id);
-        const step = steps.get(cardKey(book.id, section)) ?? 0;
-        return (
-          <div
-            key={book.id}
-            className={cn(
-              spines ? "spine-slot" : "relative rounded-lg",
-              !returning && "card-in",
-              // The ones after the cascade (globals.css, "Page and library
-              // motion").
-              !returning && step >= STAGGERED_CARDS && "card-in-rest",
-              // Skipped while off screen (globals.css, "Card styles").
-              list ? "card-skip card-skip-row" : !spines && style !== "shelf" && "card-skip",
-              style === "shelf" && "shelf-slot",
-              selectMode && isSelected && !spines && "ring-2 ring-primary",
-            )}
-            data-selected={spines && selectMode && isSelected ? "" : undefined}
-            style={{ "--i": step } as React.CSSProperties}
-          >
-            {list ? (
-              <BookRow book={book} details={display} formatPrefs={prefs} />
-            ) : spines ? (
-              <BookSpine book={book} colour={spineColourOf(book, coverColours)} />
-            ) : style === "shelf" ? (
-              <BookOnShelf book={book} />
-            ) : style === "covers" ? (
-              <BookCoverTile book={book} compact={display.cardSize === "small"} />
-            ) : (
-              <BookCard
-                book={book}
-                details={display}
-                compact={display.cardSize === "small"}
-              />
-            )}
-            {selectMode && (
-              <button
-                type="button"
-                onClick={() => toggle(book.id)}
-                aria-pressed={isSelected}
-                aria-label={`Select ${book.title}`}
-                className="absolute inset-0 z-10 rounded-lg"
-              >
-                <span
-                  className={cn(
-                    "absolute flex items-center justify-center rounded-md border bg-background/90 shadow-sm",
-                    // Above a spine, in the head room of its shelf.
-                    spines ? "left-1/2 top-0 size-5 -translate-x-1/2" : "left-2 top-2 size-6",
-                    isSelected &&
-                      "border-primary bg-primary text-primary-foreground",
-                  )}
-                >
-                  {isSelected && <Check className="size-4" />}
-                </span>
-              </button>
-            )}
-          </div>
-        );
-      })}
+      {items.map((book) => (
+        <LibraryCell
+          key={book.id}
+          book={book}
+          step={steps.get(cardKey(book.id, section)) ?? 0}
+          returning={returning}
+          display={display}
+          formatPrefs={prefs}
+          colour={spines ? spineColourOf(book, coverColours) : undefined}
+          selectMode={selectMode}
+          selected={selected.has(book.id)}
+          onToggle={toggle}
+        />
+      ))}
     </div>
   );
 
@@ -718,3 +676,157 @@ export function LibraryView({
     </div>
   );
 }
+
+/** The fields of the View menu a card is drawn from. */
+const CARD_DISPLAY = [
+  "layout",
+  "cardStyle",
+  "cardSize",
+  "showRating",
+  "showStatus",
+  "showSeries",
+  "showOwnership",
+  "rowDate",
+  "showPageCount",
+] as const satisfies readonly (keyof LibraryDisplay)[];
+
+function sameValue(a: unknown, b: unknown): boolean {
+  return (
+    Object.is(a, b) ||
+    (a instanceof Date && b instanceof Date && a.getTime() === b.getTime()) ||
+    (Array.isArray(a) &&
+      Array.isArray(b) &&
+      a.length === b.length &&
+      a.every((v, i) => Object.is(v, b[i])))
+  );
+}
+
+/** Same book, field by field: each visit to the server (a filter, a sort,
+ *  Show more) sends every book as a new object, mostly unchanged. */
+function sameBook(a: BookCardBook, b: BookCardBook): boolean {
+  if (a === b) return true;
+  const keys = Object.keys(a) as (keyof BookCardBook)[];
+  return (
+    keys.length === Object.keys(b).length && keys.every((k) => sameValue(a[k], b[k]))
+  );
+}
+
+interface CellProps {
+  book: BookCardBook;
+  /** Its turn as the cards rise in (lib/card-cascade.ts). */
+  step: number;
+  /** Back from a book's page: no rising in. */
+  returning: boolean;
+  display: LibraryDisplay;
+  formatPrefs: FormatPrefs;
+  /** A spine's colour, in the Spines view. */
+  colour: string | undefined;
+  selectMode: boolean;
+  selected: boolean;
+  onToggle: (id: string) => void;
+}
+
+/**
+ * One book in the library, with its checkbox while picking books. Drawn
+ * again only when something it shows has changed: picking a book redraws
+ * that card alone, typing a tag in the bar redraws none, and a sort or a
+ * filter redraws only the books that are new to the page. Before, each
+ * redrew all 200 cards, the better part of a second a tap on a slow phone.
+ * Starting to pick redraws each card's frame and checkbox, not the card.
+ */
+const LibraryCell = memo(
+  function LibraryCell({
+    book,
+    step,
+    returning,
+    display,
+    formatPrefs,
+    colour,
+    selectMode,
+    selected,
+    onToggle,
+  }: CellProps) {
+    const list = display.layout === "list";
+    const style = list ? null : display.cardStyle;
+    const spines = style === "spines";
+    return (
+      <div
+        className={cn(
+          spines ? "spine-slot" : "relative rounded-lg",
+          !returning && "card-in",
+          // The ones after the cascade (globals.css, "Page and library
+          // motion").
+          !returning && step >= STAGGERED_CARDS && "card-in-rest",
+          // Skipped while off screen (globals.css, "Card styles").
+          list ? "card-skip card-skip-row" : !spines && style !== "shelf" && "card-skip",
+          style === "shelf" && "shelf-slot",
+          selectMode && selected && !spines && "ring-2 ring-primary",
+        )}
+        data-selected={spines && selectMode && selected ? "" : undefined}
+        style={{ "--i": step } as React.CSSProperties}
+      >
+        <LibraryCard book={book} display={display} formatPrefs={formatPrefs} colour={colour} />
+        {selectMode && (
+          <button
+            type="button"
+            onClick={() => onToggle(book.id)}
+            aria-pressed={selected}
+            aria-label={`Select ${book.title}`}
+            className="absolute inset-0 z-10 rounded-lg"
+          >
+            <span
+              className={cn(
+                "absolute flex items-center justify-center rounded-md border bg-background/90 shadow-sm",
+                // Above a spine, in the head room of its shelf.
+                spines ? "left-1/2 top-0 size-5 -translate-x-1/2" : "left-2 top-2 size-6",
+                selected && "border-primary bg-primary text-primary-foreground",
+              )}
+            >
+              {selected && <Check className="size-4" />}
+            </span>
+          </button>
+        )}
+      </div>
+    );
+  },
+  (a, b) =>
+    sameBook(a.book, b.book) &&
+    a.step === b.step &&
+    a.returning === b.returning &&
+    CARD_DISPLAY.every((k) => a.display[k] === b.display[k]) &&
+    a.formatPrefs === b.formatPrefs &&
+    a.colour === b.colour &&
+    a.selectMode === b.selectMode &&
+    a.selected === b.selected &&
+    a.onToggle === b.onToggle,
+);
+
+/** The card itself, in the layout and style the View menu sets. */
+const LibraryCard = memo(
+  function LibraryCard({
+    book,
+    display,
+    formatPrefs,
+    colour,
+  }: Pick<CellProps, "book" | "display" | "formatPrefs" | "colour">) {
+    if (display.layout === "list") {
+      return <BookRow book={book} details={display} formatPrefs={formatPrefs} />;
+    }
+    const compact = display.cardSize === "small";
+    switch (display.cardStyle) {
+      case "spines":
+        return <BookSpine book={book} colour={colour!} />;
+      case "shelf":
+        return <BookOnShelf book={book} />;
+      case "covers":
+        return <BookCoverTile book={book} compact={compact} />;
+      default:
+        return <BookCard book={book} details={display} compact={compact} />;
+    }
+  },
+  (a, b) =>
+    sameBook(a.book, b.book) &&
+    CARD_DISPLAY.every((k) => a.display[k] === b.display[k]) &&
+    a.formatPrefs === b.formatPrefs &&
+    a.colour === b.colour,
+);

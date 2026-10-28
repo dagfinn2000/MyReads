@@ -1611,6 +1611,17 @@
     cursor: pointer;
   }
 }
+/* A menu, list or dialog that opens (Radix) stops the page scrolling
+   behind it, and sets this property on <body> as it does: the width of the
+   scroll bar it took away, in case anything wants it. Nothing here does.
+   Inherited, as custom properties are, it changed for every element on the
+   page, so opening the format filter on a slow phone restyled the whole
+   library twice, open and shut, for well over a second each time. Kept to
+   <body> itself, opening one restyles next to nothing. */
+@property --removed-body-scroll-bar-size {
+  syntax: "*";
+  inherits: false;
+}
 /* ── Beyond colour ─────────────────────────────────────────────────────────
    A theme can bring more than colours. In its block, --radius gives it
    corners of its own and --heading-font a heading face; the Corners and
