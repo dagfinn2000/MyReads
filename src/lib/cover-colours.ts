@@ -1,5 +1,6 @@
 import { useEffect, useSyncExternalStore } from "react";
 import { spineColour } from "@/lib/spine-colour";
+import { coverAt } from "@/lib/cover-src";
 
 /**
  * The main colour of each cover, for the spines in the reading room and in
@@ -74,7 +75,9 @@ function readCover(url: string): Promise<string | null> {
       }
     };
     img.onerror = () => resolve(local ? null : "");
-    img.src = url;
+    // 24 by 36 pixels are read, so the smallest copy of a cached cover
+    // does (lib/cover-src.ts); the colour stays filed under the cover.
+    img.src = coverAt(url, 160);
   });
 }
 

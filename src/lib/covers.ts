@@ -2,6 +2,7 @@ import crypto from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { readBodyCapped } from "@/lib/capped-read";
+import { COVER_WIDTHS } from "@/lib/cover-src";
 import { checkUrlAllowed } from "@/lib/net-guard";
 import { prisma } from "@/lib/prisma";
 
@@ -28,6 +29,55 @@ export function coversDir(): string {
  */
 export function coverFilePath(filename: string): string {
   return path.join(/* turbopackIgnore: true */ coversDir(), filename);
+}
+
+/** Where a cover's smaller copies are kept: thumbs/ beside the covers. */
+function thumbPath(filename: string, width: number): string {
+  return coverFilePath(path.join("thumbs", `${filename}.${width}.webp`));
+}
+
+/**
+ * A copy of the cached cover `filename`, `width` pixels wide (or as wide as
+ * the cover, if that is less), as WebP: made the first time it is asked for
+ * and kept in thumbs/ (see lib/cover-src.ts for why). sharp comes with
+ * Next.js, which puts it in the standalone build for its own images; it is
+ * loaded only here, on first use. Null when the copy can't be made (sharp
+ * missing, a file it can't read): the caller then serves the cover itself.
+ */
+export async function coverThumbnail(filename: string, width: number): Promise<Buffer | null> {
+  const out = thumbPath(filename, width);
+  try {
+    return await fs.readFile(out);
+  } catch {
+    // not made yet
+  }
+  try {
+    const { default: sharp } = await import("sharp");
+    const buf = await sharp(await fs.readFile(coverFilePath(filename)))
+      .resize({ width, withoutEnlargement: true })
+      .webp({ quality: 78 })
+      .toBuffer();
+    // Written under a name of its own and moved into place, so a request
+    // arriving meanwhile never reads half a file.
+    await fs.mkdir(path.dirname(out), { recursive: true });
+    const temp = `${out}.${crypto.randomBytes(4).toString("hex")}.tmp`;
+    await fs.writeFile(temp, buf);
+    await fs.rename(temp, out).catch(() => fs.unlink(temp).catch(() => {}));
+    return buf;
+  } catch {
+    return null;
+  }
+}
+
+/** Deletes a cached cover and its smaller copies. */
+async function unlinkCover(filename: string) {
+  await Promise.all(
+    [coverFilePath(filename), ...COVER_WIDTHS.map((w) => thumbPath(filename, w))].map((p) =>
+      fs.unlink(p).catch(() => {
+        // already gone — fine
+      }),
+    ),
+  );
 }
 
 const EXT_BY_MIME: Record<string, string> = {
@@ -142,11 +192,7 @@ export async function deleteCachedCover(coverUrl: string | null | undefined) {
   } catch {
     return; // can't tell — keep the file
   }
-  try {
-    await fs.unlink(coverFilePath(filename));
-  } catch {
-    // already gone — fine
-  }
+  await unlinkCover(filename);
 }
 
 /**
@@ -182,10 +228,6 @@ export async function deleteCachedCovers(coverUrls: (string | null | undefined)[
 
   for (const filename of filenames) {
     if (stillUsed.has(filename)) continue;
-    try {
-      await fs.unlink(coverFilePath(filename));
-    } catch {
-      // already gone — fine
-    }
+    await unlinkCover(filename);
   }
 }

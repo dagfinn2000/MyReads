@@ -53,3 +53,17 @@ describe("transition-all (components/ui)", () => {
   });
 });
 
+
+describe("skipping what is off screen (globals.css)", () => {
+  it("skips library cards and rows only where they can still draw past their edge", () => {
+    // content-visibility clips what a card draws outside itself (its
+    // shadow, its lift, a theme's frame); overflow-clip-margin gives that
+    // back, so a browser without it must draw every card as before.
+    const guarded = /@supports\s*\(overflow-clip-margin[^)]*\)\s*\{\s*\.card-skip\s*\{([^{}]*)\}/.exec(css);
+    expect(guarded).not.toBeNull();
+    expect(guarded![1]).toMatch(/content-visibility:\s*auto/);
+    expect(guarded![1]).toMatch(/overflow-clip-margin:/);
+    const everywhere = css.replace(/@supports\s*\(overflow-clip-margin[\s\S]*?\n\}/, "");
+    expect(everywhere).not.toMatch(/\.card-skip[^{]*\{[^}]*content-visibility/);
+  });
+});

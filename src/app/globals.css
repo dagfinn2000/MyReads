@@ -2931,6 +2931,16 @@ html[data-covers="plain"] .drawn-cover {
   animation: card-in 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
   animation-delay: calc(var(--i, 0) * 40ms);
 }
+/* The cards after the cascade's last step rise all together. On a screen
+   under 64rem the cascade's own cards already run well past its foot, so
+   these, all out of sight, simply appear: on a 200-card library that was
+   176 animations, each restyled as it started and ended, 0.7 s of a slow
+   phone's load. */
+@media (width < 64rem) {
+  .card-in-rest {
+    animation: none;
+  }
+}
 @media (prefers-reduced-motion: no-preference) {
   html:not([data-motion="off"]) .lift {
     transition:
@@ -3064,6 +3074,28 @@ html[data-covers="plain"] .drawn-cover {
   box-shadow:
     0 1px 2px rgb(0 0 0 / 0.14),
     0 10px 18px -12px rgb(0 0 0 / 0.55);
+}
+/* Library cards and rows out of sight are skipped: the browser doesn't
+   style, lay out or paint them until they come near the screen. A phone
+   shows four or so of the 200, and drawing them all held up the page's
+   first full paint by more than a second on a slow one. Skipping clips
+   what a card draws past its edge (its shadow, its lift under the
+   pointer, a theme's frame), so it waits for overflow-clip-margin, which
+   lets a card draw 2rem beyond it; a browser without it draws every card
+   as before. The heights stand in for a card not drawn yet, and once one
+   has been drawn its own height is kept ("auto"). */
+@supports (overflow-clip-margin: 1px) {
+  .card-skip {
+    content-visibility: auto;
+    contain-intrinsic-block-size: auto 20rem;
+    overflow-clip-margin: 2rem;
+  }
+  .card-skip-row {
+    contain-intrinsic-block-size: auto 4.75rem;
+  }
+  .card-skip-tall {
+    contain-intrinsic-block-size: auto 26rem;
+  }
 }
 .bookshelf {
   overflow-x: clip;

@@ -265,6 +265,29 @@ function colourOf(book: RoomBook, known: Record<string, string>): string {
   return (book.coverUrl && known[book.coverUrl]) || drawnSpineColour(book.title);
 }
 
+/** For memo(): the props are the same but for the map of cover colours,
+ *  and that map gives each of these books (by index) the same colour. On
+ *  a first visit the colours are read from the covers a few at a time,
+ *  and each batch made a new map, which redrew every bookcase in the
+ *  house, two seconds' work at a time on a slow phone; now only the
+ *  bookcases holding a book that got its colour redraw. */
+function sameButColours<P extends { known: Record<string, string>; books: RoomBook[] }>(
+  a: Readonly<P>,
+  b: Readonly<P>,
+  indexes: () => number[],
+): boolean {
+  const keys = Object.keys(b) as (keyof P)[];
+  if (Object.keys(a).length !== keys.length) return false;
+  for (const k of keys) if (k !== "known" && a[k] !== b[k]) return false;
+  return (
+    a.known === b.known ||
+    indexes().every((i) => {
+      const url = b.books[i]?.coverUrl;
+      return !url || a.known[url] === b.known[url];
+    })
+  );
+}
+
 interface OpenBook {
   index: number;
   book: RoomBook;
@@ -508,9 +531,13 @@ export function ReadingRoom({
   }, [layout, seen, books, reading]);
   const known = useCoverColours(covers);
 
+  // Keyed on the open book's colour, not the whole map of colours, which
+  // changes with every batch read from the covers: a new object here would
+  // redraw every floor (see sameButColours).
+  const openColour = reading >= 0 ? colourOf(books[reading], known) : "";
   const openBook = useMemo<OpenBook | null>(
-    () => (reading >= 0 ? { index: reading, book: books[reading], colour: colourOf(books[reading], known) } : null),
-    [books, reading, known],
+    () => (reading >= 0 ? { index: reading, book: books[reading], colour: openColour } : null),
+    [books, reading, openColour],
   );
 
   // A note about the last move goes after a while.
@@ -1025,7 +1052,11 @@ const Floor = memo(function Floor({
       )}
     </div>
   );
-});
+},
+(a, b) =>
+  sameButColours(a, b, () =>
+    b.pieces.flatMap((p) => (p.kind === "case" ? b.cases[p.caseIndex!].flat() : [])),
+  ));
 
 const Bookcase = memo(function Bookcase({
   index,
@@ -1119,7 +1150,8 @@ const Bookcase = memo(function Bookcase({
       {front && <Sprite art={front} scale={s} className="room-abs room-case-front" style={{ left: 0, top: 0 }} />}
     </div>
   );
-});
+},
+(a, b) => sameButColours(a, b, () => b.shelves.flat()));
 
 /** Smoke rising from the chimney pot whose top is at `x`, `y`, or steam
  *  from a stack. */

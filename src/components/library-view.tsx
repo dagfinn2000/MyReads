@@ -7,7 +7,7 @@ import { BookFormat, BookOwnership, ReadingStatus } from "@/lib/enums";
 import { Check, Dices, SquareCheckBig, X } from "lucide-react";
 import { bulkDeleteBooks, bulkUpdateBooks } from "@/lib/actions/bulk";
 import { pickRandomBook } from "@/lib/actions/pick";
-import { cascadeSteps } from "@/lib/card-cascade";
+import { STAGGERED_CARDS, cascadeSteps } from "@/lib/card-cascade";
 import { useCoverColours } from "@/lib/cover-colours";
 import { isClosingBook } from "@/lib/cover-flight";
 import { FORMAT_LABELS, OWNERSHIP_LABELS, formatNumber } from "@/lib/display";
@@ -357,17 +357,23 @@ export function LibraryView({
     >
       {items.map((book) => {
         const isSelected = selected.has(book.id);
+        const step = steps.get(cardKey(book.id, section)) ?? 0;
         return (
           <div
             key={book.id}
             className={cn(
               spines ? "spine-slot" : "relative rounded-lg",
               !returning && "card-in",
+              // The ones after the cascade (globals.css, "Page and library
+              // motion").
+              !returning && step >= STAGGERED_CARDS && "card-in-rest",
+              // Skipped while off screen (globals.css, "Card styles").
+              list ? "card-skip card-skip-row" : !spines && style !== "shelf" && "card-skip",
               style === "shelf" && "shelf-slot",
               selectMode && isSelected && !spines && "ring-2 ring-primary",
             )}
             data-selected={spines && selectMode && isSelected ? "" : undefined}
-            style={{ "--i": steps.get(cardKey(book.id, section)) ?? 0 } as React.CSSProperties}
+            style={{ "--i": step } as React.CSSProperties}
           >
             {list ? (
               <BookRow book={book} details={display} formatPrefs={prefs} />
