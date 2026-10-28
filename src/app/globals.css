@@ -3043,6 +3043,17 @@ html[data-covers="plain"] .drawn-cover {
   animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
+/* Words and ticks on the app's amber (a series' "Next" and "Reading" tags
+   and its read ticks). Themes repaint that amber, from Newsprint's black
+   to Blueprint's white, so what goes on it is worked out from it: a deep
+   brown of its own hue on a light amber, near-white on a dark one. White
+   on the usual amber was 2:1. Browsers without relative colours keep the
+   brown. */
+.on-amber {
+  color: #3b1d00;
+  color: oklch(from var(--color-amber-500) clamp(0.25, (0.62 - l) * 1000, 0.99) calc(c * 0.35) h);
+}
+
 /* ── Card styles and 3D covers ───────────────────────────────────────────
    "Covers only" and "Bookshelf" (the library's View menu) drop the card
    frame, so the cover carries its own shadow and rises on its own under the

@@ -205,12 +205,12 @@ function Place({ slot }: { slot: Extract<SeriesSlot<SeriesBook>, { kind: "book" 
           )}
         />
         {done && b.status !== ReadingStatus.DNF && (
-          <span className="absolute top-1 right-1 grid size-5 place-items-center rounded-full bg-amber-500 text-white shadow">
+          <span className="on-amber absolute top-1 right-1 grid size-5 place-items-center rounded-full bg-amber-500 shadow">
             <Check className="size-3.5" strokeWidth={3} aria-hidden="true" />
           </span>
         )}
         {tag && (
-          <span className="absolute inset-x-0 bottom-0 rounded-b-md bg-amber-500/95 py-0.5 text-center text-[10px] font-semibold tracking-wide text-white uppercase">
+          <span className="on-amber absolute inset-x-0 bottom-0 rounded-b-md bg-amber-500 py-0.5 text-center text-[10px] font-semibold tracking-wide uppercase">
             {tag}
           </span>
         )}
