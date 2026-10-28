@@ -221,8 +221,8 @@ The reading room's files:
   the hues are nearly all taken, so a new theme should differ in kind,
   not shade.
 - **A few themes restyle everything.** Desktop 95, Terminal, Newsprint,
-  Blueprint, Notebook, Quest, Pinstripe, Aero and Golden Gate start from
-  a colour block like any theme, and [restyles.css](../src/app/restyles.css) reshapes the
+  Blueprint, Notebook, Quest, Pinstripe, Aero, Golden Gate, KDE Plasma,
+  GNOME and Hyprland start from a colour block like any theme, and [restyles.css](../src/app/restyles.css) reshapes the
   app for them, one section per theme. Its rules aim at shadcn's
   `data-slot` attributes and buttons by `data-size` and `data-variant`:
   a button inside a Radix trigger (`asChild`) wears the trigger's
@@ -246,8 +246,8 @@ The reading room's files:
   After changing one, look at every page at phone width too, and check
   the other themes still match main pixel for pixel.
 - **A theme's big picture is a file, and its glass is cheap.** A picture
-  more than a few hundred bytes (Aero's desktop, Golden Gate's)
-  is an SVG in `public/themes`, named by `--page-gradient`, so only a
+  more than a few hundred bytes (Aero's desktop, Golden Gate's, the
+  Linux desktops') is an SVG in `public/themes`, named by `--page-gradient`, so only a
   reader on that theme downloads it; the sign-in proxy leaves that
   folder alone, as the sign-in pages show the theme too. Glass that
   blurs what is behind it (`backdrop-filter`) is kept to small or
@@ -265,7 +265,18 @@ The reading room's files:
   contrast anywhere on it. The glass over the page does the same with
   `contrast()` and `brightness()` in its `backdrop-filter`, so black
   beneath it comes out light enough. Keep both when changing the
-  picture or the glass.
+  picture or the glass. KDE Plasma, GNOME and Hyprland draw their
+  windows the same way: a fixed layer under the page for the window, a
+  fixed layer over it with the window cut out, and their panels and bars
+  on fixed layers too, with `scroll-padding` on `<html>` so keyboard
+  focus never lands under them. KDE Plasma cuts its window out with a
+  `clip-path` rather than a mask: that layer takes clicks, so nothing
+  hidden behind the panel can be clicked, and only a clip-path shapes
+  where clicks land. Each section's comments name the variables that
+  hold its geometry; change those, not the layers one by one. The
+  desktops are our own drawings after each one's wallpaper: KDE
+  Plasma's after Hanabi by Krystian Zajdel, GNOME's after Roundhex,
+  Hyprland's after its wall0.
 - **A theme is retired, never just deleted.** Take out its block and
   entry and add it to `RETIRED_THEMES` in
   [themes.ts](../src/lib/themes.ts) with the theme that replaces it, of

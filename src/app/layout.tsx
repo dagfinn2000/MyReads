@@ -6,7 +6,10 @@ import localFont from "next/font/local";
 import {
   Architects_Daughter,
   Geist,
+  Inter,
+  JetBrains_Mono,
   Literata,
+  Noto_Sans,
   Nunito,
   Patrick_Hand,
   Playfair_Display,
@@ -66,6 +69,12 @@ const handwriting = Patrick_Hand({
   variable: "--font-hand",
   preload: false,
 });
+// The Linux desktops' faces: KDE Plasma's Noto Sans (Hyprland's body text
+// too), Inter for GNOME's Adwaita Sans, which is made from it, and
+// JetBrains Mono for Hyprland's bar and labels.
+const notoSans = Noto_Sans({ subsets: ["latin"], variable: "--font-noto-sans", preload: false });
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter", preload: false });
+const jetbrains = JetBrains_Mono({ subsets: ["latin"], variable: "--font-jetbrains", preload: false });
 // DotGothic16 is a Japanese face, which Google Fonts serves in 120-odd
 // slices; through next/font/google each slice was a rule in the CSS every
 // page loads (94 KB of it, for one theme). This is the Latin slice alone
@@ -128,6 +137,9 @@ export default async function RootLayout({
         playfair.variable,
         architect.variable,
         handwriting.variable,
+        notoSans.variable,
+        inter.variable,
+        jetbrains.variable,
         pixel.variable,
         setting?.kind === "fixed" && THEME_CLASS_PREFIX + setting.id,
         dark && "dark",

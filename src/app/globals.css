@@ -660,6 +660,37 @@
     --ring: #ff6a52;
 }
 
+/* Hyprland, the tiling Wayland compositor, as its users rice it: Catppuccin
+   Mocha's dark blue-greys with its pastel text, and Sapphire for the
+   accent, the Mocha colour nearest Hyprland's own cyan, so the window's
+   border, the wallpaper's logo and the app's links read as one. Restyled
+   from top to bottom in restyles.css: a tiled window on wall0 under a
+   floating Waybar. The picture is a file of its own (public/themes). */
+[data-theme="hyprland"] {
+    --background: #1e1e2e;
+    --foreground: #cdd6f4;
+    --card: #181825;
+    --card-foreground: #cdd6f4;
+    --popover: #181825;
+    --popover-foreground: #cdd6f4;
+    --primary: #74c7ec;
+    --primary-foreground: #11111b;
+    --secondary: #313244;
+    --secondary-foreground: #cdd6f4;
+    --muted: #313244;
+    --muted-foreground: #a6adc8;
+    --accent: #313244;
+    --accent-foreground: #cdd6f4;
+    --destructive: #f38ba8;
+    --border: #45475a;
+    --input: #45475a;
+    --ring: #74c7ec;
+    --radius: 0.3125rem;
+    --heading-font: var(--font-jetbrains), "JetBrains Mono", ui-monospace, monospace;
+    --page-gradient: url("/themes/hyprland.svg");
+    --page-size: cover;
+}
+
 [data-theme="solarized-light"] {
     --background: #fdf6e3;
     --foreground: #657b83;
@@ -1205,6 +1236,68 @@
     --radius: 0.875rem;
     --heading-font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro", "Helvetica Neue", "Inter", system-ui, sans-serif;
     --page-gradient: url("/themes/golden-gate.svg");
+    --page-size: cover;
+}
+
+/* KDE Plasma 6.8 in Breeze, its light colours: light grey window chrome
+   round white views, the title bar and toolbar one band, near-black text
+   and Breeze blue for focus, selection and links (deepened where it
+   carries text). Restyled from top to bottom in restyles.css: a Breeze
+   window on the Hanabi wallpaper above a floating panel. The pictures are
+   files of their own (public/themes). */
+[data-theme="kde-plasma"] {
+    --background: #eff0f1;
+    --foreground: #232629;
+    --card: #ffffff;
+    --card-foreground: #232629;
+    --popover: #f4f4f5;
+    --popover-foreground: #232629;
+    --primary: #1c6b9f;
+    --primary-foreground: #ffffff;
+    --secondary: #e3e5e7;
+    --secondary-foreground: #232629;
+    --muted: #e3e5e7;
+    --muted-foreground: #56616b;
+    --accent: #d6ecf8;
+    --accent-foreground: #232629;
+    --destructive: #c42f3d;
+    --border: #c6c8c9;
+    --input: #c6c8c9;
+    --ring: #3daee9;
+    --radius: 0.3125rem;
+    --heading-font: var(--font-noto-sans), "Noto Sans", ui-sans-serif, system-ui, sans-serif;
+    --page-gradient: url("/themes/kde-plasma.svg");
+    --page-size: cover;
+}
+
+/* GNOME 51: a libadwaita window on the blue-violet Roundhex desktop, under
+   the Shell's black top bar. Near-white window, white cards, text in
+   Adwaita's soft near-black and its blue, a deeper shade of it where it
+   carries text. Restyled from top to bottom in restyles.css: a flat header
+   bar with a view switcher, grey buttons and fields, boxed-list cards. The
+   desktop is a file of its own (public/themes). */
+[data-theme="gnome"] {
+    --background: #fafafb;
+    --foreground: #323237;
+    --card: #ffffff;
+    --card-foreground: #323237;
+    --popover: #ffffff;
+    --popover-foreground: #323237;
+    --primary: #1c71d8;
+    --primary-foreground: #ffffff;
+    --secondary: #e6e6e7;
+    --secondary-foreground: #323237;
+    --muted: #ebebed;
+    --muted-foreground: #646469;
+    --accent: #ebebed;
+    --accent-foreground: #323237;
+    --destructive: #c30000;
+    --border: #dddde0;
+    --input: #dcdcde;
+    --ring: #3584e4;
+    --radius: 0.5625rem;
+    --heading-font: "Adwaita Sans", var(--font-inter), Inter, Cantarell, system-ui, sans-serif;
+    --page-gradient: url("/themes/gnome.svg");
     --page-size: cover;
 }
 

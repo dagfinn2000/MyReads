@@ -4204,3 +4204,3060 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
 .theme-is-aero main:has(> .auth-backdrop) [data-slot="popover-trigger"] {
   color: #ffffff;
 }
+
+/* ── KDE Plasma ────────────────────────────────────────────────────────────
+   KDE Plasma 6.8 with Breeze, in its light colours, on the Hanabi
+   wallpaper: blurred bursts of fireworks in peach and rose over indigo and
+   cornflower blue, one sharp spark trailing a ribbon. The app is a Breeze
+   window on it: light grey, 5px corners, a hairline round it and a large
+   soft shadow falling below it. Its title bar and toolbar are one darker
+   grey band ended by a hairline: the title centred and not bold, the app's
+   icon at the left, the window's buttons at the right as thin line glyphs
+   with nothing behind them, and under them the page links as flat toolbar
+   buttons, the open page's checked. Below the window floats Plasma's
+   panel: the launcher's logo, a few task icons with the open app's tile
+   tinted blue under a blue line, and the tray. Inside, views are white
+   with grey hairlines; buttons are near-white with a darker line under
+   them; the pointer shows itself as a crisp Breeze blue edge and the
+   keyboard as an edge twice as thick in Breeze's deeper blue, never a
+   glow. Boxes and radios fill pale blue round a dark mark, tabs carry a
+   blue strip along the open one, progress runs in thin grooves, menus
+   light up their item in translucent blue with a blue edge, and a dialog
+   dims only the window it opens in. Headings stay at normal weight, as
+   Breeze's do, and the type is Noto Sans throughout. Signed out, the app
+   is Plasma's login screen: white type and a dark frosted sheet on the
+   dimmed desktop.
+   The window costs nothing to scroll: its body is a fixed layer under the
+   page and the desktop a fixed layer over it, the window's shape cut out
+   of it with a mask, so what scrolls past the window's edge goes behind
+   the desktop; the window's hairline and shadow are painted on that same
+   layer, round the hole, and it takes the clicks that land on it, so
+   none reach the page hidden beneath. The panel is one more fixed layer.
+   None of them moves or blurs, and the title bar, being opaque, needs no
+   blur either.
+   On phones, and on screens too short to spare the room, the window fills
+   the screen as Plasma Mobile's do, with no title bar, desktop or panel. */
+:root[data-theme="kde-plasma"] {
+  --kp-font: var(--font-noto-sans), "Noto Sans", ui-sans-serif, system-ui, sans-serif;
+  --kp-text: #232629;
+  --kp-accent: #3daee9;
+  --kp-window: #eff0f1;
+  --kp-button: #fcfcfc;
+  --kp-header: #dee0e2;
+  /* Hairlines: round frames and fields, round buttons, on white views,
+     and under the header band. */
+  --kp-frame: #c6c8c9;
+  --kp-outline: #c9cbcc;
+  --kp-view-frame: #d3d4d4;
+  --kp-header-line: #b9bbbd;
+  /* The accent at 30% (a pressed button, a box ticked) and at 20%. */
+  --kp-pressed: #c3e5f6;
+  --kp-tint: #d6ecf8;
+  /* Keyboard focus: the blue edge drawn twice as thick as hover's, and in
+     Breeze's deeper link blue, as #3daee9 is too pale to show on the grey
+     band (1.9:1); this one is 3.2:1 there and 4.3:1 on white. */
+  --kp-focus-color: #2980b9;
+  --kp-focus: inset 0 0 0 1px var(--kp-focus-color);
+  /* The pointer on a check box: a ring of the accent inside its edge. */
+  --kp-hover-ring: inset 0 0 0 1px var(--kp-accent);
+  --kp-lip: 0 1px rgb(0 0 0 / 0.125);
+  /* Where the window sits: its sides, top and bottom, the title row and
+     the toolbar under it; the panel's thickness and how far it floats off
+     the screen's edge. The desktop's own parts (the title row, the panel
+     and the gaps round the window) are in px, so they keep their size when
+     the app's Text size grows, as Plasma's chrome does; the toolbar and
+     the window's width belong to the app and grow with it. */
+  --kp-x: max(1rem, calc(50vw - 37.5rem));
+  --kp-top: 12px;
+  --kp-title: 28px;
+  --kp-tool: 2.875rem;
+  --kp-panel: 46px;
+  --kp-float: 8px;
+  --kp-bottom: calc(var(--kp-panel) + var(--kp-float) + 10px);
+  --heading-font: var(--kp-font);
+  --surface-shadow: none;
+  --chart-1: #2a8fd0;
+  --chart-2: #27ae60;
+  --chart-3: #f67400;
+  --chart-4: #9b59b6;
+  --chart-5: #7f8c8d;
+  /* What the keyboard or a #link scrolls to lands clear of the header band
+     and of the desktop strip and panel under the window, not behind them. */
+  scroll-padding-top: calc(var(--kp-top) + var(--kp-title) + var(--kp-tool) + 1.5rem);
+  scroll-padding-bottom: calc(var(--kp-bottom) + 1rem);
+  /* The page's own scrollbar runs down the screen's edge, beside the
+     desktop rather than in the window (CSS can't move it there): slim, its
+     gutter the wallpaper's middle blue and its thumb the window's grey, so
+     it reads as a strip of desktop, not of window. (Only the gutter's
+     colour shows there, never the picture.) */
+  scrollbar-width: thin;
+  scrollbar-color: rgb(239 240 241 / 0.75) #6f7fa3;
+}
+/* Scrollbars inside the page: Breeze's, a grey thumb in a clear gutter. */
+.theme-is-kde-plasma body {
+  scrollbar-color: #b3b5b7 transparent;
+}
+.theme-is-kde-plasma body {
+  font-family: var(--kp-font);
+}
+.theme-is-kde-plasma body::before {
+  background-position: center;
+}
+/* Selected text: solid Breeze blue, the text on it kept dark, as white
+   on #3daee9 is only 2.5:1. */
+.theme-is-kde-plasma ::selection {
+  color: var(--kp-text);
+  background: var(--kp-accent);
+}
+.theme-is-kde-plasma :is(h1, h2, [data-slot="card-title"], [data-slot="dialog-title"]) {
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.theme-is-kde-plasma .book-backdrop {
+  display: none;
+}
+/* A book's cover on its page casts a short shadow, as a thumbnail in a
+   Breeze view does: the long one fell over the Edit and Delete buttons
+   under it and dimmed their text. */
+.theme-is-kde-plasma .hero-cover {
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.16), 0 4px 12px -6px rgb(0 0 0 / 0.4);
+}
+/* Anything else the keyboard reaches keeps the app's ring or outline, in
+   solid focus blue rather than a faint glow. */
+.theme-is-kde-plasma :focus-visible {
+  --tw-ring-color: var(--kp-focus-color);
+  outline-color: var(--kp-focus-color);
+}
+/* Dim text faded further (a tile's series, an error's code) would fall
+   under AA on white; it keeps the dim colour as it is. */
+.theme-is-kde-plasma :is(.text-muted-foreground\/80, .text-muted-foreground\/70) {
+  color: var(--muted-foreground);
+}
+
+/* The window's body, fixed under the page. */
+.theme-is-kde-plasma .top-bar + main::before {
+  content: "";
+  position: fixed;
+  inset: var(--kp-top) var(--kp-x) var(--kp-bottom);
+  z-index: -1;
+  pointer-events: none;
+  border-radius: 5px;
+  background: var(--kp-window);
+}
+/* The desktop again, fixed over the page with the window's shape cut out
+   of it (a clip-path tracing the screen and then the window, so the
+   window is a hole): what scrolls past the window's edge goes behind it.
+   It takes the clicks that land on it, so a click on the desktop, the
+   panel (which lets clicks through) or the strip between them can't
+   reach a book or a button scrolled out of sight beneath; the wheel still
+   scrolls the page. A clip-path, unlike a mask, shapes where clicks land
+   too. The window's hairline and its large soft shadow are drawn on it
+   round the hole, four edges and four corners each, so they need no
+   layer of their own. Under the top bar, menus, dialogs and the bulk
+   bar.
+   The shadow is Breeze's large one for the active window, 48px of blur
+   12px down: drawn as the shadow of a box 12px lower than the window
+   (with 12px corners, as blur rounds them), so it is lightest above the
+   window, darker at its sides and darkest under it, falling onto the gap
+   and the panel. All eight pieces share one fall-off, measured from 12px
+   inside that box (the part over the window is cut away with it), in
+   steps of a Gaussian's, three quarters as strong as the source's, as
+   Breeze's tiled shadow is lighter than one box-shadow this size. */
+.theme-is-kde-plasma .top-bar + main::after {
+  /* How far the shadow reaches past its box, how far down it falls, and
+     the depth of each piece (the two together). */
+  --kp-s: 60px;
+  --kp-o: 12px;
+  --kp-l: calc(var(--kp-s) + var(--kp-o));
+  --kp-shade:
+    rgb(0 0 0 / 0.47) 0, rgb(0 0 0 / 0.41) 6px, rgb(0 0 0 / 0.345) 12px, rgb(0 0 0 / 0.27) 18px,
+    rgb(0 0 0 / 0.2) 24px, rgb(0 0 0 / 0.145) 30px, rgb(0 0 0 / 0.1) 36px, rgb(0 0 0 / 0.064) 42px,
+    rgb(0 0 0 / 0.04) 48px, rgb(0 0 0 / 0.024) 54px, rgb(0 0 0 / 0.012) 60px, rgb(0 0 0 / 0) 72px;
+  --kp-rim: linear-gradient(rgb(35 38 41 / 0.32), rgb(35 38 41 / 0.32));
+  --kp-ring: transparent 4.6px, rgb(35 38 41 / 0.32) 5.2px 5.8px, transparent 6.4px;
+  /* The window's straight edges, between its round corners. */
+  --kp-w: calc(100% - 2 * var(--kp-x) - 10px);
+  --kp-h: calc(100% - var(--kp-top) - var(--kp-bottom) - 10px);
+  /* The shadow box's straight edges, between its corners. */
+  --kp-sw: calc(100% - 2 * var(--kp-x) - 2 * var(--kp-o));
+  --kp-sh: calc(100% - var(--kp-top) - 2 * var(--kp-o) - var(--kp-bottom));
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 35;
+  background:
+    var(--kp-rim) left calc(var(--kp-x) + 5px) top calc(var(--kp-top) - 1px) / var(--kp-w) 1px no-repeat,
+    var(--kp-rim) left calc(var(--kp-x) + 5px) bottom calc(var(--kp-bottom) - 1px) / var(--kp-w) 1px no-repeat,
+    var(--kp-rim) left calc(var(--kp-x) - 1px) top calc(var(--kp-top) + 5px) / 1px var(--kp-h) no-repeat,
+    var(--kp-rim) right calc(var(--kp-x) - 1px) top calc(var(--kp-top) + 5px) / 1px var(--kp-h) no-repeat,
+    radial-gradient(circle at 100% 100%, var(--kp-ring)) left calc(var(--kp-x) - 1px) top calc(var(--kp-top) - 1px) / 6px 6px no-repeat,
+    radial-gradient(circle at 0 100%, var(--kp-ring)) right calc(var(--kp-x) - 1px) top calc(var(--kp-top) - 1px) / 6px 6px no-repeat,
+    radial-gradient(circle at 100% 0, var(--kp-ring)) left calc(var(--kp-x) - 1px) bottom calc(var(--kp-bottom) - 1px) / 6px 6px no-repeat,
+    radial-gradient(circle at 0 0, var(--kp-ring)) right calc(var(--kp-x) - 1px) bottom calc(var(--kp-bottom) - 1px) / 6px 6px no-repeat,
+    linear-gradient(to top, var(--kp-shade)) left calc(var(--kp-x) + var(--kp-o)) top calc(var(--kp-top) + var(--kp-o) - var(--kp-s)) / var(--kp-sw) var(--kp-l) no-repeat,
+    linear-gradient(to bottom, var(--kp-shade)) left calc(var(--kp-x) + var(--kp-o)) bottom calc(var(--kp-bottom) - var(--kp-l)) / var(--kp-sw) var(--kp-l) no-repeat,
+    linear-gradient(to left, var(--kp-shade)) left calc(var(--kp-x) - var(--kp-s)) top calc(var(--kp-top) + 2 * var(--kp-o)) / var(--kp-l) var(--kp-sh) no-repeat,
+    linear-gradient(to right, var(--kp-shade)) right calc(var(--kp-x) - var(--kp-s)) top calc(var(--kp-top) + 2 * var(--kp-o)) / var(--kp-l) var(--kp-sh) no-repeat,
+    radial-gradient(circle at 100% 100%, var(--kp-shade)) left calc(var(--kp-x) - var(--kp-s)) top calc(var(--kp-top) + var(--kp-o) - var(--kp-s)) / var(--kp-l) var(--kp-l) no-repeat,
+    radial-gradient(circle at 0 100%, var(--kp-shade)) right calc(var(--kp-x) - var(--kp-s)) top calc(var(--kp-top) + var(--kp-o) - var(--kp-s)) / var(--kp-l) var(--kp-l) no-repeat,
+    radial-gradient(circle at 100% 0, var(--kp-shade)) left calc(var(--kp-x) - var(--kp-s)) bottom calc(var(--kp-bottom) - var(--kp-l)) / var(--kp-l) var(--kp-l) no-repeat,
+    radial-gradient(circle at 0 0, var(--kp-shade)) right calc(var(--kp-x) - var(--kp-s)) bottom calc(var(--kp-bottom) - var(--kp-l)) / var(--kp-l) var(--kp-l) no-repeat,
+    var(--page-gradient) center / cover no-repeat,
+    var(--background);
+  clip-path: polygon(
+    evenodd,
+    0 0, 100% 0, 100% 100%, 0 100%, 0 0,
+    /* The window, round from its top right corner, each corner in four
+       straight steps. */
+    calc(100% - var(--kp-x) - 5px) var(--kp-top),
+    calc(100% - var(--kp-x) - 3.087px) calc(var(--kp-top) + 0.381px),
+    calc(100% - var(--kp-x) - 1.464px) calc(var(--kp-top) + 1.464px),
+    calc(100% - var(--kp-x) - 0.381px) calc(var(--kp-top) + 3.087px),
+    calc(100% - var(--kp-x)) calc(var(--kp-top) + 5px),
+    calc(100% - var(--kp-x)) calc(100% - var(--kp-bottom) - 5px),
+    calc(100% - var(--kp-x) - 0.381px) calc(100% - var(--kp-bottom) - 3.087px),
+    calc(100% - var(--kp-x) - 1.464px) calc(100% - var(--kp-bottom) - 1.464px),
+    calc(100% - var(--kp-x) - 3.087px) calc(100% - var(--kp-bottom) - 0.381px),
+    calc(100% - var(--kp-x) - 5px) calc(100% - var(--kp-bottom)),
+    calc(var(--kp-x) + 5px) calc(100% - var(--kp-bottom)),
+    calc(var(--kp-x) + 3.087px) calc(100% - var(--kp-bottom) - 0.381px),
+    calc(var(--kp-x) + 1.464px) calc(100% - var(--kp-bottom) - 1.464px),
+    calc(var(--kp-x) + 0.381px) calc(100% - var(--kp-bottom) - 3.087px),
+    var(--kp-x) calc(100% - var(--kp-bottom) - 5px),
+    var(--kp-x) calc(var(--kp-top) + 5px),
+    calc(var(--kp-x) + 0.381px) calc(var(--kp-top) + 3.087px),
+    calc(var(--kp-x) + 1.464px) calc(var(--kp-top) + 1.464px),
+    calc(var(--kp-x) + 3.087px) calc(var(--kp-top) + 0.381px),
+    calc(var(--kp-x) + 5px) var(--kp-top),
+    calc(100% - var(--kp-x) - 5px) var(--kp-top)
+  );
+}
+/* The top bar: the window's header band, title bar and toolbar in one,
+   the band itself its inner row. Opaque, so it needs no blur. */
+.theme-is-kde-plasma .top-bar {
+  padding: var(--kp-top) var(--kp-x) 0;
+  border: 0;
+  color: var(--kp-text);
+  background: transparent;
+  backdrop-filter: none;
+  box-shadow: none;
+  animation: none;
+}
+/* Plasma's panel, floating under the window: the launcher and the task
+   manager at its left, the tray at its right, on the window's grey with
+   the desktop showing through. */
+.theme-is-kde-plasma .top-bar::after {
+  content: "";
+  position: fixed;
+  inset: auto var(--kp-float) var(--kp-float);
+  height: var(--kp-panel);
+  pointer-events: none;
+  border-radius: 6px;
+  background:
+    url("/themes/kde-plasma-tasks.svg") left 0.25rem center / auto 100% no-repeat,
+    url("/themes/kde-plasma-tray.svg") right 0.375rem center / auto 100% no-repeat,
+    rgb(239 240 241 / 0.86);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.45), 0 0 0 1px rgb(35 38 41 / 0.12), 0 0 12px rgb(0 0 0 / 0.2);
+}
+.theme-is-kde-plasma .top-bar > div {
+  position: relative;
+  max-width: none;
+  height: calc(var(--kp-title) + var(--kp-tool));
+  padding: var(--kp-title) 0.375rem 0;
+  border-bottom: 1px solid var(--kp-header-line);
+  border-radius: 5px 5px 0 0;
+  background: var(--kp-header);
+}
+/* The title, centred across the band. */
+.theme-is-kde-plasma .top-bar > div::before {
+  content: "MyReads";
+  content: "MyReads" / "";
+  position: absolute;
+  inset: 0 88px auto;
+  height: var(--kp-title);
+  overflow: hidden;
+  color: var(--kp-text);
+  font-size: 13.33px;
+  line-height: calc(var(--kp-title) + 1px);
+  text-align: center;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  pointer-events: none;
+}
+/* The app's icon (its favicon, the line-drawn book) at the left of the
+   title bar; minimise, maximise and close at its right, as thin chevrons
+   and a cross. */
+.theme-is-kde-plasma .top-bar > div::after {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: var(--kp-title);
+  pointer-events: none;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231e293b'/%3E%3Cpath d='M16 9c-1.8-1.6-4.2-2.2-7-2.2v14.7c2.8 0 5.2.6 7 2.2 1.8-1.6 4.2-2.2 7-2.2V6.8c-2.8 0-5.2.6-7 2.2zM16 9v14.7' fill='none' stroke='%23fbbf24' stroke-width='2.6' stroke-linejoin='round'/%3E%3C/svg%3E")
+      left 0.5rem center / 16px 16px no-repeat,
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='68' height='20' fill='none' stroke='%23232629' stroke-width='1.1' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 8l5 5 5-5M29 12l5-5 5 5M54 6l8 8M62 6l-8 8'/%3E%3C/svg%3E")
+      right 4px center / 68px 20px no-repeat;
+}
+.theme-is-kde-plasma[data-section="library"] .top-bar > div::before {
+  content: "Library — MyReads";
+  content: "Library — MyReads" / "";
+}
+.theme-is-kde-plasma[data-section="book"] .top-bar > div::before {
+  content: "Book — MyReads";
+  content: "Book — MyReads" / "";
+}
+.theme-is-kde-plasma[data-section="series"] .top-bar > div::before {
+  content: "Series — MyReads";
+  content: "Series — MyReads" / "";
+}
+.theme-is-kde-plasma[data-section="stats"] .top-bar > div::before {
+  content: "Stats — MyReads";
+  content: "Stats — MyReads" / "";
+}
+.theme-is-kde-plasma[data-section="reading"] .top-bar > div::before {
+  content: "Now reading — MyReads";
+  content: "Now reading — MyReads" / "";
+}
+.theme-is-kde-plasma[data-section="quotes"] .top-bar > div::before {
+  content: "Quotes — MyReads";
+  content: "Quotes — MyReads" / "";
+}
+.theme-is-kde-plasma[data-section="room"] .top-bar > div::before {
+  content: "Reading room — MyReads";
+  content: "Reading room — MyReads" / "";
+}
+.theme-is-kde-plasma[data-section="account"] .top-bar > div::before {
+  content: "Account — MyReads";
+  content: "Account — MyReads" / "";
+}
+.theme-is-kde-plasma:has(.top-bar .nav-link[href="/books/new"][aria-current="page"]) .top-bar > div::before {
+  content: "Add book — MyReads";
+  content: "Add book — MyReads" / "";
+}
+.theme-is-kde-plasma:has(.top-bar .nav-link[href="/books/check"][aria-current="page"]) .top-bar > div::before {
+  content: "Check — MyReads";
+  content: "Check — MyReads" / "";
+}
+/* The app's name leads the toolbar, a heading in Kirigami's manner:
+   larger, normal weight. */
+.theme-is-kde-plasma .top-bar .wordmark {
+  height: 2rem;
+  margin-right: 0.5rem;
+  padding: 0 0.5rem;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  font-family: var(--kp-font);
+  font-size: 1.0625rem;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.theme-is-kde-plasma .top-bar .wordmark:hover {
+  border-color: var(--kp-accent);
+}
+.theme-is-kde-plasma .top-bar .wordmark:focus-visible {
+  outline: none;
+  border-color: var(--kp-focus-color);
+  box-shadow: var(--kp-focus);
+}
+.theme-is-kde-plasma .top-bar .wordmark > svg {
+  color: var(--primary);
+}
+/* The page links: toolbar buttons, all in the text colour; the open
+   page's is checked, filled a shade darker. */
+.theme-is-kde-plasma .top-bar .nav-link {
+  height: 2rem;
+  color: var(--kp-text);
+}
+.theme-is-kde-plasma .top-bar .nav-link[data-size][aria-current="page"] {
+  border-color: rgb(35 38 41 / 0.22);
+  background: rgb(35 38 41 / 0.11);
+}
+.theme-is-kde-plasma .top-bar .nav-link[data-size][aria-current="page"]:focus-visible {
+  border-color: var(--kp-focus-color);
+  box-shadow: var(--kp-focus);
+}
+.theme-is-kde-plasma .top-bar .nav-link[aria-current="page"]::after {
+  display: none;
+}
+/* Every toolbar button's text is the one text colour, the account's name
+   too (the app dims it). */
+.theme-is-kde-plasma .top-bar [data-size][data-variant="ghost"] {
+  height: 2rem;
+  --muted-foreground: var(--kp-text);
+}
+.theme-is-kde-plasma .top-bar + main {
+  width: calc(100% - 2 * var(--kp-x));
+  max-width: none;
+  padding-inline: 1.5rem;
+  padding-bottom: calc(var(--kp-bottom) + 1.5rem);
+}
+
+/* Buttons: near-white, a grey hairline and a darker line under the
+   bottom edge. The pointer turns the edge Breeze blue; pressing fills the
+   button pale blue. The main one is the dialog's default button, tinted
+   pale blue already. Flat ones (toolbar buttons) show nothing until
+   pointed at. */
+.theme-is-kde-plasma [data-size][data-variant] {
+  border: 1px solid var(--kp-outline);
+  border-radius: 5px;
+  color: var(--kp-text);
+  font-weight: 400;
+  background: var(--kp-button);
+  box-shadow: var(--kp-lip);
+  text-shadow: none;
+}
+.theme-is-kde-plasma [data-size][data-variant="default"] {
+  border-color: #87c0de;
+  background: var(--kp-tint);
+}
+.theme-is-kde-plasma [data-size][data-variant="destructive"] {
+  color: var(--destructive);
+}
+.theme-is-kde-plasma [data-size]:is([data-variant="ghost"], [data-variant="link"]) {
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+}
+.theme-is-kde-plasma [data-size][data-variant="link"] {
+  color: var(--primary);
+}
+.theme-is-kde-plasma [data-size][data-variant]:not([data-variant="link"]):hover {
+  border-color: var(--kp-accent);
+  color: var(--kp-text);
+}
+/* Breeze has no red button; KDE apps mark a deleting one with red, and
+   so does this: red text, and a red edge under the pointer. The app's
+   outline and flat buttons that it colours red are the same. */
+.theme-is-kde-plasma [data-size][data-variant="destructive"]:not([data-variant="link"]):hover {
+  border-color: #da4453;
+  color: var(--destructive);
+}
+.theme-is-kde-plasma [data-size][data-variant]:is(.text-destructive, .hover\:text-destructive:hover) {
+  color: var(--destructive);
+}
+.theme-is-kde-plasma [data-size][data-variant]:is(.text-destructive, .hover\:text-destructive):not([data-variant="link"]):hover {
+  border-color: #da4453;
+}
+.theme-is-kde-plasma [data-size][data-variant="default"]:hover {
+  background: var(--kp-tint);
+}
+.theme-is-kde-plasma [data-size][data-variant]:not([data-variant="default"], [data-variant="ghost"], [data-variant="link"]):hover {
+  background: var(--kp-button);
+}
+.theme-is-kde-plasma [data-size][data-variant="ghost"]:hover {
+  background: transparent;
+}
+.theme-is-kde-plasma [data-size][data-variant="link"]:hover {
+  background: transparent;
+  text-decoration: underline;
+}
+/* Pressed, or holding its menu open. Only buttons and combo boxes: cards
+   carry data-size too. */
+.theme-is-kde-plasma :is([data-size][data-variant], [data-slot="select-trigger"]):not([data-variant="link"]):is(:active:not(:disabled), [aria-expanded="true"]) {
+  translate: none;
+  border-color: var(--kp-accent);
+  background: var(--kp-pressed);
+  box-shadow: none;
+}
+/* A red button pressed fills pale red, keeping its red text readable. */
+.theme-is-kde-plasma :is([data-variant="destructive"], .text-destructive, .hover\:text-destructive)[data-size]:not([data-variant="link"]):active:not(:disabled) {
+  border-color: #da4453;
+  background: #f9e3e5;
+}
+.theme-is-kde-plasma [data-size][data-variant]:disabled {
+  opacity: 0.55;
+  box-shadow: none;
+}
+/* Keyboard focus, which the pointer resting on it doesn't turn pale. */
+.theme-is-kde-plasma :is([data-size][data-variant], [data-slot="select-trigger"], .select-like):is(:focus-visible, :focus-visible:hover) {
+  outline: none;
+  border-color: var(--kp-focus-color);
+  --tw-ring-shadow: 0 0 #0000;
+  box-shadow: var(--kp-focus), var(--kp-lip);
+}
+.theme-is-kde-plasma [data-size]:is([data-variant="ghost"], [data-variant="link"]):is(:focus-visible, :focus-visible:hover) {
+  box-shadow: var(--kp-focus);
+}
+
+/* Fields: white, a grey hairline, blue while pointed at or typed in. */
+.theme-is-kde-plasma :is([data-slot="input"], [data-slot="textarea"]),
+.theme-is-kde-plasma input:is([type="text"], [type="search"], [type="number"], [type="date"], [type="password"], [type="url"], [type="email"], :not([type])),
+.theme-is-kde-plasma textarea {
+  border: 1px solid var(--kp-frame);
+  border-radius: 5px;
+  background: #ffffff;
+  box-shadow: none;
+}
+.theme-is-kde-plasma :is([data-slot="input"], [data-slot="textarea"], input, textarea):hover {
+  border-color: var(--kp-accent);
+}
+.theme-is-kde-plasma :is([data-slot="input"], [data-slot="textarea"], input, textarea):focus-visible {
+  outline: none;
+  border-color: var(--kp-focus-color);
+  --tw-ring-shadow: 0 0 #0000;
+  box-shadow: var(--kp-focus);
+}
+/* A field that won't take what was typed: Breeze's negative red edge. */
+.theme-is-kde-plasma :is([data-slot="input"], [data-slot="textarea"], input, textarea, [data-slot="select-trigger"])[aria-invalid="true"] {
+  border-color: #da4453;
+}
+.theme-is-kde-plasma :is([data-slot="input"], [data-slot="textarea"], input, textarea)::placeholder {
+  color: #66707a;
+}
+/* A combo box: a button with a thin chevron at its right. */
+.theme-is-kde-plasma :is([data-slot="select-trigger"], .select-like) {
+  border: 1px solid var(--kp-outline);
+  border-radius: 5px;
+  color: var(--kp-text);
+  background: var(--kp-button);
+  box-shadow: var(--kp-lip);
+}
+.theme-is-kde-plasma :is([data-slot="select-trigger"], .select-like):hover {
+  border-color: var(--kp-accent);
+}
+.theme-is-kde-plasma :is([data-slot="select-trigger"], .select-like)[data-state="open"] {
+  border-color: var(--kp-accent);
+  background: var(--kp-pressed);
+  box-shadow: none;
+}
+.theme-is-kde-plasma :is([data-slot="select-trigger"], .select-like) > svg:last-child {
+  color: var(--kp-text);
+  opacity: 1;
+}
+
+/* Check boxes and radios: near-white with a grey edge; checked, pale blue
+   with a blue edge and a dark tick or dot. Pointing adds a blue ring
+   inside the edge. */
+.theme-is-kde-plasma input[type="checkbox"],
+.theme-is-kde-plasma input[type="radio"] {
+  appearance: none;
+  flex: none;
+  width: 1rem;
+  height: 1rem;
+  margin: 0;
+  border: 1px solid #b4b7b9;
+  border-radius: 4px;
+  background: var(--kp-button);
+  box-shadow: none;
+}
+.theme-is-kde-plasma input[type="radio"] {
+  border-radius: 50%;
+}
+.theme-is-kde-plasma input:is([type="checkbox"], [type="radio"]):hover {
+  border-color: var(--kp-accent);
+  box-shadow: var(--kp-hover-ring);
+}
+.theme-is-kde-plasma input[type="checkbox"]:checked {
+  border-color: var(--kp-accent);
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M3 7l3 3 5.5-5.5' fill='none' stroke='%23232629' stroke-width='2'/%3E%3C/svg%3E") center / 100% no-repeat,
+    var(--kp-pressed);
+}
+.theme-is-kde-plasma input[type="checkbox"]:indeterminate {
+  border-color: var(--kp-accent);
+  background:
+    radial-gradient(circle, var(--kp-text) 0 1.2px, transparent 1.6px) center / 4px 4px repeat-x,
+    var(--kp-pressed);
+}
+.theme-is-kde-plasma input[type="radio"]:checked {
+  border-color: var(--kp-accent);
+  background: radial-gradient(circle, var(--kp-text) 0 2.8px, transparent 3.3px), var(--kp-pressed);
+}
+.theme-is-kde-plasma input:is([type="checkbox"], [type="radio"]):focus-visible {
+  outline: 1px solid var(--kp-focus-color);
+  outline-offset: 2px;
+  border-color: var(--kp-focus-color);
+  box-shadow: var(--kp-focus);
+}
+/* Switches: a slim groove the knob overhangs; on, the groove fills with
+   the accent at half strength. */
+.theme-is-kde-plasma button[role="switch"] > span:last-child {
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='20'%3E%3Crect x='.5' y='4.5' width='35' height='11' rx='5.5' fill='%23e6e7e7' stroke='%23c6c8c9'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+}
+.theme-is-kde-plasma button[role="switch"][aria-checked="true"] > span:last-child {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='20'%3E%3Crect x='.5' y='4.5' width='35' height='11' rx='5.5' fill='%2392cae8' stroke='%233daee9'/%3E%3C/svg%3E");
+}
+.theme-is-kde-plasma button[role="switch"] > span:last-child > span {
+  top: 1px;
+  left: 0;
+  width: 18px;
+  height: 18px;
+  border: 1px solid var(--kp-outline);
+  background: var(--kp-button);
+  box-shadow: var(--kp-lip);
+}
+.theme-is-kde-plasma button[role="switch"]:hover > span:last-child > span {
+  border-color: var(--kp-accent);
+}
+.theme-is-kde-plasma button[role="switch"]:focus-visible > span:last-child > span {
+  border-color: var(--kp-focus-color);
+  box-shadow: var(--kp-focus), var(--kp-lip);
+}
+
+/* Panels: white views with a grey hairline, a faint lip under them.
+   Library tiles likewise, flat; under the pointer they tint pale blue
+   and take the blue edge. */
+.theme-is-kde-plasma [data-slot="card"] {
+  border: 1px solid var(--kp-view-frame);
+  border-radius: 5px;
+  background: #ffffff;
+  box-shadow: 0 1px rgb(0 0 0 / 0.05), 0 2px 18px rgb(0 0 0 / 0.05);
+  --tw-ring-shadow: 0 0 #0000;
+}
+.theme-is-kde-plasma [data-slot="card-title"] {
+  font-size: 1.125rem;
+}
+.theme-is-kde-plasma [data-slot="card-footer"] {
+  border-top: 1px solid var(--kp-view-frame);
+  border-radius: 0 0 5px 5px;
+  background: #ffffff;
+}
+.theme-is-kde-plasma .surface:not([data-slot="card"]) {
+  border: 1px solid var(--kp-view-frame);
+  border-radius: 5px;
+  background: #ffffff;
+  box-shadow: 0 1px rgb(0 0 0 / 0.05);
+}
+.theme-is-kde-plasma .surface:not([data-slot="card"]):hover {
+  border-color: var(--kp-accent);
+  background: #ecf7fd;
+  transform: none;
+}
+.theme-is-kde-plasma .surface:not([data-slot="card"]):focus-visible {
+  outline: none;
+  border-color: var(--kp-focus-color);
+  box-shadow: var(--kp-focus);
+}
+.theme-is-kde-plasma .bg-card.border:not(.surface, .bulk-bar) {
+  border-color: var(--kp-view-frame);
+  border-radius: 5px;
+  background: #ffffff;
+  box-shadow: 0 1px rgb(0 0 0 / 0.05);
+}
+.theme-is-kde-plasma .bg-card.border:not(.surface, .bulk-bar):is(a, button):hover {
+  border-color: var(--kp-accent);
+  background: #ecf7fd;
+}
+/* Choosing books: each tile's box is a Breeze check box, and a chosen
+   tile is tinted as a checked Kirigami card is, ringed in Breeze blue. */
+.theme-is-kde-plasma button[aria-pressed] > span.rounded-md.border {
+  border-color: #b4b7b9;
+  border-radius: 4px;
+  background: var(--kp-button);
+  box-shadow: none;
+}
+.theme-is-kde-plasma button[aria-pressed]:hover > span.rounded-md.border {
+  border-color: var(--kp-accent);
+  box-shadow: var(--kp-hover-ring);
+}
+.theme-is-kde-plasma button[aria-pressed]:focus-visible > span.rounded-md.border {
+  border-color: var(--kp-focus-color);
+  box-shadow: var(--kp-focus);
+  outline: 1px solid var(--kp-focus-color);
+  outline-offset: 2px;
+}
+.theme-is-kde-plasma button[aria-pressed="true"] > span.rounded-md.border {
+  border-color: var(--kp-accent);
+  color: var(--kp-text);
+  background: var(--kp-pressed);
+}
+.theme-is-kde-plasma .ring-primary {
+  --tw-ring-color: var(--kp-accent);
+}
+.theme-is-kde-plasma .ring-2.ring-primary > .surface {
+  border-color: var(--kp-accent);
+  background: #d4edfa;
+}
+/* The overdue notice: Kirigami's inline message for an error, a red
+   hairline round a pale red fill. */
+.theme-is-kde-plasma .bg-card.border.border-red-300 {
+  border-color: #da4453;
+  background: #f9e3e5;
+}
+
+/* Tabs: a Breeze tab bar. The open tab is lighter, joined to the line
+   under the bar, with a blue strip along its top; the others a darker
+   grey. The library's shelves, the series' kinds and the reading room's
+   decorating panel are tab bars too. */
+.theme-is-kde-plasma :is(.shelf-tabs, nav[aria-label="Which series"], #room-decorate > [role="tablist"]) {
+  gap: 2px 1px;
+  border-bottom: 1px solid var(--kp-frame);
+}
+.theme-is-kde-plasma :is(.shelf-tabs, nav[aria-label="Which series"]) > a,
+.theme-is-kde-plasma #room-decorate > [role="tablist"] > [role="tab"],
+.theme-is-kde-plasma [data-slot="tabs-trigger"] {
+  position: relative;
+  margin: 0 0 -1px;
+  padding: 0.375rem 0.75rem;
+  border: 1px solid transparent;
+  border-bottom: 0;
+  border-radius: 5px 5px 0 0;
+  color: var(--kp-text);
+  font-weight: 400;
+  background: #d5d7d9;
+}
+.theme-is-kde-plasma [data-slot="tabs-trigger"] + [data-slot="tabs-trigger"] {
+  margin-left: 1px;
+}
+.theme-is-kde-plasma :is(.shelf-tabs, nav[aria-label="Which series"]) > a:hover,
+.theme-is-kde-plasma #room-decorate > [role="tablist"] > [role="tab"]:hover,
+.theme-is-kde-plasma [data-slot="tabs-trigger"]:hover {
+  color: var(--kp-text);
+  background: #cbe3ef;
+}
+.theme-is-kde-plasma :is(.shelf-tabs, nav[aria-label="Which series"]) > a[aria-current="page"],
+.theme-is-kde-plasma #room-decorate > [role="tablist"] > [role="tab"][aria-selected="true"],
+.theme-is-kde-plasma [data-slot="tabs-trigger"][data-state="active"] {
+  z-index: 1;
+  border-color: var(--kp-frame);
+  background: #f7f7f8;
+  box-shadow: inset 0 3px var(--kp-accent);
+}
+.theme-is-kde-plasma :is(.shelf-tabs, nav[aria-label="Which series"]) > a:focus-visible,
+.theme-is-kde-plasma #room-decorate > [role="tablist"] > [role="tab"]:focus-visible,
+.theme-is-kde-plasma [data-slot="tabs-trigger"]:focus-visible {
+  outline: none;
+  --tw-ring-shadow: 0 0 #0000;
+  box-shadow: inset 0 0 0 2px var(--kp-focus-color);
+}
+.theme-is-kde-plasma :is(.shelf-tabs, nav[aria-label="Which series"]) > a[aria-current="page"]:focus-visible,
+.theme-is-kde-plasma #room-decorate > [role="tablist"] > [role="tab"][aria-selected="true"]:focus-visible,
+.theme-is-kde-plasma [data-slot="tabs-trigger"][data-state="active"]:focus-visible {
+  box-shadow: inset 0 3px var(--kp-accent), inset 0 0 0 2px var(--kp-focus-color);
+}
+.theme-is-kde-plasma :is(.shelf-tabs, nav[aria-label="Which series"]) > a > span {
+  border-radius: 3px;
+  color: var(--kp-text);
+  background: rgb(35 38 41 / 0.08);
+}
+.theme-is-kde-plasma [data-slot="tabs-list"] {
+  gap: 0;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: inset 0 -1px var(--kp-frame);
+}
+.theme-is-kde-plasma [data-slot="tabs-trigger"]::after {
+  display: none;
+}
+/* Chips: Kirigami's, a near-white box with a hairline; the chosen one
+   tinted pale blue with a blue edge. */
+.theme-is-kde-plasma :is(a, button).rounded-full.border:not(.aspect-square, .border-2) {
+  border-color: var(--kp-outline);
+  border-radius: 5px;
+  color: var(--kp-text);
+  background: var(--kp-button);
+}
+/* Pointed at, the edge turns Breeze blue (and a chosen one takes a ring
+   inside it as well); pressed, it fills with the accent at 30%. */
+.theme-is-kde-plasma :is(a, button).rounded-full.border:not(.aspect-square, .border-2):hover {
+  border-color: var(--kp-accent);
+}
+.theme-is-kde-plasma :is(a, button).rounded-full.border:is([class*="border-primary"], [aria-current="page"], [aria-pressed="true"]):not(.aspect-square, .border-2) {
+  border-color: rgb(61 174 233 / 0.9);
+  background: var(--kp-tint);
+}
+.theme-is-kde-plasma :is(a, button).rounded-full.border:is([class*="border-primary"], [aria-current="page"], [aria-pressed="true"]):not(.aspect-square, .border-2):hover {
+  border-color: var(--kp-accent);
+  box-shadow: var(--kp-hover-ring);
+}
+.theme-is-kde-plasma :is(a, button).rounded-full.border:not(.aspect-square, .border-2):active {
+  border-color: rgb(61 174 233 / 0.7);
+  background: var(--kp-pressed);
+  box-shadow: none;
+}
+.theme-is-kde-plasma :is(a, button).rounded-full.border:not(.aspect-square, .border-2):is(:focus-visible, :focus-visible:hover) {
+  outline: none;
+  border-color: var(--kp-focus-color);
+  box-shadow: var(--kp-focus);
+}
+.theme-is-kde-plasma kbd {
+  border: 1px solid var(--kp-outline);
+  border-radius: 4px;
+  color: var(--kp-text);
+  background: var(--kp-button);
+  box-shadow: var(--kp-lip);
+}
+/* Labels (a book's status, its format) are Kirigami's chips in shape,
+   their colours the app's. */
+.theme-is-kde-plasma [data-slot="badge"] {
+  border-radius: 4px;
+}
+/* The Tags menu's Any/All: two flat toolbar buttons in a frame, the
+   chosen one checked pale blue under a blue edge. */
+.theme-is-kde-plasma [role="radiogroup"] > button[data-match] {
+  border: 1px solid transparent;
+  border-radius: 4px;
+  color: var(--kp-text);
+}
+.theme-is-kde-plasma [role="radiogroup"] > button[data-match]:hover {
+  border-color: var(--kp-accent);
+}
+.theme-is-kde-plasma [role="radiogroup"] > button[data-match][aria-checked="true"] {
+  border-color: var(--kp-accent);
+  color: var(--kp-text);
+  background: var(--kp-pressed);
+}
+/* A chosen room, house, look or texture in the reading room and
+   Preferences: ringed in Breeze blue round a pale blue gap, as a checked
+   Kirigami card, not in black. */
+.theme-is-kde-plasma .ring-2.ring-foreground:is(.room-scene, .texture-swatch) {
+  --tw-ring-color: var(--kp-accent);
+  --tw-ring-offset-color: var(--kp-pressed);
+}
+
+/* Progress: a thin grey groove, filled Breeze blue. */
+.theme-is-kde-plasma :has(> .bar-grow) {
+  border-radius: 3px;
+  background: rgb(35 38 41 / 0.13);
+  box-shadow: inset 0 0 0 1px rgb(35 38 41 / 0.06);
+}
+.theme-is-kde-plasma .bar-grow {
+  border-radius: 3px;
+}
+.theme-is-kde-plasma .bar-grow[class*="primary"] {
+  background: #5ab8ea;
+  box-shadow: inset 0 0 0 1px rgb(29 140 200 / 0.5);
+}
+
+/* Menus: light grey with a hairline and a soft shadow, 4px inside; the
+   item under the pointer is an inset box of translucent blue with a blue
+   edge, its text still dark. */
+.theme-is-kde-plasma :is([data-slot="dropdown-menu-content"], [data-slot="select-content"], [data-slot="dropdown-menu-sub-content"], [data-slot="popover-content"]) {
+  border: 1px solid var(--kp-frame);
+  border-radius: 5px;
+  color: var(--kp-text);
+  background: #f4f4f5;
+  box-shadow: 0 5px 20px rgb(0 0 0 / 0.22), 0 2px 10px rgb(0 0 0 / 0.12);
+  --tw-ring-shadow: 0 0 #0000;
+}
+.theme-is-kde-plasma :is([data-slot="dropdown-menu-item"], [data-slot="select-item"], [data-slot="dropdown-menu-checkbox-item"], [data-slot="dropdown-menu-radio-item"], [data-slot="dropdown-menu-sub-trigger"]) {
+  border: 1px solid transparent;
+  border-radius: 4px;
+}
+.theme-is-kde-plasma :is([data-slot="dropdown-menu-item"], [data-slot="select-item"], [data-slot="dropdown-menu-checkbox-item"], [data-slot="dropdown-menu-radio-item"], [data-slot="dropdown-menu-sub-trigger"]):is(:focus, [data-highlighted], [data-state="open"]) {
+  border-color: #399acc;
+  color: var(--kp-text);
+  background: rgb(61 174 233 / 0.3);
+}
+.theme-is-kde-plasma :is([data-slot="dropdown-menu-label"], [data-slot="select-label"]) {
+  color: #55585b;
+  font-weight: 600;
+}
+.theme-is-kde-plasma :is([data-slot="dropdown-menu-separator"], [data-slot="select-separator"]) {
+  margin-inline: 4px;
+  background: var(--kp-frame);
+}
+/* The palette menu's two switch rows are menu items: pointed at, the
+   translucent blue box; reached by the keyboard, the focus edge. */
+.theme-is-kde-plasma [data-slot="popover-content"] button[role="switch"].w-full {
+  border: 1px solid transparent;
+}
+.theme-is-kde-plasma [data-slot="popover-content"] button[role="switch"].w-full:hover {
+  border-color: #399acc;
+  color: var(--kp-text);
+  background: rgb(61 174 233 / 0.3);
+}
+.theme-is-kde-plasma [data-slot="popover-content"] button[role="switch"].w-full:focus-visible {
+  outline: none;
+  border-color: var(--kp-focus-color);
+  box-shadow: var(--kp-focus);
+}
+
+/* Dialogs: Kirigami's in-window sheet, white with a hairline, a heading
+   at normal weight and a flat close button; the buttons under a hairline.
+   Only the window under the title bar is dimmed, not blurred: the title
+   bar is the desktop's, and the desktop and panel stay bright. */
+.theme-is-kde-plasma [data-slot="dialog-overlay"] {
+  inset: calc(var(--kp-top) + var(--kp-title)) var(--kp-x) var(--kp-bottom);
+  border-radius: 0 0 5px 5px;
+  background: rgb(0 0 0 / 0.3);
+  backdrop-filter: none;
+}
+.theme-is-kde-plasma [data-slot="dialog-content"] {
+  border: 1px solid var(--kp-view-frame);
+  border-radius: 5px;
+  background: #ffffff;
+  box-shadow: 0 0 10px rgb(0 0 0 / 0.3), 0 12px 40px rgb(0 0 0 / 0.25);
+  --tw-ring-shadow: 0 0 #0000;
+}
+.theme-is-kde-plasma [data-slot="dialog-title"] {
+  font-size: 1.125rem;
+}
+.theme-is-kde-plasma [data-slot="dialog-footer"] {
+  border-top: 1px solid var(--kp-view-frame);
+  border-radius: 0 0 5px 5px;
+  background: #ffffff;
+}
+/* The bar of actions for chosen books floats over the window like a
+   panel's popup, raised clear of the panel. */
+.theme-is-kde-plasma .bulk-bar {
+  bottom: calc(var(--kp-bottom) + 0.75rem);
+  border: 1px solid var(--kp-frame);
+  border-radius: 6px;
+  background: var(--kp-window);
+  box-shadow: 0 5px 20px rgb(0 0 0 / 0.22), 0 2px 10px rgb(0 0 0 / 0.12);
+}
+
+/* On phones the window fills the screen, as Plasma Mobile's do: no title
+   bar, no desktop round it, no panel. So it does on a screen too short to
+   spare them the room (a phone turned on its side). */
+@media (width < 40rem), (height < 32rem) {
+  :root[data-theme="kde-plasma"] {
+    --kp-x: 0px;
+    --kp-top: 0px;
+    --kp-title: 0px;
+    --kp-bottom: 0px;
+    scrollbar-color: #b3b5b7 var(--kp-window);
+  }
+  .theme-is-kde-plasma .top-bar::after,
+  .theme-is-kde-plasma .top-bar > div::before,
+  .theme-is-kde-plasma .top-bar > div::after,
+  .theme-is-kde-plasma .top-bar + main::after {
+    display: none;
+  }
+  .theme-is-kde-plasma .top-bar + main::before,
+  .theme-is-kde-plasma .top-bar > div {
+    border-radius: 0;
+  }
+  .theme-is-kde-plasma .top-bar + main {
+    padding-inline: 1rem;
+  }
+  .theme-is-kde-plasma .bulk-bar {
+    bottom: 1rem;
+  }
+}
+
+/* A page with no app round it (an address that leads nowhere) shows its
+   message in a small Breeze window on the desktop, the title bar drawn on
+   with the app's name. */
+.theme-is-kde-plasma body > .min-h-screen > .text-center {
+  position: relative;
+  padding: calc(28px + 1.5rem) 2rem 1.5rem;
+  border-radius: 5px;
+  background:
+    linear-gradient(var(--kp-header-line), var(--kp-header-line)) 0 28px / 100% 1px no-repeat,
+    linear-gradient(var(--kp-header), var(--kp-header)) 0 0 / 100% 28px no-repeat,
+    var(--kp-window);
+  box-shadow: 0 0 0 1px rgb(35 38 41 / 0.32), 0 12px 48px rgb(0 0 0 / 0.42), 0 6px 24px rgb(0 0 0 / 0.16);
+}
+.theme-is-kde-plasma body > .min-h-screen > .text-center::before {
+  content: "MyReads";
+  content: "MyReads" / "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 28px;
+  font-size: 13.33px;
+  line-height: 29px;
+  pointer-events: none;
+}
+
+/* The sign-in pages: Plasma's login screen. The desktop is dimmed, and
+   the app's name and the form sit on it in white, the form on a sheet of
+   dark frosted glass with no edge, its fields near-white. The sheet is
+   small and its page doesn't scroll, so its blur is cheap. */
+.theme-is-kde-plasma .auth-backdrop {
+  position: fixed;
+  background: rgb(22 22 44 / 0.42);
+}
+.theme-is-kde-plasma main:has(> .auth-backdrop) .wordmark {
+  color: #ffffff;
+  font-family: var(--kp-font);
+  font-weight: 400;
+  text-shadow: 0 1px 3px rgb(0 0 0 / 0.5);
+}
+.theme-is-kde-plasma main:has(> .auth-backdrop) > div > svg {
+  color: #ffffff;
+}
+.theme-is-kde-plasma main:has(> .auth-backdrop) > div > [data-slot="popover-trigger"] {
+  color: #ffffff;
+}
+.theme-is-kde-plasma main:has(> .auth-backdrop) [data-slot="card"] {
+  --card-foreground: #ffffff;
+  --foreground: #ffffff;
+  --muted-foreground: #e3e5e7;
+  --muted: #565b61;
+  --border: #7d8389;
+  --destructive: #ffd0d5;
+  border: 0;
+  background: rgb(35 38 41 / 0.58);
+  box-shadow: 0 12px 40px rgb(0 0 0 / 0.25);
+  backdrop-filter: blur(16px);
+}
+.theme-is-kde-plasma main:has(> .auth-backdrop) [data-slot="card"] :is([data-slot="input"], input) {
+  border-color: rgb(255 255 255 / 0.6);
+  color: var(--kp-text);
+  background: rgb(255 255 255 / 0.9);
+}
+.theme-is-kde-plasma main:has(> .auth-backdrop) [data-slot="card"] :is([data-slot="input"], input):hover {
+  border-color: var(--kp-accent);
+}
+.theme-is-kde-plasma main:has(> .auth-backdrop) [data-slot="card"] :is([data-slot="input"], input):focus-visible {
+  border-color: var(--kp-focus-color);
+}
+.theme-is-kde-plasma main:has(> .auth-backdrop) [data-slot="card"] :is([data-slot="input"], input)::placeholder {
+  color: #545c64;
+}
+
+/* ── GNOME ─────────────────────────────────────────────────────────────────
+   GNOME 51 with libadwaita, as a fresh install shows it: the Shell's solid
+   black bar along the top of the screen, the workspace dots at its left and
+   the status icons at its right, and below it the app as a window on the
+   Roundhex desktop of glassy rounded hexagons, electric blue into violet.
+   The window is near-white, with 15px corners, no frame line and a soft
+   grey halo for a shadow. Its header bar is flat in the window's own
+   colour, the page links a view switcher in the middle of it (the open page
+   a grey rounded fill), and at its far right the lone round close button.
+   Inside, cards are white boxed lists with whisper shadows and no borders,
+   the library one list whose rows are parted by hairlines, buttons are
+   translucent grey with bold labels, the suggested one solid blue, the
+   destructive one red on a pale red tint, and fields look like buttons
+   until a blue ring inside their edge shows where the typing goes. Menus
+   and popovers are white with large round corners and point at their
+   button, the item under the pointer a grey pill, never blue; on a phone
+   a dialog rises from the foot of the screen as a sheet. An accent colour
+   chosen in Preferences replaces the blue throughout. The type is Adwaita
+   Sans, which is Inter with a few changes.
+   The window costs nothing to scroll: it is the page's own colour, and a
+   fixed layer over the page paints the desktop and the Shell's bar
+   everywhere else, the window's shape cut out of it with a mask, so what
+   scrolls past the window's edge goes behind the desktop. A second fixed
+   layer above it draws only the window's shadow, which a box-shadow paints
+   outside the box and never over the page. Nothing is blurred. */
+:root[data-theme="gnome"] {
+  --gn-font: "Adwaita Sans", var(--font-inter), Inter, Cantarell, system-ui, sans-serif;
+  /* The Shell's bar, the window's distance from it and from the screen's
+     edges, its width (100% is the width of what uses it: the screen for
+     the fixed layers, the page for the header bar and the content) and
+     its corners. */
+  --gn-bar: 2rem;
+  --gn-gap: 0.75rem;
+  --gn-top: calc(var(--gn-bar) + var(--gn-gap));
+  --gn-w: min(100% - 2 * var(--gn-gap), 74rem);
+  --gn-r: 15px;
+  /* What is scrolled into view (a #link, a field reached with Tab) lands
+     below the Shell's bar and the header bar, and above the desktop's
+     strip under the window. */
+  scroll-padding-top: calc(var(--gn-top) + 3rem + 1.5rem);
+  scroll-padding-bottom: calc(var(--gn-gap) + 1rem);
+  /* Adwaita's real accent, for what carries no text: checks, switches,
+     progress, focus. Text and the suggested button use --primary, a
+     deeper shade of it that white text reads on. */
+  --gn-accent: #3584e4;
+  /* Links are Adwaita's standalone accent, deep enough for text on grey. */
+  --gn-link: #0461be;
+  /* Controls are tints of the text colour, so they read on the window, on
+     cards and on menus alike: raised at rest, hovered, pressed or checked;
+     flat ones hovered and pressed. */
+  --gn-fill: rgb(0 0 6 / 0.08);
+  --gn-fill-hover: rgb(0 0 6 / 0.12);
+  --gn-fill-active: rgb(0 0 6 / 0.24);
+  --gn-flat-hover: rgb(0 0 6 / 0.055);
+  --gn-flat-active: rgb(0 0 6 / 0.13);
+  /* The focus ring, a little stronger than libadwaita's half-strength one
+     so it shows on a grey button. */
+  --gn-focus: rgb(4 97 190 / 0.65);
+  --gn-card-shadow: 0 0 0 1px rgb(0 0 6 / 0.03), 0 1px 3px 1px rgb(0 0 6 / 0.07), 0 2px 6px 2px rgb(0 0 6 / 0.03);
+  --gn-popover-shadow: 0 0 0 1px rgb(0 0 0 / 0.05), 0 1px 5px 1px rgb(0 0 0 / 0.09), 0 2px 14px 3px rgb(0 0 0 / 0.05);
+  --gn-ease: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --gn-close: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Ccircle cx='12' cy='12' r='12' fill='%23000006' fill-opacity='.08'/%3E%3Cpath d='M8.5 8.5l7 7m0-7-7 7' stroke='%232e2e33' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E");
+  --surface-shadow: var(--gn-card-shadow);
+  --chart-1: #3584e4;
+  --chart-2: #2ec27e;
+  --chart-3: #e5a50a;
+  --chart-4: #9141ac;
+  --chart-5: #77767b;
+  /* The screen's own scrollbar runs beside the desktop, so it is drawn in
+     the desktop's blue; inside the page they are grey (below). */
+  scrollbar-width: thin;
+  scrollbar-color: rgb(255 255 255 / 0.55) #2a3ef6;
+}
+/* An accent colour chosen in Preferences takes over every blue, as
+   GNOME's own accent setting does: its shade, deep enough already for
+   white text, stands in for the accent, the links and the focus ring. */
+:root[data-theme="gnome"][data-accent]:not([data-accent="theme"]) {
+  --gn-accent: var(--primary);
+  --gn-link: var(--primary);
+  --gn-focus: color-mix(in srgb, var(--primary) 65%, transparent);
+}
+.theme-is-gnome body {
+  font-family: var(--gn-font);
+  scrollbar-color: rgb(0 0 6 / 0.3) transparent;
+}
+.theme-is-gnome ::selection {
+  background: color-mix(in srgb, var(--gn-accent) 30%, transparent);
+}
+.theme-is-gnome h1 {
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+.theme-is-gnome .book-backdrop {
+  display: none;
+}
+
+/* The desktop and the Shell's bar, over the page, with the window cut out:
+   two bands and four round corners, taken away from the whole. Under the
+   header bar, menus and dialogs. The bar's dots and icons are drawn, not
+   live: there is no clock, so it never shows a time that is wrong. */
+.theme-is-gnome::after {
+  --gn-corner: #000 calc(var(--gn-r) - 0.5px), #0000 calc(var(--gn-r) + 0.5px);
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 35;
+  pointer-events: none;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='42' height='8'%3E%3Crect width='29' height='8' rx='4' fill='%23fff'/%3E%3Ccircle cx='38' cy='4' r='3' fill='%23fff' fill-opacity='.5'/%3E%3C/svg%3E")
+      left 1.125rem top calc(var(--gn-bar) / 2 - 4px) / 42px 8px no-repeat,
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='16' fill='%23fff'%3E%3Cpath d='M8 14.5 1.4 6.6a10 10 0 0 1 13.2 0z'/%3E%3Cpath d='M25 5.5h2.5L31 2.5v11l-3.5-3H25z'/%3E%3Cpath d='M33.5 5.2a3.6 3.6 0 0 1 0 5.6M35.6 3a6.6 6.6 0 0 1 0 10' fill='none' stroke='%23fff' stroke-width='1.5' stroke-linecap='round'/%3E%3Crect x='54' y='1' width='4' height='2' rx='.6'/%3E%3Crect x='52.25' y='2.75' width='7.5' height='12.5' rx='1.75' fill='none' stroke='%23fff' stroke-width='1.5'/%3E%3Crect x='54' y='6' width='4' height='7.5' rx='.6'/%3E%3C/svg%3E")
+      right 1.125rem top calc(var(--gn-bar) / 2 - 8px) / 64px 16px no-repeat,
+    linear-gradient(#000000, #000000) top / 100% var(--gn-bar) no-repeat,
+    var(--page-gradient) center / cover no-repeat,
+    #2a3ef6;
+  mask:
+    linear-gradient(#000 0 0),
+    linear-gradient(#000 0 0) center top calc(var(--gn-top) + var(--gn-r)) /
+      var(--gn-w) calc(100% - var(--gn-top) - var(--gn-gap) - 2 * var(--gn-r)) no-repeat,
+    linear-gradient(#000 0 0) center top var(--gn-top) /
+      calc(var(--gn-w) - 2 * var(--gn-r)) calc(100% - var(--gn-top) - var(--gn-gap)) no-repeat,
+    radial-gradient(circle at var(--gn-r) var(--gn-r), var(--gn-corner)) center top var(--gn-top) /
+      var(--gn-w) calc(2 * var(--gn-r)) no-repeat,
+    radial-gradient(circle at calc(100% - var(--gn-r)) var(--gn-r), var(--gn-corner)) center top var(--gn-top) /
+      var(--gn-w) calc(2 * var(--gn-r)) no-repeat,
+    radial-gradient(circle at var(--gn-r) var(--gn-r), var(--gn-corner)) center bottom var(--gn-gap) /
+      var(--gn-w) calc(2 * var(--gn-r)) no-repeat,
+    radial-gradient(circle at calc(100% - var(--gn-r)) var(--gn-r), var(--gn-corner)) center bottom var(--gn-gap) /
+      var(--gn-w) calc(2 * var(--gn-r)) no-repeat;
+  mask-composite: exclude, add, add, add, add, add, add;
+}
+/* The window's halo: an empty box the window's size and shape whose
+   shadow falls on the desktop around it. */
+.theme-is-gnome::before {
+  content: "";
+  position: fixed;
+  inset: var(--gn-top) 0 var(--gn-gap);
+  z-index: 36;
+  width: var(--gn-w);
+  margin-inline: auto;
+  pointer-events: none;
+  border-radius: var(--gn-r);
+  box-shadow: 0 0 14px 5px rgb(0 0 0 / 0.15), 0 0 5px 2px rgb(0 0 0 / 0.1), 0 0 0 1px rgb(0 0 0 / 0.05);
+}
+/* The window itself is the page's colour, so the picture behind the page
+   is not needed: the layer above shows it wherever it shows. */
+.theme-is-gnome[data-own-background] body::before {
+  display: none;
+}
+@media print {
+  .theme-is-gnome::before,
+  .theme-is-gnome::after {
+    display: none;
+  }
+}
+
+/* The header bar: flat, the window's colour, its top corners the window's.
+   It keeps clear of the Shell's bar above it, and a shade appears along
+   its foot once the page scrolls under it. The view switcher sits in the
+   middle, and the close button, drawn, at the far right. */
+.theme-is-gnome .top-bar {
+  padding-top: var(--gn-top);
+  border: 0;
+  background: transparent;
+  backdrop-filter: none;
+  box-shadow: none;
+  animation: none;
+}
+.theme-is-gnome .top-bar > div {
+  max-width: var(--gn-w);
+  height: 3rem;
+  padding: 0 2.9375rem 0 0.4375rem;
+  border-radius: var(--gn-r) var(--gn-r) 0 0;
+  background: var(--gn-close) right 0.75rem center / 1.5rem 1.5rem no-repeat, var(--background);
+}
+@keyframes gnome-header-shade {
+  to {
+    box-shadow: 0 1px rgb(0 0 6 / 0.12);
+  }
+}
+@supports (animation-timeline: scroll()) {
+  .theme-is-gnome .top-bar > div {
+    animation: gnome-header-shade linear both;
+    animation-timeline: scroll(root);
+    animation-range: 0 1rem;
+  }
+}
+.theme-is-gnome .top-bar .wordmark {
+  height: 2.125rem;
+  margin-right: auto;
+  padding: 0 0.5rem;
+  border-radius: 9px;
+  font-family: var(--gn-font);
+  font-size: 0.9375rem;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+.theme-is-gnome .top-bar .wordmark:hover {
+  background: var(--gn-flat-hover);
+}
+.theme-is-gnome .top-bar .wordmark > svg {
+  width: 1rem;
+  height: 1rem;
+}
+/* The view switcher: flat buttons, icon and bold label, the open page a
+   grey fill. */
+.theme-is-gnome .top-bar .nav-link {
+  border-radius: 9px;
+  color: var(--foreground);
+  font-weight: 700;
+}
+.theme-is-gnome .top-bar .nav-link:hover {
+  background: var(--gn-flat-hover);
+}
+.theme-is-gnome .top-bar .nav-link[aria-current="page"] {
+  background: rgb(0 0 6 / 0.1);
+}
+.theme-is-gnome .top-bar .nav-link[aria-current="page"]:hover {
+  background: rgb(0 0 6 / 0.14);
+}
+.theme-is-gnome .top-bar .nav-link:active {
+  background: rgb(0 0 6 / 0.18);
+}
+.theme-is-gnome .top-bar .nav-link[aria-current="page"]::after {
+  display: none;
+}
+/* 34px tall, as libadwaita's are, where the bar has room for it; a phone
+   keeps the app's tighter icons so every link fits. */
+@media (width >= 40rem) {
+  .theme-is-gnome .top-bar .nav-link {
+    gap: 0.375rem;
+    padding-inline: 0.5rem;
+  }
+  .theme-is-gnome .top-bar [data-size][data-variant="ghost"] {
+    height: 2.125rem;
+    min-width: 2.125rem;
+  }
+  .theme-is-gnome .top-bar > div > .ml-auto {
+    gap: 0.375rem;
+  }
+}
+@media (width >= 80rem) {
+  .theme-is-gnome .top-bar .nav-link {
+    padding-inline: 0.75rem;
+  }
+}
+.theme-is-gnome .top-bar + main {
+  max-width: min(72rem, var(--gn-w));
+  padding-bottom: calc(1.5rem + var(--gn-gap));
+}
+
+/* Buttons: translucent grey, 9px corners, bold labels, no border or
+   shadow; the suggested action solid blue. A destructive one is red text
+   on a pale red tint, as libadwaita has drawn it since 1.6. The suggested
+   button darkens under the pointer rather than lightening, so its white
+   label keeps its contrast. */
+.theme-is-gnome [data-size][data-variant] {
+  border-color: transparent;
+  border-radius: 9px;
+  color: var(--foreground);
+  font-weight: 700;
+  background: var(--gn-fill);
+  box-shadow: none;
+  transition:
+    background-color 0.2s var(--gn-ease),
+    color 0.2s var(--gn-ease),
+    outline-color 0.2s var(--gn-ease);
+}
+.theme-is-gnome [data-size][data-variant]:hover {
+  background: var(--gn-fill-hover);
+}
+.theme-is-gnome [data-size][data-variant]:is(:active:not(:disabled), [aria-expanded="true"]) {
+  translate: none;
+  background: var(--gn-fill-active);
+}
+.theme-is-gnome [data-size][data-variant="default"] {
+  color: var(--primary-foreground);
+  background: var(--primary);
+}
+.theme-is-gnome [data-size][data-variant="default"]:hover {
+  background: color-mix(in srgb, var(--primary) 92%, #000);
+}
+.theme-is-gnome [data-size][data-variant="default"]:is(:active:not(:disabled), [aria-expanded="true"]) {
+  background: color-mix(in srgb, var(--primary) 80%, #000);
+}
+/* The tint is mixed solid, not see-through: under a cover's shadow a
+   translucent one darkened past what the red text reads on. */
+.theme-is-gnome [data-size][data-variant="destructive"] {
+  color: var(--destructive);
+  background: color-mix(in srgb, #c30000 14%, var(--background));
+}
+.theme-is-gnome [data-size][data-variant="destructive"]:hover {
+  color: #a90000;
+  background: color-mix(in srgb, #c30000 20%, var(--background));
+}
+.theme-is-gnome [data-size][data-variant="destructive"]:active:not(:disabled) {
+  color: #940000;
+  background: color-mix(in srgb, #c30000 30%, var(--background));
+}
+/* Buttons the app reddens with a class ("Delete…" in the bar for chosen
+   books, "Delete account…") are destructive actions too, and icon buttons
+   that redden under the pointer (a shelf's or a tag's bin) still do. */
+.theme-is-gnome [data-size][data-variant].text-destructive {
+  color: var(--destructive);
+  background: color-mix(in srgb, #c30000 14%, var(--background));
+}
+.theme-is-gnome [data-size][data-variant].text-destructive:hover {
+  color: #a90000;
+  background: color-mix(in srgb, #c30000 20%, var(--background));
+}
+.theme-is-gnome [data-size][data-variant].text-destructive:active:not(:disabled) {
+  color: #940000;
+  background: color-mix(in srgb, #c30000 30%, var(--background));
+}
+.theme-is-gnome [data-size][data-variant="ghost"][class*="hover:text-destructive"]:hover {
+  color: var(--destructive);
+}
+.theme-is-gnome [data-size]:is([data-variant="ghost"], [data-variant="link"]) {
+  background: transparent;
+}
+.theme-is-gnome [data-size][data-variant="ghost"]:hover {
+  background: var(--gn-flat-hover);
+}
+.theme-is-gnome [data-size][data-variant="ghost"]:is(:active:not(:disabled), [aria-expanded="true"]) {
+  background: var(--gn-flat-active);
+}
+.theme-is-gnome [data-size][data-variant="link"] {
+  color: var(--primary);
+}
+.theme-is-gnome [data-size][data-variant="link"]:hover {
+  background: transparent;
+  text-decoration: underline;
+}
+.theme-is-gnome [data-size][data-variant]:disabled {
+  opacity: 0.5;
+}
+/* The X back from a book's page is a round button, as libadwaita's
+   circular ones are. */
+.theme-is-gnome .close-book[data-size] {
+  border-radius: 50%;
+  backdrop-filter: none;
+}
+/* Toggle buttons: pressed is the checked grey, a step darker under the
+   pointer; a flat one keeps a lighter fill. */
+.theme-is-gnome [data-size][data-variant]:not([data-variant="default"], [data-variant="ghost"], [data-variant="link"])[aria-pressed="true"] {
+  background: var(--gn-fill-active);
+}
+.theme-is-gnome [data-size][data-variant]:not([data-variant="default"], [data-variant="ghost"], [data-variant="link"])[aria-pressed="true"]:hover {
+  background: rgb(0 0 6 / 0.28);
+}
+.theme-is-gnome [data-size][data-variant="ghost"][aria-pressed="true"] {
+  background: rgb(0 0 6 / 0.1);
+}
+/* Focus: a ring of the accent inside the edge; the suggested button's sits
+   just outside it. */
+.theme-is-gnome
+  :is(
+    [data-size][data-variant],
+    [data-slot="select-trigger"],
+    .select-like,
+    [role="tab"],
+    [role="radio"],
+    button[aria-pressed],
+    [data-slot="tabs-trigger"],
+    :is(.shelf-tabs, main nav.border-b) > a,
+    .wordmark,
+    :is(a, button).rounded-full.border
+  ):focus-visible {
+  outline: 2px solid var(--gn-focus);
+  outline-offset: -2px;
+  border-color: transparent;
+  --tw-ring-shadow: 0 0 #0000;
+}
+/* These two name the element, :is(a, button), so they weigh as much as
+   the focus rule above and, coming after it, win. */
+.theme-is-gnome :is(a, button)[data-size][data-variant="default"]:focus-visible {
+  outline-offset: 1px;
+}
+.theme-is-gnome :is(a, button)[data-size]:is([data-variant="destructive"], .text-destructive):focus-visible {
+  outline-color: rgb(195 0 0 / 0.6);
+}
+
+/* Fields look like buttons, grey with no border, and gain the ring while
+   typed in. Drop-down lists are buttons with an arrow. */
+.theme-is-gnome :is([data-slot="input"], [data-slot="textarea"]),
+.theme-is-gnome input:is([type="text"], [type="search"], [type="number"], [type="date"], [type="password"], [type="url"], [type="email"], :not([type])),
+.theme-is-gnome textarea {
+  border-color: transparent;
+  border-radius: 9px;
+  background: var(--gn-fill);
+  box-shadow: none;
+}
+.theme-is-gnome :is([data-slot="input"], [data-slot="textarea"], input, textarea):focus-visible {
+  outline: 2px solid var(--gn-focus);
+  outline-offset: -2px;
+  border-color: transparent;
+  --tw-ring-shadow: 0 0 #0000;
+}
+.theme-is-gnome :is([data-slot="input"], [data-slot="textarea"], input, textarea)::placeholder {
+  color: var(--muted-foreground);
+}
+.theme-is-gnome :is([data-slot="select-trigger"], .select-like) {
+  border-color: transparent;
+  border-radius: 9px;
+  color: var(--foreground);
+  font-weight: 700;
+  background-color: var(--gn-fill);
+  box-shadow: none;
+}
+.theme-is-gnome :is([data-slot="select-trigger"], .select-like):hover {
+  background-color: var(--gn-fill-hover);
+}
+.theme-is-gnome :is([data-slot="select-trigger"], .select-like)[data-state="open"] {
+  background-color: var(--gn-fill-active);
+}
+.theme-is-gnome :is([data-slot="select-trigger"], .select-like) > svg:last-child {
+  color: var(--foreground);
+  opacity: 0.8;
+}
+
+/* Check boxes: 20px, 6px corners, a ring of the text colour; checked, the
+   accent with a white tick. Radio buttons the same, round, with a white
+   dot. */
+.theme-is-gnome input[type="checkbox"],
+.theme-is-gnome input[type="radio"] {
+  appearance: none;
+  flex: none;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  box-shadow: inset 0 0 0 2px rgb(0 0 6 / 0.3);
+}
+.theme-is-gnome input[type="radio"] {
+  border-radius: 50%;
+}
+.theme-is-gnome input:is([type="checkbox"], [type="radio"]):hover {
+  box-shadow: inset 0 0 0 2px rgb(0 0 6 / 0.42);
+}
+.theme-is-gnome input:is([type="checkbox"], [type="radio"]):active {
+  background: rgb(0 0 6 / 0.2);
+}
+.theme-is-gnome input[type="checkbox"]:checked {
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M2.5 7.2 5.8 10.5 11.5 3.5' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+      center / 14px no-repeat,
+    var(--gn-accent);
+  box-shadow: none;
+}
+.theme-is-gnome input[type="checkbox"]:indeterminate {
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Crect x='1' y='5' width='12' height='4' rx='2' fill='%23fff'/%3E%3C/svg%3E")
+      center / 14px no-repeat,
+    var(--gn-accent);
+  box-shadow: none;
+}
+.theme-is-gnome input[type="radio"]:checked {
+  background: radial-gradient(circle, #ffffff 0 3.5px, transparent 4.5px), var(--gn-accent);
+  box-shadow: none;
+}
+.theme-is-gnome input:is([type="checkbox"], [type="radio"]):checked:hover {
+  background-color: color-mix(in srgb, var(--gn-accent) 90%, #000);
+}
+.theme-is-gnome input:is([type="checkbox"], [type="radio"]):focus-visible {
+  outline: 2px solid var(--gn-focus);
+  outline-offset: 1px;
+}
+/* Switches: a 46x26 pill, grey off and the accent on, with a white 20px
+   knob that casts a small shadow. */
+.theme-is-gnome button[role="switch"] > span:last-child {
+  width: 46px;
+  height: 26px;
+  border-radius: 14px;
+  background: rgb(0 0 6 / 0.15);
+}
+.theme-is-gnome button[role="switch"]:hover > span:last-child {
+  background: rgb(0 0 6 / 0.2);
+}
+.theme-is-gnome button[role="switch"][aria-checked="true"] > span:last-child {
+  background: var(--gn-accent);
+}
+.theme-is-gnome button[role="switch"][aria-checked="true"]:hover > span:last-child {
+  background: color-mix(in srgb, var(--gn-accent) 90%, #000);
+}
+.theme-is-gnome button[role="switch"] > span:last-child > span {
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  background: #ffffff;
+  box-shadow: 0 2px 4px rgb(0 0 6 / 0.2);
+}
+.theme-is-gnome button[role="switch"][aria-checked="true"] > span:last-child > span {
+  translate: 20px 0;
+}
+.theme-is-gnome button[role="switch"]:focus-visible {
+  outline: 2px solid var(--gn-focus);
+  outline-offset: -2px;
+}
+
+/* Cards: boxed lists, white with 12px corners and whisper shadows, no
+   borders. Library tiles too, a grey step darker under the pointer. */
+.theme-is-gnome [data-slot="card"] {
+  border-radius: 12px;
+  background: var(--card);
+  box-shadow: var(--gn-card-shadow);
+}
+.theme-is-gnome :is([data-slot="card-title"], [data-slot="dialog-title"]) {
+  font-weight: 700;
+}
+.theme-is-gnome [data-slot="card-footer"] {
+  border-top: 1px solid #ededee;
+  background: transparent;
+}
+.theme-is-gnome .surface:not([data-slot="card"]) {
+  border-color: transparent;
+  border-radius: 12px;
+  background-color: var(--card);
+  box-shadow: var(--gn-card-shadow);
+  backdrop-filter: none;
+}
+.theme-is-gnome .surface:not([data-slot="card"]):hover {
+  border-color: transparent;
+  background-color: #f4f4f5;
+  box-shadow: var(--gn-card-shadow);
+  transform: none;
+}
+.theme-is-gnome .surface:not([data-slot="card"]):active {
+  background-color: #ececed;
+}
+.theme-is-gnome .surface:not([data-slot="card"]):focus-visible {
+  outline: 2px solid var(--gn-focus);
+  outline-offset: -2px;
+}
+.theme-is-gnome .surface .book-cover {
+  border-radius: 6px;
+}
+/* The library as a list is one boxed list: a single white card holding
+   the rows, parted by full-width hairlines, with one shadow for the lot
+   rather than one per row. */
+.theme-is-gnome [data-library-view] .grid.gap-2:not([class*="grid-cols"]):has(> div > .surface) {
+  row-gap: 0;
+  border-radius: 12px;
+  background: var(--card);
+  box-shadow: var(--gn-card-shadow);
+}
+.theme-is-gnome [data-library-view] .grid.gap-2:not([class*="grid-cols"]) > div > .surface {
+  border-radius: 0;
+  box-shadow: none;
+}
+.theme-is-gnome [data-library-view] .grid.gap-2:not([class*="grid-cols"]) > div + div > .surface {
+  border-top-color: rgb(0 0 6 / 0.07);
+}
+.theme-is-gnome [data-library-view] .grid.gap-2:not([class*="grid-cols"]) > div:first-child > .surface {
+  border-radius: 12px 12px 0 0;
+}
+.theme-is-gnome [data-library-view] .grid.gap-2:not([class*="grid-cols"]) > div:last-child > .surface {
+  border-radius: 0 0 12px 12px;
+}
+.theme-is-gnome [data-library-view] .grid.gap-2:not([class*="grid-cols"]) > div:only-child > .surface {
+  border-radius: 12px;
+}
+/* Picking books: a chosen row or card takes the accent's selection tint,
+   as a selected row does in GNOME, rather than a ring, so the focus ring
+   stays the only ring; each one's marker is a check box. A cover with no
+   card round it keeps the ring. */
+.theme-is-gnome .ring-2.ring-primary:has(> .surface) {
+  box-shadow: none;
+}
+.theme-is-gnome .ring-2.ring-primary > .surface:not([data-slot="card"]) {
+  background-color: color-mix(in srgb, var(--gn-accent) 18%, var(--card));
+}
+.theme-is-gnome button.absolute[aria-pressed][aria-label^="Select "] > span {
+  width: 20px;
+  height: 20px;
+  border: 0;
+  border-radius: 6px;
+  background: rgb(255 255 255 / 0.92);
+  box-shadow: inset 0 0 0 2px rgb(0 0 6 / 0.3), 0 1px 3px rgb(0 0 6 / 0.2);
+}
+.theme-is-gnome button.absolute[aria-pressed][aria-label^="Select "]:hover > span {
+  box-shadow: inset 0 0 0 2px rgb(0 0 6 / 0.45), 0 1px 3px rgb(0 0 6 / 0.2);
+}
+.theme-is-gnome button.absolute[aria-pressed="true"][aria-label^="Select "] > span {
+  color: #ffffff;
+  background: var(--gn-accent);
+  box-shadow: 0 1px 3px rgb(0 0 6 / 0.2);
+}
+.theme-is-gnome button.absolute[aria-pressed="true"][aria-label^="Select "]:hover > span {
+  background: color-mix(in srgb, var(--gn-accent) 90%, #000);
+  box-shadow: 0 1px 3px rgb(0 0 6 / 0.2);
+}
+.theme-is-gnome button.absolute[aria-pressed][aria-label^="Select "] > span > svg {
+  width: 14px;
+  height: 14px;
+  stroke-width: 3.5;
+}
+.theme-is-gnome button.absolute[aria-pressed][aria-label^="Select "]:focus-visible {
+  outline: 2px solid var(--gn-focus);
+  outline-offset: -2px;
+  --tw-ring-shadow: 0 0 #0000;
+}
+/* A chosen picture (a house, a room, a look, a colour) is ringed in the
+   accent, as GNOME marks the chosen wallpaper, not in the text colour. */
+.theme-is-gnome .ring-2.ring-foreground {
+  --tw-ring-color: var(--gn-accent);
+}
+/* A tile's series line is faded a little, which white allows only just. */
+.theme-is-gnome .surface .text-muted-foreground\/80 {
+  color: var(--muted-foreground);
+}
+/* Covers cast the small soft shadow of a thumbnail, not a long drop: the
+   long one fell over the caption under a cover and the buttons under the
+   book's own. */
+.theme-is-gnome .cover-shadow {
+  box-shadow: 0 1px 3px rgb(0 0 6 / 0.16), 0 2px 8px -2px rgb(0 0 6 / 0.14);
+}
+.theme-is-gnome .hero-cover {
+  box-shadow: 0 1px 3px 1px rgb(0 0 6 / 0.1), 0 4px 14px rgb(0 0 6 / 0.12);
+}
+/* Other panels on the card's colour, notices among them: cards too; the
+   overdue notice keeps a red edge. */
+.theme-is-gnome .bg-card.border:not(.surface, .bulk-bar) {
+  border-color: transparent;
+  border-radius: 12px;
+  box-shadow: var(--gn-card-shadow);
+}
+.theme-is-gnome .bg-card.border.border-red-300 {
+  box-shadow: var(--gn-card-shadow), inset 0 0 0 1px rgb(195 0 0 / 0.35);
+}
+
+/* Shelves, the series filter and every tab list: libadwaita's toggle
+   group, a grey track holding bold toggles, the chosen one a raised white
+   segment. */
+.theme-is-gnome :is(.shelf-tabs, main nav.border-b, [role="tablist"]) {
+  width: fit-content;
+  max-width: 100%;
+  gap: 0;
+  padding: 3px;
+  border: 0;
+  border-radius: 9px;
+  background: var(--gn-fill);
+  box-shadow: none;
+}
+.theme-is-gnome :is(.shelf-tabs, main nav.border-b) > a,
+.theme-is-gnome [role="tablist"] > [role="tab"] {
+  min-height: 1.75rem;
+  margin: 0;
+  padding: 0.125rem 0.75rem;
+  border: 0;
+  border-radius: 6px;
+  color: var(--foreground);
+  font-weight: 700;
+  background: transparent;
+  box-shadow: none;
+}
+.theme-is-gnome :is(.shelf-tabs, main nav.border-b) > a:hover,
+.theme-is-gnome [role="tablist"] > [role="tab"]:hover {
+  background: var(--gn-flat-hover);
+}
+.theme-is-gnome :is(.shelf-tabs, main nav.border-b) > a[aria-current="page"],
+.theme-is-gnome [role="tablist"] > [role="tab"][aria-selected="true"] {
+  background: #ffffff;
+  box-shadow: 0 1px 3px 1px rgb(0 0 6 / 0.07), 0 2px 6px 2px rgb(0 0 6 / 0.03);
+}
+.theme-is-gnome [data-slot="tabs-trigger"]::after {
+  display: none;
+}
+/* Counts in toggles (and chips, below) are a step darker than dim text
+   elsewhere, so they still read on a hovered or chosen grey. */
+.theme-is-gnome :is(.shelf-tabs, main nav.border-b) > a > span {
+  border-radius: 999px;
+  color: #46464b;
+  font-weight: 400;
+  background: transparent;
+}
+/* Segmented choices (Any or All, a quote card's shape) are toggle groups
+   too. */
+.theme-is-gnome [role="radiogroup"].border {
+  gap: 0;
+  padding: 3px;
+  border: 0;
+  border-radius: 9px;
+  background: var(--gn-fill);
+}
+.theme-is-gnome [role="radiogroup"].border > button[role="radio"] {
+  border-radius: 6px;
+  color: var(--foreground);
+  font-weight: 700;
+  background: transparent;
+}
+.theme-is-gnome [role="radiogroup"].border > button[role="radio"]:hover {
+  background: var(--gn-flat-hover);
+}
+.theme-is-gnome [role="radiogroup"].border > button[role="radio"][aria-checked="true"] {
+  background: #ffffff;
+  box-shadow: 0 1px 3px 1px rgb(0 0 6 / 0.07), 0 2px 6px 2px rgb(0 0 6 / 0.03);
+}
+/* The tag filter's small "Not" toggles: grey buttons, red when on. */
+.theme-is-gnome button[aria-pressed].rounded-md.border {
+  border-color: transparent;
+  color: var(--foreground);
+  font-weight: 700;
+  background: var(--gn-fill);
+}
+.theme-is-gnome button[aria-pressed].rounded-md.border:hover {
+  background: var(--gn-fill-hover);
+}
+.theme-is-gnome button[aria-pressed="true"].rounded-md.border {
+  color: var(--destructive);
+  background: color-mix(in srgb, #c30000 14%, var(--popover));
+}
+.theme-is-gnome button[aria-pressed="true"].rounded-md.border:hover {
+  color: #a90000;
+  background: color-mix(in srgb, #c30000 20%, var(--popover));
+}
+/* Chips: pill toggle buttons, grey, darker when chosen. */
+.theme-is-gnome :is(a, button).rounded-full.border:not(.aspect-square, .border-2) {
+  border-color: transparent;
+  color: var(--foreground);
+  font-weight: 700;
+  background: var(--gn-fill);
+}
+.theme-is-gnome :is(a, button).rounded-full.border:not(.aspect-square, .border-2):hover {
+  border-color: transparent;
+  background: var(--gn-fill-hover);
+}
+.theme-is-gnome :is(a, button).rounded-full.border:is([class*="border-primary"], [aria-current="page"], [aria-pressed="true"]):not(.aspect-square, .border-2) {
+  background: var(--gn-fill-active);
+}
+.theme-is-gnome :is(a, button).rounded-full.border:is([class*="border-primary"], [aria-current="page"], [aria-pressed="true"]):not(.aspect-square, .border-2):hover {
+  background: rgb(0 0 6 / 0.28);
+}
+.theme-is-gnome :is(a, button).rounded-full.border .text-muted-foreground {
+  color: #46464b;
+}
+/* The open shelf's delete button, joined to its chip: the second half of
+   a linked pair, the chip's grey, the red tint under the pointer. */
+.theme-is-gnome button.rounded-r-full.border {
+  align-self: stretch;
+  margin-left: 1px;
+  border-color: transparent;
+  color: var(--foreground);
+  background: var(--gn-fill-active);
+}
+.theme-is-gnome button.rounded-r-full.border:hover {
+  color: var(--destructive);
+  background: color-mix(in srgb, #c30000 20%, var(--background));
+}
+.theme-is-gnome button.rounded-r-full.border:focus-visible {
+  outline: 2px solid rgb(195 0 0 / 0.6);
+  outline-offset: -2px;
+}
+/* Keys: keycaps, as in a shortcuts window. */
+.theme-is-gnome kbd {
+  border: 1px solid rgb(0 0 6 / 0.15);
+  border-radius: 6px;
+  color: var(--foreground);
+  background: #ffffff;
+  box-shadow: inset 0 -2px rgb(0 0 6 / 0.08);
+}
+/* Badges other than a status's own colours (a format, a tag, how often a
+   book was read) are plain grey pills. */
+.theme-is-gnome [data-slot="badge"]:is([data-variant="secondary"], [data-variant="outline"]):not([class*="border-red"], [class*="border-amber"]) {
+  border-color: transparent;
+  color: var(--foreground);
+  background: var(--gn-fill);
+}
+/* A tag that links to the library fills its link, so it lines up with
+   the badges beside it rather than sitting on the link's baseline. */
+.theme-is-gnome a > [data-slot="badge"] {
+  display: flex;
+}
+.theme-is-gnome a:hover > [data-slot="badge"][data-variant="secondary"] {
+  background: var(--gn-fill-hover);
+}
+
+/* Group titles over a boxed list are bold headings in the text colour and
+   in sentence case, as a preferences group's title is. Links in running
+   text are the link blue, underlined. */
+.theme-is-gnome :is(h2, h3).uppercase.tracking-wide {
+  color: var(--foreground);
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.theme-is-gnome :is(a, button).underline:not([data-size], .nav-link, .wordmark),
+.theme-is-gnome [data-slot="dialog-description"] > a {
+  color: var(--gn-link);
+}
+.theme-is-gnome :is(a, button).underline:not([data-size], .nav-link, .wordmark):hover,
+.theme-is-gnome [data-slot="dialog-description"] > a:hover {
+  text-decoration-thickness: 2px;
+}
+
+/* Progress: a pill track of the text colour, a pill of the accent. */
+.theme-is-gnome :has(> .bar-grow) {
+  border-radius: 999px;
+  background: rgb(0 0 6 / 0.12);
+}
+.theme-is-gnome .bar-grow {
+  border-radius: 999px;
+}
+.theme-is-gnome .bar-grow[class*="primary"] {
+  background: var(--gn-accent);
+}
+
+/* Menus and popovers: white, 15px corners, 6px inside, a soft shadow and a
+   faint line; the item under the pointer a grey pill. */
+.theme-is-gnome :is([data-slot="dropdown-menu-content"], [data-slot="popover-content"], [data-slot="select-content"], [data-slot="dropdown-menu-sub-content"]) {
+  border-color: transparent;
+  border-radius: var(--gn-r);
+  background: var(--popover);
+  box-shadow: var(--gn-popover-shadow);
+  --tw-ring-shadow: 0 0 #0000;
+}
+.theme-is-gnome :is([data-slot="dropdown-menu-content"], [data-slot="select-content"], [data-slot="dropdown-menu-sub-content"]) {
+  padding: 6px;
+}
+.theme-is-gnome :is([data-slot="dropdown-menu-item"], [data-slot="select-item"], [data-slot="dropdown-menu-checkbox-item"], [data-slot="dropdown-menu-radio-item"], [data-slot="dropdown-menu-sub-trigger"]) {
+  min-height: 2rem;
+  border-radius: 9px;
+}
+.theme-is-gnome :is([data-slot="dropdown-menu-item"], [data-slot="select-item"], [data-slot="dropdown-menu-checkbox-item"], [data-slot="dropdown-menu-radio-item"], [data-slot="dropdown-menu-sub-trigger"]):is(:focus, [data-highlighted]) {
+  color: var(--popover-foreground);
+  background: var(--gn-fill);
+}
+/* A popover points at its button with GTK's tail, set back from the round
+   corner when the button is narrow; it opens a little further off to make
+   room. */
+.theme-is-gnome [data-slot="popover-content"]:is([data-side="bottom"], [data-side="top"]) {
+  --gn-tail: max(10px, calc(var(--radix-popper-anchor-width, 2rem) / 2 - 10px));
+}
+.theme-is-gnome [data-slot="popover-content"][data-side="bottom"] {
+  margin-top: 6px;
+}
+.theme-is-gnome [data-slot="popover-content"][data-side="top"] {
+  margin-bottom: 6px;
+}
+.theme-is-gnome [data-slot="popover-content"]:is([data-side="bottom"], [data-side="top"])::before {
+  content: "";
+  position: absolute;
+  top: -9px;
+  left: var(--gn-tail);
+  width: 20px;
+  height: 10px;
+  pointer-events: none;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='10'%3E%3Cpath d='M0 10.5 8.6 1.4a2 2 0 0 1 2.8 0L20 10.5z' fill='%23fff'/%3E%3Cpath d='M0 10 8.6 1.4a2 2 0 0 1 2.8 0L20 10' fill='none' stroke='%23000' stroke-opacity='.08'/%3E%3C/svg%3E")
+    0 0 / 100% 100% no-repeat;
+}
+.theme-is-gnome [data-slot="popover-content"][data-side="top"]::before {
+  top: auto;
+  bottom: -9px;
+  rotate: 180deg;
+}
+.theme-is-gnome [data-slot="popover-content"][data-align="end"]::before {
+  left: auto;
+  right: var(--gn-tail);
+}
+.theme-is-gnome [data-slot="popover-content"][data-align="center"]::before {
+  left: calc(50% - 10px);
+}
+/* Menus scroll, which would clip a tail of their own, so theirs is drawn
+   on the box Radix places them in, which holds the same measures. */
+.theme-is-gnome [data-radix-popper-content-wrapper]:has(> [data-slot="dropdown-menu-content"]:is([data-side="bottom"], [data-side="top"])) {
+  --gn-tail: max(10px, calc(var(--radix-popper-anchor-width, 2rem) / 2 - 10px));
+}
+.theme-is-gnome [data-slot="dropdown-menu-content"][data-side="bottom"] {
+  margin-top: 6px;
+}
+.theme-is-gnome [data-slot="dropdown-menu-content"][data-side="top"] {
+  margin-bottom: 6px;
+}
+.theme-is-gnome [data-radix-popper-content-wrapper]:has(> [data-slot="dropdown-menu-content"]:is([data-side="bottom"], [data-side="top"]))::before {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  top: -3px;
+  left: var(--gn-tail);
+  width: 20px;
+  height: 10px;
+  pointer-events: none;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='10'%3E%3Cpath d='M0 10.5 8.6 1.4a2 2 0 0 1 2.8 0L20 10.5z' fill='%23fff'/%3E%3Cpath d='M0 10 8.6 1.4a2 2 0 0 1 2.8 0L20 10' fill='none' stroke='%23000' stroke-opacity='.08'/%3E%3C/svg%3E")
+    0 0 / 100% 100% no-repeat;
+}
+.theme-is-gnome [data-radix-popper-content-wrapper]:has(> [data-slot="dropdown-menu-content"][data-side="top"])::before {
+  top: auto;
+  bottom: -3px;
+  rotate: 180deg;
+}
+.theme-is-gnome [data-radix-popper-content-wrapper]:has(> [data-slot="dropdown-menu-content"][data-align="end"])::before {
+  left: auto;
+  right: var(--gn-tail);
+}
+.theme-is-gnome [data-radix-popper-content-wrapper]:has(> [data-slot="dropdown-menu-content"][data-align="center"])::before {
+  left: calc(50% - 10px);
+}
+.theme-is-gnome [data-slot="dropdown-menu-separator"] {
+  margin-block: 6px;
+  background: rgb(0 0 6 / 0.1);
+}
+.theme-is-gnome [data-slot="dropdown-menu-label"] {
+  font-weight: 700;
+}
+
+/* Dialogs: a floating sheet in the window's colour, 15px corners, the page
+   dimmed a little behind it, its title bold and centred as in a header
+   bar, and the round grey close button at its right. */
+.theme-is-gnome [data-slot="dialog-overlay"] {
+  background: rgb(0 0 6 / 0.14);
+  backdrop-filter: none;
+}
+.theme-is-gnome [data-slot="dialog-content"] {
+  border-radius: var(--gn-r);
+  background: var(--background);
+  box-shadow: 0 0 14px 2px rgb(0 0 6 / 0.03), 0 0 5px 2px rgb(0 0 6 / 0.1), 0 0 0 1px rgb(0 0 0 / 0.05);
+  --tw-ring-shadow: 0 0 #0000;
+}
+.theme-is-gnome [data-slot="dialog-content"] > [data-slot="dialog-header"]:first-child > [data-slot="dialog-title"]:first-child {
+  padding-inline: 2rem;
+  text-align: center;
+}
+.theme-is-gnome [data-slot="dialog-content"] > [data-slot="dialog-close"] {
+  top: 0.6875rem;
+  right: 0.6875rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  min-width: 0;
+  padding: 0;
+  border-radius: 50%;
+  color: var(--foreground);
+  background: var(--gn-fill);
+  opacity: 1;
+}
+.theme-is-gnome [data-slot="dialog-content"] > [data-slot="dialog-close"]:hover {
+  background: var(--gn-fill-hover);
+}
+.theme-is-gnome [data-slot="dialog-content"] > [data-slot="dialog-close"]:active {
+  background: var(--gn-fill-active);
+}
+.theme-is-gnome [data-slot="dialog-content"] > [data-slot="dialog-close"] svg {
+  width: 1rem;
+  height: 1rem;
+}
+.theme-is-gnome [data-slot="dialog-footer"] {
+  border-top: 0;
+  background: transparent;
+}
+/* The bar of actions for chosen books floats over the foot of the window
+   as a popover would, clear of its edge. */
+.theme-is-gnome .bulk-bar {
+  bottom: calc(var(--gn-gap) + 0.75rem);
+  border-color: transparent;
+  border-radius: var(--gn-r);
+  background: var(--popover);
+  box-shadow: var(--gn-popover-shadow), 0 6px 20px rgb(0 0 6 / 0.12);
+}
+
+/* The sign-in pages: the window on its own, the app's name a big title in
+   it and the form a boxed list. */
+.theme-is-gnome .auth-backdrop {
+  display: none;
+}
+.theme-is-gnome main:has(> .auth-backdrop) {
+  padding-block: calc(var(--gn-top) + 1rem) calc(var(--gn-gap) + 1rem);
+}
+/* The theme button sits in the window's top right corner, before the
+   close button, drawn as in the app's header bar. */
+.theme-is-gnome main:has(> .auth-backdrop) > .absolute {
+  top: calc(var(--gn-top) + 0.4375rem);
+  right: calc((100% - var(--gn-w)) / 2 + 0.4375rem);
+  padding-right: 2.5rem;
+  background: var(--gn-close) right 0.3125rem center / 1.5rem 1.5rem no-repeat;
+}
+.theme-is-gnome main:has(> .auth-backdrop) .wordmark {
+  font-family: var(--gn-font);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+/* Phones: a slimmer bar, the window nearly to the screen's edges, and no
+   drawn close button, so the header keeps its room for the links. */
+@media (width < 40rem) {
+  :root[data-theme="gnome"] {
+    --gn-bar: 1.625rem;
+    --gn-gap: 0.25rem;
+    --gn-r: 12px;
+  }
+  .theme-is-gnome::after {
+    background-size:
+      34px 6.5px,
+      52px 13px,
+      100% var(--gn-bar),
+      cover;
+    background-position:
+      left 0.75rem top calc(var(--gn-bar) / 2 - 3.25px),
+      right 0.75rem top calc(var(--gn-bar) / 2 - 6.5px),
+      top,
+      center;
+  }
+  .theme-is-gnome .top-bar > div {
+    padding-inline: 0.25rem;
+    background: var(--background);
+  }
+  .theme-is-gnome main:has(> .auth-backdrop) > .absolute {
+    padding-right: 0;
+    background: none;
+  }
+  /* A toggle group stays one row, scrolling sideways if it must. */
+  .theme-is-gnome .shelf-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .theme-is-gnome .shelf-tabs > a {
+    flex: none;
+    white-space: nowrap;
+  }
+  /* Dialogs are bottom sheets, as an AdwDialog is in a narrow window:
+     docked to the foot of the screen, round only at the top, with the
+     drag handle drawn above the title (only drawn: the sheet doesn't
+     drag). They rise into place rather than grow. */
+  .theme-is-gnome [data-slot="dialog-content"] {
+    top: auto;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    max-width: 100%;
+    max-height: calc(100dvh - var(--gn-top));
+    overflow-y: auto;
+    padding-top: 1.5rem;
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+    translate: none;
+    border-radius: 15px 15px 0 0;
+    --tw-enter-scale: 1;
+    --tw-enter-translate-y: 100%;
+    --tw-exit-scale: 1;
+    --tw-exit-translate-y: 100%;
+  }
+  .theme-is-gnome [data-slot="dialog-content"]::before {
+    content: "";
+    position: absolute;
+    top: 6px;
+    left: calc(50% - 27px);
+    width: 54px;
+    height: 6px;
+    border-radius: 3px;
+    pointer-events: none;
+    background: rgb(0 0 6 / 0.25);
+  }
+}
+
+/* ── Hyprland ──────────────────────────────────────────────────────────────
+   Hyprland 0.56, the tiling compositor, set up as most of its users set it
+   up: Catppuccin Mocha, a Waybar along the top, JetBrains Mono, on its own
+   first wallpaper (wall0: a dark navy rain of capsules, two bundles of
+   contour lines, the cyan-to-mint droplet logo in the middle and a splash
+   line under it). There are no title bars, window buttons or dock: the app
+   is a tiled window, a bare dark rectangle with 10px corners and a 2px
+   border in Hyprland's active gradient, cyan at the top left to mint at the
+   bottom right, set 20px in from the screen and from the bar, the
+   wallpaper showing in the gaps. The bar floats above it: the page links
+   are its workspace buttons, numbered, the open one filled with the
+   accent; the wordmark is its launcher, the open page's title sits in the
+   middle as the window module shows it, and the icons on the right are a
+   module of their own, each in its own Catppuccin colour. Inside, cards,
+   library tiles and the bar of bulk actions are smaller windows with the
+   grey inactive border, and focus follows the mouse: the one under the
+   pointer, or holding the keyboard's focus, takes the active gradient
+   (and, for the keyboard, Hyprland's glow). Menus, popovers and dialogs
+   float as windows of their own with the gradient border and the tight
+   dark halo, and pop in from 87% as Hyprland's windows do; a dialog takes
+   the focus, so the app's window turns grey and dims under it, and only
+   it. Controls are hyprtoolkit's: flat dark boxes with 1px borders that
+   turn the accent under the pointer, 5px corners, check marks with no fill
+   behind them, progress in the border's gradient. The accent is the
+   reader's Accent colour when one is chosen; the window borders keep
+   Hyprland's gradient whatever it is, as they are the compositor's.
+   Labels, headings and buttons are in JetBrains Mono, the bar's font;
+   reading text stays in Noto Sans, Hyprland's "Sans", as monospace makes
+   long titles and notes slow to read and much wider (small field captions
+   keep it too, and on a phone book titles, which mono cut short).
+   The window costs nothing to scroll. Its body is a fixed layer under the
+   page; the wallpaper is drawn again on a fixed layer over the page with
+   the window's shape cut out (two bands and four round corners, taken from
+   the whole), so what scrolls past the window's edge goes behind the
+   desktop; and the border is one more fixed layer, a ring cut out of the
+   gradient. None of them moves or blurs, and nothing else on the app's
+   pages blurs either: Hyprland's windows are opaque (only the small, still
+   sign-in window is see-through). The gradient is a tiny SVG stretched over
+   each box, so it runs from corner to corner in the box's own proportions
+   as Hyprland's does (0.293 across, 0.707 down), whatever its shape. */
+:root[data-theme="hyprland"] {
+  --hl-mono: var(--font-jetbrains), "JetBrains Mono", ui-monospace, "Cascadia Mono", Menlo, monospace;
+  --hl-sans: var(--font-noto-sans), "Noto Sans", ui-sans-serif, system-ui, sans-serif;
+  /* Catppuccin Mocha. */
+  --hl-crust: #11111b;
+  --hl-mantle: #181825;
+  --hl-base: #1e1e2e;
+  --hl-surface0: #313244;
+  --hl-surface1: #45475a;
+  --hl-surface2: #585b70;
+  --hl-overlay0: #6c7086;
+  --hl-overlay2: #9399b2;
+  --hl-subtext: #a6adc8;
+  --hl-text: #cdd6f4;
+  /* The accent and the text on it: the palette's (Sapphire), or the
+     reader's Accent colour, which replaces --primary. Under the pointer it
+     lightens to Sky, the next Mocha colour, and pressed it darkens. */
+  --hl-accent: var(--primary);
+  --hl-on-accent: var(--primary-foreground);
+  --hl-accent-hover: #89dceb;
+  --hl-accent-down: #5fb2d8;
+  /* A progress bar fills with the border's gradient, the accent's own
+     colours; a chosen accent fills it instead. */
+  --hl-progress: linear-gradient(90deg in oklab, #33ccff, #00ff99);
+  /* Hyprland's borders: the active gradient, #33ccff to #00ff99 at 93%,
+     blended in OkLab (the stops between are worked out in it), and the
+     inactive grey, #595959 at 67%, as it comes out over the window. */
+  --hl-active: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1' preserveAspectRatio='none'%3E%3ClinearGradient id='g' x2='.5' y2='1.207'%3E%3Cstop stop-color='%2333ccff'/%3E%3Cstop offset='.25' stop-color='%2327dae9'/%3E%3Cstop offset='.5' stop-color='%2319e7d1'/%3E%3Cstop offset='.75' stop-color='%230bf3b7'/%3E%3Cstop offset='1' stop-color='%2300ff99'/%3E%3C/linearGradient%3E%3Crect width='1' height='1' fill='url(%23g)' fill-opacity='.93'/%3E%3C/svg%3E");
+  --hl-inactive: #46464c;
+  /* The shadow every window has: 4px of #1a1a1a, steep, centred. */
+  --hl-halo: 0 0 0 1px rgb(17 17 27 / 0.45), 0 0 4px 1px rgb(17 17 27 / 0.7);
+  /* Hyprland's glow, inside and just outside the border: here the mark of
+     keyboard focus. */
+  --hl-glow: 0 0 0 1px rgb(17 17 27 / 0.45), 0 0 10px 1px rgb(51 204 255 / 0.5);
+  /* How a border fades to the active colours, as Hyprland's does: 539ms
+     on easeOutQuint. */
+  --hl-fade: border-color 0.54s cubic-bezier(0.23, 1, 0.32, 1);
+  /* The gaps (gaps_out 20), the bar's place above the window, the border
+     and the window's outer corner (rounding 10 plus the 2px border). */
+  --hl-out: 1.25rem;
+  --hl-bar-y: 0.625rem;
+  --hl-bar: 2.25rem;
+  --hl-top: calc(var(--hl-bar-y) + var(--hl-bar) + var(--hl-out));
+  --hl-b: 2px;
+  --hl-r: 0.75rem;
+  --surface-shadow: none;
+  --chart-1: #74c7ec;
+  --chart-2: #a6e3a1;
+  --chart-3: #fab387;
+  --chart-4: #cba6f7;
+  --chart-5: #9399b2;
+  /* Native parts (a date field's calendar icon, its picker, autofill)
+     drawn for a dark page. */
+  color-scheme: dark;
+  /* Scrollbars: hyprtoolkit's thin thumb, the text colour at 40%. */
+  scrollbar-width: thin;
+  scrollbar-color: rgb(205 214 244 / 0.4) transparent;
+}
+/* A chosen accent lightens and darkens by mixing; with its near-black text
+   every one keeps 4.8:1 or more, pressed included. */
+:root[data-theme="hyprland"][data-accent]:not([data-accent="theme"]) {
+  --hl-accent-hover: color-mix(in oklab, var(--primary) 80%, #ffffff);
+  --hl-accent-down: color-mix(in oklab, var(--primary) 90%, #000000);
+  --hl-progress: var(--primary);
+}
+@media (width < 40rem) {
+  :root[data-theme="hyprland"] {
+    --hl-out: 0.5rem;
+    --hl-bar-y: 0.375rem;
+    --hl-bar: 2.5rem;
+  }
+}
+.theme-is-hyprland body {
+  font-family: var(--hl-sans);
+}
+.theme-is-hyprland body::before {
+  background-position: center;
+}
+.theme-is-hyprland ::selection {
+  color: var(--hl-text);
+  background: rgb(147 153 178 / 0.35);
+}
+/* Headings in the theme's heading face, JetBrains Mono, unless Headings
+   in Preferences picks another. */
+.theme-is-hyprland :is(h1, h2, h3, [data-slot="card-title"], [data-slot="dialog-title"]) {
+  font-family: var(--heading-font);
+  letter-spacing: 0;
+}
+.theme-is-hyprland h1 {
+  font-weight: 700;
+}
+/* A stat card's big number: monospace digits run wide, so they close up a
+   little, and the units beside them stay in the reading face. */
+.theme-is-hyprland .font-heading.text-3xl {
+  letter-spacing: -0.04em;
+}
+.theme-is-hyprland .font-heading.text-3xl .text-base {
+  font-family: var(--hl-sans);
+  letter-spacing: 0;
+}
+.theme-is-hyprland :is(label, [data-slot="label"], [data-slot="badge"], kbd, legend) {
+  font-family: var(--hl-mono);
+}
+/* A field's small caption stays in the reading face: in mono it ran wider
+   than the field under it, and the row beside it moved over. */
+.theme-is-hyprland label.text-xs {
+  font-family: var(--hl-sans);
+}
+.theme-is-hyprland .book-backdrop {
+  display: none;
+}
+
+/* The window: its body under the page, and over it the desktop with the
+   window cut out of it and the border's ring. Only on pages with the bar:
+   the sign-in pages are the bare desktop. */
+.theme-is-hyprland body:has(> .top-bar)::after {
+  content: "";
+  position: fixed;
+  inset: var(--hl-top) var(--hl-out) var(--hl-out);
+  z-index: -1;
+  pointer-events: none;
+  border-radius: var(--hl-r);
+  background: var(--hl-base);
+}
+.theme-is-hyprland:has(> body > .top-bar)::before {
+  --hl-r2: calc(2 * var(--hl-r));
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 35;
+  pointer-events: none;
+  background: var(--page-gradient) center / cover no-repeat, var(--background);
+  mask:
+    linear-gradient(#000 0 0),
+    linear-gradient(#000 0 0) var(--hl-out) calc(var(--hl-top) + var(--hl-r)) /
+      calc(100% - 2 * var(--hl-out)) calc(100% - var(--hl-top) - var(--hl-out) - var(--hl-r2)) no-repeat,
+    linear-gradient(#000 0 0) calc(var(--hl-out) + var(--hl-r)) var(--hl-top) /
+      calc(100% - 2 * var(--hl-out) - var(--hl-r2)) calc(100% - var(--hl-top) - var(--hl-out)) no-repeat,
+    radial-gradient(closest-side, #000 98%, transparent) left var(--hl-out) top var(--hl-top) / var(--hl-r2) var(--hl-r2) no-repeat,
+    radial-gradient(closest-side, #000 98%, transparent) right var(--hl-out) top var(--hl-top) / var(--hl-r2) var(--hl-r2) no-repeat,
+    radial-gradient(closest-side, #000 98%, transparent) left var(--hl-out) bottom var(--hl-out) / var(--hl-r2) var(--hl-r2) no-repeat,
+    radial-gradient(closest-side, #000 98%, transparent) right var(--hl-out) bottom var(--hl-out) / var(--hl-r2) var(--hl-r2) no-repeat;
+  mask-composite: exclude, add, add, add, add, add, add;
+}
+.theme-is-hyprland:has(> body > .top-bar)::after {
+  content: "";
+  position: fixed;
+  inset: var(--hl-top) var(--hl-out) var(--hl-out);
+  z-index: 36;
+  pointer-events: none;
+  border: var(--hl-b) solid transparent;
+  border-radius: var(--hl-r);
+  background: var(--hl-active) 0 0 / 100% 100% border-box;
+  mask: linear-gradient(#000 0 0) padding-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+}
+/* While a dialog is open it has the focus, so the app's window is the
+   inactive one: its border turns grey (and the overlay dims it, below).
+   Radix puts a dialog's overlay straight into <body>, so this looks only
+   at body's children. */
+.theme-is-hyprland:has(> body > .top-bar):has(> body > [data-slot="dialog-overlay"])::after {
+  background: var(--hl-inactive);
+}
+
+/* The page inside the window: clear of its border on every side, and of
+   its bottom edge when scrolled to the end. */
+.theme-is-hyprland .top-bar + main {
+  padding-top: calc(var(--hl-out) + var(--hl-b) + 1.25rem);
+  padding-bottom: calc(var(--hl-out) + var(--hl-b) + 2rem);
+  /* The page is 72rem at most, centred: past that its own margin counts
+     toward the gap. */
+  padding-inline: max(1rem, calc(var(--hl-out) + var(--hl-b) + 1.25rem - max(0rem, (100vw - 72rem) / 2)));
+}
+/* On a phone the page keeps the app's own 16px margins, which put it 6px
+   inside the border: any more and dates and titles were cut short. */
+@media (width < 40rem) {
+  .theme-is-hyprland .top-bar + main {
+    padding-top: calc(var(--hl-out) + var(--hl-b) + 0.875rem);
+    padding-inline: calc(var(--hl-out) + var(--hl-b) + 0.375rem);
+  }
+}
+/* What the page scrolls to (a #link, the field the keyboard moves to)
+   lands inside the window, not under the desktop above or below it; and
+   what sticks to the top of the page sticks to the top of the window. */
+.theme-is-hyprland:has(> body > .top-bar) {
+  scroll-padding-top: calc(var(--hl-top) + var(--hl-b) + 1rem);
+  scroll-padding-bottom: calc(var(--hl-out) + var(--hl-b) + 1rem);
+}
+.theme-is-hyprland .top-bar + main .sticky {
+  top: calc(var(--hl-top) + var(--hl-b) + 0.5rem);
+}
+
+/* The bar: a Waybar floating 10px from the top and level with the
+   window's sides, mantle at 90%, in JetBrains Mono. */
+.theme-is-hyprland .top-bar {
+  --foreground: var(--hl-text);
+  --muted-foreground: var(--hl-subtext);
+  padding: var(--hl-bar-y) var(--hl-out) 0;
+  border: 0;
+  background: transparent;
+  backdrop-filter: none;
+  box-shadow: none;
+  animation: none;
+  font-family: var(--hl-mono);
+}
+.theme-is-hyprland .top-bar > div {
+  max-width: none;
+  height: var(--hl-bar);
+  padding-inline: 0.3125rem;
+  border: 1px solid var(--hl-surface0);
+  border-radius: 0.625rem;
+  background: rgb(24 24 37 / 0.92);
+  counter-reset: workspace;
+}
+.theme-is-hyprland .top-bar .wordmark {
+  height: calc(var(--hl-bar) - 0.5rem);
+  padding-inline: 0.5rem 0.625rem;
+  border-radius: 0.4375rem;
+  color: var(--hl-text);
+  font-family: var(--hl-mono);
+  font-size: 0.9375rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.theme-is-hyprland .top-bar .wordmark > svg {
+  color: var(--hl-accent);
+}
+.theme-is-hyprland .top-bar .wordmark:hover {
+  background: var(--hl-surface0);
+}
+/* The page links: workspace buttons. */
+.theme-is-hyprland .top-bar .nav-link {
+  height: calc(var(--hl-bar) - 0.625rem);
+  border: 0;
+  border-radius: 0.4375rem;
+  color: var(--hl-subtext);
+  font-family: var(--hl-mono);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  counter-increment: workspace;
+}
+.theme-is-hyprland .top-bar .nav-link:hover {
+  color: var(--hl-text);
+  background: var(--hl-surface0);
+}
+.theme-is-hyprland .top-bar .nav-link[aria-current="page"] {
+  color: var(--hl-on-accent);
+  font-weight: 800;
+  background: var(--hl-accent);
+}
+.theme-is-hyprland .top-bar .nav-link[aria-current="page"]:hover {
+  background: var(--hl-accent-hover);
+}
+.theme-is-hyprland .top-bar .nav-link[aria-current="page"]::after {
+  display: none;
+}
+/* Each numbered, as workspaces are, where there is room beside the words:
+   monospace runs wider than the app's face, so the numbers wait for 72rem
+   (90rem when an eighth link crowds the bar), and just after the words
+   appear the links close up a little. A numbered workspace shows its
+   number and its name, as Waybar's do, without the icon. */
+@media (width >= 72rem) {
+  .theme-is-hyprland .top-bar .nav-link::before {
+    content: counter(workspace);
+    content: counter(workspace) / "";
+    font-weight: 800;
+    opacity: 0.75;
+  }
+  .theme-is-hyprland .top-bar .nav-link[aria-current="page"]::before {
+    opacity: 1;
+  }
+  .theme-is-hyprland .top-bar .nav-link > svg {
+    display: none;
+  }
+}
+@media (width < 90rem) {
+  .theme-is-hyprland .top-bar > div:has(> a:nth-of-type(9)) .nav-link::before {
+    content: none;
+  }
+  .theme-is-hyprland .top-bar > div:has(> a:nth-of-type(9)) .nav-link > svg {
+    display: block;
+  }
+}
+@media (64rem <= width < 72rem) {
+  .theme-is-hyprland .top-bar .nav-link {
+    padding-inline: 0.375rem;
+  }
+}
+/* In the middle, Waybar's window module: the open window's title (the
+   page's own, as the browser would give it) in the quieter text colour,
+   centred in the room between the workspaces and the icons, where there is
+   room for it. Generated, so screen readers skip it. */
+@media (width >= 80rem) {
+  .theme-is-hyprland .top-bar > div::after {
+    content: "MyReads";
+    content: "MyReads" / "";
+    order: 1;
+    min-width: 0;
+    margin-left: auto;
+    padding-inline: 0.75rem;
+    overflow: hidden;
+    color: var(--hl-subtext);
+    font-size: 0.8125rem;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    pointer-events: none;
+  }
+  .theme-is-hyprland .top-bar > div > div:last-child {
+    order: 2;
+  }
+  .theme-is-hyprland[data-section="library"] .top-bar > div::after {
+    content: "Library · MyReads";
+    content: "Library · MyReads" / "";
+  }
+  .theme-is-hyprland[data-section="book"] .top-bar > div::after {
+    content: "Book · MyReads";
+    content: "Book · MyReads" / "";
+  }
+  .theme-is-hyprland[data-section="reading"] .top-bar > div::after {
+    content: "Now reading · MyReads";
+    content: "Now reading · MyReads" / "";
+  }
+  .theme-is-hyprland[data-section="quotes"] .top-bar > div::after {
+    content: "Quotes · MyReads";
+    content: "Quotes · MyReads" / "";
+  }
+  .theme-is-hyprland[data-section="stats"] .top-bar > div::after {
+    content: "Stats · MyReads";
+    content: "Stats · MyReads" / "";
+  }
+  .theme-is-hyprland[data-section="room"] .top-bar > div::after {
+    content: "Reading room · MyReads";
+    content: "Reading room · MyReads" / "";
+  }
+  .theme-is-hyprland[data-section="series"] .top-bar > div::after {
+    content: "Series · MyReads";
+    content: "Series · MyReads" / "";
+  }
+  .theme-is-hyprland[data-section="account"] .top-bar > div::after {
+    content: "Account · MyReads";
+    content: "Account · MyReads" / "";
+  }
+  .theme-is-hyprland .top-bar > div:has(> a[href="/books/new"][aria-current="page"])::after {
+    content: "Add book · MyReads";
+    content: "Add book · MyReads" / "";
+  }
+  .theme-is-hyprland .top-bar > div:has(> a[href="/books/check"][aria-current="page"])::after {
+    content: "Do I own this? · MyReads";
+    content: "Do I own this? · MyReads" / "";
+  }
+}
+@media (80rem <= width < 90rem) {
+  .theme-is-hyprland .top-bar > div:has(> a:nth-of-type(9))::after {
+    content: none;
+  }
+}
+/* The icons on the right: one module, each icon in its own colour. */
+.theme-is-hyprland .top-bar > div > div:last-child {
+  height: calc(var(--hl-bar) - 0.625rem);
+  padding-inline: 0.1875rem;
+  border-radius: 0.4375rem;
+  background: var(--hl-surface0);
+}
+.theme-is-hyprland .top-bar > div > div:last-child [data-size][data-variant="ghost"] {
+  height: calc(var(--hl-bar) - 1rem);
+  border-radius: 0.3125rem;
+}
+.theme-is-hyprland .top-bar > div > div:last-child [data-size][data-variant="ghost"]:is(:hover, [aria-expanded="true"]) {
+  background: var(--hl-surface1);
+}
+.theme-is-hyprland .top-bar a[href="/api/export"] {
+  color: #a6e3a1;
+}
+.theme-is-hyprland .top-bar [data-slot="popover-trigger"] {
+  color: #f5c2e7;
+}
+.theme-is-hyprland .top-bar a[href="/account"] {
+  color: #b4befe;
+}
+.theme-is-hyprland .top-bar a[href="/account"] > span {
+  color: var(--hl-subtext);
+}
+.theme-is-hyprland .top-bar a[href="/account"]:hover > span {
+  color: var(--hl-text);
+}
+.theme-is-hyprland .top-bar button[type="submit"] {
+  color: #f38ba8;
+}
+.theme-is-hyprland .top-bar :is(.nav-link, .wordmark, [data-size][data-variant]):focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 1px;
+  --tw-ring-shadow: 0 0 #0000;
+}
+/* On phones the bar holds every link as an icon from 360px up, as the
+   app's own does: no room to spare round the wordmark or the module. */
+@media (width < 40rem) {
+  .theme-is-hyprland .top-bar > div {
+    padding-inline: 0.1875rem;
+  }
+  .theme-is-hyprland .top-bar .wordmark {
+    padding-inline: 0;
+  }
+  .theme-is-hyprland .top-bar > div > div:last-child {
+    padding-inline: 0;
+    background: transparent;
+  }
+}
+
+/* Buttons: hyprtoolkit's flat dark boxes, a 1px border that turns the
+   accent under the pointer, darker pressed; the main one filled with the
+   accent. */
+.theme-is-hyprland [data-size][data-variant] {
+  border: 1px solid var(--hl-surface1);
+  border-radius: var(--radius);
+  color: var(--hl-text);
+  background: var(--hl-surface0);
+  font-family: var(--hl-mono);
+  font-weight: 500;
+  transition: none;
+}
+.theme-is-hyprland [data-size][data-variant="default"] {
+  border-color: var(--hl-accent);
+  color: var(--hl-on-accent);
+  font-weight: 700;
+  background: var(--hl-accent);
+}
+.theme-is-hyprland [data-size][data-variant="destructive"] {
+  color: #f38ba8;
+}
+.theme-is-hyprland [data-size]:is([data-variant="ghost"], [data-variant="link"]) {
+  border-color: transparent;
+  background: transparent;
+}
+.theme-is-hyprland [data-size][data-variant="link"] {
+  color: var(--hl-accent);
+}
+.theme-is-hyprland [data-size]:is([data-variant="outline"], [data-variant="secondary"]):is(:hover, [aria-expanded="true"]) {
+  border-color: var(--hl-accent);
+  color: var(--hl-text);
+  background: var(--hl-surface1);
+}
+/* The red stays on the darker greys, where it keeps its contrast. */
+.theme-is-hyprland [data-size][data-variant="destructive"]:hover {
+  border-color: #f38ba8;
+  color: #f38ba8;
+  background: var(--hl-surface0);
+}
+.theme-is-hyprland [data-size][data-variant="default"]:is(:hover, [aria-expanded="true"]) {
+  border-color: var(--hl-accent-hover);
+  color: var(--hl-on-accent);
+  background: var(--hl-accent-hover);
+}
+.theme-is-hyprland [data-size][data-variant="ghost"]:is(:hover, [aria-expanded="true"]) {
+  color: var(--hl-text);
+  background: var(--hl-surface0);
+}
+.theme-is-hyprland [data-size][data-variant="link"]:hover {
+  background: transparent;
+  text-decoration: underline;
+}
+/* Outline and ghost buttons the app marks as destructive (Delete account,
+   the bulk Delete, a tag's remove) keep their red, and their border turns
+   red under the pointer; they stay on surface0 and darken pressed, as red
+   on the lighter greys falls under 4.5:1. */
+.theme-is-hyprland [data-size][data-variant].text-destructive,
+.theme-is-hyprland [data-size][data-variant][class*="hover:text-destructive"]:hover {
+  color: #f38ba8;
+}
+.theme-is-hyprland [data-size][data-variant="outline"].text-destructive:is(:hover, [aria-expanded="true"]) {
+  border-color: #f38ba8;
+  background: var(--hl-surface0);
+}
+.theme-is-hyprland [data-size][data-variant]:active:not(:disabled) {
+  translate: none;
+}
+.theme-is-hyprland [data-size]:is([data-variant="outline"], [data-variant="secondary"], [data-variant="ghost"]):active:not(:disabled) {
+  background: var(--hl-surface2);
+}
+.theme-is-hyprland [data-size][data-variant]:is([data-variant="destructive"], .text-destructive, [class*="hover:text-destructive"]):active:not(:disabled) {
+  background: var(--hl-mantle);
+}
+.theme-is-hyprland [data-size][data-variant="default"]:active:not(:disabled) {
+  border-color: var(--hl-accent-down);
+  background: var(--hl-accent-down);
+}
+.theme-is-hyprland [data-size][data-variant]:disabled {
+  opacity: 0.5;
+}
+.theme-is-hyprland :is([data-size][data-variant], [data-slot="select-trigger"], .select-like, [role="tab"], [data-slot="tabs-trigger"], .shelf-tabs > a, nav[aria-label="Which series"] > a, :is(a, button).rounded-full.border):focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+  --tw-ring-shadow: 0 0 #0000;
+}
+
+/* Fields: crust boxes with a 1px border, lighter under the pointer and the
+   accent while typed in. */
+.theme-is-hyprland :is([data-slot="input"], [data-slot="textarea"]),
+.theme-is-hyprland input:is([type="text"], [type="search"], [type="number"], [type="date"], [type="password"], [type="url"], [type="email"], :not([type])),
+.theme-is-hyprland textarea {
+  border: 1px solid var(--hl-surface1);
+  border-radius: var(--radius);
+  color: var(--hl-text);
+  background: var(--hl-crust);
+  box-shadow: none;
+}
+.theme-is-hyprland :is([data-slot="input"], [data-slot="textarea"], input, textarea):hover {
+  border-color: var(--hl-overlay0);
+}
+.theme-is-hyprland :is([data-slot="input"], [data-slot="textarea"], input, textarea):focus-visible {
+  outline: none;
+  border-color: var(--ring);
+  box-shadow: 0 0 0 1px var(--ring);
+  --tw-ring-shadow: 0 0 #0000;
+}
+.theme-is-hyprland :is([data-slot="input"], [data-slot="textarea"], input, textarea)::placeholder {
+  color: var(--hl-overlay2);
+}
+/* A drop-down: a field with its arrow. It shows a value, not a command,
+   so it keeps the reading face (and its fixed width fits the value). The
+   library's Tags and More filters open popovers but are drawn as
+   drop-downs among the others, so they are dressed as them too. */
+.theme-is-hyprland :is([data-slot="select-trigger"], .select-like[data-size], [data-slot="popover-trigger"].justify-between.border-input) {
+  border: 1px solid var(--hl-surface1);
+  border-radius: var(--radius);
+  color: var(--hl-text);
+  background: var(--hl-crust);
+  box-shadow: none;
+  font-family: var(--hl-sans);
+  font-weight: 400;
+}
+.theme-is-hyprland :is([data-slot="select-trigger"], .select-like[data-size], [data-slot="popover-trigger"].justify-between.border-input):is(:hover, [data-state="open"], [aria-expanded="true"]) {
+  border-color: var(--hl-accent);
+  background: var(--hl-crust);
+}
+.theme-is-hyprland :is([data-slot="select-trigger"], .select-like, [data-slot="popover-trigger"].justify-between.border-input) > svg:last-child {
+  color: var(--hl-accent);
+  opacity: 1;
+}
+
+/* Check boxes and radios: dark boxes, an accent mark and no fill. The
+   tick is a shape cut from the accent (a mask), so it takes whichever
+   accent is chosen. */
+.theme-is-hyprland input[type="checkbox"],
+.theme-is-hyprland input[type="radio"] {
+  appearance: none;
+  flex: none;
+  width: 0.9375rem;
+  height: 0.9375rem;
+  margin: 0;
+  border: 1px solid var(--hl-surface2);
+  border-radius: 0.25rem;
+  background: var(--hl-surface0);
+}
+.theme-is-hyprland input[type="radio"] {
+  border-radius: 50%;
+}
+.theme-is-hyprland input:is([type="checkbox"], [type="radio"]):hover {
+  border-color: var(--hl-accent);
+  background: var(--hl-surface1);
+}
+.theme-is-hyprland input:is([type="checkbox"], [type="radio"]):checked {
+  border-color: var(--hl-accent);
+  background: var(--hl-surface0);
+}
+.theme-is-hyprland input[type="checkbox"]:checked::before {
+  content: "";
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--hl-accent);
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 6.2l2.4 2.4 4.6-5' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 100% no-repeat;
+}
+.theme-is-hyprland input[type="radio"]:checked {
+  background: radial-gradient(circle, var(--hl-accent) 0 3.5px, transparent 4px), var(--hl-surface0);
+}
+.theme-is-hyprland input:is([type="checkbox"], [type="radio"]):disabled {
+  opacity: 0.5;
+}
+.theme-is-hyprland input:is([type="checkbox"], [type="radio"]):focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+/* Switches: a pill, the accent when on; the knob text-coloured when off
+   and the base colour when on. */
+.theme-is-hyprland button[role="switch"] > span:last-child {
+  border: 1px solid var(--hl-surface2);
+  background: var(--hl-surface1);
+  box-shadow: none;
+}
+.theme-is-hyprland button[role="switch"][aria-checked="true"] > span:last-child {
+  border-color: var(--hl-accent);
+  background: var(--hl-accent);
+}
+.theme-is-hyprland button[role="switch"] > span:last-child > span {
+  background: var(--hl-text);
+  box-shadow: none;
+}
+.theme-is-hyprland button[role="switch"][aria-checked="true"] > span:last-child > span {
+  background: var(--hl-base);
+}
+.theme-is-hyprland button[role="switch"]:hover > span:last-child {
+  border-color: var(--hl-accent);
+}
+.theme-is-hyprland button[role="switch"]:focus-visible {
+  outline: none;
+}
+.theme-is-hyprland button[role="switch"]:focus-visible > span:last-child {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* Cards: smaller windows, bare and dark, with the grey inactive border,
+   opaque as Hyprland's windows are (so Frosted cards in Preferences have
+   nothing to blur here, and don't).
+   Focus follows the mouse: the one under the pointer, or with the
+   keyboard's focus inside (not a click's, which would leave a second
+   window lit once the pointer moves on), takes the active gradient,
+   fading to it as Hyprland's borders do. The gradient sits under the
+   border, which turns see-through over it; it is only painted while it
+   shows, so the way back is at once (fading back would show the dark
+   under the border). */
+.theme-is-hyprland [data-slot="card"] {
+  border: var(--hl-b) solid var(--hl-inactive);
+  border-radius: var(--hl-r);
+  background-color: var(--card);
+  background-clip: padding-box;
+  box-shadow: var(--hl-halo);
+  transition: none;
+  --tw-ring-shadow: 0 0 #0000;
+}
+.theme-is-hyprland [data-slot="card"]:is(:hover, :has(:focus-visible)) {
+  border-color: transparent;
+  transition: var(--hl-fade);
+  background: linear-gradient(var(--card), var(--card)) padding-box, var(--hl-active) 0 0 / 100% 100% border-box;
+}
+.theme-is-hyprland[data-cards="frosted"] .surface {
+  background-color: var(--card);
+  backdrop-filter: none;
+}
+.theme-is-hyprland :is([data-slot="card-title"], [data-slot="dialog-title"]) {
+  font-weight: 700;
+}
+.theme-is-hyprland [data-slot="card-footer"] {
+  border-top: 1px solid var(--hl-surface0);
+  background: transparent;
+}
+/* Library tiles: the same small windows. A tile doesn't lift: tiled
+   windows stay where they are. */
+.theme-is-hyprland .surface:not([data-slot="card"]) {
+  border: var(--hl-b) solid var(--hl-inactive);
+  border-radius: var(--hl-r);
+  background-color: var(--card);
+  background-clip: padding-box;
+  box-shadow: var(--hl-halo);
+  transition: none;
+}
+.theme-is-hyprland .surface.lift:not([data-slot="card"]):is(:hover, :focus-visible) {
+  transform: none;
+  border-color: transparent;
+  transition: var(--hl-fade);
+  background: linear-gradient(var(--card), var(--card)) padding-box, var(--hl-active) 0 0 / 100% 100% border-box;
+  box-shadow: var(--hl-halo);
+}
+.theme-is-hyprland .surface:not([data-slot="card"]):focus-visible {
+  outline: none;
+}
+.theme-is-hyprland .surface.lift:not([data-slot="card"]):focus-visible {
+  box-shadow: var(--hl-glow);
+}
+.theme-is-hyprland .surface .book-cover {
+  border-radius: 0.3125rem;
+}
+/* On a phone a book's title on a tile or row is set in the reading face
+   (unless Headings picks a face of its own): in mono most titles were cut
+   short. */
+@media (width < 40rem) {
+  .theme-is-hyprland:not([data-heading-font="serif"], [data-heading-font="rounded"]) .font-heading:is(.truncate, .line-clamp-2) {
+    font-family: var(--hl-sans);
+  }
+  .theme-is-hyprland .font-heading.text-3xl {
+    font-size: 1.625rem;
+  }
+}
+/* Other panels drawn on the card's colour, notices among them: windows
+   too, the overdue notice's border in the red of an error. */
+.theme-is-hyprland .bg-card.border:not(.surface, .bulk-bar) {
+  border: var(--hl-b) solid var(--hl-inactive);
+  border-radius: var(--hl-r);
+  box-shadow: var(--hl-halo);
+}
+.theme-is-hyprland .bg-card.border:not(.surface, .bulk-bar):is(a, button):is(:hover, :focus-visible) {
+  border-color: transparent;
+  transition: var(--hl-fade);
+  background: linear-gradient(var(--card), var(--card)) padding-box, var(--hl-active) 0 0 / 100% 100% border-box;
+}
+.theme-is-hyprland .bg-card.border.border-red-300 {
+  border-color: #f38ba8;
+}
+
+/* Tabs and chips: workspace buttons too. The open tab is filled with the
+   accent; chips are outlined pills whose border turns the accent under
+   the pointer, the chosen one filled. The Series page's row of tabs is
+   drawn as the library's. */
+.theme-is-hyprland :is(.shelf-tabs, nav[aria-label="Which series"]) {
+  gap: 0.25rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--hl-surface0);
+}
+.theme-is-hyprland :is(.shelf-tabs, nav[aria-label="Which series"]) > a,
+.theme-is-hyprland [data-slot="tabs-trigger"] {
+  margin: 0;
+  padding-block: 0.25rem;
+  border: 0;
+  border-radius: 0.4375rem;
+  color: var(--hl-subtext);
+  font-family: var(--hl-mono);
+  font-size: 0.8125rem;
+}
+.theme-is-hyprland :is(.shelf-tabs, nav[aria-label="Which series"]) > a:hover,
+.theme-is-hyprland [data-slot="tabs-trigger"]:hover {
+  color: var(--hl-text);
+  background: var(--hl-surface0);
+}
+.theme-is-hyprland :is(.shelf-tabs, nav[aria-label="Which series"]) > a[aria-current="page"],
+.theme-is-hyprland [data-slot="tabs-trigger"][data-state="active"] {
+  color: var(--hl-on-accent);
+  font-weight: 800;
+  background: var(--hl-accent);
+  box-shadow: none;
+}
+.theme-is-hyprland :is(.shelf-tabs, nav[aria-label="Which series"]) > a[aria-current="page"]::after,
+.theme-is-hyprland [data-slot="tabs-trigger"]::after {
+  display: none;
+}
+.theme-is-hyprland :is(.shelf-tabs, nav[aria-label="Which series"]) > a > span {
+  border-radius: 0.3125rem;
+  color: var(--hl-subtext);
+  background: var(--hl-surface0);
+}
+.theme-is-hyprland :is(.shelf-tabs, nav[aria-label="Which series"]) > a:hover > span {
+  color: var(--hl-text);
+  background: var(--hl-surface1);
+}
+.theme-is-hyprland :is(.shelf-tabs, nav[aria-label="Which series"]) > a[aria-current="page"] > span {
+  color: var(--hl-accent);
+  background: var(--hl-crust);
+}
+.theme-is-hyprland [data-slot="tabs-list"] {
+  gap: 0.125rem;
+  padding: 0.1875rem;
+  border: 1px solid var(--hl-surface0);
+  border-radius: 0.625rem;
+  background: var(--hl-mantle);
+}
+.theme-is-hyprland :is(a, button).rounded-full.border:not(.aspect-square, .border-2) {
+  border-color: var(--hl-surface1);
+  color: var(--hl-text);
+  background: transparent;
+  font-family: var(--hl-mono);
+  font-size: 0.8125rem;
+}
+.theme-is-hyprland :is(a, button).rounded-full.border:not(.aspect-square, .border-2):hover {
+  border-color: var(--hl-accent);
+  background: var(--hl-surface0);
+}
+.theme-is-hyprland :is(a, button).rounded-full.border:is([class*="border-primary"], [aria-current="page"], [aria-pressed="true"]):not(.aspect-square, .border-2) {
+  border-color: var(--hl-accent);
+  color: var(--hl-on-accent);
+  font-weight: 700;
+  background: var(--hl-accent);
+}
+.theme-is-hyprland :is(a, button).rounded-full.border:is([class*="border-primary"], [aria-current="page"], [aria-pressed="true"]):not(.aspect-square, .border-2) > * {
+  color: inherit;
+}
+.theme-is-hyprland kbd {
+  border: 1px solid var(--hl-surface1);
+  border-radius: var(--radius);
+  color: var(--hl-text);
+  background: var(--hl-surface0);
+  box-shadow: none;
+}
+
+/* Progress: a dark groove filled with the border's gradient. */
+.theme-is-hyprland :has(> .bar-grow) {
+  border-radius: var(--radius);
+  background: var(--hl-surface0);
+}
+.theme-is-hyprland .bar-grow {
+  border-radius: var(--radius);
+}
+.theme-is-hyprland .bar-grow[class*="primary"] {
+  background: var(--hl-progress);
+}
+
+/* Menus, popovers and the lists of drop-downs: floating windows, the
+   gradient border and the dark halo; the item under the pointer lit with
+   the accent, as hyprlauncher lights its choice. */
+.theme-is-hyprland :is([data-slot="dropdown-menu-content"], [data-slot="popover-content"], [data-slot="select-content"], [data-slot="dropdown-menu-sub-content"]) {
+  padding: 0.375rem;
+  border: var(--hl-b) solid transparent;
+  border-radius: var(--hl-r);
+  background: linear-gradient(var(--hl-mantle), var(--hl-mantle)) padding-box, var(--hl-active) 0 0 / 100% 100% border-box;
+  box-shadow: var(--hl-halo);
+  --tw-ring-shadow: 0 0 #0000;
+}
+.theme-is-hyprland :is([data-slot="dropdown-menu-item"], [data-slot="select-item"], [data-slot="dropdown-menu-checkbox-item"], [data-slot="dropdown-menu-radio-item"], [data-slot="dropdown-menu-sub-trigger"]) {
+  min-height: 1.875rem;
+  border-radius: var(--radius);
+}
+.theme-is-hyprland :is([data-slot="dropdown-menu-item"], [data-slot="select-item"], [data-slot="dropdown-menu-checkbox-item"], [data-slot="dropdown-menu-radio-item"], [data-slot="dropdown-menu-sub-trigger"]):is(:focus, [data-highlighted]) {
+  color: var(--hl-text);
+  background: color-mix(in srgb, var(--hl-accent) 22%, var(--hl-mantle));
+}
+.theme-is-hyprland :is([data-slot="dropdown-menu-item"], [data-slot="select-item"], [data-slot="dropdown-menu-checkbox-item"], [data-slot="dropdown-menu-radio-item"]) svg {
+  color: var(--hl-accent);
+}
+.theme-is-hyprland [data-slot="dropdown-menu-label"] {
+  font-family: var(--hl-mono);
+}
+.theme-is-hyprland [data-slot="dropdown-menu-separator"] {
+  background: var(--hl-surface0);
+}
+
+/* Windows open as Hyprland's do, popping in from 87% with a little
+   overshoot (its "easy" spring, about a third of a second; menus a little
+   quicker), and close in 150ms, shrinking back to 87% as they fade. */
+.theme-is-hyprland :is([data-slot="dropdown-menu-content"], [data-slot="popover-content"], [data-slot="select-content"], [data-slot="dropdown-menu-sub-content"], [data-slot="dialog-content"])[data-state="open"] {
+  --tw-enter-scale: 0.87;
+  --tw-duration: 0.26s;
+  --tw-ease: cubic-bezier(0.3, 1.35, 0.6, 1);
+}
+.theme-is-hyprland [data-slot="dialog-content"][data-state="open"] {
+  --tw-duration: 0.34s;
+}
+.theme-is-hyprland :is([data-slot="dropdown-menu-content"], [data-slot="popover-content"], [data-slot="select-content"], [data-slot="dropdown-menu-sub-content"], [data-slot="dialog-content"])[data-state="closed"] {
+  --tw-exit-scale: 0.87;
+  --tw-duration: 0.15s;
+  --tw-ease: linear;
+}
+
+/* Dialogs: a floating window over the app, which dims to half, as
+   Hyprland dims a modal's parent (dim_modal): that window only, inside
+   its border, not the bar or the desktop. The title over a short rule, as
+   hyprland-dialog draws it. */
+.theme-is-hyprland [data-slot="dialog-overlay"] {
+  background: rgb(0 0 0 / 0.5);
+  backdrop-filter: none;
+}
+.theme-is-hyprland:has(> body > .top-bar) [data-slot="dialog-overlay"] {
+  inset: calc(var(--hl-top) + var(--hl-b)) calc(var(--hl-out) + var(--hl-b)) calc(var(--hl-out) + var(--hl-b));
+  border-radius: calc(var(--hl-r) - var(--hl-b));
+}
+.theme-is-hyprland [data-slot="dialog-content"] {
+  border: var(--hl-b) solid transparent;
+  border-radius: var(--hl-r);
+  background: linear-gradient(var(--hl-mantle), var(--hl-mantle)) padding-box, var(--hl-active) 0 0 / 100% 100% border-box;
+  box-shadow: var(--hl-halo);
+  --tw-ring-shadow: 0 0 #0000;
+}
+.theme-is-hyprland [data-slot="dialog-header"] {
+  padding-bottom: 0.75rem;
+  background: linear-gradient(var(--hl-surface1), var(--hl-surface1)) left bottom / 50% 1px no-repeat;
+}
+.theme-is-hyprland [data-slot="dialog-title"] {
+  font-size: 1.125rem;
+  line-height: 1.3;
+}
+.theme-is-hyprland [data-slot="dialog-footer"] {
+  border-top: 1px solid var(--hl-surface0);
+  border-radius: 0 0 0.625rem 0.625rem;
+  background: transparent;
+}
+.theme-is-hyprland [data-slot="dialog-content"] > [data-slot="dialog-close"] {
+  border-color: transparent;
+  color: var(--hl-subtext);
+  background: transparent;
+}
+.theme-is-hyprland [data-slot="dialog-content"] > [data-slot="dialog-close"]:hover {
+  color: #f38ba8;
+  background: var(--hl-surface0);
+}
+
+/* The bar of bulk actions: a floating window at the foot of the screen,
+   inside the app's window and clear of its border. Focus stays in the
+   library while books are picked, so it is an inactive window like the
+   cards, lit only under the pointer or with the keyboard in it: Hyprland
+   has one active border at a time. */
+.theme-is-hyprland .bulk-bar {
+  bottom: calc(var(--hl-out) + var(--hl-b) + 0.5rem);
+  border: var(--hl-b) solid var(--hl-inactive);
+  border-radius: var(--hl-r);
+  background-color: var(--hl-mantle);
+  background-clip: padding-box;
+  box-shadow: var(--hl-halo);
+}
+.theme-is-hyprland .bulk-bar:is(:hover, :has(:focus-visible)) {
+  border-color: transparent;
+  transition: var(--hl-fade);
+  background: linear-gradient(var(--hl-mantle), var(--hl-mantle)) padding-box, var(--hl-active) 0 0 / 100% 100% border-box;
+}
+
+/* The sign-in pages: the bare desktop, logo and all, the form a floating
+   window on it. */
+.theme-is-hyprland .auth-backdrop {
+  display: none;
+}
+/* Where the window floats. Where there is room beside it, the logo shows
+   whole, as on an empty workspace: the column goes to its right, centred
+   in the room there. Elsewhere the window lies over the logo, its top just
+   above the prongs so none of it peeks out. The logo is centred and the
+   picture covers the screen, scaled by the larger of 100vw/1920 and
+   100vh/1080: its prongs are 106 of those pixels above the middle, its
+   sides 81 out from it (100 and 120 with the glow); the wordmark and the
+   gap above the window take 8.5rem. */
+.theme-is-hyprland main:has(> .auth-backdrop) {
+  justify-content: flex-start;
+  padding-top: max(1rem, calc(50vh - max(6.25vw, 11.11vh) - 8.5rem));
+}
+@media (width >= 52rem) and (min-aspect-ratio: 5/4) {
+  .theme-is-hyprland main:has(> .auth-backdrop) {
+    justify-content: center;
+    padding-top: 1rem;
+    padding-left: calc(50% + max(5.21vw, 9.26vh) + 1.5rem);
+  }
+}
+/* Hyprland's splash line, under the logo: white, a 76th of the screen's
+   height, its foot at 98% of it. "Read the wiki." is one of its own
+   splashes. Hyprland draws it at a third, which is 3:1 on the navy; at a
+   half it is 5.3:1 and still faint. Behind the page, and only here: a
+   window covers it elsewhere. */
+.theme-is-hyprland main:has(> .auth-backdrop)::after {
+  content: "Read the wiki.";
+  content: "Read the wiki." / "";
+  position: fixed;
+  inset: auto 0 2vh;
+  z-index: -1;
+  pointer-events: none;
+  color: rgb(255 255 255 / 0.5);
+  font-size: max(0.6875rem, calc(100vh / 76));
+  line-height: 1;
+  text-align: center;
+}
+.theme-is-hyprland main:has(> .auth-backdrop) .wordmark {
+  font-family: var(--hl-mono);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+/* The sign-in window is see-through and blurred, as riced terminals are,
+   so the desktop behind it glows through. It is small and still, so its
+   blur costs nothing. Its border is a ring of its own, cut out of the
+   gradient, as the fill would let a gradient under it show. */
+.theme-is-hyprland main:has(> .auth-backdrop) [data-slot="card"] {
+  position: relative;
+  overflow: visible;
+  border-color: transparent;
+  background: rgb(24 24 37 / 0.8);
+  backdrop-filter: blur(12px) saturate(1.2);
+}
+.theme-is-hyprland main:has(> .auth-backdrop) [data-slot="card"]::before {
+  content: "";
+  position: absolute;
+  inset: calc(-1 * var(--hl-b));
+  border: var(--hl-b) solid transparent;
+  border-radius: inherit;
+  background: var(--hl-active) 0 0 / 100% 100% border-box;
+  mask: linear-gradient(#000 0 0) padding-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+}
