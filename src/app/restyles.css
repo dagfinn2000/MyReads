@@ -5227,14 +5227,22 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
    outside the box and never over the page. Nothing is blurred. */
 :root[data-theme="gnome"] {
   --gn-font: "Adwaita Sans", var(--font-inter), Inter, Cantarell, system-ui, sans-serif;
-  /* The Shell's bar, the window's distance from it and from the screen's
-     edges, its width (100% is the width of what uses it: the screen for
-     the fixed layers, the page for the header bar and the content) and
-     its corners. */
+  /* The Shell's bar, the window's distance from it, from the screen's
+     edges (--gn-x, at most 74rem wide in all) and its width, and its
+     corners. The width is the same inset taken from both sides of what
+     uses it: the screen for the fixed layers, the page for the header bar
+     and the content, which are equally wide, so all of them line up even
+     beside a scrollbar. The desktop layer's mask keeps to the forms
+     Golden Gate's uses: an inset that is a max() of a length and
+     viewport units, plain calc() sizes and closest-side corners. With
+     sizes from a min() over a percentage and corners as positioned
+     circles, a reader's browser dropped the whole mask, and the desktop
+     covered the page. */
   --gn-bar: 2rem;
   --gn-gap: 0.75rem;
   --gn-top: calc(var(--gn-bar) + var(--gn-gap));
-  --gn-w: min(100% - 2 * var(--gn-gap), 74rem);
+  --gn-x: max(var(--gn-gap), calc(50vw - 37rem));
+  --gn-w: calc(100% - 2 * var(--gn-x));
   --gn-r: 15px;
   /* What is scrolled into view (a #link, a field reached with Tab) lands
      below the Shell's bar and the header bar, and above the desktop's
@@ -5301,7 +5309,7 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
    header bar, menus and dialogs. The bar's dots and icons are drawn, not
    live: there is no clock, so it never shows a time that is wrong. */
 .theme-is-gnome::after {
-  --gn-corner: #000 calc(var(--gn-r) - 0.5px), #0000 calc(var(--gn-r) + 0.5px);
+  --gn-r2: calc(2 * var(--gn-r));
   content: "";
   position: fixed;
   inset: 0;
@@ -5317,18 +5325,14 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
     #2a3ef6;
   mask:
     linear-gradient(#000 0 0),
-    linear-gradient(#000 0 0) center top calc(var(--gn-top) + var(--gn-r)) /
-      var(--gn-w) calc(100% - var(--gn-top) - var(--gn-gap) - 2 * var(--gn-r)) no-repeat,
-    linear-gradient(#000 0 0) center top var(--gn-top) /
-      calc(var(--gn-w) - 2 * var(--gn-r)) calc(100% - var(--gn-top) - var(--gn-gap)) no-repeat,
-    radial-gradient(circle at var(--gn-r) var(--gn-r), var(--gn-corner)) center top var(--gn-top) /
-      var(--gn-w) calc(2 * var(--gn-r)) no-repeat,
-    radial-gradient(circle at calc(100% - var(--gn-r)) var(--gn-r), var(--gn-corner)) center top var(--gn-top) /
-      var(--gn-w) calc(2 * var(--gn-r)) no-repeat,
-    radial-gradient(circle at var(--gn-r) var(--gn-r), var(--gn-corner)) center bottom var(--gn-gap) /
-      var(--gn-w) calc(2 * var(--gn-r)) no-repeat,
-    radial-gradient(circle at calc(100% - var(--gn-r)) var(--gn-r), var(--gn-corner)) center bottom var(--gn-gap) /
-      var(--gn-w) calc(2 * var(--gn-r)) no-repeat;
+    linear-gradient(#000 0 0) var(--gn-x) calc(var(--gn-top) + var(--gn-r)) /
+      calc(100% - 2 * var(--gn-x)) calc(100% - var(--gn-top) - var(--gn-gap) - var(--gn-r2)) no-repeat,
+    linear-gradient(#000 0 0) calc(var(--gn-x) + var(--gn-r)) var(--gn-top) /
+      calc(100% - 2 * var(--gn-x) - var(--gn-r2)) calc(100% - var(--gn-top) - var(--gn-gap)) no-repeat,
+    radial-gradient(closest-side, #000 98%, transparent) left var(--gn-x) top var(--gn-top) / var(--gn-r2) var(--gn-r2) no-repeat,
+    radial-gradient(closest-side, #000 98%, transparent) right var(--gn-x) top var(--gn-top) / var(--gn-r2) var(--gn-r2) no-repeat,
+    radial-gradient(closest-side, #000 98%, transparent) left var(--gn-x) bottom var(--gn-gap) / var(--gn-r2) var(--gn-r2) no-repeat,
+    radial-gradient(closest-side, #000 98%, transparent) right var(--gn-x) bottom var(--gn-gap) / var(--gn-r2) var(--gn-r2) no-repeat;
   mask-composite: exclude, add, add, add, add, add, add;
 }
 /* The window's halo: an empty box the window's size and shape whose
