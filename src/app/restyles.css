@@ -6585,26 +6585,30 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
   }
 }
 /* In the middle, Waybar's window module: the open window's title (the
-   page's own, as the browser would give it) in the quieter text colour,
-   centred in the room between the workspaces and the icons, where there is
-   room for it. Generated, so screen readers skip it. */
+   page's own, as the browser would give it) in the quieter text colour, in
+   the very centre of the bar, which is the centre of the screen. It shows
+   only where that centre is clear of the workspaces on its left, so it is
+   never pushed off it: monospace runs wide, so that waits for a wide
+   screen, and longer for a larger Text size or an eighth link (the widths
+   below are where the longest title, "Do I own this?", clears them).
+   Generated, so screen readers skip it. */
 @media (width >= 80rem) {
+  .theme-is-hyprland .top-bar > div {
+    position: relative;
+  }
   .theme-is-hyprland .top-bar > div::after {
     content: "MyReads";
     content: "MyReads" / "";
-    order: 1;
-    min-width: 0;
-    margin-left: auto;
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    translate: -50% -50%;
     padding-inline: 0.75rem;
-    overflow: hidden;
     color: var(--hl-subtext);
     font-size: 0.8125rem;
     white-space: nowrap;
-    text-overflow: ellipsis;
     pointer-events: none;
-  }
-  .theme-is-hyprland .top-bar > div > div:last-child {
-    order: 2;
   }
   .theme-is-hyprland[data-section="library"] .top-bar > div::after {
     content: "Library · MyReads";
@@ -6647,9 +6651,34 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
     content: "Do I own this? · MyReads" / "";
   }
 }
-@media (80rem <= width < 90rem) {
-  .theme-is-hyprland .top-bar > div:has(> a:nth-of-type(9))::after {
-    content: none;
+@media (width >= 113rem) {
+  .theme-is-hyprland:not([data-text-size="large"], [data-text-size="larger"]) .top-bar > div:not(:has(> a:nth-of-type(9)))::after {
+    display: block;
+  }
+}
+@media (width >= 122rem) {
+  .theme-is-hyprland:not([data-text-size="large"], [data-text-size="larger"]) .top-bar > div::after {
+    display: block;
+  }
+}
+@media (width >= 127rem) {
+  .theme-is-hyprland[data-text-size="large"] .top-bar > div:not(:has(> a:nth-of-type(9)))::after {
+    display: block;
+  }
+}
+@media (width >= 136rem) {
+  .theme-is-hyprland[data-text-size="large"] .top-bar > div::after {
+    display: block;
+  }
+}
+@media (width >= 141rem) {
+  .theme-is-hyprland[data-text-size="larger"] .top-bar > div:not(:has(> a:nth-of-type(9)))::after {
+    display: block;
+  }
+}
+@media (width >= 151rem) {
+  .theme-is-hyprland[data-text-size="larger"] .top-bar > div::after {
+    display: block;
   }
 }
 /* The icons on the right: one module, each icon in its own colour. */
