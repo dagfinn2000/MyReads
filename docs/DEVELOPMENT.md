@@ -309,6 +309,36 @@ The reading room's files:
   its widest child's longest word, and one long series name, a monospace
   theme or a large text size then pushed the whole page past a phone's
   edge.
+- **A slow phone only draws what it shows.** Measured on a phone-sized
+  page with the CPU slowed six times and slow 4G:
+  - Library cards and Now reading rows off screen are skipped
+    (`.card-skip`, `content-visibility: auto`) until they come near it:
+    the library's first full paint came 0.9 s sooner, and its blocking
+    time halved. It is only on where `overflow-clip-margin` lets a card
+    draw past its edge (a test checks), since skipping clips what a card
+    draws outside itself.
+  - Below 64rem the cards after the cascade's last step don't animate
+    (`.card-in-rest`): they are all out of sight there, and 176
+    animations were 0.7 s of the library's load.
+  - Each Now reading row is a Suspense boundary of its own, so React
+    wakes the rows in short tasks, a tapped one first; the page finished
+    waking 4 s sooner. The library's cards are not: it updates itself while
+    waking, which made React wake all 200 boundaries at once, in one task
+    eight seconds long.
+  - In the reading room, a bookcase redraws only when one of its own
+    books gets its colour (`sameButColours`), not for every batch read
+    from the covers, which redrew the whole house twice a second for the
+    length of a first visit.
+  - Covers come in smaller copies (`?w=160` to `720` on `/api/covers`,
+    [cover-src.ts](../src/lib/cover-src.ts)), made by sharp, which
+    Next.js already puts in the standalone build, the first time one is
+    asked for, and kept in `thumbs/` beside the covers. `BookCover` lets
+    the browser pick one by the size of its box (`sizes="auto"`); the
+    book page's own cover is the original, and backups carry only
+    originals. Deleting a cover
+    deletes its copies, and `covers:prune` clears copies of covers that
+    are gone. An Open Library cover is often 50 to 100 KB, and its 160 px
+    copy, enough for a row on a phone, about a fifth of that.
 - **Moving backgrounds slide pictures, they don't redraw them.**
   [background-scene.tsx](../src/components/background-scene.tsx) puts one
   fixed layer under the page, and everything in it moves by `transform` or

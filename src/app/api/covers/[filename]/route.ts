@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { coverFilePath } from "@/lib/covers";
+import { COVER_WIDTHS } from "@/lib/cover-src";
+import { coverFilePath, coverThumbnail } from "@/lib/covers";
 import { MIME_BY_KIND, type ImageKind } from "@/lib/image-type";
 
 const KIND_BY_EXT: Record<string, ImageKind> = {
@@ -11,9 +12,11 @@ const KIND_BY_EXT: Record<string, ImageKind> = {
   ".webp": "webp",
 };
 
-/** GET /api/covers/[filename] — serves a locally cached cover image. */
+/** GET /api/covers/[filename] — serves a locally cached cover image, or with
+ *  ?w=<width> (one of COVER_WIDTHS) a smaller copy of it as WebP, falling
+ *  back to the cover itself if the copy can't be made. */
 export async function GET(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ filename: string }> },
 ) {
   const { filename } = await params;
@@ -22,11 +25,16 @@ export async function GET(
   const kind = KIND_BY_EXT[path.extname(safe).toLowerCase()];
   if (!kind) return new NextResponse("Not found", { status: 404 });
 
+  const width = Number(new URL(req.url).searchParams.get("w"));
+  const thumb = (COVER_WIDTHS as readonly number[]).includes(width)
+    ? await coverThumbnail(safe, width)
+    : null;
+
   try {
-    const buf = await fs.readFile(coverFilePath(safe));
+    const buf = thumb ?? (await fs.readFile(coverFilePath(safe)));
     return new NextResponse(new Uint8Array(buf), {
       headers: {
-        "Content-Type": MIME_BY_KIND[kind],
+        "Content-Type": thumb ? "image/webp" : MIME_BY_KIND[kind],
         // Filenames embed a content hash (or a random upload id), so a
         // changed cover always gets a new URL and immutable caching is safe.
         //

@@ -20,6 +20,7 @@ import {
   type FormatPrefs,
 } from "@/lib/display";
 import { coverArt } from "@/lib/cover-art";
+import { coverAt, coverSrcSet, hasCoverCopies } from "@/lib/cover-src";
 import type { LibraryDisplay } from "@/lib/library-view";
 import { cn } from "@/lib/utils";
 
@@ -54,6 +55,12 @@ export function BookCover({
         // eslint-disable-next-line @next/next/no-img-element
         <img
           src={book.coverUrl}
+          // A cached cover comes in smaller copies (lib/cover-src.ts): the
+          // browser takes the one its box needs, measured from the page
+          // ("auto"; 10rem where that isn't understood). The book page's own
+          // cover, loaded at once, keeps the original.
+          srcSet={loading === "lazy" ? coverSrcSet(book.coverUrl) : undefined}
+          sizes={loading === "lazy" && hasCoverCopies(book.coverUrl) ? "auto, 10rem" : undefined}
           alt={`Cover of ${book.title}`}
           loading={loading}
           decoding="async"
@@ -78,8 +85,9 @@ export function BookBackdrop({ book }: { book: Pick<Book, "title" | "coverUrl"> 
   if (book.coverUrl) {
     return (
       <div className="book-backdrop" aria-hidden="true">
+        {/* Blurred to its colours, so the smallest copy does. */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={book.coverUrl} alt="" decoding="async" />
+        <img src={coverAt(book.coverUrl, 160)} alt="" decoding="async" />
       </div>
     );
   }

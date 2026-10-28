@@ -48,6 +48,7 @@ try {
   let deleted = 0;
   let bytes = 0;
   let keptYoung = 0;
+  const removed = new Set();
 
   for (const name of files) {
     if (referenced.has(name)) continue;
@@ -68,16 +69,45 @@ try {
 
     bytes += stat.size;
     deleted++;
+    removed.add(name);
+    if (apply) {
+      await fs.unlink(full).catch(() => {});
+    }
+  }
+
+  // The smaller copies of covers (thumbs/<cover>.<width>.webp, made when a
+  // page asks for one) go with their cover: those of covers already gone,
+  // or going now.
+  let thumbs = [];
+  try {
+    thumbs = await fs.readdir(path.join(dir, "thumbs"));
+  } catch {
+    // none made yet
+  }
+  let thumbsDeleted = 0;
+  for (const name of thumbs) {
+    const cover = name.replace(/\.\d+\.webp$/, "");
+    if (referenced.has(cover)) continue;
+    const coverGone =
+      removed.has(cover) ||
+      !(await fs.stat(path.join(dir, cover)).then(() => true, () => false));
+    if (!coverGone) continue;
+    const full = path.join(dir, "thumbs", name);
+    const stat = await fs.stat(full).catch(() => null);
+    if (!stat?.isFile()) continue;
+    bytes += stat.size;
+    thumbsDeleted++;
     if (apply) {
       await fs.unlink(full).catch(() => {});
     }
   }
 
   const mb = (bytes / 1024 / 1024).toFixed(1);
+  const copies = thumbsDeleted ? ` and ${thumbsDeleted} smaller cop${thumbsDeleted === 1 ? "y" : "ies"}` : "";
   console.log(
     apply
-      ? `[myreads] deleted ${deleted} orphaned cover(s), freed ${mb} MB`
-      : `[myreads] ${deleted} orphaned cover(s) totalling ${mb} MB — re-run with --yes to delete`,
+      ? `[myreads] deleted ${deleted} orphaned cover(s)${copies}, freed ${mb} MB`
+      : `[myreads] ${deleted} orphaned cover(s)${copies} totalling ${mb} MB — re-run with --yes to delete`,
   );
   if (keptYoung > 0) {
     console.log(`[myreads] kept ${keptYoung} unreferenced file(s) newer than 24h`);

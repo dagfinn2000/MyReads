@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useTransition } from "react";
+import { Suspense, useEffect, useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { Hourglass } from "lucide-react";
 import { undoMoveFromReading } from "@/lib/actions/progress";
@@ -64,22 +64,30 @@ export function NowReading({
   // first, the move's result or the refreshed list, nothing flickers: the
   // row stays until the list drops the book, and comes back as soon as an
   // undo returns it.
+  //
+  // Each row is a Suspense boundary of its own, though nothing in it
+  // waits: React then wakes the rows one by one in short tasks, the row
+  // tapped first, instead of all of them in one that a slow phone took two
+  // seconds over while every tap waited. Rows out of sight are skipped
+  // until they come near the screen (card-skip, globals.css).
   return (
     <ul className="grid grid-cols-1 gap-3">
       {ids.map((id) => {
         const book = byId.get(id);
         if (book) {
           return (
-            <li key={id}>
-              <NowReadingRow
-                book={book}
-                autoFocus={focusId === id}
-                onMoved={(result) =>
-                  setMoved((m) =>
-                    new Map(m).set(id, { book, message: result.message, undo: result.undo }),
-                  )
-                }
-              />
+            <li key={id} className="card-skip card-skip-tall">
+              <Suspense fallback={null}>
+                <NowReadingRow
+                  book={book}
+                  autoFocus={focusId === id}
+                  onMoved={(result) =>
+                    setMoved((m) =>
+                      new Map(m).set(id, { book, message: result.message, undo: result.undo }),
+                    )
+                  }
+                />
+              </Suspense>
             </li>
           );
         }
