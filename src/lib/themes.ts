@@ -127,6 +127,15 @@ export const THEMES: ThemeDef[] = [
       "radial-gradient(circle, transparent 0 38%, #00e5ff 40% 47%, transparent 49%), radial-gradient(circle at 58% 58%, transparent 0 38%, #ff2bd6 40% 47%, transparent 49%)",
   },
   { id: "darkroom", name: "Darkroom", mode: "dark", swatch: ["#0a0202", "#ff6a52"] },
+  {
+    id: "hyprland",
+    name: "Hyprland",
+    mode: "dark",
+    swatch: ["#1e1e2e", "#74c7ec"],
+    pattern:
+      "radial-gradient(circle, #1e1e2e 0 49%, transparent 51% 65%, #0b1120 67%), linear-gradient(157deg, #33ccff, #00ff99)",
+    ownBackground: true,
+  },
 
   // Light palettes
   { id: "solarized-light", name: "Solarized Light", mode: "light", swatch: ["#fdf6e3", "#b58900"] },
@@ -222,6 +231,24 @@ export const THEMES: ThemeDef[] = [
     swatch: ["#f2f2f5", "#0a64d2"],
     pattern:
       "radial-gradient(120% 90% at 0% 100%, #e9cf9b 0 34%, transparent 35%), radial-gradient(110% 95% at 100% 0%, #3b3f7a 0 30%, transparent 31%), radial-gradient(140% 120% at 20% 110%, #c9c2b8 0 52%, transparent 53%), linear-gradient(120deg, #f1e3c4, #b9b8c4 55%, #4a4e86)",
+    ownBackground: true,
+  },
+  {
+    id: "kde-plasma",
+    name: "KDE Plasma",
+    mode: "light",
+    swatch: ["#eff0f1", "#1c6b9f"],
+    pattern:
+      "radial-gradient(circle at 28% 34%, rgb(234 202 178 / 0.95) 0 12%, rgb(214 168 166 / 0.5) 19%, transparent 29%), radial-gradient(circle at 76% 20%, rgb(206 160 188 / 0.85) 0 8%, transparent 18%), radial-gradient(75% 55% at 0% 100%, #c96c58 0 40%, transparent 72%), linear-gradient(170deg, #3d3b67 6%, #4d6896 28%, #8fa9bf 44%, #b7bcc0 56%, #8fa9bf 70%, #6489bd 90%)",
+    ownBackground: true,
+  },
+  {
+    id: "gnome",
+    name: "GNOME",
+    mode: "light",
+    swatch: ["#fafafb", "#1c71d8"],
+    pattern:
+      "linear-gradient(#000000 0 22%, transparent 22%), linear-gradient(90deg, #2d3cff 0 16%, transparent 16% 84%, #3a27ff 84%), linear-gradient(#1a40ff 0 31%, transparent 31% 85%, #4404e0 85%)",
     ownBackground: true,
   },
 

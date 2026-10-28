@@ -353,7 +353,7 @@ tab goes away. You can also keep the house and leave the avatar out.
 
 ## Look and feel
 
-- 56 colour themes, or a light and a dark one that switch with your
+- 59 colour themes, or a light and a dark one that switch with your
   device, with an accent colour of your own on top if you like. Your
   choice follows you to every device you sign in on, unless you give one
   phone or computer a theme of its own ("Only on this device" in the
@@ -400,7 +400,7 @@ tab goes away. You can also keep the house and leave the avatar out.
   green ribbon), Party (confetti), Camouflage and Quest. They are as easy to
   read as the rest, only nobody should want them. Hover over one in the
   menu for a word about it.
-- **Nine themes restyle the whole app**, not just its colours: the top
+- **Twelve themes restyle the whole app**, not just its colours: the top
   bar, cards, buttons, fields, menus, dialogs, tabs, progress bars, type
   and the picture behind the page all take after what the theme is named
   for. The rest stay as they were.
@@ -452,8 +452,65 @@ tab goes away. You can also keep the house and leave the avatar out.
     the red one closes it. The page scrolls behind the window's rounded
     edges, as in a real window. Text on the glass keeps its contrast
     over any part of the picture and any cover.
-- A theme with a picture of its own (Desktop 95's desktop, Aero's and
-  Golden Gate's, Notebook's ruled page, Party's confetti, Quest's night
+  - KDE Plasma (new, light): Plasma 6.8 with Breeze. The app is a Breeze
+    window on the Hanabi wallpaper, blurred fireworks in peach and rose
+    over indigo and cornflower blue with one sharp spark. The window is
+    light grey with white panels, a hairline round it and Breeze's large
+    soft shadow, darkest underneath. Its title bar and toolbar are one
+    grey band: the app's icon and the page's name above, thin minimise,
+    maximise and close glyphs at the right, and the page links as flat
+    toolbar buttons, the open page's checked. Plasma's panel floats
+    below the window with the launcher, a few task icons (the app's own
+    lit blue under a blue line) and the tray. Buttons are near-white
+    with a darker line under them. The pointer shows as a crisp
+    Breeze-blue edge and the keyboard as a thicker, deeper blue one,
+    never a glow. Ticked boxes are pale blue round a dark tick, the open
+    tab has a blue strip along its top, menus light their item in
+    translucent blue, and dialogs are Kirigami sheets that dim only the
+    window. The page scrolls behind the window's edges. The sign-in
+    pages are Plasma's login screen: white type and a dark frosted sheet
+    on the dimmed wallpaper.
+  - GNOME (new, light): GNOME 51 with libadwaita. The Shell's black bar
+    runs along the top of the screen, workspace dots at its left and
+    status icons at its right. The app is a near-white window with round
+    corners and a soft grey halo, on the Roundhex desktop of glassy
+    hexagons in electric blue and violet. Its header bar is flat, with
+    the page links as a view switcher in the middle (the open page a
+    grey rounded fill) and the lone round close button at the far right.
+    The library is one white boxed list with hairlines between its rows,
+    and other cards are white with whisper shadows. Buttons are
+    translucent grey with bold labels (the main one solid blue, a
+    destructive one red on a pale red tint). Fields look like buttons
+    and take a blue ring while you type. Tabs and shelves are toggle
+    groups with the chosen one raised in white, switches and check boxes
+    turn blue, and menus and popovers point at their button with GTK's
+    tail. On a phone, dialogs rise from the bottom as sheets. An accent
+    colour chosen in Preferences replaces the blue everywhere. The page
+    scrolls behind the window's rounded edges, as in a real window.
+  - Hyprland (new, dark): the tiling Wayland compositor, set up the way
+    its users rice it, in Catppuccin Mocha. There are no title bars,
+    buttons or dock. The app is a tiled window: a bare dark rectangle
+    whose 2px border runs from cyan at the top left to mint at the
+    bottom right, set in even gaps on Hyprland's own wallpaper (a navy
+    rain of capsules, contour lines and the glowing droplet logo). A
+    Waybar floats above it in JetBrains Mono. The page links are
+    numbered workspaces with the open one filled, the page's title sits
+    in the middle as the window module shows it, and the icons on the
+    right form a module of their own, each in its own pastel. Cards,
+    library tiles and the bulk-edit bar are smaller windows with grey
+    borders, and focus follows the mouse: the one under the pointer
+    takes the glowing border, and keyboard focus adds Hyprland's glow.
+    Menus, popovers and dialogs float as windows that pop in from a
+    little smaller. A dialog takes the focus, so the app's window turns
+    grey and dims, while the bar and the desktop stay lit. Buttons,
+    pills and checkboxes follow the reader's Accent colour, and the
+    window borders keep Hyprland's gradient. The page scrolls behind the
+    window's edges, as in a real window. Signed out, the desktop is
+    bare: the sign-in window floats beside the logo, which shows whole
+    above the splash line "Read the wiki.", and on a phone the window
+    covers the logo completely.
+- A theme with a picture of its own (Desktop 95's desktop, Aero's,
+  Golden Gate's and the Linux desktops', Notebook's ruled page, Party's confetti, Quest's night
   sky and the rest) shows it whatever background you picked, and
   Preferences says so under Background. Your background comes back when
   you pick another theme.
