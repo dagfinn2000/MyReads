@@ -47,7 +47,40 @@ compare medians.
 three runs each, medians. "Before" is the app as it was when this page was
 written; "after" is with the changes below.
 
-RESULTS
+Page loads, cold, on slow 4G:
+
+| Page | Blocking, before | Blocking, after | Elements, before | Elements, after |
+| --- | ---: | ---: | ---: | ---: |
+| Library (`/books`) | 1,550 ms | 1,180 ms | 4,386 | 4,386 |
+| Now reading (`/reading`) | 2,260 ms | 950 ms | 3,974 | 3,755 |
+| Reading room (`/room`) | 3,960 ms | 2,460 ms | 6,030 | 1,289 |
+| Quotes (`/quotes`) | 860 ms | 760 ms | 2,262 | 2,263 |
+| Stats (`/stats`) | 630 ms | 750 ms | 1,083 | 1,084 |
+
+First paint stayed at about 1.5 s and the largest paint between 1.8 and
+2.7 s on every page; Stats was not changed, and its difference is the
+noise between runs. Now reading no longer shifts as it loads (0.017 to
+0); the reading room still does (0.10), as its house is laid out in the
+browser.
+
+Taps:
+
+| Tap | Response, before | Response, after | Shown, before | Shown, after |
+| --- | ---: | ---: | ---: | ---: |
+| Open the format list | 1,000 ms | 470 ms | 1,480 ms | 940 ms |
+| Pick a format | 660 ms | 340 ms | 2,130 ms | 1,580 ms |
+| Open the sort list | 1,110 ms | 610 ms | 1,580 ms | 1,060 ms |
+| Open the View menu | 1,180 ms | 650 ms | 1,670 ms | 1,290 ms |
+| Start picking books | 830 ms | 740 ms | 1,410 ms | 1,300 ms |
+| Pick a book | 480 ms | 410 ms | 1,210 ms | 1,040 ms |
+| Open a book | 690 ms | 600 ms | 2,590 ms | 2,620 ms |
+| Go to Now reading | 210 ms | 190 ms | 5,300 ms | 4,030 ms |
+| Open the theme palette | 540 ms | 590 ms | 1,070 ms | 1,150 ms |
+
+Runs taking turns between the two builds found more: ticking a second
+or third book went from about 430 to 150 ms and from 520 to 250 ms,
+leaving the picking from 500 to 350 ms, closing Manage shelves from 420
+to 180 ms, and a new sort was shown in 2.0 s rather than 2.9 s.
 
 ## Rules
 
