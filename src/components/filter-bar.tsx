@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useEffectEvent, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useEffectEvent, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { BookFormat } from "@/lib/enums";
 import {
@@ -141,6 +141,61 @@ const OWNED_OPTIONS = [
  *  line instead of squeezing "All formats" down to "All fo". */
 const HALF_ROW = "min-w-[calc(50%_-_0.25rem)] flex-1 sm:min-w-0 sm:flex-initial";
 
+const FORMAT_OPTIONS = [
+  { value: "all", label: "All formats" },
+  ...Object.values(BookFormat).map((f) => ({ value: f, label: FORMAT_LABELS[f] })),
+];
+const NO_CHANGES: Partial<FilterValues> = {};
+
+/**
+ * One of the bar's lists. A closed Radix Select still draws every item,
+ * off the page, so its button can show the chosen one; drawn again only
+ * when its own value or items change, the four of them no longer redraw
+ * thirty-odd items for each letter typed in the search box.
+ */
+const BarSelect = memo(function BarSelect({
+  value,
+  options,
+  onValueChange,
+  className,
+  label,
+  placeholder,
+  children,
+}: {
+  value: string;
+  options: readonly { value: string; label: string }[];
+  onValueChange: (value: string) => void;
+  className: string;
+  label?: string;
+  placeholder?: string;
+  /** What the closed list shows, when it isn't the chosen item's label. */
+  children?: React.ReactNode;
+}) {
+  return (
+    <Select value={value} onValueChange={onValueChange}>
+      <SelectTrigger className={className} aria-label={label}>
+        {children ?? <SelectValue placeholder={placeholder} />}
+      </SelectTrigger>
+      <SelectContent>
+        {options.map((o) => (
+          <SelectItem key={o.value} value={o.value}>
+            {o.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+});
+
+// The rest of the bar, likewise drawn again only when what it's given
+// changes: typing a search redraws the box and the Save view button, which
+// saves what it says, and nothing else.
+const MemoTagFilter = memo(TagFilter);
+const MemoManageTags = memo(ManageTagsDialog);
+const MemoMoreFilters = memo(MoreFilters);
+const MemoViewMenu = memo(LibraryViewMenu);
+const MemoChips = memo(ActiveFilterChips);
+
 /**
  * Search/filter/sort controls. All state lives in the URL: every change
  * router.replace()s with updated query params and the server component
@@ -187,9 +242,9 @@ export function FilterBar({
   // builds on them rather than on the stale `values`, so it can't undo the
   // first. New props from the server are a new object, which clears them.
   const [sent, setSent] = useState({ base: values, changes: {} as Partial<FilterValues> });
-  const pending = sent.base === values ? sent.changes : {};
+  const pending = sent.base === values ? sent.changes : NO_CHANGES;
   /** What the controls show: the server's values with those changes. */
-  const current: FilterValues = { ...values, ...pending };
+  const current: FilterValues = useMemo(() => ({ ...values, ...pending }), [values, pending]);
 
   function navigate(overrides: Partial<FilterValues>) {
     setSent({ base: values, changes: { ...pending, ...overrides } });
@@ -233,6 +288,36 @@ export function FilterBar({
     }
   }
 
+  // The latest navigate, for the parts of the bar: they're handed the same
+  // function every time, so they can skip redrawing.
+  const navigateRef = useRef(navigate);
+  useLayoutEffect(() => {
+    navigateRef.current = navigate;
+  });
+  const go = useCallback((overrides: Partial<FilterValues>) => navigateRef.current(overrides), []);
+  const onFormat = useCallback((v: string) => go({ format: v }), [go]);
+  const onOwned = useCallback((v: string) => go({ owned: v }), [go]);
+  const onGroup = useCallback((v: string) => go({ group: v }), [go]);
+  // Each sort opens its natural way round: titles A to Z, the rest newest,
+  // highest or longest first.
+  const onSort = useCallback((v: string) => go({ sort: v, dir: naturalDir(v) }), [go]);
+  const onRemoveChip = useCallback((chip: { clear: Partial<FilterValues> }) => go(chip.clear), [go]);
+  const onClearAll = useCallback(
+    () =>
+      go({
+        author: "",
+        tag: "",
+        tagMatch: "",
+        notTag: "",
+        finished: "",
+        minRating: "",
+        missing: "",
+        series: "",
+        field: "",
+      }),
+    [go],
+  );
+
   // Debounced text search. Skips a box that already says what the URL does
   // (on mount, and after following the URL), which would only navigate to
   // the page already showing.
@@ -275,12 +360,38 @@ export function FilterBar({
     return () => document.removeEventListener("click", onClick, true);
   }, []);
 
-  const chips = activeFilterChips(
-    current,
-    (v) => minRatingLabel(v, ratingStyle),
-    (field) => fieldFilterLabel(field, prefs.customFields, prefs),
+  const chips = useMemo(
+    () =>
+      activeFilterChips(
+        current,
+        (v) => minRatingLabel(v, ratingStyle),
+        (field) => fieldFilterLabel(field, prefs.customFields, prefs),
+      ),
+    [current, ratingStyle, prefs],
   );
   const group = GROUP_OPTIONS.find((o) => o.value === current.group);
+  // Made once per grouping, so the list can skip redrawing.
+  const groupValue = useMemo(
+    () => (
+      <>
+        <Layers className="size-4 text-muted-foreground" />
+        <SelectValue>
+          <span className="sm:hidden">{group?.short}</span>
+          <span className="hidden sm:inline">{group?.label}</span>
+        </SelectValue>
+      </>
+    ),
+    [group],
+  );
+  const ratings = ratingStyle !== "off";
+  const groupOptions = useMemo(
+    () => GROUP_OPTIONS.filter((o) => o.value !== "rating" || ratings || current.group === "rating"),
+    [ratings, current.group],
+  );
+  const sortOptions = useMemo(
+    () => SORT_OPTIONS.filter((o) => o.value !== "rating" || ratings || current.sort === "rating"),
+    [ratings, current.sort],
+  );
   const asc = current.dir === "asc";
 
   return (
@@ -304,105 +415,64 @@ export function FilterBar({
           />
         </div>
         <div className="flex shrink-0 items-center gap-1 sm:order-last">
-          <LibraryViewMenu display={display} ratings={ratingStyle !== "off"} />
+          <MemoViewMenu display={display} ratings={ratings} />
           <SaveViewDialog query={canonicalViewQuery({ ...current, q: search })} />
         </div>
 
-        <TagFilter
+        <MemoTagFilter
           allTags={allTags}
           tagCounts={tagCounts}
           tag={current.tag}
           notTag={current.notTag}
           tagMatch={current.tagMatch}
-          onChange={navigate}
+          onChange={go}
           className={`${HALF_ROW} sm:w-36`}
         />
-        <ManageTagsDialog tagCounts={tagCounts} />
+        <MemoManageTags tagCounts={tagCounts} />
 
-        <Select
+        <BarSelect
           value={current.format || "all"}
-          onValueChange={(v) => navigate({ format: v })}
-        >
-          <SelectTrigger className={`${HALF_ROW} sm:w-32`}>
-            <SelectValue placeholder="Format" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All formats</SelectItem>
-            {Object.values(BookFormat).map((f) => (
-              <SelectItem key={f} value={f}>
-                {FORMAT_LABELS[f]}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+          options={FORMAT_OPTIONS}
+          onValueChange={onFormat}
+          className={`${HALF_ROW} sm:w-32`}
+          placeholder="Format"
+        />
 
-        <Select
+        <BarSelect
           value={current.owned || "all"}
-          onValueChange={(v) => navigate({ owned: v })}
-        >
-          <SelectTrigger className={`${HALF_ROW} sm:w-40`}>
-            <SelectValue placeholder="Owned" />
-          </SelectTrigger>
-          <SelectContent>
-            {OWNED_OPTIONS.map((o) => (
-              <SelectItem key={o.value} value={o.value}>
-                {o.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+          options={OWNED_OPTIONS}
+          onValueChange={onOwned}
+          className={`${HALF_ROW} sm:w-40`}
+          placeholder="Owned"
+        />
 
-        <MoreFilters
+        <MemoMoreFilters
           values={current}
           finishedYears={finishedYears}
           ratingStyle={ratingStyle}
           fields={prefs.customFields}
-          onChange={navigate}
+          onChange={go}
           triggerRef={moreFiltersRef}
           className={`${HALF_ROW} sm:w-40`}
         />
 
         <div className="flex w-full items-center gap-1 sm:ml-auto sm:w-auto">
-          <Select
+          <BarSelect
             value={current.group || "none"}
-            onValueChange={(v) => navigate({ group: v })}
+            options={groupOptions}
+            onValueChange={onGroup}
+            className="min-w-0 flex-1 sm:w-56 sm:flex-initial"
+            label="Group by"
           >
-            <SelectTrigger className="min-w-0 flex-1 sm:w-56 sm:flex-initial" aria-label="Group by">
-              <Layers className="size-4 text-muted-foreground" />
-              <SelectValue>
-                <span className="sm:hidden">{group?.short}</span>
-                <span className="hidden sm:inline">{group?.label}</span>
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              {GROUP_OPTIONS.filter(
-                (o) => o.value !== "rating" || ratingStyle !== "off" || current.group === "rating",
-              ).map((o) => (
-                <SelectItem key={o.value} value={o.value}>
-                  {o.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select
+            {groupValue}
+          </BarSelect>
+          <BarSelect
             value={current.sort}
-            // Each sort opens its natural way round: titles A to Z, the
-            // rest newest, highest or longest first.
-            onValueChange={(v) => navigate({ sort: v, dir: naturalDir(v) })}
-          >
-            <SelectTrigger className="min-w-0 flex-1 sm:w-40 sm:flex-initial" aria-label="Sort by">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {SORT_OPTIONS.filter(
-                (o) => o.value !== "rating" || ratingStyle !== "off" || current.sort === "rating",
-              ).map((o) => (
-                <SelectItem key={o.value} value={o.value}>
-                  {o.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            options={sortOptions}
+            onValueChange={onSort}
+            className="min-w-0 flex-1 sm:w-40 sm:flex-initial"
+            label="Sort by"
+          />
           <Button
             variant="outline"
             size="icon"
@@ -427,22 +497,10 @@ export function FilterBar({
         </div>
       </div>
 
-      <ActiveFilterChips
+      <MemoChips
         chips={chips}
-        onRemove={(chip) => navigate(chip.clear)}
-        onClearAll={() =>
-          navigate({
-            author: "",
-            tag: "",
-            tagMatch: "",
-            notTag: "",
-            finished: "",
-            minRating: "",
-            missing: "",
-            series: "",
-            field: "",
-          })
-        }
+        onRemove={onRemoveChip}
+        onClearAll={onClearAll}
         fallbackFocus={moreFiltersRef}
       />
     </div>

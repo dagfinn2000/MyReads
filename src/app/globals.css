@@ -1622,6 +1622,25 @@
   syntax: "*";
   inherits: false;
 }
+/* It also stops the page behind taking the pointer, with pointer-events:
+   none on <body>, and that is inherited too: another restyle of the whole
+   page as one opened, and again as it closed (a tenth to a quarter of a
+   second each on a slow phone). <body> keeps its own value here, and the
+   shield, one empty element over the window just under the open menu (it
+   comes after the page, and the menu after it), takes the taps instead: a
+   tap on it still closes the menu, and reaches nothing behind. */
+body[style*="pointer-events: none"] {
+  pointer-events: auto !important;
+}
+.outside-shield {
+  display: none;
+}
+body[style*="pointer-events: none"] > .outside-shield {
+  display: block;
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+}
 /* ── Beyond colour ─────────────────────────────────────────────────────────
    A theme can bring more than colours. In its block, --radius gives it
    corners of its own and --heading-font a heading face; the Corners and

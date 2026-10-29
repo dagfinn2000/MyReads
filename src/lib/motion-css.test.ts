@@ -78,4 +78,15 @@ describe("menus and dialogs opening (globals.css)", () => {
     expect(rule![1]).toMatch(/inherits:\s*false/);
     expect(rule![1]).toMatch(/syntax:\s*"\*"/);
   });
+
+  it("keeps <body> taking the pointer, and covers the page with the shield instead", () => {
+    // Radix's pointer-events: none on <body> is inherited by every element.
+    const body = /body\[style\*="pointer-events: none"\]\s*\{([^{}]*)\}/.exec(css);
+    expect(body?.[1]).toMatch(/pointer-events:\s*auto\s*!important/);
+    const shield = /body\[style\*="pointer-events: none"\]\s*>\s*\.outside-shield\s*\{([^{}]*)\}/.exec(css);
+    expect(shield?.[1]).toMatch(/position:\s*fixed/);
+    expect(shield?.[1]).toMatch(/inset:\s*0/);
+    const layout = readFileSync(path.resolve(__dirname, "../app/layout.tsx"), "utf8");
+    expect(layout).toMatch(/\{children\}[\s\S]*className="outside-shield"[\s\S]*<\/body>/);
+  });
 });

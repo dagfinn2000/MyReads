@@ -184,6 +184,9 @@ export default async function RootLayout({
         {/* Star and book icons that pages repeat, drawn once. */}
         <IconSprite />
         {children}
+        {/* Takes the taps behind an open menu, list or dialog
+            (globals.css, .outside-shield). */}
+        <div className="outside-shield" aria-hidden="true" />
       </body>
     </html>
   );
