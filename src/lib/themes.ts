@@ -649,6 +649,25 @@ function themeInit(
         const pair = root.getAttribute("data-theme-auto");
         if (pair) apply("auto:" + pair, darkIds, backgrounds, ownBackgroundIds);
       });
+    // The Linux desktops draw their text in faces of their own, which the
+    // page doesn't preload (every other theme would pay for them). Asked
+    // for now, they arrive a good deal sooner than when the first layout
+    // finds text in them, so the text swaps to them sooner on a slow
+    // connection. load() only fetches; nothing on screen changes.
+    const faces: Record<string, string[]> = {
+      gnome: ["Inter"],
+      "kde-plasma": ["Noto Sans"],
+      hyprland: ["Noto Sans", "JetBrains Mono"],
+    };
+    const id = root.getAttribute("data-theme") || "";
+    // GNOME's text is Adwaita Sans where that is installed, and Inter only
+    // where it isn't: no need to fetch Inter for a GNOME desktop.
+    const local = id === "gnome" && document.fonts && document.fonts.check && document.fonts.check('1em "Adwaita Sans"');
+    if (!local && Object.prototype.hasOwnProperty.call(faces, id) && document.fonts && document.fonts.load) {
+      faces[id].forEach(function (face) {
+        document.fonts.load('1em "' + face + '"').catch(function () {});
+      });
+    }
   } catch {}
 }
 

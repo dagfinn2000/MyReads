@@ -114,7 +114,9 @@ export function QuotesToolbar({
       </div>
 
       {showFrom && (
-        <Select value={fromValue} onValueChange={changeFrom}>
+        // Both lists are drawn when wanted (ui/select.tsx), not as the page
+        // loads: this one holds every shelf and tag.
+        <Select lazyList value={fromValue} onValueChange={changeFrom}>
           <SelectTrigger aria-label="From" className="w-full sm:w-56">
             <SelectValue>
               <span className="truncate">From: {fromLabel}</span>
@@ -150,9 +152,9 @@ export function QuotesToolbar({
 
       {hasQuotes && (
         <div className="flex w-full items-center gap-2 sm:ml-auto sm:w-auto">
-          <Select value={params.order} onValueChange={(v) => changeOrder(v as QuoteOrder)}>
+          <Select lazyList value={params.order} onValueChange={(v) => changeOrder(v as QuoteOrder)}>
             <SelectTrigger aria-label="Order" className="min-w-0 flex-1 sm:w-36 sm:flex-initial">
-              <SelectValue />
+              <SelectValue>{ORDER_OPTIONS.find((o) => o.value === params.order)?.label}</SelectValue>
             </SelectTrigger>
             <SelectContent>
               {ORDER_OPTIONS.map((o) => (

@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { savePreferences } from "@/lib/actions/preferences";
 import { DEFAULT_PREFERENCES, type Preferences } from "@/lib/preferences";
@@ -37,7 +37,16 @@ export function PreferencesProvider({
       .catch(() => {});
   }, [detectTimeZone, router]);
 
-  return <PreferencesContext.Provider value={value}>{children}</PreferencesContext.Provider>;
+  // A refresh, or a save that draws the page again, sends the preferences
+  // as a new object, almost always equal to the last. Handing on the same
+  // one keeps the memoised cards and rows that read them (stars, status
+  // badges, the library's cards) from all drawing again for nothing.
+  const json = JSON.stringify(value);
+  const [kept, setKept] = useState({ json, value });
+  if (kept.json !== json) setKept({ json, value });
+  const shown = kept.json === json ? kept.value : value;
+
+  return <PreferencesContext.Provider value={shown}>{children}</PreferencesContext.Provider>;
 }
 
 export function usePreferences(): Preferences {

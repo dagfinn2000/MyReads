@@ -1,7 +1,7 @@
 "use client";
 
 import "./reading-room.css";
-import { Fragment, memo, useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, memo, startTransition, useEffect, useMemo, useRef, useState } from "react";
 import type {
   RoomBookcase,
   RoomCeiling,
@@ -434,7 +434,13 @@ export function ReadingRoom({
   useEffect(() => {
     const el = wrap.current;
     if (!el) return;
-    const observer = new ResizeObserver(([entry]) => setWidth(Math.floor(entry.contentRect.width)));
+    // Drawn in a transition: building the house is the page's longest job
+    // (most of a second on a slow phone), and this way a tap or a scroll
+    // meanwhile is answered at once.
+    const observer = new ResizeObserver(([entry]) => {
+      const w = Math.floor(entry.contentRect.width);
+      startTransition(() => setWidth(w));
+    });
     observer.observe(el);
     return () => observer.disconnect();
   }, []);
@@ -1586,7 +1592,7 @@ export const HousePreview = memo(function HousePreview({
       aria-hidden="true"
       focusable="false"
     >
-      <Rects rects={a.rects} />
+      <Rects rects={a.rects} separate />
     </svg>
   );
 });

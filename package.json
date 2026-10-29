@@ -19,7 +19,8 @@
     "db:migrate": "prisma migrate deploy",
     "db:studio": "prisma studio",
     "db:prune": "node --env-file-if-exists=.env scripts/prune-metadata-cache.mjs",
-    "covers:prune": "node --env-file-if-exists=.env scripts/prune-covers.mjs"
+    "covers:prune": "node --env-file-if-exists=.env scripts/prune-covers.mjs",
+    "perf": "node --env-file-if-exists=.env scripts/perf.mjs"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.10.1",

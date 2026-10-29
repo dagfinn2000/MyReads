@@ -220,7 +220,10 @@ export function QuickLog({
             </Button>
           ))}
           {days.length > 1 && (
+            // Drawn when wanted (ui/select.tsx): a page of rows each drew
+            // its closed list as it loaded.
             <Select
+              lazyList
               value={day}
               onValueChange={(v) => {
                 setDay(v);
@@ -228,7 +231,9 @@ export function QuickLog({
               }}
             >
               <SelectTrigger aria-label="Which day">
-                <SelectValue />
+                <SelectValue>
+                  {day === "other" ? "Another day…" : days.find((d) => d.value === day)?.label}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {days.map((d) => (

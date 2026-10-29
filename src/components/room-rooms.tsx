@@ -19,6 +19,8 @@ import {
   Sprite,
   Stand,
   grid,
+  lazy,
+  lazyTable,
   type Art,
   type Paint,
   type Rect,
@@ -125,7 +127,6 @@ function rangeArt(): Art {
   R.push([0, 72, 34, 2, "soot"], [1, 72, 4, 2, "metal"], [29, 72, 4, 2, "metal"]);
   return { w: 34, h: 74, rects: R };
 }
-const RANGE = rangeArt();
 /** The fire behind the range's little window, in two flickers. */
 const RANGE_FLAMES = [g(["..f..r.", ".rFf.fr", "rfFFfFf"], 21, 58), g([".r..f..", "rf.rFf.", "fFfFFfr"], 21, 58)];
 
@@ -1471,44 +1472,44 @@ function bucketArt(): Art {
 
 // ── Drawn in the room ────────────────────────────────────────────────────
 
-const ART = {
-  range: RANGE,
-  dresser: dresserArt(),
-  table: tableArt(),
-  wardrobe: wardrobeArt(),
-  bed: bedArt(),
-  nightstand: nightstandArt(),
-  piano: pianoArt(),
-  harp: harpArt(),
-  cello: celloArt(),
-  palm: PALM,
-  wicker: WICKER,
-  birdcage: birdcageArt(),
-  ferns: FERNS,
-  darts: dartsArt(),
-  billiards: billiardsArt(),
-  chess: chessArt(),
-  easel: easelArt(),
-  paints: paintsArt(),
-  bust: BUST,
-  bath: bathArt(),
-  washstand: washstandArt(),
-  towels: towelsArt(),
-  sideboard: sideboardArt(),
-  dining: diningArt(),
-  cabinet: cabinetArt(),
-  cot: cotArt(),
-  toybox: toyboxArt(),
-  blocks: blocksArt(),
-  workbench: workbenchArt(),
-  sawhorse: sawhorseArt(),
-  toolchest: toolchestArt(),
-  benches: benchesArt(),
-  heater: heaterArt(),
-  bucket: bucketArt(),
-} satisfies Record<RoomPiece, Art>;
-const WINDOW_24 = archWindow(24);
-const WINDOW_18 = archWindow(18);
+const ART = lazyTable({
+  range: rangeArt,
+  dresser: dresserArt,
+  table: tableArt,
+  wardrobe: wardrobeArt,
+  bed: bedArt,
+  nightstand: nightstandArt,
+  piano: pianoArt,
+  harp: harpArt,
+  cello: celloArt,
+  palm: () => PALM,
+  wicker: () => WICKER,
+  birdcage: birdcageArt,
+  ferns: () => FERNS,
+  darts: dartsArt,
+  billiards: billiardsArt,
+  chess: chessArt,
+  easel: easelArt,
+  paints: paintsArt,
+  bust: () => BUST,
+  bath: bathArt,
+  washstand: washstandArt,
+  towels: towelsArt,
+  sideboard: sideboardArt,
+  dining: diningArt,
+  cabinet: cabinetArt,
+  cot: cotArt,
+  toybox: toyboxArt,
+  blocks: blocksArt,
+  workbench: workbenchArt,
+  sawhorse: sawhorseArt,
+  toolchest: toolchestArt,
+  benches: benchesArt,
+  heater: heaterArt,
+  bucket: bucketArt,
+} satisfies Record<RoomPiece, () => Art>);
+const WINDOW_24 = lazy(() => archWindow(24));
+const WINDOW_18 = lazy(() => archWindow(18));
 
 /** Each piece's own art, for tests and previews. */
 export const ROOM_PIECE_ART: Readonly<Record<RoomPiece, Art>> = ART;
@@ -1591,7 +1592,7 @@ export function RoomPieceView({
     case "wicker":
       return (
         <>
-          <Sprite art={WINDOW_24} scale={s} className="room-abs" style={at(0, -96)} />
+          <Sprite art={WINDOW_24()} scale={s} className="room-abs" style={at(0, -96)} />
           <div className="room-sunbeam" aria-hidden="true" style={{ ...at(2, -40), width: 30 * s, height: 40 * s }} />
           {stand()}
         </>
@@ -1599,7 +1600,7 @@ export function RoomPieceView({
     case "ferns":
       return (
         <>
-          <Sprite art={WINDOW_18} scale={s} className="room-abs" style={at(0, -96)} />
+          <Sprite art={WINDOW_18()} scale={s} className="room-abs" style={at(0, -96)} />
           {stand()}
         </>
       );

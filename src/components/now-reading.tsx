@@ -1,9 +1,10 @@
 "use client";
 
-import { Suspense, useEffect, useRef, useState, useTransition } from "react";
+import { Suspense, memo, useCallback, useEffect, useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { Hourglass } from "lucide-react";
 import { undoMoveFromReading } from "@/lib/actions/progress";
+import { dayKey } from "@/lib/dates";
 import { lastReadText } from "@/lib/on-this-day";
 import { nowReadingPaceText } from "@/lib/pace";
 import { currentPassEntries } from "@/lib/progress";
@@ -26,7 +27,7 @@ export interface NowReadingBook extends QuickLogBook, LogBook {
 }
 
 interface Moved {
-  book: NowReadingBook;
+  bookId: string;
   message: string;
   undo: UndoMove;
 }
@@ -52,6 +53,15 @@ export function NowReading({
   const [order] = useState(() => books.map((b) => b.id));
   const [moved, setMoved] = useState<Map<string, Moved>>(() => new Map());
   const [focusId, setFocusId] = useState<string | null>(null);
+  // The same function every time, so the rows can skip redrawing.
+  const handleMoved = useCallback(
+    (id: string, result: MovedResult) =>
+      setMoved((m) => new Map(m).set(id, { bookId: id, message: result.message, undo: result.undo })),
+    [],
+  );
+  // Rows say "Yesterday" and "Last read 3 days ago": they draw again when
+  // the day turns, even if nothing else has changed.
+  const today = dayKey(new Date(), usePreferences().timeZone);
 
   const byId = new Map(books.map((b) => [b.id, b]));
   // Books started since the page loaded (another tab, say) go first.
@@ -80,12 +90,9 @@ export function NowReading({
               <Suspense fallback={null}>
                 <NowReadingRow
                   book={book}
+                  today={today}
                   autoFocus={focusId === id}
-                  onMoved={(result) =>
-                    setMoved((m) =>
-                      new Map(m).set(id, { book, message: result.message, undo: result.undo }),
-                    )
-                  }
+                  onMoved={handleMoved}
                 />
               </Suspense>
             </li>
@@ -101,14 +108,55 @@ export function NowReading({
   );
 }
 
-function NowReadingRow({
+/** Equal as data: the same values, dates and lists, however new the
+ *  objects. */
+function sameData(a: unknown, b: unknown): boolean {
+  if (Object.is(a, b)) return true;
+  if (a instanceof Date || b instanceof Date) {
+    return a instanceof Date && b instanceof Date && a.getTime() === b.getTime();
+  }
+  if (Array.isArray(a) || Array.isArray(b)) {
+    return Array.isArray(a) && Array.isArray(b) && a.length === b.length && a.every((v, i) => sameData(v, b[i]));
+  }
+  if (a && b && typeof a === "object" && typeof b === "object") {
+    const keys = Object.keys(a);
+    return (
+      keys.length === Object.keys(b).length &&
+      keys.every((k) => sameData((a as Record<string, unknown>)[k], (b as Record<string, unknown>)[k]))
+    );
+  }
+  return false;
+}
+
+function sameRow(
+  a: { book: NowReadingBook; today: string; autoFocus: boolean; onMoved: unknown },
+  b: { book: NowReadingBook; today: string; autoFocus: boolean; onMoved: unknown },
+): boolean {
+  return (
+    a.today === b.today &&
+    a.autoFocus === b.autoFocus &&
+    a.onMoved === b.onMoved &&
+    sameData(a.book, b.book)
+  );
+}
+
+/**
+ * One book being read. A save (a page logged, a book finished or put
+ * back) sends the whole page again, every book as a new object, and only
+ * the book it touched has anything new to show: the others, compared as
+ * data, aren't drawn again. With forty books on the go that was every row
+ * for each page logged.
+ */
+const NowReadingRow = memo(function NowReadingRow({
   book,
   autoFocus,
   onMoved,
 }: {
   book: NowReadingBook;
+  /** Today, in the reader's time zone (see NowReading): only compared. */
+  today: string;
   autoFocus: boolean;
-  onMoved: (result: MovedResult) => void;
+  onMoved: (bookId: string, result: MovedResult) => void;
 }) {
   const prefs = usePreferences();
   const info = unitFor(book, prefs);
@@ -166,7 +214,12 @@ function NowReadingRow({
               {speed && <span>{speed}</span>}
             </span>
           </div>
-          <QuickLog book={book} showMoveButtons onMoved={onMoved} autoFocus={autoFocus} />
+          <QuickLog
+            book={book}
+            showMoveButtons
+            onMoved={(result) => onMoved(book.id, result)}
+            autoFocus={autoFocus}
+          />
           <div className="grid grid-cols-1 gap-1">
             <RecentEntries entries={book.progress} book={book} />
             {book.progress.length > 0 && (
@@ -182,7 +235,7 @@ function NowReadingRow({
       </CardContent>
     </Card>
   );
-}
+}, sameRow);
 
 /** A book just moved to Read or Did Not Finish: what happened, and Undo. */
 function MovedRow({ moved, onUndone }: { moved: Moved; onUndone: () => void }) {
@@ -210,9 +263,9 @@ function MovedRow({ moved, onUndone }: { moved: Moved; onUndone: () => void }) {
         disabled={pending}
         onClick={() =>
           startTransition(async () => {
-            const result = await undoMoveFromReading(moved.book.id, moved.undo);
+            const result = await undoMoveFromReading(moved.bookId, moved.undo);
             if (result.error) return setError(result.error);
-            if (result.minutes) giveBackTime(moved.book.id, result.minutes);
+            if (result.minutes) giveBackTime(moved.bookId, result.minutes);
             onUndone();
           })
         }

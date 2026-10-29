@@ -44,6 +44,7 @@ find module '.prisma/client/default'".
 | `npm run db:studio` | Browse the database in Prisma Studio |
 | `npm run db:prune` | Delete expired search-cache rows (also runs on every container start) |
 | `npm run covers:prune` | Report cover files no book uses; add `-- --yes` to delete them |
+| `npm run perf` | Time page loads and taps on an emulated slow phone ([PERFORMANCE.md](PERFORMANCE.md)) |
 
 ## Tests
 
@@ -309,6 +310,9 @@ The reading room's files:
   its widest child's longest word, and one long series name, a monospace
   theme or a large text size then pushed the whole page past a phone's
   edge.
+- **Speed has its own page.** [PERFORMANCE.md](PERFORMANCE.md) says how
+  the app is measured, the rules that keep it quick, and the numbers from
+  the last measuring.
 - **A slow phone only draws what it shows.** Measured on a phone-sized
   page with the CPU slowed six times and slow 4G:
   - Library cards and Now reading rows off screen are skipped
@@ -366,7 +370,11 @@ The reading room's files:
 - **The reading room is drawn in code**, with no image files.
   - Its pixel art is rectangles, each naming a paint whose colour lives in
     [reading-room.css](../src/components/reading-room.css): a day palette
-    for light themes and a night one for dark themes.
+    for light themes and a night one for dark themes. They are drawn as
+    paths, one for each run of a paint that nothing drawn later overlaps
+    (`pathsOf` in [room-art.tsx](../src/components/room-art.tsx)), which
+    lays the same paints on every dot as one `<rect>` each would, with a
+    tenth of the elements.
   - Spine colours are read from the covers in the browser as each floor
     scrolls into view, and kept in localStorage by cover address, which
     changes whenever the image does.

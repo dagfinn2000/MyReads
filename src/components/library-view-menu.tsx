@@ -1,7 +1,6 @@
 "use client";
 
 import { useTransition } from "react";
-import { useRouter } from "next/navigation";
 import { LayoutGrid } from "lucide-react";
 import { saveLibraryView } from "@/lib/actions/library-view";
 import type { LibraryDisplay } from "@/lib/library-view";
@@ -20,9 +19,9 @@ import {
 /**
  * The library's View menu: grid or list, cover size, card style, 3D covers,
  * and which details the cards show (list rows can add a date and the page
- * count). Saved on the account like the sort, and applied by the server on
- * the next render — so the menu only saves and refreshes. 3D covers also
- * show at once, since they live on <html>.
+ * count). Saved on the account like the sort, and applied by the server,
+ * whose reply to the save brings the page drawn again — so the menu only
+ * saves. 3D covers also show at once, since they live on <html>.
  */
 export function LibraryViewMenu({
   display,
@@ -32,7 +31,6 @@ export function LibraryViewMenu({
   /** False when ratings are switched off in Preferences: no rating toggle. */
   ratings: boolean;
 }) {
-  const router = useRouter();
   const [pending, startTransition] = useTransition();
   // Covers only, Bookshelf and Spines draw no details, so there is nothing
   // to show.
@@ -42,9 +40,9 @@ export function LibraryViewMenu({
     if (patch.cover3d !== undefined) {
       document.documentElement.toggleAttribute("data-cover-3d", patch.cover3d);
     }
+    // The action's reply brings the page drawn the new way.
     startTransition(async () => {
       await saveLibraryView(patch);
-      router.refresh();
     });
   }
 

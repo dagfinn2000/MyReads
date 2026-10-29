@@ -6,10 +6,50 @@ import { Select as SelectPrimitive } from "radix-ui"
 import { cn } from "@/lib/utils"
 import { ChevronDownIcon, CheckIcon, ChevronUpIcon } from "lucide-react"
 
+/**
+ * Whether a lazy Select's list is drawn yet (see `lazyList`). Absent for
+ * every other Select, which draws its list as Radix always does.
+ */
+const SelectListContext = React.createContext<{ drawn: boolean; draw: () => void } | null>(null)
+
+/**
+ * `lazyList`: a closed Radix Select still draws every item, into a fragment
+ * off the page, so its button can show the chosen one and its hidden form
+ * select can hold the options, and then draws them all again as each
+ * reports in. Forty of them on Now reading were most of the page's work on
+ * a slow phone. A lazy Select draws its list when its button is first
+ * focused (so a letter typed on it still finds an item) or pressed. Only
+ * for Selects whose SelectValue is given the chosen item's text as its
+ * children, and that have no `name` or `required`, which need the list.
+ */
 function Select({
+  lazyList = false,
+  ...props
+}: React.ComponentProps<typeof SelectPrimitive.Root> & { lazyList?: boolean }) {
+  if (lazyList) return <LazySelect {...props} />
+  return <SelectPrimitive.Root data-slot="select" {...props} />
+}
+
+function LazySelect({
+  onOpenChange,
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.Root>) {
-  return <SelectPrimitive.Root data-slot="select" {...props} />
+  const [drawn, setDrawn] = React.useState(!!props.defaultOpen)
+  if (props.open && !drawn) setDrawn(true)
+  const list = React.useMemo(() => ({ drawn, draw: () => setDrawn(true) }), [drawn])
+  return (
+    <SelectListContext.Provider value={list}>
+      <SelectPrimitive.Root
+        data-slot="select"
+        {...props}
+        // Any other way of opening it (a screen reader's, say) draws it too.
+        onOpenChange={(open) => {
+          if (open) setDrawn(true)
+          onOpenChange?.(open)
+        }}
+      />
+    </SelectListContext.Provider>
+  )
 }
 
 function SelectGroup({
@@ -35,14 +75,46 @@ function SelectTrigger({
   className,
   size = "default",
   children,
+  onFocus,
+  onPointerDown,
+  ref,
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.Trigger> & {
   size?: "sm" | "default"
 }) {
+  const list = React.useContext(SelectListContext)
+  const button = React.useRef<HTMLButtonElement | null>(null)
+  const setButton = React.useCallback(
+    (node: HTMLButtonElement | null) => {
+      button.current = node
+      if (typeof ref === "function") ref(node)
+      else if (ref) ref.current = node
+    },
+    [ref]
+  )
+  // Focused before the page woke up (a key pressed on a slow phone while
+  // it loaded): no focus event comes after, so the list is drawn now, before
+  // a letter typed on it looks for an item.
+  React.useLayoutEffect(() => {
+    if (list && !list.drawn && button.current === document.activeElement) list.draw()
+  }, [list])
   return (
     <SelectPrimitive.Trigger
+      ref={setButton}
       data-slot="select-trigger"
       data-size={size}
+      // A lazy list is drawn as its button is focused: a touch or a click
+      // focuses it before opening, and a key typed on it comes after.
+      // A mouse opens it on press, so it is drawn on press too, in the
+      // same pass as the opening.
+      onFocus={(e) => {
+        if (list && !list.drawn) list.draw()
+        onFocus?.(e)
+      }}
+      onPointerDown={(e) => {
+        if (list && !list.drawn && e.pointerType === "mouse") list.draw()
+        onPointerDown?.(e)
+      }}
       className={cn(
         "flex w-fit items-center justify-between gap-1.5 rounded-lg border border-input bg-transparent py-2 pr-2 pl-2.5 text-sm whitespace-nowrap transition-colors outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 data-placeholder:text-muted-foreground data-[size=default]:h-8 data-[size=sm]:h-7 data-[size=sm]:rounded-[min(var(--radius-md),10px)] *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-1.5 dark:bg-input/30 dark:hover:bg-input/50 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         className
@@ -64,6 +136,8 @@ function SelectContent({
   align = "center",
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.Content>) {
+  const list = React.useContext(SelectListContext)
+  if (list && !list.drawn) return null
   return (
     <SelectPrimitive.Portal>
       <SelectPrimitive.Content

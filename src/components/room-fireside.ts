@@ -18,6 +18,7 @@ import {
   fireplaceArt,
   floorLampArt,
   grid,
+  lazyTable,
   rugArt,
   type Art,
   type Paint,
@@ -194,12 +195,14 @@ function modernFireplace(): Art {
   return { w: 44, h: 48, rects: R };
 }
 
-export const FIREPLACES: Record<RoomFireplace, Fireplace> = {
-  stone: { art: fireplaceArt(), fires: [{ x: 15, y: 28 }], logs: true, glow: { x: 22, y: 36 } },
-  brick: { art: brickFireplace(), fires: [{ x: 15, y: 29 }], logs: true, glow: { x: 22, y: 36 } },
-  marble: { art: marbleFireplace(), fires: [{ x: 15, y: 30 }], logs: true, glow: { x: 22, y: 37 } },
-  tiles: { art: tiledFireplace(), fires: [{ x: 15, y: 30 }], logs: true, glow: { x: 22, y: 37 } },
-  modern: {
+/** Each drawn when first shown (room-art.tsx, lazyTable), as are the
+ *  chairs and lamps. */
+export const FIREPLACES = lazyTable<RoomFireplace, Fireplace>({
+  stone: () => ({ art: fireplaceArt(), fires: [{ x: 15, y: 28 }], logs: true, glow: { x: 22, y: 36 } }),
+  brick: () => ({ art: brickFireplace(), fires: [{ x: 15, y: 29 }], logs: true, glow: { x: 22, y: 36 } }),
+  marble: () => ({ art: marbleFireplace(), fires: [{ x: 15, y: 30 }], logs: true, glow: { x: 22, y: 37 } }),
+  tiles: () => ({ art: tiledFireplace(), fires: [{ x: 15, y: 30 }], logs: true, glow: { x: 22, y: 37 } }),
+  modern: () => ({
     art: modernFireplace(),
     fires: [
       { x: 8, y: 27 },
@@ -207,8 +210,8 @@ export const FIREPLACES: Record<RoomFireplace, Fireplace> = {
     ],
     logs: false,
     glow: { x: 22, y: 32 },
-  },
-};
+  }),
+});
 
 // ── Armchairs, 29 × 31 ───────────────────────────────────────────────────
 // The avatar sits in the middle, between the arms (x 7 to 22), with its
@@ -359,13 +362,13 @@ const THRONE = sheet(29, [
   "DwWdD...................DwWdD",
 ]);
 
-export const CHAIRS: Record<RoomChair, Art> = {
-  wingback: armchairArt(),
-  club: { w: 29, h: 31, rects: CLUB },
-  chesterfield: { w: 29, h: 31, rects: CHESTERFIELD },
-  lounge: { w: 29, h: 31, rects: LOUNGE },
-  throne: { w: 29, h: 31, rects: THRONE },
-};
+export const CHAIRS = lazyTable<RoomChair, Art>({
+  wingback: armchairArt,
+  club: () => ({ w: 29, h: 31, rects: CLUB }),
+  chesterfield: () => ({ w: 29, h: 31, rects: CHESTERFIELD }),
+  lounge: () => ({ w: 29, h: 31, rects: LOUNGE }),
+  throne: () => ({ w: 29, h: 31, rects: THRONE }),
+});
 
 // ── Rugs, lying in front ─────────────────────────────────────────────────
 
@@ -617,11 +620,11 @@ const LANTERN = sheet(14, [
   "DD..........DD",
 ]);
 
-export const LAMPS: Record<RoomLamp, Lamp> = {
-  standard: { art: floorLampArt(), dx: 0, glow: { x: 6, y: 6, r: 30 } },
-  tiffany: { art: { w: 16, h: 55, rects: TIFFANY }, dx: -2, glow: { x: 8, y: 6, r: 30 } },
-  arc: { art: arcLamp(), dx: -20, glow: { x: 12, y: 20, r: 32 } },
-  candles: {
+export const LAMPS = lazyTable<RoomLamp, Lamp>({
+  standard: () => ({ art: floorLampArt(), dx: 0, glow: { x: 6, y: 6, r: 30 } }),
+  tiffany: () => ({ art: { w: 16, h: 55, rects: TIFFANY }, dx: -2, glow: { x: 8, y: 6, r: 30 } }),
+  arc: () => ({ art: arcLamp(), dx: -20, glow: { x: 12, y: 20, r: 32 } }),
+  candles: () => ({
     art: { w: 15, h: 45, rects: CANDLES },
     dx: -1,
     glow: { x: 7, y: 2, r: 26 },
@@ -629,6 +632,6 @@ export const LAMPS: Record<RoomLamp, Lamp> = {
       [1, 6, 11].flatMap((x) => grid([".F.", ".f."], x, 0)),
       [1, 6, 11].flatMap((x, i) => grid([i === 1 ? "..F" : "F..", ".f."], x, 0)),
     ],
-  },
-  lantern: { art: { w: 14, h: 26, rects: LANTERN }, dx: -1, glow: { x: 7, y: 11, r: 24 } },
-};
+  }),
+  lantern: () => ({ art: { w: 14, h: 26, rects: LANTERN }, dx: -1, glow: { x: 7, y: 11, r: 24 } }),
+});

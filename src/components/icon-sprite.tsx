@@ -58,3 +58,18 @@ export function SpriteIcon({ name, className }: { name: SpriteName; className?: 
     </svg>
   );
 }
+
+/**
+ * A sprite icon as markup, exactly what <SpriteIcon> draws, for places
+ * that repeat it hundreds of times (components/stars.tsx): the browser
+ * builds those from markup in one go, where React builds each element and
+ * sets each attribute one at a time. icon-sprite.test.ts checks the two
+ * agree.
+ */
+export function spriteIconHtml(name: SpriteName, className?: string): string {
+  const cls = ["lucide", `lucide-${name}`, className]
+    .filter(Boolean)
+    .join(" ")
+    .replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${cls}" aria-hidden="true"><use href="#icon-${name}"></use></svg>`;
+}

@@ -13,10 +13,11 @@ vi.mock("@/auth", () => ({
   auth: async () => (currentUserId ? { user: { id: currentUserId } } : null),
   signOut: async () => {},
 }));
-vi.mock("next/cache", () => ({ revalidatePath: () => {} }));
+const refreshed = vi.fn();
+vi.mock("next/cache", () => ({ revalidatePath: () => {}, refresh: () => refreshed() }));
 
 const { savePreferences } = await import("@/lib/actions/preferences");
-const { saveLibraryView } = await import("@/lib/actions/library-view");
+const { rememberLibraryView, saveLibraryView } = await import("@/lib/actions/library-view");
 const { saveView, deleteView } = await import("@/lib/actions/saved-views");
 const { setReadingGoal } = await import("@/lib/actions/goals");
 
@@ -91,7 +92,7 @@ describe("savePreferences", () => {
 
 describe("saveLibraryView", () => {
   it("keeps the sort when the display changes, and the other way round", async () => {
-    await saveLibraryView({ sort: "title", dir: "asc" });
+    await rememberLibraryView({ sort: "title", dir: "asc" });
     await saveLibraryView({ layout: "list", showRating: false });
     const user = await prisma.user.findUniqueOrThrow({ where: { id: userId } });
     expect(user.libraryView).toEqual({
@@ -100,6 +101,19 @@ describe("saveLibraryView", () => {
       layout: "list",
       showRating: false,
     });
+  });
+});
+
+describe("what a library view save draws again", () => {
+  it("draws the page again for the View menu, and nothing for the sort, which the address already holds", async () => {
+    refreshed.mockClear();
+    await rememberLibraryView({ sort: "title" });
+    expect(refreshed).not.toHaveBeenCalled();
+    await saveLibraryView({ layout: "list" });
+    expect(refreshed).toHaveBeenCalledOnce();
+    // Nothing worth saving, nothing to draw.
+    await saveLibraryView({ nonsense: true } as never);
+    expect(refreshed).toHaveBeenCalledOnce();
   });
 });
 
