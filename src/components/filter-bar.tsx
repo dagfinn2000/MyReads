@@ -11,7 +11,7 @@ import {
   Layers,
   Search,
 } from "lucide-react";
-import { saveLibraryView } from "@/lib/actions/library-view";
+import { rememberLibraryView } from "@/lib/actions/library-view";
 import { FORMAT_LABELS } from "@/lib/display";
 import { activeFilterChips, searchPlaceholder } from "@/lib/library-filters";
 import { naturalDir, type LibraryDisplay } from "@/lib/library-view";
@@ -168,13 +168,20 @@ const BarSelect = memo(function BarSelect({
   className: string;
   label?: string;
   placeholder?: string;
-  /** What the closed list shows, when it isn't the chosen item's label. */
+  /** What the closed list shows, when it isn't the chosen item's label: a
+   *  SelectValue given its text, since the list isn't drawn to give it. */
   children?: React.ReactNode;
 }) {
   return (
-    <Select value={value} onValueChange={onValueChange}>
+    // Its list drawn only when wanted, too (ui/select.tsx): coming back to
+    // the library drew all four, hidden, before the page could answer.
+    <Select lazyList value={value} onValueChange={onValueChange}>
       <SelectTrigger className={className} aria-label={label}>
-        {children ?? <SelectValue placeholder={placeholder} />}
+        {children ?? (
+          <SelectValue placeholder={placeholder}>
+            {options.find((o) => o.value === value)?.label}
+          </SelectValue>
+        )}
       </SelectTrigger>
       <SelectContent>
         {options.map((o) => (
@@ -278,9 +285,10 @@ export function FilterBar({
     router.replace(`/books${qs ? `?${qs}` : ""}`);
 
     // A change to the view is a lasting preference — remember it on the
-    // account (fire-and-forget; the URL is already correct either way).
+    // account (fire-and-forget; the URL is already correct either way, so
+    // nothing is drawn again for it).
     if ("sort" in overrides || "dir" in overrides || "group" in overrides) {
-      saveLibraryView({
+      rememberLibraryView({
         sort: next.sort || "createdAt",
         dir: next.dir || "desc",
         group: next.group || "none",

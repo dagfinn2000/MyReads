@@ -297,9 +297,10 @@ export function LibraryView({
         if (status.split(":")[0] === ReadingStatus.READ && res.count) sound("finished");
         clearSelection();
         // Apply is disabled with nothing selected; focus goes to how it went
-        // rather than falling to the page.
+        // rather than falling to the page. The action's reply brings the
+        // library drawn again (it revalidates /books), so no refresh here:
+        // that drew it all a second time.
         messageRef.current?.focus();
-        router.refresh();
       }
     });
   }
@@ -318,7 +319,6 @@ export function LibraryView({
       } else {
         setMessage(`Deleted ${booksLabel(res.count ?? 0)}.`);
         clearSelection();
-        router.refresh();
       }
     });
   }
