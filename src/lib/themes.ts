@@ -660,7 +660,10 @@ function themeInit(
       hyprland: ["Noto Sans", "JetBrains Mono"],
     };
     const id = root.getAttribute("data-theme") || "";
-    if (Object.prototype.hasOwnProperty.call(faces, id) && document.fonts && document.fonts.load) {
+    // GNOME's text is Adwaita Sans where that is installed, and Inter only
+    // where it isn't: no need to fetch Inter for a GNOME desktop.
+    const local = id === "gnome" && document.fonts && document.fonts.check && document.fonts.check('1em "Adwaita Sans"');
+    if (!local && Object.prototype.hasOwnProperty.call(faces, id) && document.fonts && document.fonts.load) {
       faces[id].forEach(function (face) {
         document.fonts.load('1em "' + face + '"').catch(function () {});
       });

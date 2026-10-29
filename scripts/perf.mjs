@@ -15,6 +15,8 @@
  * server, and a library of a few hundred books: an empty one hides most of
  * what matters. Nothing here writes to the account: the taps open and
  * close things and filter the library, which only changes the address.
+ * (An account with no time zone yet has one saved by the first page it
+ * opens, as in any browser: this computer's.)
  *
  * Needs Playwright and its Chromium, which the app itself doesn't:
  *   npm install --no-save playwright && npx playwright install chromium
@@ -52,6 +54,8 @@ const PHONE = {
   userAgent:
     "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36",
 };
+/** This computer's time zone, rather than the browser's default. */
+const timezoneId = Intl.DateTimeFormat().resolvedOptions().timeZone;
 /** Slow 4G, as Lighthouse has it. */
 const SLOW_4G = { offline: false, latency: 150, downloadThroughput: (1.6 * 1024 * 1024) / 8, uploadThroughput: (750 * 1024) / 8 };
 
@@ -64,7 +68,7 @@ const browser = await chromium.launch();
 
 // Signed in once; each run starts from a fresh context with that session.
 const session = await (async () => {
-  const ctx = await browser.newContext();
+  const ctx = await browser.newContext({ timezoneId });
   const page = await ctx.newPage();
   await page.goto(`${BASE}/login`);
   await page.fill("#username", user);
@@ -77,7 +81,7 @@ const session = await (async () => {
 })();
 
 async function phonePage({ network = false } = {}) {
-  const ctx = await browser.newContext({ ...PHONE, storageState: session });
+  const ctx = await browser.newContext({ ...PHONE, timezoneId, storageState: session });
   await ctx.addInitScript((theme) => {
     try {
       localStorage.setItem("myreads-device-theme", theme);

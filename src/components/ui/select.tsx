@@ -77,13 +77,30 @@ function SelectTrigger({
   children,
   onFocus,
   onPointerDown,
+  ref,
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.Trigger> & {
   size?: "sm" | "default"
 }) {
   const list = React.useContext(SelectListContext)
+  const button = React.useRef<HTMLButtonElement | null>(null)
+  const setButton = React.useCallback(
+    (node: HTMLButtonElement | null) => {
+      button.current = node
+      if (typeof ref === "function") ref(node)
+      else if (ref) ref.current = node
+    },
+    [ref]
+  )
+  // Focused before the page woke up (a key pressed on a slow phone while
+  // it loaded): no focus event comes after, so the list is drawn now, before
+  // a letter typed on it looks for an item.
+  React.useLayoutEffect(() => {
+    if (list && !list.drawn && button.current === document.activeElement) list.draw()
+  }, [list])
   return (
     <SelectPrimitive.Trigger
+      ref={setButton}
       data-slot="select-trigger"
       data-size={size}
       // A lazy list is drawn as its button is focused: a touch or a click

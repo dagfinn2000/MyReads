@@ -23,7 +23,9 @@ It needs Playwright and its Chromium, which the app itself doesn't
 (`npm install --no-save playwright && npx playwright install chromium`).
 `BASE`, `RUNS`, `CPU` and `THEME` change where, how often and how hard it
 measures. Measure an account with a few hundred books: an empty library
-hides most of what matters. The script writes nothing to the account.
+hides most of what matters. The script writes nothing to the account,
+except that an account with no time zone yet has one saved by the first
+page it opens, as in any browser (this computer's zone).
 
 What the numbers mean:
 
@@ -98,8 +100,9 @@ What keeps the app quick, with the test that guards each where one can.
   its own `pointer-events`, and an empty shield over the window takes the
   taps behind the layer instead
   ([globals.css](../src/app/globals.css),
-  [motion-css.test.ts](../src/lib/motion-css.test.ts)). A tap outside still
-  closes the layer and reaches nothing behind it.
+  [motion-css.test.ts](../src/lib/motion-css.test.ts)). A press outside
+  still closes the layer, and while it is open nothing behind it is
+  hovered or pressed, just as before.
 - **Redraw only what changed.** A list of things (library cards, Now
   reading rows) is memoised item by item and compared as data, since each
   trip to the server sends every item again as a new object. Anything
@@ -115,9 +118,11 @@ What keeps the app quick, with the test that guards each where one can.
   repeated on a page or holding many items.
 - **Don't ask the server again for what is already on its way.** The
   library's sort and grouping are in the address it goes to, so saving
-  them on the account redraws nothing (`rememberLibraryView`). An action
-  that revalidates already brings the page drawn again, so
-  `router.refresh()` after it draws it twice.
+  them on the account redraws nothing (`rememberLibraryView`). The one
+  thing that gives up: going Back to a library opened without them, from
+  before the change, shows it sorted as it was then. An action that
+  revalidates already brings the page drawn again, so `router.refresh()`
+  after it draws it twice.
 - **Draw a repeated icon once.** The star and book icons are a sprite the
   root layout draws once ([icon-sprite.tsx](../src/components/icon-sprite.tsx)),
   and a rating's rows of stars are handed over as markup, made once per
