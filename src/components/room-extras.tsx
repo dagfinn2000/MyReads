@@ -7,7 +7,7 @@
  * at `x`. The fish swim, bubbles rise and the dog's ear twitches now and
  * then; at night the aquarium glows.
  */
-import { Glow, Rects, STEAM, Sprite, Stand, grid, type Art, type Paint, type Rect } from "@/components/room-art";
+import { Glow, Rects, STEAM, Sprite, Stand, grid, lazyTable, type Art, type Paint, type Rect } from "@/components/room-art";
 import { PIECE_WIDTH, type Extra } from "@/lib/room";
 
 /** Paints the catalogue adds to room-art's text-grid key. */
@@ -997,27 +997,27 @@ function dollhouseArt(): Art {
   return { w: 30, h: 50, rects: R };
 }
 
-const ART = {
-  sofa: sofaArt(),
-  rocker: rockerArt(),
-  aquarium: aquariumArt(),
-  dog: dogArt(),
-  armour: armourArt(),
-  chest: chestArt(),
-  coatstand: coatstandArt(),
-  telescope: telescopeArt(),
-  horse: HORSE,
-  curios: curiosArt(),
-  spinning: spinningArt(),
-  beanbag: beanbagArt(),
-  parrot: parrotArt(),
-  monstera: monsteraArt(),
-  mirror: mirrorArt(),
-  stove: stoveArt(),
-  radio: radioArt(),
-  trolley: trolleyArt(),
-  dollhouse: dollhouseArt(),
-} satisfies Record<Extra, Art>;
+const ART = lazyTable({
+  sofa: sofaArt,
+  rocker: rockerArt,
+  aquarium: aquariumArt,
+  dog: dogArt,
+  armour: armourArt,
+  chest: chestArt,
+  coatstand: coatstandArt,
+  telescope: telescopeArt,
+  horse: () => HORSE,
+  curios: curiosArt,
+  spinning: spinningArt,
+  beanbag: beanbagArt,
+  parrot: parrotArt,
+  monstera: monsteraArt,
+  mirror: mirrorArt,
+  stove: stoveArt,
+  radio: radioArt,
+  trolley: trolleyArt,
+  dollhouse: dollhouseArt,
+} satisfies Record<Extra, () => Art>);
 
 export const EXTRA_ART: Readonly<Record<Extra, Art>> = ART;
 

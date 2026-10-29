@@ -17,7 +17,7 @@ import {
   SHELVES_PER_CASE,
   dressShelf,
 } from "@/lib/room";
-import { BOOKEND, ORNAMENT_ART, bookcaseArt, type Art, type Rect } from "@/components/room-art";
+import { BOOKEND, ORNAMENT_ART, bookcaseArt, lazyTable, type Art, type Rect } from "@/components/room-art";
 
 export interface BookcaseDesign {
   /** CASE_WIDTH × (CASE_HEIGHT + rise); the case itself starts `rise`
@@ -136,13 +136,14 @@ function glazed(): BookcaseDesign {
   return { art: bookcaseArt(), rise: 0, front: { w: W, h: CASE_HEIGHT, rects: F } };
 }
 
-export const BOOKCASES: Record<RoomBookcase, BookcaseDesign> = {
-  classic: { art: bookcaseArt(), rise: 0, front: null },
-  open: open(),
-  pediment: pediment(),
-  gothic: gothic(),
-  glazed: glazed(),
-};
+/** Each drawn when first shown (room-art.tsx, lazyTable). */
+export const BOOKCASES = lazyTable<RoomBookcase, BookcaseDesign>({
+  classic: () => ({ art: bookcaseArt(), rise: 0, front: null }),
+  open,
+  pediment,
+  gothic,
+  glazed,
+});
 
 const SPINE_PAINTS = ["spine-a", "chair", "rug-2", "spine-b", "curtain", "wood-lo", "chair-lo"] as const;
 

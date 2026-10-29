@@ -2,27 +2,33 @@
 
 import { Star } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { SpriteIcon } from "@/components/icon-sprite";
+import { spriteIconHtml } from "@/components/icon-sprite";
 import { usePreferences } from "@/components/preferences-provider";
 
-function StarRow({ filled, sizeClass }: { filled?: boolean; sizeClass: string }) {
-  // w-max + shrink-0 keep the row at its natural width inside the clipping
-  // container — without them the filled row's stars shrink to fit the
-  // clipped width instead of being cut off, drifting out of alignment with
-  // the outline row underneath.
-  return (
-    <div className="flex w-max">
-      {/* Ten stars per rating add up on a page of books, so these are
-          sprite icons (components/icon-sprite.tsx). */}
-      {[0, 1, 2, 3, 4].map((i) => (
-        <SpriteIcon
-          key={i}
-          name="star"
-          className={cn(sizeClass, "shrink-0", filled && "fill-current")}
-        />
-      ))}
-    </div>
-  );
+/** A row of five stars' markup for each size and fill, made once. */
+const ROWS = new Map<string, { __html: string }>();
+
+/**
+ * Five stars in a row. Ten stars per rating add up on a page of books, so
+ * these are sprite icons (components/icon-sprite.tsx), handed over as
+ * markup: as components each row was six of them and ten elements for
+ * React to build one by one, some 860 components on a library of rated
+ * books. Called as a function, not drawn as a component, for the same
+ * reason; it keeps no state.
+ *
+ * w-max + shrink-0 keep the row at its natural width inside the clipping
+ * container — without them the filled row's stars shrink to fit the
+ * clipped width instead of being cut off, drifting out of alignment with
+ * the outline row underneath.
+ */
+function starRow(sizeClass: string, filled = false) {
+  const key = `${sizeClass}\n${filled}`;
+  let html = ROWS.get(key);
+  if (!html) {
+    const icon = spriteIconHtml("star", cn(sizeClass, "shrink-0", filled && "fill-current"));
+    ROWS.set(key, (html = { __html: icon.repeat(5) }));
+  }
+  return <div className="flex w-max" dangerouslySetInnerHTML={html} />;
 }
 
 /**
@@ -87,12 +93,12 @@ export function StarGraphic({
       role="img"
       aria-label={`${value / 2} out of 5 stars`}
     >
-      <StarRow sizeClass={sizeClass} />
+      {starRow(sizeClass)}
       <div
         className="absolute inset-y-0 left-0 overflow-hidden text-amber-500"
         style={{ width: `${value * 10}%` }}
       >
-        <StarRow filled sizeClass={sizeClass} />
+        {starRow(sizeClass, true)}
       </div>
     </div>
   );

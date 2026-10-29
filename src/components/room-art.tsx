@@ -159,10 +159,117 @@ export function Sprite({
   );
 }
 
-export function Rects({ rects, className }: { rects: readonly Rect[]; className?: string }) {
-  const body = rects.map(([x, y, w, h, paint], i) => (
-    <rect key={i} x={x} y={y} width={w} height={h} className={`rp-${paint}`} />
-  ));
+/**
+ * A table of art, each entry drawn the first time it is read. A house
+ * shows a few pieces from each table (one fireplace, the extras added),
+ * and drawing every one as the page loaded was a fifth of a second of a
+ * slow phone's start on the reading room. Read like any object: an entry,
+ * once drawn, is kept as a plain property.
+ */
+export function lazyTable<K extends string, V>(draw: Record<K, () => V>): Readonly<Record<K, V>> {
+  const table = {} as Record<K, V>;
+  for (const key of Object.keys(draw) as K[]) {
+    Object.defineProperty(table, key, {
+      enumerable: true,
+      configurable: true,
+      get() {
+        const value = draw[key]();
+        Object.defineProperty(table, key, { value, enumerable: true, writable: false });
+        return value;
+      },
+    });
+  }
+  return table;
+}
+
+/** One piece of art, drawn the first time it is wanted. */
+export function lazy<T>(draw: () => T): () => T {
+  let value: T | undefined;
+  return () => (value ??= draw());
+}
+
+/** Whether two rectangles share a dot (touching edges don't count). */
+const overlaps = (a: Rect, b: Rect) =>
+  a[0] < b[0] + b[2] && b[0] < a[0] + a[2] && a[1] < b[1] + b[3] && b[1] < a[1] + a[3];
+
+interface Run {
+  paint: Paint;
+  rects: Rect[];
+  d: string;
+  /** The box around its rectangles, to rule most out quickly. */
+  x0: number;
+  y0: number;
+  x1: number;
+  y1: number;
+}
+
+const PATHS = new WeakMap<readonly Rect[], readonly (readonly [Paint, string])[]>();
+
+/**
+ * The rectangles as the fewest paths that draw the same picture, one paint
+ * to a path. A rectangle joins the last path of its paint unless something
+ * drawn after that path, or a rectangle already in it, overlaps it: what
+ * lay on top still lies on top, and a see-through paint is never laid
+ * twice where it was laid once. Each rectangle goes round the same way, so
+ * pieces of one path that touch fill as one. A house's 4,700 rectangles
+ * come to under 400 paths: far less for the browser to build, style and
+ * paint (a second and more on a slow phone). Worked out once per art.
+ */
+export function pathsOf(rects: readonly Rect[]): readonly (readonly [Paint, string])[] {
+  const known = PATHS.get(rects);
+  if (known) return known;
+  const runs: Run[] = [];
+  for (const r of rects) {
+    const [x, y, w, h, paint] = r;
+    // What a <rect> wouldn't draw, a path mustn't either.
+    if (!(w > 0 && h > 0) || !Number.isFinite(x + y + w + h)) continue;
+    let home: Run | undefined;
+    for (let k = runs.length - 1; k >= 0; k--) {
+      const run = runs[k];
+      const hit =
+        x < run.x1 && run.x0 < x + w && y < run.y1 && run.y0 < y + h && run.rects.some((q) => overlaps(q, r));
+      if (hit) break;
+      if (run.paint === paint) {
+        home = run;
+        break;
+      }
+    }
+    const d = `M${x} ${y}h${w}v${h}h${-w}z`;
+    if (home) {
+      home.rects.push(r);
+      home.d += d;
+      home.x0 = Math.min(home.x0, x);
+      home.y0 = Math.min(home.y0, y);
+      home.x1 = Math.max(home.x1, x + w);
+      home.y1 = Math.max(home.y1, y + h);
+    } else {
+      runs.push({ paint, rects: [r], d, x0: x, y0: y, x1: x + w, y1: y + h });
+    }
+  }
+  const out = runs.map((run) => [run.paint, run.d] as const);
+  PATHS.set(rects, out);
+  return out;
+}
+
+/**
+ * Pixel art, drawn as paths (see pathsOf). `separate` keeps one <rect> a
+ * rectangle, for a drawing scaled to fit rather than drawn dot for dot
+ * (HousePreview), whose softened edges would meet differently as paths.
+ */
+export function Rects({
+  rects,
+  className,
+  separate = false,
+}: {
+  rects: readonly Rect[];
+  className?: string;
+  separate?: boolean;
+}) {
+  const body = separate
+    ? rects.map(([x, y, w, h, paint], i) => (
+        <rect key={i} x={x} y={y} width={w} height={h} className={`rp-${paint}`} />
+      ))
+    : pathsOf(rects).map(([paint, d], i) => <path key={i} d={d} className={`rp-${paint}`} />);
   return className ? <g className={className}>{body}</g> : <>{body}</>;
 }
 

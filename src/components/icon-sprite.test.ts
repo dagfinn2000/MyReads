@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { BookOpen, Star } from "lucide-react";
-import { IconSprite, SPRITE_PATHS, SpriteIcon, type SpriteName } from "@/components/icon-sprite";
+import { IconSprite, SPRITE_PATHS, SpriteIcon, spriteIconHtml, type SpriteName } from "@/components/icon-sprite";
 
 const LUCIDE: Record<SpriteName, typeof Star> = { star: Star, "book-open": BookOpen };
 
@@ -24,6 +24,17 @@ describe("sprite icons", () => {
     expect(openTag(sprite)).toBe(openTag(lucide));
     expect(sprite).toContain(`<use href="#icon-${name}">`);
   });
+
+  it.each(["size-4 shrink-0", "size-8 sm:size-6 shrink-0 fill-current", undefined])(
+    "come out the same as markup (class %s)",
+    (className) => {
+      for (const name of Object.keys(SPRITE_PATHS) as SpriteName[]) {
+        expect(spriteIconHtml(name, className)).toBe(
+          renderToStaticMarkup(createElement(SpriteIcon, { name, className })),
+        );
+      }
+    },
+  );
 
   it("puts every symbol in the sprite once", () => {
     const sprite = renderToStaticMarkup(createElement(IconSprite));
