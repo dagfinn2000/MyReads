@@ -353,7 +353,7 @@ tab goes away. You can also keep the house and leave the avatar out.
 
 ## Look and feel
 
-- 59 colour themes, or a light and a dark one that switch with your
+- 63 colour themes, or a light and a dark one that switch with your
   device, with an accent colour of your own on top if you like. Your
   choice follows you to every device you sign in on, unless you give one
   phone or computer a theme of its own ("Only on this device" in the
@@ -400,7 +400,7 @@ tab goes away. You can also keep the house and leave the avatar out.
   green ribbon), Party (confetti), Camouflage and Quest. They are as easy to
   read as the rest, only nobody should want them. Hover over one in the
   menu for a word about it.
-- **Twelve themes restyle the whole app**, not just its colours: the top
+- **Sixteen themes restyle the whole app**, not just its colours: the top
   bar, cards, buttons, fields, menus, dialogs, tabs, progress bars, type
   and the picture behind the page all take after what the theme is named
   for. The rest stay as they were.
@@ -509,9 +509,58 @@ tab goes away. You can also keep the house and leave the avatar out.
     bare: the sign-in window floats beside the logo, which shows whole
     above the splash line "Read the wiki.", and on a phone the window
     covers the logo completely.
+  - Fluent (new, dark): Windows 11 in its dark mode, Mica and acrylic.
+    The app is a Windows 11 window on a wallpaper of our own, a bloom of
+    silky violet and rose petals glowing on near-black. The window is
+    Mica, dark and faintly tinted by the bloom behind it, with a title
+    bar naming the page and thin minimise, maximise and close glyphs.
+    The top bar becomes the taskbar along the foot of the screen, of
+    acrylic that blurs what passes under it: the page links are centred
+    icons, the open page's marked by a short lavender pill, and the rest
+    sit in the tray at the right. Buttons are Windows' soft fills (the
+    main one lavender), fields have a line along their foot that turns
+    lavender while you type, the open tab has a pill under it, and menus,
+    popovers and dialogs are acrylic; a dialog's close button turns red
+    under the pointer. On a phone the window is maximised, with no title
+    bar, and on the sign-in pages it stands alone on the desktop.
+  - visionOS (new, dark): Apple Vision Pro. The app is a window of dark
+    glass floating in front of a mountain valley (snowy ranges, a pine
+    forest, a still lake), the valley showing through it blurred and
+    dimmed, with very round corners and a light rim. The page links are
+    an ornament beside the window: a capsule of glass with icons that
+    shows their names when you point at it. The other buttons sit in a
+    toolbar capsule on the window's foot, with the window bar and its
+    close dot hanging below. Panels are lighter glass, buttons are glass
+    capsules (the main one white), fields are pressed into the glass,
+    check boxes are round, switches turn green and tabs are a segmented
+    capsule. Menus, popovers and dialogs are glass over the page. On a
+    phone the page links become a capsule along the foot of the screen.
+    The page scrolls behind the window's rounded edges, and white text
+    keeps its contrast over every part of the valley.
+  - Sea Glass (new, light): a beach seen from above, the sea's edge
+    foaming across the top of the page, wet sand below and frosted
+    pebbles of sea glass (seafoam, aqua, cobalt, amber, white and olive)
+    along the sides. The top bar, panels and fields are frosted like the
+    pebbles, milky with a fine grain, their corners a little uneven, as
+    if worn smooth. The main buttons are cobalt glass, the open page and
+    tab are seafoam, progress runs from seafoam to cobalt, and headings
+    are in a rounded face. Menus and dialogs frost what is behind them.
+  - Leadlight (new, light): a leaded window. Behind the page is a lattice
+    of diamond panes of hand-made glass, each a slightly different tint
+    and a few coloured, lit from behind. The page is a pane of clear
+    glass set in lead, in a border of jewels (ruby, amber, emerald and
+    sapphire, with an amber bullseye in each corner), and the top bar is
+    a transom of deep ruby glass with the open page in amber. Panels are
+    panes framed in lead, buttons are pieces of ruby or clear glass,
+    chosen tabs and chips are amber, progress is emerald, dialogs have
+    the border of jewels too, and headings are in a high-contrast serif.
+    On the sign-in pages the name sits in a small arched light above
+    the pane. Nothing in it blurs, so it scrolls as lightly as a plain
+    theme.
 - A theme with a picture of its own (Desktop 95's desktop, Aero's,
-  Golden Gate's and the Linux desktops', Notebook's ruled page, Party's confetti, Quest's night
-  sky and the rest) shows it whatever background you picked, and
+  Golden Gate's and the Linux desktops', Fluent's bloom, visionOS's
+  valley, Sea Glass's beach, Leadlight's window, Notebook's ruled page,
+  Party's confetti, Quest's night sky and the rest) shows it whatever background you picked, and
   Preferences says so under Background. Your background comes back when
   you pick another theme.
 - A theme for each part of the app if you like: Stats in one theme, the

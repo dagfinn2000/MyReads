@@ -223,7 +223,8 @@ The reading room's files:
   not shade.
 - **A few themes restyle everything.** Desktop 95, Terminal, Newsprint,
   Blueprint, Notebook, Quest, Pinstripe, Aero, Golden Gate, KDE Plasma,
-  GNOME and Hyprland start from a colour block like any theme, and [restyles.css](../src/app/restyles.css) reshapes the
+  GNOME, Hyprland, Fluent, visionOS, Sea Glass and Leadlight start from
+  a colour block like any theme, and [restyles.css](../src/app/restyles.css) reshapes the
   app for them, one section per theme. Its rules aim at shadcn's
   `data-slot` attributes and buttons by `data-size` and `data-variant`:
   a button inside a Radix trigger (`asChild`) wears the trigger's
@@ -277,7 +278,15 @@ The reading room's files:
   hold its geometry; change those, not the layers one by one. The
   desktops are our own drawings after each one's wallpaper: KDE
   Plasma's after Hanabi by Krystian Zajdel, GNOME's after Roundhex,
-  Hyprland's after its wall0.
+  Hyprland's after its wall0. visionOS's window works like Golden
+  Gate's, from `vision-glass.svg`, but its copy is darkened rather than
+  frosted, as its text is white. An SVG filter that changes colours
+  needs `color-interpolation-filters="sRGB"`; without it the filter works
+  in linear light and barely darkens. Fluent's window is Mica, a flat
+  tint of its wallpaper's colours, so it needs no second picture. A big
+  gradient on something as tall as the page is repainted as it scrolls:
+  Leadlight's pane paints its colour washes in boxes of their own in the
+  corners, which made scrolling the library a third cheaper.
 - **A theme is retired, never just deleted.** Take out its block and
   entry and add it to `RETIRED_THEMES` in
   [themes.ts](../src/lib/themes.ts) with the theme that replaces it, of

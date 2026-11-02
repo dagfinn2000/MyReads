@@ -691,6 +691,69 @@
     --page-size: cover;
 }
 
+/* Windows 11 in its dark mode: Mica, the window's material, near-black with
+   the wallpaper's violet faintly through it, white text, and the accent
+   Windows would pick from that wallpaper, a light lavender. Restyled from
+   top to bottom in restyles.css: a window with its title bar over a bloom
+   of silky petals, the taskbar of acrylic at the foot of the screen,
+   acrylic menus and dialogs. The picture is a file of its own
+   (public/themes). */
+[data-theme="fluent"] {
+    --background: #1d1b22;
+    --foreground: #ffffff;
+    --card: #2a2730;
+    --card-foreground: #ffffff;
+    --popover: #2c2933;
+    --popover-foreground: #ffffff;
+    --primary: #c9a8ff;
+    --primary-foreground: #1b0d33;
+    --secondary: #322e39;
+    --secondary-foreground: #ffffff;
+    --muted: #2f2b36;
+    --muted-foreground: #c8c2d2;
+    --accent: #36323e;
+    --accent-foreground: #ffffff;
+    --destructive: #ff99a4;
+    --border: #3e3a47;
+    --input: #5a5566;
+    --ring: #c9a8ff;
+    --radius: 0.25rem;
+    --heading-font: "Segoe UI Variable Display", "Segoe UI", var(--font-noto-sans), "Noto Sans", system-ui, sans-serif;
+    --page-gradient: url("/themes/fluent.svg");
+    --page-size: cover;
+}
+
+/* visionOS: windows of glass floating in a mountain valley, the valley
+   showing through them softened and dimmed, white text and white for what
+   is chosen. Restyled from top to bottom in restyles.css: the page links
+   as an ornament floating beside the window, the window bar beneath it,
+   capsules of glass for buttons, and hover that lights up what you look
+   at. The pictures are files of their own (public/themes). */
+[data-theme="vision"] {
+    --background: #252e2c;
+    --foreground: #ffffff;
+    --card: #323b39;
+    --card-foreground: #ffffff;
+    --popover: #343d3b;
+    --popover-foreground: #ffffff;
+    --primary: #f5f5f7;
+    --primary-foreground: #1c1c1e;
+    --secondary: #3a4442;
+    --secondary-foreground: #ffffff;
+    --muted: #353f3d;
+    --muted-foreground: #d4dad8;
+    --accent: #3d4846;
+    --accent-foreground: #ffffff;
+    --destructive: #ffb0a8;
+    --border: #4b5654;
+    --input: #66716f;
+    --ring: #ffffff;
+    --radius: 1.25rem;
+    --heading-font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro", var(--font-inter), "Inter", system-ui, sans-serif;
+    --page-gradient: url("/themes/vision.svg");
+    --page-size: cover;
+}
+
 [data-theme="solarized-light"] {
     --background: #fdf6e3;
     --foreground: #657b83;
@@ -1298,6 +1361,68 @@
     --radius: 0.5625rem;
     --heading-font: "Adwaita Sans", var(--font-inter), Inter, Cantarell, system-ui, sans-serif;
     --page-gradient: url("/themes/gnome.svg");
+    --page-size: cover;
+}
+
+/* Sea glass: frosted, sea-worn pebbles on a shore. Wet sand for the page,
+   panels of frosted seafoam-white glass, deep sea ink for the text and
+   cobalt, the rarest sea glass, for the accent. Restyled from top to
+   bottom in restyles.css: matte frosted glass, worn soft at the edges, on
+   a picture of the sea's edge and pebbles. The picture is a file of its
+   own (public/themes). */
+[data-theme="sea-glass"] {
+    --background: #ebe3d1;
+    --foreground: #0c2826;
+    --card: #f3f8f5;
+    --card-foreground: #0c2826;
+    --popover: #f4f9f6;
+    --popover-foreground: #0c2826;
+    --primary: #2a5aa0;
+    --primary-foreground: #ffffff;
+    --secondary: #e0ece6;
+    --secondary-foreground: #0c2826;
+    --muted: #e2ebe6;
+    --muted-foreground: #3d5652;
+    --accent: #d6ebe1;
+    --accent-foreground: #0c2826;
+    --destructive: #a3211a;
+    --border: #c3d6cd;
+    --input: #a9c1b6;
+    --ring: #2a5aa0;
+    --radius: 1.125rem;
+    --heading-font: var(--font-nunito), "Nunito", ui-rounded, system-ui, sans-serif;
+    --page-gradient: url("/themes/sea-glass.svg");
+    --page-size: cover;
+}
+
+/* Leadlight: a leaded window. Pale hand-made glass in diamond quarries for
+   the page, a pane of clearer glass framed in lead and a border of jewels
+   for the content, ruby for the accent, near-black lead for the lines.
+   Restyled from top to bottom in restyles.css: lead cames round every
+   panel, buttons of ruby and clear glass, a transom of jewel-coloured
+   panes for the top bar. The picture is a file of its own (public/themes). */
+[data-theme="leadlight"] {
+    --background: #efe7d4;
+    --foreground: #221d16;
+    --card: #fbf6ea;
+    --card-foreground: #221d16;
+    --popover: #fbf6ea;
+    --popover-foreground: #221d16;
+    --primary: #8c1c32;
+    --primary-foreground: #ffffff;
+    --secondary: #ece2cb;
+    --secondary-foreground: #221d16;
+    --muted: #ebe1ca;
+    --muted-foreground: #5a4e3b;
+    --accent: #f2e2bf;
+    --accent-foreground: #221d16;
+    --destructive: #a01f15;
+    --border: #bcae93;
+    --input: #a69a80;
+    --ring: #8c1c32;
+    --radius: 0.125rem;
+    --heading-font: var(--font-playfair), "Playfair Display", Georgia, serif;
+    --page-gradient: url("/themes/leadlight.svg");
     --page-size: cover;
 }
 

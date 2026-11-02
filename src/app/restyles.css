@@ -7294,3 +7294,2075 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
   mask-composite: exclude;
   pointer-events: none;
 }
+
+/* ── Fluent ────────────────────────────────────────────────────────────────
+   Windows 11 in its dark mode. The app is a window of Mica, the material
+   Windows lays over a window's body: near-black, with the wallpaper's
+   colour coming through it faint and blurred, so the window takes on the
+   bloom it floats over, a swirl of silky violet and rose petals glowing on
+   black. Across its top, the title bar names the page beside the app's
+   icon, with Windows' thin minimise, maximise and close glyphs at the
+   right. The top bar is the taskbar of acrylic at the foot of the screen,
+   blurred, with a fine grain: its icons centred, the wordmark as Start, the
+   open page under a lavender pill and the rest of the bar's buttons in the
+   corner as the tray. Inside the window everything is WinUI: cards a shade
+   lighter than the Mica with a hairline, quiet buttons with a lighter top
+   edge, the accent button in lavender, fields with the accent underline
+   while typed in, toggle switches, check boxes and a selector bar's pill
+   under the open tab. Menus, popovers and dialogs are acrylic flyouts.
+   The Mica is drawn rather than blurred: soft gradients where the bloom
+   lies, on a fixed layer, so the page scrolls over it at no cost. Only the
+   taskbar, menus and dialogs blur what is behind them. */
+:root[data-theme="fluent"] {
+  --fl-font: "Segoe UI Variable Text", "Segoe UI", var(--font-noto-sans), "Noto Sans", system-ui, sans-serif;
+  /* Where the window sits: the taskbar under it, a margin round it. */
+  --fl-bar: 3rem;
+  --fl-top: 0.75rem;
+  --fl-x: max(0.75rem, calc(50vw - 39rem));
+  --fl-bottom: calc(var(--fl-bar) + 0.75rem);
+  --fl-title: 2.5rem;
+  --fl-radius: 0.5rem;
+  /* The picture's size, as the page behind draws it (cover, centred), and
+     where the bloom's heart falls in it, for the Mica's glow. */
+  --fl-w: max(100vw, 160vh);
+  --fl-h: max(62.5vw, 100vh);
+  --fl-bloom-x: calc(50vw + 0.15 * var(--fl-w) - var(--fl-x));
+  --fl-bloom-y: calc(50vh + 0.06 * var(--fl-h) - var(--fl-top));
+  /* Mica: the window's dark base, the bloom's colours blurred into it. */
+  --fl-mica:
+    radial-gradient(calc(0.36 * var(--fl-w)) calc(0.44 * var(--fl-h)) at var(--fl-bloom-x) var(--fl-bloom-y), rgb(150 80 235 / 0.3), rgb(120 60 210 / 0.12) 55%, transparent),
+    radial-gradient(calc(0.2 * var(--fl-w)) calc(0.26 * var(--fl-h)) at var(--fl-bloom-x) var(--fl-bloom-y), rgb(230 120 220 / 0.18), transparent),
+    linear-gradient(#1f1d25, #1c1a21);
+  /* Acrylic: a darker tint over the blur, and a fine grain of noise. */
+  --fl-noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='128' height='128'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .045 0'/%3E%3C/filter%3E%3Crect width='128' height='128' filter='url(%23n)'/%3E%3C/svg%3E");
+  --fl-acrylic: var(--fl-noise), linear-gradient(rgb(44 41 52 / 0.74), rgb(40 37 47 / 0.78));
+  --fl-blur: blur(30px) saturate(1.4);
+  /* WinUI's fills and strokes in dark mode. */
+  --fl-fill: rgb(255 255 255 / 0.061);
+  --fl-fill-hover: rgb(255 255 255 / 0.084);
+  --fl-fill-down: rgb(255 255 255 / 0.033);
+  --fl-stroke: rgb(255 255 255 / 0.07);
+  --fl-stroke-top: rgb(255 255 255 / 0.1);
+  --fl-card: rgb(255 255 255 / 0.05);
+  --fl-card-stroke: rgb(0 0 0 / 0.28);
+  --fl-flyout-shadow: 0 8px 16px rgb(0 0 0 / 0.26), 0 0 0 1px rgb(0 0 0 / 0.3);
+  --heading-font: "Segoe UI Variable Display", "Segoe UI", var(--font-noto-sans), "Noto Sans", system-ui, sans-serif;
+  --surface-shadow: none;
+  --chart-1: #c9a8ff;
+  --chart-2: #ff8fd1;
+  --chart-3: #60cdff;
+  --chart-4: #6ccb5f;
+  --chart-5: #fce100;
+  scrollbar-width: thin;
+  scrollbar-color: rgb(255 255 255 / 0.4) transparent;
+  /* What the keyboard or a #link scrolls to lands inside the window, clear
+     of the title bar above and the taskbar below. */
+  scroll-padding-top: calc(var(--fl-top) + var(--fl-title) + 1rem);
+  scroll-padding-bottom: calc(var(--fl-bottom) + 1rem);
+}
+.theme-is-fluent body {
+  font-family: var(--fl-font);
+}
+.theme-is-fluent body::before {
+  background-position: center;
+}
+.theme-is-fluent ::selection {
+  color: var(--primary-foreground);
+  background: var(--primary);
+}
+.theme-is-fluent h1 {
+  font-weight: 600;
+  letter-spacing: 0;
+}
+.theme-is-fluent :is([data-slot="card-title"], [data-slot="dialog-title"]) {
+  font-weight: 600;
+}
+.theme-is-fluent .book-backdrop {
+  display: none;
+}
+/* The window: Mica, its hairline and its shadow, a fixed layer under the
+   page. */
+.theme-is-fluent body::after {
+  content: "";
+  position: fixed;
+  inset: var(--fl-top) var(--fl-x) var(--fl-bottom);
+  z-index: -1;
+  pointer-events: none;
+  border-radius: var(--fl-radius);
+  background: var(--fl-mica);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.08), 0 0 0 1px rgb(0 0 0 / 0.4), 0 32px 64px rgb(0 0 0 / 0.56), 0 2px 21px rgb(0 0 0 / 0.42);
+}
+/* The title bar: Mica too, over what scrolls under it, with the app's icon
+   and the page's name at the left and the caption buttons at the right. */
+.theme-is-fluent::before {
+  content: "MyReads";
+  content: "MyReads" / "";
+  position: fixed;
+  top: var(--fl-top);
+  left: var(--fl-x);
+  right: var(--fl-x);
+  z-index: 36;
+  height: var(--fl-title);
+  padding: 0 9rem 0 2.75rem;
+  overflow: hidden;
+  border-radius: var(--fl-radius) var(--fl-radius) 0 0;
+  color: #ffffff;
+  font: 400 0.75rem/var(--fl-title) var(--fl-font);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  pointer-events: none;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='138' height='32' fill='none' stroke='%23fff' stroke-width='1'%3E%3Cpath d='M18 16.5h10'/%3E%3Crect x='64.5' y='11.5' width='9' height='9' rx='1.5'/%3E%3Cpath d='M110.5 11.5l9 9m0-9l-9 9'/%3E%3C/svg%3E") right 0.25rem top 50% / 8.625rem 2rem no-repeat,
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23c9a8ff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 7v14'/%3E%3Cpath d='M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z'/%3E%3C/svg%3E") 1rem 50% / 1rem 1rem no-repeat,
+    var(--fl-mica);
+  box-shadow: inset 0 1px rgb(255 255 255 / 0.08), inset 1px 0 rgb(255 255 255 / 0.08), inset -1px 0 rgb(255 255 255 / 0.08);
+}
+.theme-is-fluent[data-section="library"]::before {
+  content: "Library - MyReads";
+  content: "Library - MyReads" / "";
+}
+.theme-is-fluent[data-section="book"]::before {
+  content: "Book - MyReads";
+  content: "Book - MyReads" / "";
+}
+.theme-is-fluent[data-section="series"]::before {
+  content: "Series - MyReads";
+  content: "Series - MyReads" / "";
+}
+.theme-is-fluent[data-section="stats"]::before {
+  content: "Stats - MyReads";
+  content: "Stats - MyReads" / "";
+}
+.theme-is-fluent[data-section="reading"]::before {
+  content: "Now reading - MyReads";
+  content: "Now reading - MyReads" / "";
+}
+.theme-is-fluent[data-section="quotes"]::before {
+  content: "Quotes - MyReads";
+  content: "Quotes - MyReads" / "";
+}
+.theme-is-fluent[data-section="room"]::before {
+  content: "Reading room - MyReads";
+  content: "Reading room - MyReads" / "";
+}
+.theme-is-fluent[data-section="account"]::before {
+  content: "Account - MyReads";
+  content: "Account - MyReads" / "";
+}
+.theme-is-fluent:has(.top-bar .nav-link[href="/books/new"][aria-current="page"])::before {
+  content: "Add book - MyReads";
+  content: "Add book - MyReads" / "";
+}
+.theme-is-fluent:has(.top-bar .nav-link[href="/books/check"][aria-current="page"])::before {
+  content: "Check - MyReads";
+  content: "Check - MyReads" / "";
+}
+/* The desktop again round the window, over the page, so what scrolls past
+   the window's edges goes behind them. The window's shape is cut out with a
+   mask, as Golden Gate's is, and it never moves. */
+.theme-is-fluent::after {
+  --fl-r2: calc(2 * var(--fl-radius));
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 35;
+  pointer-events: none;
+  background:
+    var(--page-gradient) center / cover no-repeat,
+    var(--background);
+  mask:
+    linear-gradient(#000 0 0),
+    linear-gradient(#000 0 0) var(--fl-x) calc(var(--fl-top) + var(--fl-radius)) /
+      calc(100% - 2 * var(--fl-x)) calc(100% - var(--fl-top) - var(--fl-bottom) - var(--fl-r2)) no-repeat,
+    linear-gradient(#000 0 0) calc(var(--fl-x) + var(--fl-radius)) var(--fl-top) /
+      calc(100% - 2 * var(--fl-x) - var(--fl-r2)) calc(100% - var(--fl-top) - var(--fl-bottom)) no-repeat,
+    radial-gradient(closest-side, #000 98%, transparent) left var(--fl-x) top var(--fl-top) / var(--fl-r2) var(--fl-r2) no-repeat,
+    radial-gradient(closest-side, #000 98%, transparent) right var(--fl-x) top var(--fl-top) / var(--fl-r2) var(--fl-r2) no-repeat,
+    radial-gradient(closest-side, #000 98%, transparent) left var(--fl-x) bottom var(--fl-bottom) / var(--fl-r2) var(--fl-r2) no-repeat,
+    radial-gradient(closest-side, #000 98%, transparent) right var(--fl-x) bottom var(--fl-bottom) / var(--fl-r2) var(--fl-r2) no-repeat;
+  mask-composite: exclude, add, add, add, add, add, add;
+}
+@media (width < 40rem) {
+  /* On a phone the window fills the screen above the taskbar, maximised,
+     with no title bar. */
+  :root[data-theme="fluent"] {
+    --fl-top: 0px;
+    --fl-x: 0px;
+    --fl-bottom: var(--fl-bar);
+    --fl-radius: 0px;
+  }
+  .theme-is-fluent::before {
+    display: none;
+  }
+}
+/* A page without the top bar (the sign-in pages) has no taskbar either, so
+   the window keeps the same margin at its foot as at its head. */
+.theme-is-fluent:not(:has(> body > .top-bar)) {
+  --fl-bottom: var(--fl-top);
+}
+
+/* The taskbar: acrylic along the foot of the screen, its icons in the
+   middle and the tray at the right. */
+.theme-is-fluent .top-bar {
+  position: fixed;
+  inset: auto 0 0;
+  height: var(--fl-bar);
+  border: 0;
+  border-top: 1px solid rgb(255 255 255 / 0.08);
+  color: #ffffff;
+  background: var(--fl-acrylic);
+  backdrop-filter: var(--fl-blur);
+  box-shadow: none;
+  animation: none;
+}
+.theme-is-fluent .top-bar > div {
+  max-width: none;
+  height: 100%;
+  justify-content: center;
+  gap: 0.25rem;
+}
+.theme-is-fluent .top-bar :is(.wordmark, .nav-link) {
+  position: relative;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0.25rem;
+  color: #ffffff;
+}
+.theme-is-fluent .top-bar :is(.wordmark, .nav-link) svg {
+  width: 1.375rem;
+  height: 1.375rem;
+}
+/* Labels are said, not shown, as on the taskbar; hovering shows the title. */
+.theme-is-fluent .top-bar :is(.wordmark, .nav-link) > span {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+/* Start: the app's book in the accent, glowing a little. */
+.theme-is-fluent .top-bar .wordmark > svg {
+  color: var(--primary);
+  filter: drop-shadow(0 0 6px rgb(201 168 255 / 0.45));
+}
+.theme-is-fluent .top-bar :is(.wordmark, .nav-link):hover {
+  background: rgb(255 255 255 / 0.07);
+  box-shadow: inset 0 1px rgb(255 255 255 / 0.06);
+}
+.theme-is-fluent .top-bar :is(.wordmark, .nav-link):active {
+  background: rgb(255 255 255 / 0.04);
+}
+.theme-is-fluent .top-bar :is(.wordmark, .nav-link):active svg {
+  scale: 0.88;
+}
+.theme-is-fluent .top-bar .nav-link[aria-current="page"] {
+  background: rgb(255 255 255 / 0.06);
+  box-shadow: inset 0 1px rgb(255 255 255 / 0.07);
+}
+/* The open app's pill, under its icon. */
+.theme-is-fluent .top-bar .nav-link[aria-current="page"]::after {
+  inset: auto 0 0.0625rem;
+  width: 1rem;
+  height: 0.1875rem;
+  margin: 0 auto;
+  border-radius: 999px;
+  background: var(--primary);
+}
+/* The tray. */
+.theme-is-fluent .top-bar .ml-auto {
+  position: absolute;
+  inset: 0 0.5rem 0 auto;
+  gap: 0.125rem;
+}
+.theme-is-fluent .top-bar .ml-auto [data-size][data-variant] {
+  height: 2.5rem;
+  min-width: 2.5rem;
+  border: 0;
+  border-radius: 0.25rem;
+  color: #ffffff;
+  background: transparent;
+  box-shadow: none;
+}
+.theme-is-fluent .top-bar .ml-auto [data-size][data-variant]:hover {
+  background: rgb(255 255 255 / 0.07);
+}
+.theme-is-fluent .top-bar .ml-auto .text-muted-foreground {
+  color: #ffffff;
+}
+/* The page inside the window, clear of the title bar above and the
+   taskbar below. */
+.theme-is-fluent .top-bar + main {
+  padding-top: calc(var(--fl-top) + var(--fl-title) + 1.25rem);
+  padding-bottom: calc(var(--fl-bottom) + 2.5rem);
+}
+.theme-is-fluent .top-bar + main .sticky.top-2 {
+  top: calc(var(--fl-top) + var(--fl-title) + 0.5rem);
+}
+.theme-is-fluent .bulk-bar {
+  bottom: calc(var(--fl-bottom) + 0.75rem);
+}
+@media (width < 40rem) {
+  /* Nine icons and the tray in a phone's width: the tray joins the row. */
+  .theme-is-fluent .top-bar > div {
+    justify-content: space-between;
+    gap: 0;
+    padding-inline: 0.25rem;
+  }
+  .theme-is-fluent .top-bar .ml-auto {
+    position: static;
+    margin: 0;
+  }
+  .theme-is-fluent .top-bar :is(.wordmark, .nav-link),
+  .theme-is-fluent .top-bar .ml-auto [data-size][data-variant] {
+    width: 2rem;
+    min-width: 2rem;
+    padding: 0;
+  }
+  .theme-is-fluent .top-bar :is(.wordmark, .nav-link) svg {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+  .theme-is-fluent .top-bar + main {
+    padding-top: 1.25rem;
+  }
+}
+
+/* Buttons: WinUI's, a quiet fill with a lighter top edge; the accent button
+   lavender, its lower edge darker. */
+.theme-is-fluent [data-size][data-variant] {
+  border: 1px solid var(--fl-stroke);
+  border-top-color: var(--fl-stroke-top);
+  border-radius: 0.25rem;
+  color: #ffffff;
+  font-weight: 400;
+  background: var(--fl-fill);
+  box-shadow: none;
+}
+.theme-is-fluent [data-size][data-variant]:hover {
+  background: var(--fl-fill-hover);
+}
+.theme-is-fluent [data-size][data-variant]:active:not(:disabled) {
+  translate: none;
+  color: rgb(255 255 255 / 0.79);
+  background: var(--fl-fill-down);
+  border-top-color: var(--fl-stroke);
+}
+.theme-is-fluent [data-size][data-variant="default"] {
+  border-color: rgb(255 255 255 / 0.08) rgb(255 255 255 / 0.08) rgb(0 0 0 / 0.16);
+  color: var(--primary-foreground);
+  font-weight: 600;
+  background: var(--primary);
+}
+.theme-is-fluent [data-size][data-variant="default"]:hover {
+  background: color-mix(in oklab, var(--primary) 90%, #1d1b22);
+}
+.theme-is-fluent [data-size][data-variant="default"]:active:not(:disabled) {
+  color: color-mix(in oklab, var(--primary-foreground) 75%, var(--primary));
+  background: color-mix(in oklab, var(--primary) 80%, #1d1b22);
+  border-color: transparent;
+}
+.theme-is-fluent [data-size][data-variant="destructive"] {
+  color: var(--destructive);
+}
+.theme-is-fluent [data-size]:is([data-variant="ghost"], [data-variant="link"]) {
+  border-color: transparent;
+  background: transparent;
+}
+.theme-is-fluent [data-size][data-variant="ghost"]:is(:hover, [aria-expanded="true"]) {
+  background: var(--fl-fill);
+}
+.theme-is-fluent [data-size][data-variant="link"] {
+  color: var(--primary);
+}
+.theme-is-fluent [data-size][data-variant="link"]:hover {
+  background: transparent;
+}
+.theme-is-fluent [data-size][data-variant]:disabled {
+  color: rgb(255 255 255 / 0.36);
+  opacity: 1;
+}
+/* Keyboard focus: Windows' focus rectangle, white outside black. */
+.theme-is-fluent :is([data-size][data-variant], [data-slot="select-trigger"], .select-like, [role="tab"], [data-slot="tabs-trigger"], .shelf-tabs > a, .surface, .wordmark):focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 1px;
+  --tw-ring-shadow: 0 0 #0000;
+  box-shadow: 0 0 0 1px #000000;
+}
+
+/* Fields: a quiet fill and a lighter line along the bottom, which turns
+   into the accent, thicker, while typed in. */
+.theme-is-fluent :is([data-slot="input"], [data-slot="textarea"]),
+.theme-is-fluent input:is([type="text"], [type="search"], [type="number"], [type="date"], [type="password"], [type="url"], [type="email"], :not([type])),
+.theme-is-fluent textarea {
+  border: 1px solid var(--fl-stroke);
+  border-bottom-color: rgb(255 255 255 / 0.54);
+  border-radius: 0.25rem;
+  background: var(--fl-fill);
+  box-shadow: none;
+}
+.theme-is-fluent :is([data-slot="input"], [data-slot="textarea"], input, textarea):hover {
+  background: var(--fl-fill-hover);
+}
+.theme-is-fluent :is([data-slot="input"], [data-slot="textarea"], input, textarea):focus-visible {
+  outline: none;
+  --tw-ring-shadow: 0 0 #0000;
+  border-bottom-color: var(--primary);
+  background: rgb(30 28 35 / 0.7);
+  box-shadow: inset 0 -1px var(--primary);
+}
+.theme-is-fluent :is([data-slot="input"], [data-slot="textarea"], input, textarea)::placeholder {
+  color: rgb(255 255 255 / 0.6);
+}
+.theme-is-fluent :is([data-slot="select-trigger"], .select-like) {
+  border: 1px solid var(--fl-stroke);
+  border-top-color: var(--fl-stroke-top);
+  border-radius: 0.25rem;
+  color: #ffffff;
+  background: var(--fl-fill);
+  box-shadow: none;
+}
+.theme-is-fluent :is([data-slot="select-trigger"], .select-like):hover {
+  background: var(--fl-fill-hover);
+}
+.theme-is-fluent :is([data-slot="select-trigger"], .select-like) > svg:last-child {
+  color: rgb(255 255 255 / 0.79);
+  opacity: 1;
+}
+/* Check boxes: a dark square with a pale edge; checked, the accent with a
+   dark tick. Radio buttons: a ring; chosen, the accent round a dark dot. */
+.theme-is-fluent input[type="checkbox"],
+.theme-is-fluent input[type="radio"] {
+  appearance: none;
+  flex: none;
+  width: 1.125rem;
+  height: 1.125rem;
+  margin: 0;
+  border: 1px solid rgb(255 255 255 / 0.6);
+  border-radius: 0.25rem;
+  background: rgb(0 0 0 / 0.1);
+}
+.theme-is-fluent input[type="radio"] {
+  border-radius: 50%;
+}
+.theme-is-fluent input:is([type="checkbox"], [type="radio"]):hover {
+  background: rgb(255 255 255 / 0.04);
+}
+.theme-is-fluent input[type="checkbox"]:checked {
+  border-color: var(--primary);
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 6.2l2.4 2.4 4.6-5' fill='none' stroke='%231b0d33' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 80% no-repeat,
+    var(--primary);
+}
+.theme-is-fluent input[type="radio"]:checked {
+  border-color: var(--primary);
+  background: radial-gradient(circle, #1b0d33 0 26%, var(--primary) 29%);
+}
+.theme-is-fluent input:is([type="checkbox"], [type="radio"]):focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 1px;
+}
+/* Toggle switches: a ringed pill with a small knob; on, the accent with a
+   dark knob. */
+.theme-is-fluent button[role="switch"] > span:last-child {
+  border: 1px solid rgb(255 255 255 / 0.6);
+  background: rgb(0 0 0 / 0.1);
+}
+.theme-is-fluent button[role="switch"][aria-checked="true"] > span:last-child {
+  border-color: var(--primary);
+  background: var(--primary);
+}
+.theme-is-fluent button[role="switch"] > span:last-child > span {
+  background: rgb(255 255 255 / 0.79);
+  box-shadow: none;
+  scale: 0.7;
+}
+.theme-is-fluent button[role="switch"][aria-checked="true"] > span:last-child > span {
+  background: #1b0d33;
+  scale: 0.8;
+}
+
+/* Cards: a shade lighter than the Mica, with a dark hairline. Library
+   tiles the same, lighter under the pointer. */
+.theme-is-fluent [data-slot="card"],
+.theme-is-fluent .bg-card.border:not(.bulk-bar) {
+  border: 1px solid var(--fl-card-stroke);
+  border-radius: 0.5rem;
+  background: var(--fl-card);
+  box-shadow: inset 0 1px rgb(255 255 255 / 0.04);
+  --tw-ring-shadow: 0 0 #0000;
+}
+.theme-is-fluent .surface:not([data-slot="card"]) {
+  border: 1px solid var(--fl-card-stroke);
+  border-radius: 0.5rem;
+  background: var(--fl-card);
+  box-shadow: inset 0 1px rgb(255 255 255 / 0.04);
+}
+.theme-is-fluent .surface:not([data-slot="card"]):hover,
+.theme-is-fluent .bg-card.border:not(.surface, .bulk-bar):is(a, button):hover {
+  background: rgb(255 255 255 / 0.08);
+}
+.theme-is-fluent .bg-card.border.border-red-300 {
+  border-color: rgb(255 153 164 / 0.4);
+  background: rgb(68 39 38 / 0.6);
+}
+.theme-is-fluent [data-slot="card-footer"] {
+  border-top: 1px solid var(--fl-card-stroke);
+  background: rgb(0 0 0 / 0.1);
+}
+.theme-is-fluent .surface .book-cover {
+  border-radius: 0.25rem;
+}
+.theme-is-fluent [data-slot="card"] .cover-shadow {
+  box-shadow: 0 2px 4px rgb(0 0 0 / 0.26), 0 8px 16px rgb(0 0 0 / 0.26);
+}
+
+/* Tabs: a selector bar, the open one in white with the accent's pill under
+   it. Chips: toggle buttons, the chosen one in the accent. */
+.theme-is-fluent .shelf-tabs {
+  gap: 0.25rem;
+  border-bottom: 1px solid rgb(255 255 255 / 0.08);
+}
+.theme-is-fluent .shelf-tabs > a,
+.theme-is-fluent [data-slot="tabs-trigger"] {
+  position: relative;
+  margin: 0;
+  border: 0;
+  border-radius: 0.25rem;
+  color: rgb(255 255 255 / 0.79);
+  background: transparent;
+  box-shadow: none;
+}
+.theme-is-fluent .shelf-tabs > a:hover,
+.theme-is-fluent [data-slot="tabs-trigger"]:hover {
+  color: #ffffff;
+  background: var(--fl-fill);
+}
+.theme-is-fluent .shelf-tabs > a[aria-current="page"],
+.theme-is-fluent [data-slot="tabs-trigger"][data-state="active"] {
+  color: #ffffff;
+  font-weight: 600;
+  background: transparent;
+  box-shadow: none;
+}
+.theme-is-fluent .shelf-tabs > a[aria-current="page"]::after,
+.theme-is-fluent [data-slot="tabs-trigger"][data-state="active"]::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 -0.0625rem;
+  width: 1rem;
+  height: 0.1875rem;
+  margin: 0 auto;
+  border-radius: 999px;
+  background: var(--primary);
+  opacity: 1;
+}
+.theme-is-fluent [data-slot="tabs-list"] {
+  border-radius: 0.25rem;
+  background: transparent;
+  box-shadow: none;
+}
+.theme-is-fluent .shelf-tabs > a > span {
+  color: #ffffff;
+  background: rgb(255 255 255 / 0.08);
+}
+.theme-is-fluent .shelf-tabs > a[aria-current="page"] > span {
+  color: var(--primary-foreground);
+  background: var(--primary);
+}
+.theme-is-fluent :is(a, button).rounded-full.border:not(.aspect-square, .border-2) {
+  border-color: var(--fl-stroke);
+  border-top-color: var(--fl-stroke-top);
+  border-radius: 0.25rem;
+  background: var(--fl-fill);
+}
+.theme-is-fluent :is(a, button).rounded-full.border:not(.aspect-square, .border-2):hover {
+  background: var(--fl-fill-hover);
+}
+.theme-is-fluent :is(a, button).rounded-full.border:is([class*="border-primary"], [aria-current="page"], [aria-pressed="true"]):not(.aspect-square, .border-2) {
+  border-color: rgb(255 255 255 / 0.08) rgb(255 255 255 / 0.08) rgb(0 0 0 / 0.16);
+  color: var(--primary-foreground);
+  background: var(--primary);
+}
+.theme-is-fluent kbd {
+  border: 1px solid var(--fl-stroke);
+  border-bottom-color: rgb(0 0 0 / 0.3);
+  border-radius: 0.25rem;
+  background: var(--fl-fill);
+}
+
+/* Progress: a thin line, the accent a rounded bar over it. */
+.theme-is-fluent :has(> .bar-grow) {
+  border-radius: 999px;
+  background: linear-gradient(rgb(255 255 255 / 0.54), rgb(255 255 255 / 0.54)) center / 100% 1px no-repeat;
+}
+.theme-is-fluent .bar-grow {
+  border-radius: 999px;
+}
+
+/* Menus, popovers and lists: acrylic flyouts, the item under the pointer
+   lit, a chosen one marked by the accent's pill at its start. */
+.theme-is-fluent :is([data-slot="dropdown-menu-content"], [data-slot="popover-content"], [data-slot="select-content"], [data-slot="dropdown-menu-sub-content"]) {
+  border: 0;
+  border-radius: 0.5rem;
+  background: var(--fl-acrylic);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.08), var(--fl-flyout-shadow);
+  backdrop-filter: var(--fl-blur);
+  --tw-ring-shadow: 0 0 #0000;
+}
+.theme-is-fluent :is([data-slot="dropdown-menu-item"], [data-slot="select-item"], [data-slot="dropdown-menu-checkbox-item"], [data-slot="dropdown-menu-radio-item"], [data-slot="dropdown-menu-sub-trigger"]) {
+  position: relative;
+  border-radius: 0.25rem;
+}
+.theme-is-fluent :is([data-slot="dropdown-menu-item"], [data-slot="select-item"], [data-slot="dropdown-menu-checkbox-item"], [data-slot="dropdown-menu-radio-item"], [data-slot="dropdown-menu-sub-trigger"]):is(:focus, [data-highlighted]) {
+  color: #ffffff;
+  background: var(--fl-fill-hover);
+}
+.theme-is-fluent [data-slot="select-item"][data-state="checked"]::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 0.1875rem;
+  height: 1rem;
+  margin: auto 0;
+  border-radius: 999px;
+  background: var(--primary);
+}
+
+/* Dialogs: an acrylic window over a smoked page, the buttons along its foot
+   in a darker band. */
+.theme-is-fluent [data-slot="dialog-overlay"] {
+  background: rgb(0 0 0 / 0.3);
+  backdrop-filter: none;
+}
+.theme-is-fluent [data-slot="dialog-content"] {
+  border: 0;
+  border-radius: 0.5rem;
+  background: var(--fl-acrylic);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.08), 0 32px 64px rgb(0 0 0 / 0.56), 0 2px 21px rgb(0 0 0 / 0.42);
+  backdrop-filter: var(--fl-blur);
+  --tw-ring-shadow: 0 0 #0000;
+}
+.theme-is-fluent [data-slot="dialog-title"] {
+  font-family: var(--heading-font);
+  font-size: 1.25rem;
+}
+.theme-is-fluent [data-slot="dialog-footer"] {
+  border-top: 1px solid rgb(0 0 0 / 0.3);
+  border-radius: 0 0 0.5rem 0.5rem;
+  background: rgb(20 19 24 / 0.55);
+}
+.theme-is-fluent [data-slot="dialog-content"] > [data-slot="dialog-close"] {
+  border: 0;
+  border-radius: 0.25rem;
+  background: transparent;
+}
+.theme-is-fluent [data-slot="dialog-content"] > [data-slot="dialog-close"]:hover {
+  color: #ffffff;
+  background: #c42b1c;
+}
+.theme-is-fluent .bulk-bar {
+  border: 0;
+  border-radius: 0.5rem;
+  background: var(--fl-acrylic);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.08), var(--fl-flyout-shadow);
+  backdrop-filter: var(--fl-blur);
+}
+
+/* The sign-in pages: the window alone on the desktop. */
+.theme-is-fluent .auth-backdrop {
+  display: none;
+}
+.theme-is-fluent main:has(> .auth-backdrop) {
+  padding-top: calc(var(--fl-top) + var(--fl-title));
+  padding-bottom: var(--fl-bottom);
+}
+.theme-is-fluent main:has(> .auth-backdrop) .wordmark {
+  font-family: var(--heading-font);
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+/* ── visionOS ──────────────────────────────────────────────────────────────
+   Apple's spatial computer. The app is a window of glass floating in a
+   mountain valley: snowy ranges, pine forest, a still lake. The valley
+   shows through the window blurred and dimmed, so white text reads on it
+   anywhere, and its rim catches the light along the top. The page links
+   are an ornament, a tall capsule of glass floating beside the window's
+   left edge with an icon for each page, that opens out to show their names
+   when pointed at, as the tab bar does when looked at; the open page's is
+   lit. The bar's other buttons are a second ornament along the window's
+   foot, and under the window is the window bar, with the round button
+   that closes it. Buttons are capsules of glass, lighter under the pointer
+   as if looked at; the main one is white. Panels are platters of glass a
+   step lighter than the window, fields are wells pressed into it, menus
+   and dialogs are glass over the page. The text is the system's, SF Pro
+   on Apple's devices. Like Golden Gate's, the window is a softened copy
+   of the picture on a fixed layer, so the page scrolls over it at no
+   cost; only the ornaments, menus and dialogs blur for real. */
+:root[data-theme="vision"] {
+  --vo-font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro", var(--font-inter), "Inter", system-ui, sans-serif;
+  /* The window: its width, and its insets from the screen's edges, room
+     at the left for the ornament and at the foot for the window bar. */
+  --vo-w: min(76rem, calc(100vw - 7.5rem));
+  --vo-left: max(5.5rem, calc((100vw - var(--vo-w)) / 2));
+  --vo-right: calc(100vw - var(--vo-left) - var(--vo-w));
+  --vo-top: 1.5rem;
+  --vo-bottom: 4.75rem;
+  --vo-radius: 2.75rem;
+  --vo-s: 3rem;
+  /* What the keyboard or a #link scrolls to lands inside the window, clear
+     of the toolbar on its foot. */
+  scroll-padding-top: calc(var(--vo-top) + 1rem);
+  scroll-padding-bottom: calc(var(--vo-bottom) + 2rem);
+  /* The picture's size and place, as the page behind draws it (cover,
+     centred): the window repeats them to line its copy up. */
+  --vo-pw: max(100vw, 160vh);
+  --vo-ph: max(62.5vw, 100vh);
+  /* Glass over the page, for ornaments, menus and dialogs: blurred,
+     darkened and its colour heightened, a tint and a light rim over it. */
+  --vo-frost: blur(28px) brightness(0.62) saturate(1.7);
+  --vo-tint: linear-gradient(rgb(62 70 68 / 0.46), rgb(48 55 53 / 0.5));
+  --vo-rim: inset 0 1px 0.5px rgb(255 255 255 / 0.32), inset 0 -1px 0.5px rgb(255 255 255 / 0.08), inset 0 0 0 0.5px rgb(255 255 255 / 0.12);
+  --vo-lift: 0 18px 40px -14px rgb(0 0 0 / 0.5);
+  /* What the eye rests on lights up from within. */
+  --vo-gaze: radial-gradient(90% 120% at 50% 0%, rgb(255 255 255 / 0.2), rgb(255 255 255 / 0.06) 70%);
+  --vo-fill: rgb(255 255 255 / 0.1);
+  --vo-well: rgb(0 0 0 / 0.22);
+  --heading-font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro", var(--font-inter), "Inter", system-ui, sans-serif;
+  --surface-shadow: none;
+  --chart-1: #ffffff;
+  --chart-2: #64d2ff;
+  --chart-3: #30d158;
+  --chart-4: #ffd60a;
+  --chart-5: #bf5af2;
+  scrollbar-width: thin;
+  scrollbar-color: rgb(255 255 255 / 0.4) transparent;
+}
+.theme-is-vision body {
+  font-family: var(--vo-font);
+}
+.theme-is-vision body::before {
+  background-position: center;
+}
+.theme-is-vision ::selection {
+  background: rgb(255 255 255 / 0.3);
+}
+.theme-is-vision h1 {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.theme-is-vision :is([data-slot="card-title"], [data-slot="dialog-title"]) {
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.theme-is-vision .book-backdrop {
+  display: none;
+}
+/* The window: the valley again, blurred and dimmed, lighter towards its
+   top, its rim catching the light. */
+.theme-is-vision body::after {
+  content: "";
+  position: fixed;
+  inset: var(--vo-top) var(--vo-right) var(--vo-bottom) var(--vo-left);
+  z-index: -1;
+  pointer-events: none;
+  border-radius: var(--vo-radius);
+  background:
+    linear-gradient(rgb(255 255 255 / 0.05), rgb(255 255 255 / 0.015) 40%, rgb(255 255 255 / 0.03)),
+    url("/themes/vision-glass.svg")
+      calc((100vw - var(--vo-pw)) * 0.5 - var(--vo-left)) calc((100vh - var(--vo-ph)) * 0.5 - var(--vo-top)) /
+      var(--vo-pw) var(--vo-ph) no-repeat,
+    #1f2726;
+  box-shadow:
+    inset 0 1.5px 1px rgb(255 255 255 / 0.4),
+    inset 0 -1px 1px rgb(255 255 255 / 0.1),
+    inset 0 0 0 1px rgb(255 255 255 / 0.1),
+    inset 0 0 48px rgb(255 255 255 / 0.05);
+}
+/* The valley again round the window, over the page, so what scrolls past
+   the window's edges goes behind them; the window's shadow falls on it,
+   and the window bar and its close button sit under the window. */
+.theme-is-vision::after {
+  --vo-r2: calc(2 * var(--vo-radius));
+  --vo-h: calc(100% - var(--vo-top) - var(--vo-bottom));
+  --vo-shade: rgb(10 20 18 / 0.32), rgb(10 20 18 / 0.1) 40%, rgb(10 20 18 / 0);
+  --vo-shade-r:
+    rgb(10 20 18 / 0.32) var(--vo-radius), rgb(10 20 18 / 0.1) calc(var(--vo-radius) + 0.4 * var(--vo-s)),
+    rgb(10 20 18 / 0) calc(var(--vo-radius) + var(--vo-s));
+  --vo-corner: calc(var(--vo-radius) + var(--vo-s));
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 35;
+  pointer-events: none;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='156' height='22'%3E%3Ccircle cx='11' cy='11' r='10' fill='%23ffffff' fill-opacity='.28'/%3E%3Cpath d='M7.5 7.5l7 7m0-7l-7 7' stroke='%23fff' stroke-width='1.8' stroke-linecap='round'/%3E%3Crect x='32' y='7.5' width='124' height='7' rx='3.5' fill='%23ffffff' fill-opacity='.72'/%3E%3C/svg%3E")
+      left calc(var(--vo-left) + var(--vo-w) / 2 - 5.375rem) bottom 0.75rem / 9.75rem 1.375rem no-repeat,
+    linear-gradient(to top, var(--vo-shade)) left calc(var(--vo-left) + var(--vo-radius)) top calc(var(--vo-top) - var(--vo-s)) /
+      calc(var(--vo-w) - var(--vo-r2)) var(--vo-s) no-repeat,
+    linear-gradient(to bottom, var(--vo-shade)) left calc(var(--vo-left) + var(--vo-radius)) bottom calc(var(--vo-bottom) - var(--vo-s)) /
+      calc(var(--vo-w) - var(--vo-r2)) var(--vo-s) no-repeat,
+    linear-gradient(to left, var(--vo-shade)) left calc(var(--vo-left) - var(--vo-s)) top calc(var(--vo-top) + var(--vo-radius)) /
+      var(--vo-s) calc(var(--vo-h) - var(--vo-r2)) no-repeat,
+    linear-gradient(to right, var(--vo-shade)) right calc(var(--vo-right) - var(--vo-s)) top calc(var(--vo-top) + var(--vo-radius)) /
+      var(--vo-s) calc(var(--vo-h) - var(--vo-r2)) no-repeat,
+    radial-gradient(circle at 100% 100%, var(--vo-shade-r)) left calc(var(--vo-left) - var(--vo-s)) top calc(var(--vo-top) - var(--vo-s)) /
+      var(--vo-corner) var(--vo-corner) no-repeat,
+    radial-gradient(circle at 0 100%, var(--vo-shade-r)) right calc(var(--vo-right) - var(--vo-s)) top calc(var(--vo-top) - var(--vo-s)) /
+      var(--vo-corner) var(--vo-corner) no-repeat,
+    radial-gradient(circle at 100% 0, var(--vo-shade-r)) left calc(var(--vo-left) - var(--vo-s)) bottom calc(var(--vo-bottom) - var(--vo-s)) /
+      var(--vo-corner) var(--vo-corner) no-repeat,
+    radial-gradient(circle at 0 0, var(--vo-shade-r)) right calc(var(--vo-right) - var(--vo-s)) bottom calc(var(--vo-bottom) - var(--vo-s)) /
+      var(--vo-corner) var(--vo-corner) no-repeat,
+    var(--page-gradient) center / cover no-repeat,
+    var(--background);
+  mask:
+    linear-gradient(#000 0 0),
+    linear-gradient(#000 0 0) var(--vo-left) calc(var(--vo-top) + var(--vo-radius)) /
+      var(--vo-w) calc(var(--vo-h) - var(--vo-r2)) no-repeat,
+    linear-gradient(#000 0 0) calc(var(--vo-left) + var(--vo-radius)) var(--vo-top) /
+      calc(var(--vo-w) - var(--vo-r2)) var(--vo-h) no-repeat,
+    radial-gradient(closest-side, #000 98%, transparent) left var(--vo-left) top var(--vo-top) / var(--vo-r2) var(--vo-r2) no-repeat,
+    radial-gradient(closest-side, #000 98%, transparent) right var(--vo-right) top var(--vo-top) / var(--vo-r2) var(--vo-r2) no-repeat,
+    radial-gradient(closest-side, #000 98%, transparent) left var(--vo-left) bottom var(--vo-bottom) / var(--vo-r2) var(--vo-r2) no-repeat,
+    radial-gradient(closest-side, #000 98%, transparent) right var(--vo-right) bottom var(--vo-bottom) / var(--vo-r2) var(--vo-r2) no-repeat;
+  mask-composite: exclude, add, add, add, add, add, add;
+}
+
+/* The ornaments. The top bar itself steps out of the page; what it holds
+   floats on its own. */
+.theme-is-vision .top-bar {
+  position: fixed;
+  inset: 0 auto auto 0;
+  width: 0;
+  height: 0;
+  border: 0;
+  background: none;
+  backdrop-filter: none;
+  box-shadow: none;
+  animation: none;
+}
+/* The tab bar: a capsule beside the window's left edge, its middle level
+   with the window's. */
+.theme-is-vision .top-bar > div {
+  position: fixed;
+  top: var(--vo-top);
+  bottom: var(--vo-bottom);
+  left: calc(var(--vo-left) - 4.25rem);
+  flex-direction: column;
+  align-items: stretch;
+  width: auto;
+  max-width: none;
+  height: fit-content;
+  margin: auto 0;
+  padding: 0.375rem;
+  gap: 0.25rem;
+  border-radius: 1.75rem;
+  color: #ffffff;
+}
+.theme-is-vision .top-bar > div::before,
+.theme-is-vision .top-bar .ml-auto::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: var(--vo-tint);
+  box-shadow: var(--vo-rim), var(--vo-lift);
+  backdrop-filter: var(--vo-frost);
+}
+.theme-is-vision .top-bar :is(.wordmark, .nav-link) {
+  justify-content: flex-start;
+  gap: 0.625rem;
+  height: 2.75rem;
+  min-width: 2.75rem;
+  margin: 0;
+  padding: 0 0.75rem;
+  border: 0;
+  border-radius: 999px;
+  color: #ffffff;
+  font-family: var(--vo-font);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+.theme-is-vision .top-bar :is(.wordmark, .nav-link) svg {
+  flex: none;
+  width: 1.25rem;
+  height: 1.25rem;
+}
+.theme-is-vision .top-bar .wordmark {
+  margin-bottom: 0.25rem;
+  box-shadow: 0 1px rgb(255 255 255 / 0.12);
+  border-radius: 999px 999px 999px 999px;
+}
+/* Names are said, not shown, until the bar is pointed at or reached by
+   the keyboard; then it opens out over the window and shows them. */
+.theme-is-vision .top-bar :is(.wordmark, .nav-link) > span {
+  display: inline;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.theme-is-vision .top-bar > div:is(:hover, :focus-within) :is(.wordmark, .nav-link) > span {
+  position: static;
+  width: auto;
+  height: auto;
+  padding-right: 0.5rem;
+  clip-path: none;
+}
+.theme-is-vision .top-bar :is(.wordmark, .nav-link):hover {
+  background: var(--vo-gaze);
+}
+.theme-is-vision .top-bar .nav-link[aria-current="page"] {
+  background: rgb(255 255 255 / 0.24);
+  box-shadow: inset 0 1px 0.5px rgb(255 255 255 / 0.35);
+}
+.theme-is-vision .top-bar .nav-link[aria-current="page"]::after {
+  display: none;
+}
+.theme-is-vision .top-bar :is(.wordmark, .nav-link):active {
+  scale: 0.96;
+}
+/* The toolbar: the bar's other buttons, a capsule straddling the window's
+   foot. */
+.theme-is-vision .top-bar .ml-auto {
+  position: fixed;
+  bottom: calc(var(--vo-bottom) - 1.625rem);
+  left: calc(var(--vo-left) + var(--vo-w) / 2);
+  translate: -50% 0;
+  margin: 0;
+  padding: 0.25rem;
+  gap: 0.25rem;
+  border-radius: 999px;
+}
+.theme-is-vision .top-bar .ml-auto [data-size][data-variant] {
+  height: 2.5rem;
+  min-width: 2.5rem;
+  border: 0;
+  border-radius: 999px;
+  color: #ffffff;
+  background: transparent;
+  box-shadow: none;
+}
+.theme-is-vision .top-bar .ml-auto [data-size][data-variant]:hover {
+  background: var(--vo-gaze);
+}
+.theme-is-vision .top-bar .ml-auto .text-muted-foreground {
+  color: #ffffff;
+}
+/* The page inside the window. */
+.theme-is-vision .top-bar + main {
+  width: var(--vo-w);
+  max-width: none;
+  margin-left: var(--vo-left);
+  margin-right: 0;
+  padding: calc(var(--vo-top) + 2.25rem) 2.5rem calc(var(--vo-bottom) + 3rem);
+}
+.theme-is-vision .top-bar + main .sticky.top-2 {
+  top: calc(var(--vo-top) + 0.75rem);
+}
+.theme-is-vision .bulk-bar {
+  bottom: calc(var(--vo-bottom) + 2.5rem);
+}
+@media (width < 48rem) {
+  /* On a phone the window fills the screen, and the tab bar lies along its
+     foot, every button in it, as on an iPhone. */
+  :root[data-theme="vision"] {
+    --vo-w: calc(100vw - 0.75rem);
+    --vo-left: 0.375rem;
+    --vo-top: 0.375rem;
+    --vo-bottom: 4.5rem;
+    --vo-radius: 2rem;
+  }
+  .theme-is-vision::after {
+    background-size: 0 0, auto, auto, auto, auto, auto, auto, auto, auto, cover, auto;
+  }
+  .theme-is-vision .top-bar > div {
+    inset: auto 0 0.5rem;
+    flex-direction: row;
+    justify-content: space-between;
+    width: calc(100vw - 1rem);
+    height: 3.5rem;
+    margin: 0 auto;
+    padding: 0.25rem;
+    gap: 0;
+    border-radius: 999px;
+  }
+  .theme-is-vision .top-bar :is(.wordmark, .nav-link),
+  .theme-is-vision .top-bar .ml-auto [data-size][data-variant] {
+    justify-content: center;
+    width: 1.875rem;
+    min-width: 1.875rem;
+    height: 3rem;
+    padding: 0;
+  }
+  .theme-is-vision .top-bar .wordmark {
+    margin: 0;
+    box-shadow: none;
+  }
+  .theme-is-vision .top-bar > div:is(:hover, :focus-within) :is(.wordmark, .nav-link) > span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    clip-path: inset(50%);
+  }
+  .theme-is-vision .top-bar .ml-auto {
+    position: static;
+    translate: none;
+    padding: 0;
+    gap: 0;
+  }
+  .theme-is-vision .top-bar .ml-auto::before {
+    display: none;
+  }
+  .theme-is-vision .top-bar + main {
+    padding: 1.5rem 1rem calc(var(--vo-bottom) + 2rem);
+  }
+  .theme-is-vision .bulk-bar {
+    bottom: calc(var(--vo-bottom) + 0.5rem);
+  }
+}
+
+/* Buttons: capsules of glass, lit under the pointer; the main one white. */
+.theme-is-vision [data-size][data-variant] {
+  border: 0;
+  border-radius: 999px;
+  color: #ffffff;
+  font-weight: 500;
+  background: var(--vo-fill);
+  box-shadow: inset 0 1px 0.5px rgb(255 255 255 / 0.18);
+  transition: scale 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.theme-is-vision [data-size][data-variant]:hover {
+  background: var(--vo-gaze), var(--vo-fill);
+}
+.theme-is-vision [data-size][data-variant="default"] {
+  color: var(--primary-foreground);
+  font-weight: 600;
+  background: var(--primary);
+  box-shadow: 0 4px 14px -6px rgb(0 0 0 / 0.5);
+}
+.theme-is-vision [data-size][data-variant="default"]:hover {
+  background: #ffffff;
+}
+.theme-is-vision [data-size][data-variant="destructive"] {
+  color: var(--destructive);
+}
+.theme-is-vision [data-size]:is([data-variant="ghost"], [data-variant="link"]) {
+  background: transparent;
+  box-shadow: none;
+}
+.theme-is-vision [data-size][data-variant="ghost"]:is(:hover, [aria-expanded="true"]) {
+  background: var(--vo-gaze);
+}
+.theme-is-vision [data-size][data-variant="link"]:hover {
+  background: transparent;
+}
+.theme-is-vision [data-size][data-variant]:active:not(:disabled) {
+  translate: none;
+  scale: 0.96;
+}
+.theme-is-vision [data-size][data-variant]:disabled {
+  opacity: 0.4;
+}
+.theme-is-vision :is([data-size][data-variant], [data-slot="select-trigger"], .select-like, [role="tab"], [data-slot="tabs-trigger"], .shelf-tabs > a, .surface, .wordmark, .nav-link):focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+  --tw-ring-shadow: 0 0 #0000;
+}
+
+/* Fields: wells pressed into the glass. */
+.theme-is-vision :is([data-slot="input"], [data-slot="textarea"]),
+.theme-is-vision input:is([type="text"], [type="search"], [type="number"], [type="date"], [type="password"], [type="url"], [type="email"], :not([type])),
+.theme-is-vision textarea {
+  border: 0;
+  border-radius: 0.875rem;
+  background: var(--vo-well);
+  box-shadow: inset 0 1px 3px rgb(0 0 0 / 0.25), inset 0 -0.5px 0.5px rgb(255 255 255 / 0.14);
+}
+.theme-is-vision input[type="search"],
+.theme-is-vision input[placeholder^="Search"] {
+  border-radius: 999px;
+}
+.theme-is-vision :is([data-slot="input"], [data-slot="textarea"], input, textarea):focus-visible {
+  outline: none;
+  --tw-ring-shadow: 0 0 #0000;
+  background: rgb(0 0 0 / 0.3);
+  box-shadow: inset 0 1px 3px rgb(0 0 0 / 0.25), 0 0 0 2px rgb(255 255 255 / 0.75);
+}
+.theme-is-vision :is([data-slot="input"], [data-slot="textarea"], input, textarea)::placeholder {
+  color: rgb(255 255 255 / 0.6);
+}
+.theme-is-vision :is([data-slot="select-trigger"], .select-like) {
+  border: 0;
+  border-radius: 999px;
+  color: #ffffff;
+  background: var(--vo-fill);
+  box-shadow: inset 0 1px 0.5px rgb(255 255 255 / 0.18);
+}
+.theme-is-vision :is([data-slot="select-trigger"], .select-like):hover {
+  background: var(--vo-gaze), var(--vo-fill);
+}
+.theme-is-vision :is([data-slot="select-trigger"], .select-like) > svg:last-child {
+  color: #ffffff;
+  opacity: 0.8;
+}
+.theme-is-vision input[type="checkbox"],
+.theme-is-vision input[type="radio"] {
+  appearance: none;
+  flex: none;
+  width: 1.125rem;
+  height: 1.125rem;
+  margin: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--vo-well);
+  box-shadow: inset 0 0 0 1.5px rgb(255 255 255 / 0.55);
+}
+.theme-is-vision input:is([type="checkbox"], [type="radio"]):checked {
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.8 6.2l2.2 2.2 4.2-4.6' fill='none' stroke='%231c1c1e' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 80% no-repeat,
+    #ffffff;
+  box-shadow: none;
+}
+.theme-is-vision input:is([type="checkbox"], [type="radio"]):focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+}
+.theme-is-vision button[role="switch"] > span:last-child {
+  border: 0;
+  background: var(--vo-well);
+  box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.3);
+}
+.theme-is-vision button[role="switch"][aria-checked="true"] > span:last-child {
+  background: #30d158;
+}
+.theme-is-vision button[role="switch"] > span:last-child > span {
+  background: #ffffff;
+  box-shadow: 0 2px 5px rgb(0 0 0 / 0.35);
+}
+
+/* Panels: platters of glass a step lighter than the window. Library
+   tiles too, lit under the pointer as if looked at. */
+.theme-is-vision [data-slot="card"],
+.theme-is-vision .bg-card.border:not(.bulk-bar) {
+  border: 0;
+  border-radius: 1.5rem;
+  background: rgb(255 255 255 / 0.07);
+  box-shadow: inset 0 1px 0.5px rgb(255 255 255 / 0.16), inset 0 0 0 0.5px rgb(255 255 255 / 0.06);
+  --tw-ring-shadow: 0 0 #0000;
+}
+.theme-is-vision .surface:not([data-slot="card"]) {
+  border: 0;
+  border-radius: 1.5rem;
+  background: rgb(255 255 255 / 0.07);
+  box-shadow: inset 0 1px 0.5px rgb(255 255 255 / 0.16);
+}
+.theme-is-vision .surface:not([data-slot="card"]):hover,
+.theme-is-vision .bg-card.border:not(.surface, .bulk-bar):is(a, button):hover {
+  background: var(--vo-gaze), rgb(255 255 255 / 0.07);
+}
+.theme-is-vision .bg-card.border.border-red-300 {
+  background: rgb(255 80 70 / 0.16);
+  box-shadow: inset 0 0 0 1px rgb(255 138 128 / 0.5);
+}
+.theme-is-vision [data-slot="card-footer"] {
+  border-top: 1px solid rgb(255 255 255 / 0.08);
+  background: transparent;
+}
+.theme-is-vision .surface .book-cover {
+  border-radius: 0.75rem;
+}
+.theme-is-vision [data-slot="card"] .cover-shadow {
+  box-shadow: 0 2px 4px rgb(0 0 0 / 0.2), 0 14px 24px -12px rgb(0 0 0 / 0.6);
+}
+
+/* Tabs: a segmented capsule pressed into the glass, the open one lit. */
+.theme-is-vision .shelf-tabs {
+  gap: 0.25rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgb(255 255 255 / 0.1);
+}
+.theme-is-vision .shelf-tabs > a,
+.theme-is-vision [data-slot="tabs-trigger"] {
+  margin: 0;
+  border: 0;
+  border-radius: 999px;
+  color: rgb(255 255 255 / 0.85);
+  background: transparent;
+  box-shadow: none;
+}
+.theme-is-vision .shelf-tabs > a:hover,
+.theme-is-vision [data-slot="tabs-trigger"]:hover {
+  color: #ffffff;
+  background: var(--vo-gaze);
+}
+.theme-is-vision .shelf-tabs > a[aria-current="page"],
+.theme-is-vision [data-slot="tabs-trigger"][data-state="active"] {
+  color: #ffffff;
+  font-weight: 600;
+  background: rgb(255 255 255 / 0.22);
+  box-shadow: inset 0 1px 0.5px rgb(255 255 255 / 0.3);
+}
+.theme-is-vision [data-slot="tabs-trigger"]::after {
+  display: none;
+}
+.theme-is-vision [data-slot="tabs-list"] {
+  border-radius: 999px;
+  background: var(--vo-well);
+  box-shadow: inset 0 1px 3px rgb(0 0 0 / 0.25);
+}
+.theme-is-vision .shelf-tabs > a > span {
+  color: #ffffff;
+  background: rgb(255 255 255 / 0.14);
+}
+.theme-is-vision .shelf-tabs > a[aria-current="page"] > span {
+  color: var(--primary-foreground);
+  background: var(--primary);
+}
+.theme-is-vision :is(a, button).rounded-full.border:not(.aspect-square, .border-2) {
+  border-color: transparent;
+  background: var(--vo-fill);
+  box-shadow: inset 0 1px 0.5px rgb(255 255 255 / 0.18);
+}
+.theme-is-vision :is(a, button).rounded-full.border:not(.aspect-square, .border-2):hover {
+  background: var(--vo-gaze), var(--vo-fill);
+}
+.theme-is-vision :is(a, button).rounded-full.border:is([class*="border-primary"], [aria-current="page"], [aria-pressed="true"]):not(.aspect-square, .border-2) {
+  color: var(--primary-foreground);
+  background: var(--primary);
+}
+.theme-is-vision kbd {
+  border: 0;
+  border-radius: 0.5rem;
+  background: var(--vo-fill);
+  box-shadow: inset 0 1px 0.5px rgb(255 255 255 / 0.18);
+}
+
+/* Progress: a groove in the glass, filled white. */
+.theme-is-vision :has(> .bar-grow) {
+  border-radius: 999px;
+  background: var(--vo-well);
+}
+.theme-is-vision .bar-grow {
+  border-radius: 999px;
+}
+.theme-is-vision .bar-grow[class*="primary"] {
+  background: #ffffff;
+}
+
+/* Menus, popovers and lists: glass over the page. */
+.theme-is-vision :is([data-slot="dropdown-menu-content"], [data-slot="popover-content"], [data-slot="select-content"], [data-slot="dropdown-menu-sub-content"]) {
+  border: 0;
+  border-radius: 1.5rem;
+  background: var(--vo-tint);
+  box-shadow: var(--vo-rim), 0 24px 48px -16px rgb(0 0 0 / 0.55);
+  backdrop-filter: var(--vo-frost);
+  --tw-ring-shadow: 0 0 #0000;
+}
+.theme-is-vision :is([data-slot="dropdown-menu-item"], [data-slot="select-item"], [data-slot="dropdown-menu-checkbox-item"], [data-slot="dropdown-menu-radio-item"], [data-slot="dropdown-menu-sub-trigger"]) {
+  border-radius: 999px;
+}
+.theme-is-vision :is([data-slot="dropdown-menu-item"], [data-slot="select-item"], [data-slot="dropdown-menu-checkbox-item"], [data-slot="dropdown-menu-radio-item"], [data-slot="dropdown-menu-sub-trigger"]):is(:focus, [data-highlighted]) {
+  color: #ffffff;
+  background: var(--vo-gaze);
+}
+
+/* Dialogs: a sheet of glass over the window, which dims behind it. */
+.theme-is-vision [data-slot="dialog-overlay"] {
+  background: rgb(0 0 0 / 0.25);
+  backdrop-filter: none;
+}
+.theme-is-vision [data-slot="dialog-content"] {
+  border: 0;
+  border-radius: 2rem;
+  background: var(--vo-tint);
+  box-shadow: var(--vo-rim), 0 32px 64px -16px rgb(0 0 0 / 0.6);
+  backdrop-filter: var(--vo-frost);
+  --tw-ring-shadow: 0 0 #0000;
+}
+.theme-is-vision [data-slot="dialog-footer"] {
+  border-top: 0;
+  background: transparent;
+}
+.theme-is-vision [data-slot="dialog-content"] > [data-slot="dialog-close"] {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  color: #ffffff;
+  background: var(--vo-fill);
+  opacity: 1;
+}
+.theme-is-vision .bulk-bar {
+  border: 0;
+  border-radius: 1.75rem;
+  background: var(--vo-tint);
+  box-shadow: var(--vo-rim), var(--vo-lift);
+  backdrop-filter: var(--vo-frost);
+}
+
+/* The sign-in pages: a pane of glass in the window. */
+.theme-is-vision .auth-backdrop {
+  display: none;
+}
+.theme-is-vision main:has(> .auth-backdrop) .wordmark {
+  font-family: var(--heading-font);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+/* ── Sea Glass ─────────────────────────────────────────────────────────────
+   Glass worn soft by the sea. The page is a shore seen from above, the
+   sea's edge lacing across the top and pebbles of sea glass, seafoam,
+   aqua, cobalt, amber and white, scattered along the sides. Everything on
+   it is frosted glass of the kind the waves make: matte rather than
+   glossy, with a fine grain, paler at its worn edges, and never quite
+   square, as no two pebbles are. The top bar is a strip of it the sea
+   shows through as you scroll; panels and library tiles are slabs of
+   seafoam-white; buttons are pebbles, the main one cobalt, the rarest
+   kind; the open tab is a pebble of seafoam green. Headings are set round
+   and soft. Only the top bar, menus and dialogs blur what is behind them;
+   panels are frosted with a fill and a grain, which costs nothing as the
+   page scrolls. */
+:root[data-theme="sea-glass"] {
+  /* Pebble corners: never quite the same twice. */
+  --sg-pebble: 1.75rem 1.4rem 1.9rem 1.5rem / 1.5rem 1.9rem 1.4rem 1.75rem;
+  --sg-pebble-sm: 1.1rem 0.85rem 1.2rem 0.95rem / 0.95rem 1.2rem 0.85rem 1.1rem;
+  /* The frost: a fine grain over a pale fill. */
+  --sg-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .2 0 0 0 0 .38 0 0 0 0 .34 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  --sg-frost: linear-gradient(165deg, rgb(252 255 253 / 0.82), rgb(232 247 240 / 0.76) 55%, rgb(220 241 231 / 0.78));
+  /* Worn edges: paler just inside the rim, a little shade where the glass
+     is thicker, a soft shadow on the sand. */
+  --sg-wear: inset 0 0 0 1px rgb(255 255 255 / 0.7), inset 0 0 14px rgb(255 255 255 / 0.55), inset 0 -12px 22px -16px rgb(60 130 115 / 0.4);
+  --sg-shadow: 0 10px 24px -14px rgb(92 74 44 / 0.45), 0 2px 4px rgb(92 74 44 / 0.08);
+  --sg-seafoam: linear-gradient(165deg, #d3eedf, #a9d8c0 60%, #9bd0b6);
+  --sg-cobalt: linear-gradient(165deg, #4d7cc2, #2a5aa0 58%, #224d8d);
+  --surface-shadow: none;
+  --chart-1: #2a5aa0;
+  --chart-2: #5fb0a0;
+  --chart-3: #c99559;
+  --chart-4: #8fb563;
+  --chart-5: #7fbccc;
+  scrollbar-color: #a9c7bb transparent;
+}
+.theme-is-sea-glass body::before {
+  background-position: center top;
+}
+.theme-is-sea-glass ::selection {
+  background: rgb(134 201 207 / 0.55);
+}
+.theme-is-sea-glass :is(h1, h2, h3, [data-slot="card-title"], [data-slot="dialog-title"]) {
+  font-family: var(--heading-font);
+  font-weight: 800;
+  letter-spacing: -0.005em;
+}
+.theme-is-sea-glass .book-backdrop {
+  display: none;
+}
+
+/* The top bar: a strip of frosted glass, the sea and the page blurred
+   behind it; the open page a pebble of seafoam. */
+.theme-is-sea-glass .top-bar {
+  border-bottom: 1px solid rgb(255 255 255 / 0.7);
+  background: var(--sg-grain), linear-gradient(rgb(255 255 255 / 0.56), rgb(236 248 243 / 0.5));
+  backdrop-filter: blur(16px) saturate(1.35);
+  box-shadow: 0 1px 0 rgb(70 110 100 / 0.14), 0 10px 24px -18px rgb(40 80 70 / 0.5);
+  animation: none;
+}
+.theme-is-sea-glass .top-bar .wordmark {
+  font-family: var(--heading-font);
+  font-weight: 800;
+  letter-spacing: 0;
+}
+.theme-is-sea-glass .top-bar .wordmark > svg {
+  color: var(--primary);
+}
+.theme-is-sea-glass .top-bar .nav-link {
+  border-radius: var(--sg-pebble-sm);
+}
+.theme-is-sea-glass .top-bar .nav-link:hover {
+  background: rgb(255 255 255 / 0.55);
+}
+.theme-is-sea-glass .top-bar .nav-link[aria-current="page"],
+.theme-is-sea-glass .top-bar .nav-link[aria-current="page"]:hover {
+  color: var(--foreground);
+  background: var(--sg-seafoam);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.55), inset 0 0 8px rgb(255 255 255 / 0.5), 0 2px 6px -2px rgb(60 100 85 / 0.35);
+}
+.theme-is-sea-glass .top-bar .nav-link[aria-current="page"]::after {
+  display: none;
+}
+
+/* Buttons: pebbles of frosted glass; the main one cobalt. */
+.theme-is-sea-glass [data-size][data-variant] {
+  border: 0;
+  border-radius: var(--sg-pebble-sm);
+  color: var(--foreground);
+  background: var(--sg-frost);
+  box-shadow: var(--sg-wear), 0 3px 8px -4px rgb(92 74 44 / 0.4);
+}
+.theme-is-sea-glass [data-size][data-variant]:hover {
+  background: linear-gradient(165deg, rgb(255 255 255 / 0.95), rgb(242 250 246 / 0.9));
+}
+.theme-is-sea-glass [data-size][data-variant="default"] {
+  color: #ffffff;
+  background: var(--sg-cobalt);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.22), inset 0 0 10px rgb(255 255 255 / 0.2), inset 0 -8px 14px -10px rgb(10 30 70 / 0.6), 0 4px 10px -4px rgb(30 60 110 / 0.5);
+}
+.theme-is-sea-glass [data-size][data-variant="default"]:hover {
+  background: linear-gradient(165deg, #5b89cc, #3466ad 58%, #2a5799);
+}
+.theme-is-sea-glass [data-size][data-variant="destructive"] {
+  color: var(--destructive);
+}
+.theme-is-sea-glass [data-size]:is([data-variant="ghost"], [data-variant="link"]) {
+  background: transparent;
+  box-shadow: none;
+}
+.theme-is-sea-glass [data-size][data-variant="ghost"]:is(:hover, [aria-expanded="true"]) {
+  background: rgb(255 255 255 / 0.55);
+}
+.theme-is-sea-glass [data-size][data-variant="link"] {
+  color: var(--primary);
+}
+.theme-is-sea-glass [data-size][data-variant="link"]:hover {
+  background: transparent;
+}
+.theme-is-sea-glass [data-size][data-variant]:active:not(:disabled) {
+  translate: 0 1px;
+}
+.theme-is-sea-glass :is([data-size][data-variant], [data-slot="select-trigger"], .select-like, [role="tab"], [data-slot="tabs-trigger"], .shelf-tabs > a, .surface):focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  --tw-ring-shadow: 0 0 #0000;
+}
+
+/* Fields: frosted wells, ringed in cobalt while typed in. */
+.theme-is-sea-glass :is([data-slot="input"], [data-slot="textarea"]),
+.theme-is-sea-glass input:is([type="text"], [type="search"], [type="number"], [type="date"], [type="password"], [type="url"], [type="email"], :not([type])),
+.theme-is-sea-glass textarea {
+  border: 1px solid rgb(110 160 145 / 0.45);
+  border-radius: 0.95rem;
+  background: rgb(255 255 255 / 0.72);
+  box-shadow: inset 0 1px 3px rgb(60 100 90 / 0.14);
+}
+.theme-is-sea-glass input[type="search"],
+.theme-is-sea-glass input[placeholder^="Search"] {
+  border-radius: var(--sg-pebble-sm);
+}
+.theme-is-sea-glass :is([data-slot="input"], [data-slot="textarea"], input, textarea):focus-visible {
+  outline: none;
+  --tw-ring-shadow: 0 0 #0000;
+  border-color: var(--primary);
+  background: rgb(255 255 255 / 0.9);
+  box-shadow: inset 0 1px 3px rgb(60 100 90 / 0.12), 0 0 0 3px rgb(42 90 160 / 0.2);
+}
+.theme-is-sea-glass :is([data-slot="select-trigger"], .select-like) {
+  border: 0;
+  border-radius: var(--sg-pebble-sm);
+  background: var(--sg-frost);
+  box-shadow: var(--sg-wear), 0 3px 8px -4px rgb(92 74 44 / 0.4);
+}
+.theme-is-sea-glass :is([data-slot="select-trigger"], .select-like) > svg:last-child {
+  color: var(--primary);
+  opacity: 1;
+}
+.theme-is-sea-glass input[type="checkbox"],
+.theme-is-sea-glass input[type="radio"] {
+  appearance: none;
+  flex: none;
+  width: 1.0625rem;
+  height: 1.0625rem;
+  margin: 0;
+  border: 1px solid rgb(90 140 125 / 0.6);
+  border-radius: 0.375rem 0.3rem 0.4rem 0.32rem;
+  background: rgb(255 255 255 / 0.8);
+  box-shadow: inset 0 1px 2px rgb(60 100 90 / 0.15);
+}
+.theme-is-sea-glass input[type="radio"] {
+  border-radius: 50%;
+}
+.theme-is-sea-glass input[type="checkbox"]:checked {
+  border-color: #224d8d;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.6 6.3l2.3 2.3 4.5-5' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 85% no-repeat,
+    var(--sg-cobalt);
+}
+.theme-is-sea-glass input[type="radio"]:checked {
+  border-color: #224d8d;
+  background: radial-gradient(circle, #ffffff 0 24%, transparent 28%), var(--sg-cobalt);
+}
+.theme-is-sea-glass input:is([type="checkbox"], [type="radio"]):focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+.theme-is-sea-glass button[role="switch"] > span:last-child {
+  border: 0;
+  background: rgb(150 185 172 / 0.45);
+  box-shadow: inset 0 1px 3px rgb(40 80 70 / 0.25);
+}
+.theme-is-sea-glass button[role="switch"][aria-checked="true"] > span:last-child {
+  background: var(--sg-cobalt);
+}
+.theme-is-sea-glass button[role="switch"] > span:last-child > span {
+  background: radial-gradient(circle at 40% 30%, #ffffff, #e6f4ee);
+  box-shadow: 0 1px 3px rgb(30 60 50 / 0.35);
+}
+
+/* Panels: slabs of frosted sea glass with worn, pale edges. Library tiles
+   the same, a touch clearer, without the grain. */
+.theme-is-sea-glass [data-slot="card"],
+.theme-is-sea-glass .bg-card.border:not(.bulk-bar) {
+  border: 0;
+  border-radius: var(--sg-pebble);
+  background: var(--sg-grain), var(--sg-frost);
+  box-shadow: var(--sg-wear), var(--sg-shadow);
+  --tw-ring-shadow: 0 0 #0000;
+}
+.theme-is-sea-glass .surface:not([data-slot="card"]) {
+  border: 0;
+  border-radius: var(--sg-pebble);
+  background: linear-gradient(165deg, rgb(250 255 252 / 0.74), rgb(222 243 233 / 0.66));
+  box-shadow: var(--sg-wear), var(--sg-shadow);
+}
+.theme-is-sea-glass .surface:not([data-slot="card"]):hover,
+.theme-is-sea-glass .bg-card.border:not(.surface, .bulk-bar):is(a, button):hover {
+  background: linear-gradient(165deg, rgb(255 255 255 / 0.94), rgb(240 250 245 / 0.9));
+}
+.theme-is-sea-glass .bg-card.border.border-red-300 {
+  background: var(--sg-grain), linear-gradient(165deg, rgb(255 240 238 / 0.9), rgb(252 228 224 / 0.86));
+  box-shadow: inset 0 0 0 1px rgb(179 38 30 / 0.35), var(--sg-shadow);
+}
+.theme-is-sea-glass [data-slot="card-footer"] {
+  border-top: 1px solid rgb(110 160 145 / 0.25);
+  background: rgb(214 235 225 / 0.35);
+}
+.theme-is-sea-glass .surface .book-cover {
+  border-radius: 0.75rem 0.6rem 0.8rem 0.65rem;
+}
+.theme-is-sea-glass .text-muted-foreground\/80 {
+  color: var(--muted-foreground);
+}
+
+/* Tabs and chips: pebbles, the open tab seafoam, a chosen chip cobalt. */
+.theme-is-sea-glass .shelf-tabs {
+  gap: 0.375rem;
+  padding-bottom: 0.625rem;
+  border-bottom: 1px solid rgb(110 160 145 / 0.3);
+}
+.theme-is-sea-glass .shelf-tabs > a,
+.theme-is-sea-glass [data-slot="tabs-trigger"] {
+  margin: 0;
+  border: 0;
+  border-radius: var(--sg-pebble-sm);
+  background: transparent;
+  box-shadow: none;
+}
+.theme-is-sea-glass .shelf-tabs > a:hover,
+.theme-is-sea-glass [data-slot="tabs-trigger"]:hover {
+  background: rgb(255 255 255 / 0.55);
+}
+.theme-is-sea-glass .shelf-tabs > a[aria-current="page"],
+.theme-is-sea-glass [data-slot="tabs-trigger"][data-state="active"] {
+  color: var(--foreground);
+  font-weight: 600;
+  background: var(--sg-seafoam);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.55), inset 0 0 8px rgb(255 255 255 / 0.5), 0 2px 6px -2px rgb(60 100 85 / 0.35);
+}
+.theme-is-sea-glass [data-slot="tabs-trigger"]::after {
+  display: none;
+}
+.theme-is-sea-glass [data-slot="tabs-list"] {
+  border-radius: var(--sg-pebble-sm);
+  background: rgb(255 255 255 / 0.4);
+  box-shadow: inset 0 1px 3px rgb(60 100 90 / 0.15);
+}
+.theme-is-sea-glass .shelf-tabs > a > span {
+  background: rgb(255 255 255 / 0.6);
+}
+.theme-is-sea-glass .shelf-tabs > a[aria-current="page"] > span {
+  color: #ffffff;
+  background: var(--primary);
+}
+.theme-is-sea-glass :is(a, button).rounded-full.border:not(.aspect-square, .border-2) {
+  border-color: transparent;
+  border-radius: var(--sg-pebble-sm);
+  background: var(--sg-frost);
+  box-shadow: var(--sg-wear), 0 2px 6px -3px rgb(92 74 44 / 0.4);
+}
+.theme-is-sea-glass :is(a, button).rounded-full.border:is([class*="border-primary"], [aria-current="page"], [aria-pressed="true"]):not(.aspect-square, .border-2) {
+  color: #ffffff;
+  background: var(--sg-cobalt);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.22), inset 0 0 10px rgb(255 255 255 / 0.2), 0 3px 8px -4px rgb(30 60 110 / 0.5);
+}
+.theme-is-sea-glass kbd {
+  border: 0;
+  border-radius: 0.4rem;
+  background: var(--sg-frost);
+  box-shadow: var(--sg-wear), 0 1px 0 rgb(92 74 44 / 0.25);
+}
+
+/* Progress: a groove in the frost, filled from seafoam to cobalt. */
+.theme-is-sea-glass :has(> .bar-grow) {
+  border-radius: 999px;
+  background: rgb(160 195 182 / 0.4);
+  box-shadow: inset 0 1px 2px rgb(40 80 70 / 0.2);
+}
+.theme-is-sea-glass .bar-grow {
+  border-radius: 999px;
+}
+.theme-is-sea-glass .bar-grow[class*="primary"] {
+  background: linear-gradient(90deg, #6fbfa6, #2a5aa0);
+}
+
+/* Menus, popovers and dialogs: frosted glass over the page. */
+.theme-is-sea-glass :is([data-slot="dropdown-menu-content"], [data-slot="popover-content"], [data-slot="select-content"], [data-slot="dropdown-menu-sub-content"]) {
+  border: 0;
+  border-radius: 1.25rem 1rem 1.35rem 1.1rem;
+  background: var(--sg-grain), linear-gradient(165deg, rgb(255 255 255 / 0.8), rgb(236 248 243 / 0.74));
+  box-shadow: var(--sg-wear), 0 18px 40px -16px rgb(60 50 30 / 0.45);
+  backdrop-filter: blur(18px) saturate(1.3);
+  --tw-ring-shadow: 0 0 #0000;
+}
+.theme-is-sea-glass :is([data-slot="dropdown-menu-item"], [data-slot="select-item"], [data-slot="dropdown-menu-checkbox-item"], [data-slot="dropdown-menu-radio-item"], [data-slot="dropdown-menu-sub-trigger"]) {
+  border-radius: 0.8rem 0.65rem 0.85rem 0.7rem;
+}
+.theme-is-sea-glass :is([data-slot="dropdown-menu-item"], [data-slot="select-item"], [data-slot="dropdown-menu-checkbox-item"], [data-slot="dropdown-menu-radio-item"], [data-slot="dropdown-menu-sub-trigger"]):is(:focus, [data-highlighted]) {
+  color: var(--foreground);
+  background: var(--sg-seafoam);
+}
+.theme-is-sea-glass [data-slot="dialog-overlay"] {
+  background: rgb(20 60 55 / 0.22);
+  backdrop-filter: none;
+}
+.theme-is-sea-glass [data-slot="dialog-content"] {
+  border: 0;
+  border-radius: 2rem 1.6rem 2.1rem 1.75rem / 1.75rem 2.1rem 1.6rem 2rem;
+  background: var(--sg-grain), linear-gradient(165deg, rgb(255 255 255 / 0.86), rgb(236 248 243 / 0.82));
+  box-shadow: var(--sg-wear), 0 30px 60px -20px rgb(40 50 40 / 0.5);
+  backdrop-filter: blur(18px) saturate(1.3);
+  --tw-ring-shadow: 0 0 #0000;
+}
+.theme-is-sea-glass [data-slot="dialog-footer"] {
+  border-top: 1px solid rgb(110 160 145 / 0.25);
+  background: transparent;
+}
+.theme-is-sea-glass .bulk-bar {
+  border: 0;
+  border-radius: var(--sg-pebble);
+  background: var(--sg-grain), linear-gradient(165deg, rgb(255 255 255 / 0.84), rgb(236 248 243 / 0.8));
+  box-shadow: var(--sg-wear), 0 18px 40px -16px rgb(60 50 30 / 0.45);
+  backdrop-filter: blur(18px) saturate(1.3);
+}
+.theme-is-sea-glass .auth-backdrop {
+  display: none;
+}
+.theme-is-sea-glass main:has(> .auth-backdrop) .wordmark {
+  font-family: var(--heading-font);
+  font-weight: 800;
+}
+
+/* ── Leadlight ─────────────────────────────────────────────────────────────
+   A leaded window. Behind the page is a lattice of diamond quarries, each
+   of hand-made glass a little different from the next, a few of them in
+   colour, rippled and lit from behind, the lead between them dark with a
+   gleam along its crown. The page itself is a pane of clearer glass set in
+   lead, inside a border of jewels, ruby, amber, emerald and sapphire, with
+   an amber bullseye in each corner. The top bar is a transom of deep ruby
+   glass, the open page a pane of amber in it. Panels are panes framed in
+   lead, buttons are pieces of ruby or clear glass, chosen tabs and chips
+   are amber, and the bar of progress is emerald in a lead channel. Menus
+   are panes; dialogs carry the border of jewels too. Headings are set in
+   a high-contrast serif. Nothing here blurs: glass that colours the light
+   is all paint. */
+:root[data-theme="leadlight"] {
+  --ll-lead: #2f2e33;
+  /* A came: dark, with a lighter line where its crown catches the light. */
+  --ll-came: 0 0 0 1px rgb(255 255 255 / 0.4) inset;
+  /* Pale, slightly streaky cathedral glass for panels, and the clearer
+     glass of the page's pane with colour washing in from its jewels. */
+  --ll-glass: repeating-linear-gradient(100deg, rgb(255 255 255 / 0) 0 22px, rgb(255 255 255 / 0.35) 22px 26px, rgb(255 255 255 / 0) 26px 61px), linear-gradient(140deg, #fffbf1, #f8f0dd 55%, #fbf4e5);
+  /* Each wash is painted only in its own corner box, not down the whole
+     length of a long page, so scrolling never repaints a gradient. */
+  --ll-pane:
+    radial-gradient(closest-side, rgb(232 163 58 / 0.1), transparent) -42rem -28rem / 84rem 56rem no-repeat,
+    radial-gradient(closest-side, rgb(194 54 79 / 0.07), transparent) right -28rem top -21rem / 56rem 42rem no-repeat,
+    radial-gradient(closest-side, rgb(63 123 196 / 0.08), transparent) right -35rem bottom -25rem / 70rem 50rem no-repeat,
+    rgb(252 249 240 / 0.95);
+  --ll-ruby: radial-gradient(130% 150% at 50% 0%, #c23b55, #8c1c32 55%, #6c1326);
+  --ll-amber: radial-gradient(130% 150% at 50% 0%, #f6cf7a, #e2a23a 55%, #c98318);
+  --ll-emerald: linear-gradient(#3aa97a, #1d7a52);
+  --ll-glow: inset 0 1px 0 rgb(255 255 255 / 0.3), inset 0 0 10px rgb(255 255 255 / 0.12);
+  --surface-shadow: none;
+  --chart-1: #8c1c32;
+  --chart-2: #e2a23a;
+  --chart-3: #1d7a52;
+  --chart-4: #24479e;
+  --chart-5: #7b4fa3;
+  scrollbar-color: #5a5660 #e9dfc8;
+}
+.theme-is-leadlight body::before {
+  background-position: center;
+}
+.theme-is-leadlight ::selection {
+  background: rgb(226 162 58 / 0.4);
+}
+.theme-is-leadlight :is(h1, h2, [data-slot="card-title"], [data-slot="dialog-title"]) {
+  font-family: var(--heading-font);
+  font-weight: 700;
+  letter-spacing: 0;
+}
+.theme-is-leadlight .book-backdrop {
+  display: none;
+}
+
+/* The transom: deep ruby glass in lead, its panes the page links, the open
+   page's amber. */
+.theme-is-leadlight .top-bar {
+  --background: #7a1a2d;
+  --foreground: #ffffff;
+  --muted-foreground: #f6dde2;
+  --accent: rgb(255 255 255 / 0.14);
+  --accent-foreground: #ffffff;
+  --ring: #f6cf7a;
+  border-bottom: 5px solid var(--ll-lead);
+  color: #ffffff;
+  background:
+    repeating-linear-gradient(100deg, rgb(255 255 255 / 0) 0 30px, rgb(255 255 255 / 0.05) 30px 36px, rgb(255 255 255 / 0) 36px 80px),
+    linear-gradient(#93243b, #7a1a2d 60%, #6a1526);
+  backdrop-filter: none;
+  box-shadow: inset 0 3px 0 var(--ll-lead), 0 1px 0 rgb(255 255 255 / 0.4), 0 6px 14px -10px rgb(30 20 10 / 0.6);
+  animation: none;
+}
+.theme-is-leadlight .top-bar .wordmark {
+  color: #ffffff;
+  font-family: var(--heading-font);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+.theme-is-leadlight .top-bar .wordmark > svg {
+  color: #f6cf7a;
+}
+.theme-is-leadlight .top-bar .nav-link {
+  border: 2px solid transparent;
+  border-radius: 2px;
+  color: #ffffff;
+}
+.theme-is-leadlight .top-bar .nav-link:hover {
+  border-color: var(--ll-lead);
+  background: rgb(255 255 255 / 0.14);
+}
+.theme-is-leadlight .top-bar .nav-link[aria-current="page"],
+.theme-is-leadlight .top-bar .nav-link[aria-current="page"]:hover {
+  border-color: var(--ll-lead);
+  color: #2a1a05;
+  background: var(--ll-amber);
+  box-shadow: var(--ll-glow);
+}
+.theme-is-leadlight .top-bar .nav-link[aria-current="page"]::after {
+  display: none;
+}
+.theme-is-leadlight .top-bar [data-variant="ghost"] {
+  color: #ffffff;
+}
+
+/* The page: a pane of clearer glass in lead, inside the border of jewels. */
+.theme-is-leadlight .top-bar + main {
+  width: calc(100% - 2rem);
+  margin-block: 1.5rem;
+  padding: 1.75rem 2rem 2.5rem;
+  border: 22px solid transparent;
+  border-image: url("/themes/leadlight-jewels.svg") 22 round;
+  background: var(--ll-pane) padding-box;
+  box-shadow: 0 0 0 3px var(--ll-lead), 0 18px 40px -20px rgb(40 30 15 / 0.45);
+}
+@media (width < 40rem) {
+  .theme-is-leadlight .top-bar + main {
+    width: calc(100% - 0.5rem);
+    margin-block: 0.25rem;
+    padding: 1.25rem 0.75rem 2rem;
+    border-width: 14px;
+  }
+}
+
+/* Buttons: ruby glass for the main one, clear glass for the rest, each a
+   piece set in lead. */
+.theme-is-leadlight [data-size][data-variant] {
+  border: 2px solid var(--ll-lead);
+  border-radius: 2px;
+  color: var(--foreground);
+  background: var(--ll-glass);
+  box-shadow: var(--ll-came);
+}
+.theme-is-leadlight [data-size][data-variant]:hover {
+  background: radial-gradient(130% 150% at 50% 0%, #fff6dc, #f6e3b5);
+}
+.theme-is-leadlight [data-size][data-variant="default"] {
+  color: #ffffff;
+  background: var(--ll-ruby);
+  box-shadow: var(--ll-glow);
+}
+.theme-is-leadlight [data-size][data-variant="default"]:hover {
+  background: radial-gradient(130% 150% at 50% 0%, #d4506a, #9e2139 55%, #7a172b);
+}
+.theme-is-leadlight [data-size][data-variant="destructive"] {
+  color: var(--destructive);
+}
+.theme-is-leadlight [data-size]:is([data-variant="ghost"], [data-variant="link"]) {
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+}
+.theme-is-leadlight [data-size][data-variant="ghost"]:is(:hover, [aria-expanded="true"]) {
+  border-color: var(--ll-lead);
+  background: radial-gradient(130% 150% at 50% 0%, #fff6dc, #f6e3b5);
+}
+.theme-is-leadlight [data-size][data-variant="link"] {
+  color: var(--primary);
+}
+.theme-is-leadlight [data-size][data-variant="link"]:hover {
+  border-color: transparent;
+  background: transparent;
+}
+.theme-is-leadlight [data-size][data-variant]:active:not(:disabled) {
+  translate: 0 1px;
+}
+.theme-is-leadlight :is([data-size][data-variant], [data-slot="select-trigger"], .select-like, [role="tab"], [data-slot="tabs-trigger"], .shelf-tabs > a, .surface):focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  --tw-ring-shadow: 0 0 #0000;
+}
+
+/* Fields: clear glass in lead, ruby round it while typed in. */
+.theme-is-leadlight :is([data-slot="input"], [data-slot="textarea"]),
+.theme-is-leadlight input:is([type="text"], [type="search"], [type="number"], [type="date"], [type="password"], [type="url"], [type="email"], :not([type])),
+.theme-is-leadlight textarea {
+  border: 2px solid #4a4750;
+  border-radius: 2px;
+  background: #fffdf7;
+  box-shadow: inset 0 1px 2px rgb(60 40 20 / 0.12);
+}
+.theme-is-leadlight :is([data-slot="input"], [data-slot="textarea"], input, textarea):focus-visible {
+  outline: none;
+  --tw-ring-shadow: 0 0 #0000;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgb(140 28 50 / 0.2);
+}
+.theme-is-leadlight :is([data-slot="select-trigger"], .select-like) {
+  border: 2px solid var(--ll-lead);
+  border-radius: 2px;
+  background: var(--ll-glass);
+  box-shadow: var(--ll-came);
+}
+.theme-is-leadlight :is([data-slot="select-trigger"], .select-like) > svg:last-child {
+  color: var(--primary);
+  opacity: 1;
+}
+.theme-is-leadlight input[type="checkbox"],
+.theme-is-leadlight input[type="radio"] {
+  appearance: none;
+  flex: none;
+  width: 1.0625rem;
+  height: 1.0625rem;
+  margin: 0;
+  border: 2px solid var(--ll-lead);
+  border-radius: 1px;
+  background: #fffdf7;
+}
+.theme-is-leadlight input[type="radio"] {
+  border-radius: 50%;
+}
+.theme-is-leadlight input[type="checkbox"]:checked {
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.6 6.3l2.3 2.3 4.5-5' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 85% no-repeat,
+    var(--ll-ruby);
+}
+.theme-is-leadlight input[type="radio"]:checked {
+  background: radial-gradient(circle, #ffffff 0 24%, transparent 28%), var(--ll-ruby);
+}
+.theme-is-leadlight input:is([type="checkbox"], [type="radio"]):focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+.theme-is-leadlight button[role="switch"] > span:last-child {
+  border: 2px solid var(--ll-lead);
+  background: #e9dfc8;
+}
+.theme-is-leadlight button[role="switch"][aria-checked="true"] > span:last-child {
+  background: var(--ll-emerald);
+}
+.theme-is-leadlight button[role="switch"] > span:last-child > span {
+  background: radial-gradient(circle at 45% 35%, #fff6d8, #f1c66b 45%, #b9781c);
+  box-shadow: 0 0 0 1.5px var(--ll-lead);
+}
+
+/* Panels: panes of cathedral glass, framed in lead. Library tiles too,
+   amber light coming through them under the pointer. */
+.theme-is-leadlight [data-slot="card"],
+.theme-is-leadlight .bg-card.border:not(.bulk-bar) {
+  border: 3px solid var(--ll-lead);
+  border-radius: 2px;
+  background: var(--ll-glass);
+  box-shadow: var(--ll-came), 0 6px 16px -12px rgb(40 30 15 / 0.5);
+  --tw-ring-shadow: 0 0 #0000;
+}
+.theme-is-leadlight .surface:not([data-slot="card"]) {
+  border: 3px solid var(--ll-lead);
+  border-radius: 2px;
+  background: linear-gradient(140deg, #fffcf4, #faf3e3);
+  box-shadow: var(--ll-came);
+}
+.theme-is-leadlight .surface:not([data-slot="card"]):hover,
+.theme-is-leadlight .bg-card.border:not(.surface, .bulk-bar):is(a, button):hover {
+  background: radial-gradient(120% 90% at 50% 0%, #fff4d6, #f7e6bd);
+}
+.theme-is-leadlight .bg-card.border.border-red-300 {
+  border-color: var(--ll-lead);
+  background: linear-gradient(140deg, #fff1ef, #fbe0dc);
+}
+.theme-is-leadlight [data-slot="card-footer"] {
+  border-top: 3px solid var(--ll-lead);
+  background: rgb(242 226 191 / 0.45);
+}
+.theme-is-leadlight .surface .book-cover {
+  border-radius: 1px;
+}
+.theme-is-leadlight .text-muted-foreground\/80 {
+  color: var(--muted-foreground);
+}
+
+/* Tabs and chips: panes in lead, the chosen one amber. */
+.theme-is-leadlight .shelf-tabs {
+  gap: 0.25rem;
+  padding-bottom: 0.625rem;
+  border-bottom: 3px solid var(--ll-lead);
+}
+.theme-is-leadlight .shelf-tabs > a,
+.theme-is-leadlight [data-slot="tabs-trigger"] {
+  margin: 0;
+  border: 2px solid transparent;
+  border-radius: 2px;
+  background: transparent;
+  box-shadow: none;
+}
+.theme-is-leadlight .shelf-tabs > a:hover,
+.theme-is-leadlight [data-slot="tabs-trigger"]:hover {
+  border-color: var(--ll-lead);
+  background: #fff7e2;
+}
+.theme-is-leadlight .shelf-tabs > a[aria-current="page"],
+.theme-is-leadlight [data-slot="tabs-trigger"][data-state="active"] {
+  border-color: var(--ll-lead);
+  color: #2a1a05;
+  font-weight: 600;
+  background: var(--ll-amber);
+  box-shadow: var(--ll-glow);
+}
+.theme-is-leadlight [data-slot="tabs-trigger"]::after {
+  display: none;
+}
+.theme-is-leadlight [data-slot="tabs-list"] {
+  border: 2px solid var(--ll-lead);
+  border-radius: 2px;
+  background: #f4ead2;
+}
+.theme-is-leadlight .shelf-tabs > a > span {
+  background: rgb(47 46 51 / 0.1);
+}
+.theme-is-leadlight .shelf-tabs > a[aria-current="page"] > span {
+  color: #ffffff;
+  background: var(--primary);
+}
+.theme-is-leadlight :is(a, button).rounded-full.border:not(.aspect-square, .border-2) {
+  border: 2px solid var(--ll-lead);
+  border-radius: 2px;
+  background: var(--ll-glass);
+}
+.theme-is-leadlight :is(a, button).rounded-full.border:is([class*="border-primary"], [aria-current="page"], [aria-pressed="true"]):not(.aspect-square, .border-2) {
+  color: #2a1a05;
+  background: var(--ll-amber);
+  box-shadow: var(--ll-glow);
+}
+.theme-is-leadlight kbd {
+  border: 2px solid var(--ll-lead);
+  border-radius: 2px;
+  background: var(--ll-glass);
+}
+
+/* Progress: emerald glass in a lead channel. */
+.theme-is-leadlight :has(> .bar-grow) {
+  border-radius: 1px;
+  background: #ece2cb;
+  box-shadow: 0 0 0 1.5px var(--ll-lead);
+}
+.theme-is-leadlight .bar-grow {
+  border-radius: 0;
+}
+.theme-is-leadlight .bar-grow[class*="primary"] {
+  background: var(--ll-emerald);
+}
+
+/* Menus and popovers: panes in lead. Dialogs: a pane in the border of
+   jewels. */
+.theme-is-leadlight :is([data-slot="dropdown-menu-content"], [data-slot="popover-content"], [data-slot="select-content"], [data-slot="dropdown-menu-sub-content"]) {
+  border: 3px solid var(--ll-lead);
+  border-radius: 2px;
+  background: var(--ll-glass);
+  box-shadow: var(--ll-came), 0 14px 30px -12px rgb(40 30 15 / 0.5);
+  --tw-ring-shadow: 0 0 #0000;
+}
+.theme-is-leadlight :is([data-slot="dropdown-menu-item"], [data-slot="select-item"], [data-slot="dropdown-menu-checkbox-item"], [data-slot="dropdown-menu-radio-item"], [data-slot="dropdown-menu-sub-trigger"]) {
+  border-radius: 1px;
+}
+.theme-is-leadlight :is([data-slot="dropdown-menu-item"], [data-slot="select-item"], [data-slot="dropdown-menu-checkbox-item"], [data-slot="dropdown-menu-radio-item"], [data-slot="dropdown-menu-sub-trigger"]):is(:focus, [data-highlighted]) {
+  color: #2a1a05;
+  background: var(--ll-amber);
+}
+.theme-is-leadlight [data-slot="dialog-overlay"] {
+  background: rgb(35 25 10 / 0.3);
+  backdrop-filter: none;
+}
+.theme-is-leadlight [data-slot="dialog-content"] {
+  border: 18px solid transparent;
+  border-image: url("/themes/leadlight-jewels.svg") 22 / 18px round;
+  border-radius: 0;
+  background: var(--ll-pane) padding-box;
+  box-shadow: 0 0 0 3px var(--ll-lead), 0 24px 50px -16px rgb(30 20 10 / 0.6);
+  --tw-ring-shadow: 0 0 #0000;
+}
+.theme-is-leadlight [data-slot="dialog-footer"] {
+  border-top: 3px solid var(--ll-lead);
+  background: rgb(242 226 191 / 0.4);
+}
+.theme-is-leadlight .bulk-bar {
+  border: 3px solid var(--ll-lead);
+  border-radius: 2px;
+  background: var(--ll-glass);
+  box-shadow: var(--ll-came), 0 14px 30px -12px rgb(40 30 15 / 0.5);
+}
+.theme-is-leadlight .auth-backdrop {
+  display: none;
+}
+.theme-is-leadlight main:has(> .auth-backdrop) .wordmark {
+  font-family: var(--heading-font);
+  font-weight: 700;
+}
+/* The name in a small arched light of cathedral glass above the pane, so
+   no lead runs through it. */
+.theme-is-leadlight main:has(> .auth-backdrop) > .grid {
+  padding: 1.5rem 2.75rem 0.875rem;
+  border: 3px solid var(--ll-lead);
+  border-radius: 50% 50% 2px 2px / 3.75rem 3.75rem 2px 2px;
+  background: var(--ll-glass);
+  box-shadow: var(--ll-came), 0 14px 30px -12px rgb(40 30 15 / 0.5);
+}
