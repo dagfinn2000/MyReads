@@ -9366,3 +9366,1627 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
   background: var(--ll-glass);
   box-shadow: var(--ll-came), 0 14px 30px -12px rgb(40 30 15 / 0.5);
 }
+
+/* ── macOS: Mojave, Big Sur and Ventura ────────────────────────────────────
+   Three looks of the Mac from the last ten years, drawn fresh in the spirit
+   of each rather than copied: no Apple logo and none of Apple's artwork.
+   In all three the app is a window on its own desktop picture, under a menu
+   bar across the top of the screen that names the app beside a book (where
+   the Mac keeps an apple), with the three traffic lights at the window's
+   corner and the page's name in its title. Each era then shapes the window
+   its own way. Mojave (2018), the first dark mode: a charcoal window whose
+   toolbar holds bordered buttons, the page links one segmented control in
+   its middle, on dunes at night. Big Sur (2020), the great redesign: a
+   white window, rounder, with a translucent sidebar of page links down its
+   left that takes its colour from the desktop behind, and a tall toolbar
+   with the page's name in bold, on layered waves of blue, violet and coral.
+   Ventura (2022), Stage Manager: the other pages wait down the left of the
+   screen as tilted thumbnails of their windows, each with a sketch of its
+   page and an icon, beside a warm grey window of white grouped boxes, on a
+   whirl of orange blades.
+   As in Fluent, the desktop is painted again over the page with the window
+   cut out of it, so what scrolls past the window's edges goes behind them,
+   and the window's own fill is a fixed layer under the page, so scrolling
+   costs nothing. The sidebar's translucency (and Big Sur's menu bar's) is
+   a softened copy of the picture laid over the sharp one, and the toolbars
+   are solid; only menus and dialogs, which come and go, blur what is
+   behind them. */
+:is(.theme-is-mojave, .theme-is-big-sur, .theme-is-ventura) {
+  --mac-font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", var(--font-inter), "Inter", system-ui, sans-serif;
+  --mac-menu: 1.5rem;
+  /* The picture's size, as the page behind draws it (cover, centred). */
+  --mac-w: max(100vw, 160vh);
+  --mac-h: max(62.5vw, 100vh);
+  --mac-main-left: var(--mac-left);
+  --mac-pad: 1.5rem;
+  --mac-title: "MyReads";
+  --mac-lights: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='52' height='12'%3E%3Ccircle cx='6' cy='6' r='5.75' fill='%23ff5f57' stroke='%23e0443e' stroke-width='.5'/%3E%3Ccircle cx='26' cy='6' r='5.75' fill='%23febc2e' stroke='%23dea123' stroke-width='.5'/%3E%3Ccircle cx='46' cy='6' r='5.75' fill='%2328c840' stroke='%231aab29' stroke-width='.5'/%3E%3C/svg%3E");
+  --mac-tick: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.6 6.3l2.3 2.3 4.6-5.2' fill='none' stroke='%23fff' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  --mac-chevrons: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 14' fill='none' stroke='%23fff' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2.5 5.5L5 3l2.5 2.5M2.5 8.5L5 11l2.5-2.5'/%3E%3C/svg%3E");
+  scrollbar-width: thin;
+  /* What the keyboard or a #link scrolls to lands inside the window, clear
+     of its toolbar. */
+  scroll-padding-top: calc(var(--mac-top) + var(--mac-bar) + 1rem);
+  scroll-padding-bottom: calc(var(--mac-bottom) + 1rem);
+}
+:is(.theme-is-mojave, .theme-is-big-sur, .theme-is-ventura)[data-section="library"] {
+  --mac-title: "Library";
+}
+:is(.theme-is-mojave, .theme-is-big-sur, .theme-is-ventura)[data-section="book"] {
+  --mac-title: "Book";
+}
+:is(.theme-is-mojave, .theme-is-big-sur, .theme-is-ventura)[data-section="series"] {
+  --mac-title: "Series";
+}
+:is(.theme-is-mojave, .theme-is-big-sur, .theme-is-ventura)[data-section="stats"] {
+  --mac-title: "Stats";
+}
+:is(.theme-is-mojave, .theme-is-big-sur, .theme-is-ventura)[data-section="reading"] {
+  --mac-title: "Now reading";
+}
+:is(.theme-is-mojave, .theme-is-big-sur, .theme-is-ventura)[data-section="quotes"] {
+  --mac-title: "Quotes";
+}
+:is(.theme-is-mojave, .theme-is-big-sur, .theme-is-ventura)[data-section="room"] {
+  --mac-title: "Reading room";
+}
+:is(.theme-is-mojave, .theme-is-big-sur, .theme-is-ventura)[data-section="account"] {
+  --mac-title: "Account";
+}
+:is(.theme-is-mojave, .theme-is-big-sur, .theme-is-ventura):has(.top-bar .nav-link[href="/books/new"][aria-current="page"]) {
+  --mac-title: "Add book";
+}
+:is(.theme-is-mojave, .theme-is-big-sur, .theme-is-ventura):has(.top-bar .nav-link[href="/books/check"][aria-current="page"]) {
+  --mac-title: "Check";
+}
+:is(.theme-is-mojave, .theme-is-big-sur, .theme-is-ventura) body {
+  font-family: var(--mac-font);
+  -webkit-font-smoothing: antialiased;
+}
+:is(.theme-is-mojave, .theme-is-big-sur, .theme-is-ventura) body::before {
+  background-position: center;
+}
+:is(.theme-is-mojave, .theme-is-big-sur, .theme-is-ventura) .book-backdrop {
+  display: none;
+}
+:is(.theme-is-mojave, .theme-is-big-sur, .theme-is-ventura) h1 {
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+:is(.theme-is-mojave, .theme-is-big-sur, .theme-is-ventura) :is([data-slot="card-title"], [data-slot="dialog-title"]) {
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+:is(.theme-is-mojave, .theme-is-big-sur, .theme-is-ventura) ::selection {
+  color: #ffffff;
+  background: var(--mac-select);
+}
+/* The window: its fill, hairline and shadow, a fixed layer under the
+   page. */
+:is(.theme-is-mojave, .theme-is-big-sur, .theme-is-ventura) body::after {
+  content: "";
+  position: fixed;
+  inset: var(--mac-top) var(--mac-right) var(--mac-bottom) var(--mac-left);
+  z-index: -1;
+  pointer-events: none;
+  border-radius: var(--mac-radius);
+  background: var(--mac-window);
+  box-shadow: var(--mac-window-shadow);
+}
+/* The desktop again round the window, over the page, the window's shape
+   cut out of it with a mask. It never moves. */
+:is(.theme-is-mojave, .theme-is-big-sur, .theme-is-ventura)::after {
+  --mac-r2: calc(2 * var(--mac-radius));
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 35;
+  pointer-events: none;
+  background:
+    var(--page-gradient) center / cover no-repeat,
+    var(--background);
+  mask:
+    linear-gradient(#000 0 0),
+    linear-gradient(#000 0 0) var(--mac-left) calc(var(--mac-top) + var(--mac-radius)) /
+      calc(100% - var(--mac-left) - var(--mac-right)) calc(100% - var(--mac-top) - var(--mac-bottom) - var(--mac-r2)) no-repeat,
+    linear-gradient(#000 0 0) calc(var(--mac-left) + var(--mac-radius)) var(--mac-top) /
+      calc(100% - var(--mac-left) - var(--mac-right) - var(--mac-r2)) calc(100% - var(--mac-top) - var(--mac-bottom)) no-repeat,
+    radial-gradient(closest-side, #000 98%, transparent) left var(--mac-left) top var(--mac-top) / var(--mac-r2) var(--mac-r2) no-repeat,
+    radial-gradient(closest-side, #000 98%, transparent) right var(--mac-right) top var(--mac-top) / var(--mac-r2) var(--mac-r2) no-repeat,
+    radial-gradient(closest-side, #000 98%, transparent) left var(--mac-left) bottom var(--mac-bottom) / var(--mac-r2) var(--mac-r2) no-repeat,
+    radial-gradient(closest-side, #000 98%, transparent) right var(--mac-right) bottom var(--mac-bottom) / var(--mac-r2) var(--mac-r2) no-repeat;
+  mask-composite: exclude, add, add, add, add, add, add;
+}
+/* The top bar is taken apart into the window's parts, so it neither blurs
+   (which would hold its fixed parts inside it) nor lifts on scroll. */
+:is(.theme-is-mojave, .theme-is-big-sur, .theme-is-ventura) .top-bar {
+  border: 0;
+  backdrop-filter: none;
+  box-shadow: none;
+  animation: none;
+}
+:is(.theme-is-mojave, .theme-is-big-sur, .theme-is-ventura) .top-bar > div {
+  max-width: none;
+  margin: 0;
+}
+:is(.theme-is-mojave, .theme-is-big-sur, .theme-is-ventura) .top-bar .nav-link[aria-current="page"]::after {
+  content: none;
+}
+/* The menu bar along the top of the screen: the app's name in bold beside
+   its book, then its menus, and at the right a few status icons. It is a
+   tint over the desktop rather than a blur of it: a blur there is redone on
+   every frame the page scrolls, even though the page never shows through. */
+:is(.theme-is-mojave, .theme-is-big-sur, .theme-is-ventura) .top-bar::after {
+  content: "MyReads";
+  content: "MyReads" / "";
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 1;
+  height: var(--mac-menu);
+  padding-left: 2.5rem;
+  color: var(--mac-menu-ink);
+  font: 700 0.8125rem/var(--mac-menu) var(--mac-font);
+  pointer-events: none;
+  background:
+    var(--mac-book) 1rem 50% / 0.9375rem 0.9375rem no-repeat,
+    var(--mac-status) right 1rem top 50% / 4.75rem 1rem no-repeat,
+    var(--mac-menu-bg);
+  box-shadow: var(--mac-menu-edge);
+}
+:is(.theme-is-mojave, .theme-is-big-sur, .theme-is-ventura) .top-bar::before {
+  content: "File Edit View Window Help";
+  content: "File Edit View Window Help" / "";
+  position: fixed;
+  top: 0;
+  left: 7.375rem;
+  z-index: 2;
+  height: var(--mac-menu);
+  color: var(--mac-menu-ink);
+  font: 400 0.8125rem/var(--mac-menu) var(--mac-font);
+  word-spacing: 1.125rem;
+  white-space: nowrap;
+  pointer-events: none;
+}
+/* The page inside the window, clear of its toolbar, its content centred in
+   it at the page's usual width. */
+:is(.theme-is-mojave, .theme-is-big-sur, .theme-is-ventura) .top-bar + main {
+  max-width: none;
+  margin: 0 var(--mac-right) 0 var(--mac-main-left);
+  padding: calc(var(--mac-top) + var(--mac-bar) + 1.5rem) max(var(--mac-pad), calc((100% - var(--mac-main-left) - var(--mac-right) - 70rem) / 2))
+    calc(var(--mac-bottom) + 2.5rem);
+}
+:is(.theme-is-mojave, .theme-is-big-sur, .theme-is-ventura) .top-bar + main .sticky.top-2 {
+  top: calc(var(--mac-top) + var(--mac-bar) + 0.5rem);
+}
+:is(.theme-is-mojave, .theme-is-big-sur, .theme-is-ventura) .bulk-bar {
+  bottom: calc(var(--mac-bottom) + 0.75rem);
+}
+/* Names said, not shown, where a part shows only its icon. */
+:is(.theme-is-mojave, .theme-is-big-sur, .theme-is-ventura) .top-bar .wordmark > span {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+@media (width < 40rem) {
+  /* On a phone the window fills the screen, with no menu bar. (:root
+     outranks each theme's own placing of its window, below.) */
+  :root:is(.theme-is-mojave, .theme-is-big-sur, .theme-is-ventura) {
+    --mac-top: 0px;
+    --mac-left: 0px;
+    --mac-right: 0px;
+    --mac-bottom: 0px;
+    --mac-radius: 0px;
+    --mac-pad: 1rem;
+  }
+  :is(.theme-is-mojave, .theme-is-big-sur, .theme-is-ventura) .top-bar::before,
+  :is(.theme-is-mojave, .theme-is-big-sur, .theme-is-ventura) .top-bar::after,
+  :is(.theme-is-mojave, .theme-is-big-sur, .theme-is-ventura)::before {
+    display: none;
+  }
+}
+/* The sign-in pages have no menu bar and no page links: the window alone
+   on the desktop, smaller, with the theme picker in its title bar. */
+:is(.theme-is-mojave, .theme-is-big-sur, .theme-is-ventura):not(:has(> body > .top-bar)) {
+  --mac-menu: 0px;
+  --mac-top: max(1.25rem, calc(50vh - 22rem));
+  --mac-bottom: var(--mac-top);
+  --mac-left: max(1.25rem, calc(50vw - 24rem));
+  --mac-right: var(--mac-left);
+}
+:is(.theme-is-mojave, .theme-is-big-sur, .theme-is-ventura) .auth-backdrop {
+  display: none;
+}
+:is(.theme-is-mojave, .theme-is-big-sur, .theme-is-ventura) main:has(> .auth-backdrop) {
+  padding: calc(var(--mac-top) + var(--mac-bar) + 1rem) calc(var(--mac-left) + 1.25rem) calc(var(--mac-bottom) + 1.25rem);
+}
+:is(.theme-is-mojave, .theme-is-big-sur, .theme-is-ventura) main:has(> .auth-backdrop) > .absolute {
+  position: fixed;
+  top: calc(var(--mac-top) + (var(--mac-bar) - 2rem) / 2);
+  right: calc(var(--mac-right) + 0.625rem);
+  z-index: 37;
+}
+:is(.theme-is-mojave, .theme-is-big-sur, .theme-is-ventura) main:has(> .auth-backdrop) .wordmark {
+  font-family: var(--mac-font);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+@media (width < 40rem) {
+  :is(.theme-is-mojave, .theme-is-big-sur, .theme-is-ventura):not(:has(> body > .top-bar)) {
+    --mac-top: 0px;
+    --mac-left: 0px;
+  }
+}
+
+/* ── Mojave ────────────────────────────────────────────────────────────────
+   The first dark mode. A charcoal window, its title in a slim bar of its
+   own above a toolbar of bordered grey buttons: the book at the left, the
+   page links one segmented control in the middle, the open page's segment
+   lit, and the bar's other buttons at the right. Push buttons are grey,
+   the main one blue; pop-up buttons end in a blue square of up-and-down
+   arrows; fields are dark and square-cornered, ringed in a soft blue glow
+   while typed in; a tab view's open tab is blue; menus are dark glass with
+   a full-width blue highlight. */
+.theme-is-mojave {
+  --mac-top: calc(var(--mac-menu) + 1.25rem);
+  --mac-left: max(1.25rem, calc(50vw - 39rem));
+  --mac-right: var(--mac-left);
+  --mac-bottom: 1.25rem;
+  --mac-radius: 0.375rem;
+  --mj-title: 1.375rem;
+  --mac-bar: calc(var(--mj-title) + 2.5rem);
+  --mac-window: linear-gradient(#242529, #1f2024 18rem);
+  --mac-window-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.1), 0 0 0 1px rgb(0 0 0 / 0.7), 0 24px 70px rgb(0 0 0 / 0.6), 0 8px 24px rgb(0 0 0 / 0.35);
+  --mac-menu-bg: rgb(20 22 32 / 0.7);
+  --mac-menu-ink: #ffffff;
+  --mac-menu-edge: 0 1px rgb(0 0 0 / 0.5);
+  --mac-book: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 7v14'/%3E%3Cpath d='M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z'/%3E%3C/svg%3E");
+  --mac-status: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='76' height='16' fill='none' stroke='%23fff' stroke-width='1.4' stroke-linecap='round'%3E%3Cpath d='M5.9 6.4a10 10 0 0 1 14.2 0M8.4 8.9a6.5 6.5 0 0 1 9.2 0M10.9 11.4a3 3 0 0 1 4.2 0'/%3E%3Ccircle cx='13' cy='13.6' r='1' fill='%23fff' stroke='none'/%3E%3Ccircle cx='40' cy='7' r='4.6'/%3E%3Cpath d='M43.4 10.4l3.4 3.4'/%3E%3Crect x='58.8' y='2.3' width='15.4' height='5' rx='2.5'/%3E%3Crect x='58.8' y='9' width='15.4' height='5' rx='2.5'/%3E%3Ccircle cx='71.7' cy='4.8' r='1.4' fill='%23fff' stroke='none'/%3E%3Ccircle cx='61.3' cy='11.5' r='1.4' fill='%23fff' stroke='none'/%3E%3C/svg%3E");
+  --mac-select: #2f73e0;
+  --mj-blue: linear-gradient(#2f73e0, #1f62cf);
+  --mj-button: linear-gradient(#646468, #5a5a5e);
+  --mj-edge: inset 0 0.5px rgb(255 255 255 / 0.3), 0 0 0 0.5px rgb(0 0 0 / 0.6), 0 1px 1.5px rgb(0 0 0 / 0.3);
+  --mj-ring: 0 0 0 3px rgb(64 156 255 / 0.6);
+  --mj-popup: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 24'%3E%3Crect width='18' height='24' rx='4' fill='%232f73e0'/%3E%3Cpath d='M6.2 9.6L9 6.8l2.8 2.8M6.2 14.4L9 17.2l2.8-2.8' fill='none' stroke='%23fff' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  --surface-shadow: none;
+  --chart-1: #409cff;
+  --chart-2: #ff9f0a;
+  --chart-3: #30d158;
+  --chart-4: #bf5af2;
+  --chart-5: #ff6961;
+  scrollbar-color: rgb(255 255 255 / 0.35) transparent;
+}
+/* Push buttons: grey, a lighter top edge, a dark outline; the main one
+   blue. */
+.theme-is-mojave [data-size][data-variant] {
+  border: 0;
+  border-radius: 0.3125rem;
+  color: #ffffff;
+  font-weight: 400;
+  background: var(--mj-button);
+  box-shadow: var(--mj-edge);
+}
+.theme-is-mojave [data-size][data-variant]:hover {
+  background: linear-gradient(#6c6c70, #626266);
+}
+.theme-is-mojave [data-size][data-variant]:active:not(:disabled) {
+  translate: none;
+  background: linear-gradient(#7a7a7e, #707074);
+}
+.theme-is-mojave [data-size][data-variant="default"] {
+  font-weight: 500;
+  background: var(--mj-blue);
+  box-shadow: inset 0 0.5px rgb(255 255 255 / 0.3), 0 0 0 0.5px rgb(0 0 0 / 0.6), 0 1px 1.5px rgb(0 0 0 / 0.3);
+}
+.theme-is-mojave [data-size][data-variant="default"]:hover {
+  background: linear-gradient(#3a7deb, #2a6ad8);
+}
+.theme-is-mojave [data-size][data-variant="default"]:active:not(:disabled) {
+  background: linear-gradient(#2463c9, #1a55b5);
+}
+.theme-is-mojave [data-size][data-variant="destructive"] {
+  color: #ffb4ae;
+  background: linear-gradient(#55302f, #4b2a29);
+}
+.theme-is-mojave [data-size][data-variant="destructive"]:hover {
+  color: #ffc6c1;
+  background: linear-gradient(#603534, #552f2e);
+}
+.theme-is-mojave [data-size]:is([data-variant="ghost"], [data-variant="link"]) {
+  background: transparent;
+  box-shadow: none;
+}
+.theme-is-mojave [data-size][data-variant="ghost"]:is(:hover, [aria-expanded="true"]) {
+  background: rgb(255 255 255 / 0.1);
+}
+.theme-is-mojave [data-size][data-variant="link"] {
+  color: var(--primary);
+}
+.theme-is-mojave [data-size][data-variant]:disabled {
+  color: rgb(255 255 255 / 0.4);
+  opacity: 1;
+}
+/* Keyboard focus: the Mac's soft ring in the accent. */
+.theme-is-mojave :is([data-size][data-variant], [data-slot="select-trigger"], .select-like, [role="tab"], [data-slot="tabs-trigger"], .shelf-tabs > a, .surface, .wordmark, .nav-link):focus-visible {
+  outline: none;
+  --tw-ring-shadow: 0 0 #0000;
+  box-shadow: var(--mj-edge), var(--mj-ring);
+}
+
+/* The title bar: the traffic lights and the page's name. */
+.theme-is-mojave::before {
+  content: var(--mac-title);
+  content: var(--mac-title) / "";
+  position: fixed;
+  top: var(--mac-top);
+  left: var(--mac-left);
+  right: var(--mac-right);
+  z-index: 36;
+  height: var(--mj-title);
+  padding: 0 5rem;
+  overflow: hidden;
+  border-radius: var(--mac-radius) var(--mac-radius) 0 0;
+  color: #dcdcde;
+  font: 500 0.8125rem/var(--mj-title) var(--mac-font);
+  text-align: center;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  pointer-events: none;
+  background:
+    var(--mac-lights) 0.5rem 50% / 3.25rem 0.75rem no-repeat,
+    linear-gradient(#404044, #3b3b3f);
+  box-shadow: inset 0 1px rgb(255 255 255 / 0.13), inset 1px 0 rgb(255 255 255 / 0.07), inset -1px 0 rgb(255 255 255 / 0.07);
+}
+/* The toolbar, under the title, with a black line at its foot. */
+.theme-is-mojave .top-bar {
+  position: fixed;
+  top: calc(var(--mac-top) + var(--mj-title));
+  left: var(--mac-left);
+  right: var(--mac-right);
+  height: calc(var(--mac-bar) - var(--mj-title));
+  border-bottom: 1px solid #0b0b0d;
+  color: #e9e9eb;
+  background: linear-gradient(#3b3b3f, #333337);
+  box-shadow: inset 1px 0 rgb(255 255 255 / 0.07), inset -1px 0 rgb(255 255 255 / 0.07);
+}
+.theme-is-mojave .top-bar > div {
+  justify-content: center;
+  height: 100%;
+  gap: 0;
+  padding: 0 0.625rem;
+}
+.theme-is-mojave .top-bar :is(.wordmark, .nav-link),
+.theme-is-mojave .top-bar .ml-auto [data-size][data-variant] {
+  height: 1.5rem;
+  min-width: 2.25rem;
+  margin: 0;
+  padding: 0 0.625rem;
+  border: 0;
+  border-radius: 0.3125rem;
+  color: #e9e9eb;
+  font-size: 0.75rem;
+  font-weight: 400;
+  background: var(--mj-button);
+  box-shadow: var(--mj-edge);
+}
+.theme-is-mojave .top-bar :is(.wordmark, .nav-link) svg,
+.theme-is-mojave .top-bar .ml-auto [data-size][data-variant] svg {
+  width: 0.9375rem;
+  height: 0.9375rem;
+}
+.theme-is-mojave .top-bar .wordmark {
+  position: absolute;
+  inset: 0 auto 0 0.625rem;
+  justify-content: center;
+  margin: auto 0;
+}
+/* The page links: one segmented control, a shade darker than a button,
+   the open segment lit. */
+.theme-is-mojave .top-bar .nav-link {
+  gap: 0.375rem;
+  border-radius: 0;
+  background: linear-gradient(#545458, #4c4c50);
+}
+.theme-is-mojave .top-bar .nav-link + .nav-link {
+  border-left: 1px solid rgb(0 0 0 / 0.45);
+}
+.theme-is-mojave .top-bar .wordmark + .nav-link {
+  border-radius: 0.3125rem 0 0 0.3125rem;
+}
+.theme-is-mojave .top-bar .nav-link:has(+ .ml-auto) {
+  border-radius: 0 0.3125rem 0.3125rem 0;
+}
+.theme-is-mojave .top-bar .nav-link > span {
+  display: none;
+}
+@media (width >= 80rem) {
+  .theme-is-mojave .top-bar .nav-link > span {
+    display: inline;
+  }
+}
+.theme-is-mojave .top-bar :is(.wordmark, .nav-link):hover,
+.theme-is-mojave .top-bar .ml-auto [data-size][data-variant]:hover {
+  color: #ffffff;
+  background: linear-gradient(#6c6c70, #626266);
+}
+.theme-is-mojave .top-bar :is(.wordmark, .nav-link):active,
+.theme-is-mojave .top-bar .ml-auto [data-size][data-variant]:active {
+  background: linear-gradient(#7a7a7e, #707074);
+}
+.theme-is-mojave .top-bar .nav-link:not([aria-current="page"]):hover {
+  background: linear-gradient(#5f5f63, #57575b);
+}
+.theme-is-mojave .top-bar .nav-link[aria-current="page"] {
+  color: #ffffff;
+  font-weight: 500;
+  background: linear-gradient(#737377, #69696d);
+  box-shadow: inset 0 0.5px rgb(255 255 255 / 0.35), 0 0 0 0.5px rgb(0 0 0 / 0.6), 0 1px 1.5px rgb(0 0 0 / 0.3);
+}
+.theme-is-mojave .top-bar .ml-auto {
+  position: absolute;
+  inset: 0 0.625rem 0 auto;
+  gap: 0.5rem;
+}
+.theme-is-mojave .top-bar .ml-auto .text-muted-foreground {
+  color: #e9e9eb;
+}
+@media (width < 40rem) {
+  /* The phone's window: the toolbar alone at the top, the links filling
+     it. */
+  .theme-is-mojave {
+    --mj-title: 0px;
+    --mac-bar: 2.75rem;
+  }
+  .theme-is-mojave .top-bar > div {
+    justify-content: flex-start;
+    padding: 0 0.375rem;
+  }
+  .theme-is-mojave .top-bar .wordmark {
+    display: none;
+  }
+  .theme-is-mojave .top-bar .nav-link {
+    flex: 1 1 2rem;
+    min-width: 0;
+    max-width: 2.75rem;
+    padding: 0;
+  }
+  .theme-is-mojave .top-bar .ml-auto {
+    position: static;
+    gap: 0.25rem;
+    margin-left: 0.5rem;
+  }
+  .theme-is-mojave .top-bar .ml-auto [data-size][data-variant] {
+    min-width: 1.75rem;
+    padding: 0;
+  }
+}
+/* The sign-in pages: the title and an empty toolbar, the theme picker at
+   its end. */
+.theme-is-mojave:not(:has(> body > .top-bar))::before {
+  height: var(--mac-bar);
+  border-bottom: 1px solid #0b0b0d;
+  background:
+    var(--mac-lights) 0.5rem calc(var(--mj-title) / 2 - 0.375rem) / 3.25rem 0.75rem no-repeat,
+    linear-gradient(#404044, #3b3b3f) 0 0 / 100% var(--mj-title) no-repeat,
+    linear-gradient(#3b3b3f, #333337);
+}
+.theme-is-mojave main:has(> .auth-backdrop) > .absolute {
+  top: calc(var(--mac-top) + var(--mj-title) + 0.5rem);
+}
+.theme-is-mojave main:has(> .auth-backdrop) > .absolute [data-size][data-variant] {
+  height: 1.5rem;
+  background: var(--mj-button);
+  box-shadow: var(--mj-edge);
+}
+
+/* Fields: dark wells with square corners, ringed in blue while typed in. */
+.theme-is-mojave :is([data-slot="input"], [data-slot="textarea"]),
+.theme-is-mojave input:is([type="text"], [type="search"], [type="number"], [type="date"], [type="password"], [type="url"], [type="email"], :not([type])),
+.theme-is-mojave textarea {
+  border: 0;
+  border-radius: 0.125rem;
+  background: #1a1a1d;
+  box-shadow: inset 0 0 0 0.5px rgb(255 255 255 / 0.22), inset 0 1px 1px rgb(0 0 0 / 0.4);
+}
+.theme-is-mojave :is([data-slot="input"], [data-slot="textarea"], input, textarea):focus-visible {
+  outline: none;
+  --tw-ring-shadow: 0 0 #0000;
+  box-shadow: inset 0 0 0 0.5px rgb(64 156 255 / 0.9), var(--mj-ring);
+}
+.theme-is-mojave :is([data-slot="input"], [data-slot="textarea"], input, textarea)::placeholder {
+  color: rgb(255 255 255 / 0.5);
+}
+/* Pop-up buttons: a grey button ending in a blue square of arrows. */
+.theme-is-mojave :is([data-slot="select-trigger"], .select-like) {
+  border: 0;
+  border-radius: 0.3125rem;
+  color: #ffffff;
+  background:
+    var(--mj-popup) right 0.1875rem center / 1.0625rem 1.4375rem no-repeat,
+    var(--mj-button);
+  box-shadow: var(--mj-edge);
+}
+.theme-is-mojave :is([data-slot="select-trigger"], .select-like):hover {
+  background:
+    var(--mj-popup) right 0.1875rem center / 1.0625rem 1.4375rem no-repeat,
+    linear-gradient(#6c6c70, #626266);
+}
+.theme-is-mojave :is([data-slot="select-trigger"], .select-like) > svg:last-child {
+  opacity: 0;
+}
+/* Check boxes and radio buttons: grey; chosen, blue with a white tick or
+   dot. */
+.theme-is-mojave input[type="checkbox"],
+.theme-is-mojave input[type="radio"] {
+  appearance: none;
+  flex: none;
+  width: 0.875rem;
+  height: 0.875rem;
+  margin: 0;
+  border: 0;
+  border-radius: 0.1875rem;
+  background: var(--mj-button);
+  box-shadow: var(--mj-edge);
+}
+.theme-is-mojave input[type="radio"] {
+  border-radius: 50%;
+}
+.theme-is-mojave input[type="checkbox"]:checked {
+  background: var(--mac-tick) center / 80% no-repeat, var(--mj-blue);
+}
+.theme-is-mojave input[type="radio"]:checked {
+  background: radial-gradient(circle, #ffffff 0 22%, transparent 27%), var(--mj-blue);
+}
+.theme-is-mojave input:is([type="checkbox"], [type="radio"]):focus-visible {
+  outline: none;
+  box-shadow: var(--mj-edge), var(--mj-ring);
+}
+/* Switches: a grey track, blue when on, with a white knob. */
+.theme-is-mojave button[role="switch"] > span:last-child {
+  border: 0;
+  background: rgb(255 255 255 / 0.18);
+  box-shadow: inset 0 0 0 0.5px rgb(0 0 0 / 0.5);
+}
+.theme-is-mojave button[role="switch"][aria-checked="true"] > span:last-child {
+  background: var(--mj-blue);
+}
+.theme-is-mojave button[role="switch"] > span:last-child > span {
+  background: linear-gradient(#ffffff, #e4e4e6);
+  box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.4), 0 1px 2px rgb(0 0 0 / 0.4);
+}
+
+/* Boxes: a shade lighter than the window, with a faint edge. Library
+   tiles too, lighter under the pointer. */
+.theme-is-mojave [data-slot="card"],
+.theme-is-mojave .bg-card.border:not(.bulk-bar),
+.theme-is-mojave .surface:not([data-slot="card"]) {
+  border: 0;
+  border-radius: 0.375rem;
+  background: var(--card);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.07), 0 1px 2px rgb(0 0 0 / 0.25);
+  --tw-ring-shadow: 0 0 #0000;
+}
+.theme-is-mojave .surface:not([data-slot="card"]):hover,
+.theme-is-mojave .bg-card.border:not(.surface, .bulk-bar):is(a, button):hover {
+  background: #313238;
+}
+.theme-is-mojave .bg-card.border.border-red-300 {
+  background: #3a2626;
+  box-shadow: inset 0 0 0 1px rgb(255 105 97 / 0.35);
+}
+.theme-is-mojave [data-slot="card-footer"] {
+  border-top: 1px solid rgb(0 0 0 / 0.35);
+  background: rgb(0 0 0 / 0.12);
+}
+.theme-is-mojave .surface .book-cover {
+  border-radius: 0.1875rem;
+}
+
+/* Tabs: a tab view's segmented row, the open tab blue. Chips: recessed
+   buttons, the chosen one blue. */
+.theme-is-mojave .shelf-tabs,
+.theme-is-mojave [data-slot="tabs-list"] {
+  width: fit-content;
+  max-width: 100%;
+  gap: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0.3125rem;
+  background: var(--mj-button);
+  box-shadow: var(--mj-edge);
+}
+.theme-is-mojave .shelf-tabs > a,
+.theme-is-mojave [data-slot="tabs-trigger"] {
+  margin: 0;
+  padding-block: 0.25rem;
+  border: 0;
+  border-radius: 0.3125rem;
+  color: #e9e9eb;
+  background: transparent;
+  box-shadow: none;
+}
+.theme-is-mojave .shelf-tabs > a + a {
+  border-left: 1px solid rgb(0 0 0 / 0.4);
+  border-radius: 0;
+}
+.theme-is-mojave .shelf-tabs > a:hover,
+.theme-is-mojave [data-slot="tabs-trigger"]:hover {
+  color: #ffffff;
+  background: rgb(255 255 255 / 0.08);
+}
+.theme-is-mojave .shelf-tabs > a[aria-current="page"],
+.theme-is-mojave [data-slot="tabs-trigger"][data-state="active"] {
+  color: #ffffff;
+  font-weight: 500;
+  border-radius: 0.3125rem;
+  background: var(--mj-blue);
+  box-shadow: inset 0 0.5px rgb(255 255 255 / 0.3);
+}
+.theme-is-mojave .shelf-tabs > a[aria-current="page"] + a {
+  border-left-color: transparent;
+}
+.theme-is-mojave .shelf-tabs > a > span {
+  color: #ffffff;
+  background: rgb(0 0 0 / 0.25);
+}
+.theme-is-mojave .shelf-tabs > a[aria-current="page"] > span {
+  background: rgb(0 0 0 / 0.28);
+}
+.theme-is-mojave :is(a, button).rounded-full.border:not(.aspect-square, .border-2) {
+  border-color: transparent;
+  color: #e9e9eb;
+  background: rgb(255 255 255 / 0.08);
+}
+.theme-is-mojave :is(a, button).rounded-full.border:not(.aspect-square, .border-2):hover {
+  background: rgb(255 255 255 / 0.14);
+}
+.theme-is-mojave :is(a, button).rounded-full.border:is([class*="border-primary"], [aria-current="page"], [aria-pressed="true"]):not(.aspect-square, .border-2) {
+  color: #ffffff;
+  background: var(--mj-blue);
+}
+.theme-is-mojave kbd {
+  border: 0;
+  border-radius: 0.25rem;
+  background: var(--mj-button);
+  box-shadow: var(--mj-edge);
+}
+
+/* Progress: a dark groove, filled blue. */
+.theme-is-mojave :has(> .bar-grow) {
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.1);
+  box-shadow: inset 0 0 0 0.5px rgb(0 0 0 / 0.5);
+}
+.theme-is-mojave .bar-grow {
+  border-radius: 999px;
+}
+
+/* Menus, popovers and lists: dark glass, the item under the pointer in a
+   blue band from edge to edge. */
+.theme-is-mojave :is([data-slot="dropdown-menu-content"], [data-slot="popover-content"], [data-slot="select-content"], [data-slot="dropdown-menu-sub-content"]) {
+  border: 0;
+  border-radius: 0.375rem;
+  background: rgb(40 40 44 / 0.86);
+  box-shadow: inset 0 0 0 0.5px rgb(255 255 255 / 0.2), 0 0 0 0.5px rgb(0 0 0 / 0.8), 0 12px 32px rgb(0 0 0 / 0.5);
+  backdrop-filter: blur(24px) saturate(1.5);
+  --tw-ring-shadow: 0 0 #0000;
+}
+.theme-is-mojave :is([data-slot="dropdown-menu-content"], [data-slot="dropdown-menu-sub-content"]) {
+  padding-inline: 0;
+}
+.theme-is-mojave :is([data-slot="dropdown-menu-item"], [data-slot="select-item"], [data-slot="dropdown-menu-checkbox-item"], [data-slot="dropdown-menu-radio-item"], [data-slot="dropdown-menu-sub-trigger"]) {
+  border-radius: 0;
+}
+.theme-is-mojave :is([data-slot="dropdown-menu-item"], [data-slot="select-item"], [data-slot="dropdown-menu-checkbox-item"], [data-slot="dropdown-menu-radio-item"], [data-slot="dropdown-menu-sub-trigger"]):is(:focus, [data-highlighted]) {
+  color: #ffffff;
+  background: #2a6bd6;
+}
+.theme-is-mojave :is([data-slot="dropdown-menu-item"], [data-slot="select-item"], [data-slot="dropdown-menu-checkbox-item"], [data-slot="dropdown-menu-radio-item"], [data-slot="dropdown-menu-sub-trigger"]):is(:focus, [data-highlighted]) :is(svg, .text-muted-foreground) {
+  color: #ffffff;
+}
+
+/* Dialogs: a dark sheet over a dimmed window. */
+.theme-is-mojave [data-slot="dialog-overlay"] {
+  background: rgb(0 0 0 / 0.35);
+  backdrop-filter: none;
+}
+.theme-is-mojave [data-slot="dialog-content"] {
+  border: 0;
+  border-radius: 0.5rem;
+  background: #2b2c31;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.1), 0 0 0 1px rgb(0 0 0 / 0.7), 0 24px 60px rgb(0 0 0 / 0.6);
+  --tw-ring-shadow: 0 0 #0000;
+}
+.theme-is-mojave [data-slot="dialog-footer"] {
+  border-top: 1px solid rgb(0 0 0 / 0.35);
+  border-radius: 0 0 0.5rem 0.5rem;
+  background: rgb(0 0 0 / 0.15);
+}
+.theme-is-mojave .bulk-bar {
+  border: 0;
+  border-radius: 0.5rem;
+  background: rgb(44 44 48 / 0.88);
+  box-shadow: inset 0 0 0 0.5px rgb(255 255 255 / 0.2), 0 0 0 0.5px rgb(0 0 0 / 0.8), 0 12px 32px rgb(0 0 0 / 0.5);
+  backdrop-filter: blur(24px) saturate(1.5);
+}
+
+/* ── Big Sur and Ventura's controls ───────────────────────────────────────
+   The light Mac since Big Sur: white push buttons lifted by a hairline and
+   a soft shadow, the main one in the accent; white fields with the accent's
+   soft ring while typed in; pop-up buttons ending in an accent square of
+   arrows; a segmented control's chosen segment a raised white key; menus
+   of frosted glass whose highlight is a rounded accent band inside them. */
+:is(.theme-is-big-sur, .theme-is-ventura) {
+  --mac-menu-ink: #1d1d1f;
+  --mac-menu-edge: 0 0.5px rgb(0 0 0 / 0.15);
+  --mac-book: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231d1d1f' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 7v14'/%3E%3Cpath d='M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z'/%3E%3C/svg%3E");
+  --mac-status: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='76' height='16' fill='none' stroke='%231d1d1f' stroke-width='1.4' stroke-linecap='round'%3E%3Cpath d='M5.9 6.4a10 10 0 0 1 14.2 0M8.4 8.9a6.5 6.5 0 0 1 9.2 0M10.9 11.4a3 3 0 0 1 4.2 0'/%3E%3Ccircle cx='13' cy='13.6' r='1' fill='%231d1d1f' stroke='none'/%3E%3Ccircle cx='40' cy='7' r='4.6'/%3E%3Cpath d='M43.4 10.4l3.4 3.4'/%3E%3Crect x='58.8' y='2.3' width='15.4' height='5' rx='2.5'/%3E%3Crect x='58.8' y='9' width='15.4' height='5' rx='2.5'/%3E%3Ccircle cx='71.7' cy='4.8' r='1.4' fill='%231d1d1f' stroke='none'/%3E%3Ccircle cx='61.3' cy='11.5' r='1.4' fill='%231d1d1f' stroke='none'/%3E%3C/svg%3E");
+  --mac-key: #ffffff;
+  --mac-key-edge: 0 0 0 0.5px rgb(0 0 0 / 0.2), 0 0.5px 1.5px rgb(0 0 0 / 0.14);
+  --mac-ring: 0 0 0 3.5px color-mix(in oklab, var(--primary) 45%, transparent);
+  --surface-shadow: none;
+  scrollbar-color: rgb(0 0 0 / 0.3) transparent;
+}
+/* The toolbar's other buttons: plain icons, a soft key under the
+   pointer. */
+:is(.theme-is-big-sur, .theme-is-ventura) .top-bar .ml-auto {
+  position: fixed;
+  top: var(--mac-top);
+  right: var(--mac-right);
+  z-index: 1;
+  height: var(--mac-bar);
+  margin: 0;
+  padding: 0 0.75rem;
+  gap: 0.25rem;
+}
+:is(.theme-is-big-sur, .theme-is-ventura) .top-bar .ml-auto [data-size][data-variant],
+:is(.theme-is-big-sur, .theme-is-ventura) .top-bar .wordmark {
+  height: 1.75rem;
+  min-width: 2rem;
+  margin: 0;
+  padding: 0 0.5rem;
+  border: 0;
+  border-radius: 0.375rem;
+  color: #636368;
+  background: transparent;
+  box-shadow: none;
+}
+:is(.theme-is-big-sur, .theme-is-ventura) .top-bar .ml-auto [data-size][data-variant]:hover,
+:is(.theme-is-big-sur, .theme-is-ventura) .top-bar .wordmark:hover {
+  color: #1d1d1f;
+  background: rgb(0 0 0 / 0.06);
+}
+:is(.theme-is-big-sur, .theme-is-ventura) .top-bar .ml-auto [data-size][data-variant]:active,
+:is(.theme-is-big-sur, .theme-is-ventura) .top-bar .wordmark:active {
+  background: rgb(0 0 0 / 0.1);
+}
+:is(.theme-is-big-sur, .theme-is-ventura) .top-bar .ml-auto .text-muted-foreground {
+  color: inherit;
+}
+:is(.theme-is-big-sur, .theme-is-ventura) [data-size][data-variant] {
+  border: 0;
+  border-radius: 0.375rem;
+  color: #1d1d1f;
+  font-weight: 400;
+  background: var(--mac-key);
+  box-shadow: var(--mac-key-edge);
+}
+:is(.theme-is-big-sur, .theme-is-ventura) [data-size][data-variant]:hover {
+  background: #f8f8f9;
+}
+:is(.theme-is-big-sur, .theme-is-ventura) [data-size][data-variant]:active:not(:disabled) {
+  translate: none;
+  background: #ececee;
+}
+:is(.theme-is-big-sur, .theme-is-ventura) [data-size][data-variant="default"] {
+  color: #ffffff;
+  font-weight: 500;
+  background: var(--mac-accent-fill);
+  box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.12), 0 0.5px 1.5px rgb(0 0 0 / 0.18), inset 0 0.5px rgb(255 255 255 / 0.25);
+}
+:is(.theme-is-big-sur, .theme-is-ventura) [data-size][data-variant="default"]:hover {
+  background: var(--mac-accent-fill-hover);
+}
+:is(.theme-is-big-sur, .theme-is-ventura) [data-size][data-variant="default"]:active:not(:disabled) {
+  background: var(--mac-accent-fill-down);
+}
+:is(.theme-is-big-sur, .theme-is-ventura) [data-size][data-variant="destructive"] {
+  color: var(--destructive);
+}
+:is(.theme-is-big-sur, .theme-is-ventura) [data-size]:is([data-variant="ghost"], [data-variant="link"]) {
+  background: transparent;
+  box-shadow: none;
+}
+:is(.theme-is-big-sur, .theme-is-ventura) [data-size][data-variant="ghost"]:is(:hover, [aria-expanded="true"]) {
+  background: rgb(0 0 0 / 0.06);
+}
+:is(.theme-is-big-sur, .theme-is-ventura) [data-size][data-variant="link"] {
+  color: var(--primary);
+}
+:is(.theme-is-big-sur, .theme-is-ventura) [data-size][data-variant]:disabled {
+  color: rgb(0 0 0 / 0.35);
+  opacity: 1;
+}
+:is(.theme-is-big-sur, .theme-is-ventura) [data-size][data-variant="default"]:disabled {
+  color: rgb(255 255 255 / 0.75);
+  opacity: 0.6;
+}
+:is(.theme-is-big-sur, .theme-is-ventura) :is([data-size][data-variant], [data-slot="select-trigger"], .select-like, [role="tab"], [data-slot="tabs-trigger"], .shelf-tabs > a, .surface, .wordmark, .nav-link):focus-visible {
+  outline: none;
+  --tw-ring-shadow: 0 0 #0000;
+  box-shadow: var(--mac-key-edge), var(--mac-ring);
+}
+:is(.theme-is-big-sur, .theme-is-ventura) :is([data-slot="input"], [data-slot="textarea"]),
+:is(.theme-is-big-sur, .theme-is-ventura) input:is([type="text"], [type="search"], [type="number"], [type="date"], [type="password"], [type="url"], [type="email"], :not([type])),
+:is(.theme-is-big-sur, .theme-is-ventura) textarea {
+  border: 0;
+  border-radius: 0.3125rem;
+  background: #ffffff;
+  box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.22), inset 0 0.5px 1px rgb(0 0 0 / 0.08);
+}
+:is(.theme-is-big-sur, .theme-is-ventura) :is([data-slot="input"], [data-slot="textarea"], input, textarea):focus-visible {
+  outline: none;
+  --tw-ring-shadow: 0 0 #0000;
+  box-shadow: 0 0 0 0.5px color-mix(in oklab, var(--primary) 70%, transparent), var(--mac-ring);
+}
+:is(.theme-is-big-sur, .theme-is-ventura) :is([data-slot="input"], [data-slot="textarea"], input, textarea)::placeholder {
+  color: rgb(0 0 0 / 0.45);
+}
+:is(.theme-is-big-sur, .theme-is-ventura) :is([data-slot="select-trigger"], .select-like) {
+  border: 0;
+  border-radius: 0.375rem;
+  color: #1d1d1f;
+  background: var(--mac-popup) right 0.1875rem center / 1.0625rem 1.4375rem no-repeat, #ffffff;
+  box-shadow: var(--mac-key-edge);
+}
+:is(.theme-is-big-sur, .theme-is-ventura) :is([data-slot="select-trigger"], .select-like):hover {
+  background: var(--mac-popup) right 0.1875rem center / 1.0625rem 1.4375rem no-repeat, #f8f8f9;
+}
+:is(.theme-is-big-sur, .theme-is-ventura) :is([data-slot="select-trigger"], .select-like) > svg:last-child {
+  opacity: 0;
+}
+:is(.theme-is-big-sur, .theme-is-ventura) input[type="checkbox"],
+:is(.theme-is-big-sur, .theme-is-ventura) input[type="radio"] {
+  appearance: none;
+  flex: none;
+  width: 0.875rem;
+  height: 0.875rem;
+  margin: 0;
+  border: 0;
+  border-radius: 0.21875rem;
+  background: #ffffff;
+  box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.3), inset 0 0.5px 1px rgb(0 0 0 / 0.1);
+}
+:is(.theme-is-big-sur, .theme-is-ventura) input[type="radio"] {
+  border-radius: 50%;
+}
+:is(.theme-is-big-sur, .theme-is-ventura) input[type="checkbox"]:checked {
+  background: var(--mac-tick) center / 80% no-repeat, var(--mac-accent-fill);
+  box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.15);
+}
+:is(.theme-is-big-sur, .theme-is-ventura) input[type="radio"]:checked {
+  background: radial-gradient(circle, #ffffff 0 22%, transparent 27%), var(--mac-accent-fill);
+  box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.15);
+}
+:is(.theme-is-big-sur, .theme-is-ventura) input:is([type="checkbox"], [type="radio"]):focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.3), var(--mac-ring);
+}
+:is(.theme-is-big-sur, .theme-is-ventura) button[role="switch"] > span:last-child {
+  border: 0;
+  background: rgb(0 0 0 / 0.09);
+  box-shadow: inset 0 0 0 0.5px rgb(0 0 0 / 0.1);
+}
+:is(.theme-is-big-sur, .theme-is-ventura) button[role="switch"][aria-checked="true"] > span:last-child {
+  background: var(--primary);
+}
+:is(.theme-is-big-sur, .theme-is-ventura) button[role="switch"] > span:last-child > span {
+  background: #ffffff;
+  box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.08), 0 1px 3px rgb(0 0 0 / 0.25);
+}
+:is(.theme-is-big-sur, .theme-is-ventura) .shelf-tabs,
+:is(.theme-is-big-sur, .theme-is-ventura) [data-slot="tabs-list"] {
+  width: fit-content;
+  max-width: 100%;
+  gap: 0.125rem;
+  padding: 0.125rem;
+  border: 0;
+  border-radius: 0.4375rem;
+  background: rgb(0 0 0 / 0.06);
+  box-shadow: none;
+}
+:is(.theme-is-big-sur, .theme-is-ventura) .shelf-tabs > a,
+:is(.theme-is-big-sur, .theme-is-ventura) [data-slot="tabs-trigger"] {
+  margin: 0;
+  padding-block: 0.25rem;
+  border: 0;
+  border-radius: 0.3125rem;
+  color: #3a3a3e;
+  background: transparent;
+  box-shadow: none;
+}
+:is(.theme-is-big-sur, .theme-is-ventura) .shelf-tabs > a:hover,
+:is(.theme-is-big-sur, .theme-is-ventura) [data-slot="tabs-trigger"]:hover {
+  color: #1d1d1f;
+  background: rgb(0 0 0 / 0.04);
+}
+:is(.theme-is-big-sur, .theme-is-ventura) .shelf-tabs > a[aria-current="page"],
+:is(.theme-is-big-sur, .theme-is-ventura) [data-slot="tabs-trigger"][data-state="active"] {
+  color: #1d1d1f;
+  font-weight: 500;
+  background: #ffffff;
+  box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.1), 0 1px 2px rgb(0 0 0 / 0.14);
+}
+:is(.theme-is-big-sur, .theme-is-ventura) .shelf-tabs > a > span {
+  color: #3a3a3e;
+  background: rgb(0 0 0 / 0.07);
+}
+:is(.theme-is-big-sur, .theme-is-ventura) .shelf-tabs > a[aria-current="page"] > span {
+  color: #ffffff;
+  background: var(--primary);
+}
+:is(.theme-is-big-sur, .theme-is-ventura) :is(a, button).rounded-full.border:not(.aspect-square, .border-2) {
+  border-color: transparent;
+  background: #ffffff;
+  box-shadow: var(--mac-key-edge);
+}
+:is(.theme-is-big-sur, .theme-is-ventura) :is(a, button).rounded-full.border:not(.aspect-square, .border-2):hover {
+  background: #f8f8f9;
+}
+:is(.theme-is-big-sur, .theme-is-ventura) :is(a, button).rounded-full.border:is([class*="border-primary"], [aria-current="page"], [aria-pressed="true"]):not(.aspect-square, .border-2) {
+  color: #ffffff;
+  background: var(--mac-accent-fill);
+}
+:is(.theme-is-big-sur, .theme-is-ventura) kbd {
+  border: 0;
+  border-radius: 0.25rem;
+  background: #ffffff;
+  box-shadow: var(--mac-key-edge);
+}
+:is(.theme-is-big-sur, .theme-is-ventura) :has(> .bar-grow) {
+  border-radius: 999px;
+  background: rgb(0 0 0 / 0.08);
+}
+:is(.theme-is-big-sur, .theme-is-ventura) .bar-grow {
+  border-radius: 999px;
+}
+:is(.theme-is-big-sur, .theme-is-ventura) :is([data-slot="dropdown-menu-content"], [data-slot="popover-content"], [data-slot="select-content"], [data-slot="dropdown-menu-sub-content"]) {
+  border: 0;
+  border-radius: var(--mac-menu-radius);
+  background: rgb(248 247 246 / 0.82);
+  box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.22), 0 10px 30px rgb(0 0 0 / 0.18), 0 2px 6px rgb(0 0 0 / 0.08);
+  backdrop-filter: blur(24px) saturate(1.8);
+  --tw-ring-shadow: 0 0 #0000;
+}
+:is(.theme-is-big-sur, .theme-is-ventura) :is([data-slot="dropdown-menu-item"], [data-slot="select-item"], [data-slot="dropdown-menu-checkbox-item"], [data-slot="dropdown-menu-radio-item"], [data-slot="dropdown-menu-sub-trigger"]) {
+  border-radius: 0.25rem;
+}
+:is(.theme-is-big-sur, .theme-is-ventura) :is([data-slot="dropdown-menu-item"], [data-slot="select-item"], [data-slot="dropdown-menu-checkbox-item"], [data-slot="dropdown-menu-radio-item"], [data-slot="dropdown-menu-sub-trigger"]):is(:focus, [data-highlighted]) {
+  color: #ffffff;
+  background: var(--mac-select);
+}
+:is(.theme-is-big-sur, .theme-is-ventura) :is([data-slot="dropdown-menu-item"], [data-slot="select-item"], [data-slot="dropdown-menu-checkbox-item"], [data-slot="dropdown-menu-radio-item"], [data-slot="dropdown-menu-sub-trigger"]):is(:focus, [data-highlighted]) :is(svg, .text-muted-foreground) {
+  color: #ffffff;
+}
+:is(.theme-is-big-sur, .theme-is-ventura) [data-slot="dialog-overlay"] {
+  background: rgb(0 0 0 / 0.18);
+  backdrop-filter: none;
+}
+:is(.theme-is-big-sur, .theme-is-ventura) [data-slot="dialog-content"] {
+  border: 0;
+  border-radius: 0.875rem;
+  background: rgb(252 251 250 / 0.92);
+  box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.2), 0 24px 60px rgb(0 0 0 / 0.25);
+  backdrop-filter: blur(24px) saturate(1.6);
+  --tw-ring-shadow: 0 0 #0000;
+}
+:is(.theme-is-big-sur, .theme-is-ventura) [data-slot="dialog-footer"] {
+  border-top: 0;
+  background: transparent;
+}
+:is(.theme-is-big-sur, .theme-is-ventura) .bulk-bar {
+  border: 0;
+  border-radius: 0.75rem;
+  background: rgb(248 247 246 / 0.84);
+  box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.2), 0 10px 30px rgb(0 0 0 / 0.18);
+  backdrop-filter: blur(24px) saturate(1.8);
+}
+
+/* ── Big Sur ───────────────────────────────────────────────────────────────
+   The great redesign. A white window with big round corners, its page
+   links in a sidebar down the left that lets the desktop through, frosted:
+   the waves behind it show softly, under a pale tint. The traffic lights
+   sit at the top of the sidebar, the links are rows with an icon in the
+   accent, the open one on a grey key, and the app's name heads them in
+   small grey capitals. To the sidebar's right, the toolbar runs across the
+   window with the page's name in bold and the bar's other buttons at its
+   end. Panels are soft grey slabs with no edge. The accent is purple, one
+   of the Mac's own. */
+.theme-is-big-sur {
+  --mac-top: calc(var(--mac-menu) + 1.25rem);
+  --mac-left: max(1.25rem, calc(50vw - 40rem));
+  --mac-right: var(--mac-left);
+  --mac-bottom: 1.25rem;
+  --mac-radius: 0.75rem;
+  --mac-bar: 3.25rem;
+  --bs-side: 13.5rem;
+  --mac-main-left: calc(var(--mac-left) + var(--bs-side));
+  --mac-window: #ffffff;
+  --mac-window-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.25), 0 24px 64px rgb(40 20 100 / 0.35), 0 6px 18px rgb(0 0 0 / 0.14);
+  --mac-menu-bg:
+    linear-gradient(rgb(250 248 255 / 0.55), rgb(250 248 255 / 0.55)),
+    url("/themes/big-sur-frost.svg") calc((100vw - var(--mac-w)) * 0.5) calc((100vh - var(--mac-h)) * 0.5) / var(--mac-w) var(--mac-h) no-repeat;
+  --mac-menu-radius: 0.375rem;
+  --mac-select: #8e3a92;
+  --mac-accent-fill: linear-gradient(#9a47a0, #85338a);
+  --mac-accent-fill-hover: linear-gradient(#a24ea8, #8c3991);
+  --mac-accent-fill-down: linear-gradient(#80318a, #722b7a);
+  --mac-popup: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 24'%3E%3Crect width='18' height='24' rx='4.5' fill='%238e3a92'/%3E%3Cpath d='M6.2 9.6L9 6.8l2.8 2.8M6.2 14.4L9 17.2l2.8-2.8' fill='none' stroke='%23fff' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  --chart-1: #8e3a92;
+  --chart-2: #5b63f2;
+  --chart-3: #ef5f9a;
+  --chart-4: #ffa04d;
+  --chart-5: #3346d6;
+}
+/* The sidebar: the desktop softened behind a pale tint. */
+.theme-is-big-sur .top-bar {
+  position: fixed;
+  top: var(--mac-top);
+  bottom: var(--mac-bottom);
+  left: var(--mac-left);
+  width: var(--bs-side);
+  height: auto;
+  border-right: 1px solid rgb(0 0 0 / 0.1);
+  border-radius: var(--mac-radius) 0 0 var(--mac-radius);
+  color: #1d1d1f;
+  background:
+    var(--mac-lights) 1.25rem 1.25rem / 3.25rem 0.75rem no-repeat,
+    linear-gradient(rgb(250 248 254 / 0.5), rgb(246 243 252 / 0.6)),
+    url("/themes/big-sur-frost.svg") calc((100vw - var(--mac-w)) * 0.5 - var(--mac-left)) calc((100vh - var(--mac-h)) * 0.5 - var(--mac-top)) / var(--mac-w) var(--mac-h) no-repeat;
+}
+.theme-is-big-sur .top-bar > div {
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  height: 100%;
+  gap: 0.125rem;
+  padding: var(--mac-bar) 0.625rem 0.75rem;
+}
+/* The app's name heads the links. */
+.theme-is-big-sur .top-bar .wordmark {
+  justify-content: flex-start;
+  height: 1.5rem;
+  margin: 0.5rem 0 0.125rem;
+  padding: 0 0.625rem;
+  color: #5c5b63;
+  font: 700 0.6875rem/1 var(--mac-font);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.theme-is-big-sur .top-bar .wordmark > svg {
+  display: none;
+}
+.theme-is-big-sur .top-bar .wordmark > span {
+  position: static;
+  width: auto;
+  height: auto;
+  clip-path: none;
+}
+.theme-is-big-sur .top-bar .wordmark:hover {
+  color: #1d1d1f;
+  background: transparent;
+}
+.theme-is-big-sur .top-bar .nav-link {
+  justify-content: flex-start;
+  height: 1.875rem;
+  margin: 0;
+  padding: 0 0.625rem;
+  gap: 0.5rem;
+  border: 0;
+  border-radius: 0.375rem;
+  color: #1d1d1f;
+  font-size: 0.8125rem;
+  font-weight: 400;
+  background: transparent;
+  box-shadow: none;
+}
+.theme-is-big-sur .top-bar .nav-link > svg {
+  width: 1.0625rem;
+  height: 1.0625rem;
+  color: var(--primary);
+}
+.theme-is-big-sur .top-bar .nav-link > span {
+  display: inline;
+}
+.theme-is-big-sur .top-bar .nav-link:hover {
+  background: rgb(0 0 0 / 0.05);
+}
+.theme-is-big-sur .top-bar .nav-link[aria-current="page"] {
+  font-weight: 500;
+  background: rgb(0 0 0 / 0.09);
+}
+/* The toolbar, right of the sidebar, with the page's name. */
+.theme-is-big-sur::before {
+  content: var(--mac-title);
+  content: var(--mac-title) / "";
+  position: fixed;
+  top: var(--mac-top);
+  left: calc(var(--mac-left) + var(--bs-side));
+  right: var(--mac-right);
+  z-index: 36;
+  height: var(--mac-bar);
+  padding: 0 12rem 0 1.5rem;
+  overflow: hidden;
+  border-radius: 0 var(--mac-radius) 0 0;
+  border-bottom: 1px solid rgb(0 0 0 / 0.08);
+  color: #1d1d1f;
+  font: 700 0.9375rem/calc(var(--mac-bar) - 1px) var(--mac-font);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  pointer-events: none;
+  background: #ffffff;
+}
+/* Panels: soft grey slabs with no edge. Library tiles too. */
+.theme-is-big-sur [data-slot="card"],
+.theme-is-big-sur .bg-card.border:not(.bulk-bar),
+.theme-is-big-sur .surface:not([data-slot="card"]) {
+  border: 0;
+  border-radius: 0.75rem;
+  background: #f5f4f8;
+  box-shadow: none;
+  --tw-ring-shadow: 0 0 #0000;
+}
+.theme-is-big-sur .surface:not([data-slot="card"]):hover,
+.theme-is-big-sur .bg-card.border:not(.surface, .bulk-bar):is(a, button):hover {
+  background: #eeedf3;
+}
+.theme-is-big-sur .bg-card.border.border-red-300 {
+  background: #fdeff0;
+}
+.theme-is-big-sur [data-slot="card-footer"] {
+  border-top: 1px solid rgb(0 0 0 / 0.06);
+  background: transparent;
+}
+.theme-is-big-sur .surface .book-cover {
+  border-radius: 0.3125rem;
+}
+@media (40rem <= width < 64rem) {
+  .theme-is-big-sur {
+    --bs-side: 11.5rem;
+  }
+}
+@media (width < 40rem) {
+  /* The phone's window: the sidebar becomes a frosted bar of icons along
+     the top. */
+  .theme-is-big-sur {
+    --bs-side: 0px;
+    --mac-bar: 3rem;
+  }
+  .theme-is-big-sur .top-bar {
+    bottom: auto;
+    right: 0;
+    width: auto;
+    height: var(--mac-bar);
+    border-right: 0;
+    border-bottom: 1px solid rgb(0 0 0 / 0.1);
+    border-radius: 0;
+    background:
+      linear-gradient(rgb(250 248 254 / 0.6), rgb(246 243 252 / 0.72)),
+      url("/themes/big-sur-frost.svg") calc((100vw - var(--mac-w)) * 0.5) calc((100vh - var(--mac-h)) * 0.5) / var(--mac-w) var(--mac-h) no-repeat;
+  }
+  .theme-is-big-sur .top-bar > div {
+    flex-direction: row;
+    align-items: center;
+    gap: 0;
+    padding: 0 0.375rem;
+  }
+  .theme-is-big-sur .top-bar .wordmark {
+    display: none;
+  }
+  .theme-is-big-sur .top-bar .nav-link {
+    flex: 1 1 2rem;
+    justify-content: center;
+    min-width: 0;
+    max-width: 2.75rem;
+    height: 2.25rem;
+    padding: 0;
+  }
+  .theme-is-big-sur .top-bar .nav-link > span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .theme-is-big-sur .top-bar .ml-auto {
+    position: static;
+    height: auto;
+    padding: 0;
+    margin-left: 0.25rem;
+    gap: 0;
+  }
+  .theme-is-big-sur .top-bar .ml-auto [data-size][data-variant] {
+    min-width: 1.875rem;
+    padding: 0;
+  }
+}
+.theme-is-big-sur:not(:has(> body > .top-bar)) {
+  --bs-side: 0px;
+  --mac-main-left: var(--mac-left);
+}
+.theme-is-big-sur:not(:has(> body > .top-bar))::before {
+  padding-left: 6rem;
+  border-radius: var(--mac-radius) var(--mac-radius) 0 0;
+  background:
+    var(--mac-lights) 1.25rem 50% / 3.25rem 0.75rem no-repeat,
+    #ffffff;
+}
+
+/* ── Ventura ───────────────────────────────────────────────────────────────
+   Stage Manager. The open page is the window centre stage; the others wait
+   down the left of the screen as small thumbnails of their windows, turned
+   towards it, each with a sketch of its page (covers on shelves for the
+   library, a chart for stats, a little room for the reading room) and the
+   page's icon on an orange tile at its corner, its name in a frosted pill
+   beneath. Pointed at, a thumbnail turns to face the viewer. The window is
+   warm grey, its toolbar the same, with the traffic lights, the book (the
+   way home) and the page's name in bold; a hairline appears under it once
+   the page scrolls beneath. Panels are white grouped boxes with a hairline,
+   as in System Settings. The accent is orange. */
+.theme-is-ventura {
+  --vt-strip: 10rem;
+  --mac-top: calc(var(--mac-menu) + 1.5rem);
+  --mac-left: max(calc(var(--vt-strip) + 0.75rem), calc(50vw - 36rem));
+  --mac-right: max(1.5rem, calc(50vw - 40rem));
+  --mac-bottom: 1.5rem;
+  --mac-radius: 0.75rem;
+  --mac-bar: 3.25rem;
+  --mac-window: #f3f1ee;
+  --mac-window-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.22), 0 26px 70px rgb(140 50 0 / 0.32), 0 8px 20px rgb(0 0 0 / 0.12);
+  --mac-menu-bg: rgb(255 249 242 / 0.72);
+  --mac-menu-radius: 0.5rem;
+  --mac-select: #b25500;
+  --mac-accent-fill: linear-gradient(#b65800, #a04a00);
+  --mac-accent-fill-hover: linear-gradient(#bd5e05, #a84f00);
+  --mac-accent-fill-down: linear-gradient(#9c4800, #8a3f00);
+  --mac-popup: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 24'%3E%3Crect width='18' height='24' rx='4.5' fill='%23b25500'/%3E%3Cpath d='M6.2 9.6L9 6.8l2.8 2.8M6.2 14.4L9 17.2l2.8-2.8' fill='none' stroke='%23fff' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  /* The thumbnails: their height, from the room the strip has for eight,
+     and a tenth of it to draw them in. */
+  --vt-thumb: clamp(2.5rem, calc((100vh - var(--mac-top) - var(--mac-bottom)) / 8 - 2.25rem), 4.75rem);
+  --vt-u: calc(var(--vt-thumb) / 10);
+  --vt-window:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='4'%3E%3Ccircle cx='2' cy='2' r='1.6' fill='%23ff5f57'/%3E%3Ccircle cx='8' cy='2' r='1.6' fill='%23febc2e'/%3E%3Ccircle cx='14' cy='2' r='1.6' fill='%2328c840'/%3E%3C/svg%3E") calc(var(--vt-u) * 0.6) calc(var(--vt-u) * 0.55) / calc(var(--vt-u) * 2.7) calc(var(--vt-u) * 0.6) no-repeat,
+    linear-gradient(#dedbd6 0 0) 0 calc(var(--vt-u) * 1.6) / 100% 1px no-repeat,
+    linear-gradient(#efedea 0 0) 0 0 / 100% calc(var(--vt-u) * 1.6) no-repeat,
+    #ffffff;
+  --chart-1: #c25e00;
+  --chart-2: #ffb02e;
+  --chart-3: #e5452b;
+  --chart-4: #8a5a44;
+  --chart-5: #f28c28;
+}
+/* The strip down the left of the screen. */
+.theme-is-ventura .top-bar {
+  position: fixed;
+  top: var(--mac-top);
+  bottom: var(--mac-bottom);
+  left: 0;
+  width: var(--vt-strip);
+  height: auto;
+  background: transparent;
+}
+.theme-is-ventura .top-bar > div {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 2.25rem;
+  padding: 0 0 1.25rem;
+}
+.theme-is-ventura .top-bar .nav-link {
+  position: relative;
+  flex: none;
+  justify-content: center;
+  width: calc(var(--vt-thumb) * 1.55);
+  height: var(--vt-thumb);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0.5rem;
+  color: #ffffff;
+  background: transparent;
+  box-shadow: none;
+}
+.theme-is-ventura .top-bar .nav-link:hover {
+  background: transparent;
+}
+/* The little window, turned towards the stage. */
+.theme-is-ventura .top-bar .nav-link::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 0.375rem;
+  background: var(--vt-window);
+  box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.22), 0 8px 18px rgb(110 35 0 / 0.3), 0 2px 4px rgb(0 0 0 / 0.12);
+  transform: perspective(28rem) rotateY(28deg);
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.theme-is-ventura .top-bar .nav-link:is(:hover, :focus-visible)::before {
+  transform: perspective(28rem) rotateY(6deg) scale(1.06);
+}
+.theme-is-ventura .top-bar .nav-link:focus-visible {
+  box-shadow: none;
+}
+.theme-is-ventura .top-bar .nav-link:focus-visible::before {
+  box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.22), 0 8px 18px rgb(110 35 0 / 0.3), var(--mac-ring);
+}
+/* What each page's little window shows. */
+.theme-is-ventura .top-bar .nav-link[href="/books"]::before {
+  background:
+    linear-gradient(#f4a259 0 0) calc(var(--vt-u) * 1.4) calc(var(--vt-u) * 2.4) / calc(var(--vt-u) * 2.5) calc(var(--vt-u) * 3.3) no-repeat,
+    linear-gradient(#e76f51 0 0) calc(var(--vt-u) * 4.7) calc(var(--vt-u) * 2.4) / calc(var(--vt-u) * 2.5) calc(var(--vt-u) * 3.3) no-repeat,
+    linear-gradient(#6d9dc5 0 0) calc(var(--vt-u) * 8) calc(var(--vt-u) * 2.4) / calc(var(--vt-u) * 2.5) calc(var(--vt-u) * 3.3) no-repeat,
+    linear-gradient(#f6bd60 0 0) calc(var(--vt-u) * 11.3) calc(var(--vt-u) * 2.4) / calc(var(--vt-u) * 2.5) calc(var(--vt-u) * 3.3) no-repeat,
+    linear-gradient(#84a59d 0 0) calc(var(--vt-u) * 1.4) calc(var(--vt-u) * 6.3) / calc(var(--vt-u) * 2.5) calc(var(--vt-u) * 3.3) no-repeat,
+    linear-gradient(#f28482 0 0) calc(var(--vt-u) * 4.7) calc(var(--vt-u) * 6.3) / calc(var(--vt-u) * 2.5) calc(var(--vt-u) * 3.3) no-repeat,
+    linear-gradient(#c8553d 0 0) calc(var(--vt-u) * 8) calc(var(--vt-u) * 6.3) / calc(var(--vt-u) * 2.5) calc(var(--vt-u) * 3.3) no-repeat,
+    linear-gradient(#ffd166 0 0) calc(var(--vt-u) * 11.3) calc(var(--vt-u) * 6.3) / calc(var(--vt-u) * 2.5) calc(var(--vt-u) * 3.3) no-repeat,
+    var(--vt-window);
+}
+.theme-is-ventura .top-bar .nav-link[href="/reading"]::before {
+  background:
+    linear-gradient(#e76f51 0 0) calc(var(--vt-u) * 1.4) calc(var(--vt-u) * 2.5) / calc(var(--vt-u) * 3.6) calc(var(--vt-u) * 5.6) no-repeat,
+    linear-gradient(#3a3a3c 0 0) calc(var(--vt-u) * 6) calc(var(--vt-u) * 2.8) / calc(var(--vt-u) * 6.5) calc(var(--vt-u) * 0.7) no-repeat,
+    linear-gradient(#c9c6c1 0 0) calc(var(--vt-u) * 6) calc(var(--vt-u) * 4.1) / calc(var(--vt-u) * 7.5) calc(var(--vt-u) * 0.5) no-repeat,
+    linear-gradient(#c9c6c1 0 0) calc(var(--vt-u) * 6) calc(var(--vt-u) * 5.1) / calc(var(--vt-u) * 5.5) calc(var(--vt-u) * 0.5) no-repeat,
+    linear-gradient(#f28c28 0 0) calc(var(--vt-u) * 6) calc(var(--vt-u) * 7) / calc(var(--vt-u) * 5) calc(var(--vt-u) * 0.7) no-repeat,
+    linear-gradient(#e7e4df 0 0) calc(var(--vt-u) * 6) calc(var(--vt-u) * 7) / calc(var(--vt-u) * 8) calc(var(--vt-u) * 0.7) no-repeat,
+    var(--vt-window);
+}
+.theme-is-ventura .top-bar .nav-link[href="/books/new"]::before {
+  background:
+    linear-gradient(#dedbd6 0 0) calc(var(--vt-u) * 1.4) calc(var(--vt-u) * 2.5) / calc(var(--vt-u) * 12.7) calc(var(--vt-u) * 1.3) no-repeat,
+    linear-gradient(#ffffff 0 0) calc(var(--vt-u) * 1.6) calc(var(--vt-u) * 2.7) / calc(var(--vt-u) * 12.3) calc(var(--vt-u) * 0.9) no-repeat,
+    linear-gradient(#dedbd6 0 0) calc(var(--vt-u) * 1.4) calc(var(--vt-u) * 4.6) / calc(var(--vt-u) * 12.7) calc(var(--vt-u) * 1.3) no-repeat,
+    linear-gradient(#ffffff 0 0) calc(var(--vt-u) * 1.6) calc(var(--vt-u) * 4.8) / calc(var(--vt-u) * 12.3) calc(var(--vt-u) * 0.9) no-repeat,
+    linear-gradient(#c25e00 0 0) calc(var(--vt-u) * 9.6) calc(var(--vt-u) * 7.2) / calc(var(--vt-u) * 4.5) calc(var(--vt-u) * 1.5) no-repeat,
+    var(--vt-window);
+}
+.theme-is-ventura .top-bar .nav-link[href="/books/check"]::before {
+  background:
+    linear-gradient(#e7e4df 0 0) calc(var(--vt-u) * 1.4) calc(var(--vt-u) * 2.5) / calc(var(--vt-u) * 12.7) calc(var(--vt-u) * 1.6) no-repeat,
+    linear-gradient(#a8a49e 0 0) calc(var(--vt-u) * 2.2) calc(var(--vt-u) * 3.05) / calc(var(--vt-u) * 2.5) calc(var(--vt-u) * 0.5) no-repeat,
+    linear-gradient(#f6bd60 0 0) calc(var(--vt-u) * 1.4) calc(var(--vt-u) * 5.2) / calc(var(--vt-u) * 1.8) calc(var(--vt-u) * 2.6) no-repeat,
+    linear-gradient(#3a3a3c 0 0) calc(var(--vt-u) * 4) calc(var(--vt-u) * 5.4) / calc(var(--vt-u) * 6.5) calc(var(--vt-u) * 0.6) no-repeat,
+    linear-gradient(#c9c6c1 0 0) calc(var(--vt-u) * 4) calc(var(--vt-u) * 6.6) / calc(var(--vt-u) * 8) calc(var(--vt-u) * 0.5) no-repeat,
+    linear-gradient(#59a96a 0 0) calc(var(--vt-u) * 12.2) calc(var(--vt-u) * 5.6) / calc(var(--vt-u) * 1.4) calc(var(--vt-u) * 1.4) no-repeat,
+    var(--vt-window);
+}
+.theme-is-ventura .top-bar .nav-link[href="/quotes"]::before {
+  background:
+    linear-gradient(#f28c28 0 0) calc(var(--vt-u) * 1.4) calc(var(--vt-u) * 2.6) / calc(var(--vt-u) * 0.45) calc(var(--vt-u) * 2.7) no-repeat,
+    linear-gradient(#8a857e 0 0) calc(var(--vt-u) * 2.6) calc(var(--vt-u) * 2.8) / calc(var(--vt-u) * 10.5) calc(var(--vt-u) * 0.55) no-repeat,
+    linear-gradient(#8a857e 0 0) calc(var(--vt-u) * 2.6) calc(var(--vt-u) * 3.9) / calc(var(--vt-u) * 8) calc(var(--vt-u) * 0.55) no-repeat,
+    linear-gradient(#f28c28 0 0) calc(var(--vt-u) * 1.4) calc(var(--vt-u) * 6.3) / calc(var(--vt-u) * 0.45) calc(var(--vt-u) * 2.7) no-repeat,
+    linear-gradient(#8a857e 0 0) calc(var(--vt-u) * 2.6) calc(var(--vt-u) * 6.5) / calc(var(--vt-u) * 9.5) calc(var(--vt-u) * 0.55) no-repeat,
+    linear-gradient(#8a857e 0 0) calc(var(--vt-u) * 2.6) calc(var(--vt-u) * 7.6) / calc(var(--vt-u) * 6.5) calc(var(--vt-u) * 0.55) no-repeat,
+    var(--vt-window);
+}
+.theme-is-ventura .top-bar .nav-link[href="/stats"]::before {
+  background:
+    linear-gradient(#c25e00 0 0) calc(var(--vt-u) * 1.8) calc(var(--vt-u) * 5.6) / calc(var(--vt-u) * 1.3) calc(var(--vt-u) * 3.2) no-repeat,
+    linear-gradient(#f28c28 0 0) calc(var(--vt-u) * 3.9) calc(var(--vt-u) * 3.6) / calc(var(--vt-u) * 1.3) calc(var(--vt-u) * 5.2) no-repeat,
+    linear-gradient(#c25e00 0 0) calc(var(--vt-u) * 6) calc(var(--vt-u) * 6.4) / calc(var(--vt-u) * 1.3) calc(var(--vt-u) * 2.4) no-repeat,
+    linear-gradient(#f28c28 0 0) calc(var(--vt-u) * 8.1) calc(var(--vt-u) * 2.5) / calc(var(--vt-u) * 1.3) calc(var(--vt-u) * 6.3) no-repeat,
+    linear-gradient(#c25e00 0 0) calc(var(--vt-u) * 10.2) calc(var(--vt-u) * 4.4) / calc(var(--vt-u) * 1.3) calc(var(--vt-u) * 4.4) no-repeat,
+    linear-gradient(#f28c28 0 0) calc(var(--vt-u) * 12.3) calc(var(--vt-u) * 3.1) / calc(var(--vt-u) * 1.3) calc(var(--vt-u) * 5.7) no-repeat,
+    linear-gradient(#d4d0ca 0 0) calc(var(--vt-u) * 1.4) calc(var(--vt-u) * 8.8) / calc(var(--vt-u) * 12.7) calc(var(--vt-u) * 0.25) no-repeat,
+    var(--vt-window);
+}
+.theme-is-ventura .top-bar .nav-link[href="/room"]::before {
+  background:
+    linear-gradient(#a8d5e8 0 0) calc(var(--vt-u) * 2) calc(var(--vt-u) * 2.6) / calc(var(--vt-u) * 3.4) calc(var(--vt-u) * 3) no-repeat,
+    linear-gradient(#ffffff 0 0) calc(var(--vt-u) * 3.6) calc(var(--vt-u) * 2.6) / calc(var(--vt-u) * 0.2) calc(var(--vt-u) * 3) no-repeat,
+    linear-gradient(#8a5a3c 0 0) calc(var(--vt-u) * 9) calc(var(--vt-u) * 2.4) / calc(var(--vt-u) * 4.4) calc(var(--vt-u) * 6.1) no-repeat,
+    linear-gradient(#f4a259 0 0) calc(var(--vt-u) * 9.4) calc(var(--vt-u) * 2.8) / calc(var(--vt-u) * 3.6) calc(var(--vt-u) * 1.4) no-repeat,
+    linear-gradient(#6d9dc5 0 0) calc(var(--vt-u) * 9.4) calc(var(--vt-u) * 4.9) / calc(var(--vt-u) * 3.6) calc(var(--vt-u) * 1.4) no-repeat,
+    linear-gradient(#e76f51 0 0) calc(var(--vt-u) * 2) calc(var(--vt-u) * 6.6) / calc(var(--vt-u) * 5.4) calc(var(--vt-u) * 1.6) no-repeat,
+    linear-gradient(#d9a273 0 0) 0 calc(var(--vt-u) * 8.5) / calc(var(--vt-u) * 15.5) calc(var(--vt-u) * 1.5) no-repeat,
+    linear-gradient(#f6e7d2 0 0) 0 calc(var(--vt-u) * 1.6) / calc(var(--vt-u) * 15.5) calc(var(--vt-u) * 7) no-repeat,
+    var(--vt-window);
+}
+.theme-is-ventura .top-bar .nav-link[href="/series"]::before {
+  background:
+    linear-gradient(#e76f51 0 0) calc(var(--vt-u) * 1.6) calc(var(--vt-u) * 2.6) / calc(var(--vt-u) * 1.35) calc(var(--vt-u) * 6) no-repeat,
+    linear-gradient(#f4a259 0 0) calc(var(--vt-u) * 3.35) calc(var(--vt-u) * 3.1) / calc(var(--vt-u) * 1.35) calc(var(--vt-u) * 5.5) no-repeat,
+    linear-gradient(#6d9dc5 0 0) calc(var(--vt-u) * 5.1) calc(var(--vt-u) * 3.6) / calc(var(--vt-u) * 1.35) calc(var(--vt-u) * 5) no-repeat,
+    linear-gradient(#84a59d 0 0) calc(var(--vt-u) * 6.85) calc(var(--vt-u) * 2.6) / calc(var(--vt-u) * 1.35) calc(var(--vt-u) * 6) no-repeat,
+    linear-gradient(#c8553d 0 0) calc(var(--vt-u) * 8.6) calc(var(--vt-u) * 3.1) / calc(var(--vt-u) * 1.35) calc(var(--vt-u) * 5.5) no-repeat,
+    linear-gradient(#f6bd60 0 0) calc(var(--vt-u) * 10.35) calc(var(--vt-u) * 3.6) / calc(var(--vt-u) * 1.35) calc(var(--vt-u) * 5) no-repeat,
+    linear-gradient(#9b5de5 0 0) calc(var(--vt-u) * 12.1) calc(var(--vt-u) * 2.6) / calc(var(--vt-u) * 1.35) calc(var(--vt-u) * 6) no-repeat,
+    var(--vt-window);
+}
+/* Its page's icon on a tile at the corner. */
+.theme-is-ventura .top-bar .nav-link > svg {
+  position: absolute;
+  left: -0.375rem;
+  bottom: -0.5rem;
+  width: 1.625rem;
+  height: 1.625rem;
+  padding: 0.3125rem;
+  border-radius: 0.4375rem;
+  background: linear-gradient(#ee8a1c, #c95f00);
+  box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.2), 0 2px 5px rgb(110 35 0 / 0.35), inset 0 0.5px rgb(255 255 255 / 0.4);
+}
+/* Its name in a frosted pill beneath. */
+.theme-is-ventura .top-bar .nav-link > span {
+  display: block;
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  left: 50%;
+  translate: -50% 0;
+  padding: 0.0625rem 0.5rem;
+  border-radius: 999px;
+  color: #1d1d1f;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  line-height: 1.125rem;
+  white-space: nowrap;
+  background: rgb(255 255 255 / 0.84);
+  box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.08);
+}
+/* The open page is the window itself. */
+.theme-is-ventura .top-bar .nav-link[aria-current="page"] {
+  display: none;
+}
+/* The window's toolbar: the traffic lights, the book, the page's name. */
+.theme-is-ventura::before {
+  content: var(--mac-title);
+  content: var(--mac-title) / "";
+  position: fixed;
+  top: var(--mac-top);
+  left: var(--mac-left);
+  right: var(--mac-right);
+  z-index: 36;
+  height: var(--mac-bar);
+  padding: 0 12rem 0 7.75rem;
+  overflow: hidden;
+  border-radius: var(--mac-radius) var(--mac-radius) 0 0;
+  color: #1d1d1f;
+  font: 700 0.9375rem/var(--mac-bar) var(--mac-font);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  pointer-events: none;
+  background:
+    var(--mac-lights) 1.25rem 50% / 3.25rem 0.75rem no-repeat,
+    #f3f1ee;
+}
+@keyframes vt-toolbar-edge {
+  to {
+    box-shadow: inset 0 -1px rgb(0 0 0 / 0.09);
+  }
+}
+@supports (animation-timeline: scroll()) {
+  .theme-is-ventura::before {
+    animation: vt-toolbar-edge linear both;
+    animation-timeline: scroll(root);
+    animation-range: 0 1.5rem;
+  }
+}
+@supports not (animation-timeline: scroll()) {
+  .theme-is-ventura::before {
+    box-shadow: inset 0 -1px rgb(0 0 0 / 0.09);
+  }
+}
+.theme-is-ventura .top-bar .wordmark {
+  position: fixed;
+  top: calc(var(--mac-top) + (var(--mac-bar) - 1.75rem) / 2);
+  left: calc(var(--mac-left) + 5.25rem);
+  z-index: 1;
+  justify-content: center;
+}
+.theme-is-ventura .top-bar .wordmark > svg {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+/* Panels: white grouped boxes with a hairline. */
+.theme-is-ventura [data-slot="card"],
+.theme-is-ventura .bg-card.border:not(.bulk-bar),
+.theme-is-ventura .surface:not([data-slot="card"]) {
+  border: 0;
+  border-radius: 0.625rem;
+  background: #ffffff;
+  box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.12), 0 0.5px 1px rgb(0 0 0 / 0.05);
+  --tw-ring-shadow: 0 0 #0000;
+}
+.theme-is-ventura .surface:not([data-slot="card"]):hover,
+.theme-is-ventura .bg-card.border:not(.surface, .bulk-bar):is(a, button):hover {
+  background: #fdfbf8;
+  box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.14), 0 4px 12px rgb(110 35 0 / 0.1);
+}
+.theme-is-ventura .bg-card.border.border-red-300 {
+  background: #fdf0ee;
+}
+.theme-is-ventura [data-slot="card-footer"] {
+  border-top: 1px solid rgb(0 0 0 / 0.07);
+  background: transparent;
+}
+.theme-is-ventura .surface .book-cover {
+  border-radius: 0.25rem;
+}
+@media (width < 40rem) {
+  /* The phone's window: no stage beside it, so the pages are icons along a
+     toolbar at the top, the open one on a key. */
+  .theme-is-ventura {
+    --vt-strip: 0px;
+    --mac-bar: 3rem;
+  }
+  .theme-is-ventura .top-bar {
+    bottom: auto;
+    right: 0;
+    width: auto;
+    height: var(--mac-bar);
+    border-bottom: 1px solid rgb(0 0 0 / 0.09);
+    background: rgb(243 241 238 / 0.92);
+    backdrop-filter: blur(20px) saturate(1.6);
+  }
+  .theme-is-ventura .top-bar > div {
+    flex-direction: row;
+    gap: 0;
+    padding: 0 0.375rem;
+  }
+  .theme-is-ventura .top-bar .wordmark {
+    display: none;
+  }
+  .theme-is-ventura .top-bar .nav-link,
+  .theme-is-ventura .top-bar .nav-link[aria-current="page"] {
+    display: flex;
+    flex: 1 1 2rem;
+    min-width: 0;
+    max-width: 2.75rem;
+    height: 2.25rem;
+    border-radius: 0.375rem;
+    color: var(--primary);
+  }
+  .theme-is-ventura .top-bar .nav-link[aria-current="page"] {
+    background: rgb(0 0 0 / 0.07);
+  }
+  .theme-is-ventura .top-bar .nav-link::before {
+    content: none;
+  }
+  .theme-is-ventura .top-bar .nav-link > svg {
+    position: static;
+    width: 1.125rem;
+    height: 1.125rem;
+    padding: 0;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+  }
+  .theme-is-ventura .top-bar .nav-link > span {
+    position: absolute;
+    top: auto;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+  .theme-is-ventura .top-bar .ml-auto {
+    position: static;
+    height: auto;
+    padding: 0;
+    margin-left: 0.25rem;
+    gap: 0;
+  }
+  .theme-is-ventura .top-bar .ml-auto [data-size][data-variant] {
+    min-width: 1.875rem;
+    padding: 0;
+  }
+}
+.theme-is-ventura:not(:has(> body > .top-bar))::before {
+  padding-left: 6rem;
+}

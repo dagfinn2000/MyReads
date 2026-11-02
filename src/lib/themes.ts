@@ -154,6 +154,15 @@ export const THEMES: ThemeDef[] = [
       "linear-gradient(transparent 22%, rgb(60 70 68 / 0.85) 22% 78%, transparent 78%), linear-gradient(#7fb0e0 0 40%, #8ea3b8 40% 55%, #2f5240 55% 78%, #5f8fa6 78%)",
     ownBackground: true,
   },
+  {
+    id: "mojave",
+    name: "Mojave",
+    mode: "dark",
+    swatch: ["#1f2024", "#409cff"],
+    pattern:
+      "radial-gradient(120% 60% at 25% 100%, #3d4f88 0 45%, transparent 46%), radial-gradient(110% 55% at 90% 100%, #2b3c74 0 50%, transparent 51%), linear-gradient(#0d1838, #3a4a7e)",
+    ownBackground: true,
+  },
 
   // Light palettes
   { id: "solarized-light", name: "Solarized Light", mode: "light", swatch: ["#fdf6e3", "#b58900"] },
@@ -285,6 +294,24 @@ export const THEMES: ThemeDef[] = [
     swatch: ["#efe7d4", "#8c1c32"],
     pattern:
       "repeating-linear-gradient(57deg, transparent 0 7px, #2f2e33 7px 9px), repeating-linear-gradient(-57deg, transparent 0 7px, #2f2e33 7px 9px), radial-gradient(circle at 50% 50%, #ebc77f 0 18%, transparent 20%)",
+    ownBackground: true,
+  },
+  {
+    id: "big-sur",
+    name: "Big Sur",
+    mode: "light",
+    swatch: ["#f7f6fa", "#8e3a92"],
+    pattern:
+      "radial-gradient(140% 90% at 0% 130%, #3346d6 0 40%, transparent 41%), radial-gradient(130% 90% at 30% 120%, #d453b8 0 45%, transparent 46%), radial-gradient(120% 80% at 70% 110%, #ffb05c 0 40%, transparent 41%), linear-gradient(#e4ecff, #f3e6ff)",
+    ownBackground: true,
+  },
+  {
+    id: "ventura",
+    name: "Ventura",
+    mode: "light",
+    swatch: ["#f3f1ee", "#a84f00"],
+    pattern:
+      "radial-gradient(circle at 60% 55%, #fffdf5 0 10%, transparent 24%), conic-gradient(from 10deg at 60% 55%, #ffc93c, #ff7a52, #ffb84d, #f2611f, #ffd04a, #ff8f5a, #ffc93c)",
     ownBackground: true,
   },
 

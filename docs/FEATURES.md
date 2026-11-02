@@ -353,7 +353,7 @@ tab goes away. You can also keep the house and leave the avatar out.
 
 ## Look and feel
 
-- 63 colour themes, or a light and a dark one that switch with your
+- 66 colour themes, or a light and a dark one that switch with your
   device, with an accent colour of your own on top if you like. Your
   choice follows you to every device you sign in on, unless you give one
   phone or computer a theme of its own ("Only on this device" in the
@@ -400,7 +400,7 @@ tab goes away. You can also keep the house and leave the avatar out.
   green ribbon), Party (confetti), Camouflage and Quest. They are as easy to
   read as the rest, only nobody should want them. Hover over one in the
   menu for a word about it.
-- **Sixteen themes restyle the whole app**, not just its colours: the top
+- **Nineteen themes restyle the whole app**, not just its colours: the top
   bar, cards, buttons, fields, menus, dialogs, tabs, progress bars, type
   and the picture behind the page all take after what the theme is named
   for. The rest stay as they were.
@@ -557,9 +557,42 @@ tab goes away. You can also keep the house and leave the avatar out.
     On the sign-in pages the name sits in a small arched light above
     the pane. Nothing in it blurs, so it scrolls as lightly as a plain
     theme.
+  - Three looks of the Mac from the last ten years, each drawn fresh in
+    its spirit (no Apple logo, none of Apple's pictures). In all three
+    the app is a window on its own desktop picture, under a menu bar
+    along the top of the screen that names MyReads beside a book, with
+    the red, amber and green lights at the window's corner and the
+    page's name in its title; the page scrolls behind the window's
+    edges. On a phone the window fills the screen.
+  - Mojave (new, dark): the first dark mode, 2018. A charcoal window on
+    sand dunes at night under a sky of stars. Its title sits in a slim
+    bar above a toolbar of bordered grey buttons, with the page links as
+    one segmented control in the middle and the open page's segment
+    lit. Buttons are grey (the main one blue), pop-up menus end in a
+    blue square of arrows, fields are dark with square corners and a
+    soft blue ring while you type, the open tab is blue and menus are
+    dark glass with a blue band under the pointer.
+  - Big Sur (new, light): the redesign of 2020. A white window with big
+    round corners on layered waves of blue, violet, pink and coral. The
+    page links are a sidebar down its left that lets the desktop show
+    through, frosted, each link a row with a purple icon and the open
+    one on a grey key; the toolbar beside it names the page in bold.
+    Panels are soft grey slabs, buttons are white keys (the main one
+    purple), the open tab is a raised white segment, and menus are
+    frosted glass with a rounded purple highlight.
+  - Ventura (new, light): Stage Manager, 2022. The open page is the
+    window centre stage, warm grey with white grouped boxes, on a whirl
+    of orange and gold blades. The other pages wait down the left of the
+    screen as small tilted windows, each showing a sketch of its page
+    (covers on shelves for the library, bars for stats, a little room
+    for the reading room) with its icon on an orange tile and its name
+    beneath; point at one and it turns to face you. The toolbar holds
+    the book that takes you home and the page's name, and a hairline
+    appears under it once the page scrolls. Buttons are white keys (the
+    main one orange).
 - A theme with a picture of its own (Desktop 95's desktop, Aero's,
-  Golden Gate's and the Linux desktops', Fluent's bloom, visionOS's
-  valley, Sea Glass's beach, Leadlight's window, Notebook's ruled page,
+  Golden Gate's and the Linux desktops', Fluent's bloom, the Mac's dunes,
+  waves and whirl, visionOS's valley, Sea Glass's beach, Leadlight's window, Notebook's ruled page,
   Party's confetti, Quest's night sky and the rest) shows it whatever background you picked, and
   Preferences says so under Background. Your background comes back when
   you pick another theme.

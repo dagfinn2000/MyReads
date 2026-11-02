@@ -223,7 +223,8 @@ The reading room's files:
   not shade.
 - **A few themes restyle everything.** Desktop 95, Terminal, Newsprint,
   Blueprint, Notebook, Quest, Pinstripe, Aero, Golden Gate, KDE Plasma,
-  GNOME, Hyprland, Fluent, visionOS, Sea Glass and Leadlight start from
+  GNOME, Hyprland, Fluent, visionOS, Sea Glass, Leadlight, Mojave, Big
+  Sur and Ventura start from
   a colour block like any theme, and [restyles.css](../src/app/restyles.css) reshapes the
   app for them, one section per theme. Its rules aim at shadcn's
   `data-slot` attributes and buttons by `data-size` and `data-variant`:
@@ -286,7 +287,24 @@ The reading room's files:
   tint of its wallpaper's colours, so it needs no second picture. A big
   gradient on something as tall as the page is repainted as it scrolls:
   Leadlight's pane paints its colour washes in boxes of their own in the
-  corners, which made scrolling the library a third cheaper.
+  corners, which made scrolling the library a third cheaper. Mojave, Big
+  Sur and Ventura share one section for their window, menu bar and page
+  titles (`--mac-top`, `--mac-left`, `--mac-right`, `--mac-bottom`,
+  `--mac-bar` and `--mac-title`), each theme placing the window and
+  shaping its toolbar after it. Their menu bars and toolbars don't blur:
+  a `backdrop-filter` on the menu bar, though nothing scrolls through it,
+  still cost Ventura 4 ms a frame (at 4x CPU throttling) while the page
+  scrolled, so the menu bar is a tint (Big Sur's laid over a softened
+  copy of its waves, `big-sur-frost.svg`, as is its sidebar) and the
+  toolbars are solid. Their pictures draw soft shadows as stacks of faint
+  strokes rather than with `feGaussianBlur`: a blur filter on each of
+  Ventura's thirteen blades held up the page's first load by about a
+  second and a half while the browser drew the picture (Golden Gate's
+  picture still costs that much). One filter over a whole group, as
+  Mojave's grain and the frosted copies use, is cheap. Ventura's Stage
+  Manager thumbnails are drawn with
+  gradients in units of a tenth of their height (`--vt-u`), a sketch for
+  each page link by its `href`.
 - **A theme is retired, never just deleted.** Take out its block and
   entry and add it to `RETIRED_THEMES` in
   [themes.ts](../src/lib/themes.ts) with the theme that replaces it, of
