@@ -754,6 +754,37 @@
     --page-size: cover;
 }
 
+/* Mojave: macOS's first Dark Mode, dark grey windows faintly tinted by
+   the night desert behind them, with blue for what is chosen. Restyled
+   from top to bottom in restyles.css: a menu bar along the top of the
+   screen, the page links as a segmented control in the window's toolbar,
+   blue pop-up buttons and tabs. The picture is a file of its own
+   (public/themes). */
+[data-theme="mojave"] {
+    --background: #1f2024;
+    --foreground: #ffffff;
+    --card: #2a2b30;
+    --card-foreground: #ffffff;
+    --popover: #2c2d32;
+    --popover-foreground: #ffffff;
+    --primary: #409cff;
+    --primary-foreground: #04203f;
+    --secondary: #313238;
+    --secondary-foreground: #ffffff;
+    --muted: #2e2f34;
+    --muted-foreground: #b4b5bc;
+    --accent: #36373d;
+    --accent-foreground: #ffffff;
+    --destructive: #ff6961;
+    --border: #3d3e44;
+    --input: #5a5b62;
+    --ring: #409cff;
+    --radius: 0.375rem;
+    --heading-font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro", var(--font-inter), "Inter", system-ui, sans-serif;
+    --page-gradient: url("/themes/mojave.svg");
+    --page-size: cover;
+}
+
 [data-theme="solarized-light"] {
     --background: #fdf6e3;
     --foreground: #657b83;
@@ -1423,6 +1454,66 @@
     --radius: 0.125rem;
     --heading-font: var(--font-playfair), "Playfair Display", Georgia, serif;
     --page-gradient: url("/themes/leadlight.svg");
+    --page-size: cover;
+}
+
+/* Big Sur: macOS redrawn in 2020, light and round, with purple for what
+   is chosen. Restyled from top to bottom in restyles.css: a translucent
+   menu bar, the page links in a full-height sidebar of frosted glass, a
+   toolbar with the page's name, pop-up buttons and switches. The
+   pictures are files of their own (public/themes). */
+[data-theme="big-sur"] {
+    --background: #f7f6fa;
+    --foreground: #1d1d1f;
+    --card: #ffffff;
+    --card-foreground: #1d1d1f;
+    --popover: #fbfbfd;
+    --popover-foreground: #1d1d1f;
+    --primary: #8e3a92;
+    --primary-foreground: #ffffff;
+    --secondary: #eeedf2;
+    --secondary-foreground: #1d1d1f;
+    --muted: #efeef3;
+    --muted-foreground: #5f5f64;
+    --accent: #efe6f4;
+    --accent-foreground: #1d1d1f;
+    --destructive: #d70015;
+    --border: #dcdbe2;
+    --input: #c7c6ce;
+    --ring: #8e3a92;
+    --radius: 0.625rem;
+    --heading-font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro", var(--font-inter), "Inter", system-ui, sans-serif;
+    --page-gradient: url("/themes/big-sur.svg");
+    --page-size: cover;
+}
+
+/* Ventura: macOS in 2022, warm light greys, white panels like System
+   Settings', and orange for what is chosen. Restyled from top to bottom
+   in restyles.css: a translucent menu bar, and Stage Manager down the
+   left of the screen, every other page a small window tilted towards the
+   one in front. The picture is a file of its own (public/themes). */
+[data-theme="ventura"] {
+    --background: #f3f1ee;
+    --foreground: #1d1d1f;
+    --card: #ffffff;
+    --card-foreground: #1d1d1f;
+    --popover: #fdfcfa;
+    --popover-foreground: #1d1d1f;
+    --primary: #a84f00;
+    --primary-foreground: #ffffff;
+    --secondary: #ecebe8;
+    --secondary-foreground: #1d1d1f;
+    --muted: #efeeeb;
+    --muted-foreground: #5f5f64;
+    --accent: #f6e7d6;
+    --accent-foreground: #1d1d1f;
+    --destructive: #d70015;
+    --border: #dedcd8;
+    --input: #c9c6c1;
+    --ring: #a84f00;
+    --radius: 0.625rem;
+    --heading-font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro", var(--font-inter), "Inter", system-ui, sans-serif;
+    --page-gradient: url("/themes/ventura.svg");
     --page-size: cover;
 }
 
