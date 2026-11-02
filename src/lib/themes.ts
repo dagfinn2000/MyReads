@@ -136,6 +136,24 @@ export const THEMES: ThemeDef[] = [
       "radial-gradient(circle, #1e1e2e 0 49%, transparent 51% 65%, #0b1120 67%), linear-gradient(157deg, #33ccff, #00ff99)",
     ownBackground: true,
   },
+  {
+    id: "fluent",
+    name: "Fluent",
+    mode: "dark",
+    swatch: ["#1d1b22", "#c9a8ff"],
+    pattern:
+      "radial-gradient(circle at 62% 56%, #fff4fd 0 6%, transparent 18%), conic-gradient(from 20deg at 62% 56%, #5a2fd6, #e05cc8, #4b45e6, #b04ff0, #5a2fd6), linear-gradient(#1d1b22, #1d1b22)",
+    ownBackground: true,
+  },
+  {
+    id: "vision",
+    name: "visionOS",
+    mode: "dark",
+    swatch: ["#252e2c", "#f5f5f7"],
+    pattern:
+      "linear-gradient(transparent 22%, rgb(60 70 68 / 0.85) 22% 78%, transparent 78%), linear-gradient(#7fb0e0 0 40%, #8ea3b8 40% 55%, #2f5240 55% 78%, #5f8fa6 78%)",
+    ownBackground: true,
+  },
 
   // Light palettes
   { id: "solarized-light", name: "Solarized Light", mode: "light", swatch: ["#fdf6e3", "#b58900"] },
@@ -249,6 +267,24 @@ export const THEMES: ThemeDef[] = [
     swatch: ["#fafafb", "#1c71d8"],
     pattern:
       "linear-gradient(#000000 0 22%, transparent 22%), linear-gradient(90deg, #2d3cff 0 16%, transparent 16% 84%, #3a27ff 84%), linear-gradient(#1a40ff 0 31%, transparent 31% 85%, #4404e0 85%)",
+    ownBackground: true,
+  },
+  {
+    id: "sea-glass",
+    name: "Sea Glass",
+    mode: "light",
+    swatch: ["#ebe3d1", "#2a5aa0"],
+    pattern:
+      "radial-gradient(circle at 30% 64%, #93cdb2 0 15%, transparent 17%), radial-gradient(circle at 70% 60%, #c99559 0 11%, transparent 13%), linear-gradient(#5cb8bd 0 30%, #ebe3d1 30%)",
+    ownBackground: true,
+  },
+  {
+    id: "leadlight",
+    name: "Leadlight",
+    mode: "light",
+    swatch: ["#efe7d4", "#8c1c32"],
+    pattern:
+      "repeating-linear-gradient(57deg, transparent 0 7px, #2f2e33 7px 9px), repeating-linear-gradient(-57deg, transparent 0 7px, #2f2e33 7px 9px), radial-gradient(circle at 50% 50%, #ebc77f 0 18%, transparent 20%)",
     ownBackground: true,
   },
 

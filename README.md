@@ -58,11 +58,12 @@ server.
 
 **Make it yours**
 
-- 59 colour themes, a few with a picture, outlines or a font of their
-  own, and twelve that restyle the whole app (Desktop 95 turns it into a
-  1995 desktop, Aero into Windows 7's glass, Golden Gate into macOS's
-  Liquid Glass, and KDE Plasma, GNOME and Hyprland into the Linux
-  desktops). 26 background textures. On some of the textures rain falls,
+- 63 colour themes, a few with a picture, outlines or a font of their
+  own, and sixteen that restyle the whole app (Desktop 95 turns it into
+  a 1995 desktop, Aero into Windows 7's glass, Fluent into Windows 11's,
+  Golden Gate into macOS's Liquid Glass, visionOS into a window floating
+  over a valley, Sea Glass and Leadlight into frosted and stained glass,
+  and KDE Plasma, GNOME and Hyprland into the Linux desktops). 26 background textures. On some of the textures rain falls,
   snow drifts or stars twinkle.
 - A theme for one device or one part of the app, and your own CSS.
 - Preferences for date formats, time zone, sorting, fonts and much more.
