@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
@@ -139,6 +139,24 @@ describe("THEMES", () => {
   it("lets exactly the themes with a page picture cover the Background", () => {
     const pictured = [...blocks].filter(([, body]) => body.includes("--page-gradient"));
     expect([...OWN_BACKGROUND_IDS].sort()).toEqual(pictured.map(([id]) => id).sort());
+  });
+
+  it("finds every picture a theme names in public/themes", () => {
+    const named = new Set<string>();
+    for (const file of ["../app/globals.css", "../app/restyles.css", "themes.ts"]) {
+      const text = readFileSync(path.resolve(__dirname, file), "utf8");
+      for (const [, name] of text.matchAll(/\/themes\/([\w.-]+\.(?:svg|png|webp))/g)) named.add(name);
+    }
+    expect(named.size).toBeGreaterThan(10);
+    for (const name of named) expect(existsSync(path.resolve(__dirname, "../../public/themes", name)), name).toBe(true);
+  });
+
+  it("draws Golden Gate's pictures with no filter left to run as the page paints", () => {
+    // Its blurs ran again for every tile of every layer the picture is on,
+    // each repaint, and picking the theme stalled for half a second.
+    // scripts/golden-gate-pictures.mjs draws them once instead.
+    const picture = readFileSync(path.resolve(__dirname, "../../public/themes/golden-gate.svg"), "utf8");
+    expect(picture).not.toContain("<filter");
   });
 
   it("replaces each retired theme with one of its own kind that exists", () => {

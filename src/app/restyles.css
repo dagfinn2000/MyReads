@@ -3584,11 +3584,13 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
    The window is drawn on a fixed layer behind the page, from a softened
    copy of the picture laid exactly over the sharp one, so it looks blurred
    without blurring anything: the page scrolls over it at no cost. That
-   copy is frosted as it is drawn, whiter where the picture behind is
-   darker, so text on the glass reads anywhere. Only the toolbar, menus and
-   dialogs, which sit over the page, blur for real, and they pull in and
-   lift what they show, as the frost does, so text on them reads over the
-   darkest cover. */
+   copy is frosted too, whiter where the picture behind is darker, so text
+   on the glass reads anywhere. Both pictures are drawn ahead of time by
+   scripts/golden-gate-pictures.mjs, so no blur runs as the page is
+   painted (one did, and picking the theme stalled for half a second).
+   Only the toolbar, menus and dialogs, which sit over the page, blur for
+   real, and they pull in and lift what they show, as the frost does, so
+   text on them reads over the darkest cover. */
 :root[data-theme="golden-gate"] {
   --gg-font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro", "Helvetica Neue", "Inter", system-ui, sans-serif;
   /* Where the window sits, and the picture's size and place, as the page
@@ -3656,7 +3658,7 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
   pointer-events: none;
   background:
     linear-gradient(118deg, rgb(255 255 255 / 0.34), rgb(255 255 255 / 0) 32%, rgb(255 255 255 / 0) 72%, rgb(255 255 255 / 0.16)),
-    url("/themes/golden-gate-frosted.svg")
+    url("/themes/golden-gate-frosted.png")
       calc((100vw - var(--gg-w)) * 0.5 - var(--gg-x)) calc((100vh - var(--gg-h)) * 0.5 - var(--gg-top)) /
       var(--gg-w) var(--gg-h) no-repeat;
   border-radius: var(--gg-radius);
