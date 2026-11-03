@@ -259,13 +259,16 @@ The reading room's files:
   window frame is tinted glass with nothing blurred, which over so soft
   a desktop looks the same. Golden Gate's window is a fixed layer under
   the page drawn from a softened copy of the picture
-  (`golden-gate-frosted.svg`), laid exactly over the sharp one; a second
+  (`golden-gate-frosted.png`), laid exactly over the sharp one; a second
   fixed layer over the page repeats the picture with the window's shape
   masked out, so what scrolls past the window's edge goes behind it.
-  That copy is frosted as it is drawn, by an SVG filter that lays white
-  over it as opaque as the colour beneath is dark, so the glass is
-  never darker than a set luminance (0.6) and its text keeps AA
-  contrast anywhere on it. The glass over the page does the same with
+  That copy is frosted: white laid over it as opaque as the colour
+  beneath is dark, so the glass is never darker than a set luminance
+  (0.6) and its text keeps AA contrast anywhere on it. Both Golden Gate
+  pictures come from
+  [golden-gate-pictures.mjs](../scripts/golden-gate-pictures.mjs), which
+  draws their blurs once (see below why); change the picture there and
+  run it. The glass over the page does the same with
   `contrast()` and `brightness()` in its `backdrop-filter`, so black
   beneath it comes out light enough. Keep both when changing the
   picture or the glass. KDE Plasma, GNOME and Hyprland draw their
@@ -299,9 +302,17 @@ The reading room's files:
   toolbars are solid. Their pictures draw soft shadows as stacks of faint
   strokes rather than with `feGaussianBlur`: a blur filter on each of
   Ventura's thirteen blades held up the page's first load by about a
-  second and a half while the browser drew the picture (Golden Gate's
-  picture still costs that much). One filter over a whole group, as
-  Mojave's grain and the frosted copies use, is cheap. Ventura's Stage
+  second and a half while the browser drew the picture. The browser runs
+  a picture's filters again for every tile of every layer it is on, each
+  time it repaints, so a big blur per shape is never cheap. Golden Gate's
+  five fold shadows made picking the theme stall for half a second;
+  there, stacked strokes weren't close enough (very faint strokes lose
+  their colour in 8-bit drawing), so its script draws each blurred
+  shadow once as a small image laid under its fold, whose sharp edge
+  hides the image's soft one, and its frosted copy as a small picture,
+  both within 3 of 255 levels of the filtered picture. One filter over a
+  whole group, as Mojave's grain and Big Sur's frosted copy use, is
+  cheap. Ventura's Stage
   Manager thumbnails are drawn with
   gradients in units of a tenth of their height (`--vt-u`), a sketch for
   each page link by its `href`.
