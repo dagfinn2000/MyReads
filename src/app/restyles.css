@@ -11026,3 +11026,2103 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
 .theme-is-ventura:not(:has(> body > .top-bar))::before {
   padding-left: 6rem;
 }
+
+/* ── Luna ──────────────────────────────────────────────────────────────────
+   Windows XP in its blue look. The desktop is a green hill under a summer
+   sky. The top bar is the taskbar along the foot of the screen: glossy
+   blue, the wordmark its green Start button, the page links its buttons
+   (the open page's pressed in) and the bar's other buttons in the pale
+   blue tray at its end. Every page is a window: a thick, glossy blue title
+   bar with rounded top corners naming the page in white, the minimise,
+   maximise and red close buttons, a thin blue frame and a body of warm
+   beige. Inside, buttons are rounded and pale with a dark blue edge and
+   glow orange under the pointer; fields have XP's blue-grey border; panels
+   are Explorer's task panes, a pale blue band under a bold blue title;
+   tabs are white with an orange edge on the open one; check boxes tick in
+   green; progress bars fill with green blocks. Menus are white with the
+   blue highlight, dialogs are windows too, and scrollbars are pale blue.
+   Nothing here blurs, so nothing costs anything as the page scrolls. */
+:root[data-theme="luna"] {
+  --luna-font: Tahoma, var(--font-noto-sans), "Noto Sans", Verdana, "DejaVu Sans", sans-serif;
+  --luna-title-font: "Trebuchet MS", Tahoma, Verdana, "DejaVu Sans", var(--font-noto-sans), sans-serif;
+  --luna-bar: 2.5rem;
+  --luna-caption: 1.875rem;
+  --luna-frame: 4px;
+  /* The title bar's blue, glossy along its top edge. */
+  --luna-title: linear-gradient(#0997ff, #0053ee 8%, #0050ee 40%, #06f 88%, #06f 93%, #005bff 95%, #003dd7 96%, #003dd7);
+  --luna-frame-blue: #0831d9;
+  --luna-taskbar: linear-gradient(#1f2f86, #3165c4 3%, #3682e5 6%, #4490e6 10%, #3883e5 12%, #2b71e0 15%, #2663da 18%, #235bd6 20%, #2258d5 23%, #2157d6 38%, #245ddb 54%, #2562df 86%, #245fdc 89%, #2158d4 92%, #1d4ec0 95%, #1941a5 98%);
+  --luna-tray: linear-gradient(#0a4596, #0f7cc4 5%, #128dcc 10%, #0f79c0 14%, #0d6db8 19%, #0a69b8 63%, #0a72bd 81%, #0c71ba 88%, #0e6eb6 91%, #0f6ab0 94%, #0f5ea9 97%, #08479e);
+  --luna-start: linear-gradient(#358035, #42a042 8%, #389338 40%, #31842f 70%, #2b7a2b 88%, #235f23);
+  --luna-button: linear-gradient(#ffffff, #f8f7f2 30%, #f0efe8 70%, #e3e0d5 92%, #d6d0c5);
+  --luna-button-down: linear-gradient(#e5e4de, #e3e2da 60%, #ece9df);
+  /* The orange glow of a button under the pointer, the blue of the default
+     one: two rings inside its edge. */
+  --luna-hot: inset 0 -1px 0 1px #f8b330, inset 0 1px 0 1px #ffeab0;
+  --luna-default: inset 0 -1px 0 1px #7da2ce, inset 0 1px 0 1px #cee7ff;
+  --luna-caption-buttons: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='71' height='21'%3E%3Cdefs%3E%3ClinearGradient id='b' x1='0' y1='0' x2='.3' y2='1'%3E%3Cstop offset='0' stop-color='%23d2e2ff'/%3E%3Cstop offset='.25' stop-color='%234c8efc'/%3E%3Cstop offset='.7' stop-color='%231e5be6'/%3E%3Cstop offset='1' stop-color='%232a6af0'/%3E%3C/linearGradient%3E%3ClinearGradient id='r' x1='0' y1='0' x2='.3' y2='1'%3E%3Cstop offset='0' stop-color='%23f6b9a3'/%3E%3Cstop offset='.25' stop-color='%23e9683f'/%3E%3Cstop offset='.7' stop-color='%23c8401b'/%3E%3Cstop offset='1' stop-color='%23d65428'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect x='.5' y='.5' width='20' height='20' rx='3' fill='url(%23b)' stroke='%23fff'/%3E%3Crect x='5' y='13' width='7' height='3' fill='%23fff'/%3E%3Crect x='25.5' y='.5' width='20' height='20' rx='3' fill='url(%23b)' stroke='%23fff'/%3E%3Cpath d='M30.5 5.5h10v10h-10z' fill='none' stroke='%23fff'/%3E%3Cpath d='M30 5h11v2.5H30z' fill='%23fff'/%3E%3Crect x='50.5' y='.5' width='20' height='20' rx='3' fill='url(%23r)' stroke='%23fff'/%3E%3Cpath d='M55.5 5.5l10 10m0-10l-10 10' stroke='%23fff' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E");
+  --heading-font: var(--luna-title-font);
+  --surface-shadow: none;
+  --chart-1: #0054e3;
+  --chart-2: #2fa82f;
+  --chart-3: #f8b330;
+  --chart-4: #9b4fc4;
+  --chart-5: #6d8796;
+  scrollbar-color: #c4d3fc #f4f4f0;
+  scroll-padding-bottom: calc(var(--luna-bar) + 1rem);
+}
+.theme-is-luna body {
+  font-family: var(--luna-font);
+}
+.theme-is-luna body::before {
+  background-position: center bottom;
+}
+.theme-is-luna ::selection {
+  color: #ffffff;
+  background: #316ac5;
+}
+.theme-is-luna h1 {
+  color: #003399;
+  font-family: var(--luna-title-font);
+  font-weight: 700;
+  letter-spacing: 0;
+}
+.theme-is-luna .book-backdrop {
+  display: none;
+}
+
+/* The taskbar, along the foot of the screen. The colour tokens are set
+   again inside it, so everything on it writes in white. */
+.theme-is-luna .top-bar {
+  --foreground: #ffffff;
+  --muted-foreground: #ffffff;
+  --accent: rgb(255 255 255 / 0.16);
+  --accent-foreground: #ffffff;
+  --ring: #ffffff;
+  position: fixed;
+  inset: auto 0 0;
+  height: var(--luna-bar);
+  border: 0;
+  color: #ffffff;
+  background: var(--luna-taskbar);
+  box-shadow: 0 -1px 0 #0a246a;
+  backdrop-filter: none;
+  text-shadow: 1px 1px 1px rgb(0 0 0 / 0.35);
+  animation: none;
+}
+.theme-is-luna .top-bar > div {
+  max-width: none;
+  height: 100%;
+  padding: 0 0 0 0;
+  gap: 0.25rem;
+}
+/* Start: green, rounded at its end, its name in white italics. */
+.theme-is-luna .top-bar .wordmark {
+  height: 100%;
+  margin: 0 0.5rem 0 0;
+  padding: 0 1.125rem 0 0.625rem;
+  gap: 0.375rem;
+  border-radius: 0 0.875rem 0.875rem 0;
+  color: #ffffff;
+  font-family: var(--luna-title-font);
+  font-size: 1.1875rem;
+  font-style: italic;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  background: var(--luna-start);
+  box-shadow: inset -1px 0 1px rgb(255 255 255 / 0.35), inset 0 1px rgb(255 255 255 / 0.3), 2px 0 3px rgb(0 0 0 / 0.35);
+  text-shadow: 1px 1px 2px rgb(0 0 0 / 0.55);
+}
+.theme-is-luna .top-bar .wordmark > svg {
+  filter: drop-shadow(1px 1px 1px rgb(0 0 0 / 0.45));
+}
+.theme-is-luna .top-bar .wordmark:hover {
+  background: linear-gradient(#3d903d, #4cb04c 8%, #41a141 40%, #389238 70%, #318831 88%, #286c28);
+}
+.theme-is-luna .top-bar .wordmark:active {
+  background: linear-gradient(#2c6f2c, #307f30 50%, #2d7a2d);
+  box-shadow: inset 1px 1px 3px rgb(0 0 0 / 0.45);
+}
+/* The page links: buttons on the taskbar, the open page's pressed in. */
+.theme-is-luna .top-bar .nav-link[data-size] {
+  height: calc(100% - 0.375rem);
+  border: 1px solid rgb(0 0 0 / 0.25);
+  border-radius: 3px;
+  color: #ffffff;
+  background: linear-gradient(#4f8ef4, #2f6fe0 12%, #2c6adc 70%, #2560d0);
+  box-shadow: inset 1px 1px rgb(255 255 255 / 0.3), inset -1px -1px rgb(0 0 0 / 0.12);
+}
+.theme-is-luna .top-bar .nav-link[data-size]:hover {
+  color: #ffffff;
+  background: linear-gradient(#5f9cfb, #3b7aea 12%, #3674e6 70%, #2c68da);
+}
+.theme-is-luna .top-bar .nav-link[data-size][aria-current="page"],
+.theme-is-luna .top-bar .nav-link[data-size][aria-current="page"]:hover {
+  border-color: rgb(0 0 0 / 0.4);
+  background: linear-gradient(#1a48b0, #1e52b7 10%, #2158c2 90%, #2a63cd);
+  box-shadow: inset 1px 1px 2px rgb(0 0 0 / 0.5);
+}
+.theme-is-luna .top-bar .nav-link[aria-current="page"]::after {
+  display: none;
+}
+/* The tray: pale blue, the time's place taken by the bar's own buttons. */
+.theme-is-luna .top-bar .ml-auto {
+  height: 100%;
+  padding: 0 0.5rem 0 0.625rem;
+  gap: 0.125rem;
+  border-left: 1px solid #092e7e;
+  background: var(--luna-tray);
+  box-shadow: inset 1px 0 1px #18bbff;
+}
+.theme-is-luna .top-bar .ml-auto [data-size][data-variant] {
+  height: 1.875rem;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  color: #ffffff;
+  background: transparent;
+  box-shadow: none;
+}
+.theme-is-luna .top-bar .ml-auto [data-size][data-variant]:is(:hover, [aria-expanded="true"]) {
+  border-color: rgb(0 0 0 / 0.2);
+  background: rgb(255 255 255 / 0.18);
+}
+.theme-is-luna .top-bar .ml-auto .text-muted-foreground {
+  color: #ffffff;
+}
+.theme-is-luna .top-bar :is(.nav-link, .wordmark, [data-size][data-variant]):focus-visible {
+  outline: 1px dotted #ffffff;
+  outline-offset: -4px;
+  --tw-ring-shadow: 0 0 #0000;
+}
+@media (width < 40rem) {
+  .theme-is-luna .top-bar > div {
+    gap: 0.125rem;
+  }
+  .theme-is-luna .top-bar .wordmark {
+    margin-right: 0.125rem;
+    padding: 0 0.75rem 0 0.5rem;
+  }
+  .theme-is-luna .top-bar .nav-link[data-size] {
+    padding-inline: 0.3125rem;
+  }
+  .theme-is-luna .top-bar .ml-auto {
+    padding: 0 0.25rem;
+  }
+}
+.theme-is-luna .bulk-bar {
+  bottom: calc(var(--luna-bar) + 0.75rem);
+}
+
+/* The window each page sits in: a blue title bar with rounded top corners,
+   naming the page, a thin blue frame and a beige body. */
+.theme-is-luna .top-bar + main {
+  position: relative;
+  width: calc(100% - 2rem);
+  margin-block: 1.25rem calc(var(--luna-bar) + 1.5rem);
+  padding: calc(var(--luna-caption) + 1.25rem) calc(var(--luna-frame) + 1.25rem) calc(var(--luna-frame) + 1.5rem);
+  border-radius: 8px 8px 0 0;
+  background:
+    linear-gradient(var(--background), var(--background)) var(--luna-frame) var(--luna-caption) / calc(100% - 2 * var(--luna-frame))
+      calc(100% - var(--luna-caption) - var(--luna-frame)) no-repeat,
+    var(--luna-title) top / 100% var(--luna-caption) no-repeat,
+    linear-gradient(90deg, #0019cf, #166aee 1px, var(--luna-frame-blue) 2px calc(100% - 2px), #166aee calc(100% - 1px), #0019cf);
+  box-shadow: 0 0 0 1px #0019cf, 4px 6px 18px rgb(0 0 0 / 0.35);
+}
+.theme-is-luna .top-bar + main::before {
+  content: "MyReads";
+  content: "MyReads" / "";
+  position: absolute;
+  inset: 0 5.5rem auto 0;
+  height: var(--luna-caption);
+  padding-left: 0.625rem;
+  overflow: hidden;
+  color: #ffffff;
+  font: 700 0.875rem/var(--luna-caption) var(--luna-title-font);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  text-shadow: 1px 1px #0f1089;
+}
+.theme-is-luna .top-bar + main::after {
+  content: "";
+  position: absolute;
+  top: calc((var(--luna-caption) - 21px) / 2);
+  right: 5px;
+  width: 71px;
+  height: 21px;
+  background: var(--luna-caption-buttons);
+  pointer-events: none;
+}
+.theme-is-luna[data-section="library"] .top-bar + main::before {
+  content: "Library";
+  content: "Library" / "";
+}
+.theme-is-luna[data-section="book"] .top-bar + main::before {
+  content: "Book";
+  content: "Book" / "";
+}
+.theme-is-luna[data-section="series"] .top-bar + main::before {
+  content: "Series";
+  content: "Series" / "";
+}
+.theme-is-luna[data-section="stats"] .top-bar + main::before {
+  content: "Stats";
+  content: "Stats" / "";
+}
+.theme-is-luna[data-section="reading"] .top-bar + main::before {
+  content: "Now reading";
+  content: "Now reading" / "";
+}
+.theme-is-luna[data-section="quotes"] .top-bar + main::before {
+  content: "Quotes";
+  content: "Quotes" / "";
+}
+.theme-is-luna[data-section="room"] .top-bar + main::before {
+  content: "Reading room";
+  content: "Reading room" / "";
+}
+.theme-is-luna[data-section="account"] .top-bar + main::before {
+  content: "Account";
+  content: "Account" / "";
+}
+.theme-is-luna:has(.top-bar .nav-link[href="/books/new"][aria-current="page"]) .top-bar + main::before {
+  content: "Add book";
+  content: "Add book" / "";
+}
+.theme-is-luna:has(.top-bar .nav-link[href="/books/check"][aria-current="page"]) .top-bar + main::before {
+  content: "Check";
+  content: "Check" / "";
+}
+@media (width < 40rem) {
+  :root[data-theme="luna"] {
+    --luna-frame: 3px;
+    --luna-caption: 1.75rem;
+  }
+  .theme-is-luna .top-bar + main {
+    width: calc(100% - 0.5rem);
+    margin-block: 0.25rem calc(var(--luna-bar) + 0.5rem);
+    padding-inline: calc(var(--luna-frame) + 0.75rem);
+  }
+}
+
+/* Buttons: rounded, pale, with a dark blue edge; an orange glow under the
+   pointer, the default one ringed in blue. */
+.theme-is-luna [data-size][data-variant] {
+  border: 1px solid #003c74;
+  border-radius: 3px;
+  color: #000000;
+  background: var(--luna-button);
+  box-shadow: none;
+  text-shadow: none;
+  transition: none;
+}
+.theme-is-luna [data-size][data-variant="default"] {
+  box-shadow: var(--luna-default);
+}
+.theme-is-luna [data-size][data-variant="destructive"] {
+  color: var(--destructive);
+}
+.theme-is-luna [data-size]:is([data-variant="ghost"], [data-variant="link"]) {
+  border-color: transparent;
+  background: transparent;
+}
+.theme-is-luna [data-size][data-variant="link"] {
+  color: var(--primary);
+}
+.theme-is-luna [data-size][data-variant]:not([data-variant="ghost"], [data-variant="link"]):is(:hover, [aria-expanded="true"]) {
+  color: #000000;
+  background: var(--luna-button);
+  box-shadow: var(--luna-hot);
+}
+.theme-is-luna [data-size][data-variant="ghost"]:is(:hover, [aria-expanded="true"]) {
+  border-color: #aca899;
+  color: #000000;
+  background: var(--luna-button);
+}
+.theme-is-luna [data-size][data-variant="link"]:hover {
+  background: transparent;
+  text-decoration: underline;
+}
+.theme-is-luna [data-size]:not([data-variant="ghost"], [data-variant="link"]):active:not(:disabled) {
+  translate: none;
+  background: var(--luna-button-down);
+  box-shadow: none;
+}
+.theme-is-luna [data-size][data-variant]:disabled {
+  opacity: 1;
+  color: #aca899;
+}
+.theme-is-luna [data-size]:not([data-variant="ghost"], [data-variant="link"]):disabled {
+  border-color: #c9c7ba;
+  background: #f5f4ea;
+  box-shadow: none;
+}
+.theme-is-luna :is([data-size][data-variant], [data-slot="select-trigger"], .select-like, [role="tab"], [data-slot="tabs-trigger"], .shelf-tabs > a):focus-visible {
+  outline: 1px dotted #000000;
+  outline-offset: -4px;
+  --tw-ring-shadow: 0 0 #0000;
+}
+.theme-is-luna .surface:focus-visible {
+  outline: 1px dotted #000000;
+  outline-offset: 2px;
+}
+
+/* Fields: white, square, with XP's blue-grey border. */
+.theme-is-luna :is([data-slot="input"], [data-slot="textarea"]),
+.theme-is-luna input:is([type="text"], [type="search"], [type="number"], [type="date"], [type="password"], [type="url"], [type="email"], :not([type])),
+.theme-is-luna textarea {
+  border: 1px solid #7f9db9;
+  border-radius: 0;
+  background: #ffffff;
+  box-shadow: none;
+}
+.theme-is-luna :is([data-slot="input"], [data-slot="textarea"], input, textarea):focus-visible {
+  border-color: #316ac5;
+  outline: none;
+  --tw-ring-shadow: 0 0 #0000;
+}
+/* XP's controls were lettered small, and so are these, so the library's
+   drop-downs keep their words. Fields only from tablet width up: smaller
+   on a phone, it would zoom in on one as you type. */
+.theme-is-luna :is([data-slot="select-trigger"], .select-like) {
+  padding-left: 0.375rem;
+  font-size: 0.8125rem;
+}
+@media (width >= 40rem) {
+  .theme-is-luna :is([data-slot="input"], [data-slot="textarea"]) {
+    font-size: 0.8125rem;
+  }
+}
+/* A drop-down list: a white box with the pale blue arrow button. */
+.theme-is-luna :is([data-slot="select-trigger"], .select-like) {
+  border: 1px solid #7f9db9;
+  border-radius: 0;
+  color: #000000;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4.5 6.5L8 10l3.5-3.5' fill='none' stroke='%234d6185' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") right 2px center / 1.0625rem 1.0625rem no-repeat,
+    linear-gradient(#dae6fe, #c4d3fc 50%, #b6c9fb) right 1px center / 1.0625rem calc(100% - 2px) no-repeat,
+    #ffffff;
+  padding-right: 1.5rem;
+  box-shadow: none;
+}
+.theme-is-luna :is([data-slot="select-trigger"], .select-like):is(:hover, [data-state="open"]) {
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4.5 6.5L8 10l3.5-3.5' fill='none' stroke='%234d6185' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") right 2px center / 1.0625rem 1.0625rem no-repeat,
+    linear-gradient(#f0f6ff, #d9e6ff 50%, #c8daff) right 1px center / 1.0625rem calc(100% - 2px) no-repeat,
+    #ffffff;
+}
+.theme-is-luna :is([data-slot="select-trigger"], .select-like) > svg:last-child {
+  opacity: 0;
+}
+
+/* Check boxes and radio buttons: a white box shaded at its foot, a green
+   tick or dot; orange round the box under the pointer. */
+.theme-is-luna input[type="checkbox"],
+.theme-is-luna input[type="radio"] {
+  appearance: none;
+  flex: none;
+  width: 0.8125rem;
+  height: 0.8125rem;
+  margin: 0;
+  border: 1px solid #1c5180;
+  border-radius: 0;
+  background: linear-gradient(135deg, #dcdcd7, #ffffff);
+}
+.theme-is-luna input[type="radio"] {
+  border-radius: 50%;
+}
+.theme-is-luna input:is([type="checkbox"], [type="radio"]):hover {
+  box-shadow: inset 0 0 0 2px #f8b330;
+}
+.theme-is-luna input[type="checkbox"]:checked {
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 9 9'%3E%3Cpath d='M1.2 4.4l2.2 2.3L7.9 1.6' fill='none' stroke='%2321a121' stroke-width='1.9'/%3E%3C/svg%3E") center / 80% no-repeat, linear-gradient(135deg, #dcdcd7, #ffffff);
+}
+.theme-is-luna input[type="radio"]:checked {
+  background: radial-gradient(circle, #21a121 0 2.5px, #6ed46e 3px, transparent 3.5px), linear-gradient(135deg, #dcdcd7, #ffffff);
+}
+.theme-is-luna input:is([type="checkbox"], [type="radio"]):focus-visible {
+  outline: 1px dotted #000000;
+  outline-offset: 2px;
+}
+/* Switches, which XP didn't have: a trackbar's groove and its blue tab. */
+.theme-is-luna button[role="switch"] > span:last-child {
+  border: 1px solid #7f9db9;
+  background: #ffffff;
+  box-shadow: inset 1px 1px 2px rgb(0 0 0 / 0.15);
+}
+.theme-is-luna button[role="switch"][aria-checked="true"] > span:last-child {
+  background: linear-gradient(#cbe6b9, #8fd46f);
+}
+.theme-is-luna button[role="switch"] > span:last-child > span {
+  border: 1px solid #003c74;
+  border-radius: 3px;
+  background: linear-gradient(#ffffff, #e3e0d5);
+  box-shadow: inset 0 -2px #21a121;
+}
+
+/* Panels: Explorer's task panes, a pale blue band under a bold blue title.
+   Library tiles: an Explorer item, lit pale blue under the pointer. */
+.theme-is-luna [data-slot="card"] {
+  border: 1px solid #ffffff;
+  border-radius: 3px;
+  background: #ffffff;
+  box-shadow: 0 0 0 1px #c7d3ea, 1px 1px 3px rgb(0 0 0 / 0.08);
+  --tw-ring-shadow: 0 0 #0000;
+}
+.theme-is-luna [data-slot="card"] > [data-slot="card-header"]:first-child {
+  margin-top: calc(-1 * var(--card-spacing));
+  padding-top: 0.625rem;
+  border-radius: 2px 2px 0 0;
+  background: linear-gradient(90deg, #ffffff, #c6d3f7) top / 100% 2.5rem no-repeat;
+}
+.theme-is-luna [data-slot="card-title"] {
+  color: #215dc6;
+  font-family: var(--luna-font);
+  font-size: 0.9375rem;
+  font-weight: 700;
+}
+.theme-is-luna [data-slot="card-footer"] {
+  border-top: 1px solid #d6dff7;
+  border-radius: 0;
+  background: #eef2fb;
+}
+.theme-is-luna .surface:not([data-slot="card"]) {
+  border: 1px solid transparent;
+  border-radius: 2px;
+  background: #ffffff;
+  box-shadow: 0 0 0 1px #e1ddcc;
+}
+.theme-is-luna .surface:not([data-slot="card"]):hover {
+  border-color: #316ac5;
+  background: #e8eefa;
+  box-shadow: none;
+  transform: none;
+}
+.theme-is-luna .surface .book-cover {
+  border-radius: 0;
+  box-shadow: 2px 2px 3px rgb(0 0 0 / 0.25);
+}
+
+/* Tabs: white, the open one standing taller with an orange edge along its
+   top, as on an XP property sheet. */
+.theme-is-luna .shelf-tabs {
+  gap: 0;
+  padding-left: 2px;
+  border-bottom: 1px solid #919b9c;
+}
+.theme-is-luna .shelf-tabs > a,
+.theme-is-luna [data-slot="tabs-trigger"] {
+  position: relative;
+  margin: 2px 0 -1px;
+  padding: 0.25rem 0.625rem;
+  border: 1px solid #919b9c;
+  border-bottom-color: transparent;
+  border-radius: 3px 3px 0 0;
+  color: #000000;
+  background: linear-gradient(#ffffff, #f3f3ef 70%, #ecebe6);
+}
+.theme-is-luna .shelf-tabs > a + a,
+.theme-is-luna [data-slot="tabs-trigger"] + [data-slot="tabs-trigger"] {
+  margin-left: -1px;
+}
+.theme-is-luna .shelf-tabs > a:hover,
+.theme-is-luna [data-slot="tabs-trigger"]:hover {
+  box-shadow: inset 0 2px #f8b330;
+}
+.theme-is-luna .shelf-tabs > a[aria-current="page"],
+.theme-is-luna [data-slot="tabs-trigger"][data-state="active"] {
+  z-index: 1;
+  margin-top: 0;
+  padding-bottom: 0.375rem;
+  border-color: #919b9c #919b9c #fcfcfe;
+  font-weight: 400;
+  background: #fcfcfe;
+  box-shadow: inset 0 3px #e68b2c, inset 0 4px #ffc73c;
+}
+.theme-is-luna .shelf-tabs > a > span {
+  border-radius: 2px;
+  background: #ece9d8;
+}
+.theme-is-luna [data-slot="tabs-list"] {
+  border-radius: 0;
+  background: transparent;
+  box-shadow: inset 0 -1px #919b9c;
+}
+.theme-is-luna [data-slot="tabs-trigger"]::after {
+  display: none;
+}
+/* Chips: toolbar buttons, the chosen one pressed in. */
+.theme-is-luna :is(a, button).rounded-full.border:not(.aspect-square, .border-2) {
+  border-color: #aca899;
+  border-radius: 3px;
+  color: #000000;
+  background: var(--luna-button);
+}
+.theme-is-luna :is(a, button).rounded-full.border:not(.aspect-square, .border-2):hover {
+  box-shadow: var(--luna-hot);
+}
+.theme-is-luna :is(a, button).rounded-full.border:is([class*="border-primary"], [aria-current="page"], [aria-pressed="true"]):not(.aspect-square, .border-2) {
+  border-color: #003c74;
+  background: var(--luna-button-down);
+  box-shadow: inset 1px 1px 2px rgb(0 0 0 / 0.2);
+}
+.theme-is-luna kbd {
+  border: 1px solid #003c74;
+  border-radius: 3px;
+  color: #000000;
+  background: var(--luna-button);
+}
+
+/* Progress: green blocks in a white trough. */
+.theme-is-luna :has(> .bar-grow) {
+  height: 0.5rem;
+  padding: 1px;
+  border: 1px solid #686868;
+  border-radius: 3px;
+  background: #ffffff;
+  box-shadow: inset 0 0 0 1px #e5e5e5;
+}
+.theme-is-luna .bar-grow {
+  border-radius: 0;
+}
+.theme-is-luna .bar-grow[class*="primary"] {
+  background:
+    repeating-linear-gradient(90deg, transparent 0 0.4375rem, #ffffff 0.4375rem 0.5625rem),
+    linear-gradient(#acedad, #7be47d 15%, #4cda50 40%, #2ed330 60%, #42d845 85%, #76e275);
+}
+
+/* Menus: white with a grey edge and a shadow, the item under the pointer
+   in the selection blue. */
+.theme-is-luna :is([data-slot="dropdown-menu-content"], [data-slot="select-content"], [data-slot="dropdown-menu-sub-content"]) {
+  border: 1px solid #aca899;
+  border-radius: 0;
+  background: #ffffff;
+  box-shadow: 2px 2px 3px rgb(0 0 0 / 0.35);
+  --tw-ring-shadow: 0 0 #0000;
+}
+.theme-is-luna :is([data-slot="dropdown-menu-item"], [data-slot="select-item"], [data-slot="dropdown-menu-checkbox-item"], [data-slot="dropdown-menu-radio-item"], [data-slot="dropdown-menu-sub-trigger"]) {
+  border-radius: 0;
+}
+.theme-is-luna :is([data-slot="dropdown-menu-item"], [data-slot="select-item"], [data-slot="dropdown-menu-checkbox-item"], [data-slot="dropdown-menu-radio-item"], [data-slot="dropdown-menu-sub-trigger"]):is(:focus, [data-highlighted]) {
+  --muted-foreground: #ffffff;
+  color: #ffffff;
+  background: #316ac5;
+}
+.theme-is-luna :is([data-slot="dropdown-menu-item"], [data-slot="select-item"], [data-slot="dropdown-menu-checkbox-item"], [data-slot="dropdown-menu-radio-item"], [data-slot="dropdown-menu-sub-trigger"]):is(:focus, [data-highlighted]) svg {
+  color: #ffffff;
+}
+
+/* Popovers: white panes edged in grey. Dialogs: windows. */
+.theme-is-luna [data-slot="popover-content"] {
+  border: 1px solid #aca899;
+  border-radius: 0;
+  background: #ffffff;
+  box-shadow: 2px 2px 4px rgb(0 0 0 / 0.3);
+  --tw-ring-shadow: 0 0 #0000;
+}
+.theme-is-luna [data-slot="dialog-overlay"] {
+  background: rgb(0 0 0 / 0.2);
+  backdrop-filter: none;
+}
+.theme-is-luna [data-slot="dialog-content"] {
+  padding: calc(var(--luna-caption) + 1rem) calc(var(--luna-frame) + 1.25rem) calc(var(--luna-frame) + 1.25rem);
+  border: 0;
+  border-radius: 8px 8px 0 0;
+  background:
+    linear-gradient(var(--background), var(--background)) var(--luna-frame) var(--luna-caption) / calc(100% - 2 * var(--luna-frame))
+      calc(100% - var(--luna-caption) - var(--luna-frame)) no-repeat,
+    var(--luna-title) top / 100% var(--luna-caption) no-repeat,
+    linear-gradient(90deg, #0019cf, #166aee 1px, var(--luna-frame-blue) 2px calc(100% - 2px), #166aee calc(100% - 1px), #0019cf);
+  box-shadow: 0 0 0 1px #0019cf, 4px 6px 20px rgb(0 0 0 / 0.4);
+  --tw-ring-shadow: 0 0 #0000;
+}
+/* A dialog's title is its title bar's. */
+.theme-is-luna [data-slot="dialog-content"] > [data-slot="dialog-header"]:first-child > [data-slot="dialog-title"]:first-child {
+  position: absolute;
+  inset: 0 2.5rem auto 0;
+  height: var(--luna-caption);
+  padding-left: 0.625rem;
+  overflow: hidden;
+  color: #ffffff;
+  font: 700 0.875rem/var(--luna-caption) var(--luna-title-font);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  text-shadow: 1px 1px #0f1089;
+}
+.theme-is-luna [data-slot="dialog-content"] > [data-slot="dialog-close"] {
+  top: calc((var(--luna-caption) - 21px) / 2);
+  right: 5px;
+  width: 21px;
+  height: 21px;
+  min-width: 0;
+  padding: 0;
+  border: 1px solid #ffffff;
+  border-radius: 3px;
+  color: #ffffff;
+  background: linear-gradient(160deg, #f6b9a3, #e9683f 25%, #c8401b 70%, #d65428);
+  box-shadow: none;
+  opacity: 1;
+}
+.theme-is-luna [data-slot="dialog-content"] > [data-slot="dialog-close"]:hover {
+  background: linear-gradient(160deg, #fbd3c3, #f08860 25%, #d9542b 70%, #e56b3c);
+}
+.theme-is-luna [data-slot="dialog-content"] > [data-slot="dialog-close"] svg {
+  width: 0.8125rem;
+  height: 0.8125rem;
+  stroke-width: 3.5;
+}
+.theme-is-luna [data-slot="dialog-footer"] {
+  border-top: 0;
+  border-radius: 0;
+  background: transparent;
+}
+.theme-is-luna .bulk-bar {
+  border: 1px solid #0019cf;
+  border-top: var(--luna-caption) solid transparent;
+  border-radius: 8px 8px 0 0;
+  background:
+    linear-gradient(var(--background), var(--background)) padding-box,
+    var(--luna-title) top / 100% var(--luna-caption) no-repeat border-box,
+    var(--luna-frame-blue) border-box;
+  box-shadow: 4px 6px 20px rgb(0 0 0 / 0.4);
+}
+
+/* Scrollbars: a pale track, a pale blue thumb with grip lines. */
+[data-theme="luna"]::-webkit-scrollbar,
+.theme-is-luna ::-webkit-scrollbar {
+  width: 17px;
+  height: 17px;
+}
+[data-theme="luna"]::-webkit-scrollbar-track,
+.theme-is-luna ::-webkit-scrollbar-track {
+  background: linear-gradient(90deg, #f3f1ec, #fefefb);
+}
+[data-theme="luna"]::-webkit-scrollbar-thumb,
+.theme-is-luna ::-webkit-scrollbar-thumb {
+  border: 1px solid #ffffff;
+  border-radius: 3px;
+  background:
+    repeating-linear-gradient(transparent 0 2px, #8ea6e4 2px 3px, #eef3ff 3px 4px) center / 7px 8px no-repeat,
+    linear-gradient(90deg, #cbdafd, #bacbfa 50%, #aec2f6);
+  box-shadow: 0 0 0 1px #a7bfef;
+}
+[data-theme="luna"]::-webkit-scrollbar-thumb:horizontal,
+.theme-is-luna ::-webkit-scrollbar-thumb:horizontal {
+  background:
+    repeating-linear-gradient(90deg, transparent 0 2px, #8ea6e4 2px 3px, #eef3ff 3px 4px) center / 8px 7px no-repeat,
+    linear-gradient(#cbdafd, #bacbfa 50%, #aec2f6);
+}
+[data-theme="luna"]::-webkit-scrollbar-thumb:hover,
+.theme-is-luna ::-webkit-scrollbar-thumb:hover {
+  background:
+    repeating-linear-gradient(transparent 0 2px, #8ea6e4 2px 3px, #eef3ff 3px 4px) center / 7px 8px no-repeat,
+    linear-gradient(90deg, #dde7ff, #cad8fc 50%, #bdcdf9);
+}
+[data-theme="luna"]::-webkit-scrollbar-corner,
+.theme-is-luna ::-webkit-scrollbar-corner {
+  background: #ece9d8;
+}
+
+/* The sign-in pages: a window on the desktop, with no taskbar. */
+.theme-is-luna .auth-backdrop {
+  display: none;
+}
+.theme-is-luna main:has(> .auth-backdrop) .wordmark {
+  color: #ffffff;
+  font-family: var(--luna-title-font);
+  font-style: italic;
+  font-weight: 700;
+  text-shadow: 1px 1px 3px rgb(0 0 0 / 0.6);
+}
+.theme-is-luna main:has(> .auth-backdrop) [data-slot="card"] {
+  position: relative;
+  padding-top: calc(var(--luna-caption) + 1rem);
+  border: 0;
+  border-radius: 8px 8px 0 0;
+  background:
+    linear-gradient(var(--background), var(--background)) var(--luna-frame) var(--luna-caption) / calc(100% - 2 * var(--luna-frame))
+      calc(100% - var(--luna-caption) - var(--luna-frame)) no-repeat,
+    var(--luna-title) top / 100% var(--luna-caption) no-repeat,
+    var(--luna-frame-blue);
+  box-shadow: 0 0 0 1px #0019cf, 4px 6px 20px rgb(0 0 0 / 0.4);
+}
+.theme-is-luna main:has(> .auth-backdrop) [data-slot="card"]::before {
+  content: "Log On to MyReads";
+  content: "Log On to MyReads" / "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: var(--luna-caption);
+  padding-left: 0.625rem;
+  color: #ffffff;
+  font: 700 0.875rem/var(--luna-caption) var(--luna-title-font);
+  text-shadow: 1px 1px #0f1089;
+}
+.theme-is-luna main:has(> .auth-backdrop) [data-slot="card"] > [data-slot="card-header"]:first-child {
+  margin-top: 0;
+  padding-top: 0;
+  background: none;
+}
+
+/* ── Metro ─────────────────────────────────────────────────────────────────
+   Windows 8 and Windows Phone: flat, square and typographic, white on
+   near-black with the cyan accent. The page's name is set big, light and
+   in lower case, like a hub's title, and the top bar is a pivot: the app's
+   name in small capitals, the page links as lower-case words, the open
+   one white and the rest grey. The library is a Start screen: every book
+   a flat tile of its own colour, white lettering on it, that tilts a
+   little when pressed. Panels are flat grey, buttons are outlined in
+   white and fill white when pressed, the main one cyan; text boxes and
+   drop-downs are light with black text; toggles are the square Metro
+   switch. Menus and popovers are white, and a dialog is a band of colour
+   across the whole width of the screen. No blur, no shadows, no curves. */
+:root[data-theme="metro"] {
+  --metro-font: "Segoe UI", var(--font-open-sans), "Open Sans", system-ui, sans-serif;
+  /* The tiles' colours, from Windows' own set: cobalt, crimson, emerald,
+     violet, magenta, teal, orange and brown. White text holds on each. */
+  --metro-1: #0050ef;
+  --metro-2: #a20025;
+  --metro-3: #008a00;
+  --metro-4: #6a00ff;
+  --metro-5: #d80073;
+  --metro-6: #00827f;
+  --metro-7: #c44f00;
+  --metro-8: #825a2c;
+  --metro-field: #d9d9d9;
+  --surface-shadow: none;
+  --chart-1: #1ba1e2;
+  --chart-2: #8cbf26;
+  --chart-3: #f09609;
+  --chart-4: #e671b8;
+  --chart-5: #a05000;
+  scrollbar-width: thin;
+  scrollbar-color: #6b6b6b transparent;
+}
+.theme-is-metro body {
+  font-family: var(--metro-font);
+}
+.theme-is-metro ::selection {
+  color: #000000;
+  background: #1ba1e2;
+}
+/* A hub's title: big, light and lower case. A book's page keeps its
+   title as written. */
+.theme-is-metro h1 {
+  font-family: var(--metro-font);
+  font-size: 3.25rem;
+  font-weight: 300;
+  line-height: 1.05;
+  letter-spacing: -0.015em;
+}
+.theme-is-metro:not([data-section="book"]) h1 {
+  text-transform: lowercase;
+}
+@media (width < 40rem) {
+  .theme-is-metro h1 {
+    font-size: 2.5rem;
+  }
+}
+.theme-is-metro :is(h2, h3, [data-slot="card-title"], [data-slot="dialog-title"]) {
+  font-family: var(--metro-font);
+  font-weight: 300;
+  letter-spacing: 0;
+}
+.theme-is-metro [data-slot="card-title"] {
+  font-size: 1.375rem;
+  text-transform: lowercase;
+}
+.theme-is-metro .book-backdrop {
+  display: none;
+}
+
+/* The top bar: a pivot. The app's name in small capitals; the page links
+   as words, the open one white. */
+.theme-is-metro .top-bar {
+  border: 0;
+  background: var(--background);
+  backdrop-filter: none;
+  box-shadow: none;
+  animation: none;
+}
+.theme-is-metro .top-bar > div {
+  height: 3.75rem;
+}
+.theme-is-metro .top-bar .wordmark {
+  font-family: var(--metro-font);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.theme-is-metro .top-bar .wordmark > svg {
+  box-sizing: content-box;
+  padding: 0.3125rem;
+  color: #ffffff;
+  background: #1ba1e2;
+}
+.theme-is-metro .top-bar .nav-link {
+  height: 2.75rem;
+  border: 0;
+  border-radius: 0;
+  color: #8a8a8a;
+  background: transparent;
+  font-family: var(--metro-font);
+  font-weight: 300;
+  text-transform: lowercase;
+}
+@media (width >= 64rem) {
+  .theme-is-metro .top-bar .nav-link {
+    padding-inline: 0.5rem;
+    font-size: 1.3125rem;
+  }
+  .theme-is-metro .top-bar .nav-link > svg {
+    display: none;
+  }
+}
+.theme-is-metro .top-bar .nav-link:hover {
+  color: #d0d0d0;
+  background: transparent;
+}
+.theme-is-metro .top-bar .nav-link[aria-current="page"],
+.theme-is-metro .top-bar .nav-link[aria-current="page"]:hover {
+  color: #ffffff;
+  background: transparent;
+}
+.theme-is-metro .top-bar .nav-link[aria-current="page"]::after {
+  display: none;
+}
+@media (width < 64rem) {
+  .theme-is-metro .top-bar .nav-link[aria-current="page"] {
+    color: #000000;
+    background: #ffffff;
+  }
+}
+.theme-is-metro .top-bar .ml-auto [data-size][data-variant] {
+  border: 0;
+  color: #ffffff;
+}
+
+/* Buttons: outlined in white, filled white while pressed; the main one in
+   the accent. */
+.theme-is-metro [data-size][data-variant] {
+  border: 2px solid #ffffff;
+  border-radius: 0;
+  color: #ffffff;
+  background: transparent;
+  box-shadow: none;
+  font-weight: 400;
+}
+.theme-is-metro [data-size][data-variant="default"] {
+  border-color: #1ba1e2;
+  color: #000000;
+  background: #1ba1e2;
+}
+.theme-is-metro [data-size][data-variant="destructive"] {
+  border-color: var(--destructive);
+  color: var(--destructive);
+}
+.theme-is-metro [data-size]:is([data-variant="ghost"], [data-variant="link"]) {
+  border-color: transparent;
+}
+.theme-is-metro [data-size][data-variant="link"] {
+  color: var(--primary);
+}
+.theme-is-metro [data-size][data-variant]:not([data-variant="link"]):is(:hover, [aria-expanded="true"]) {
+  color: #ffffff;
+  background: #3a3a3a;
+}
+.theme-is-metro [data-size][data-variant="default"]:is(:hover, [aria-expanded="true"]) {
+  border-color: #4ab7ec;
+  color: #000000;
+  background: #4ab7ec;
+}
+.theme-is-metro [data-size][data-variant="link"]:hover {
+  background: transparent;
+  text-decoration: underline;
+}
+.theme-is-metro [data-size][data-variant]:not([data-variant="link"]):active:not(:disabled) {
+  translate: none;
+  border-color: #ffffff;
+  color: #000000;
+  background: #ffffff;
+}
+.theme-is-metro [data-size][data-variant]:disabled {
+  opacity: 0.4;
+}
+.theme-is-metro :is([data-size][data-variant], [data-slot="select-trigger"], .select-like, [role="tab"], [data-slot="tabs-trigger"], .shelf-tabs > a, .nav-link, .wordmark):focus-visible {
+  outline: 2px dashed #ffffff;
+  outline-offset: 2px;
+  --tw-ring-shadow: 0 0 #0000;
+}
+
+/* Text boxes: light, with black text, white while typed in and ringed in
+   the accent. Drop-downs: outlined in white, like buttons, white while
+   open. */
+.theme-is-metro :is([data-slot="input"], [data-slot="textarea"]),
+.theme-is-metro input:is([type="text"], [type="search"], [type="number"], [type="date"], [type="password"], [type="url"], [type="email"], :not([type])),
+.theme-is-metro textarea {
+  border: 2px solid transparent;
+  border-radius: 0;
+  color: #000000;
+  background: var(--metro-field);
+  box-shadow: none;
+  color-scheme: light;
+}
+.theme-is-metro :is([data-slot="input"], [data-slot="textarea"], input, textarea)::placeholder {
+  color: #5c5c5c;
+}
+.theme-is-metro :is([data-slot="input"], [data-slot="textarea"], input, textarea):hover {
+  background: #e8e8e8;
+}
+.theme-is-metro :is([data-slot="input"], [data-slot="textarea"], input, textarea):focus-visible {
+  border-color: #1ba1e2;
+  outline: none;
+  background: #ffffff;
+  --tw-ring-shadow: 0 0 #0000;
+}
+.theme-is-metro :is([data-slot="input"], [data-slot="textarea"]) ~ svg,
+.theme-is-metro :has(> input) > svg {
+  color: #3d3d3d;
+}
+.theme-is-metro :is([data-slot="select-trigger"], .select-like[data-size], .select-like) {
+  border: 2px solid #ffffff;
+  border-radius: 0;
+  color: #ffffff;
+  background: transparent;
+  box-shadow: none;
+}
+.theme-is-metro :is([data-slot="select-trigger"], .select-like) svg {
+  color: currentColor;
+  opacity: 1;
+}
+.theme-is-metro :is([data-slot="select-trigger"], .select-like[data-size], .select-like):hover {
+  color: #ffffff;
+  background: #3a3a3a;
+}
+.theme-is-metro :is([data-slot="select-trigger"], .select-like[data-size], .select-like)[data-state="open"] {
+  color: #000000;
+  background: #ffffff;
+}
+
+/* Check boxes: a white square outline, white with a black tick when on.
+   Switches: Metro's, a square track that fills with the accent, and a
+   white block for its handle. */
+.theme-is-metro input[type="checkbox"],
+.theme-is-metro input[type="radio"] {
+  appearance: none;
+  flex: none;
+  width: 1.125rem;
+  height: 1.125rem;
+  margin: 0;
+  border: 2px solid #ffffff;
+  border-radius: 0;
+  background: transparent;
+}
+.theme-is-metro input[type="radio"] {
+  border-radius: 50%;
+}
+.theme-is-metro input[type="checkbox"]:checked {
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3 8.2l3.3 3.3L13 4.8' fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='square'/%3E%3C/svg%3E") center / 100% no-repeat, #ffffff;
+}
+.theme-is-metro input[type="radio"]:checked {
+  background: radial-gradient(circle, #ffffff 0 3.5px, transparent 4.5px);
+}
+.theme-is-metro input:is([type="checkbox"], [type="radio"]):focus-visible {
+  outline: 2px dashed #ffffff;
+  outline-offset: 2px;
+}
+.theme-is-metro button[role="switch"] > span:last-child {
+  width: 2.75rem;
+  border: 2px solid #ffffff;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: inset 0 0 0 2px var(--background);
+}
+.theme-is-metro [data-slot="popover-content"] button[role="switch"] > span:last-child {
+  border-color: #000000;
+  box-shadow: inset 0 0 0 2px #ffffff;
+}
+.theme-is-metro button[role="switch"][aria-checked="true"] > span:last-child {
+  background: #1ba1e2;
+}
+.theme-is-metro button[role="switch"] > span:last-child > span {
+  top: -2px;
+  left: -2px;
+  width: 0.75rem;
+  height: calc(100% + 4px);
+  border-radius: 0;
+  background: #ffffff;
+  box-shadow: none;
+}
+.theme-is-metro [data-slot="popover-content"] button[role="switch"] > span:last-child > span {
+  background: #000000;
+}
+.theme-is-metro button[role="switch"][aria-checked="true"] > span:last-child > span {
+  translate: 2rem 0;
+}
+
+/* Panels: flat grey, square. */
+.theme-is-metro [data-slot="card"] {
+  border: 0;
+  border-radius: 0;
+  background: var(--card);
+  box-shadow: none;
+  --tw-ring-shadow: 0 0 #0000;
+}
+.theme-is-metro [data-slot="card-footer"] {
+  border-top: 0;
+  border-radius: 0;
+  background: #333333;
+}
+
+/* The library's tiles: the Start screen. Each a flat colour of its own,
+   white lettering, a light edge under the pointer, and a tilt away when
+   pressed. */
+.theme-is-metro .surface:not([data-slot="card"]) {
+  --foreground: #ffffff;
+  --card-foreground: #ffffff;
+  --muted-foreground: #ffffff;
+  --primary: #ffffff;
+  border: 0;
+  border-radius: 0;
+  color: #ffffff;
+  background: var(--metro-tile, var(--metro-1));
+  box-shadow: none;
+}
+.theme-is-metro :is(:nth-child(8n + 2) > .surface, .surface:nth-child(8n + 2)):not([data-slot="card"]) { --metro-tile: var(--metro-2); }
+.theme-is-metro :is(:nth-child(8n + 3) > .surface, .surface:nth-child(8n + 3)):not([data-slot="card"]) { --metro-tile: var(--metro-3); }
+.theme-is-metro :is(:nth-child(8n + 4) > .surface, .surface:nth-child(8n + 4)):not([data-slot="card"]) { --metro-tile: var(--metro-4); }
+.theme-is-metro :is(:nth-child(8n + 5) > .surface, .surface:nth-child(8n + 5)):not([data-slot="card"]) { --metro-tile: var(--metro-5); }
+.theme-is-metro :is(:nth-child(8n + 6) > .surface, .surface:nth-child(8n + 6)):not([data-slot="card"]) { --metro-tile: var(--metro-6); }
+.theme-is-metro :is(:nth-child(8n + 7) > .surface, .surface:nth-child(8n + 7)):not([data-slot="card"]) { --metro-tile: var(--metro-7); }
+.theme-is-metro :is(:nth-child(8n) > .surface, .surface:nth-child(8n)):not([data-slot="card"]) { --metro-tile: var(--metro-8); }
+.theme-is-metro .surface:not([data-slot="card"]):hover {
+  box-shadow: inset 0 0 0 3px rgb(255 255 255 / 0.45);
+  transform: none;
+}
+.theme-is-metro .surface:not([data-slot="card"]):active {
+  transform: perspective(40rem) rotateX(5deg) scale(0.97);
+}
+.theme-is-metro .surface:not([data-slot="card"]) :is(.text-muted-foreground, .text-muted-foreground\/80) {
+  color: #ffffff;
+}
+.theme-is-metro .surface:not([data-slot="card"]) .text-muted-foreground\/30 {
+  color: rgb(255 255 255 / 0.35);
+}
+.theme-is-metro .surface:not([data-slot="card"]) [data-slot="badge"] {
+  border-color: transparent;
+  color: #ffffff;
+  background: rgb(0 0 0 / 0.3);
+}
+.theme-is-metro .surface .book-cover {
+  border-radius: 0;
+  box-shadow: none;
+}
+.theme-is-metro .surface :has(> .bar-grow) {
+  background: rgb(0 0 0 / 0.3);
+}
+.theme-is-metro .surface .bar-grow[class*="primary"] {
+  background: #ffffff;
+}
+
+/* Tabs and chips: words. The open tab white, the rest grey; a chosen chip
+   white with black text. */
+.theme-is-metro .shelf-tabs {
+  gap: 0.25rem 1.25rem;
+  border-bottom: 0;
+}
+.theme-is-metro .shelf-tabs > a,
+.theme-is-metro [data-slot="tabs-trigger"] {
+  margin: 0;
+  padding: 0.125rem 0;
+  border: 0;
+  border-radius: 0;
+  color: #8a8a8a;
+  background: transparent;
+  box-shadow: none;
+  font-size: 1.3125rem;
+  font-weight: 300;
+  text-transform: lowercase;
+}
+.theme-is-metro .shelf-tabs > a:hover,
+.theme-is-metro [data-slot="tabs-trigger"]:hover {
+  color: #d0d0d0;
+  background: transparent;
+}
+.theme-is-metro .shelf-tabs > a[aria-current="page"],
+.theme-is-metro [data-slot="tabs-trigger"][data-state="active"] {
+  color: #ffffff;
+  font-weight: 300;
+  background: transparent;
+  box-shadow: none;
+}
+.theme-is-metro .shelf-tabs > a > span {
+  align-self: flex-start;
+  margin-top: 0.25rem;
+  padding: 0;
+  border-radius: 0;
+  color: inherit;
+  background: transparent;
+  font-size: 0.75rem;
+}
+/* On a phone the pivot runs off the screen's edge and scrolls sideways,
+   the next tab's name peeking in. */
+@media (width < 40rem) {
+  .theme-is-metro .shelf-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .theme-is-metro .shelf-tabs > a {
+    flex: none;
+    font-size: 1.1875rem;
+  }
+}
+.theme-is-metro [data-slot="tabs-list"] {
+  gap: 1.25rem;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.theme-is-metro [data-slot="tabs-trigger"]::after {
+  display: none;
+}
+.theme-is-metro :is(a, button).rounded-full.border:not(.aspect-square, .border-2) {
+  border: 2px solid #6b6b6b;
+  border-radius: 0;
+  color: #ffffff;
+  background: transparent;
+}
+.theme-is-metro :is(a, button).rounded-full.border:not(.aspect-square, .border-2):hover {
+  border-color: #ffffff;
+}
+.theme-is-metro :is(a, button).rounded-full.border:is([class*="border-primary"], [aria-current="page"], [aria-pressed="true"]):not(.aspect-square, .border-2) {
+  border-color: #ffffff;
+  color: #000000;
+  background: #ffffff;
+}
+.theme-is-metro kbd {
+  border: 2px solid #ffffff;
+  border-radius: 0;
+  background: transparent;
+}
+.theme-is-metro [data-slot="badge"] {
+  border-radius: 0;
+}
+
+/* Progress: a thin bar of the accent on grey. */
+.theme-is-metro :has(> .bar-grow) {
+  border-radius: 0;
+  background: #3d3d3d;
+}
+.theme-is-metro .bar-grow {
+  border-radius: 0;
+}
+
+/* Menus and popovers: white, black text, the item under the pointer grey.
+   The colours are set again inside them, as on the page they're light on
+   dark. */
+.theme-is-metro :is([data-slot="dropdown-menu-content"], [data-slot="popover-content"], [data-slot="select-content"], [data-slot="dropdown-menu-sub-content"]) {
+  --foreground: #000000;
+  --muted-foreground: #555555;
+  --muted: #e6e6e6;
+  --accent: #dedede;
+  --accent-foreground: #000000;
+  --border: #cccccc;
+  --input: #8a8a8a;
+  --primary: #0f6ca3;
+  --primary-foreground: #ffffff;
+  --destructive: #c30000;
+  --ring: #000000;
+  border: 2px solid #000000;
+  border-radius: 0;
+  color: #000000;
+  background: #ffffff;
+  box-shadow: none;
+  --tw-ring-shadow: 0 0 #0000;
+}
+.theme-is-metro :is([data-slot="dropdown-menu-content"], [data-slot="popover-content"], [data-slot="select-content"]) [data-size][data-variant] {
+  border-color: #000000;
+  color: #000000;
+}
+.theme-is-metro :is([data-slot="dropdown-menu-content"], [data-slot="popover-content"], [data-slot="select-content"]) [data-size][data-variant]:is(:hover, [aria-expanded="true"]) {
+  color: #000000;
+  background: #dedede;
+}
+.theme-is-metro :is([data-slot="dropdown-menu-content"], [data-slot="popover-content"], [data-slot="select-content"]) [data-size][data-variant="default"] {
+  border-color: #0f6ca3;
+  color: #ffffff;
+  background: #0f6ca3;
+}
+.theme-is-metro [data-slot="popover-content"] :is([data-slot="input"], [data-slot="textarea"], input, textarea, [data-slot="select-trigger"]) {
+  border-color: #8a8a8a;
+  background: #ffffff;
+}
+.theme-is-metro [data-slot="popover-content"] input[type="checkbox"] {
+  border-color: #000000;
+}
+.theme-is-metro [data-slot="popover-content"] input[type="checkbox"]:checked {
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3 8.2l3.3 3.3L13 4.8' fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='square'/%3E%3C/svg%3E") center / 100% no-repeat, #ffffff;
+}
+.theme-is-metro :is([data-slot="dropdown-menu-item"], [data-slot="select-item"], [data-slot="dropdown-menu-checkbox-item"], [data-slot="dropdown-menu-radio-item"], [data-slot="dropdown-menu-sub-trigger"]) {
+  border-radius: 0;
+}
+.theme-is-metro :is([data-slot="dropdown-menu-item"], [data-slot="select-item"], [data-slot="dropdown-menu-checkbox-item"], [data-slot="dropdown-menu-radio-item"], [data-slot="dropdown-menu-sub-trigger"]):is(:focus, [data-highlighted]) {
+  color: #000000;
+  background: #dedede;
+}
+
+/* Dialogs: a band across the whole width of the screen, its content in
+   the middle, the page dimmed above and below. */
+.theme-is-metro [data-slot="dialog-overlay"] {
+  background: rgb(0 0 0 / 0.6);
+  backdrop-filter: none;
+}
+.theme-is-metro [data-slot="dialog-content"] {
+  --metro-band: 34rem;
+  left: 0;
+  width: 100%;
+  max-width: none;
+  translate: 0 -50%;
+  padding: 1.75rem max(1.25rem, calc((100% - var(--metro-band)) / 2));
+  border: 0;
+  border-radius: 0;
+  color: #ffffff;
+  background: #2b2b2b;
+  box-shadow: none;
+  --popover: #2b2b2b;
+  --popover-foreground: #ffffff;
+  --tw-ring-shadow: 0 0 #0000;
+}
+.theme-is-metro [data-slot="dialog-content"]:is(.sm\:max-w-lg, .sm\:max-w-xl, .sm\:max-w-2xl, .max-w-2xl, .sm\:max-w-3xl) {
+  --metro-band: 44rem;
+}
+.theme-is-metro [data-slot="dialog-title"] {
+  font-size: 1.75rem;
+}
+.theme-is-metro [data-slot="dialog-content"] > [data-slot="dialog-close"] {
+  top: 1rem;
+  right: max(0.5rem, calc((100% - var(--metro-band)) / 2 - 3rem));
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  color: #ffffff;
+}
+.theme-is-metro [data-slot="dialog-footer"] {
+  border-top: 0;
+  border-radius: 0;
+  background: transparent;
+}
+.theme-is-metro .bulk-bar {
+  border: 0;
+  border-radius: 0;
+  background: #2b2b2b;
+  box-shadow: 0 0 0 2px #1ba1e2;
+}
+
+/* The sign-in pages: the app's name as a hub's title. */
+.theme-is-metro .auth-backdrop {
+  display: none;
+}
+.theme-is-metro main:has(> .auth-backdrop) .wordmark {
+  font-family: var(--metro-font);
+  font-size: 3.25rem;
+  font-weight: 300;
+  letter-spacing: -0.015em;
+  text-transform: lowercase;
+}
+.theme-is-metro main:has(> .auth-backdrop) [data-slot="card-title"] {
+  font-size: 1.75rem;
+}
+
+/* ── Card Catalogue ────────────────────────────────────────────────────────
+   A library's card catalogue, laid out on an oak table. The page is pale
+   oak, its grain running along the planks. The top bar is the front of a
+   catalogue drawer, darker oak, each page's name typed on a card in a
+   brass label holder, the open page's in the date-due stamp's violet.
+   A page's title sits in a holder of its own, screwed to the table.
+   Everything else is typed on index cards: cream, a red rule along the
+   top and faint blue lines below, and in the library a punched hole at
+   the foot of each, as if just lifted off the rod. Buttons are slips of
+   card, the main one a rubber stamp in violet; tabs are guide cards, the
+   open one standing in front; check boxes are typed over with an x;
+   progress bars are inked in violet. Menus, popovers and dialogs are
+   cards too. The text is Courier Prime, a typewriter's face, throughout. */
+:root[data-theme="card-catalogue"] {
+  --cc-font: var(--font-typewriter), "Courier Prime", "Courier New", Courier, monospace;
+  --cc-red: #d24a43;
+  --cc-blue: rgb(96 140 205 / 0.26);
+  --cc-ink: #1f160d;
+  --cc-violet: #5b2b84;
+  --cc-brass: linear-gradient(135deg, #f6df90, #c99a3e 38%, #8c6322 58%, #c4973c 78%, #ecd27c);
+  --cc-oak: #a9783f;
+  --cc-paper-shadow: 0 1px 1px rgb(70 45 15 / 0.22), 0 8px 14px -10px rgb(70 45 15 / 0.55);
+  /* An index card: a red rule along its top, faint blue lines below. */
+  --cc-rules:
+    linear-gradient(transparent 0.625rem, var(--cc-red) 0.625rem calc(0.625rem + 1.5px), transparent calc(0.625rem + 1.5px)),
+    repeating-linear-gradient(transparent 0 1.5rem, var(--cc-blue) 1.5rem calc(1.5rem + 1px)) 0 0.625rem;
+  --surface-shadow: var(--cc-paper-shadow);
+  --chart-1: #5b2b84;
+  --chart-2: #d24a43;
+  --chart-3: #3f6ea8;
+  --chart-4: #b88a2e;
+  --chart-5: #6f5a3a;
+  scrollbar-color: #a9783f transparent;
+}
+.theme-is-card-catalogue body {
+  font-family: var(--cc-font);
+  letter-spacing: -0.01em;
+}
+/* A typewriter's letters are wide: the controls set them a little closer,
+   so the library's filters keep their words. */
+.theme-is-card-catalogue :is(input, textarea, button, [data-slot="select-trigger"], .select-like, [data-size][data-variant]) {
+  letter-spacing: -0.035em;
+}
+.theme-is-card-catalogue ::selection {
+  color: #ffffff;
+  background: var(--cc-violet);
+}
+.theme-is-card-catalogue :is(h1, h2, h3, [data-slot="card-title"], [data-slot="dialog-title"]) {
+  font-family: var(--cc-font);
+  font-weight: 700;
+  letter-spacing: 0;
+}
+.theme-is-card-catalogue .book-backdrop {
+  display: none;
+}
+/* A page's title on a card in a brass holder, a screw at each end. A
+   book's own page keeps its title as typed. */
+.theme-is-card-catalogue:not([data-section="book"]) .top-bar + main h1 {
+  width: fit-content;
+  max-width: 100%;
+  padding: 0.15em 1.75em;
+  background:
+    radial-gradient(circle at 0.75em 50%, #5c3d10 0 0.1em, #f0d07a 0.13em 0.2em, #8c6322 0.22em, transparent 0.26em),
+    radial-gradient(circle at calc(100% - 0.75em) 50%, #5c3d10 0 0.1em, #f0d07a 0.13em 0.2em, #8c6322 0.22em, transparent 0.26em),
+    linear-gradient(#fcf8ec, #f6efdc) 1.4em 0.2em / calc(100% - 2.8em) calc(100% - 0.4em) no-repeat,
+    var(--cc-brass);
+  box-shadow: 0 2px 3px rgb(60 38 10 / 0.35), inset 0 0 0 1px rgb(90 60 15 / 0.45);
+}
+.theme-is-card-catalogue .top-bar + main h1 {
+  font-size: 1.75rem;
+}
+/* Text typed straight onto the table keeps the grain off its letters. */
+.theme-is-card-catalogue .top-bar + main {
+  text-shadow: 0 0 1px #e6cfa6, 0 0 2px #e6cfa6, 0 0 3px #e6cfa6, 0 0 5px #e6cfa6;
+}
+.theme-is-card-catalogue .top-bar + main :is(h1, .surface, [data-slot="card"], .bg-card, [data-size][data-variant], [data-slot="badge"], input, textarea, [data-slot="select-trigger"], .shelf-tabs) {
+  text-shadow: none;
+}
+
+/* The top bar: the front of a catalogue drawer, darker oak with its own
+   grain, and each page's name on a card in a brass holder. */
+.theme-is-card-catalogue .top-bar {
+  --foreground: #fbf1d8;
+  --muted-foreground: #fbf1d8;
+  --accent: rgb(255 240 200 / 0.16);
+  --accent-foreground: #ffffff;
+  --ring: #fbf1d8;
+  border: 0;
+  color: var(--foreground);
+  background:
+    repeating-linear-gradient(transparent 0 5px, rgb(90 55 20 / 0.16) 5px 6px, transparent 6px 9px),
+    repeating-linear-gradient(transparent 0 13px, rgb(255 230 180 / 0.1) 13px 15px, transparent 15px 23px),
+    repeating-linear-gradient(transparent 0 31px, rgb(70 40 10 / 0.14) 31px 34px, transparent 34px 47px),
+    linear-gradient(#8a5e33, #77502a 60%, #6a4622);
+  box-shadow: inset 0 1px rgb(255 230 180 / 0.35), inset 0 -2px rgb(60 35 10 / 0.35), 0 4px 10px -4px rgb(60 35 10 / 0.5);
+  backdrop-filter: none;
+  animation: none;
+}
+.theme-is-card-catalogue .top-bar .wordmark {
+  color: #fbf1d8;
+  font-family: var(--cc-font);
+  font-weight: 700;
+  letter-spacing: 0;
+  text-shadow: 0 1px 1px rgb(50 28 8 / 0.7);
+}
+.theme-is-card-catalogue .top-bar .wordmark > svg {
+  color: #f0d07a;
+  filter: drop-shadow(0 1px 1px rgb(50 28 8 / 0.7));
+}
+.theme-is-card-catalogue .top-bar .nav-link[data-size] {
+  height: 2.25rem;
+  border: 3px solid transparent;
+  border-radius: 0;
+  color: var(--cc-ink);
+  background: linear-gradient(#fcf8ec, #efe5cd) padding-box, var(--cc-brass) border-box;
+  box-shadow: 0 1px 2px rgb(40 22 5 / 0.55), inset 0 1px 2px rgb(60 38 10 / 0.25);
+  text-shadow: none;
+}
+.theme-is-card-catalogue .top-bar .nav-link[data-size]:hover {
+  color: var(--cc-ink);
+  background: linear-gradient(#ffffff, #f7efda) padding-box, var(--cc-brass) border-box;
+}
+.theme-is-card-catalogue .top-bar .nav-link[data-size][aria-current="page"],
+.theme-is-card-catalogue .top-bar .nav-link[data-size][aria-current="page"]:hover {
+  color: var(--cc-violet);
+  font-weight: 700;
+  background: linear-gradient(#ffffff, #f7efda) padding-box, var(--cc-brass) border-box;
+}
+.theme-is-card-catalogue .top-bar .nav-link[aria-current="page"]::after {
+  inset: auto 0.375rem 0.25rem;
+  height: 2px;
+  background: var(--cc-violet);
+}
+.theme-is-card-catalogue .top-bar .ml-auto [data-size][data-variant] {
+  border: 0;
+  color: #fbf1d8;
+  background: transparent;
+  box-shadow: none;
+}
+.theme-is-card-catalogue .top-bar .ml-auto [data-size][data-variant]:is(:hover, [aria-expanded="true"]) {
+  background: rgb(255 240 200 / 0.18);
+}
+.theme-is-card-catalogue .top-bar .ml-auto .text-muted-foreground {
+  color: #fbf1d8;
+}
+@media (width < 40rem) {
+  .theme-is-card-catalogue .top-bar .nav-link[data-size] {
+    height: 2rem;
+    padding-inline: 0.25rem;
+    border-width: 2px;
+  }
+}
+
+/* Buttons: slips of card, typed on; the main one a rubber stamp, inked
+   in violet. */
+.theme-is-card-catalogue [data-size][data-variant] {
+  border: 1px solid #a48857;
+  border-radius: 0;
+  color: var(--cc-ink);
+  background: #fcf8ec;
+  box-shadow: 0 1px 1px rgb(70 45 15 / 0.25);
+}
+.theme-is-card-catalogue [data-size][data-variant]:hover {
+  color: var(--cc-ink);
+  background: #ffffff;
+}
+.theme-is-card-catalogue [data-size][data-variant="default"] {
+  border: 2px solid var(--cc-violet);
+  color: var(--cc-violet);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: rgb(252 248 236 / 0.92);
+  box-shadow: inset 0 0 0 2px rgb(252 248 236 / 0.92), inset 0 0 0 3px rgb(91 43 132 / 0.6);
+  rotate: -1deg;
+}
+.theme-is-card-catalogue [data-size][data-variant="default"]:hover {
+  border-color: var(--cc-violet);
+  color: #ffffff;
+  background: var(--cc-violet);
+  box-shadow: inset 0 0 0 2px var(--cc-violet), inset 0 0 0 3px rgb(255 255 255 / 0.55);
+}
+.theme-is-card-catalogue [data-size][data-variant="destructive"] {
+  border-color: var(--destructive);
+  color: var(--destructive);
+}
+.theme-is-card-catalogue [data-size]:is([data-variant="ghost"], [data-variant="link"]) {
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+}
+.theme-is-card-catalogue [data-size][data-variant="ghost"]:is(:hover, [aria-expanded="true"]) {
+  background: rgb(252 248 236 / 0.7);
+}
+.theme-is-card-catalogue [data-size][data-variant="link"] {
+  color: var(--cc-violet);
+}
+.theme-is-card-catalogue [data-size][data-variant="link"]:hover {
+  background: transparent;
+  text-decoration: underline;
+}
+.theme-is-card-catalogue [data-size][data-variant]:active:not(:disabled) {
+  translate: 0 1px;
+  box-shadow: none;
+}
+.theme-is-card-catalogue :is([data-size][data-variant], [data-slot="select-trigger"], .select-like, [role="tab"], [data-slot="tabs-trigger"], .shelf-tabs > a, .surface, .nav-link):focus-visible {
+  outline: 2px dashed var(--cc-violet);
+  outline-offset: 2px;
+  --tw-ring-shadow: 0 0 #0000;
+}
+
+/* Fields: white card, ruled in brown, violet while typed in. */
+.theme-is-card-catalogue :is([data-slot="input"], [data-slot="textarea"]),
+.theme-is-card-catalogue input:is([type="text"], [type="search"], [type="number"], [type="date"], [type="password"], [type="url"], [type="email"], :not([type])),
+.theme-is-card-catalogue textarea {
+  border: 1px solid #a48857;
+  border-radius: 0;
+  background: #fffdf6;
+  box-shadow: inset 0 1px 2px rgb(70 45 15 / 0.12);
+}
+.theme-is-card-catalogue :is([data-slot="input"], [data-slot="textarea"], input, textarea):focus-visible {
+  border-color: var(--cc-violet);
+  outline: none;
+  box-shadow: inset 0 1px 2px rgb(70 45 15 / 0.12), 0 0 0 2px rgb(91 43 132 / 0.2);
+  --tw-ring-shadow: 0 0 #0000;
+}
+.theme-is-card-catalogue :is([data-slot="select-trigger"], .select-like) {
+  border: 1px solid #a48857;
+  border-radius: 0;
+  background: #fcf8ec;
+  box-shadow: 0 1px 1px rgb(70 45 15 / 0.25);
+}
+.theme-is-card-catalogue :is([data-slot="select-trigger"], .select-like) > svg:last-child {
+  color: var(--cc-violet);
+  opacity: 1;
+}
+
+/* Check boxes: a typed box, an x typed over it. Switches: a groove in the
+   card, a brass knob. */
+.theme-is-card-catalogue input[type="checkbox"],
+.theme-is-card-catalogue input[type="radio"] {
+  appearance: none;
+  flex: none;
+  width: 1rem;
+  height: 1rem;
+  margin: 0;
+  border: 1.5px solid var(--cc-ink);
+  border-radius: 0;
+  background: #fffdf6;
+}
+.theme-is-card-catalogue input[type="radio"] {
+  border-radius: 50%;
+}
+.theme-is-card-catalogue input[type="checkbox"]:checked {
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 2.8l7 6.6M9.3 2.6l-6.6 6.9' stroke='%231f160d' stroke-width='1.7' stroke-linecap='round' opacity='.9'/%3E%3C/svg%3E") center / 100% no-repeat, #fffdf6;
+}
+.theme-is-card-catalogue input[type="radio"]:checked {
+  background: radial-gradient(circle, var(--cc-ink) 0 3px, transparent 3.5px), #fffdf6;
+}
+.theme-is-card-catalogue input:is([type="checkbox"], [type="radio"]):focus-visible {
+  outline: 2px dashed var(--cc-violet);
+  outline-offset: 2px;
+}
+.theme-is-card-catalogue button[role="switch"] > span:last-child {
+  border: 1px solid #a48857;
+  background: #e8d7b1;
+  box-shadow: inset 0 1px 3px rgb(70 45 15 / 0.35);
+}
+.theme-is-card-catalogue button[role="switch"][aria-checked="true"] > span:last-child {
+  background: var(--cc-violet);
+}
+.theme-is-card-catalogue button[role="switch"] > span:last-child > span {
+  background: radial-gradient(circle at 35% 30%, #fff4c4, #e0b65a 35%, #a37628 75%, #7a5418);
+  box-shadow: 0 1px 2px rgb(50 30 5 / 0.5);
+}
+
+/* Index cards: cream, a red rule along the top, faint blue lines below,
+   corners a touch rounded by handling. */
+.theme-is-card-catalogue [data-slot="card"],
+.theme-is-card-catalogue .bg-card.border:not(.bulk-bar, .surface) {
+  border: 0;
+  border-radius: 2px;
+  background: var(--cc-rules), #fcf8ec;
+  box-shadow: var(--cc-paper-shadow), inset 0 0 0 1px rgb(150 115 60 / 0.25);
+  --tw-ring-shadow: 0 0 #0000;
+}
+.theme-is-card-catalogue [data-slot="card"] {
+  padding-top: calc(var(--card-spacing) + 0.5rem);
+}
+.theme-is-card-catalogue [data-slot="card-footer"] {
+  border-top: 1px dashed #c4a676;
+  border-radius: 0;
+  background: transparent;
+}
+/* In the library each card has its hole punched at the foot, where the
+   rod through the drawer runs. */
+.theme-is-card-catalogue .surface:not([data-slot="card"]) {
+  position: relative;
+  padding-top: 1.25rem;
+  padding-bottom: 1.5rem;
+  border: 0;
+  border-radius: 2px;
+  background: var(--cc-rules), #fcf8ec;
+  box-shadow: var(--cc-paper-shadow), inset 0 0 0 1px rgb(150 115 60 / 0.25);
+}
+.theme-is-card-catalogue .surface:not([data-slot="card"])::after {
+  content: "";
+  position: absolute;
+  bottom: 0.375rem;
+  left: 50%;
+  width: 0.6875rem;
+  height: 0.6875rem;
+  margin-left: -0.34375rem;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 35%, #9a7245, #c7a271);
+  box-shadow: inset 0 1px 2px rgb(50 30 5 / 0.55), 0 0.5px 0 rgb(255 255 255 / 0.8);
+}
+.theme-is-card-catalogue .surface:not([data-slot="card"]):hover {
+  background: var(--cc-rules), #fffdf6;
+  box-shadow: 0 1px 1px rgb(70 45 15 / 0.22), 0 14px 22px -12px rgb(70 45 15 / 0.6), inset 0 0 0 1px rgb(150 115 60 / 0.3);
+}
+.theme-is-card-catalogue .surface .book-cover {
+  border-radius: 1px;
+  box-shadow: 0 1px 3px rgb(60 38 10 / 0.35);
+}
+.theme-is-card-catalogue .surface .font-heading {
+  font-weight: 700;
+}
+
+/* Tabs: guide cards, manila with a rounded tab; the open one cream and in
+   front. Chips: slips of card, the chosen one stamped violet. */
+.theme-is-card-catalogue .shelf-tabs {
+  gap: 0 0.25rem;
+  border-bottom: 2px solid #9a7a4a;
+}
+.theme-is-card-catalogue .shelf-tabs > a,
+.theme-is-card-catalogue [data-slot="tabs-trigger"] {
+  margin: 0.25rem 0 -2px;
+  padding: 0.25rem 0.75rem;
+  border: 1px solid #a48857;
+  border-bottom: 0;
+  border-radius: 0.625rem 0.625rem 0 0;
+  color: var(--cc-ink);
+  background: linear-gradient(#ead5a4, #ddc28b);
+  box-shadow: none;
+}
+.theme-is-card-catalogue .shelf-tabs > a:hover,
+.theme-is-card-catalogue [data-slot="tabs-trigger"]:hover {
+  color: var(--cc-ink);
+  background: linear-gradient(#f2e2b9, #e6cf9d);
+}
+.theme-is-card-catalogue .shelf-tabs > a[aria-current="page"],
+.theme-is-card-catalogue [data-slot="tabs-trigger"][data-state="active"] {
+  z-index: 1;
+  margin-top: 0;
+  padding-bottom: 0.5rem;
+  color: var(--cc-violet);
+  font-weight: 700;
+  background: #fcf8ec;
+  box-shadow: 0 -2px 4px -2px rgb(70 45 15 / 0.3);
+}
+.theme-is-card-catalogue .shelf-tabs > a > span {
+  border-radius: 0;
+  background: transparent;
+  box-shadow: inset 0 0 0 1px currentColor;
+}
+.theme-is-card-catalogue [data-slot="tabs-list"] {
+  border-radius: 0;
+  background: transparent;
+  box-shadow: inset 0 -2px #9a7a4a;
+}
+.theme-is-card-catalogue [data-slot="tabs-trigger"]::after {
+  display: none;
+}
+.theme-is-card-catalogue :is(a, button).rounded-full.border:not(.aspect-square, .border-2) {
+  border-color: #a48857;
+  border-radius: 0;
+  color: var(--cc-ink);
+  background: #fcf8ec;
+}
+.theme-is-card-catalogue :is(a, button).rounded-full.border:not(.aspect-square, .border-2):hover {
+  background: #ffffff;
+}
+.theme-is-card-catalogue :is(a, button).rounded-full.border:is([class*="border-primary"], [aria-current="page"], [aria-pressed="true"]):not(.aspect-square, .border-2) {
+  border: 2px solid var(--cc-violet);
+  color: var(--cc-violet);
+  font-weight: 700;
+  background: #fcf8ec;
+}
+.theme-is-card-catalogue [data-slot="badge"] {
+  border-radius: 0;
+}
+.theme-is-card-catalogue kbd {
+  border: 1px solid #a48857;
+  border-radius: 0;
+  background: #fcf8ec;
+}
+
+/* Progress: a ruled strip, inked across in violet. */
+.theme-is-card-catalogue :has(> .bar-grow) {
+  border-radius: 0;
+  background: #fffdf6;
+  box-shadow: inset 0 0 0 1px #a48857;
+}
+.theme-is-card-catalogue .bar-grow {
+  border-radius: 0;
+}
+.theme-is-card-catalogue .bar-grow[class*="primary"] {
+  background: repeating-linear-gradient(-45deg, #5b2b84 0 3px, #6f3d9a 3px 5px);
+}
+
+/* Menus, popovers and dialogs: index cards over the table. */
+.theme-is-card-catalogue :is([data-slot="dropdown-menu-content"], [data-slot="popover-content"], [data-slot="select-content"], [data-slot="dropdown-menu-sub-content"]) {
+  border: 0;
+  border-radius: 2px;
+  background: linear-gradient(transparent 0.375rem, var(--cc-red) 0.375rem calc(0.375rem + 1.5px), transparent calc(0.375rem + 1.5px)), #fcf8ec;
+  padding-top: 0.75rem;
+  box-shadow: 0 2px 3px rgb(70 45 15 / 0.25), 0 16px 30px -12px rgb(70 45 15 / 0.55), inset 0 0 0 1px rgb(150 115 60 / 0.3);
+  --tw-ring-shadow: 0 0 #0000;
+}
+.theme-is-card-catalogue :is([data-slot="dropdown-menu-item"], [data-slot="select-item"], [data-slot="dropdown-menu-checkbox-item"], [data-slot="dropdown-menu-radio-item"], [data-slot="dropdown-menu-sub-trigger"]) {
+  border-radius: 0;
+}
+.theme-is-card-catalogue :is([data-slot="dropdown-menu-item"], [data-slot="select-item"], [data-slot="dropdown-menu-checkbox-item"], [data-slot="dropdown-menu-radio-item"], [data-slot="dropdown-menu-sub-trigger"]):is(:focus, [data-highlighted]) {
+  color: var(--cc-ink);
+  background: #f0e2bf;
+}
+.theme-is-card-catalogue [data-slot="dialog-overlay"] {
+  background: rgb(60 38 10 / 0.3);
+  backdrop-filter: none;
+}
+.theme-is-card-catalogue [data-slot="dialog-content"] {
+  padding-top: 1.5rem;
+  padding-bottom: 1.75rem;
+  border: 0;
+  border-radius: 2px;
+  background: var(--cc-rules), #fcf8ec;
+  box-shadow: 0 2px 4px rgb(60 38 10 / 0.3), 0 30px 60px -20px rgb(60 38 10 / 0.6), inset 0 0 0 1px rgb(150 115 60 / 0.3);
+  --tw-ring-shadow: 0 0 #0000;
+}
+.theme-is-card-catalogue [data-slot="dialog-content"]::after {
+  content: "";
+  position: absolute;
+  bottom: 0.4375rem;
+  left: 50%;
+  width: 0.75rem;
+  height: 0.75rem;
+  margin-left: -0.375rem;
+  border-radius: 50%;
+  background: #8a6a45;
+  box-shadow: inset 0 1px 2px rgb(30 18 5 / 0.6), 0 0.5px 0 rgb(255 255 255 / 0.8);
+}
+.theme-is-card-catalogue [data-slot="dialog-footer"] {
+  border-top: 0;
+  border-radius: 0;
+  background: transparent;
+}
+.theme-is-card-catalogue .bulk-bar {
+  border: 0;
+  border-radius: 2px;
+  background: var(--cc-rules), #fcf8ec;
+  box-shadow: 0 2px 4px rgb(60 38 10 / 0.3), 0 20px 40px -16px rgb(60 38 10 / 0.6), inset 0 0 0 1px rgb(150 115 60 / 0.3);
+}
+
+/* The sign-in pages: the app's name on a brass plate, the form a card. */
+.theme-is-card-catalogue .auth-backdrop {
+  display: none;
+}
+.theme-is-card-catalogue main:has(> .auth-backdrop) .wordmark {
+  padding: 0.2em 1.6em;
+  color: var(--cc-ink);
+  font-family: var(--cc-font);
+  font-weight: 700;
+  background:
+    radial-gradient(circle at 0.7em 50%, #5c3d10 0 0.1em, #f0d07a 0.13em 0.2em, #8c6322 0.22em, transparent 0.26em),
+    radial-gradient(circle at calc(100% - 0.7em) 50%, #5c3d10 0 0.1em, #f0d07a 0.13em 0.2em, #8c6322 0.22em, transparent 0.26em),
+    linear-gradient(#fcf8ec, #f6efdc) 1.3em 0.2em / calc(100% - 2.6em) calc(100% - 0.4em) no-repeat,
+    var(--cc-brass);
+  box-shadow: 0 2px 3px rgb(60 38 10 / 0.35);
+}
+
+/* ── Comic ─────────────────────────────────────────────────────────────────
+   A comic book, in the Silly set. The page is paper printed with Ben-Day
+   dots; every panel is ruled round in heavy black ink, each a little
+   askew, as if inked by hand; card titles sit in yellow caption boxes;
+   in the library a book's title and author are a speech bubble, its tail
+   pointing up at the cover. Lettering is Bangers: page titles in red with
+   a black drop, buttons in capitals, the main one red. The top bar is a
+   yellow strip ruled off in black. */
+:root[data-theme="comic"] {
+  --comic-ink: #111111;
+  --comic-font: var(--font-bangers), "Bangers", Impact, "Arial Black", sans-serif;
+  --surface-shadow: none;
+  --chart-1: #d10f2b;
+  --chart-2: #1d4ed8;
+  --chart-3: #ffc400;
+  --chart-4: #12a150;
+  --chart-5: #8b2fc9;
+}
+.theme-is-comic ::selection {
+  color: #111111;
+  background: #ffe14d;
+}
+.theme-is-comic h1 {
+  color: #d10f2b;
+  font-family: var(--comic-font);
+  font-size: 2.75rem;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 0.03em;
+  text-shadow: 3px 3px 0 var(--comic-ink);
+  -webkit-text-stroke: 1.5px var(--comic-ink);
+}
+.theme-is-comic[data-section="book"] h1 {
+  color: var(--comic-ink);
+  text-shadow: 3px 3px 0 #ffe14d;
+  -webkit-text-stroke: 0;
+}
+.theme-is-comic :is(h2, h3, [data-slot="dialog-title"]) {
+  font-family: var(--comic-font);
+  font-weight: 400;
+  letter-spacing: 0.04em;
+}
+.theme-is-comic .book-backdrop {
+  display: none;
+}
+
+/* The top bar: a yellow strip, ruled off in black. */
+.theme-is-comic .top-bar {
+  --background: #ffe14d;
+  --accent: #fff3a6;
+  --accent-foreground: #111111;
+  border-bottom: 3px solid var(--comic-ink);
+  color: var(--comic-ink);
+  background: #ffe14d;
+  backdrop-filter: none;
+  animation: none;
+}
+.theme-is-comic .top-bar .wordmark {
+  color: #d10f2b;
+  font-family: var(--comic-font);
+  font-size: 1.5rem;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  text-shadow: 2px 2px 0 var(--comic-ink);
+}
+.theme-is-comic .top-bar .wordmark > svg {
+  color: var(--comic-ink);
+}
+.theme-is-comic .top-bar .nav-link[data-size] {
+  border: 0;
+  color: var(--comic-ink);
+  font-family: var(--comic-font);
+  font-size: 1.0625rem;
+  font-weight: 400;
+  letter-spacing: 0.05em;
+  background: transparent;
+  box-shadow: none;
+}
+.theme-is-comic .top-bar .nav-link[data-size]:hover {
+  background: #fff3a6;
+}
+.theme-is-comic .top-bar .nav-link[data-size][aria-current="page"] {
+  border: 2px solid var(--comic-ink);
+  color: #ffffff;
+  background: #d10f2b;
+  box-shadow: 2px 2px 0 var(--comic-ink);
+  rotate: -2deg;
+}
+.theme-is-comic .top-bar .nav-link[aria-current="page"]::after {
+  display: none;
+}
+.theme-is-comic .top-bar .ml-auto [data-size][data-variant] {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+/* Buttons: lettered in capitals, ruled in ink; the main one red. */
+.theme-is-comic [data-size][data-variant] {
+  border: 2px solid var(--comic-ink);
+  border-radius: 0;
+  color: var(--comic-ink);
+  font-family: var(--comic-font);
+  font-size: 1.0625rem;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  background: #ffffff;
+  box-shadow: 2px 2px 0 var(--comic-ink);
+}
+.theme-is-comic [data-size="icon"][data-variant],
+.theme-is-comic [data-size="icon-sm"][data-variant],
+.theme-is-comic [data-size="icon-xs"][data-variant] {
+  font-size: inherit;
+}
+.theme-is-comic [data-size][data-variant]:hover {
+  color: var(--comic-ink);
+  background: #fff3a6;
+}
+.theme-is-comic [data-size][data-variant="default"] {
+  color: #ffffff;
+  background: #d10f2b;
+}
+.theme-is-comic [data-size][data-variant="default"]:hover {
+  color: #ffffff;
+  background: #e8243f;
+}
+.theme-is-comic [data-size][data-variant="destructive"] {
+  color: var(--destructive);
+}
+.theme-is-comic [data-size]:is([data-variant="ghost"], [data-variant="link"]) {
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+}
+.theme-is-comic [data-size][data-variant="link"] {
+  color: var(--primary);
+}
+.theme-is-comic [data-size][data-variant]:active:not(:disabled) {
+  translate: 2px 2px;
+  box-shadow: none;
+}
+
+/* Fields: white, ruled in ink; a drop-down's choice lettered like a
+   button. */
+.theme-is-comic :is([data-slot="select-trigger"], .select-like) {
+  font-family: var(--comic-font);
+  font-size: 1.0625rem;
+  letter-spacing: 0.05em;
+}
+.theme-is-comic :is([data-slot="input"], [data-slot="textarea"], [data-slot="select-trigger"], .select-like),
+.theme-is-comic input:is([type="text"], [type="search"], [type="number"], [type="date"], [type="password"], [type="url"], [type="email"], :not([type])),
+.theme-is-comic textarea {
+  border: 2px solid var(--comic-ink);
+  border-radius: 0;
+  background: #ffffff;
+}
+.theme-is-comic input[type="checkbox"] {
+  accent-color: #d10f2b;
+}
+
+/* Panels: ruled round in heavy ink, each a touch askew. */
+.theme-is-comic [data-slot="card"],
+.theme-is-comic .surface {
+  border: 3px solid var(--comic-ink);
+  border-radius: 0;
+  background: #ffffff;
+  box-shadow: none;
+  --tw-ring-shadow: 0 0 #0000;
+}
+.theme-is-comic :nth-child(3n + 1) > .surface:not([data-slot="card"]) {
+  rotate: -0.6deg;
+}
+.theme-is-comic :nth-child(3n + 2) > .surface:not([data-slot="card"]) {
+  rotate: 0.5deg;
+}
+.theme-is-comic .surface:not([data-slot="card"]):hover {
+  rotate: 0deg;
+  transform: none;
+  box-shadow: 4px 4px 0 #d10f2b;
+}
+/* A card's title in a caption box. */
+.theme-is-comic [data-slot="card-title"] {
+  width: fit-content;
+  padding: 0.125rem 0.5rem;
+  border: 2px solid var(--comic-ink);
+  font-family: var(--comic-font);
+  font-size: 1.125rem;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: #ffe14d;
+}
+/* In the library, the title and author are a speech bubble, its tail
+   pointing up at the cover. */
+.theme-is-comic .surface > .flex-1:last-child {
+  position: relative;
+  margin-top: 0.75rem;
+  padding: 0.375rem 0.625rem 0.5rem;
+  border: 2px solid var(--comic-ink);
+  border-radius: 1.25rem;
+  background: #ffffff;
+}
+.theme-is-comic .surface > .flex-1:last-child::before {
+  content: "";
+  position: absolute;
+  top: -0.5625rem;
+  left: 1.25rem;
+  width: 0.875rem;
+  height: 0.875rem;
+  border-top: 2px solid var(--comic-ink);
+  border-left: 2px solid var(--comic-ink);
+  background: #ffffff;
+  transform: skewX(20deg) rotate(45deg);
+}
+.theme-is-comic .surface .book-cover {
+  border: 2px solid var(--comic-ink);
+  border-radius: 0;
+}
+
+/* Tabs: lettered boxes, the open one yellow. Chips the same. */
+.theme-is-comic .shelf-tabs {
+  gap: 0.375rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 3px solid var(--comic-ink);
+}
+.theme-is-comic .shelf-tabs > a,
+.theme-is-comic [data-slot="tabs-trigger"] {
+  margin: 0;
+  border: 2px solid var(--comic-ink);
+  border-radius: 0;
+  color: var(--comic-ink);
+  font-family: var(--comic-font);
+  font-size: 1.0625rem;
+  font-weight: 400;
+  letter-spacing: 0.05em;
+  background: #ffffff;
+}
+.theme-is-comic .shelf-tabs > a[aria-current="page"],
+.theme-is-comic [data-slot="tabs-trigger"][data-state="active"] {
+  background: #ffe14d;
+  box-shadow: 2px 2px 0 var(--comic-ink);
+}
+.theme-is-comic [data-slot="tabs-trigger"]::after {
+  display: none;
+}
+.theme-is-comic .shelf-tabs > a > span {
+  border-radius: 0;
+  font-family: var(--font-sans);
+  letter-spacing: 0;
+  background: rgb(0 0 0 / 0.08);
+}
+.theme-is-comic :is(a, button).rounded-full.border:not(.aspect-square, .border-2) {
+  border: 2px solid var(--comic-ink);
+  border-radius: 0;
+  color: var(--comic-ink);
+  background: #ffffff;
+}
+.theme-is-comic :is(a, button).rounded-full.border:is([class*="border-primary"], [aria-current="page"], [aria-pressed="true"]):not(.aspect-square, .border-2) {
+  background: #ffe14d;
+}
+.theme-is-comic [data-slot="badge"] {
+  border-radius: 0;
+}
+
+/* Progress: a red bar ruled in ink. */
+.theme-is-comic :has(> .bar-grow) {
+  border-radius: 0;
+  background: #ffffff;
+  box-shadow: 0 0 0 1.5px var(--comic-ink);
+}
+.theme-is-comic .bar-grow {
+  border-radius: 0;
+}
+
+/* Menus, popovers and dialogs: panels of their own. */
+.theme-is-comic :is([data-slot="dropdown-menu-content"], [data-slot="popover-content"], [data-slot="select-content"], [data-slot="dropdown-menu-sub-content"], [data-slot="dialog-content"]) {
+  border: 3px solid var(--comic-ink);
+  border-radius: 0;
+  background: #ffffff;
+  box-shadow: 5px 5px 0 var(--comic-ink);
+  --tw-ring-shadow: 0 0 #0000;
+}
+.theme-is-comic :is([data-slot="dropdown-menu-item"], [data-slot="select-item"], [data-slot="dropdown-menu-checkbox-item"], [data-slot="dropdown-menu-radio-item"], [data-slot="dropdown-menu-sub-trigger"]):is(:focus, [data-highlighted]) {
+  color: var(--comic-ink);
+  background: #ffe14d;
+}
+.theme-is-comic [data-slot="dialog-overlay"] {
+  background: rgb(17 17 17 / 0.35);
+  backdrop-filter: none;
+}
+.theme-is-comic [data-slot="dialog-title"] {
+  width: fit-content;
+  padding: 0.125rem 0.5rem;
+  border: 2px solid var(--comic-ink);
+  font-size: 1.375rem;
+  background: #ffe14d;
+  rotate: -1deg;
+}
+.theme-is-comic .bulk-bar {
+  border: 3px solid var(--comic-ink);
+  border-radius: 0;
+  box-shadow: 5px 5px 0 var(--comic-ink);
+}
+.theme-is-comic .auth-backdrop {
+  display: none;
+}
+.theme-is-comic main:has(> .auth-backdrop) .wordmark {
+  color: #d10f2b;
+  font-family: var(--comic-font);
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  text-shadow: 3px 3px 0 var(--comic-ink);
+}

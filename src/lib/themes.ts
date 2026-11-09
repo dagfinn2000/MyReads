@@ -163,6 +163,14 @@ export const THEMES: ThemeDef[] = [
       "radial-gradient(120% 60% at 25% 100%, #3d4f88 0 45%, transparent 46%), radial-gradient(110% 55% at 90% 100%, #2b3c74 0 50%, transparent 51%), linear-gradient(#0d1838, #3a4a7e)",
     ownBackground: true,
   },
+  {
+    id: "metro",
+    name: "Metro",
+    mode: "dark",
+    swatch: ["#1d1d1d", "#1ba1e2"],
+    pattern:
+      "linear-gradient(90deg, transparent 46%, #1d1d1d 46% 54%, transparent 54%), linear-gradient(transparent 46%, #1d1d1d 46% 54%, transparent 54%), conic-gradient(#008a00 0 25%, #d80073 0 50%, #a20025 0 75%, #0050ef 0)",
+  },
 
   // Light palettes
   { id: "solarized-light", name: "Solarized Light", mode: "light", swatch: ["#fdf6e3", "#b58900"] },
@@ -314,6 +322,33 @@ export const THEMES: ThemeDef[] = [
       "radial-gradient(circle at 60% 55%, #fffdf5 0 10%, transparent 24%), conic-gradient(from 10deg at 60% 55%, #ffc93c, #ff7a52, #ffb84d, #f2611f, #ffd04a, #ff8f5a, #ffc93c)",
     ownBackground: true,
   },
+  {
+    id: "luna",
+    name: "Luna",
+    mode: "light",
+    swatch: ["#ece9d8", "#0054e3"],
+    pattern:
+      "linear-gradient(#0058ee 0 26%, #3a93ff 26% 30%, transparent 30%), radial-gradient(120% 60% at 30% 100%, #4f9e24 0 48%, transparent 50%), linear-gradient(#3f86ea, #b6d5f6)",
+    ownBackground: true,
+  },
+  {
+    id: "card-catalogue",
+    name: "Card Catalogue",
+    mode: "light",
+    swatch: ["#e6cfa6", "#5b2b84"],
+    pattern:
+      "linear-gradient(transparent 33%, #d24a43 33% 37%, transparent 37%), linear-gradient(transparent 24%, #fcf8ec 24% 76%, transparent 76%), repeating-linear-gradient(#e6cfa6 0 3px, #d3b583 3px 4px)",
+    ownBackground: true,
+  },
+  {
+    id: "contour",
+    name: "Contour",
+    mode: "light",
+    swatch: ["#f4f0e2", "#8a4513"],
+    pattern:
+      "radial-gradient(circle at 70% 75%, #bfdcef 0 9%, transparent 10%), repeating-radial-gradient(circle at 68% 70%, transparent 0 3px, #b07a43 3px 4px), linear-gradient(135deg, #d9e6bf 0 40%, #f4f0e2 40%)",
+    ownBackground: true,
+  },
 
   // The Silly set
   {
@@ -408,6 +443,16 @@ export const THEMES: ThemeDef[] = [
     swatch: ["#080818", "#ffd84a"],
     pattern: "radial-gradient(circle, #2438b8 0 44%, #f0f0f8 46% 54%, transparent 56%)",
     silly: "Your library gained a level!",
+    ownBackground: true,
+  },
+  {
+    id: "comic",
+    name: "Comic",
+    mode: "light",
+    swatch: ["#fffbea", "#d10f2b"],
+    pattern:
+      "radial-gradient(circle, #ffffff 0 30%, #111111 32% 37%, transparent 39%), repeating-conic-gradient(#ffe14d 0 12deg, #86cff0 12deg 24deg)",
+    silly: "KAPOW! Your library, in four colours.",
     ownBackground: true,
   },
 ];

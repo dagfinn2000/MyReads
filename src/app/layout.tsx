@@ -5,12 +5,15 @@ import "./restyles.css";
 import localFont from "next/font/local";
 import {
   Architects_Daughter,
+  Bangers,
+  Courier_Prime,
   Geist,
   Inter,
   JetBrains_Mono,
   Literata,
   Noto_Sans,
   Nunito,
+  Open_Sans,
   Patrick_Hand,
   Playfair_Display,
   UnifrakturMaguntia,
@@ -75,6 +78,18 @@ const handwriting = Patrick_Hand({
 const notoSans = Noto_Sans({ subsets: ["latin"], variable: "--font-noto-sans", preload: false });
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", preload: false });
 const jetbrains = JetBrains_Mono({ subsets: ["latin"], variable: "--font-jetbrains", preload: false });
+// Open Sans for Metro where Segoe UI isn't installed, light for its big
+// headings; Courier Prime for the Card Catalogue's typewritten cards; and
+// Bangers for the Comic's lettering.
+const openSans = Open_Sans({ subsets: ["latin"], variable: "--font-open-sans", preload: false });
+const courierPrime = Courier_Prime({
+  weight: ["400", "700"],
+  style: ["normal", "italic"],
+  subsets: ["latin"],
+  variable: "--font-typewriter",
+  preload: false,
+});
+const bangers = Bangers({ weight: "400", subsets: ["latin"], variable: "--font-bangers", preload: false });
 // DotGothic16 is a Japanese face, which Google Fonts serves in 120-odd
 // slices; through next/font/google each slice was a rule in the CSS every
 // page loads (94 KB of it, for one theme). This is the Latin slice alone
@@ -140,6 +155,9 @@ export default async function RootLayout({
         notoSans.variable,
         inter.variable,
         jetbrains.variable,
+        openSans.variable,
+        courierPrime.variable,
+        bangers.variable,
         pixel.variable,
         setting?.kind === "fixed" && THEME_CLASS_PREFIX + setting.id,
         dark && "dark",

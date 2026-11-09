@@ -224,7 +224,7 @@ The reading room's files:
 - **A few themes restyle everything.** Desktop 95, Terminal, Newsprint,
   Blueprint, Notebook, Quest, Pinstripe, Aero, Golden Gate, KDE Plasma,
   GNOME, Hyprland, Fluent, visionOS, Sea Glass, Leadlight, Mojave, Big
-  Sur and Ventura start from
+  Sur, Ventura, Luna, Metro, Card Catalogue and Comic start from
   a colour block like any theme, and [restyles.css](../src/app/restyles.css) reshapes the
   app for them, one section per theme. Its rules aim at shadcn's
   `data-slot` attributes and buttons by `data-size` and `data-variant`:
@@ -315,7 +315,16 @@ The reading room's files:
   cheap. Ventura's Stage
   Manager thumbnails are drawn with
   gradients in units of a tenth of their height (`--vt-u`), a sketch for
-  each page link by its `href`.
+  each page link by its `href`. Card Catalogue's oak and Contour's map
+  are drawn by [card-catalogue-picture.mjs](../scripts/card-catalogue-picture.mjs)
+  and [contour-picture.mjs](../scripts/contour-picture.mjs) from a seeded
+  random generator, so they never repeat across a wide screen and come
+  out the same each run; change the picture there and run the script.
+  Their text laid straight on the picture wears a halo of the page
+  colour (`text-shadow`), so grain and contour lines never run through
+  a letter. Metro colours the library's tiles by their place in the
+  grid; each tile sits in a wrapper (`.card-in`), so the rule counts the
+  wrapper (`:nth-child(8n + 2) > .surface`), not the tile.
 - **A theme is retired, never just deleted.** Take out its block and
   entry and add it to `RETIRED_THEMES` in
   [themes.ts](../src/lib/themes.ts) with the theme that replaces it, of

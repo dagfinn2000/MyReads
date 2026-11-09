@@ -785,6 +785,35 @@
     --page-size: cover;
 }
 
+/* Metro: Windows 8 and Windows Phone. Flat and square, near-black, white
+   text, and the cyan accent. Restyled from top to bottom in restyles.css:
+   page names in big, light lower-case letters, the library as a Start
+   screen of flat coloured tiles that tilt when pressed, buttons outlined
+   in white, light text boxes, white menus, and dialogs as a band across
+   the whole screen. */
+[data-theme="metro"] {
+    --background: #1d1d1d;
+    --foreground: #ffffff;
+    --card: #2b2b2b;
+    --card-foreground: #ffffff;
+    --popover: #ffffff;
+    --popover-foreground: #000000;
+    --primary: #1ba1e2;
+    --primary-foreground: #000000;
+    --secondary: #333333;
+    --secondary-foreground: #ffffff;
+    --muted: #2b2b2b;
+    --muted-foreground: #b0b0b0;
+    --accent: #3a3a3a;
+    --accent-foreground: #ffffff;
+    --destructive: #ff8a80;
+    --border: #444444;
+    --input: #6b6b6b;
+    --ring: #ffffff;
+    --radius: 0;
+    --heading-font: "Segoe UI", var(--font-open-sans), "Open Sans", system-ui, sans-serif;
+}
+
 [data-theme="solarized-light"] {
     --background: #fdf6e3;
     --foreground: #657b83;
@@ -1517,6 +1546,102 @@
     --page-size: cover;
 }
 
+/* Luna: Windows XP, its blue look. Windows of warm beige under thick blue
+   title bars, white panes, black text, and the title bar's blue for the
+   accent. Restyled from top to bottom in restyles.css: the blue taskbar
+   along the foot of the screen with its green Start button, a window
+   round every page, rounded buttons that glow orange under the pointer,
+   tabs with an orange edge and green progress blocks. The picture, a
+   green hill under a summer sky, is a file of its own (public/themes). */
+[data-theme="luna"] {
+    --background: #ece9d8;
+    --foreground: #000000;
+    --card: #ffffff;
+    --card-foreground: #000000;
+    --popover: #ffffff;
+    --popover-foreground: #000000;
+    --primary: #0054e3;
+    --primary-foreground: #ffffff;
+    --secondary: #f4f3ee;
+    --secondary-foreground: #000000;
+    --muted: #f4f2e8;
+    --muted-foreground: #4d4d4d;
+    --accent: #c1d2ee;
+    --accent-foreground: #000000;
+    --destructive: #a8141a;
+    --border: #aca899;
+    --input: #7f9db9;
+    --ring: #316ac5;
+    --radius: 0.1875rem;
+    --heading-font: "Trebuchet MS", Tahoma, Verdana, "DejaVu Sans", var(--font-noto-sans), sans-serif;
+    --page-gradient: url("/themes/luna.svg");
+    --page-size: cover;
+}
+
+/* Card Catalogue: a library's card catalogue on an oak table. Pale oak
+   for the page, cream index cards, typewriter ink for the text, and the
+   violet of a date-due stamp for the accent. Restyled from top to bottom
+   in restyles.css: a drawer front for the top bar with each page's name
+   on a card in a brass holder, typewritten index cards ruled in red and
+   blue with a punched hole, guide-card tabs and stamped buttons. The
+   picture is a file of its own (public/themes), drawn by
+   scripts/card-catalogue-picture.mjs. */
+[data-theme="card-catalogue"] {
+    --background: #e6cfa6;
+    --foreground: #1f160d;
+    --card: #fcf8ec;
+    --card-foreground: #1f160d;
+    --popover: #fcf8ec;
+    --popover-foreground: #1f160d;
+    --primary: #5b2b84;
+    --primary-foreground: #ffffff;
+    --secondary: #f1e6cc;
+    --secondary-foreground: #1f160d;
+    --muted: #efe3c6;
+    --muted-foreground: #4b3b28;
+    --accent: #f3e7c8;
+    --accent-foreground: #1f160d;
+    --destructive: #a3191f;
+    --border: #c4a676;
+    --input: #a48857;
+    --ring: #5b2b84;
+    --radius: 0.125rem;
+    --heading-font: var(--font-typewriter), "Courier Prime", "Courier New", Courier, monospace;
+    --page-gradient: url("/themes/card-catalogue.svg");
+    --page-size: cover;
+}
+
+/* Contour: a walker's map. Map paper for the page with the land drawn on
+   it, contour lines in brown, woods in green, a lake and the blue survey
+   grid; dark ink for the text and the contours' brown for the accent.
+   Panels are framed as the map's legend, with a double rule, and page
+   titles are spaced out in capitals like the names of hills. The picture
+   is a file of its own (public/themes), drawn by
+   scripts/contour-picture.mjs. */
+[data-theme="contour"] {
+    --background: #f4f0e2;
+    --foreground: #1e1a14;
+    --card: #fffdf7;
+    --card-foreground: #1e1a14;
+    --popover: #fffdf7;
+    --popover-foreground: #1e1a14;
+    --primary: #8a4513;
+    --primary-foreground: #ffffff;
+    --secondary: #ece6d2;
+    --secondary-foreground: #1e1a14;
+    --muted: #ece6d2;
+    --muted-foreground: #4f3e2c;
+    --accent: #ebe2c6;
+    --accent-foreground: #1e1a14;
+    --destructive: #9c1f16;
+    --border: #cdbf9f;
+    --input: #a8987a;
+    --ring: #8a4513;
+    --radius: 0.125rem;
+    --page-gradient: url("/themes/contour.svg");
+    --page-size: cover;
+}
+
 /* ── The Silly set ─────────────────────────────────────────────────────────
    Themes nobody should pick, listed apart in the palette menu. They are
    absurd on purpose but hold the same contrast as the rest, so the app
@@ -1803,6 +1928,34 @@
     --page-size: 613px 613px, 431px 431px, 100% 100%;
 }
 
+/* A comic book: paper printed with pale blue Ben-Day dots, black ink, the
+   red of a hero's cape for the accent and yellow for the captions. Its
+   panels, speech bubbles and lettering are in restyles.css. */
+[data-theme="comic"] {
+    --background: #fffbea;
+    --foreground: #111111;
+    --card: #ffffff;
+    --card-foreground: #111111;
+    --popover: #ffffff;
+    --popover-foreground: #111111;
+    --primary: #d10f2b;
+    --primary-foreground: #ffffff;
+    --secondary: #fff3c4;
+    --secondary-foreground: #111111;
+    --muted: #fff3c4;
+    --muted-foreground: #4a4a4a;
+    --accent: #ffe14d;
+    --accent-foreground: #111111;
+    --destructive: #b3001b;
+    --border: #111111;
+    --input: #111111;
+    --ring: #1d4ed8;
+    --radius: 0;
+    --heading-font: var(--font-bangers), "Bangers", Impact, "Arial Black", sans-serif;
+    --page-gradient: radial-gradient(75% 65% at 50% 40%, #fffbea 25%, rgb(255 251 234 / 0.55) 60%, transparent 85%), radial-gradient(circle, #86cff0 0 1.5px, transparent 2px), radial-gradient(circle, #f6a6c8 0 1.2px, transparent 1.7px);
+    --page-size: 100% 100%, 10px 10px, 14px 14px;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -1945,6 +2098,43 @@ html[data-own-background] body::before {
 }
 :root[data-theme="arcade"]:not([data-cards="flat"]) {
   --surface-shadow: 5px 5px 0 #ff2bd6;
+}
+
+/* Contour: panels framed as a map's legend, a rule and a hairline round
+   them; the top bar ruled off the same way; page titles in spaced
+   capitals, like the name of a range of hills (a book's own title is left
+   as written). */
+.theme-is-contour .surface {
+  border-color: #6b5238;
+  outline: 1px solid #6b5238;
+  outline-offset: 2px;
+}
+.theme-is-contour .top-bar {
+  border-bottom: 3px double #6b5238;
+}
+.theme-is-contour:not([data-section="book"]) h1 {
+  color: #6b3a12;
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}
+/* Words laid on the map get a halo of paper round them, as a map's names
+   do, and fields and buttons are filled, so the lines never run through
+   what is written. */
+.theme-is-contour .top-bar + main {
+  text-shadow: 0 0 2px #f4f0e2, 0 0 4px #f4f0e2, 0 0 6px #f4f0e2;
+}
+.theme-is-contour .top-bar + main :is(.surface, [data-slot="card"], .bg-card, [data-size][data-variant="default"]) {
+  text-shadow: none;
+}
+.theme-is-contour :is(input, textarea, [data-slot="select-trigger"], [data-variant="outline"], [data-variant="secondary"], .shelf-tabs > a > span) {
+  background-color: var(--card);
+}
+.theme-is-contour [data-size][data-variant="destructive"] {
+  background-color: #fbe9e4;
+}
+.theme-is-contour [data-size][data-variant="destructive"]:hover {
+  background-color: #f6d8cf;
 }
 
 /* One font for the whole page. */

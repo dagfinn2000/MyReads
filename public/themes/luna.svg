@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice">
+  <!-- Luna: a summer sky over a green hill. Drawn with gradients alone, no
+       filters, so it costs nothing to repaint. -->
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1557d6"/>
+      <stop offset="0.28" stop-color="#3f86ea"/>
+      <stop offset="0.52" stop-color="#7db3f2"/>
+      <stop offset="0.68" stop-color="#b6d5f6"/>
+      <stop offset="0.8" stop-color="#dcebf8"/>
+    </linearGradient>
+    <radialGradient id="cloud">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.95"/>
+      <stop offset="0.45" stop-color="#ffffff" stop-opacity="0.75"/>
+      <stop offset="0.8" stop-color="#f4f9ff" stop-opacity="0.25"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="wisp">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.55"/>
+      <stop offset="0.6" stop-color="#ffffff" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="far" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#5ea83a"/>
+      <stop offset="1" stop-color="#2f7d1e"/>
+    </linearGradient>
+    <radialGradient id="hill" cx="0.36" cy="0.08" r="0.95">
+      <stop offset="0" stop-color="#9fdc55"/>
+      <stop offset="0.22" stop-color="#7cc23a"/>
+      <stop offset="0.5" stop-color="#4f9e24"/>
+      <stop offset="0.8" stop-color="#357f16"/>
+      <stop offset="1" stop-color="#26640f"/>
+    </radialGradient>
+    <radialGradient id="sheen" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#c8f07a" stop-opacity="0.5"/>
+      <stop offset="1" stop-color="#c8f07a" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="shade" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#1b4d08" stop-opacity="0.45"/>
+      <stop offset="1" stop-color="#1b4d08" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1600" height="1000" fill="url(#sky)"/>
+  <!-- High, thin cloud across the top. -->
+  <ellipse cx="300" cy="120" rx="420" ry="46" fill="url(#wisp)"/>
+  <ellipse cx="1180" cy="90" rx="380" ry="40" fill="url(#wisp)"/>
+  <ellipse cx="820" cy="210" rx="300" ry="34" fill="url(#wisp)"/>
+  <!-- Fair-weather clouds, each a heap of soft puffs. -->
+  <g fill="url(#cloud)">
+    <ellipse cx="250" cy="330" rx="150" ry="62"/>
+    <ellipse cx="350" cy="300" rx="120" ry="70"/>
+    <ellipse cx="450" cy="335" rx="140" ry="52"/>
+    <ellipse cx="330" cy="355" rx="210" ry="40"/>
+
+    <ellipse cx="1040" cy="280" rx="130" ry="56"/>
+    <ellipse cx="1130" cy="250" rx="110" ry="66"/>
+    <ellipse cx="1230" cy="285" rx="150" ry="50"/>
+    <ellipse cx="1140" cy="305" rx="230" ry="38"/>
+
+    <ellipse cx="1460" cy="430" rx="120" ry="40"/>
+    <ellipse cx="1530" cy="410" rx="90" ry="46"/>
+    <ellipse cx="700" cy="440" rx="110" ry="34"/>
+    <ellipse cx="770" cy="425" rx="80" ry="36"/>
+    <ellipse cx="80" cy="470" rx="120" ry="36"/>
+  </g>
+  <!-- A hill behind, then the near hill, its crest left of the middle. -->
+  <path d="M0 640 C 260 610 520 600 760 612 S 1280 560 1600 590 V 1000 H 0 Z" fill="url(#far)"/>
+  <path d="M0 720 C 180 650 380 590 640 586 C 900 582 1120 640 1320 700 C 1440 736 1530 752 1600 756 V 1000 H 0 Z" fill="url(#hill)"/>
+  <!-- Light on the grass, and the shade of its folds. -->
+  <ellipse cx="560" cy="640" rx="360" ry="56" fill="url(#sheen)"/>
+  <ellipse cx="300" cy="700" rx="240" ry="40" fill="url(#sheen)"/>
+  <ellipse cx="1180" cy="820" rx="420" ry="120" fill="url(#shade)"/>
+  <ellipse cx="200" cy="930" rx="360" ry="90" fill="url(#shade)"/>
+</svg>
