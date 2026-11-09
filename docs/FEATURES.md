@@ -353,7 +353,7 @@ tab goes away. You can also keep the house and leave the avatar out.
 
 ## Look and feel
 
-- 66 colour themes, or a light and a dark one that switch with your
+- 71 colour themes, or a light and a dark one that switch with your
   device, with an accent colour of your own on top if you like. Your
   choice follows you to every device you sign in on, unless you give one
   phone or computer a theme of its own ("Only on this device" in the
@@ -382,12 +382,14 @@ tab goes away. You can also keep the house and leave the avatar out.
     pink, lilac and lemon with very round corners; Kraft, brown parcel
     paper with red and typewriter headings; and Notebook, ruled paper
     with the text in blue ink.
-- Nine are set apart by more than their colours:
+- Ten are set apart by more than their colours:
   - Light: Sunset (peach to rose to lilac down the page), Opal (pastel
     colours playing across the page, very round corners), Brutalist (hot
-    pink, cards outlined in black with hard shadows) and Mondrian (white,
+    pink, cards outlined in black with hard shadows), Mondrian (white,
     a black top bar, black lines with red, yellow and blue, and square
-    corners).
+    corners) and Contour (a walker's map behind the page, brown contour
+    lines round woods and a lake on a survey grid, cards ruled twice
+    like the map's border and page titles in spaced capitals).
   - Dark: Ember (a red glow rising from the foot of the page, serif
     headings), Northern Lights (green and violet light over a night sky),
     Lacquer (red cards on a black page, with gold), Arcade (cards
@@ -397,10 +399,10 @@ tab goes away. You can also keep the house and leave the avatar out.
   recommended": Blue Screen, Glowstick, Hot Dog Stand, Toxic, Desktop 95,
   Under Construction (a hazard-striped top bar and Comic Sans), Ugly
   Sweater (green cards on knitted red), Spreadsheet (gridlines and a
-  green ribbon), Party (confetti), Camouflage and Quest. They are as easy to
+  green ribbon), Party (confetti), Camouflage, Quest and Comic. They are as easy to
   read as the rest, only nobody should want them. Hover over one in the
   menu for a word about it.
-- **Nineteen themes restyle the whole app**, not just its colours: the top
+- **Twenty-three themes restyle the whole app**, not just its colours: the top
   bar, cards, buttons, fields, menus, dialogs, tabs, progress bars, type
   and the picture behind the page all take after what the theme is named
   for. The rest stay as they were.
@@ -590,9 +592,52 @@ tab goes away. You can also keep the house and leave the avatar out.
     the book that takes you home and the page's name, and a hairline
     appears under it once the page scrolls. Buttons are white keys (the
     main one orange).
+  - Luna (new, light): Windows XP. The top bar is the blue taskbar along
+    the foot of the screen, with the wordmark in white italics on the
+    green Start button, the page links as taskbar buttons (the open
+    page's pressed in) and the other buttons in the pale blue tray.
+    Every page is a window with a rounded blue title bar naming it and
+    the minimise, maximise and red close buttons, on green hills under
+    a blue sky. Buttons are pale and rounded with a dark blue edge,
+    glowing orange under the pointer (the main one ringed in blue),
+    drop-downs end in a blue arrow button, ticks are green, panels are
+    task panes with a blue band and bold blue titles, the open tab has
+    an orange edge, progress bars fill in green blocks, and dialogs are
+    windows of their own. Signed out, the window is "Log On to MyReads".
+  - Metro (new, dark): Windows 8. The library is the Start screen, each
+    book a flat tile in one of Metro's colours in turn (cobalt, crimson,
+    green, purple, magenta, teal, orange and brown) with white
+    lettering, a light edge under the pointer and a tilt away when
+    pressed. Page titles are large, thin and lowercase. The top bar is a
+    pivot of lowercase words, the open page white and the rest grey
+    (icons on narrower screens). Buttons are square and outlined in
+    white, the main one cyan; fields are light grey; check boxes and
+    switches are square; tabs are pivot words too; menus are white; and
+    dialogs are bands right across the screen. The text is Segoe UI
+    where you have it, Open Sans where you don't.
+  - Card Catalogue (new, light): a library's card catalogue on an oak
+    table, all in a typewriter's face (Courier Prime). The top bar is the
+    front of a catalogue drawer, each page's name typed on a card in a
+    brass label holder (the open page's in the date-due stamp's violet),
+    and a page's title sits in a brass holder screwed to the table.
+    Everything else is typed on index cards with a red rule and faint
+    blue lines; in the library each card has a punched hole at its foot,
+    as if just lifted off the rod. Buttons are slips of card, the main
+    one a violet rubber stamp; tabs are guide cards; check boxes are
+    typed over with an x; switches have a brass knob; progress is inked
+    in violet; menus and dialogs are cards too.
+  - Comic (new, in the Silly set): a comic book printed on paper with
+    Ben-Day dots. Every panel is ruled round in heavy black ink, each a
+    little askew; card titles sit in yellow caption boxes; in the
+    library a book's title and author are a speech bubble pointing up at
+    its cover. Lettering is Bangers: page titles in red with a black
+    drop, buttons in capitals with a hard shadow (the main one red). The
+    top bar is a yellow strip ruled off in black, the open page tilted
+    in red, and menus and dialogs are panels of their own.
 - A theme with a picture of its own (Desktop 95's desktop, Aero's,
-  Golden Gate's and the Linux desktops', Fluent's bloom, the Mac's dunes,
-  waves and whirl, visionOS's valley, Sea Glass's beach, Leadlight's window, Notebook's ruled page,
+  Luna's hills, Golden Gate's and the Linux desktops', Fluent's bloom, the Mac's dunes,
+  waves and whirl, visionOS's valley, Sea Glass's beach, Leadlight's window,
+  Card Catalogue's oak table, Contour's map, Comic's dots, Notebook's ruled page,
   Party's confetti, Quest's night sky and the rest) shows it whatever background you picked, and
   Preferences says so under Background. Your background comes back when
   you pick another theme.
