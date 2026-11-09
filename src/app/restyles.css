@@ -1016,6 +1016,40 @@
   font-size: 3rem;
   font-weight: 400;
 }
+/* As the page opens the name types itself out at the prompt, a letter at
+   a time, and the cursor waits after it, as after a page's heading. The
+   line is as wide as the whole name from the start, so the letters don't
+   push it out from its middle; "MyReads" is seven of the face's equal
+   widths. With motion off the name is simply there. */
+.theme-is-terminal .auth-wordmark {
+  min-width: calc(7ch + 0.65em);
+  animation: none;
+}
+.theme-is-terminal .auth-wordmark > span {
+  display: inline-block;
+  width: 7ch;
+  overflow: hidden;
+  vertical-align: bottom;
+  white-space: nowrap;
+  animation: term-type 0.6s steps(7, end) 0.45s backwards;
+}
+.theme-is-terminal .auth-wordmark::after {
+  content: "";
+  display: inline-block;
+  width: 0.5em;
+  height: 0.85em;
+  margin-left: 0.15em;
+  vertical-align: -0.05em;
+  background: var(--primary);
+  box-shadow: 0 0 6px rgb(182 255 200 / 0.6);
+  /* Steady while the name types, blinking once it waits. */
+  animation: term-blink 1.06s steps(1) 1.05s infinite;
+}
+@keyframes term-type {
+  from {
+    width: 0;
+  }
+}
 
 /* ── Newsprint ─────────────────────────────────────────────────────────────
    The front page of a newspaper. The top bar is the masthead: the name in

@@ -90,3 +90,24 @@ describe("menus and dialogs opening (globals.css)", () => {
     expect(layout).toMatch(/\{children\}[\s\S]*className="outside-shield"[\s\S]*<\/body>/);
   });
 });
+
+describe("the sign-in page (globals.css)", () => {
+  const rules = [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)].map(([, selector, body]) => ({
+    selector: selector.trim(),
+    body,
+  }));
+
+  it("is still once it has come in: its only looping animation runs while the form signs in", () => {
+    const looping = rules.filter((r) => /animation:[^;]*\bauth-[\s\S]*infinite/.test(r.body));
+    expect(looping.length).toBe(1);
+    expect(looping[0].selector).toContain('form[aria-busy="true"]');
+  });
+
+  it("moves the books with the separate transform properties, not `transform`", () => {
+    // The leaning book's lean is its own transform attribute; `transform`
+    // in CSS would replace it, where `rotate` and `translate` add to it.
+    const keyframes = [...css.matchAll(/@keyframes (auth-book-[\w-]+) \{([\s\S]*?)\n\}/g)];
+    expect(keyframes.length).toBeGreaterThanOrEqual(3);
+    for (const [, name, body] of keyframes) expect(body, name).not.toMatch(/\btransform:/);
+  });
+});

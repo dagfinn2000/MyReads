@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
+import { shakeNo } from "@/lib/motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,13 +17,18 @@ import {
 } from "@/components/ui/card";
 
 /** Changing your password invalidates every session, including this browser's
- *  — say so, otherwise being bounced here looks like a bug. */
+ *  — say so, otherwise being bounced here looks like a bug.
+ *
+ *  The card and its rows rise in as the page opens, the shelf above bobs
+ *  while it signs in (aria-busy) and the card shakes at a wrong password:
+ *  "Sign-in page motion" in globals.css. */
 export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const justChangedPassword = searchParams.get("changed") === "1";
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const card = useRef<HTMLDivElement>(null);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -43,6 +49,7 @@ export function LoginForm() {
           : "Invalid username or password",
       );
       setBusy(false);
+      shakeNo(card.current);
     } else {
       router.push("/");
       router.refresh();
@@ -50,24 +57,27 @@ export function LoginForm() {
   }
 
   return (
-    <Card className="w-full max-w-sm">
-      <CardHeader>
+    <Card ref={card} className="auth-card w-full max-w-sm">
+      <CardHeader className="auth-row">
         <CardTitle>Sign in</CardTitle>
         <CardDescription>Personal self-hosted library and reading tracker</CardDescription>
       </CardHeader>
       <CardContent>
         {justChangedPassword && (
-          <p className="mb-4 rounded-md border bg-muted/50 p-3 text-sm text-muted-foreground">
+          <p
+            className="auth-row mb-4 rounded-md border bg-muted/50 p-3 text-sm text-muted-foreground"
+            style={{ "--i": 1 } as React.CSSProperties}
+          >
             Password changed. Sign in again — this also signed you out
             anywhere else you were logged in.
           </p>
         )}
-        <form onSubmit={handleSubmit} className="grid gap-4">
-          <div className="grid gap-2">
+        <form onSubmit={handleSubmit} className="grid gap-4" aria-busy={busy}>
+          <div className="auth-row grid gap-2" style={{ "--i": 2 } as React.CSSProperties}>
             <Label htmlFor="username">Username</Label>
             <Input id="username" name="username" autoComplete="username" required autoFocus />
           </div>
-          <div className="grid gap-2">
+          <div className="auth-row grid gap-2" style={{ "--i": 3 } as React.CSSProperties}>
             <Label htmlFor="password">Password</Label>
             <Input
               id="password"
@@ -77,11 +87,19 @@ export function LoginForm() {
               required
             />
           </div>
-          {error && <p className="text-sm text-destructive">{error}</p>}
-          <Button type="submit" disabled={busy}>
+          {error && <p className="auth-error text-sm text-destructive">{error}</p>}
+          <Button
+            type="submit"
+            disabled={busy}
+            className="auth-row"
+            style={{ "--i": 4 } as React.CSSProperties}
+          >
             {busy ? "Signing in…" : "Sign in"}
           </Button>
-          <p className="text-center text-sm text-muted-foreground">
+          <p
+            className="auth-row text-center text-sm text-muted-foreground"
+            style={{ "--i": 5 } as React.CSSProperties}
+          >
             No account?{" "}
             <Link href="/register" className="underline underline-offset-4 hover:text-foreground">
               Register
