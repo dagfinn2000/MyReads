@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
+import { shakeNo } from "@/lib/motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,10 +16,12 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
+/** Moves like the sign-in card: "Sign-in page motion" in globals.css. */
 export function RegisterForm() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const card = useRef<HTMLDivElement>(null);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -33,6 +36,7 @@ export function RegisterForm() {
     if (password !== confirm) {
       setError("Passwords do not match");
       setBusy(false);
+      shakeNo(card.current);
       return;
     }
 
@@ -46,6 +50,7 @@ export function RegisterForm() {
       const data = await res.json().catch(() => null);
       setError(data?.error ?? "Registration failed");
       setBusy(false);
+      shakeNo(card.current);
       return;
     }
 
@@ -56,14 +61,14 @@ export function RegisterForm() {
   }
 
   return (
-    <Card className="w-full max-w-sm">
-      <CardHeader>
+    <Card ref={card} className="auth-card w-full max-w-sm">
+      <CardHeader className="auth-row">
         <CardTitle>Create account</CardTitle>
         <CardDescription>Set up your library</CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="grid gap-4">
-          <div className="grid gap-2">
+        <form onSubmit={handleSubmit} className="grid gap-4" aria-busy={busy}>
+          <div className="auth-row grid gap-2" style={{ "--i": 1 } as React.CSSProperties}>
             <Label htmlFor="username">Username</Label>
             <Input
               id="username"
@@ -77,7 +82,7 @@ export function RegisterForm() {
               maxLength={32}
             />
           </div>
-          <div className="grid gap-2">
+          <div className="auth-row grid gap-2" style={{ "--i": 2 } as React.CSSProperties}>
             <Label htmlFor="password">Password</Label>
             <Input
               id="password"
@@ -88,15 +93,23 @@ export function RegisterForm() {
               minLength={8}
             />
           </div>
-          <div className="grid gap-2">
+          <div className="auth-row grid gap-2" style={{ "--i": 3 } as React.CSSProperties}>
             <Label htmlFor="confirm">Confirm password</Label>
             <Input id="confirm" name="confirm" type="password" required minLength={8} />
           </div>
-          {error && <p className="text-sm text-destructive">{error}</p>}
-          <Button type="submit" disabled={busy}>
+          {error && <p className="auth-error text-sm text-destructive">{error}</p>}
+          <Button
+            type="submit"
+            disabled={busy}
+            className="auth-row"
+            style={{ "--i": 4 } as React.CSSProperties}
+          >
             {busy ? "Creating…" : "Create account"}
           </Button>
-          <p className="text-center text-sm text-muted-foreground">
+          <p
+            className="auth-row text-center text-sm text-muted-foreground"
+            style={{ "--i": 5 } as React.CSSProperties}
+          >
             Already registered?{" "}
             <Link href="/login" className="underline underline-offset-4 hover:text-foreground">
               Sign in

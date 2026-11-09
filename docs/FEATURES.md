@@ -611,6 +611,11 @@ tab goes away. You can also keep the house and leave the avatar out.
   back into its place in the library when you close it, bars fill up,
   finishing a book or reaching your goal sets off a celebration, and the
   reading room's fire flickers.
+- The sign-in page fills its shelf as it opens: the books drop onto it one
+  by one and the last tips over to lean, then the name and the form rise
+  into place. While you sign in the books bob in turn until your library
+  opens, and a wrong password shakes the form. On Terminal the name types
+  itself out at the prompt.
 - **Celebrations.** Choose how finishing a book or reaching a goal is
   marked, in Preferences > Motion: a burst of confetti, three fireworks
   going up and bursting into rings of glittering sparks, gold sparkles
