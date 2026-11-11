@@ -1424,66 +1424,32 @@
     --page-size: cover;
 }
 
-/* Sea glass: frosted, sea-worn pebbles on a shore. Wet sand for the page,
-   panels of frosted seafoam-white glass, deep sea ink for the text and
-   cobalt, the rarest sea glass, for the accent. Restyled from top to
-   bottom in restyles.css: matte frosted glass, worn soft at the edges, on
-   a picture of the sea's edge and pebbles. The picture is a file of its
-   own (public/themes). */
-[data-theme="sea-glass"] {
-    --background: #ebe3d1;
-    --foreground: #0c2826;
-    --card: #f3f8f5;
-    --card-foreground: #0c2826;
-    --popover: #f4f9f6;
-    --popover-foreground: #0c2826;
-    --primary: #2a5aa0;
+/* Porcelain: soft, unglazed porcelain. One pale cool grey for the page and
+   everything on it, deep slate for the text and a raspberry glaze for the
+   accent. Restyled from top to bottom in restyles.css: shaped by light
+   alone, with panels and buttons standing up out of the page and fields
+   pressed into it, no lines and no picture. */
+[data-theme="porcelain"] {
+    --background: #e6e9ef;
+    --foreground: #232836;
+    --card: #e6e9ef;
+    --card-foreground: #232836;
+    --popover: #eceff4;
+    --popover-foreground: #232836;
+    --primary: #a83a5c;
     --primary-foreground: #ffffff;
-    --secondary: #e0ece6;
-    --secondary-foreground: #0c2826;
-    --muted: #e2ebe6;
-    --muted-foreground: #3d5652;
-    --accent: #d6ebe1;
-    --accent-foreground: #0c2826;
-    --destructive: #a3211a;
-    --border: #c3d6cd;
-    --input: #a9c1b6;
-    --ring: #2a5aa0;
-    --radius: 1.125rem;
-    --heading-font: var(--font-nunito), "Nunito", ui-rounded, system-ui, sans-serif;
-    --page-gradient: url("/themes/sea-glass.svg");
-    --page-size: cover;
-}
-
-/* Leadlight: a leaded window. Pale hand-made glass in diamond quarries for
-   the page, a pane of clearer glass framed in lead and a border of jewels
-   for the content, ruby for the accent, near-black lead for the lines.
-   Restyled from top to bottom in restyles.css: lead cames round every
-   panel, buttons of ruby and clear glass, a transom of jewel-coloured
-   panes for the top bar. The picture is a file of its own (public/themes). */
-[data-theme="leadlight"] {
-    --background: #efe7d4;
-    --foreground: #221d16;
-    --card: #fbf6ea;
-    --card-foreground: #221d16;
-    --popover: #fbf6ea;
-    --popover-foreground: #221d16;
-    --primary: #8c1c32;
-    --primary-foreground: #ffffff;
-    --secondary: #ece2cb;
-    --secondary-foreground: #221d16;
-    --muted: #ebe1ca;
-    --muted-foreground: #5a4e3b;
-    --accent: #f2e2bf;
-    --accent-foreground: #221d16;
-    --destructive: #a01f15;
-    --border: #bcae93;
-    --input: #a69a80;
-    --ring: #8c1c32;
-    --radius: 0.125rem;
-    --heading-font: var(--font-playfair), "Playfair Display", Georgia, serif;
-    --page-gradient: url("/themes/leadlight.svg");
-    --page-size: cover;
+    --secondary: #dde1e8;
+    --secondary-foreground: #232836;
+    --muted: #dde1e8;
+    --muted-foreground: #4a5263;
+    --accent: #dce0e8;
+    --accent-foreground: #232836;
+    --destructive: #b3261e;
+    --border: #cdd3dd;
+    --input: #b9c1ce;
+    --ring: #a83a5c;
+    --radius: 1rem;
+    --heading-font: var(--font-nunito), ui-rounded, ui-sans-serif, system-ui, sans-serif;
 }
 
 /* Big Sur: macOS redrawn in 2020, light and round, with purple for what
@@ -1611,35 +1577,65 @@
     --page-size: cover;
 }
 
-/* Contour: a walker's map. Map paper for the page with the land drawn on
-   it, contour lines in brown, woods in green, a lake and the blue survey
-   grid; dark ink for the text and the contours' brown for the accent.
-   Panels are framed as the map's legend, with a double rule, and page
-   titles are spaced out in capitals like the names of hills. The picture
-   is a file of its own (public/themes), drawn by
-   scripts/contour-picture.mjs. */
-[data-theme="contour"] {
-    --background: #f4f0e2;
-    --foreground: #1e1a14;
-    --card: #fffdf7;
-    --card-foreground: #1e1a14;
-    --popover: #fffdf7;
-    --popover-foreground: #1e1a14;
-    --primary: #8a4513;
+/* Material You: Android's Material 3 in its light scheme from a violet
+   seed. A violet-white page, cards and menus filled a tone deeper, lilac
+   for what is chosen and violet for the main buttons. Restyled from top to
+   bottom in restyles.css: flat tonal surfaces with no lines, pill buttons,
+   filled fields, a top app bar and Roboto. */
+[data-theme="material-you"] {
+    --background: #fef7ff;
+    --foreground: #1d1b20;
+    --card: #f3edf7;
+    --card-foreground: #1d1b20;
+    --popover: #f3edf7;
+    --popover-foreground: #1d1b20;
+    --primary: #6750a4;
     --primary-foreground: #ffffff;
-    --secondary: #ece6d2;
-    --secondary-foreground: #1e1a14;
-    --muted: #ece6d2;
-    --muted-foreground: #4f3e2c;
-    --accent: #ebe2c6;
-    --accent-foreground: #1e1a14;
-    --destructive: #9c1f16;
-    --border: #cdbf9f;
-    --input: #a8987a;
-    --ring: #8a4513;
-    --radius: 0.125rem;
-    --page-gradient: url("/themes/contour.svg");
-    --page-size: cover;
+    --secondary: #e8def8;
+    --secondary-foreground: #1d192b;
+    --muted: #ece6f0;
+    --muted-foreground: #49454f;
+    --accent: #e8def8;
+    --accent-foreground: #1d192b;
+    --destructive: #b3261e;
+    --border: #cac4d0;
+    --input: #79747e;
+    --ring: #6750a4;
+    --radius: 0.75rem;
+    --heading-font: var(--font-roboto), Roboto, system-ui, sans-serif;
+}
+
+/* Ink Wash: a brush painting on rice paper. Mountains in washes of grey
+   ink rise out of mist along the foot of the window and the rest of the
+   paper is left empty, as such paintings leave it. Sumi black for the
+   text, indigo ink for the buttons, a red seal by the app's name, and page
+   titles in the book face over one stroke of the brush (see "Beyond
+   colour" below). The picture is a file of its own (public/themes), drawn
+   by scripts/ink-wash-picture.mjs; it is pale enough that text reads on
+   it anywhere. */
+[data-theme="ink-wash"] {
+    --background: #f2efe6;
+    --foreground: #1c1a17;
+    --card: #fbfaf6;
+    --card-foreground: #1c1a17;
+    --popover: #fbfaf6;
+    --popover-foreground: #1c1a17;
+    --primary: #2b4262;
+    --primary-foreground: #ffffff;
+    --secondary: #ebe7dc;
+    --secondary-foreground: #1c1a17;
+    --muted: #ebe7dc;
+    --muted-foreground: #46423b;
+    --accent: #e7e2d5;
+    --accent-foreground: #1c1a17;
+    --destructive: #a3221a;
+    --border: #d8d2c3;
+    --input: #c2bba9;
+    --ring: #2b4262;
+    --radius: 0.25rem;
+    --heading-font: var(--font-literata), "Literata", Georgia, serif;
+    --page-gradient: url("/themes/ink-wash.svg");
+    --page-size: max(100%, 75rem) auto;
 }
 
 /* ── The Silly set ─────────────────────────────────────────────────────────
@@ -2100,41 +2096,27 @@ html[data-own-background] body::before {
   --surface-shadow: 5px 5px 0 #ff2bd6;
 }
 
-/* Contour: panels framed as a map's legend, a rule and a hairline round
-   them; the top bar ruled off the same way; page titles in spaced
-   capitals, like the name of a range of hills (a book's own title is left
-   as written). */
-.theme-is-contour .surface {
-  border-color: #6b5238;
-  outline: 1px solid #6b5238;
-  outline-offset: 2px;
+/* Ink Wash: the painting keeps to the foot of the window, the paper above
+   it left empty. The app's name is stamped with a red seal, and page titles
+   rest on a single stroke of ink, laid on as a brush lays it: heavy where
+   it starts, thinning out to a dry tip. */
+.theme-is-ink-wash body::before {
+  background-position: center bottom;
+  background-repeat: no-repeat;
 }
-.theme-is-contour .top-bar {
-  border-bottom: 3px double #6b5238;
+.theme-is-ink-wash .top-bar .wordmark > svg {
+  box-sizing: content-box;
+  padding: 3px;
+  border-radius: 3px;
+  color: #ffffff;
+  background: #b8321f;
 }
-.theme-is-contour:not([data-section="book"]) h1 {
-  color: #6b3a12;
-  font-weight: 600;
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
+.theme-is-ink-wash h1 {
+  font-weight: 500;
 }
-/* Words laid on the map get a halo of paper round them, as a map's names
-   do, and fields and buttons are filled, so the lines never run through
-   what is written. */
-.theme-is-contour .top-bar + main {
-  text-shadow: 0 0 2px #f4f0e2, 0 0 4px #f4f0e2, 0 0 6px #f4f0e2;
-}
-.theme-is-contour .top-bar + main :is(.surface, [data-slot="card"], .bg-card, [data-size][data-variant="default"]) {
-  text-shadow: none;
-}
-.theme-is-contour :is(input, textarea, [data-slot="select-trigger"], [data-variant="outline"], [data-variant="secondary"], .shelf-tabs > a > span) {
-  background-color: var(--card);
-}
-.theme-is-contour [data-size][data-variant="destructive"] {
-  background-color: #fbe9e4;
-}
-.theme-is-contour [data-size][data-variant="destructive"]:hover {
-  background-color: #f6d8cf;
+.theme-is-ink-wash .top-bar + main h1 {
+  padding-bottom: 0.7rem;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 10'%3E%3Cpath d='M1.5 5.2C3 2.6 9 2.2 20 2.4c22 .3 50 1 72 1.6 9 .3 17 .7 26.5 1.4-8 .6-17 1-26 1.4C69 7.6 41 8 20 8.2 9 8.3 3 8 1.5 5.2Z' fill='%231c1a17' fill-opacity='.82'/%3E%3C/svg%3E") left bottom / 4.75rem 0.45rem no-repeat;
 }
 
 /* One font for the whole page. */

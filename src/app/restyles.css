@@ -8657,750 +8657,880 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
   letter-spacing: -0.02em;
 }
 
-/* ── Sea Glass ─────────────────────────────────────────────────────────────
-   Glass worn soft by the sea. The page is a shore seen from above, the
-   sea's edge lacing across the top and pebbles of sea glass, seafoam,
-   aqua, cobalt, amber and white, scattered along the sides. Everything on
-   it is frosted glass of the kind the waves make: matte rather than
-   glossy, with a fine grain, paler at its worn edges, and never quite
-   square, as no two pebbles are. The top bar is a strip of it the sea
-   shows through as you scroll; panels and library tiles are slabs of
-   seafoam-white; buttons are pebbles, the main one cobalt, the rarest
-   kind; the open tab is a pebble of seafoam green. Headings are set round
-   and soft. Only the top bar, menus and dialogs blur what is behind them;
-   panels are frosted with a fill and a grain, which costs nothing as the
-   page scrolls. */
-:root[data-theme="sea-glass"] {
-  /* Pebble corners: never quite the same twice. */
-  --sg-pebble: 1.75rem 1.4rem 1.9rem 1.5rem / 1.5rem 1.9rem 1.4rem 1.75rem;
-  --sg-pebble-sm: 1.1rem 0.85rem 1.2rem 0.95rem / 0.95rem 1.2rem 0.85rem 1.1rem;
-  /* The frost: a fine grain over a pale fill. */
-  --sg-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .2 0 0 0 0 .38 0 0 0 0 .34 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
-  --sg-frost: linear-gradient(165deg, rgb(252 255 253 / 0.82), rgb(232 247 240 / 0.76) 55%, rgb(220 241 231 / 0.78));
-  /* Worn edges: paler just inside the rim, a little shade where the glass
-     is thicker, a soft shadow on the sand. */
-  --sg-wear: inset 0 0 0 1px rgb(255 255 255 / 0.7), inset 0 0 14px rgb(255 255 255 / 0.55), inset 0 -12px 22px -16px rgb(60 130 115 / 0.4);
-  --sg-shadow: 0 10px 24px -14px rgb(92 74 44 / 0.45), 0 2px 4px rgb(92 74 44 / 0.08);
-  --sg-seafoam: linear-gradient(165deg, #d3eedf, #a9d8c0 60%, #9bd0b6);
-  --sg-cobalt: linear-gradient(165deg, #4d7cc2, #2a5aa0 58%, #224d8d);
-  --surface-shadow: none;
-  --chart-1: #2a5aa0;
-  --chart-2: #5fb0a0;
-  --chart-3: #c99559;
-  --chart-4: #8fb563;
-  --chart-5: #7fbccc;
-  scrollbar-color: #a9c7bb transparent;
+/* ── Porcelain ─────────────────────────────────────────────────────────────
+   Soft, unglazed porcelain: the page and everything on it are one pale
+   cool grey, as if pressed from a single sheet, and shaped by light alone.
+   The light falls from the upper left, so what stands up out of the page
+   (panels, library tiles, buttons, the top bar) has a white edge on that
+   side and a soft shadow on the other, and what is pressed into it (fields,
+   grooves, the open page and tab, a button held down) is shaded the other
+   way round. There are no lines and no picture. Only the main button and
+   what is chosen take colour, a raspberry glaze, which an accent colour
+   chosen in Preferences replaces. Headings are set round and soft. Nothing
+   is blurred or see-through, so scrolling costs what the default look
+   costs. With flat cards (Preferences) panels lie in the page, ringed with
+   a hairline. */
+:root[data-theme="porcelain"] {
+  --pc-light: rgb(255 255 255 / 0.9);
+  --pc-dark: rgb(158 168 188 / 0.62);
+  --pc-raise: -6px -6px 14px var(--pc-light), 6px 6px 16px var(--pc-dark);
+  --pc-raise-sm: -3px -3px 7px var(--pc-light), 3px 3px 8px var(--pc-dark);
+  --pc-raise-xs: -1px -1px 3px var(--pc-light), 2px 2px 4px var(--pc-dark);
+  --pc-press: inset 3px 3px 7px var(--pc-dark), inset -3px -3px 7px var(--pc-light);
+  --pc-press-sm: inset 2px 2px 4px var(--pc-dark), inset -2px -2px 4px var(--pc-light);
+  --pc-float: -10px -10px 26px var(--pc-light), 14px 16px 34px rgb(130 142 166 / 0.55);
+  --pc-glaze: linear-gradient(145deg, oklch(from var(--primary) calc(l + 0.07) c h), var(--primary) 70%);
+  --pc-glaze-hover: linear-gradient(145deg, oklch(from var(--primary) calc(l + 0.11) c h), oklch(from var(--primary) calc(l + 0.03) c h) 70%);
+  --chart-1: #a83a5c;
+  --chart-2: #5b6b8c;
+  --chart-3: #d08a9f;
+  --chart-4: #8f9bb3;
+  --chart-5: #c76a52;
+  scrollbar-color: #b9c1ce transparent;
 }
-.theme-is-sea-glass body::before {
-  background-position: center top;
+:root[data-theme="porcelain"]:not([data-cards="flat"]) {
+  --surface-shadow: var(--pc-raise);
 }
-.theme-is-sea-glass ::selection {
-  background: rgb(134 201 207 / 0.55);
+:root[data-theme="porcelain"][data-cards="flat"] {
+  --surface-shadow: inset 0 0 0 1px #cdd3dd;
 }
-.theme-is-sea-glass :is(h1, h2, h3, [data-slot="card-title"], [data-slot="dialog-title"]) {
+.theme-is-porcelain ::selection {
+  background: rgb(168 58 92 / 0.22);
+}
+.theme-is-porcelain :is(h1, h2, h3, [data-slot="card-title"], [data-slot="dialog-title"]) {
   font-family: var(--heading-font);
   font-weight: 800;
   letter-spacing: -0.005em;
 }
-.theme-is-sea-glass .book-backdrop {
+.theme-is-porcelain .book-backdrop {
   display: none;
 }
 
-/* The top bar: a strip of frosted glass, the sea and the page blurred
-   behind it; the open page a pebble of seafoam. */
-.theme-is-sea-glass .top-bar {
-  border-bottom: 1px solid rgb(255 255 255 / 0.7);
-  background: var(--sg-grain), linear-gradient(rgb(255 255 255 / 0.56), rgb(236 248 243 / 0.5));
-  backdrop-filter: blur(16px) saturate(1.35);
-  box-shadow: 0 1px 0 rgb(70 110 100 / 0.14), 0 10px 24px -18px rgb(40 80 70 / 0.5);
+/* The top bar: a strip of the page standing a little proud of it; the open
+   page's link pressed in, its icon and name glazed. */
+.theme-is-porcelain .top-bar {
+  border: 0;
+  background: var(--background);
+  backdrop-filter: none;
+  box-shadow: 0 5px 14px -6px var(--pc-dark), inset 0 -1px 0 rgb(255 255 255 / 0.7);
   animation: none;
 }
-.theme-is-sea-glass .top-bar .wordmark {
+.theme-is-porcelain .top-bar .wordmark {
   font-family: var(--heading-font);
   font-weight: 800;
   letter-spacing: 0;
 }
-.theme-is-sea-glass .top-bar .wordmark > svg {
+.theme-is-porcelain .top-bar .wordmark > svg {
   color: var(--primary);
 }
-.theme-is-sea-glass .top-bar .nav-link {
-  border-radius: var(--sg-pebble-sm);
+.theme-is-porcelain .top-bar .nav-link[data-size] {
+  border-radius: 0.75rem;
 }
-.theme-is-sea-glass .top-bar .nav-link:hover {
-  background: rgb(255 255 255 / 0.55);
-}
-.theme-is-sea-glass .top-bar .nav-link[aria-current="page"],
-.theme-is-sea-glass .top-bar .nav-link[aria-current="page"]:hover {
+.theme-is-porcelain .top-bar .nav-link[data-size]:hover {
   color: var(--foreground);
-  background: var(--sg-seafoam);
-  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.55), inset 0 0 8px rgb(255 255 255 / 0.5), 0 2px 6px -2px rgb(60 100 85 / 0.35);
+  box-shadow: var(--pc-raise-xs);
 }
-.theme-is-sea-glass .top-bar .nav-link[aria-current="page"]::after {
+.theme-is-porcelain .top-bar .nav-link[aria-current="page"][data-size],
+.theme-is-porcelain .top-bar .nav-link[aria-current="page"][data-size]:hover {
+  color: var(--primary);
+  font-weight: 600;
+  box-shadow: var(--pc-press-sm);
+}
+.theme-is-porcelain .top-bar .nav-link[aria-current="page"]::after {
   display: none;
 }
 
-/* Buttons: pebbles of frosted glass; the main one cobalt. */
-.theme-is-sea-glass [data-size][data-variant] {
+/* Buttons: little slabs of the page, standing up from it and pressed down
+   when held; the main one glazed. Flat ones (in the top bar, icons) rise
+   only under the pointer. */
+.theme-is-porcelain [data-size][data-variant] {
   border: 0;
-  border-radius: var(--sg-pebble-sm);
+  border-radius: 0.75rem;
   color: var(--foreground);
-  background: var(--sg-frost);
-  box-shadow: var(--sg-wear), 0 3px 8px -4px rgb(92 74 44 / 0.4);
+  background: transparent;
+  box-shadow: var(--pc-raise-sm);
 }
-.theme-is-sea-glass [data-size][data-variant]:hover {
-  background: linear-gradient(165deg, rgb(255 255 255 / 0.95), rgb(242 250 246 / 0.9));
+.theme-is-porcelain [data-size][data-variant]:hover {
+  color: var(--primary);
+  background: transparent;
 }
-.theme-is-sea-glass [data-size][data-variant="default"] {
-  color: #ffffff;
-  background: var(--sg-cobalt);
-  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.22), inset 0 0 10px rgb(255 255 255 / 0.2), inset 0 -8px 14px -10px rgb(10 30 70 / 0.6), 0 4px 10px -4px rgb(30 60 110 / 0.5);
+.theme-is-porcelain [data-size][data-variant]:is(:active:not(:disabled), [aria-expanded="true"]) {
+  box-shadow: var(--pc-press-sm);
 }
-.theme-is-sea-glass [data-size][data-variant="default"]:hover {
-  background: linear-gradient(165deg, #5b89cc, #3466ad 58%, #2a5799);
+.theme-is-porcelain [data-size][data-variant="default"] {
+  color: var(--primary-foreground);
+  background: var(--pc-glaze);
+  box-shadow: var(--pc-raise-sm), inset 1px 1px 0 rgb(255 255 255 / 0.22);
 }
-.theme-is-sea-glass [data-size][data-variant="destructive"] {
+.theme-is-porcelain [data-size][data-variant="default"]:hover {
+  color: var(--primary-foreground);
+  background: var(--pc-glaze-hover);
+}
+.theme-is-porcelain [data-size][data-variant="default"]:is(:active:not(:disabled), [aria-expanded="true"]) {
+  background: var(--primary);
+  box-shadow: var(--pc-raise-xs), inset 2px 2px 5px rgb(40 10 25 / 0.35);
+}
+.theme-is-porcelain [data-size][data-variant="destructive"],
+.theme-is-porcelain [data-size][data-variant="destructive"]:hover {
   color: var(--destructive);
 }
-.theme-is-sea-glass [data-size]:is([data-variant="ghost"], [data-variant="link"]) {
-  background: transparent;
+.theme-is-porcelain [data-size][data-variant="ghost"] {
   box-shadow: none;
 }
-.theme-is-sea-glass [data-size][data-variant="ghost"]:is(:hover, [aria-expanded="true"]) {
-  background: rgb(255 255 255 / 0.55);
+.theme-is-porcelain [data-size][data-variant="ghost"]:hover {
+  box-shadow: var(--pc-raise-xs);
 }
-.theme-is-sea-glass [data-size][data-variant="link"] {
+.theme-is-porcelain [data-size][data-variant="ghost"]:is(:active:not(:disabled), [aria-expanded="true"]) {
+  box-shadow: var(--pc-press-sm);
+}
+.theme-is-porcelain [data-size][data-variant="link"],
+.theme-is-porcelain [data-size][data-variant="link"]:is(:hover, :active) {
   color: var(--primary);
+  box-shadow: none;
 }
-.theme-is-sea-glass [data-size][data-variant="link"]:hover {
-  background: transparent;
-}
-.theme-is-sea-glass [data-size][data-variant]:active:not(:disabled) {
-  translate: 0 1px;
-}
-.theme-is-sea-glass :is([data-size][data-variant], [data-slot="select-trigger"], .select-like, [role="tab"], [data-slot="tabs-trigger"], .shelf-tabs > a, .surface):focus-visible {
+.theme-is-porcelain :is([data-size][data-variant], [data-slot="select-trigger"], .select-like, [role="tab"], [data-slot="tabs-trigger"], .shelf-tabs > a, .surface):focus-visible {
   outline: 2px solid var(--primary);
-  outline-offset: 2px;
+  outline-offset: 3px;
   --tw-ring-shadow: 0 0 #0000;
 }
 
-/* Fields: frosted wells, ringed in cobalt while typed in. */
-.theme-is-sea-glass :is([data-slot="input"], [data-slot="textarea"]),
-.theme-is-sea-glass input:is([type="text"], [type="search"], [type="number"], [type="date"], [type="password"], [type="url"], [type="email"], :not([type])),
-.theme-is-sea-glass textarea {
-  border: 1px solid rgb(110 160 145 / 0.45);
-  border-radius: 0.95rem;
-  background: rgb(255 255 255 / 0.72);
-  box-shadow: inset 0 1px 3px rgb(60 100 90 / 0.14);
-}
-.theme-is-sea-glass input[type="search"],
-.theme-is-sea-glass input[placeholder^="Search"] {
-  border-radius: var(--sg-pebble-sm);
-}
-.theme-is-sea-glass :is([data-slot="input"], [data-slot="textarea"], input, textarea):focus-visible {
-  outline: none;
-  --tw-ring-shadow: 0 0 #0000;
-  border-color: var(--primary);
-  background: rgb(255 255 255 / 0.9);
-  box-shadow: inset 0 1px 3px rgb(60 100 90 / 0.12), 0 0 0 3px rgb(42 90 160 / 0.2);
-}
-.theme-is-sea-glass :is([data-slot="select-trigger"], .select-like) {
+/* Fields: hollows pressed into the page, a glazed ring round the one being
+   typed in. */
+.theme-is-porcelain :is([data-slot="input"], [data-slot="textarea"]),
+.theme-is-porcelain input:is([type="text"], [type="search"], [type="number"], [type="date"], [type="password"], [type="url"], [type="email"], :not([type])),
+.theme-is-porcelain textarea {
   border: 0;
-  border-radius: var(--sg-pebble-sm);
-  background: var(--sg-frost);
-  box-shadow: var(--sg-wear), 0 3px 8px -4px rgb(92 74 44 / 0.4);
+  border-radius: 0.75rem;
+  background: transparent;
+  box-shadow: var(--pc-press);
 }
-.theme-is-sea-glass :is([data-slot="select-trigger"], .select-like) > svg:last-child {
+.theme-is-porcelain input[type="search"],
+.theme-is-porcelain input[placeholder^="Search"] {
+  border-radius: 999px;
+}
+.theme-is-porcelain :is([data-slot="input"], [data-slot="textarea"], input, textarea):focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  --tw-ring-shadow: 0 0 #0000;
+  box-shadow: var(--pc-press);
+}
+.theme-is-porcelain :is([data-slot="select-trigger"], .select-like) {
+  border: 0;
+  border-radius: 0.75rem;
+  background: transparent;
+  box-shadow: var(--pc-raise-sm);
+}
+.theme-is-porcelain :is([data-slot="select-trigger"], .select-like)[data-state="open"] {
+  box-shadow: var(--pc-press-sm);
+}
+.theme-is-porcelain :is([data-slot="select-trigger"], .select-like) > svg:last-child {
   color: var(--primary);
   opacity: 1;
 }
-.theme-is-sea-glass input[type="checkbox"],
-.theme-is-sea-glass input[type="radio"] {
+.theme-is-porcelain input[type="checkbox"],
+.theme-is-porcelain input[type="radio"] {
   appearance: none;
   flex: none;
-  width: 1.0625rem;
-  height: 1.0625rem;
+  width: 1.125rem;
+  height: 1.125rem;
   margin: 0;
-  border: 1px solid rgb(90 140 125 / 0.6);
-  border-radius: 0.375rem 0.3rem 0.4rem 0.32rem;
-  background: rgb(255 255 255 / 0.8);
-  box-shadow: inset 0 1px 2px rgb(60 100 90 / 0.15);
+  border: 0;
+  border-radius: 0.375rem;
+  background: var(--background);
+  box-shadow: var(--pc-press-sm);
 }
-.theme-is-sea-glass input[type="radio"] {
+.theme-is-porcelain input[type="radio"] {
   border-radius: 50%;
 }
-.theme-is-sea-glass input[type="checkbox"]:checked {
-  border-color: #224d8d;
+.theme-is-porcelain input[type="checkbox"]:checked {
   background:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.6 6.3l2.3 2.3 4.5-5' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 85% no-repeat,
-    var(--sg-cobalt);
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.6 6.3l2.3 2.3 4.5-5' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 80% no-repeat,
+    var(--pc-glaze);
+  box-shadow: var(--pc-raise-xs);
 }
-.theme-is-sea-glass input[type="radio"]:checked {
-  border-color: #224d8d;
-  background: radial-gradient(circle, #ffffff 0 24%, transparent 28%), var(--sg-cobalt);
+.theme-is-porcelain input[type="radio"]:checked {
+  background: radial-gradient(circle, var(--primary) 0 30%, transparent 34%), var(--background);
 }
-.theme-is-sea-glass input:is([type="checkbox"], [type="radio"]):focus-visible {
+.theme-is-porcelain input:is([type="checkbox"], [type="radio"]):focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: 2px;
 }
-.theme-is-sea-glass button[role="switch"] > span:last-child {
+.theme-is-porcelain button[role="switch"] > span:last-child {
   border: 0;
-  background: rgb(150 185 172 / 0.45);
-  box-shadow: inset 0 1px 3px rgb(40 80 70 / 0.25);
+  background: var(--background);
+  box-shadow: var(--pc-press-sm);
 }
-.theme-is-sea-glass button[role="switch"][aria-checked="true"] > span:last-child {
-  background: var(--sg-cobalt);
+.theme-is-porcelain button[role="switch"][aria-checked="true"] > span:last-child {
+  background: var(--pc-glaze);
+  box-shadow: inset 2px 2px 4px rgb(40 10 25 / 0.3);
 }
-.theme-is-sea-glass button[role="switch"] > span:last-child > span {
-  background: radial-gradient(circle at 40% 30%, #ffffff, #e6f4ee);
-  box-shadow: 0 1px 3px rgb(30 60 50 / 0.35);
+.theme-is-porcelain button[role="switch"] > span:last-child > span {
+  background: var(--background);
+  box-shadow: 1px 1px 3px rgb(120 132 156 / 0.7), inset 1px 1px 0 rgb(255 255 255 / 0.8);
 }
 
-/* Panels: slabs of frosted sea glass with worn, pale edges. Library tiles
-   the same, a touch clearer, without the grain. */
-.theme-is-sea-glass [data-slot="card"],
-.theme-is-sea-glass .bg-card.border:not(.bulk-bar) {
+/* Panels and library tiles: the page itself, raised. */
+.theme-is-porcelain [data-slot="card"],
+.theme-is-porcelain .bg-card.border:not(.bulk-bar) {
   border: 0;
-  border-radius: var(--sg-pebble);
-  background: var(--sg-grain), var(--sg-frost);
-  box-shadow: var(--sg-wear), var(--sg-shadow);
+  border-radius: 1.25rem;
+  background: var(--card);
+  box-shadow: var(--surface-shadow);
   --tw-ring-shadow: 0 0 #0000;
 }
-.theme-is-sea-glass .surface:not([data-slot="card"]) {
-  border: 0;
-  border-radius: var(--sg-pebble);
-  background: linear-gradient(165deg, rgb(250 255 252 / 0.74), rgb(222 243 233 / 0.66));
-  box-shadow: var(--sg-wear), var(--sg-shadow);
+.theme-is-porcelain :is([data-slot="card"], .bg-card.border) .bg-card.border {
+  border-radius: 0.875rem;
+  box-shadow: var(--pc-raise-sm);
 }
-.theme-is-sea-glass .surface:not([data-slot="card"]):hover,
-.theme-is-sea-glass .bg-card.border:not(.surface, .bulk-bar):is(a, button):hover {
-  background: linear-gradient(165deg, rgb(255 255 255 / 0.94), rgb(240 250 245 / 0.9));
+.theme-is-porcelain .surface:not([data-slot="card"]):hover,
+.theme-is-porcelain .bg-card.border:not(.surface, .bulk-bar):is(a, button):hover {
+  background: linear-gradient(145deg, #edf0f5, var(--card) 60%);
 }
-.theme-is-sea-glass .bg-card.border.border-red-300 {
-  background: var(--sg-grain), linear-gradient(165deg, rgb(255 240 238 / 0.9), rgb(252 228 224 / 0.86));
-  box-shadow: inset 0 0 0 1px rgb(179 38 30 / 0.35), var(--sg-shadow);
+.theme-is-porcelain .bg-card.border.border-red-300 {
+  box-shadow: var(--surface-shadow), inset 0 0 0 1.5px rgb(179 38 30 / 0.45);
 }
-.theme-is-sea-glass [data-slot="card-footer"] {
-  border-top: 1px solid rgb(110 160 145 / 0.25);
-  background: rgb(214 235 225 / 0.35);
+.theme-is-porcelain [data-slot="card-footer"] {
+  border-top: 0;
+  background: transparent;
 }
-.theme-is-sea-glass .surface .book-cover {
-  border-radius: 0.75rem 0.6rem 0.8rem 0.65rem;
+.theme-is-porcelain .surface .book-cover {
+  border-radius: 0.625rem;
 }
-.theme-is-sea-glass .text-muted-foreground\/80 {
+.theme-is-porcelain .text-muted-foreground\/80 {
   color: var(--muted-foreground);
 }
 
-/* Tabs and chips: pebbles, the open tab seafoam, a chosen chip cobalt. */
-.theme-is-sea-glass .shelf-tabs {
-  gap: 0.375rem;
-  padding-bottom: 0.625rem;
-  border-bottom: 1px solid rgb(110 160 145 / 0.3);
+/* Tabs and chips: a groove in the page with the open tab standing up in
+   it; a chosen chip pressed in and glazed. */
+.theme-is-porcelain .shelf-tabs {
+  gap: 0.25rem;
+  width: fit-content;
+  max-width: 100%;
+  padding: 0.3125rem;
+  border: 0;
+  border-radius: 1.125rem;
+  box-shadow: var(--pc-press);
 }
-.theme-is-sea-glass .shelf-tabs > a,
-.theme-is-sea-glass [data-slot="tabs-trigger"] {
+.theme-is-porcelain .shelf-tabs > a,
+.theme-is-porcelain [data-slot="tabs-trigger"] {
   margin: 0;
   border: 0;
-  border-radius: var(--sg-pebble-sm);
+  border-radius: 0.8125rem;
   background: transparent;
   box-shadow: none;
 }
-.theme-is-sea-glass .shelf-tabs > a:hover,
-.theme-is-sea-glass [data-slot="tabs-trigger"]:hover {
-  background: rgb(255 255 255 / 0.55);
-}
-.theme-is-sea-glass .shelf-tabs > a[aria-current="page"],
-.theme-is-sea-glass [data-slot="tabs-trigger"][data-state="active"] {
+.theme-is-porcelain .shelf-tabs > a:hover,
+.theme-is-porcelain [data-slot="tabs-trigger"]:hover {
   color: var(--foreground);
-  font-weight: 600;
-  background: var(--sg-seafoam);
-  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.55), inset 0 0 8px rgb(255 255 255 / 0.5), 0 2px 6px -2px rgb(60 100 85 / 0.35);
 }
-.theme-is-sea-glass [data-slot="tabs-trigger"]::after {
+.theme-is-porcelain .shelf-tabs > a[aria-current="page"],
+.theme-is-porcelain [data-slot="tabs-trigger"][data-state="active"] {
+  color: var(--primary);
+  font-weight: 600;
+  background: var(--background);
+  box-shadow: var(--pc-raise-xs);
+}
+.theme-is-porcelain [data-slot="tabs-trigger"]::after {
   display: none;
 }
-.theme-is-sea-glass [data-slot="tabs-list"] {
-  border-radius: var(--sg-pebble-sm);
-  background: rgb(255 255 255 / 0.4);
-  box-shadow: inset 0 1px 3px rgb(60 100 90 / 0.15);
+.theme-is-porcelain [data-slot="tabs-list"] {
+  border-radius: 1rem;
+  background: transparent;
+  box-shadow: var(--pc-press);
 }
-.theme-is-sea-glass .shelf-tabs > a > span {
-  background: rgb(255 255 255 / 0.6);
+.theme-is-porcelain .shelf-tabs > a > span {
+  background: transparent;
+  box-shadow: var(--pc-press-sm);
 }
-.theme-is-sea-glass .shelf-tabs > a[aria-current="page"] > span {
-  color: #ffffff;
+.theme-is-porcelain .shelf-tabs > a[aria-current="page"] > span {
+  color: var(--primary-foreground);
   background: var(--primary);
+  box-shadow: none;
 }
-.theme-is-sea-glass :is(a, button).rounded-full.border:not(.aspect-square, .border-2) {
+.theme-is-porcelain :is(a, button).rounded-full.border:not(.aspect-square, .border-2) {
   border-color: transparent;
-  border-radius: var(--sg-pebble-sm);
-  background: var(--sg-frost);
-  box-shadow: var(--sg-wear), 0 2px 6px -3px rgb(92 74 44 / 0.4);
+  background: transparent;
+  box-shadow: var(--pc-raise-xs);
 }
-.theme-is-sea-glass :is(a, button).rounded-full.border:is([class*="border-primary"], [aria-current="page"], [aria-pressed="true"]):not(.aspect-square, .border-2) {
-  color: #ffffff;
-  background: var(--sg-cobalt);
-  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.22), inset 0 0 10px rgb(255 255 255 / 0.2), 0 3px 8px -4px rgb(30 60 110 / 0.5);
+.theme-is-porcelain :is(a, button).rounded-full.border:is([class*="border-primary"], [aria-current="page"], [aria-pressed="true"]):not(.aspect-square, .border-2) {
+  color: var(--primary);
+  font-weight: 600;
+  background: transparent;
+  box-shadow: var(--pc-press-sm);
 }
-.theme-is-sea-glass kbd {
+.theme-is-porcelain kbd {
   border: 0;
-  border-radius: 0.4rem;
-  background: var(--sg-frost);
-  box-shadow: var(--sg-wear), 0 1px 0 rgb(92 74 44 / 0.25);
+  border-radius: 0.375rem;
+  background: var(--background);
+  box-shadow: var(--pc-raise-xs);
 }
 
-/* Progress: a groove in the frost, filled from seafoam to cobalt. */
-.theme-is-sea-glass :has(> .bar-grow) {
+/* Progress: a groove, filled with glaze. */
+.theme-is-porcelain :has(> .bar-grow) {
   border-radius: 999px;
-  background: rgb(160 195 182 / 0.4);
-  box-shadow: inset 0 1px 2px rgb(40 80 70 / 0.2);
+  background: var(--background);
+  box-shadow: var(--pc-press-sm);
 }
-.theme-is-sea-glass .bar-grow {
+.theme-is-porcelain .bar-grow {
   border-radius: 999px;
 }
-.theme-is-sea-glass .bar-grow[class*="primary"] {
-  background: linear-gradient(90deg, #6fbfa6, #2a5aa0);
+.theme-is-porcelain .bar-grow[class*="primary"] {
+  background: var(--pc-glaze);
 }
 
-/* Menus, popovers and dialogs: frosted glass over the page. */
-.theme-is-sea-glass :is([data-slot="dropdown-menu-content"], [data-slot="popover-content"], [data-slot="select-content"], [data-slot="dropdown-menu-sub-content"]) {
+/* Menus, popovers and dialogs: a lighter sheet lifted well off the page,
+   the item under the pointer pressed into it. */
+.theme-is-porcelain :is([data-slot="dropdown-menu-content"], [data-slot="popover-content"], [data-slot="select-content"], [data-slot="dropdown-menu-sub-content"]) {
   border: 0;
-  border-radius: 1.25rem 1rem 1.35rem 1.1rem;
-  background: var(--sg-grain), linear-gradient(165deg, rgb(255 255 255 / 0.8), rgb(236 248 243 / 0.74));
-  box-shadow: var(--sg-wear), 0 18px 40px -16px rgb(60 50 30 / 0.45);
-  backdrop-filter: blur(18px) saturate(1.3);
+  border-radius: 1.125rem;
+  background: var(--popover);
+  box-shadow: var(--pc-float);
   --tw-ring-shadow: 0 0 #0000;
 }
-.theme-is-sea-glass :is([data-slot="dropdown-menu-item"], [data-slot="select-item"], [data-slot="dropdown-menu-checkbox-item"], [data-slot="dropdown-menu-radio-item"], [data-slot="dropdown-menu-sub-trigger"]) {
-  border-radius: 0.8rem 0.65rem 0.85rem 0.7rem;
+.theme-is-porcelain :is([data-slot="dropdown-menu-item"], [data-slot="select-item"], [data-slot="dropdown-menu-checkbox-item"], [data-slot="dropdown-menu-radio-item"], [data-slot="dropdown-menu-sub-trigger"]) {
+  border-radius: 0.75rem;
 }
-.theme-is-sea-glass :is([data-slot="dropdown-menu-item"], [data-slot="select-item"], [data-slot="dropdown-menu-checkbox-item"], [data-slot="dropdown-menu-radio-item"], [data-slot="dropdown-menu-sub-trigger"]):is(:focus, [data-highlighted]) {
-  color: var(--foreground);
-  background: var(--sg-seafoam);
+.theme-is-porcelain :is([data-slot="dropdown-menu-item"], [data-slot="select-item"], [data-slot="dropdown-menu-checkbox-item"], [data-slot="dropdown-menu-radio-item"], [data-slot="dropdown-menu-sub-trigger"]):is(:focus, [data-highlighted]) {
+  color: var(--primary);
+  background: transparent;
+  box-shadow: var(--pc-press-sm);
 }
-.theme-is-sea-glass [data-slot="dialog-overlay"] {
-  background: rgb(20 60 55 / 0.22);
+.theme-is-porcelain [data-slot="dialog-overlay"] {
+  background: rgb(35 40 54 / 0.28);
   backdrop-filter: none;
 }
-.theme-is-sea-glass [data-slot="dialog-content"] {
+.theme-is-porcelain [data-slot="dialog-content"] {
   border: 0;
-  border-radius: 2rem 1.6rem 2.1rem 1.75rem / 1.75rem 2.1rem 1.6rem 2rem;
-  background: var(--sg-grain), linear-gradient(165deg, rgb(255 255 255 / 0.86), rgb(236 248 243 / 0.82));
-  box-shadow: var(--sg-wear), 0 30px 60px -20px rgb(40 50 40 / 0.5);
-  backdrop-filter: blur(18px) saturate(1.3);
+  border-radius: 1.75rem;
+  background: var(--popover);
+  box-shadow: var(--pc-float);
   --tw-ring-shadow: 0 0 #0000;
 }
-.theme-is-sea-glass [data-slot="dialog-footer"] {
-  border-top: 1px solid rgb(110 160 145 / 0.25);
+.theme-is-porcelain [data-slot="dialog-footer"] {
+  border-top: 0;
   background: transparent;
 }
-.theme-is-sea-glass .bulk-bar {
+.theme-is-porcelain .bulk-bar {
   border: 0;
-  border-radius: var(--sg-pebble);
-  background: var(--sg-grain), linear-gradient(165deg, rgb(255 255 255 / 0.84), rgb(236 248 243 / 0.8));
-  box-shadow: var(--sg-wear), 0 18px 40px -16px rgb(60 50 30 / 0.45);
-  backdrop-filter: blur(18px) saturate(1.3);
+  border-radius: 1.5rem;
+  background: var(--popover);
+  box-shadow: var(--pc-float);
 }
-.theme-is-sea-glass .auth-backdrop {
+.theme-is-porcelain .auth-backdrop {
   display: none;
 }
-.theme-is-sea-glass main:has(> .auth-backdrop) .wordmark {
+.theme-is-porcelain main:has(> .auth-backdrop) .wordmark {
   font-family: var(--heading-font);
   font-weight: 800;
 }
 
-/* ── Leadlight ─────────────────────────────────────────────────────────────
-   A leaded window. Behind the page is a lattice of diamond quarries, each
-   of hand-made glass a little different from the next, a few of them in
-   colour, rippled and lit from behind, the lead between them dark with a
-   gleam along its crown. The page itself is a pane of clearer glass set in
-   lead, inside a border of jewels, ruby, amber, emerald and sapphire, with
-   an amber bullseye in each corner. The top bar is a transom of deep ruby
-   glass, the open page a pane of amber in it. Panels are panes framed in
-   lead, buttons are pieces of ruby or clear glass, chosen tabs and chips
-   are amber, and the bar of progress is emerald in a lead channel. Menus
-   are panes; dialogs carry the border of jewels too. Headings are set in
-   a high-contrast serif. Nothing here blurs: glass that colours the light
-   is all paint. */
-:root[data-theme="leadlight"] {
-  --ll-lead: #2f2e33;
-  /* A came: dark, with a lighter line where its crown catches the light. */
-  --ll-came: 0 0 0 1px rgb(255 255 255 / 0.4) inset;
-  /* Pale, slightly streaky cathedral glass for panels, and the clearer
-     glass of the page's pane with colour washing in from its jewels. */
-  --ll-glass: repeating-linear-gradient(100deg, rgb(255 255 255 / 0) 0 22px, rgb(255 255 255 / 0.35) 22px 26px, rgb(255 255 255 / 0) 26px 61px), linear-gradient(140deg, #fffbf1, #f8f0dd 55%, #fbf4e5);
-  /* Each wash is painted only in its own corner box, not down the whole
-     length of a long page, so scrolling never repaints a gradient. */
-  --ll-pane:
-    radial-gradient(closest-side, rgb(232 163 58 / 0.1), transparent) -42rem -28rem / 84rem 56rem no-repeat,
-    radial-gradient(closest-side, rgb(194 54 79 / 0.07), transparent) right -28rem top -21rem / 56rem 42rem no-repeat,
-    radial-gradient(closest-side, rgb(63 123 196 / 0.08), transparent) right -35rem bottom -25rem / 70rem 50rem no-repeat,
-    rgb(252 249 240 / 0.95);
-  --ll-ruby: radial-gradient(130% 150% at 50% 0%, #c23b55, #8c1c32 55%, #6c1326);
-  --ll-amber: radial-gradient(130% 150% at 50% 0%, #f6cf7a, #e2a23a 55%, #c98318);
-  --ll-emerald: linear-gradient(#3aa97a, #1d7a52);
-  --ll-glow: inset 0 1px 0 rgb(255 255 255 / 0.3), inset 0 0 10px rgb(255 255 255 / 0.12);
+/* ── Material You ──────────────────────────────────────────────────────────
+   Android's Material You (Material 3) in its light scheme, from a violet
+   seed. Surfaces are flat tones, never lines or heavy shadows: the page is
+   a violet-white, cards and menus are filled a tone deeper, dialogs deeper
+   still, and what is chosen is a pill of lilac. The top bar is a top app
+   bar in the page's own colour that takes the cards' tone once the page
+   scrolls under it, the open page's link a lilac pill behind its icon and
+   name as in Android's navigation bar. Buttons are pills (filled, tonal,
+   outlined or text), Add book is an extended floating action button, fields
+   are filled with a line along their foot that turns violet and thickens
+   while typed in, the search field is a round search bar, selects and chips
+   are outlined with 8px corners, tabs sit over a rounded indicator and
+   dialogs have 28px corners. Hovering lays a faint tint of a control's own
+   text colour over it, as Material's state layers do, and pressing a
+   deeper one. The type is Roboto, headings in its regular weight.
+   Android draws the whole scheme from one colour; here the containers are
+   drawn from --primary, and an accent colour chosen in Preferences reshades
+   the surfaces too, as a new wallpaper would. */
+:root[data-theme="material-you"] {
+  --m3-font: var(--font-roboto), Roboto, system-ui, sans-serif;
+  --m3-primary-container: oklch(from var(--primary) 0.918 0.048 calc(h + 9));
+  --m3-on-primary-container: oklch(from var(--primary) 0.25 0.13 calc(h - 7));
+  --m3-secondary-container: oklch(from var(--primary) 0.916 0.037 calc(h + 10));
+  --m3-on-secondary-container: oklch(from var(--primary) 0.227 0.035 h);
+  --m3-container-low: #f7f2fa;
+  --m3-container: #f3edf7;
+  --m3-container-high: #ece6f0;
+  --m3-container-highest: #e6e0e9;
+  --m3-outline: #79747e;
+  --m3-outline-variant: #cac4d0;
+  --m3-on-surface: #1d1b20;
+  --m3-on-surface-variant: #49454f;
+  /* State layers: the content's colour at 8% under the pointer, 10% when
+     focused, 12% pressed. */
+  --m3-hover: linear-gradient(rgb(29 27 32 / 0.08) 0 0);
+  --m3-press: linear-gradient(rgb(29 27 32 / 0.12) 0 0);
+  --m3-hover-primary: linear-gradient(color-mix(in srgb, var(--primary) 8%, transparent) 0 0);
+  --m3-press-primary: linear-gradient(color-mix(in srgb, var(--primary) 12%, transparent) 0 0);
+  --m3-hover-on-primary: linear-gradient(rgb(255 255 255 / 0.08) 0 0);
+  --m3-press-on-primary: linear-gradient(rgb(255 255 255 / 0.12) 0 0);
+  --m3-e1: 0 1px 2px rgb(0 0 0 / 0.3), 0 1px 3px 1px rgb(0 0 0 / 0.15);
+  --m3-e2: 0 1px 2px rgb(0 0 0 / 0.3), 0 2px 6px 2px rgb(0 0 0 / 0.15);
+  --m3-e3: 0 1px 3px rgb(0 0 0 / 0.3), 0 4px 8px 3px rgb(0 0 0 / 0.15);
   --surface-shadow: none;
-  --chart-1: #8c1c32;
-  --chart-2: #e2a23a;
-  --chart-3: #1d7a52;
-  --chart-4: #24479e;
-  --chart-5: #7b4fa3;
-  scrollbar-color: #5a5660 #e9dfc8;
+  --chart-1: #6750a4;
+  --chart-2: #7d5260;
+  --chart-3: #625b71;
+  --chart-4: #b69df8;
+  --chart-5: #efb8c8;
+  scrollbar-color: #cac4d0 transparent;
 }
-.theme-is-leadlight body::before {
-  background-position: center;
+/* With an accent colour of the reader's own, the surfaces follow it. */
+:root[data-theme="material-you"][data-accent]:not([data-accent="theme"]) {
+  --background: oklch(from var(--primary) 0.984 0.012 calc(h + 28));
+  --card: oklch(from var(--primary) 0.954 0.014 calc(h + 19));
+  --popover: var(--card);
+  --muted: oklch(from var(--primary) 0.933 0.014 calc(h + 19));
+  --secondary: var(--m3-secondary-container);
+  --accent: var(--m3-secondary-container);
+  --border: oklch(from var(--primary) 0.83 0.016 calc(h + 15));
+  --m3-container-low: oklch(from var(--primary) 0.967 0.012 calc(h + 20));
+  --m3-container: var(--card);
+  --m3-container-high: var(--muted);
+  --m3-container-highest: oklch(from var(--primary) 0.914 0.014 calc(h + 21));
+  --m3-outline-variant: var(--border);
 }
-.theme-is-leadlight ::selection {
-  background: rgb(226 162 58 / 0.4);
+.theme-is-material-you body {
+  font-family: var(--m3-font);
 }
-.theme-is-leadlight :is(h1, h2, [data-slot="card-title"], [data-slot="dialog-title"]) {
-  font-family: var(--heading-font);
-  font-weight: 700;
+.theme-is-material-you ::selection {
+  background: var(--m3-primary-container);
+}
+.theme-is-material-you h1 {
+  font-weight: 400;
   letter-spacing: 0;
 }
-.theme-is-leadlight .book-backdrop {
-  display: none;
+.theme-is-material-you :is(h2, h3, [data-slot="card-title"]) {
+  font-weight: 500;
+  letter-spacing: 0;
+}
+.theme-is-material-you [data-slot="dialog-title"] {
+  font-size: 1.5rem;
+  font-weight: 400;
+  line-height: 2rem;
+  letter-spacing: 0;
 }
 
-/* The transom: deep ruby glass in lead, its panes the page links, the open
-   page's amber. */
-.theme-is-leadlight .top-bar {
-  --background: #7a1a2d;
-  --foreground: #ffffff;
-  --muted-foreground: #f6dde2;
-  --accent: rgb(255 255 255 / 0.14);
-  --accent-foreground: #ffffff;
-  --ring: #f6cf7a;
-  border-bottom: 5px solid var(--ll-lead);
-  color: #ffffff;
-  background:
-    repeating-linear-gradient(100deg, rgb(255 255 255 / 0) 0 30px, rgb(255 255 255 / 0.05) 30px 36px, rgb(255 255 255 / 0) 36px 80px),
-    linear-gradient(#93243b, #7a1a2d 60%, #6a1526);
+/* The top app bar: the page's colour, taking the cards' tone once the page
+   scrolls under it; the open page a lilac pill. */
+.theme-is-material-you .top-bar {
+  border: 0;
+  background: var(--background);
   backdrop-filter: none;
-  box-shadow: inset 0 3px 0 var(--ll-lead), 0 1px 0 rgb(255 255 255 / 0.4), 0 6px 14px -10px rgb(30 20 10 / 0.6);
+  box-shadow: none;
   animation: none;
 }
-.theme-is-leadlight .top-bar .wordmark {
-  color: #ffffff;
-  font-family: var(--heading-font);
-  font-weight: 700;
-  letter-spacing: 0.01em;
-}
-.theme-is-leadlight .top-bar .wordmark > svg {
-  color: #f6cf7a;
-}
-.theme-is-leadlight .top-bar .nav-link {
-  border: 2px solid transparent;
-  border-radius: 2px;
-  color: #ffffff;
-}
-.theme-is-leadlight .top-bar .nav-link:hover {
-  border-color: var(--ll-lead);
-  background: rgb(255 255 255 / 0.14);
-}
-.theme-is-leadlight .top-bar .nav-link[aria-current="page"],
-.theme-is-leadlight .top-bar .nav-link[aria-current="page"]:hover {
-  border-color: var(--ll-lead);
-  color: #2a1a05;
-  background: var(--ll-amber);
-  box-shadow: var(--ll-glow);
-}
-.theme-is-leadlight .top-bar .nav-link[aria-current="page"]::after {
-  display: none;
-}
-.theme-is-leadlight .top-bar [data-variant="ghost"] {
-  color: #ffffff;
-}
-
-/* The page: a pane of clearer glass in lead, inside the border of jewels. */
-.theme-is-leadlight .top-bar + main {
-  width: calc(100% - 2rem);
-  margin-block: 1.5rem;
-  padding: 1.75rem 2rem 2.5rem;
-  border: 22px solid transparent;
-  border-image: url("/themes/leadlight-jewels.svg") 22 round;
-  background: var(--ll-pane) padding-box;
-  box-shadow: 0 0 0 3px var(--ll-lead), 0 18px 40px -20px rgb(40 30 15 / 0.45);
-}
-@media (width < 40rem) {
-  .theme-is-leadlight .top-bar + main {
-    width: calc(100% - 0.5rem);
-    margin-block: 0.25rem;
-    padding: 1.25rem 0.75rem 2rem;
-    border-width: 14px;
+@keyframes m3-bar-scrolled {
+  to {
+    background-color: var(--m3-container);
   }
 }
+@supports (animation-timeline: scroll()) {
+  .theme-is-material-you .top-bar {
+    animation: m3-bar-scrolled linear both;
+    animation-timeline: scroll(root);
+    animation-range: 0 1rem;
+  }
+}
+.theme-is-material-you .top-bar .wordmark {
+  font-family: var(--m3-font);
+  font-size: 1.375rem;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.theme-is-material-you .top-bar .wordmark > svg {
+  color: var(--primary);
+}
+.theme-is-material-you .top-bar .nav-link[data-size] {
+  border-radius: 999px;
+  color: var(--m3-on-surface-variant);
+  font-weight: 500;
+}
+.theme-is-material-you .top-bar .nav-link[aria-current="page"][data-size] {
+  color: var(--m3-on-secondary-container);
+  font-weight: 600;
+  background-color: var(--m3-secondary-container);
+}
+.theme-is-material-you .top-bar .nav-link[aria-current="page"]::after {
+  display: none;
+}
 
-/* Buttons: ruby glass for the main one, clear glass for the rest, each a
-   piece set in lead. */
-.theme-is-leadlight [data-size][data-variant] {
-  border: 2px solid var(--ll-lead);
-  border-radius: 2px;
-  color: var(--foreground);
-  background: var(--ll-glass);
-  box-shadow: var(--ll-came);
-}
-.theme-is-leadlight [data-size][data-variant]:hover {
-  background: radial-gradient(130% 150% at 50% 0%, #fff6dc, #f6e3b5);
-}
-.theme-is-leadlight [data-size][data-variant="default"] {
-  color: #ffffff;
-  background: var(--ll-ruby);
-  box-shadow: var(--ll-glow);
-}
-.theme-is-leadlight [data-size][data-variant="default"]:hover {
-  background: radial-gradient(130% 150% at 50% 0%, #d4506a, #9e2139 55%, #7a172b);
-}
-.theme-is-leadlight [data-size][data-variant="destructive"] {
-  color: var(--destructive);
-}
-.theme-is-leadlight [data-size]:is([data-variant="ghost"], [data-variant="link"]) {
-  border-color: transparent;
-  background: transparent;
+/* Buttons: pills. Text buttons in the accent, icon buttons in the grey of
+   secondary text, outlined, tonal and filled ones, the state layer over
+   each. */
+.theme-is-material-you [data-size][data-variant] {
+  border: 0;
+  border-radius: 999px;
+  color: var(--m3-on-surface-variant);
+  font-weight: 500;
+  letter-spacing: 0.00625rem;
+  background-color: transparent;
+  background-image: none;
   box-shadow: none;
 }
-.theme-is-leadlight [data-size][data-variant="ghost"]:is(:hover, [aria-expanded="true"]) {
-  border-color: var(--ll-lead);
-  background: radial-gradient(130% 150% at 50% 0%, #fff6dc, #f6e3b5);
+.theme-is-material-you [data-size][data-variant]:hover {
+  color: var(--m3-on-surface);
+  background-color: transparent;
+  background-image: var(--m3-hover);
 }
-.theme-is-leadlight [data-size][data-variant="link"] {
+.theme-is-material-you [data-size][data-variant]:is(:active:not(:disabled), [aria-expanded="true"]) {
+  background-image: var(--m3-press);
+}
+.theme-is-material-you [data-size][data-variant="outline"] {
   color: var(--primary);
+  box-shadow: inset 0 0 0 1px var(--m3-outline);
 }
-.theme-is-leadlight [data-size][data-variant="link"]:hover {
-  border-color: transparent;
-  background: transparent;
+.theme-is-material-you [data-size][data-variant="outline"]:hover {
+  color: var(--primary);
+  background-image: var(--m3-hover-primary);
 }
-.theme-is-leadlight [data-size][data-variant]:active:not(:disabled) {
-  translate: 0 1px;
+.theme-is-material-you [data-size][data-variant="outline"]:is(:active:not(:disabled), [aria-expanded="true"]) {
+  background-image: var(--m3-press-primary);
 }
-.theme-is-leadlight :is([data-size][data-variant], [data-slot="select-trigger"], .select-like, [role="tab"], [data-slot="tabs-trigger"], .shelf-tabs > a, .surface):focus-visible {
-  outline: 2px solid var(--primary);
+.theme-is-material-you [data-size][data-variant="secondary"],
+.theme-is-material-you [data-size][data-variant="secondary"]:hover {
+  color: var(--m3-on-secondary-container);
+  background-color: var(--m3-secondary-container);
+}
+.theme-is-material-you [data-size][data-variant="default"] {
+  color: var(--primary-foreground);
+  background-color: var(--primary);
+}
+.theme-is-material-you [data-size][data-variant="default"]:hover {
+  color: var(--primary-foreground);
+  background-color: var(--primary);
+  background-image: var(--m3-hover-on-primary);
+  box-shadow: var(--m3-e1);
+}
+.theme-is-material-you [data-size][data-variant="default"]:is(:active:not(:disabled), [aria-expanded="true"]) {
+  background-image: var(--m3-press-on-primary);
+  box-shadow: none;
+}
+.theme-is-material-you [data-size][data-variant="destructive"],
+.theme-is-material-you [data-size][data-variant="destructive"]:hover {
+  color: var(--destructive);
+}
+.theme-is-material-you [data-size][data-variant="destructive"]:hover {
+  background-image: linear-gradient(color-mix(in srgb, var(--destructive) 8%, transparent) 0 0);
+}
+.theme-is-material-you [data-size][data-variant="link"],
+.theme-is-material-you [data-size][data-variant="link"]:hover {
+  color: var(--primary);
+  background-image: none;
+}
+.theme-is-material-you :is([data-size][data-variant], [data-slot="select-trigger"], .select-like, [role="tab"], [data-slot="tabs-trigger"], .shelf-tabs > a, .surface):focus-visible {
+  outline: 3px solid var(--primary);
   outline-offset: 2px;
   --tw-ring-shadow: 0 0 #0000;
 }
 
-/* Fields: clear glass in lead, ruby round it while typed in. */
-.theme-is-leadlight :is([data-slot="input"], [data-slot="textarea"]),
-.theme-is-leadlight input:is([type="text"], [type="search"], [type="number"], [type="date"], [type="password"], [type="url"], [type="email"], :not([type])),
-.theme-is-leadlight textarea {
-  border: 2px solid #4a4750;
-  border-radius: 2px;
-  background: #fffdf7;
-  box-shadow: inset 0 1px 2px rgb(60 40 20 / 0.12);
+/* Add book: an extended floating action button, square-cornered and in the
+   primary container's tone. */
+.theme-is-material-you .top-bar + main a[href="/books/new"][data-variant="default"] {
+  height: 3.5rem;
+  padding-inline: 1rem 1.25rem;
+  gap: 0.75rem;
+  border-radius: 1rem;
+  color: var(--m3-on-primary-container);
+  background-color: var(--m3-primary-container);
+  box-shadow: var(--m3-e3);
 }
-.theme-is-leadlight :is([data-slot="input"], [data-slot="textarea"], input, textarea):focus-visible {
+.theme-is-material-you .top-bar + main a[href="/books/new"][data-variant="default"]:hover {
+  color: var(--m3-on-primary-container);
+  background-color: var(--m3-primary-container);
+  background-image: var(--m3-hover-primary);
+  box-shadow: 0 2px 3px rgb(0 0 0 / 0.3), 0 6px 10px 4px rgb(0 0 0 / 0.15);
+}
+.theme-is-material-you .top-bar + main a[href="/books/new"][data-variant="default"] > svg {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+/* Fields: filled, with a line along the foot that thickens into the accent
+   while typed in; the search field a round search bar. */
+.theme-is-material-you :is([data-slot="input"], [data-slot="textarea"]),
+.theme-is-material-you input:is([type="text"], [type="search"], [type="number"], [type="date"], [type="password"], [type="url"], [type="email"], :not([type])),
+.theme-is-material-you textarea {
+  border: 0;
+  border-radius: 0.25rem 0.25rem 0 0;
+  background-color: var(--m3-container-highest);
+  box-shadow: inset 0 -1px 0 var(--m3-on-surface-variant);
+}
+.theme-is-material-you :is([data-slot="input"], [data-slot="textarea"], input, textarea):hover {
+  box-shadow: inset 0 -1px 0 var(--m3-on-surface);
+}
+.theme-is-material-you :is([data-slot="input"], [data-slot="textarea"], input, textarea):focus-visible {
   outline: none;
   --tw-ring-shadow: 0 0 #0000;
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgb(140 28 50 / 0.2);
+  box-shadow: inset 0 -2px 0 var(--primary);
 }
-.theme-is-leadlight :is([data-slot="select-trigger"], .select-like) {
-  border: 2px solid var(--ll-lead);
-  border-radius: 2px;
-  background: var(--ll-glass);
-  box-shadow: var(--ll-came);
+.theme-is-material-you input[type="search"],
+.theme-is-material-you input[placeholder^="Search"],
+.theme-is-material-you input[type="search"]:is(:hover, :focus-visible),
+.theme-is-material-you input[placeholder^="Search"]:is(:hover, :focus-visible) {
+  border-radius: 999px;
+  background-color: var(--m3-container-high);
+  box-shadow: none;
 }
-.theme-is-leadlight :is([data-slot="select-trigger"], .select-like) > svg:last-child {
-  color: var(--primary);
+.theme-is-material-you input[type="search"]:focus-visible,
+.theme-is-material-you input[placeholder^="Search"]:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 0;
+}
+.theme-is-material-you :is([data-slot="select-trigger"], .select-like) {
+  border: 0;
+  border-radius: 0.5rem;
+  color: var(--m3-on-surface-variant);
+  background-color: transparent;
+  box-shadow: inset 0 0 0 1px var(--m3-outline);
+}
+/* Buttons dressed as selects (Tags, More filters) look like the selects. */
+.theme-is-material-you [data-size][data-variant="outline"].justify-between,
+.theme-is-material-you [data-size][data-variant="outline"].justify-between:hover {
+  border-radius: 0.5rem;
+  color: var(--m3-on-surface-variant);
+}
+.theme-is-material-you [data-size][data-variant="outline"].justify-between:hover {
+  background-image: var(--m3-hover);
+}
+.theme-is-material-you :is([data-slot="select-trigger"], .select-like):hover {
+  background-image: var(--m3-hover);
+}
+.theme-is-material-you :is([data-slot="select-trigger"], .select-like)[data-state="open"] {
+  color: var(--m3-on-secondary-container);
+  background-color: var(--m3-secondary-container);
+  box-shadow: none;
+}
+.theme-is-material-you :is([data-slot="select-trigger"], .select-like) > svg:last-child {
+  color: var(--m3-on-surface-variant);
   opacity: 1;
 }
-.theme-is-leadlight input[type="checkbox"],
-.theme-is-leadlight input[type="radio"] {
+.theme-is-material-you input[type="checkbox"],
+.theme-is-material-you input[type="radio"] {
   appearance: none;
   flex: none;
-  width: 1.0625rem;
-  height: 1.0625rem;
+  width: 1.125rem;
+  height: 1.125rem;
   margin: 0;
-  border: 2px solid var(--ll-lead);
-  border-radius: 1px;
-  background: #fffdf7;
+  border: 2px solid var(--m3-on-surface-variant);
+  border-radius: 2px;
+  background: transparent;
 }
-.theme-is-leadlight input[type="radio"] {
+.theme-is-material-you input[type="radio"] {
+  width: 1.25rem;
+  height: 1.25rem;
   border-radius: 50%;
 }
-.theme-is-leadlight input[type="checkbox"]:checked {
+.theme-is-material-you input[type="checkbox"]:checked {
+  border-color: var(--primary);
   background:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.6 6.3l2.3 2.3 4.5-5' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 85% no-repeat,
-    var(--ll-ruby);
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.4 6.2l2.4 2.4 4.8-5' fill='none' stroke='%23fff' stroke-width='1.9'/%3E%3C/svg%3E") center / 100% no-repeat,
+    var(--primary);
 }
-.theme-is-leadlight input[type="radio"]:checked {
-  background: radial-gradient(circle, #ffffff 0 24%, transparent 28%), var(--ll-ruby);
+.theme-is-material-you input[type="radio"]:checked {
+  border-color: var(--primary);
+  background: radial-gradient(circle, var(--primary) 0 44%, transparent 48%);
 }
-.theme-is-leadlight input:is([type="checkbox"], [type="radio"]):focus-visible {
-  outline: 2px solid var(--primary);
-  outline-offset: 2px;
+.theme-is-material-you input:is([type="checkbox"], [type="radio"]):focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: 3px;
 }
-.theme-is-leadlight button[role="switch"] > span:last-child {
-  border: 2px solid var(--ll-lead);
-  background: #e9dfc8;
+.theme-is-material-you button[role="switch"] > span:last-child {
+  border: 0;
+  background-color: var(--m3-container-highest);
+  box-shadow: inset 0 0 0 2px var(--m3-outline);
 }
-.theme-is-leadlight button[role="switch"][aria-checked="true"] > span:last-child {
-  background: var(--ll-emerald);
+.theme-is-material-you button[role="switch"][aria-checked="true"] > span:last-child {
+  background-color: var(--primary);
+  box-shadow: none;
 }
-.theme-is-leadlight button[role="switch"] > span:last-child > span {
-  background: radial-gradient(circle at 45% 35%, #fff6d8, #f1c66b 45%, #b9781c);
-  box-shadow: 0 0 0 1.5px var(--ll-lead);
+.theme-is-material-you button[role="switch"] > span:last-child > span {
+  background-color: var(--m3-outline);
+  box-shadow: none;
+  scale: 0.7;
+}
+.theme-is-material-you button[role="switch"][aria-checked="true"] > span:last-child > span {
+  background-color: var(--primary-foreground);
+  scale: 1;
 }
 
-/* Panels: panes of cathedral glass, framed in lead. Library tiles too,
-   amber light coming through them under the pointer. */
-.theme-is-leadlight [data-slot="card"],
-.theme-is-leadlight .bg-card.border:not(.bulk-bar) {
-  border: 3px solid var(--ll-lead);
-  border-radius: 2px;
-  background: var(--ll-glass);
-  box-shadow: var(--ll-came), 0 6px 16px -12px rgb(40 30 15 / 0.5);
+/* Cards and library tiles: filled a tone deeper than the page; a card on a
+   card a tone deeper again. */
+.theme-is-material-you [data-slot="card"],
+.theme-is-material-you .bg-card.border:not(.bulk-bar) {
+  border: 0;
+  border-radius: 0.75rem;
+  background-color: var(--m3-container);
+  box-shadow: none;
   --tw-ring-shadow: 0 0 #0000;
 }
-.theme-is-leadlight .surface:not([data-slot="card"]) {
-  border: 3px solid var(--ll-lead);
-  border-radius: 2px;
-  background: linear-gradient(140deg, #fffcf4, #faf3e3);
-  box-shadow: var(--ll-came);
+.theme-is-material-you :is([data-slot="card"], .bg-card.border) .bg-card.border {
+  background-color: var(--m3-container-high);
 }
-.theme-is-leadlight .surface:not([data-slot="card"]):hover,
-.theme-is-leadlight .bg-card.border:not(.surface, .bulk-bar):is(a, button):hover {
-  background: radial-gradient(120% 90% at 50% 0%, #fff4d6, #f7e6bd);
+.theme-is-material-you .surface:not([data-slot="card"]):hover,
+.theme-is-material-you .bg-card.border:not(.surface, .bulk-bar):is(a, button):hover {
+  background-image: var(--m3-hover);
 }
-.theme-is-leadlight .bg-card.border.border-red-300 {
-  border-color: var(--ll-lead);
-  background: linear-gradient(140deg, #fff1ef, #fbe0dc);
+.theme-is-material-you .bg-card.border.border-red-300 {
+  background-color: #f9dedc;
 }
-.theme-is-leadlight [data-slot="card-footer"] {
-  border-top: 3px solid var(--ll-lead);
-  background: rgb(242 226 191 / 0.45);
+.theme-is-material-you [data-slot="card-footer"] {
+  border-top: 0;
+  background: transparent;
 }
-.theme-is-leadlight .surface .book-cover {
-  border-radius: 1px;
+.theme-is-material-you .surface .book-cover {
+  border-radius: 0.5rem;
 }
-.theme-is-leadlight .text-muted-foreground\/80 {
+.theme-is-material-you .text-muted-foreground\/80 {
   color: var(--muted-foreground);
 }
 
-/* Tabs and chips: panes in lead, the chosen one amber. */
-.theme-is-leadlight .shelf-tabs {
-  gap: 0.25rem;
-  padding-bottom: 0.625rem;
-  border-bottom: 3px solid var(--ll-lead);
+/* Tabs over a rounded indicator; Tabs as a segmented button; chips with
+   8px corners, a chosen one lilac. */
+.theme-is-material-you .shelf-tabs {
+  gap: 0;
+  border-bottom: 1px solid var(--m3-outline-variant);
 }
-.theme-is-leadlight .shelf-tabs > a,
-.theme-is-leadlight [data-slot="tabs-trigger"] {
-  margin: 0;
-  border: 2px solid transparent;
-  border-radius: 2px;
-  background: transparent;
-  box-shadow: none;
+.theme-is-material-you .shelf-tabs > a {
+  position: relative;
+  padding-inline: 1rem;
+  border-bottom-color: transparent;
+  color: var(--m3-on-surface-variant);
+  font-weight: 500;
 }
-.theme-is-leadlight .shelf-tabs > a:hover,
-.theme-is-leadlight [data-slot="tabs-trigger"]:hover {
-  border-color: var(--ll-lead);
-  background: #fff7e2;
+.theme-is-material-you .shelf-tabs > a:hover {
+  color: var(--m3-on-surface);
+  background-image: var(--m3-hover);
 }
-.theme-is-leadlight .shelf-tabs > a[aria-current="page"],
-.theme-is-leadlight [data-slot="tabs-trigger"][data-state="active"] {
-  border-color: var(--ll-lead);
-  color: #2a1a05;
-  font-weight: 600;
-  background: var(--ll-amber);
-  box-shadow: var(--ll-glow);
+.theme-is-material-you .shelf-tabs > a[aria-current="page"] {
+  border-bottom-color: transparent;
+  color: var(--primary);
 }
-.theme-is-leadlight [data-slot="tabs-trigger"]::after {
-  display: none;
-}
-.theme-is-leadlight [data-slot="tabs-list"] {
-  border: 2px solid var(--ll-lead);
-  border-radius: 2px;
-  background: #f4ead2;
-}
-.theme-is-leadlight .shelf-tabs > a > span {
-  background: rgb(47 46 51 / 0.1);
-}
-.theme-is-leadlight .shelf-tabs > a[aria-current="page"] > span {
-  color: #ffffff;
+.theme-is-material-you .shelf-tabs > a[aria-current="page"]::after {
+  content: "";
+  position: absolute;
+  inset: auto 0.75rem -1px;
+  height: 3px;
+  border-radius: 3px 3px 0 0;
   background: var(--primary);
 }
-.theme-is-leadlight :is(a, button).rounded-full.border:not(.aspect-square, .border-2) {
-  border: 2px solid var(--ll-lead);
-  border-radius: 2px;
-  background: var(--ll-glass);
+.theme-is-material-you .shelf-tabs > a > span {
+  color: var(--m3-on-surface-variant);
+  background-color: var(--m3-container-high);
 }
-.theme-is-leadlight :is(a, button).rounded-full.border:is([class*="border-primary"], [aria-current="page"], [aria-pressed="true"]):not(.aspect-square, .border-2) {
-  color: #2a1a05;
-  background: var(--ll-amber);
-  box-shadow: var(--ll-glow);
+.theme-is-material-you .shelf-tabs > a[aria-current="page"] > span {
+  color: var(--primary-foreground);
+  background-color: var(--primary);
 }
-.theme-is-leadlight kbd {
-  border: 2px solid var(--ll-lead);
-  border-radius: 2px;
-  background: var(--ll-glass);
+.theme-is-material-you [data-slot="tabs-list"] {
+  gap: 0;
+  padding: 0;
+  border-radius: 999px;
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--m3-outline);
+  overflow: hidden;
 }
-
-/* Progress: emerald glass in a lead channel. */
-.theme-is-leadlight :has(> .bar-grow) {
-  border-radius: 1px;
-  background: #ece2cb;
-  box-shadow: 0 0 0 1.5px var(--ll-lead);
-}
-.theme-is-leadlight .bar-grow {
+.theme-is-material-you [data-slot="tabs-trigger"] {
+  margin: 0;
+  border: 0;
   border-radius: 0;
+  color: var(--m3-on-surface);
+  font-weight: 500;
+  background: transparent;
+  box-shadow: inset -1px 0 0 var(--m3-outline);
 }
-.theme-is-leadlight .bar-grow[class*="primary"] {
-  background: var(--ll-emerald);
+.theme-is-material-you [data-slot="tabs-trigger"]:last-child {
+  box-shadow: none;
 }
-
-/* Menus and popovers: panes in lead. Dialogs: a pane in the border of
-   jewels. */
-.theme-is-leadlight :is([data-slot="dropdown-menu-content"], [data-slot="popover-content"], [data-slot="select-content"], [data-slot="dropdown-menu-sub-content"]) {
-  border: 3px solid var(--ll-lead);
-  border-radius: 2px;
-  background: var(--ll-glass);
-  box-shadow: var(--ll-came), 0 14px 30px -12px rgb(40 30 15 / 0.5);
-  --tw-ring-shadow: 0 0 #0000;
+.theme-is-material-you [data-slot="tabs-trigger"][data-state="active"] {
+  color: var(--m3-on-secondary-container);
+  background-color: var(--m3-secondary-container);
 }
-.theme-is-leadlight :is([data-slot="dropdown-menu-item"], [data-slot="select-item"], [data-slot="dropdown-menu-checkbox-item"], [data-slot="dropdown-menu-radio-item"], [data-slot="dropdown-menu-sub-trigger"]) {
-  border-radius: 1px;
-}
-.theme-is-leadlight :is([data-slot="dropdown-menu-item"], [data-slot="select-item"], [data-slot="dropdown-menu-checkbox-item"], [data-slot="dropdown-menu-radio-item"], [data-slot="dropdown-menu-sub-trigger"]):is(:focus, [data-highlighted]) {
-  color: #2a1a05;
-  background: var(--ll-amber);
-}
-.theme-is-leadlight [data-slot="dialog-overlay"] {
-  background: rgb(35 25 10 / 0.3);
-  backdrop-filter: none;
-}
-.theme-is-leadlight [data-slot="dialog-content"] {
-  border: 18px solid transparent;
-  border-image: url("/themes/leadlight-jewels.svg") 22 / 18px round;
-  border-radius: 0;
-  background: var(--ll-pane) padding-box;
-  box-shadow: 0 0 0 3px var(--ll-lead), 0 24px 50px -16px rgb(30 20 10 / 0.6);
-  --tw-ring-shadow: 0 0 #0000;
-}
-.theme-is-leadlight [data-slot="dialog-footer"] {
-  border-top: 3px solid var(--ll-lead);
-  background: rgb(242 226 191 / 0.4);
-}
-.theme-is-leadlight .bulk-bar {
-  border: 3px solid var(--ll-lead);
-  border-radius: 2px;
-  background: var(--ll-glass);
-  box-shadow: var(--ll-came), 0 14px 30px -12px rgb(40 30 15 / 0.5);
-}
-.theme-is-leadlight .auth-backdrop {
+.theme-is-material-you [data-slot="tabs-trigger"]::after {
   display: none;
 }
-.theme-is-leadlight main:has(> .auth-backdrop) .wordmark {
-  font-family: var(--heading-font);
-  font-weight: 700;
+.theme-is-material-you :is(a, button).rounded-full.border:not(.aspect-square, .border-2) {
+  border-color: var(--m3-outline);
+  border-radius: 0.5rem;
+  color: var(--m3-on-surface-variant);
+  font-weight: 500;
+  background-color: transparent;
 }
-/* The name in a small arched light of cathedral glass above the pane, so
-   no lead runs through it. */
-.theme-is-leadlight main:has(> .auth-backdrop) > .grid {
-  padding: 1.5rem 2.75rem 0.875rem;
-  border: 3px solid var(--ll-lead);
-  border-radius: 50% 50% 2px 2px / 3.75rem 3.75rem 2px 2px;
-  background: var(--ll-glass);
-  box-shadow: var(--ll-came), 0 14px 30px -12px rgb(40 30 15 / 0.5);
+.theme-is-material-you :is(a, button).rounded-full.border:not(.aspect-square, .border-2):hover {
+  background-image: var(--m3-hover);
+}
+.theme-is-material-you :is(a, button).rounded-full.border:is([class*="border-primary"], [aria-current="page"], [aria-pressed="true"]):not(.aspect-square, .border-2) {
+  border-color: transparent;
+  color: var(--m3-on-secondary-container);
+  background-color: var(--m3-secondary-container);
+}
+.theme-is-material-you kbd {
+  border: 0;
+  border-radius: 0.25rem;
+  background-color: var(--m3-container-high);
+}
+
+/* Progress: Material's linear indicator, a lilac track with the accent
+   running along it. */
+.theme-is-material-you :has(> .bar-grow) {
+  border-radius: 999px;
+  background-color: var(--m3-secondary-container);
+}
+.theme-is-material-you .bar-grow {
+  border-radius: 999px;
+}
+
+/* Menus with small corners, popovers with larger, dialogs with 28px, each
+   a tone of its own and lifted on Material's shadows. */
+.theme-is-material-you :is([data-slot="dropdown-menu-content"], [data-slot="select-content"], [data-slot="dropdown-menu-sub-content"]) {
+  border: 0;
+  border-radius: 0.25rem;
+  background-color: var(--m3-container);
+  box-shadow: var(--m3-e2);
+  --tw-ring-shadow: 0 0 #0000;
+}
+.theme-is-material-you [data-slot="popover-content"] {
+  border: 0;
+  border-radius: 1rem;
+  background-color: var(--m3-container);
+  box-shadow: var(--m3-e2);
+  --tw-ring-shadow: 0 0 #0000;
+}
+.theme-is-material-you :is([data-slot="dropdown-menu-item"], [data-slot="select-item"], [data-slot="dropdown-menu-checkbox-item"], [data-slot="dropdown-menu-radio-item"], [data-slot="dropdown-menu-sub-trigger"]) {
+  border-radius: 0;
+}
+.theme-is-material-you :is([data-slot="dropdown-menu-item"], [data-slot="select-item"], [data-slot="dropdown-menu-checkbox-item"], [data-slot="dropdown-menu-radio-item"], [data-slot="dropdown-menu-sub-trigger"]):is(:focus, [data-highlighted]) {
+  color: var(--m3-on-surface);
+  background-color: transparent;
+  background-image: var(--m3-hover);
+}
+.theme-is-material-you [data-slot="dialog-overlay"] {
+  background: rgb(0 0 0 / 0.32);
+  backdrop-filter: none;
+}
+.theme-is-material-you [data-slot="dialog-content"] {
+  border: 0;
+  border-radius: 1.75rem;
+  background-color: var(--m3-container-high);
+  box-shadow: var(--m3-e3);
+  --tw-ring-shadow: 0 0 #0000;
+}
+.theme-is-material-you [data-slot="dialog-footer"] {
+  border-top: 0;
+  background: transparent;
+}
+.theme-is-material-you .bulk-bar {
+  border: 0;
+  border-radius: 1rem;
+  background-color: var(--m3-container);
+  box-shadow: var(--m3-e2);
+}
+.theme-is-material-you .auth-backdrop {
+  display: none;
+}
+.theme-is-material-you main:has(> .auth-backdrop) .wordmark {
+  font-family: var(--m3-font);
+  font-weight: 400;
 }
 
 /* ── macOS: Mojave, Big Sur and Ventura ────────────────────────────────────

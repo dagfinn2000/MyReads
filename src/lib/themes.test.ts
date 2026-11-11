@@ -168,6 +168,9 @@ describe("THEMES", () => {
       "kanagawa-lotus",
       "gruvbox-light",
       "apricot",
+      "sea-glass",
+      "contour",
+      "leadlight",
     ]);
     for (const [old, replacement] of Object.entries(RETIRED_THEMES)) {
       expect(THEMES.some((t) => t.id === old), old).toBe(false);

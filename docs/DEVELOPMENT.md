@@ -223,8 +223,8 @@ The reading room's files:
   not shade.
 - **A few themes restyle everything.** Desktop 95, Terminal, Newsprint,
   Blueprint, Notebook, Quest, Pinstripe, Aero, Golden Gate, KDE Plasma,
-  GNOME, Hyprland, Fluent, visionOS, Sea Glass, Leadlight, Mojave, Big
-  Sur, Ventura, Luna, Metro, Card Catalogue and Comic start from
+  GNOME, Hyprland, Fluent, visionOS, Porcelain, Material You, Mojave,
+  Big Sur, Ventura, Luna, Metro, Card Catalogue and Comic start from
   a colour block like any theme, and [restyles.css](../src/app/restyles.css) reshapes the
   app for them, one section per theme. Its rules aim at shadcn's
   `data-slot` attributes and buttons by `data-size` and `data-variant`:
@@ -288,9 +288,18 @@ The reading room's files:
   needs `color-interpolation-filters="sRGB"`; without it the filter works
   in linear light and barely darkens. Fluent's window is Mica, a flat
   tint of its wallpaper's colours, so it needs no second picture. A big
-  gradient on something as tall as the page is repainted as it scrolls:
-  Leadlight's pane paints its colour washes in boxes of their own in the
-  corners, which made scrolling the library a third cheaper. Mojave, Big
+  gradient on something as tall as the page is repainted as it scrolls,
+  so keep such washes in small boxes of their own (the retired Leadlight
+  painted its pane's washes in the corners, which made scrolling the
+  library a third cheaper). Porcelain draws everything with paired
+  shadows, white to the upper left and grey to the lower right, outside
+  for what stands up and inset for what is pressed in (`--pc-raise`,
+  `--pc-press`); its cards are the page's own colour, so with flat cards
+  `--surface-shadow` becomes a hairline instead. Material You draws its
+  containers from `--primary` with relative colours
+  (`oklch(from var(--primary) …)`), and with an accent colour picked its
+  page and card tones follow too; hovering lays a state layer, a
+  translucent `background-image`, over a control's own fill. Mojave, Big
   Sur and Ventura share one section for their window, menu bar and page
   titles (`--mac-top`, `--mac-left`, `--mac-right`, `--mac-bottom`,
   `--mac-bar` and `--mac-title`), each theme placing the window and
@@ -315,14 +324,15 @@ The reading room's files:
   cheap. Ventura's Stage
   Manager thumbnails are drawn with
   gradients in units of a tenth of their height (`--vt-u`), a sketch for
-  each page link by its `href`. Card Catalogue's oak and Contour's map
-  are drawn by [card-catalogue-picture.mjs](../scripts/card-catalogue-picture.mjs)
-  and [contour-picture.mjs](../scripts/contour-picture.mjs) from a seeded
-  random generator, so they never repeat across a wide screen and come
-  out the same each run; change the picture there and run the script.
-  Their text laid straight on the picture wears a halo of the page
-  colour (`text-shadow`), so grain and contour lines never run through
-  a letter. Metro colours the library's tiles by their place in the
+  each page link by its `href`. Card Catalogue's oak and Ink Wash's
+  mountains are drawn by [card-catalogue-picture.mjs](../scripts/card-catalogue-picture.mjs)
+  and [ink-wash-picture.mjs](../scripts/ink-wash-picture.mjs) from a
+  seeded random generator, so they never repeat across a wide screen and
+  come out the same each run; change the picture there and run the
+  script. Card Catalogue's text laid straight on the oak wears a halo of
+  the page colour (`text-shadow`), so the grain never runs through a
+  letter; Ink Wash needs none, as its nearest ink is kept pale enough for
+  muted text to read on it. Metro colours the library's tiles by their place in the
   grid; each tile sits in a wrapper (`.card-in`), so the rule counts the
   wrapper (`:nth-child(8n + 2) > .surface`), not the tile.
 - **A theme is retired, never just deleted.** Take out its block and

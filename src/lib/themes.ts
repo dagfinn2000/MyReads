@@ -14,8 +14,8 @@
  * outlined cards with hard shadows, a top bar of its own (see "Beyond
  * colour" in globals.css). Last is the Silly set, absurd on purpose, which
  * the palette menu lists apart. Themes that turned out to be lookalikes of
- * another were retired; RETIRED_THEMES sends their readers to the closest
- * one left.
+ * another, or too busy to live with, were retired; RETIRED_THEMES sends
+ * their readers to the closest one left.
  * Dark-mode themes additionally get the `dark` class on <html> so Tailwind
  * `dark:` variants (status badges etc.) follow along.
  */
@@ -287,24 +287,6 @@ export const THEMES: ThemeDef[] = [
     ownBackground: true,
   },
   {
-    id: "sea-glass",
-    name: "Sea Glass",
-    mode: "light",
-    swatch: ["#ebe3d1", "#2a5aa0"],
-    pattern:
-      "radial-gradient(circle at 30% 64%, #93cdb2 0 15%, transparent 17%), radial-gradient(circle at 70% 60%, #c99559 0 11%, transparent 13%), linear-gradient(#5cb8bd 0 30%, #ebe3d1 30%)",
-    ownBackground: true,
-  },
-  {
-    id: "leadlight",
-    name: "Leadlight",
-    mode: "light",
-    swatch: ["#efe7d4", "#8c1c32"],
-    pattern:
-      "repeating-linear-gradient(57deg, transparent 0 7px, #2f2e33 7px 9px), repeating-linear-gradient(-57deg, transparent 0 7px, #2f2e33 7px 9px), radial-gradient(circle at 50% 50%, #ebc77f 0 18%, transparent 20%)",
-    ownBackground: true,
-  },
-  {
     id: "big-sur",
     name: "Big Sur",
     mode: "light",
@@ -341,15 +323,30 @@ export const THEMES: ThemeDef[] = [
     ownBackground: true,
   },
   {
-    id: "contour",
-    name: "Contour",
+    id: "material-you",
+    name: "Material You",
     mode: "light",
-    swatch: ["#f4f0e2", "#8a4513"],
+    swatch: ["#fef7ff", "#6750a4"],
     pattern:
-      "radial-gradient(circle at 70% 75%, #bfdcef 0 9%, transparent 10%), repeating-radial-gradient(circle at 68% 70%, transparent 0 3px, #b07a43 3px 4px), linear-gradient(135deg, #d9e6bf 0 40%, #f4f0e2 40%)",
+      "radial-gradient(62% 30% at 50% 50%, #e8def8 0 96%, transparent 100%), linear-gradient(transparent 76%, #f3edf7 76%)",
+  },
+  {
+    id: "porcelain",
+    name: "Porcelain",
+    mode: "light",
+    swatch: ["#e6e9ef", "#a83a5c"],
+    pattern:
+      "radial-gradient(circle at 36% 34%, #ffffff 0 22%, transparent 48%), radial-gradient(circle at 66% 68%, #b4bccb 0 18%, transparent 46%)",
+  },
+  {
+    id: "ink-wash",
+    name: "Ink Wash",
+    mode: "light",
+    swatch: ["#f2efe6", "#2b4262"],
+    pattern:
+      "linear-gradient(transparent 50%, #f2efe6 86%), radial-gradient(70% 46% at 74% 100%, #b6b1a7 0 96%, transparent 100%), radial-gradient(80% 62% at 24% 100%, #d0cbc1 0 96%, transparent 100%), radial-gradient(circle at 76% 26%, #b8321f 0 9%, transparent 11%)",
     ownBackground: true,
   },
-
   // The Silly set
   {
     id: "blue-screen",
@@ -458,8 +455,10 @@ export const THEMES: ThemeDef[] = [
 ];
 
 /**
- * Themes retired as lookalikes of another, and the theme each one's readers
- * get instead: the closest one left. Kept so a choice stored before (on the
+ * Themes retired, as lookalikes of another or as too busy (Sea Glass,
+ * Contour and Leadlight, whose pictures crowded the page), and the theme
+ * each one's readers get instead: the closest one left, or the simpler
+ * theme that took its place. Kept so a choice stored before (on the
  * account, in this browser, for a part of the app, in a backup) still shows
  * something like what was picked.
  */
@@ -478,6 +477,9 @@ export const RETIRED_THEMES: Record<string, string> = {
   "kanagawa-lotus": "kraft",
   "gruvbox-light": "solarized-light",
   apricot: "solarized-light",
+  "sea-glass": "porcelain",
+  contour: "ink-wash",
+  leadlight: "material-you",
 };
 
 /** A theme id, or the one that replaced it if it was retired. */

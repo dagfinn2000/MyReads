@@ -361,8 +361,10 @@ tab goes away. You can also keep the house and leave the avatar out.
   swatch, the page colour with the accent as a dot (and the theme's
   picture or outline, if it has one): point at one to see its name, or
   tap it to try it. No two themes look alike: fourteen that were too
-  close to others were retired, and if you had one of them you now have
-  the theme nearest to it.
+  close to others were retired, and so were Sea Glass, Contour and
+  Leadlight, whose pictures crowded the page. If you had one of them you
+  now have the theme nearest to it (Porcelain, Ink Wash and Material You
+  for those three).
 - Eleven of the themes put together colours you rarely see side by side:
   - Dark: Bordeaux (wine red and sea-glass green), Riviera (ultramarine
     and peach), Provence (olive and lavender), Terracotta (clay and sky
@@ -387,9 +389,10 @@ tab goes away. You can also keep the house and leave the avatar out.
     colours playing across the page, very round corners), Brutalist (hot
     pink, cards outlined in black with hard shadows), Mondrian (white,
     a black top bar, black lines with red, yellow and blue, and square
-    corners) and Contour (a walker's map behind the page, brown contour
-    lines round woods and a lake on a survey grid, cards ruled twice
-    like the map's border and page titles in spaced capitals).
+    corners) and Ink Wash (rice paper with pale grey mountains rising
+    out of mist along the foot of the window and the rest left empty,
+    indigo ink buttons, the app's name stamped with a red seal and page
+    titles in a book face over one stroke of the brush).
   - Dark: Ember (a red glow rising from the foot of the page, serif
     headings), Northern Lights (green and violet light over a night sky),
     Lacquer (red cards on a black page, with gold), Arcade (cards
@@ -539,26 +542,16 @@ tab goes away. You can also keep the house and leave the avatar out.
     phone the page links become a capsule along the foot of the screen.
     The page scrolls behind the window's rounded edges, and white text
     keeps its contrast over every part of the valley.
-  - Sea Glass (new, light): a beach seen from above, the sea's edge
-    foaming across the top of the page, wet sand below and frosted
-    pebbles of sea glass (seafoam, aqua, cobalt, amber, white and olive)
-    along the sides. The top bar, panels and fields are frosted like the
-    pebbles, milky with a fine grain, their corners a little uneven, as
-    if worn smooth. The main buttons are cobalt glass, the open page and
-    tab are seafoam, progress runs from seafoam to cobalt, and headings
-    are in a rounded face. Menus and dialogs frost what is behind them.
-  - Leadlight (new, light): a leaded window. Behind the page is a lattice
-    of diamond panes of hand-made glass, each a slightly different tint
-    and a few coloured, lit from behind. The page is a pane of clear
-    glass set in lead, in a border of jewels (ruby, amber, emerald and
-    sapphire, with an amber bullseye in each corner), and the top bar is
-    a transom of deep ruby glass with the open page in amber. Panels are
-    panes framed in lead, buttons are pieces of ruby or clear glass,
-    chosen tabs and chips are amber, progress is emerald, dialogs have
-    the border of jewels too, and headings are in a high-contrast serif.
-    On the sign-in pages the name sits in a small arched light above
-    the pane. Nothing in it blurs, so it scrolls as lightly as a plain
-    theme.
+  - Porcelain (new, light): soft, unglazed porcelain, simple and calm.
+    The page and everything on it are one pale cool grey, with no lines
+    and no picture, shaped only by light falling from the upper left:
+    panels, library tiles, buttons and the top bar stand up out of the
+    page with a white edge and a soft shadow, while fields, the tab row
+    and the open page's link are pressed into it. A button sinks in when
+    you press it. Only the main buttons and what is chosen take colour,
+    a raspberry glaze (or the accent colour you picked), and headings
+    are in a rounded face. With flat cards picked, panels lie in the
+    page with a hairline round them.
   - Three looks of the Mac from the last ten years, each drawn fresh in
     its spirit (no Apple logo, none of Apple's pictures). In all three
     the app is a window on its own desktop picture, under a menu bar
@@ -626,6 +619,18 @@ tab goes away. You can also keep the house and leave the avatar out.
     one a violet rubber stamp; tabs are guide cards; check boxes are
     typed over with an x; switches have a brass knob; progress is inked
     in violet; menus and dialogs are cards too.
+  - Material You (new, light): Android's Material 3, in its light
+    scheme from a violet seed. Everything is flat tones, never lines: a
+    violet-white page, cards and menus a shade deeper, and what is chosen
+    a pill of lilac, the open page's link too. The top bar takes the
+    cards' tone once the page scrolls under it. Buttons are pills
+    (filled, tonal, outlined or plain text), Add book is Material's big
+    rounded action button, fields are filled with a line along their foot that
+    turns violet while you type, the search field is a round search bar,
+    tabs sit over a rounded indicator and dialogs have big round corners.
+    Pointing at a button tints it faintly. The type is Roboto. Pick an
+    accent colour and the whole scheme is redrawn from it, page and cards
+    included, the way Android draws it from your wallpaper.
   - Comic (new, in the Silly set): a comic book printed on paper with
     Ben-Day dots. Every panel is ruled round in heavy black ink, each a
     little askew; card titles sit in yellow caption boxes; in the
@@ -636,8 +641,8 @@ tab goes away. You can also keep the house and leave the avatar out.
     in red, and menus and dialogs are panels of their own.
 - A theme with a picture of its own (Desktop 95's desktop, Aero's,
   Luna's hills, Golden Gate's and the Linux desktops', Fluent's bloom, the Mac's dunes,
-  waves and whirl, visionOS's valley, Sea Glass's beach, Leadlight's window,
-  Card Catalogue's oak table, Contour's map, Comic's dots, Notebook's ruled page,
+  waves and whirl, visionOS's valley, Card Catalogue's oak table,
+  Ink Wash's mountains, Comic's dots, Notebook's ruled page,
   Party's confetti, Quest's night sky and the rest) shows it whatever background you picked, and
   Preferences says so under Background. Your background comes back when
   you pick another theme.
