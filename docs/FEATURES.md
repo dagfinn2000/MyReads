@@ -353,7 +353,7 @@ tab goes away. You can also keep the house and leave the avatar out.
 
 ## Look and feel
 
-- 76 colour themes, 32 light, 32 dark and the Silly set, or a light
+- 92 colour themes, 40 light, 40 dark and the Silly set, or a light
   and a dark one that switch with your
   device, with an accent colour of your own on top if you like. Your
   choice follows you to every device you sign in on, unless you give one
@@ -407,6 +407,42 @@ tab goes away. You can also keep the house and leave the avatar out.
     hung in a gilt frame with a cream mount under its own brass
     picture lamp, titles in italics and page titles in spaced
     capitals, like a museum's labels).
+- Fourteen new ones are set apart the same way:
+  - Light: Delft (white and cobalt, every book in the library a blue
+    tile with a white rim round its cover, serif headings), Airmail
+    (pale blue airmail paper, the red, white and blue stripes of an
+    airmail envelope along the top bar and round dialogs), Paperback (an
+    old orange paperback: the top bar is the orange band across its
+    cover, a thin band runs along the foot of the window, and headings
+    are in Gill Sans, or Cabin where you don't have it, with a short
+    rule under each page's title), Sunroom (warm stone, with the morning
+    sun coming in at a window up to the left and lying in soft panes
+    across the page), E-Paper (an e-reader's screen: grey-white and ink
+    black with no shadows, covers in greys, labels outlined, everything
+    in a book face), Dog-Ear (lilac-grey, every book in the library a
+    white card with its top right corner folded down, folding further
+    under the pointer) and Seventies (cream and chocolate brown, round
+    corners and soft, wonky headings in Fraunces, a little rainbow of
+    sand, mustard, burnt orange and chocolate beside each page's title
+    and a big one rising from the corner at the foot of every page).
+  - Dark: Eclipse (the sky at totality: on a wide screen the moon's
+    black disc hangs in the margin ringed by the corona, with a bead of
+    sunlight at its edge, and on a narrower one it peeks out of the top
+    right corner), Rooftops (a city's roofs at night along the foot of
+    the window, with chimneys, dormers and a few windows still lit),
+    Transit (a metro map: each part of the app has its line's colour,
+    the library orange, Now reading green, Stats blue, Quotes violet,
+    the reading room yellow and Account teal; page titles sit at a
+    station with the line running in from the edge, and each link in the
+    top bar carries its colour; an accent colour of your own still
+    wins), Sashiko (indigo cloth, every card and tile stitched round in
+    cream thread), Halo (every card lit softly from behind round its
+    edges, more under the pointer), Lamplight (a reading lamp's warm pool
+    of light falling from the upper left, its green shade glowing at the
+    edge, serif headings and green for what is chosen) and Fireflies
+    (a dark green meadow at night with fireflies glowing up and fading
+    in the lower part of the window; with Animations off they simply
+    glow).
 - The Silly set, listed apart at the bottom of the palette menu as "not
   recommended": Blue Screen, Glowstick, Hot Dog Stand, Toxic, Desktop 95,
   Under Construction (a hazard-striped top bar and Comic Sans), Ugly
@@ -414,7 +450,7 @@ tab goes away. You can also keep the house and leave the avatar out.
   green ribbon), Party (confetti), Camouflage, Quest and Comic. They are as easy to
   read as the rest, only nobody should want them. Hover over one in the
   menu for a word about it.
-- **Twenty-five themes restyle the whole app**, not just its colours: the top
+- **Twenty-seven themes restyle the whole app**, not just its colours: the top
   bar, cards, buttons, fields, menus, dialogs, tabs, progress bars, type
   and the picture behind the page all take after what the theme is named
   for. The rest stay as they were.
@@ -574,6 +610,8 @@ tab goes away. You can also keep the house and leave the avatar out.
     a raspberry glaze (or the accent colour you picked), and headings
     are in a rounded face. With flat cards picked, panels lie in the
     page with a hairline round them.
+  - Graphite (new, dark): Porcelain in dark graphite, shaped by the same
+    light, with a rose glaze for the main buttons and what is chosen.
   - Three looks of the Mac from the last ten years, each drawn fresh in
     its spirit (no Apple logo, none of Apple's pictures). In all three
     the app is a window on its own desktop picture, under a menu bar
@@ -672,11 +710,24 @@ tab goes away. You can also keep the house and leave the avatar out.
     drop, buttons in capitals with a hard shadow (the main one red). The
     top bar is a yellow strip ruled off in black, the open page tilted
     in red, and menus and dialogs are panels of their own.
+  - Haiku (new, light): the desktop of Haiku, heir to BeOS, on its flat
+    blue. The top bar is the Deskbar, its entries between etched lines
+    (the open page's pressed in) and the other buttons in its sunken
+    tray. Every page is a grey window with the short yellow tab on its
+    top edge that names it, as wide as its name, with the close box at
+    its left and the zoom box at its right, and the resize knob in the
+    corner. Buttons are soft grey with a dark frame round the main one,
+    drop-downs end in a small black arrow, panels are etched boxes, a
+    ticked box has an X in it, whatever has the keyboard is edged in
+    blue, progress fills in blue, and dialogs are windows with tabs of
+    their own. Signed out, the form is a window on the blue desktop.
 - A theme with a picture of its own (Desktop 95's desktop, Aero's,
   Luna's hills, Golden Gate's and the Linux desktops', Fluent's bloom, the Mac's dunes,
   waves and whirl, visionOS's valley, Card Catalogue's oak table,
   Ink Wash's mountains, Comic's dots, Notebook's ruled page,
-  Noir's blind, Fernery's ferns, Ubuntu's ribbons,
+  Noir's blind, Fernery's ferns, Ubuntu's ribbons, Haiku's blue,
+  Sunroom's sunlight, Rooftops' roofs, Eclipse's sky, Lamplight's lamp,
+  Fireflies' meadow,
   Party's confetti, Quest's night sky and the rest) shows it whatever background you picked, and
   Preferences says so under Background. Your background comes back when
   you pick another theme.

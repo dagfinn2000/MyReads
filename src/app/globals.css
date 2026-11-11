@@ -963,6 +963,240 @@
     --page-size: cover;
 }
 
+/* Eclipse: the sky at totality. A black so deep it is nearly blue, the
+   moon's disc tucked into the top right corner of the window, ringed by
+   the sun's pearly corona, a bead of sunlight just breaking at its edge,
+   and that pale light for what is chosen. The rest of the sky is left
+   dark. Drawn with gradients, sized to the window: the bright ring only
+   comes out from behind the top bar in the margin beside the page, so it
+   never lies under writing, and the corona past it is kept faint. */
+[data-theme="eclipse"] {
+    --background: #06070b;
+    --foreground: #eceff6;
+    --card: #101219;
+    --card-foreground: #eceff6;
+    --popover: #13151d;
+    --popover-foreground: #eceff6;
+    --primary: #d3def5;
+    --primary-foreground: #06070b;
+    --secondary: #1a1d27;
+    --secondary-foreground: #eceff6;
+    --muted: #1a1d27;
+    --muted-foreground: #a3abbd;
+    --accent: #1f2330;
+    --accent-foreground: #eceff6;
+    --destructive: #ff9b8a;
+    --border: #232735;
+    --input: #4a5064;
+    --ring: #d3def5;
+    --radius: 0.625rem;
+    --ec-r: clamp(4.5rem, 8vw, 7rem);
+    --ec-x: calc(100% - 1rem);
+    --ec-y: -2rem;
+    --page-gradient:
+        radial-gradient(circle at calc(var(--ec-x) - var(--ec-r) * 0.34) calc(var(--ec-y) + var(--ec-r) * 0.94), #ffffff 0 2px, rgb(255 252 240 / 0.6) 4px, rgb(255 246 225 / 0.18) 12px, transparent 26px),
+        radial-gradient(circle at var(--ec-x) var(--ec-y), #06070b 0 var(--ec-r), #f4f7ff calc(var(--ec-r) + 1px), rgb(226 234 255 / 0.45) calc(var(--ec-r) + 3px), rgb(186 202 245 / 0.16) calc(var(--ec-r) * 1.15), rgb(140 160 220 / 0.07) calc(var(--ec-r) * 1.6), rgb(110 130 200 / 0.03) calc(var(--ec-r) * 2.4), transparent calc(var(--ec-r) * 3.5)),
+        radial-gradient(calc(var(--ec-r) * 4.5) calc(var(--ec-r) * 2) at var(--ec-x) var(--ec-y), rgb(200 212 250 / 0.09), transparent),
+        radial-gradient(calc(var(--ec-r) * 1.6) calc(var(--ec-r) * 3.6) at var(--ec-x) var(--ec-y), rgb(200 212 250 / 0.06), transparent);
+    --page-size: 100% 100%;
+}
+
+/* Rooftops: a city's roofs at night, seen from a window high up. A slate
+   blue sky, a little lighter where the city's light meets it, gables,
+   chimneys and dormers in silhouette along the foot of the window with a
+   few windows still lit (public/themes, drawn by
+   scripts/rooftops-picture.mjs), and their lamplight yellow for what is
+   chosen. */
+[data-theme="rooftops"] {
+    --background: #151b28;
+    --foreground: #eef1f7;
+    --card: #1c2333;
+    --card-foreground: #eef1f7;
+    --popover: #1f2638;
+    --popover-foreground: #eef1f7;
+    --primary: #ffd27a;
+    --primary-foreground: #1d1503;
+    --secondary: #252d40;
+    --secondary-foreground: #eef1f7;
+    --muted: #252d40;
+    --muted-foreground: #aab4c8;
+    --accent: #2a3347;
+    --accent-foreground: #eef1f7;
+    --destructive: #ff9d8c;
+    --border: #2c3549;
+    --input: #4c566c;
+    --ring: #ffd27a;
+    --radius: 0.375rem;
+    --page-gradient: url("/themes/rooftops.svg"), linear-gradient(#10151f, #151b28 50%, #212a3d);
+    --page-size: max(100%, 100rem) auto, 100% 100%;
+}
+
+/* Transit: a city's underground map. A charcoal page, and each part of the
+   app on a line of its own colour (see "Beyond colour"): the library
+   orange, Now reading green, Stats blue, Quotes violet, the Room yellow
+   and the account cyan. Page titles sit at a station on their line, and
+   the links in the top bar wear their lines' colours. */
+[data-theme="transit"] {
+    --background: #14171c;
+    --foreground: #f2f4f7;
+    --card: #1c2027;
+    --card-foreground: #f2f4f7;
+    --popover: #20242c;
+    --popover-foreground: #f2f4f7;
+    --primary: #ff8f3f;
+    --primary-foreground: #1a0c02;
+    --secondary: #252a33;
+    --secondary-foreground: #f2f4f7;
+    --muted: #252a33;
+    --muted-foreground: #aeb5c2;
+    --accent: #2a303a;
+    --accent-foreground: #f2f4f7;
+    --destructive: #ff8f8f;
+    --border: #2c323d;
+    --input: #4d5563;
+    --ring: #ff8f3f;
+    --radius: 0.5rem;
+}
+
+/* Sashiko: indigo cotton mended and strengthened with white running
+   stitch, as Japanese farm coats were. Indigo for the page, a lighter
+   indigo for the cards with a line of stitching round their edges in ecru
+   thread (see "Beyond colour"), and that thread for what is chosen. */
+[data-theme="sashiko"] {
+    --background: #16203a;
+    --foreground: #eef0f6;
+    --card: #1d2845;
+    --card-foreground: #eef0f6;
+    --popover: #1f2b4a;
+    --popover-foreground: #eef0f6;
+    --primary: #ece3d0;
+    --primary-foreground: #16203a;
+    --secondary: #24304f;
+    --secondary-foreground: #eef0f6;
+    --muted: #24304f;
+    --muted-foreground: #b3bfd8;
+    --accent: #2a3758;
+    --accent-foreground: #eef0f6;
+    --destructive: #ffa491;
+    --border: #2c3a5c;
+    --input: #52608a;
+    --ring: #ece3d0;
+    --radius: 0.375rem;
+    --heading-font: var(--font-literata), "Literata", Georgia, serif;
+}
+
+/* Halo: cards lit from behind. A blue-black page, and every card, panel
+   and tile with a soft light spilling out round its edges, as if it hung
+   in front of a lamp (see "Beyond colour"); periwinkle for what is
+   chosen. */
+[data-theme="halo"] {
+    --background: #0c0d14;
+    --foreground: #eef0fa;
+    --card: #161823;
+    --card-foreground: #eef0fa;
+    --popover: #181a26;
+    --popover-foreground: #eef0fa;
+    --primary: #b3b8ff;
+    --primary-foreground: #0c0d14;
+    --secondary: #1f2230;
+    --secondary-foreground: #eef0fa;
+    --muted: #1f2230;
+    --muted-foreground: #a9adc4;
+    --accent: #242838;
+    --accent-foreground: #eef0fa;
+    --destructive: #ff9aa6;
+    --border: #2a2e40;
+    --input: #4d5270;
+    --ring: #b3b8ff;
+    --radius: 0.875rem;
+}
+
+/* Lamplight: reading at a desk late at night under a banker's lamp. Dark
+   walnut, the lamp's warm light pooled in the top left corner of the
+   window and fading out across it, a touch of green from its glass shade
+   at the very top, and that green for what is chosen. */
+[data-theme="lamplight"] {
+    --background: #15100c;
+    --foreground: #f4ece2;
+    --card: #1e1712;
+    --card-foreground: #f4ece2;
+    --popover: #221a14;
+    --popover-foreground: #f4ece2;
+    --primary: #7ad6a3;
+    --primary-foreground: #0b1a11;
+    --secondary: #2a2019;
+    --secondary-foreground: #f4ece2;
+    --muted: #2a2019;
+    --muted-foreground: #c4b3a1;
+    --accent: #30251d;
+    --accent-foreground: #f4ece2;
+    --destructive: #ff9e88;
+    --border: #33281f;
+    --input: #5a4a3d;
+    --ring: #7ad6a3;
+    --radius: 0.375rem;
+    --heading-font: var(--font-literata), "Literata", Georgia, serif;
+    --page-gradient:
+        radial-gradient(28rem 9rem at 12% 0, rgb(120 214 160 / 0.1), transparent 75%),
+        radial-gradient(75rem 50rem at 10% -4rem, rgb(255 196 128 / 0.2), rgb(255 186 116 / 0.07) 48%, transparent 74%);
+    --page-size: 100% 100%;
+}
+
+/* Fireflies: a summer night at the edge of a meadow. A deep green-blue
+   dark, and fireflies low in it, glowing up and fading away (see "Beyond
+   colour"), and their yellow-green for what is chosen. */
+[data-theme="fireflies"] {
+    --background: #0b1a1b;
+    --foreground: #eef4ef;
+    --card: #122422;
+    --card-foreground: #eef4ef;
+    --popover: #142725;
+    --popover-foreground: #eef4ef;
+    --primary: #d4f06a;
+    --primary-foreground: #131a02;
+    --secondary: #1a2e2b;
+    --secondary-foreground: #eef4ef;
+    --muted: #1a2e2b;
+    --muted-foreground: #a8c0b8;
+    --accent: #1f3632;
+    --accent-foreground: #eef4ef;
+    --destructive: #ffa08a;
+    --border: #233a36;
+    --input: #46625c;
+    --ring: #d4f06a;
+    --radius: 0.625rem;
+    --page-gradient: linear-gradient(#081314, #0b1a1b 50%, #0f2420);
+    --page-size: 100% 100%;
+}
+
+/* Graphite: Porcelain's soft shaping in the dark. One charcoal for the page
+   and everything on it, near-white text and a rose glaze for the accent.
+   Restyled from top to bottom with Porcelain in restyles.css: panels and
+   buttons standing up out of the page, fields pressed into it, a faint
+   sheen on the edges that face the light and deep shadow on the others. */
+[data-theme="graphite"] {
+    --background: #2a2d33;
+    --foreground: #eceef2;
+    --card: #2a2d33;
+    --card-foreground: #eceef2;
+    --popover: #30333a;
+    --popover-foreground: #eceef2;
+    --primary: #ff8fae;
+    --primary-foreground: #2a0c16;
+    --secondary: #31343b;
+    --secondary-foreground: #eceef2;
+    --muted: #31343b;
+    --muted-foreground: #b4b9c4;
+    --accent: #33363e;
+    --accent-foreground: #eceef2;
+    --destructive: #ffad7a;
+    --border: #3a3e46;
+    --input: #5a5f6a;
+    --ring: #ff8fae;
+    --radius: 1rem;
+    --heading-font: var(--font-nunito), ui-rounded, ui-sans-serif, system-ui, sans-serif;
+}
+
 [data-theme="solarized-light"] {
     --background: #fdf6e3;
     --foreground: #657b83;
@@ -1787,6 +2021,230 @@
     --page-size: max(100%, 75rem) auto;
 }
 
+/* Delft: blue and white tin-glazed tiles. A cool white glaze for the page,
+   every book in the library on a cobalt tile with a white line just inside
+   its edge (see "Beyond colour"), and cobalt for what is chosen. */
+[data-theme="delft"] {
+    --background: #f3f6fb;
+    --foreground: #0f1c38;
+    --card: #ffffff;
+    --card-foreground: #0f1c38;
+    --popover: #ffffff;
+    --popover-foreground: #0f1c38;
+    --primary: #1f46a0;
+    --primary-foreground: #ffffff;
+    --secondary: #e4eaf5;
+    --secondary-foreground: #0f1c38;
+    --muted: #e4eaf5;
+    --muted-foreground: #3b4a69;
+    --accent: #dde5f3;
+    --accent-foreground: #0f1c38;
+    --destructive: #b3261e;
+    --border: #d3dcec;
+    --input: #b5c2da;
+    --ring: #1f46a0;
+    --radius: 0.375rem;
+    --heading-font: var(--font-literata), "Literata", Georgia, serif;
+}
+
+/* Airmail: a letter sent overseas. Thin pale blue writing paper, the red
+   and blue stripes of an airmail envelope along the foot of the top bar
+   and round dialogs (see "Beyond colour"), and the envelope's red for what
+   is chosen. */
+[data-theme="airmail"] {
+    --background: #e7edf6;
+    --foreground: #101a2e;
+    --card: #f6f8fc;
+    --card-foreground: #101a2e;
+    --popover: #f9fafd;
+    --popover-foreground: #101a2e;
+    --primary: #b3162b;
+    --primary-foreground: #ffffff;
+    --secondary: #dae3f0;
+    --secondary-foreground: #101a2e;
+    --muted: #dae3f0;
+    --muted-foreground: #38455e;
+    --accent: #d3ddec;
+    --accent-foreground: #101a2e;
+    --destructive: #8a1024;
+    --border: #c9d5e6;
+    --input: #a7b6cf;
+    --ring: #1f3a8a;
+    --radius: 0.25rem;
+}
+
+/* Paperback: the old orange paperback cover, a band of orange above and
+   below a cream panel. The top bar is the top band, black lettering on
+   orange, a thinner band runs along the foot of the window, and page
+   titles sit over a short rule in a sans after Gill's, as the cover set
+   its title over the author (see "Beyond colour"). Orange, deepened to
+   read on cream, for what is chosen. */
+[data-theme="paperback"] {
+    --background: #fbf7ee;
+    --foreground: #1a1714;
+    --card: #ffffff;
+    --card-foreground: #1a1714;
+    --popover: #ffffff;
+    --popover-foreground: #1a1714;
+    --primary: #a84200;
+    --primary-foreground: #ffffff;
+    --secondary: #f3ecde;
+    --secondary-foreground: #1a1714;
+    --muted: #f1e9da;
+    --muted-foreground: #574b3e;
+    --accent: #f7e4cf;
+    --accent-foreground: #1a1714;
+    --destructive: #9f1420;
+    --border: #e6dcca;
+    --input: #cbbca5;
+    --ring: #e0701c;
+    --radius: 0.125rem;
+    --heading-font: "Gill Sans", "Gill Sans MT", var(--font-cabin), Cabin, ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Sunroom: a quiet room in the morning. A warm putty wall with the sun
+   coming in at a window to the top left, its panes laid across the wall in
+   soft light (public/themes, drawn by scripts/sunroom-picture.mjs), and
+   plum for what is chosen. */
+[data-theme="sunroom"] {
+    --background: #e9e2d8;
+    --foreground: #221b17;
+    --card: #f8f4ee;
+    --card-foreground: #221b17;
+    --popover: #faf7f2;
+    --popover-foreground: #221b17;
+    --primary: #6b2d5c;
+    --primary-foreground: #ffffff;
+    --secondary: #e0d7cb;
+    --secondary-foreground: #221b17;
+    --muted: #e0d7cb;
+    --muted-foreground: #4e443c;
+    --accent: #ddd2c4;
+    --accent-foreground: #221b17;
+    --destructive: #a3261c;
+    --border: #d5cabc;
+    --input: #b9ab99;
+    --ring: #6b2d5c;
+    --radius: 0.5rem;
+    --page-gradient: url("/themes/sunroom.svg");
+    --page-size: max(100%, 80rem) auto;
+}
+
+/* E-Paper: the screen of an e-reader. Soft grey, ink black and nothing
+   else: covers shown in greys as such a screen shows them, no shadows,
+   hairline edges and a book face for everything (see "Beyond colour").
+   Danger keeps a little red so it can't be missed. */
+[data-theme="e-paper"] {
+    --background: #e8e7e3;
+    --foreground: #111111;
+    --card: #efeeea;
+    --card-foreground: #111111;
+    --popover: #f2f1ed;
+    --popover-foreground: #111111;
+    --primary: #1a1a1a;
+    --primary-foreground: #f2f1ed;
+    --secondary: #dcdbd6;
+    --secondary-foreground: #111111;
+    --muted: #dcdbd6;
+    --muted-foreground: #3d3d3b;
+    --accent: #d6d5d0;
+    --accent-foreground: #111111;
+    --destructive: #8f1d16;
+    --border: #b9b8b2;
+    --input: #8e8d88;
+    --ring: #1a1a1a;
+    --radius: 0.25rem;
+    --heading-font: var(--font-literata), "Literata", Georgia, serif;
+    --color-amber-500: #2b2b2b;
+}
+
+/* Dog-Ear: pages with their corners turned down to keep the place. A pale
+   heather page, white paper cards, the top corner of every book's folded
+   over (see "Beyond colour"), and bottle green for what is chosen. */
+[data-theme="dog-ear"] {
+    --background: #ebe5ec;
+    --foreground: #1d1a1f;
+    --card: #fdfbfd;
+    --card-foreground: #1d1a1f;
+    --popover: #fdfbfd;
+    --popover-foreground: #1d1a1f;
+    --primary: #2b5a4c;
+    --primary-foreground: #ffffff;
+    --secondary: #e2dbe3;
+    --secondary-foreground: #1d1a1f;
+    --muted: #e2dbe3;
+    --muted-foreground: #4a4350;
+    --accent: #ddd4de;
+    --accent-foreground: #1d1a1f;
+    --destructive: #a3241c;
+    --border: #d8cfda;
+    --input: #b7abba;
+    --ring: #2b5a4c;
+    --radius: 0.375rem;
+    --heading-font: var(--font-literata), "Literata", Georgia, serif;
+}
+
+/* Seventies: a living room in 1974. A cream page, a rainbow in chocolate,
+   burnt orange, mustard and sand rising from the bottom right corner at
+   the foot of every page and a little one beside each page's title, round
+   corners, soft and a little wonky headings (Fraunces), and chocolate
+   brown for what is chosen. */
+[data-theme="seventies"] {
+    --background: #f6ead7;
+    --foreground: #2a1a10;
+    --card: #fdf6ec;
+    --card-foreground: #2a1a10;
+    --popover: #fef8ef;
+    --popover-foreground: #2a1a10;
+    --primary: #6b3a1f;
+    --primary-foreground: #ffffff;
+    --secondary: #efdfc6;
+    --secondary-foreground: #2a1a10;
+    --muted: #efdfc6;
+    --muted-foreground: #5a4331;
+    --accent: #ecd7b8;
+    --accent-foreground: #2a1a10;
+    --destructive: #a3261c;
+    --border: #e4d1b4;
+    --input: #c9ae88;
+    --ring: #c9622b;
+    --radius: 1rem;
+    --heading-font: var(--font-fraunces), Fraunces, Georgia, serif;
+    --sv-r: clamp(4rem, 9vw, 7.5rem);
+    --sv-w: calc(var(--sv-r) * 0.25);
+}
+
+/* Haiku: the desktop of the Haiku operating system, BeOS's heir. A flat
+   blue desktop and grey windows, each with the short yellow tab on its top
+   edge that names it. Restyled from top to bottom in restyles.css: the
+   Deskbar along the top, a window round every page with its close and
+   zoom boxes in the tab, soft grey controls, etched boxes for panels,
+   blue for the keyboard's focus and an X in a ticked box. */
+[data-theme="haiku"] {
+    --background: #d8d8d8;
+    --foreground: #000000;
+    --card: #ffffff;
+    --card-foreground: #000000;
+    --popover: #d8d8d8;
+    --popover-foreground: #000000;
+    --primary: #285889;
+    --primary-foreground: #ffffff;
+    --secondary: #e4e4e4;
+    --secondary-foreground: #000000;
+    --muted: #cbcbcb;
+    --muted-foreground: #3d3d3d;
+    --accent: #c4c4c4;
+    --accent-foreground: #000000;
+    --destructive: #a01c14;
+    --border: #a6a6a6;
+    --input: #8f8f8f;
+    --ring: #0000e5;
+    --radius: 0.1875rem;
+    --heading-font: var(--font-noto-sans), "Noto Sans", "DejaVu Sans", ui-sans-serif, system-ui, sans-serif;
+    --page-gradient: linear-gradient(#336698, #336698);
+    --page-size: 100% 100%;
+}
+
 /* ── The Silly set ─────────────────────────────────────────────────────────
    Themes nobody should pick, listed apart in the palette menu. They are
    absurd on purpose but hold the same contrast as the rest, so the app
@@ -2370,6 +2828,420 @@ html[data-own-background] body::before {
 .theme-is-gallery[data-section="book"] h1 {
   font-style: italic;
   font-weight: 500;
+}
+
+/* Delft: every book in the library sits on a cobalt tile with a line of
+   white glaze just inside its edge. The colours are set again on the tile,
+   as they are in an own-colour top bar, so the title, the author, the
+   reading progress and the stars all read on the blue. */
+.theme-is-delft a.surface {
+  --foreground: #ffffff;
+  --card-foreground: #ffffff;
+  --muted: #183a86;
+  --muted-foreground: #c9d6f4;
+  --primary: #ffffff;
+  --ring: #ffffff;
+  border-color: #183a86;
+  color: var(--foreground);
+  background-color: #1f46a0;
+  box-shadow: inset 0 0 0 4px #1f46a0, inset 0 0 0 5px rgb(255 255 255 / 0.6), var(--surface-shadow);
+}
+.theme-is-delft a.surface:hover {
+  border-color: #183a86;
+  background-color: #2450b3;
+  box-shadow: inset 0 0 0 4px #2450b3, inset 0 0 0 5px rgb(255 255 255 / 0.75), var(--surface-shadow);
+}
+.theme-is-delft a.surface.flex-col {
+  padding: 0.875rem;
+}
+
+/* Airmail: the stripes of an airmail envelope, red and blue on white,
+   along the foot of the top bar and round the edge of a dialog. */
+.theme-is-airmail .top-bar {
+  border-bottom: 6px solid transparent;
+  border-image: repeating-linear-gradient(-45deg, #c8102e 0 12px, #ffffff 12px 18px, #1d3a8a 18px 30px, #ffffff 30px 36px) 6;
+}
+.theme-is-airmail [data-slot="dialog-content"] {
+  border: 7px solid transparent;
+  border-image: repeating-linear-gradient(-45deg, #c8102e 0 12px, #ffffff 12px 18px, #1d3a8a 18px 30px, #ffffff 30px 36px) 7;
+}
+.theme-is-airmail h1 {
+  color: #1d3a8a;
+}
+
+/* Paperback: the top bar is the cover's top band, black lettering on
+   orange, and a narrower band runs along the foot of the window. Page
+   titles sit over a short black rule, in the cover's sans. */
+.theme-is-paperback .top-bar {
+  --background: #ee7d2b;
+  --foreground: #141210;
+  --muted-foreground: #2e2218;
+  --accent: #f39a55;
+  --accent-foreground: #141210;
+  --border: #d86a16;
+  --primary: #141210;
+  --primary-foreground: #ee7d2b;
+  --ring: #141210;
+  border-bottom-color: #d86a16;
+  background-color: var(--background);
+  color: var(--foreground);
+  backdrop-filter: none;
+}
+.theme-is-paperback body::after {
+  content: "";
+  position: fixed;
+  inset: auto 0 0;
+  z-index: 30;
+  height: 0.625rem;
+  background: #ee7d2b;
+  pointer-events: none;
+}
+.theme-is-paperback body {
+  padding-bottom: 0.625rem;
+}
+.theme-is-paperback h1,
+.theme-is-paperback .wordmark {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  letter-spacing: 0;
+}
+.theme-is-paperback .top-bar + main h1 {
+  padding-bottom: 0.5rem;
+  background: linear-gradient(currentColor, currentColor) left bottom / 2.5rem 2px no-repeat;
+}
+
+/* Sunroom: the window is up to the left, so its light lands from the top
+   left corner of the page, wherever the page is. */
+.theme-is-sunroom body::before {
+  background-position: left top;
+  background-repeat: no-repeat;
+}
+
+/* E-Paper: an e-reader's screen shows no colour and draws no shadows, so
+   covers are in greys, badges are outlined, cards are edged with a
+   hairline, and everything is set in the book face. */
+:root[data-theme="e-paper"]:not([data-cards="flat"]) {
+  --surface-shadow: none;
+}
+.theme-is-e-paper body {
+  font-family: var(--font-literata), "Literata", Georgia, serif;
+}
+.theme-is-e-paper .book-cover img {
+  filter: grayscale(1) contrast(1.04);
+}
+.theme-is-e-paper .drawn-cover {
+  background: hsl(0 0% var(--cover-light));
+  color: hsl(0 0% 94%);
+}
+.theme-is-e-paper .drawn-cover-frame {
+  border-color: hsl(0 0% 90% / 0.45);
+}
+.theme-is-e-paper .book-backdrop {
+  display: none;
+}
+.theme-is-e-paper [data-slot="badge"]:not([data-variant="default"]) {
+  border-color: currentColor;
+  color: var(--foreground);
+  background: transparent;
+}
+.theme-is-e-paper [data-slot="badge"] > [class*="rounded-full"] {
+  background: currentColor;
+}
+.theme-is-e-paper .surface {
+  border-color: var(--border);
+}
+
+/* Dog-Ear: each book's card has its top corner turned down. The corner
+   is cut away from the card, and the flap lies folded over on it, the
+   back of the page a shade darker and curling up off the card a little,
+   with its own small shadow. Under the pointer the corner turns down a
+   little further. */
+.theme-is-dog-ear a.surface.flex-col {
+  --fold: 2rem;
+  position: relative;
+  border-color: transparent;
+  box-shadow: 0 1px 2px rgb(60 40 70 / 0.1), 0 6px 12px -8px rgb(60 40 70 / 0.3);
+  background: linear-gradient(225deg, transparent calc(var(--fold) * 0.7071 - 0.5px), var(--card) calc(var(--fold) * 0.7071)) border-box;
+}
+.theme-is-dog-ear a.surface.flex-col.p-2 {
+  --fold: 1.375rem;
+}
+.theme-is-dog-ear a.surface.flex-col::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: var(--fold);
+  height: var(--fold);
+  border-bottom-left-radius: 0.375rem;
+  background: linear-gradient(45deg, #cdbfd0, #e3dae4 30%, #f3eef4 49.5%, transparent 50%);
+  box-shadow: -2px 3px 4px -2px rgb(60 40 70 / 0.35);
+  pointer-events: none;
+}
+.theme-is-dog-ear a.surface.flex-col:hover {
+  --fold: 2.5rem;
+  box-shadow: 0 1px 2px rgb(60 40 70 / 0.1), 0 12px 20px -12px rgb(60 40 70 / 0.4);
+}
+.theme-is-dog-ear a.surface.flex-col.p-2:hover {
+  --fold: 1.75rem;
+}
+
+/* Seventies: titles in the soft, wonky cut of Fraunces. */
+.theme-is-seventies h1,
+.theme-is-seventies .wordmark {
+  font-family: var(--font-heading);
+  font-variation-settings: "SOFT" 100, "WONK" 1;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+/* A little rainbow sunrise beside each page's title. */
+.theme-is-seventies .top-bar + main h1::after {
+  content: "";
+  display: inline-block;
+  width: 1.5em;
+  height: 0.75em;
+  margin-left: 0.35em;
+  background: radial-gradient(circle at 50% 100%, transparent 0.25em, #f0cf86 calc(0.25em + 0.5px) 0.375em, #e3a137 calc(0.375em + 0.5px) 0.5em, #c9622b calc(0.5em + 0.5px) 0.625em, #7a4122 calc(0.625em + 0.5px) 0.75em, transparent calc(0.75em + 0.5px));
+}
+/* Its rainbow rises from the bottom right corner at the foot of the page,
+   in room kept for it under the last of the page, so it never lies under
+   any writing; on a short page that is the foot of the screen. */
+.theme-is-seventies body {
+  position: relative;
+}
+.theme-is-seventies .top-bar + main {
+  padding-bottom: calc(var(--sv-r) + var(--sv-w) * 4);
+}
+.theme-is-seventies body::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  z-index: -1;
+  width: calc(var(--sv-r) + var(--sv-w) * 4);
+  height: calc(var(--sv-r) + var(--sv-w) * 4);
+  background: radial-gradient(circle at 100% 100%, transparent var(--sv-r), #f0cf86 calc(var(--sv-r) + 1px) calc(var(--sv-r) + var(--sv-w)), #e3a137 calc(var(--sv-r) + var(--sv-w) + 1px) calc(var(--sv-r) + var(--sv-w) * 2), #c9622b calc(var(--sv-r) + var(--sv-w) * 2 + 1px) calc(var(--sv-r) + var(--sv-w) * 3), #7a4122 calc(var(--sv-r) + var(--sv-w) * 3 + 1px) calc(var(--sv-r) + var(--sv-w) * 4), transparent calc(var(--sv-r) + var(--sv-w) * 4 + 1px));
+  pointer-events: none;
+}
+
+/* Eclipse: on a wide screen, where the margin beside the page is wide
+   enough to hold it, the whole eclipse hangs in that margin, a third of
+   the way down. */
+@media (width >= 90rem) {
+  .theme-is-eclipse {
+    --ec-g: calc((100vw - 72rem) / 2 + 1rem);
+    --ec-r: min(8rem, calc((var(--ec-g) - 2.5rem) / 2.3));
+    --ec-x: calc(100% - var(--ec-g) / 2);
+    --ec-y: 32%;
+  }
+}
+
+/* Rooftops: the roofs keep to the foot of the window. */
+.theme-is-rooftops body::before {
+  background-position: center bottom, 0 0;
+  background-repeat: no-repeat;
+}
+
+/* Transit: each part of the app takes its line's colour for what is
+   chosen (an accent colour from Preferences still wins), page titles sit
+   at a station with the line running in from the left edge of the window,
+   and each link in the top bar carries its line's colour. */
+.theme-is-transit {
+  --line-library: #ff8f3f;
+  --line-reading: #3ecf8e;
+  --line-stats: #5aa9ff;
+  --line-quotes: #b892ff;
+  --line-room: #f4c430;
+  --line-account: #3cc7d6;
+}
+.theme-is-transit[data-section="reading"] {
+  --primary: var(--line-reading);
+  --primary-foreground: #03150c;
+  --ring: var(--line-reading);
+}
+.theme-is-transit[data-section="stats"] {
+  --primary: var(--line-stats);
+  --primary-foreground: #04101f;
+  --ring: var(--line-stats);
+}
+.theme-is-transit[data-section="quotes"] {
+  --primary: var(--line-quotes);
+  --primary-foreground: #150a26;
+  --ring: var(--line-quotes);
+}
+.theme-is-transit[data-section="room"] {
+  --primary: var(--line-room);
+  --primary-foreground: #1d1500;
+  --ring: var(--line-room);
+}
+.theme-is-transit[data-section="account"] {
+  --primary: var(--line-account);
+  --primary-foreground: #021719;
+  --ring: var(--line-account);
+}
+.theme-is-transit .top-bar + main h1 {
+  position: relative;
+  padding-left: 2.125rem;
+}
+.theme-is-transit .top-bar + main h1::before,
+.theme-is-transit .top-bar + main h1::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  pointer-events: none;
+}
+.theme-is-transit .top-bar + main h1::before {
+  left: 0;
+  z-index: 1;
+  width: 1.375rem;
+  height: 1.375rem;
+  margin-top: -0.6875rem;
+  border: 0.3125rem solid var(--primary);
+  border-radius: 50%;
+  background: #ffffff;
+}
+.theme-is-transit .top-bar + main h1::after {
+  right: calc(100% - 0.5rem);
+  width: 100vw;
+  height: 0.375rem;
+  margin-top: -0.1875rem;
+  background: var(--primary);
+}
+.theme-is-transit .top-bar .nav-link[data-size] {
+  --line: var(--line-library);
+}
+.theme-is-transit .top-bar .nav-link[href="/reading"][data-size] {
+  --line: var(--line-reading);
+}
+.theme-is-transit .top-bar .nav-link[href="/stats"][data-size] {
+  --line: var(--line-stats);
+}
+.theme-is-transit .top-bar .nav-link[href="/quotes"][data-size] {
+  --line: var(--line-quotes);
+}
+.theme-is-transit .top-bar .nav-link[href="/room"][data-size] {
+  --line: var(--line-room);
+}
+.theme-is-transit .top-bar .nav-link[data-size] > svg {
+  color: var(--line);
+}
+.theme-is-transit .top-bar .nav-link[aria-current="page"]::after {
+  inset-inline: 0.25rem;
+  height: 4px;
+  background: var(--line);
+}
+
+/* Sashiko: a line of running stitch round each card, panel and dialog,
+   just inside its edge, in ecru thread: four dashed lines, drawn under
+   what the card holds. */
+.theme-is-sashiko :is(.surface, [data-slot="card"], [data-slot="dialog-content"]) {
+  --stitch: rgb(236 227 208 / 0.62);
+  --in: 0.4375rem;
+  background:
+    repeating-linear-gradient(90deg, var(--stitch) 0 7px, transparent 7px 11px) var(--in) var(--in) / calc(100% - var(--in) * 2) 1.5px no-repeat,
+    repeating-linear-gradient(90deg, var(--stitch) 0 7px, transparent 7px 11px) var(--in) calc(100% - var(--in)) / calc(100% - var(--in) * 2) 1.5px no-repeat,
+    repeating-linear-gradient(var(--stitch) 0 7px, transparent 7px 11px) var(--in) var(--in) / 1.5px calc(100% - var(--in) * 2) no-repeat,
+    repeating-linear-gradient(var(--stitch) 0 7px, transparent 7px 11px) calc(100% - var(--in)) var(--in) / 1.5px calc(100% - var(--in) * 2) no-repeat,
+    var(--card);
+}
+.theme-is-sashiko [data-slot="dialog-content"] {
+  --in: 0.625rem;
+  background-color: var(--popover);
+}
+.theme-is-sashiko a.surface.flex-col {
+  padding: 0.9375rem;
+}
+.theme-is-sashiko a.surface.flex-col.p-2 {
+  --in: 0.3125rem;
+  padding: 0.625rem;
+}
+.theme-is-sashiko a.surface:not(.flex-col) {
+  --in: 0.3125rem;
+}
+
+/* Halo: every card glows round its edges, a little more under the
+   pointer. With flat cards (Preferences) only the hairline is left. */
+:root[data-theme="halo"]:not([data-cards="flat"]) {
+  --surface-shadow: 0 0 0 1px rgb(179 184 255 / 0.2), 0 0 22px -2px rgb(150 156 255 / 0.34), 0 0 60px -14px rgb(150 156 255 / 0.3);
+}
+:root[data-theme="halo"][data-cards="flat"] {
+  --surface-shadow: 0 0 0 1px rgb(179 184 255 / 0.2);
+}
+.theme-is-halo .surface {
+  border-color: transparent;
+}
+.theme-is-halo:not([data-cards="flat"]) .surface:hover {
+  box-shadow: 0 0 0 1px rgb(179 184 255 / 0.4), 0 0 28px 0 rgb(150 156 255 / 0.45), 0 0 72px -10px rgb(150 156 255 / 0.4);
+}
+.theme-is-halo [data-size][data-variant="default"] {
+  box-shadow: 0 0 18px -3px rgb(179 184 255 / 0.7);
+}
+
+/* Fireflies: two swarms of them in the lower part of the window, on
+   fixed layers over the page's own dark and under everything on it. Each
+   swarm glows up and fades in its own time, so the lights come and go
+   across the meadow; only the layers' opacity changes, which the browser
+   does without drawing anything again, and the layers cover only the
+   part of the window the swarms are in. (Letting them drift as well
+   cost frames while scrolling on a slow phone.) With motion off
+   (Preferences, or the system's reduced motion) they simply glow. */
+.theme-is-fireflies::after,
+.theme-is-fireflies body::after {
+  content: "";
+  position: fixed;
+  inset: 45% 0 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.85;
+}
+.theme-is-fireflies::after {
+  background-image:
+    radial-gradient(circle at 6% 60.0%, rgb(240 255 170 / 0.95) 0 1.6px, rgb(214 240 106 / 0.42) 3.5px, rgb(214 240 106 / 0.1) 10.2px, transparent 18.4px),
+    radial-gradient(circle at 14% 23.6%, rgb(240 255 170 / 0.95) 0 1.4px, rgb(214 240 106 / 0.42) 3.1px, rgb(214 240 106 / 0.1) 9.0px, transparent 16.1px),
+    radial-gradient(circle at 23% 81.8%, rgb(240 255 170 / 0.95) 0 2.0px, rgb(214 240 106 / 0.42) 4.4px, rgb(214 240 106 / 0.1) 12.8px, transparent 23.0px),
+    radial-gradient(circle at 34% 38.2%, rgb(240 255 170 / 0.95) 0 1.5px, rgb(214 240 106 / 0.42) 3.3px, rgb(214 240 106 / 0.1) 9.6px, transparent 17.2px),
+    radial-gradient(circle at 47% 70.9%, rgb(240 255 170 / 0.95) 0 1.8px, rgb(214 240 106 / 0.42) 4.0px, rgb(214 240 106 / 0.1) 11.5px, transparent 20.7px),
+    radial-gradient(circle at 58% 18.2%, rgb(240 255 170 / 0.95) 0 1.4px, rgb(214 240 106 / 0.42) 3.1px, rgb(214 240 106 / 0.1) 9.0px, transparent 16.1px),
+    radial-gradient(circle at 68% 85.5%, rgb(240 255 170 / 0.95) 0 2.1px, rgb(214 240 106 / 0.42) 4.6px, rgb(214 240 106 / 0.1) 13.4px, transparent 24.2px),
+    radial-gradient(circle at 79% 45.5%, rgb(240 255 170 / 0.95) 0 1.6px, rgb(214 240 106 / 0.42) 3.5px, rgb(214 240 106 / 0.1) 10.2px, transparent 18.4px),
+    radial-gradient(circle at 88% 12.7%, rgb(240 255 170 / 0.95) 0 1.4px, rgb(214 240 106 / 0.42) 3.1px, rgb(214 240 106 / 0.1) 9.0px, transparent 16.1px),
+    radial-gradient(circle at 95% 74.5%, rgb(240 255 170 / 0.95) 0 1.9px, rgb(214 240 106 / 0.42) 4.2px, rgb(214 240 106 / 0.1) 12.2px, transparent 21.8px);
+}
+.theme-is-fireflies body::after {
+  background-image:
+    radial-gradient(circle at 3% 34.5%, rgb(240 255 170 / 0.95) 0 1.5px, rgb(214 240 106 / 0.42) 3.3px, rgb(214 240 106 / 0.1) 9.6px, transparent 17.2px),
+    radial-gradient(circle at 18% 52.7%, rgb(240 255 170 / 0.95) 0 1.9px, rgb(214 240 106 / 0.42) 4.2px, rgb(214 240 106 / 0.1) 12.2px, transparent 21.8px),
+    radial-gradient(circle at 29% 12.7%, rgb(240 255 170 / 0.95) 0 1.4px, rgb(214 240 106 / 0.42) 3.1px, rgb(214 240 106 / 0.1) 9.0px, transparent 16.1px),
+    radial-gradient(circle at 40% 89.1%, rgb(240 255 170 / 0.95) 0 2.2px, rgb(214 240 106 / 0.42) 4.8px, rgb(214 240 106 / 0.1) 14.1px, transparent 25.3px),
+    radial-gradient(circle at 52% 45.5%, rgb(240 255 170 / 0.95) 0 1.6px, rgb(214 240 106 / 0.42) 3.5px, rgb(214 240 106 / 0.1) 10.2px, transparent 18.4px),
+    radial-gradient(circle at 63% 63.6%, rgb(240 255 170 / 0.95) 0 1.9px, rgb(214 240 106 / 0.42) 4.2px, rgb(214 240 106 / 0.1) 12.2px, transparent 21.8px),
+    radial-gradient(circle at 73% 23.6%, rgb(240 255 170 / 0.95) 0 1.4px, rgb(214 240 106 / 0.42) 3.1px, rgb(214 240 106 / 0.1) 9.0px, transparent 16.1px),
+    radial-gradient(circle at 84% 78.2%, rgb(240 255 170 / 0.95) 0 2.0px, rgb(214 240 106 / 0.42) 4.4px, rgb(214 240 106 / 0.1) 12.8px, transparent 23.0px),
+    radial-gradient(circle at 91% 38.2%, rgb(240 255 170 / 0.95) 0 1.5px, rgb(214 240 106 / 0.42) 3.3px, rgb(214 240 106 / 0.1) 9.6px, transparent 17.2px),
+    radial-gradient(circle at 44% 27.3%, rgb(240 255 170 / 0.95) 0 1.4px, rgb(214 240 106 / 0.42) 3.1px, rgb(214 240 106 / 0.1) 9.0px, transparent 16.1px);
+}
+@keyframes firefly-glow {
+  0%,
+  100% {
+    opacity: 0.08;
+  }
+  35% {
+    opacity: 1;
+  }
+  55% {
+    opacity: 0.9;
+  }
+  80% {
+    opacity: 0.15;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-motion="off"]).theme-is-fireflies::after {
+    animation: firefly-glow 7s ease-in-out infinite;
+  }
+  html:not([data-motion="off"]).theme-is-fireflies body::after {
+    animation: firefly-glow 9.5s ease-in-out -4s infinite reverse;
+  }
 }
 
 /* One font for the whole page. */

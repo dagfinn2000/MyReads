@@ -215,6 +215,73 @@ export const THEMES: ThemeDef[] = [
       "linear-gradient(90deg, #161616 0 24%, transparent 24%), linear-gradient(transparent 0 16%, #2c2c2c 16% 84%, transparent 84%), radial-gradient(130% 100% at 95% 100%, #f47a3a, #e95420 22%, #77216f 62%, #2c001e)",
     ownBackground: true,
   },
+  {
+    id: "eclipse",
+    name: "Eclipse",
+    mode: "dark",
+    swatch: ["#06070b", "#d3def5"],
+    pattern:
+      "radial-gradient(circle at 62% 40%, #06070b 0 22%, #f4f7ff 24%, rgb(186 202 245 / 0.4) 32%, rgb(140 160 220 / 0.12) 44%, transparent 58%)",
+    ownBackground: true,
+  },
+  {
+    id: "rooftops",
+    name: "Rooftops",
+    mode: "dark",
+    swatch: ["#151b28", "#ffd27a"],
+    pattern:
+      "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M0 24V15l4-3 4 3v-2h3v-3l5 4v2h4l4-3v11z' fill='%230b0f18'/%3E%3Crect x='5' y='17' width='1.6' height='2' fill='%23ffd27a'/%3E%3Crect x='17' y='19' width='1.6' height='2' fill='%23ffd27a'/%3E%3C/svg%3E\")",
+    ownBackground: true,
+  },
+  {
+    id: "transit",
+    name: "Transit",
+    mode: "dark",
+    swatch: ["#14171c", "#ff8f3f"],
+    pattern:
+      "radial-gradient(circle, #ffffff 0 13%, #ff8f3f 14% 24%, transparent 25%), linear-gradient(transparent 44%, #ff8f3f 44% 56%, transparent 56%), linear-gradient(90deg, transparent 44%, #3ecf8e 44% 56%, transparent 56%)",
+  },
+  {
+    id: "sashiko",
+    name: "Sashiko",
+    mode: "dark",
+    swatch: ["#16203a", "#ece3d0"],
+    pattern:
+      "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='4' y='4' width='16' height='16' fill='%231d2845'/%3E%3Crect x='6' y='6' width='12' height='12' fill='none' stroke='%23ece3d0' stroke-width='.8' stroke-dasharray='2.2 1.3'/%3E%3C/svg%3E\")",
+  },
+  {
+    id: "halo",
+    name: "Halo",
+    mode: "dark",
+    swatch: ["#0c0d14", "#b3b8ff"],
+    pattern: "radial-gradient(circle, #161823 0 32%, rgb(150 156 255 / 0.6) 38%, rgb(150 156 255 / 0.15) 52%, transparent 64%)",
+  },
+  {
+    id: "lamplight",
+    name: "Lamplight",
+    mode: "dark",
+    swatch: ["#15100c", "#7ad6a3"],
+    pattern:
+      "radial-gradient(45% 22% at 24% 0%, rgb(120 214 160 / 0.55), transparent), radial-gradient(100% 90% at 20% 0%, rgb(255 196 128 / 0.5), transparent 72%)",
+    ownBackground: true,
+  },
+  {
+    id: "fireflies",
+    name: "Fireflies",
+    mode: "dark",
+    swatch: ["#0b1a1b", "#d4f06a"],
+    pattern:
+      "radial-gradient(circle at 30% 62%, #f0ffaa 0 5%, rgb(214 240 106 / 0.35) 12%, transparent 22%), radial-gradient(circle at 70% 44%, #f0ffaa 0 4%, rgb(214 240 106 / 0.3) 10%, transparent 18%), radial-gradient(circle at 58% 80%, #f0ffaa 0 3%, rgb(214 240 106 / 0.3) 8%, transparent 15%)",
+    ownBackground: true,
+  },
+  {
+    id: "graphite",
+    name: "Graphite",
+    mode: "dark",
+    swatch: ["#2a2d33", "#ff8fae"],
+    pattern:
+      "radial-gradient(circle at 36% 34%, #3b3f47 0 22%, transparent 48%), radial-gradient(circle at 66% 68%, #15171b 0 18%, transparent 46%)",
+  },
 
   // Light palettes
   { id: "solarized-light", name: "Solarized Light", mode: "light", swatch: ["#fdf6e3", "#b58900"] },
@@ -389,6 +456,70 @@ export const THEMES: ThemeDef[] = [
     swatch: ["#f2efe6", "#2b4262"],
     pattern:
       "linear-gradient(transparent 50%, #f2efe6 86%), radial-gradient(70% 46% at 74% 100%, #b6b1a7 0 96%, transparent 100%), radial-gradient(80% 62% at 24% 100%, #d0cbc1 0 96%, transparent 100%), radial-gradient(circle at 76% 26%, #b8321f 0 9%, transparent 11%)",
+    ownBackground: true,
+  },
+  {
+    id: "delft",
+    name: "Delft",
+    mode: "light",
+    swatch: ["#f3f6fb", "#1f46a0"],
+    pattern:
+      "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='5' y='5' width='14' height='14' rx='1.2' fill='%231f46a0'/%3E%3Crect x='6.6' y='6.6' width='10.8' height='10.8' fill='none' stroke='%23ffffff' stroke-opacity='.75' stroke-width='.6'/%3E%3C/svg%3E\")",
+  },
+  {
+    id: "airmail",
+    name: "Airmail",
+    mode: "light",
+    swatch: ["#e7edf6", "#b3162b"],
+    pattern:
+      "radial-gradient(circle, #e7edf6 0 52%, transparent 54%), repeating-linear-gradient(-45deg, #c8102e 0 3px, #ffffff 3px 4.5px, #1d3a8a 4.5px 7.5px, #ffffff 7.5px 9px)",
+  },
+  {
+    id: "paperback",
+    name: "Paperback",
+    mode: "light",
+    swatch: ["#fbf7ee", "#a84200"],
+    pattern: "linear-gradient(#ee7d2b 0 30%, transparent 30% 70%, #ee7d2b 70%)",
+  },
+  {
+    id: "sunroom",
+    name: "Sunroom",
+    mode: "light",
+    swatch: ["#e9e2d8", "#6b2d5c"],
+    pattern:
+      "linear-gradient(118deg, transparent 14%, rgb(255 250 236 / 0.95) 14% 34%, transparent 34% 39%, rgb(255 250 236 / 0.95) 39% 59%, transparent 59%)",
+    ownBackground: true,
+  },
+  {
+    id: "e-paper",
+    name: "E-Paper",
+    mode: "light",
+    swatch: ["#e8e7e3", "#1a1a1a"],
+    pattern:
+      "linear-gradient(90deg, transparent 22%, #e8e7e3 22% 78%, transparent 78%), linear-gradient(transparent 28%, #3d3d3b 28% 32%, transparent 32% 42%, #3d3d3b 42% 46%, transparent 46% 56%, #3d3d3b 56% 60%, transparent 60% 70%, #3d3d3b 70% 74%, transparent 74%)",
+  },
+  {
+    id: "dog-ear",
+    name: "Dog-Ear",
+    mode: "light",
+    swatch: ["#ebe5ec", "#2b5a4c"],
+    pattern: "linear-gradient(45deg, #fdfbfd 0 58%, #d9cedb 58% 72%, transparent 72%)",
+  },
+  {
+    id: "seventies",
+    name: "Seventies",
+    mode: "light",
+    swatch: ["#f6ead7", "#6b3a1f"],
+    pattern:
+      "radial-gradient(circle at 100% 100%, transparent 0 34%, #f0cf86 34% 48%, #e3a137 48% 62%, #c9622b 62% 76%, #7a4122 76% 90%, transparent 90%)",
+  },
+  {
+    id: "haiku",
+    name: "Haiku",
+    mode: "light",
+    swatch: ["#d8d8d8", "#285889"],
+    pattern:
+      "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' fill='%23336698'/%3E%3Cpath d='M4 5.5h9v3H4z' fill='%23ffcb00' stroke='%23555' stroke-width='.5'/%3E%3Cpath d='M4 8.5h20V24H4z' fill='%23d8d8d8' stroke='%23555' stroke-width='.5'/%3E%3C/svg%3E\")",
     ownBackground: true,
   },
   // The Silly set
