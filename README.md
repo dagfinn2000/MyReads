@@ -64,9 +64,10 @@ server.
   Metro into Windows 8's tiles, Fluent into Windows 11's glass,
   Mojave, Big Sur and Ventura into the Mac of 2018, 2020 and 2022,
   Golden Gate into macOS's Liquid Glass, visionOS into a window floating
-  over a valley, Sea Glass and Leadlight into frosted and stained glass,
-  KDE Plasma, GNOME and Hyprland into the Linux desktops, Card Catalogue
-  into a library's card drawers and Comic into a comic book). 26 background textures. On some of the textures rain falls,
+  over a valley, Material You into Android, Porcelain into soft grey
+  porcelain shaped by light, KDE Plasma, GNOME and Hyprland into the
+  Linux desktops, Card Catalogue into a library's card drawers and Comic
+  into a comic book). 26 background textures. On some of the textures rain falls,
   snow drifts or stars twinkle.
 - A theme for one device or one part of the app, and your own CSS.
 - Preferences for date formats, time zone, sorting, fonts and much more.

@@ -16,6 +16,7 @@ import {
   Open_Sans,
   Patrick_Hand,
   Playfair_Display,
+  Roboto,
   UnifrakturMaguntia,
   VT323,
 } from "next/font/google";
@@ -90,6 +91,8 @@ const courierPrime = Courier_Prime({
   preload: false,
 });
 const bangers = Bangers({ weight: "400", subsets: ["latin"], variable: "--font-bangers", preload: false });
+// Roboto for Material You, Android's face.
+const roboto = Roboto({ subsets: ["latin"], variable: "--font-roboto", preload: false });
 // DotGothic16 is a Japanese face, which Google Fonts serves in 120-odd
 // slices; through next/font/google each slice was a rule in the CSS every
 // page loads (94 KB of it, for one theme). This is the Latin slice alone
@@ -158,6 +161,7 @@ export default async function RootLayout({
         openSans.variable,
         courierPrime.variable,
         bangers.variable,
+        roboto.variable,
         pixel.variable,
         setting?.kind === "fixed" && THEME_CLASS_PREFIX + setting.id,
         dark && "dark",
