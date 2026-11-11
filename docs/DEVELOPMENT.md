@@ -224,8 +224,8 @@ The reading room's files:
 - **A few themes restyle everything.** Desktop 95, Terminal, Newsprint,
   Blueprint, Notebook, Quest, Pinstripe, Aero, Golden Gate, KDE Plasma,
   GNOME, Hyprland, Fluent, visionOS, Porcelain, Material You, Mojave,
-  Big Sur, Ventura, Luna, Metro, Card Catalogue and Comic start from
-  a colour block like any theme, and [restyles.css](../src/app/restyles.css) reshapes the
+  Big Sur, Ventura, Luna, Metro, Card Catalogue, Comic, Editor and
+  Ubuntu start from a colour block like any theme, and [restyles.css](../src/app/restyles.css) reshapes the
   app for them, one section per theme. Its rules aim at shadcn's
   `data-slot` attributes and buttons by `data-size` and `data-variant`:
   a button inside a Radix trigger (`asChild`) wears the trigger's

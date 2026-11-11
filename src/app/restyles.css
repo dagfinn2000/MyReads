@@ -13256,3 +13256,939 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
   letter-spacing: 0.04em;
   text-shadow: 3px 3px 0 var(--comic-ink);
 }
+
+/* ── Editor ────────────────────────────────────────────────────────────────
+   A code editor late at night, with the library open in it like a file.
+   The top bar is the editor's strip of tabs, a tab for each page and the
+   open page's tab the colour of the editor with a teal line along its top;
+   the app's name is the project's, at the strip's start. Under it, the path
+   to the open page as the editor's breadcrumbs, and down the left of the
+   page the gutter's line numbers, which scroll with it. A status bar runs
+   along the foot of the screen: the branch and the problems at its left,
+   the cursor's line and the file's kind at its right. Page titles are a
+   Markdown heading, their # in the colour of a keyword; books' titles,
+   authors and counts are highlighted as code is, a title in a function's
+   yellow, an author in a string's orange, a count in a number's green and
+   a note in a comment's. Panels and menus are the editor's own greys, the
+   item under the pointer in its blue of a selected line, and everything is
+   in JetBrains Mono but long text, which keeps the app's own face as an
+   editor's preview of a document does. Nothing blurs. */
+:root[data-theme="editor"] {
+  --ed-font: var(--font-jetbrains), "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --ed-strip: #2b2d30;
+  --ed-line: #393b40;
+  --ed-keyword: #569cd6;
+  --ed-function: #dcdcaa;
+  --ed-string: #ce9178;
+  --ed-number: #b5cea8;
+  --ed-comment: #7fae6a;
+  --ed-select: #264f78;
+  --ed-focus: #04395e;
+  --ed-status: 1.5rem;
+  --ed-gutter: 3rem;
+  --surface-shadow: none;
+  --chart-1: #4ec9b0;
+  --chart-2: #569cd6;
+  --chart-3: #dcdcaa;
+  --chart-4: #c586c0;
+  --chart-5: #ce9178;
+  scrollbar-width: thin;
+  scrollbar-color: rgb(121 121 121 / 0.45) #1e1f22;
+  scroll-padding-bottom: calc(var(--ed-status) + 1rem);
+}
+.theme-is-editor body {
+  padding-bottom: var(--ed-status);
+  font-family: var(--ed-font);
+  letter-spacing: -0.015em;
+}
+.theme-is-editor .long-text {
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: 0;
+}
+.theme-is-editor ::selection {
+  background: var(--ed-select);
+}
+.theme-is-editor .book-backdrop {
+  display: none;
+}
+
+/* Page titles as Markdown headings, panels' titles one level down. */
+.theme-is-editor h1 {
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.theme-is-editor .top-bar + main h1::before {
+  content: "# ";
+  content: "# " / "";
+  color: var(--ed-keyword);
+  font-weight: 400;
+}
+.theme-is-editor [data-slot="card-title"] {
+  font-family: var(--ed-font);
+  font-weight: 600;
+}
+.theme-is-editor [data-slot="card"] > [data-slot="card-header"] > [data-slot="card-title"]::before {
+  content: "## ";
+  content: "## " / "";
+  color: var(--ed-keyword);
+  font-weight: 400;
+}
+
+/* The strip of tabs. The bar is the strip's grey, each page link a tab
+   from its top to its foot with a hairline between, and the open one the
+   editor's colour, as if part of the page below, with a teal line along its
+   top. The wordmark is the project's name, the other buttons the strip's
+   own small ones. */
+.theme-is-editor .top-bar {
+  border-bottom: 1px solid #1a1b1e;
+  background: var(--ed-strip);
+  backdrop-filter: none;
+  animation: none;
+}
+.theme-is-editor .top-bar > div {
+  align-items: stretch;
+  height: 2.75rem;
+}
+.theme-is-editor .top-bar .wordmark {
+  align-self: center;
+  margin-right: 0.5rem;
+  padding: 0 0.75rem 0 0.25rem;
+  font-family: var(--ed-font);
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.theme-is-editor .top-bar .wordmark > svg {
+  box-sizing: content-box;
+  padding: 3px;
+  border-radius: 4px;
+  color: #08231d;
+  background: var(--primary);
+}
+.theme-is-editor .top-bar .nav-link[data-size] {
+  height: auto;
+  border-radius: 0;
+  border-right: 1px solid #1e1f22;
+  padding-inline: 0.875rem;
+  font-weight: 400;
+}
+.theme-is-editor .top-bar .nav-link[data-size]:first-of-type {
+  border-left: 1px solid #1e1f22;
+}
+.theme-is-editor .top-bar .nav-link[data-size]:hover {
+  background: #313338;
+}
+.theme-is-editor .top-bar .nav-link[data-size][aria-current="page"],
+.theme-is-editor .top-bar .nav-link[data-size][aria-current="page"]:hover {
+  color: #ffffff;
+  background: var(--background);
+  box-shadow: inset 0 2px var(--primary);
+}
+.theme-is-editor .top-bar .nav-link[aria-current="page"]::after {
+  display: none;
+}
+/* Each tab's icon in the colour an editor gives a kind of file. */
+.theme-is-editor .top-bar .nav-link > svg {
+  color: var(--ed-keyword);
+}
+.theme-is-editor .top-bar .nav-link[href="/reading"] > svg {
+  color: var(--ed-function);
+}
+.theme-is-editor .top-bar .nav-link[href="/books/new"] > svg {
+  color: var(--ed-comment);
+}
+.theme-is-editor .top-bar .nav-link[href="/quotes"] > svg {
+  color: var(--ed-string);
+}
+.theme-is-editor .top-bar .nav-link[href="/stats"] > svg {
+  color: #c586c0;
+}
+.theme-is-editor .top-bar .nav-link[href="/room"] > svg,
+.theme-is-editor .top-bar .nav-link[href="/series"] > svg {
+  color: var(--primary);
+}
+.theme-is-editor .top-bar .ml-auto {
+  align-items: center;
+}
+.theme-is-editor .top-bar .ml-auto [data-size][data-variant] {
+  height: 1.75rem;
+}
+@media (width < 40rem) {
+  .theme-is-editor .top-bar .wordmark {
+    margin-right: 0.25rem;
+    padding: 0;
+  }
+  .theme-is-editor .top-bar .nav-link[data-size] {
+    padding-inline: 4px;
+  }
+}
+
+/* The breadcrumbs: the path to the open page, as the file it would be. */
+.theme-is-editor .top-bar + main::before {
+  content: "myreads › library.md";
+  content: "myreads › library.md" / "";
+  display: block;
+  margin: -0.75rem 0 1rem;
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.theme-is-editor[data-section="book"] .top-bar + main::before {
+  content: "myreads › books › book.md";
+  content: "myreads › books › book.md" / "";
+}
+.theme-is-editor[data-section="series"] .top-bar + main::before {
+  content: "myreads › series.md";
+  content: "myreads › series.md" / "";
+}
+.theme-is-editor[data-section="stats"] .top-bar + main::before {
+  content: "myreads › stats.md";
+  content: "myreads › stats.md" / "";
+}
+.theme-is-editor[data-section="reading"] .top-bar + main::before {
+  content: "myreads › now-reading.md";
+  content: "myreads › now-reading.md" / "";
+}
+.theme-is-editor[data-section="quotes"] .top-bar + main::before {
+  content: "myreads › quotes.md";
+  content: "myreads › quotes.md" / "";
+}
+.theme-is-editor[data-section="room"] .top-bar + main::before {
+  content: "myreads › reading-room.md";
+  content: "myreads › reading-room.md" / "";
+}
+.theme-is-editor[data-section="account"] .top-bar + main::before {
+  content: "myreads › settings.json";
+  content: "myreads › settings.json" / "";
+}
+.theme-is-editor:has(.top-bar .nav-link[href="/books/new"][aria-current="page"]) .top-bar + main::before {
+  content: "myreads › library › new-book.md";
+  content: "myreads › library › new-book.md" / "";
+}
+.theme-is-editor:has(.top-bar .nav-link[href="/books/check"][aria-current="page"]) .top-bar + main::before {
+  content: "myreads › library › check.md";
+  content: "myreads › library › check.md" / "";
+}
+
+/* The gutter: line numbers down the left of the page, in a column of their
+   own that scrolls with it. Too narrow a screen for it shows none. */
+@media (width >= 40rem) {
+  .theme-is-editor .top-bar + main {
+    position: relative;
+    padding-left: calc(var(--ed-gutter) + 1.5rem);
+  }
+  .theme-is-editor .top-bar + main::after {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    z-index: -1;
+    width: var(--ed-gutter);
+    border-right: 1px solid #2b2d30;
+    background: url("/themes/editor-gutter.svg") 0 0.25rem / var(--ed-gutter) auto no-repeat;
+    pointer-events: none;
+  }
+}
+
+/* The status bar, along the foot of the screen: the branch on a teal tab
+   and the problems at its left, the cursor and the file's kind at its
+   right. Drawn, not live. */
+.theme-is-editor body::after,
+.theme-is-editor::after {
+  position: fixed;
+  bottom: 0;
+  z-index: 39;
+  height: var(--ed-status);
+  color: #c5c8ce;
+  font-family: var(--ed-font);
+  font-size: 0.75rem;
+  line-height: var(--ed-status);
+  white-space: pre;
+  pointer-events: none;
+}
+.theme-is-editor body::after {
+  content: "     main   ⊗ 0  △ 0";
+  content: "     main   ⊗ 0  △ 0" / "";
+  inset-inline: 0;
+  border-top: 1px solid #1a1b1e;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%2308231d' stroke-width='1.4' stroke-linecap='round'%3E%3Ccircle cx='3.5' cy='2.5' r='1.5'/%3E%3Ccircle cx='3.5' cy='9.5' r='1.5'/%3E%3Ccircle cx='8.5' cy='4' r='1.5'/%3E%3Cpath d='M3.5 4v4M8.5 5.5c0 2-2 2.5-5 2.8'/%3E%3C/svg%3E") 0.375rem center / 0.75rem no-repeat,
+    linear-gradient(var(--primary), var(--primary)) left / 1.5rem 100% no-repeat,
+    var(--ed-strip);
+  background-clip: padding-box;
+}
+.theme-is-editor::after {
+  content: "Ln 1, Col 1   UTF-8   LF   Markdown  ";
+  content: "Ln 1, Col 1   UTF-8   LF   Markdown  " / "";
+  right: 0;
+}
+.theme-is-editor[data-section="account"]::after {
+  content: "Ln 1, Col 1   UTF-8   LF   JSON  ";
+  content: "Ln 1, Col 1   UTF-8   LF   JSON  " / "";
+}
+@media (width < 40rem) {
+  .theme-is-editor::after,
+  .theme-is-editor[data-section="account"]::after {
+    content: "Ln 1, Col 1  ";
+    content: "Ln 1, Col 1  " / "";
+  }
+}
+@media print {
+  .theme-is-editor body::after,
+  .theme-is-editor::after,
+  .theme-is-editor .top-bar + main::after {
+    display: none;
+  }
+}
+.theme-is-editor .bulk-bar {
+  bottom: calc(var(--ed-status) + 0.75rem);
+}
+
+/* Library tiles and rows: the editor's panels, flat, outlined in teal
+   under the pointer. A title in a function's colour, an author in a
+   string's, a series as a comment. */
+.theme-is-editor .surface:not([data-slot="card"]) {
+  border-color: var(--ed-line);
+  border-radius: 0.25rem;
+  box-shadow: none;
+}
+.theme-is-editor .surface:not([data-slot="card"]):hover {
+  border-color: var(--primary);
+}
+.theme-is-editor .surface:not([data-slot="card"]) .font-heading {
+  color: var(--ed-function);
+  font-weight: 500;
+}
+.theme-is-editor .surface:not([data-slot="card"]) .font-heading + .text-muted-foreground {
+  color: var(--ed-string);
+}
+.theme-is-editor .surface:not([data-slot="card"]) .italic {
+  color: var(--ed-comment);
+}
+.theme-is-editor [data-library-view] > :first-child > p:first-child {
+  color: var(--ed-comment);
+  font-style: italic;
+}
+.theme-is-editor [data-library-view] > :first-child > p:first-child::before {
+  content: "// ";
+  content: "// " / "";
+}
+.theme-is-editor [data-slot="card"] {
+  border-radius: 0.375rem;
+  box-shadow: none;
+  --tw-ring-color: var(--ed-line);
+}
+
+/* Tabs and counts: the open tab underlined in teal, counts as numbers. */
+.theme-is-editor .shelf-tabs > a > span,
+.theme-is-editor [data-slot="badge"].tabular-nums {
+  border-radius: 0.1875rem;
+  color: var(--ed-number);
+  background: transparent;
+}
+.theme-is-editor :is(a, button).rounded-full.border:not(.aspect-square, .border-2),
+.theme-is-editor [data-slot="badge"] {
+  border-radius: 0.25rem;
+}
+
+/* Buttons: flat. The main one teal, the others the editor's greys, and
+   none of them lifts or presses down. */
+.theme-is-editor [data-size][data-variant] {
+  border-radius: 0.25rem;
+  box-shadow: none;
+}
+.theme-is-editor [data-size][data-variant]:active:not(:disabled) {
+  translate: none;
+}
+.theme-is-editor [data-size][data-variant="default"]:hover {
+  background: #6bd6bf;
+}
+.theme-is-editor [data-size]:is([data-variant="outline"], [data-variant="secondary"]) {
+  border: 1px solid var(--input);
+  background: #2b2d30;
+}
+.theme-is-editor [data-size]:is([data-variant="outline"], [data-variant="secondary"]):is(:hover, [aria-expanded="true"]) {
+  border-color: #6f737a;
+  background: #34363b;
+}
+.theme-is-editor [data-size][data-variant="ghost"]:is(:hover, [aria-expanded="true"]) {
+  background: #34363b;
+}
+
+/* Fields: the editor's colour inside a grey edge that turns teal while
+   typing goes in, and no glow. */
+.theme-is-editor :is([data-slot="input"], [data-slot="textarea"], [data-slot="select-trigger"], .select-like),
+.theme-is-editor input:is([type="text"], [type="search"], [type="number"], [type="date"], [type="password"], [type="url"], [type="email"], :not([type])),
+.theme-is-editor textarea {
+  border-color: var(--input);
+  border-radius: 0.25rem;
+  background: #1e1f22;
+  box-shadow: none;
+}
+.theme-is-editor :is([data-slot="input"], [data-slot="textarea"], [data-slot="select-trigger"], .select-like, input, textarea):focus-visible,
+.theme-is-editor [data-size][data-variant]:focus-visible {
+  --tw-ring-shadow: 0 0 #0000;
+  border-color: var(--primary);
+  outline: 1px solid var(--primary);
+  outline-offset: -1px;
+}
+/* The face is wider than the app's, and the filter bar's lists keep
+   their widths: their words come a little smaller to fit. */
+.theme-is-editor :is([data-slot="select-trigger"], .select-like) {
+  font-size: 0.8125rem;
+  letter-spacing: -0.035em;
+}
+.theme-is-editor :is(input, textarea)::placeholder {
+  color: #7d828a;
+}
+
+/* Progress: a thin teal line on a grey one. */
+.theme-is-editor :has(> .bar-grow) {
+  border-radius: 1px;
+  background: var(--ed-line);
+}
+.theme-is-editor .bar-grow {
+  border-radius: 1px;
+  background: var(--primary);
+}
+
+/* Menus, popovers and dialogs: the editor's grey with a hairline edge, the
+   item under the pointer in the blue of a selected line. */
+.theme-is-editor :is([data-slot="dropdown-menu-content"], [data-slot="popover-content"], [data-slot="select-content"], [data-slot="dropdown-menu-sub-content"]) {
+  border: 1px solid #454850;
+  border-radius: 0.375rem;
+  background: #2b2d30;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.5);
+  --tw-ring-shadow: 0 0 #0000;
+}
+.theme-is-editor :is([data-slot="dropdown-menu-item"], [data-slot="select-item"], [data-slot="dropdown-menu-checkbox-item"], [data-slot="dropdown-menu-radio-item"], [data-slot="dropdown-menu-sub-trigger"]) {
+  border-radius: 0.1875rem;
+}
+.theme-is-editor :is([data-slot="dropdown-menu-item"], [data-slot="select-item"], [data-slot="dropdown-menu-checkbox-item"], [data-slot="dropdown-menu-radio-item"], [data-slot="dropdown-menu-sub-trigger"]):focus {
+  color: #ffffff;
+  background: var(--ed-focus);
+}
+.theme-is-editor [data-slot="dialog-overlay"] {
+  background: rgb(0 0 0 / 0.55);
+  backdrop-filter: none;
+}
+.theme-is-editor [data-slot="dialog-content"] {
+  border: 1px solid #454850;
+  border-radius: 0.5rem;
+  background: #2b2d30;
+  box-shadow: 0 16px 48px rgb(0 0 0 / 0.55);
+  --tw-ring-shadow: 0 0 #0000;
+}
+.theme-is-editor .bulk-bar {
+  border-color: #454850;
+  border-radius: 0.5rem;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.5);
+}
+
+/* The sign-in pages: the project's name, and the status bar. */
+.theme-is-editor main:has(> .auth-backdrop) .wordmark {
+  font-family: var(--ed-font);
+  font-weight: 700;
+}
+
+/* ── Ubuntu ────────────────────────────────────────────────────────────────
+   Ubuntu's own desktop in its dark style, Yaru. The black top panel runs
+   along the top of the screen, Activities at its left and the status icons
+   at its right; the Ubuntu Dock runs down the left, the app's name and
+   page links its apps, each a coloured tile with an orange dot beside the
+   one that is open, the bar's other buttons at its foot over the grid of
+   Show Applications. The page is a window on the aubergine and orange
+   desktop: charcoal, round at the corners, with a darker header bar naming
+   the page and the three round window buttons at its right. Inside,
+   buttons are translucent grey and the suggested one Ubuntu's orange,
+   fields are grey with an orange ring while typing goes in, panels are
+   grey with round corners and no edge, and menus are the same grey with
+   the item under the pointer a lighter pill. On a phone the dock moves to
+   the foot of the screen, as Ubuntu lets it. Ubuntu Sans throughout. The
+   window scrolls with the page, as a long one would, and nothing blurs. */
+:root[data-theme="ubuntu"] {
+  --ub-font: var(--font-ubuntu), "Ubuntu Sans", Ubuntu, system-ui, sans-serif;
+  --ub-orange: #e95420;
+  --ub-suggested: #cc4518;
+  --ub-panel: 1.75rem;
+  --ub-dock: 4rem;
+  --ub-gap: 0.75rem;
+  --ub-header: 2.875rem;
+  --ub-fill: rgb(255 255 255 / 0.1);
+  --ub-fill-hover: rgb(255 255 255 / 0.15);
+  --ub-fill-active: rgb(255 255 255 / 0.24);
+  --ub-window-shadow: 0 0 0 1px rgb(0 0 0 / 0.7), 0 2px 8px rgb(0 0 0 / 0.3), 0 16px 48px rgb(0 0 0 / 0.45);
+  --surface-shadow: none;
+  --chart-1: #e95420;
+  --chart-2: #77216f;
+  --chart-3: #f6c344;
+  --chart-4: #19b6ee;
+  --chart-5: #3eb34f;
+  scrollbar-width: thin;
+  scrollbar-color: rgb(255 255 255 / 0.35) transparent;
+  scroll-padding-top: calc(var(--ub-panel) + var(--ub-gap) + 1.5rem);
+}
+.theme-is-ubuntu body {
+  font-family: var(--ub-font);
+}
+.theme-is-ubuntu ::selection {
+  color: #ffffff;
+  background: var(--ub-orange);
+}
+.theme-is-ubuntu h1 {
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.theme-is-ubuntu .book-backdrop {
+  display: none;
+}
+.theme-is-ubuntu :is(input[type="checkbox"], input[type="radio"]) {
+  accent-color: var(--ub-orange);
+}
+
+/* The top panel, over everything else, drawn: Activities, and the status
+   icons. There is no clock, so it never shows a time that is wrong. */
+.theme-is-ubuntu::before {
+  content: "Activities";
+  content: "Activities" / "";
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 45;
+  height: var(--ub-panel);
+  padding-left: 1rem;
+  color: #ffffff;
+  font: 500 0.875rem/var(--ub-panel) var(--ub-font);
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='16' fill='%23fff'%3E%3Cpath d='M8 14.5 1.4 6.6a10 10 0 0 1 13.2 0z'/%3E%3Cpath d='M25 5.5h2.5L31 2.5v11l-3.5-3H25z'/%3E%3Cpath d='M33.5 5.2a3.6 3.6 0 0 1 0 5.6M35.6 3a6.6 6.6 0 0 1 0 10' fill='none' stroke='%23fff' stroke-width='1.5' stroke-linecap='round'/%3E%3Crect x='54' y='1' width='4' height='2' rx='.6'/%3E%3Crect x='52.25' y='2.75' width='7.5' height='12.5' rx='1.75' fill='none' stroke='%23fff' stroke-width='1.5'/%3E%3Crect x='54' y='6' width='4' height='7.5' rx='.6'/%3E%3C/svg%3E")
+      right 1rem center / 64px 16px no-repeat,
+    #000000;
+  pointer-events: none;
+}
+@media print {
+  .theme-is-ubuntu::before {
+    display: none;
+  }
+}
+
+/* The dock: down the left of the screen under the panel, near-black and a
+   little see-through. The wordmark and page links are its apps, square
+   tiles each in a colour of its own with its icon in white; the open
+   page's has an orange dot at the dock's edge. The other buttons sit at its
+   foot, over Show Applications. */
+.theme-is-ubuntu .top-bar {
+  position: fixed;
+  top: var(--ub-panel);
+  bottom: 0;
+  left: 0;
+  width: var(--ub-dock);
+  height: auto;
+  border: 0;
+  background: rgb(18 18 18 / 0.86);
+  backdrop-filter: none;
+  box-shadow: none;
+  animation: none;
+}
+.theme-is-ubuntu .top-bar > div {
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  height: 100%;
+  max-width: none;
+  gap: 0.25rem;
+  padding: 0.5rem 0 3.25rem;
+}
+.theme-is-ubuntu .top-bar::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0.5rem;
+  height: 2.75rem;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22' fill='%23fff'%3E%3Ccircle cx='3' cy='3' r='2.2'/%3E%3Ccircle cx='11' cy='3' r='2.2'/%3E%3Ccircle cx='19' cy='3' r='2.2'/%3E%3Ccircle cx='3' cy='11' r='2.2'/%3E%3Ccircle cx='11' cy='11' r='2.2'/%3E%3Ccircle cx='19' cy='11' r='2.2'/%3E%3Ccircle cx='3' cy='19' r='2.2'/%3E%3Ccircle cx='11' cy='19' r='2.2'/%3E%3Ccircle cx='19' cy='19' r='2.2'/%3E%3C/svg%3E")
+    center / 1.375rem no-repeat;
+  pointer-events: none;
+}
+.theme-is-ubuntu .top-bar .wordmark,
+.theme-is-ubuntu .top-bar .nav-link[data-size] {
+  position: relative;
+  isolation: isolate;
+  justify-content: center;
+  flex: none;
+  width: 3.25rem;
+  height: 3.25rem;
+  margin: 0;
+  padding: 0;
+  border-radius: 0.75rem;
+  color: #ffffff;
+  background: transparent;
+  box-shadow: none;
+}
+.theme-is-ubuntu .top-bar .wordmark > span,
+.theme-is-ubuntu .top-bar .nav-link > span {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.theme-is-ubuntu .top-bar :is(.wordmark, .nav-link) > svg {
+  width: 1.375rem;
+  height: 1.375rem;
+  color: #ffffff;
+}
+.theme-is-ubuntu .top-bar :is(.wordmark, .nav-link[data-size]):hover {
+  background: var(--ub-fill);
+}
+/* Each app's tile. */
+.theme-is-ubuntu .top-bar :is(.wordmark, .nav-link)::before {
+  content: "";
+  position: absolute;
+  inset: 0.375rem;
+  z-index: -1;
+  border-radius: 0.625rem;
+  background: linear-gradient(#f37b3e, #d6461a);
+  box-shadow: inset 0 1px rgb(255 255 255 / 0.25), 0 1px 2px rgb(0 0 0 / 0.4);
+}
+.theme-is-ubuntu .top-bar .nav-link[href="/books"]::before {
+  background: linear-gradient(#a0479a, #6c1f65);
+}
+.theme-is-ubuntu .top-bar .nav-link[href="/reading"]::before {
+  background: linear-gradient(#3ba8f0, #1a74c9);
+}
+.theme-is-ubuntu .top-bar .nav-link[href="/books/new"]::before {
+  background: linear-gradient(#52c463, #26903a);
+}
+.theme-is-ubuntu .top-bar .nav-link[href="/books/check"]::before {
+  background: linear-gradient(#8c8c8c, #5b5b5b);
+}
+.theme-is-ubuntu .top-bar .nav-link[href="/quotes"]::before {
+  background: linear-gradient(#f8cf5a, #dd9f17);
+}
+.theme-is-ubuntu .top-bar .nav-link[href="/quotes"] > svg {
+  color: #3a2600;
+}
+.theme-is-ubuntu .top-bar .nav-link[href="/stats"]::before {
+  background: linear-gradient(#2fc0b0, #16867b);
+}
+.theme-is-ubuntu .top-bar .nav-link[href="/room"]::before {
+  background: linear-gradient(#e2555f, #b0202d);
+}
+.theme-is-ubuntu .top-bar .nav-link[href="/series"]::before {
+  background: linear-gradient(#8f83e8, #5a4cc2);
+}
+/* The open page's dot, at the dock's edge. */
+.theme-is-ubuntu .top-bar .nav-link[aria-current="page"]::after {
+  inset: 50% auto auto -0.375rem;
+  width: 0.3125rem;
+  height: 0.3125rem;
+  margin-top: -0.15625rem;
+  border-radius: 50%;
+  background: var(--ub-orange);
+}
+.theme-is-ubuntu .top-bar .ml-auto {
+  flex-direction: column;
+  gap: 0.125rem;
+  margin: auto 0 0;
+}
+.theme-is-ubuntu .top-bar .ml-auto [data-size][data-variant] {
+  width: 2.75rem;
+  height: 2.5rem;
+  padding: 0;
+  border-radius: 0.625rem;
+  color: #ffffff;
+}
+.theme-is-ubuntu .top-bar .ml-auto [data-size][data-variant]:is(:hover, [aria-expanded="true"]) {
+  background: var(--ub-fill);
+}
+.theme-is-ubuntu .top-bar .ml-auto .text-muted-foreground {
+  display: none;
+}
+
+/* The window. It fills the screen right of the dock, keeping a gap round
+   it, at most 74rem wide; the header bar names the page and has the window
+   buttons at its right. */
+.theme-is-ubuntu .top-bar + main {
+  --ub-w: min(74rem, calc(100% - var(--ub-dock) - 2 * var(--ub-gap)));
+  width: var(--ub-w);
+  max-width: none;
+  min-height: calc(100vh - var(--ub-panel) - 2 * var(--ub-gap));
+  margin: calc(var(--ub-panel) + var(--ub-gap)) 0 var(--ub-gap) calc(var(--ub-dock) + (100% - var(--ub-dock) - var(--ub-w)) / 2);
+  padding: 0 1.5rem 1.5rem;
+  border-radius: 0.75rem;
+  background: var(--background);
+  box-shadow: var(--ub-window-shadow);
+}
+.theme-is-ubuntu .top-bar + main::before {
+  content: "Library";
+  content: "Library" / "";
+  display: block;
+  height: var(--ub-header);
+  margin: 0 -1.5rem 1.5rem;
+  padding: 0 6.5rem;
+  overflow: hidden;
+  border-radius: 0.75rem 0.75rem 0 0;
+  border-bottom: 1px solid #1f1f1f;
+  color: #ffffff;
+  font: 700 0.9375rem/var(--ub-header) var(--ub-font);
+  text-align: center;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='24'%3E%3Ccircle cx='12' cy='12' r='12' fill='%23fff' fill-opacity='.1'/%3E%3Cpath d='M8 15h8' stroke='%23fff' stroke-width='1.5' stroke-linecap='round'/%3E%3Ccircle cx='40' cy='12' r='12' fill='%23fff' fill-opacity='.1'/%3E%3Crect x='35.75' y='7.75' width='8.5' height='8.5' rx='1' fill='none' stroke='%23fff' stroke-width='1.5'/%3E%3Ccircle cx='68' cy='12' r='12' fill='%23e95420'/%3E%3Cpath d='M64.5 8.5l7 7m0-7-7 7' stroke='%23fff' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E")
+      right 0.75rem center / 80px 24px no-repeat,
+    #232323;
+}
+.theme-is-ubuntu[data-section="book"] .top-bar + main::before {
+  content: "Book";
+  content: "Book" / "";
+}
+.theme-is-ubuntu[data-section="series"] .top-bar + main::before {
+  content: "Series";
+  content: "Series" / "";
+}
+.theme-is-ubuntu[data-section="stats"] .top-bar + main::before {
+  content: "Stats";
+  content: "Stats" / "";
+}
+.theme-is-ubuntu[data-section="reading"] .top-bar + main::before {
+  content: "Now reading";
+  content: "Now reading" / "";
+}
+.theme-is-ubuntu[data-section="quotes"] .top-bar + main::before {
+  content: "Quotes";
+  content: "Quotes" / "";
+}
+.theme-is-ubuntu[data-section="room"] .top-bar + main::before {
+  content: "Reading room";
+  content: "Reading room" / "";
+}
+.theme-is-ubuntu[data-section="account"] .top-bar + main::before {
+  content: "Settings";
+  content: "Settings" / "";
+}
+.theme-is-ubuntu:has(.top-bar .nav-link[href="/books/new"][aria-current="page"]) .top-bar + main::before {
+  content: "Add book";
+  content: "Add book" / "";
+}
+.theme-is-ubuntu:has(.top-bar .nav-link[href="/books/check"][aria-current="page"]) .top-bar + main::before {
+  content: "Do I own this?";
+  content: "Do I own this?" / "";
+}
+
+/* Panels and tiles: Yaru's grey, round, with no edge or shadow. */
+.theme-is-ubuntu [data-slot="card"],
+.theme-is-ubuntu .surface:not([data-slot="card"]) {
+  border-color: transparent;
+  border-radius: 0.75rem;
+  box-shadow: none;
+  --tw-ring-shadow: 0 0 #0000;
+}
+.theme-is-ubuntu .surface:not([data-slot="card"]):hover {
+  border-color: transparent;
+  background: #404040;
+}
+.theme-is-ubuntu .surface .book-cover {
+  border-radius: 0.375rem;
+}
+
+/* Buttons: translucent grey with white words; the suggested one Ubuntu's
+   orange, the destructive one red. None of them lifts or presses down. */
+.theme-is-ubuntu [data-size][data-variant] {
+  border-radius: 0.375rem;
+  box-shadow: none;
+  font-weight: 600;
+}
+.theme-is-ubuntu [data-size][data-variant]:active:not(:disabled) {
+  translate: none;
+}
+.theme-is-ubuntu main [data-size]:is([data-variant="outline"], [data-variant="secondary"]),
+.theme-is-ubuntu [data-slot="dialog-content"] [data-size]:is([data-variant="outline"], [data-variant="secondary"]),
+.theme-is-ubuntu .bulk-bar [data-size]:is([data-variant="outline"], [data-variant="secondary"]) {
+  border-color: transparent;
+  color: #ffffff;
+  background: var(--ub-fill);
+}
+.theme-is-ubuntu main [data-size]:is([data-variant="outline"], [data-variant="secondary"]):is(:hover, [aria-expanded="true"]),
+.theme-is-ubuntu [data-slot="dialog-content"] [data-size]:is([data-variant="outline"], [data-variant="secondary"]):hover,
+.theme-is-ubuntu .bulk-bar [data-size]:is([data-variant="outline"], [data-variant="secondary"]):hover {
+  background: var(--ub-fill-hover);
+}
+.theme-is-ubuntu [data-size][data-variant="default"] {
+  color: #ffffff;
+  background: var(--ub-suggested);
+}
+.theme-is-ubuntu [data-size][data-variant="default"]:hover {
+  background: #d94c1c;
+}
+.theme-is-ubuntu [data-size][data-variant="destructive"] {
+  color: #ffffff;
+  background: #c01c28;
+}
+.theme-is-ubuntu [data-size][data-variant="destructive"]:hover {
+  background: #d02532;
+}
+.theme-is-ubuntu main [data-size][data-variant="ghost"]:is(:hover, [aria-expanded="true"]) {
+  background: var(--ub-fill);
+}
+.theme-is-ubuntu [data-size][data-variant]:focus-visible {
+  --tw-ring-shadow: 0 0 #0000;
+  outline: 2px solid rgb(233 84 32 / 0.8);
+  outline-offset: 1px;
+}
+
+/* Fields: grey like the buttons, with an orange ring inside the edge while
+   typing goes in. */
+.theme-is-ubuntu :is([data-slot="input"], [data-slot="textarea"], [data-slot="select-trigger"], .select-like),
+.theme-is-ubuntu input:is([type="text"], [type="search"], [type="number"], [type="date"], [type="password"], [type="url"], [type="email"], :not([type])),
+.theme-is-ubuntu textarea {
+  border-color: transparent;
+  border-radius: 0.375rem;
+  background: var(--ub-fill);
+  box-shadow: none;
+}
+.theme-is-ubuntu :is([data-slot="select-trigger"], .select-like):hover {
+  background: var(--ub-fill-hover);
+}
+.theme-is-ubuntu :is([data-slot="input"], [data-slot="textarea"], [data-slot="select-trigger"], .select-like, input, textarea):focus-visible {
+  --tw-ring-shadow: 0 0 #0000;
+  outline: 2px solid rgb(233 84 32 / 0.8);
+  outline-offset: -2px;
+}
+.theme-is-ubuntu :is(input, textarea)::placeholder {
+  color: #a8a8a8;
+}
+
+/* Tabs and chips: the open tab's line in orange, chips as grey pills. */
+.theme-is-ubuntu .shelf-tabs > a[aria-current="page"] {
+  border-color: var(--ub-orange);
+}
+.theme-is-ubuntu .shelf-tabs > a > span {
+  background: var(--ub-fill);
+}
+.theme-is-ubuntu :has(> .bar-grow) {
+  background: var(--ub-fill);
+}
+.theme-is-ubuntu .bar-grow {
+  background: var(--ub-orange);
+}
+
+/* Menus, popovers and dialogs: the window's grey, very round, with a
+   lighter pill under the pointer. */
+.theme-is-ubuntu :is([data-slot="dropdown-menu-content"], [data-slot="popover-content"], [data-slot="select-content"], [data-slot="dropdown-menu-sub-content"]) {
+  border: 1px solid #1f1f1f;
+  border-radius: 0.75rem;
+  background: #383838;
+  box-shadow: 0 2px 6px rgb(0 0 0 / 0.3), 0 8px 28px rgb(0 0 0 / 0.4);
+  --tw-ring-shadow: 0 0 #0000;
+}
+.theme-is-ubuntu :is([data-slot="dropdown-menu-item"], [data-slot="select-item"], [data-slot="dropdown-menu-checkbox-item"], [data-slot="dropdown-menu-radio-item"], [data-slot="dropdown-menu-sub-trigger"]) {
+  border-radius: 0.375rem;
+}
+.theme-is-ubuntu :is([data-slot="dropdown-menu-item"], [data-slot="select-item"], [data-slot="dropdown-menu-checkbox-item"], [data-slot="dropdown-menu-radio-item"], [data-slot="dropdown-menu-sub-trigger"]):focus {
+  color: #ffffff;
+  background: var(--ub-fill-hover);
+}
+.theme-is-ubuntu [data-slot="dialog-overlay"] {
+  background: rgb(0 0 0 / 0.5);
+  backdrop-filter: none;
+}
+.theme-is-ubuntu [data-slot="dialog-content"] {
+  border: 1px solid #1f1f1f;
+  border-radius: 0.875rem;
+  background: #383838;
+  box-shadow: 0 4px 12px rgb(0 0 0 / 0.35), 0 16px 48px rgb(0 0 0 / 0.45);
+  --tw-ring-shadow: 0 0 #0000;
+}
+.theme-is-ubuntu .bulk-bar {
+  border-color: #1f1f1f;
+  border-radius: 0.875rem;
+  background: #383838;
+  box-shadow: 0 8px 28px rgb(0 0 0 / 0.45);
+}
+
+/* A phone: the dock along the foot of the screen, its apps in a row, and
+   the window between it and the panel. */
+@media (width < 40rem) {
+  :root[data-theme="ubuntu"] {
+    --ub-dock: 0px;
+    --ub-gap: 0.375rem;
+    --ub-foot: 3.5rem;
+    scroll-padding-bottom: calc(var(--ub-foot) + 1rem);
+  }
+  .theme-is-ubuntu body {
+    padding-bottom: var(--ub-foot);
+  }
+  .theme-is-ubuntu .top-bar {
+    top: auto;
+    right: 0;
+    width: auto;
+    height: var(--ub-foot);
+  }
+  .theme-is-ubuntu .top-bar > div {
+    flex-direction: row;
+    justify-content: center;
+    gap: 0;
+    padding: 0 0.25rem;
+  }
+  .theme-is-ubuntu .top-bar::after {
+    display: none;
+  }
+  .theme-is-ubuntu .top-bar .wordmark {
+    display: none;
+  }
+  .theme-is-ubuntu .top-bar .nav-link[data-size] {
+    flex: 1 1 2.5rem;
+    width: auto;
+    max-width: 2.75rem;
+    height: 2.75rem;
+  }
+  .theme-is-ubuntu .top-bar :is(.wordmark, .nav-link)::before {
+    inset: 0.25rem;
+    border-radius: 0.5rem;
+  }
+  .theme-is-ubuntu .top-bar :is(.wordmark, .nav-link) > svg {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+  .theme-is-ubuntu .top-bar .nav-link[aria-current="page"]::after {
+    inset: auto auto -0.3125rem 50%;
+    margin: 0 0 0 -0.15625rem;
+  }
+  .theme-is-ubuntu .top-bar .ml-auto {
+    flex-direction: row;
+    margin: 0 0 0 0.25rem;
+    gap: 0;
+  }
+  .theme-is-ubuntu .top-bar .ml-auto [data-size][data-variant] {
+    width: 1.875rem;
+    height: 2.5rem;
+  }
+  .theme-is-ubuntu .top-bar + main {
+    padding: 0 1rem 1.25rem;
+  }
+  .theme-is-ubuntu .top-bar + main::before {
+    margin: 0 -1rem 1.25rem;
+    padding: 0 5.5rem 0 1rem;
+    text-align: left;
+  }
+  .theme-is-ubuntu .bulk-bar {
+    bottom: calc(var(--ub-foot) + 0.5rem);
+  }
+}
+
+/* The sign-in pages: the desktop and the panel, the form a dialog. */
+.theme-is-ubuntu .auth-backdrop {
+  display: none;
+}
+.theme-is-ubuntu main:has(> .auth-backdrop) [data-slot="card"] {
+  border: 1px solid #1f1f1f;
+  background: #383838;
+  box-shadow: var(--ub-window-shadow);
+}
+.theme-is-ubuntu main:has(> .auth-backdrop) .wordmark {
+  font-family: var(--ub-font);
+  font-weight: 700;
+}
+.theme-is-ubuntu .auth-corner {
+  top: calc(var(--ub-panel) + 0.5rem);
+}

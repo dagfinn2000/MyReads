@@ -353,7 +353,8 @@ tab goes away. You can also keep the house and leave the avatar out.
 
 ## Look and feel
 
-- 71 colour themes, or a light and a dark one that switch with your
+- 76 colour themes, 32 light, 32 dark and the Silly set, or a light
+  and a dark one that switch with your
   device, with an accent colour of your own on top if you like. Your
   choice follows you to every device you sign in on, unless you give one
   phone or computer a theme of its own ("Only on this device" in the
@@ -384,7 +385,7 @@ tab goes away. You can also keep the house and leave the avatar out.
     pink, lilac and lemon with very round corners; Kraft, brown parcel
     paper with red and typewriter headings; and Notebook, ruled paper
     with the text in blue ink.
-- Ten are set apart by more than their colours:
+- Thirteen are set apart by more than their colours:
   - Light: Sunset (peach to rose to lilac down the page), Opal (pastel
     colours playing across the page, very round corners), Brutalist (hot
     pink, cards outlined in black with hard shadows), Mondrian (white,
@@ -397,7 +398,15 @@ tab goes away. You can also keep the house and leave the avatar out.
     headings), Northern Lights (green and violet light over a night sky),
     Lacquer (red cards on a black page, with gold), Arcade (cards
     outlined in cyan with magenta shadows, typewriter headings and square
-    corners) and Darkroom (everything in safelight red, the text too).
+    corners), Darkroom (everything in safelight red, the text too),
+    Noir (warm light falling through a venetian blind across a dark
+    room, cream buttons and italic headings in a film's title face),
+    Fernery (deep green glass with fronds of fern growing in from the
+    lower left corner, one still curled up as a fiddlehead, and a
+    soft coral for the buttons) and Gallery (petrol walls, every cover
+    hung in a gilt frame with a cream mount under its own brass
+    picture lamp, titles in italics and page titles in spaced
+    capitals, like a museum's labels).
 - The Silly set, listed apart at the bottom of the palette menu as "not
   recommended": Blue Screen, Glowstick, Hot Dog Stand, Toxic, Desktop 95,
   Under Construction (a hazard-striped top bar and Comic Sans), Ugly
@@ -405,7 +414,7 @@ tab goes away. You can also keep the house and leave the avatar out.
   green ribbon), Party (confetti), Camouflage, Quest and Comic. They are as easy to
   read as the rest, only nobody should want them. Hover over one in the
   menu for a word about it.
-- **Twenty-three themes restyle the whole app**, not just its colours: the top
+- **Twenty-five themes restyle the whole app**, not just its colours: the top
   bar, cards, buttons, fields, menus, dialogs, tabs, progress bars, type
   and the picture behind the page all take after what the theme is named
   for. The rest stay as they were.
@@ -492,6 +501,19 @@ tab goes away. You can also keep the house and leave the avatar out.
     tail. On a phone, dialogs rise from the bottom as sheets. An accent
     colour chosen in Preferences replaces the blue everywhere. The page
     scrolls behind the window's rounded edges, as in a real window.
+  - Ubuntu (new, dark): Ubuntu's own desktop in its dark style, Yaru,
+    on an aubergine desktop warming to orange with ribbons of light
+    across it. The black top panel runs along the top of the screen
+    with Activities and the status icons, and the Ubuntu Dock runs
+    down the left: each page is an app with a coloured tile, the open
+    one marked by an orange dot, and the other buttons sit at its foot
+    over the Show Applications grid. Every page is a charcoal window
+    with round corners and a header bar naming it, with the three
+    round window buttons (the close one orange). Buttons are
+    translucent grey (the main one Ubuntu's orange), fields take an
+    orange ring while you type, the open tab is underlined in orange,
+    progress fills in orange and everything is in Ubuntu Sans. On a
+    phone the dock moves to the foot of the screen.
   - Hyprland (new, dark): the tiling Wayland compositor, set up the way
     its users rice it, in Catppuccin Mocha. There are no title bars,
     buttons or dock. The app is a tiled window: a bare dark rectangle
@@ -631,6 +653,17 @@ tab goes away. You can also keep the house and leave the avatar out.
     Pointing at a button tints it faintly. The type is Roboto. Pick an
     accent colour and the whole scheme is redrawn from it, page and cards
     included, the way Android draws it from your wallpaper.
+  - Editor (new, dark): a code editor late at night, with the library
+    open in it like a file. The top bar is the editor's strip of tabs,
+    the open page's tab marked by a teal line, with the path to the
+    page as breadcrumbs under it (library.md, settings.json for
+    Account), the gutter's line numbers down the left and a status bar
+    along the foot of the screen with the branch, no problems and the
+    cursor's line. Page titles are Markdown headings with a blue #,
+    books' titles, authors and counts are highlighted as code is, and
+    menus light the item under the pointer in a selected line's blue.
+    Everything is in JetBrains Mono except long text such as reviews
+    and descriptions, which keeps the app's own face.
   - Comic (new, in the Silly set): a comic book printed on paper with
     Ben-Day dots. Every panel is ruled round in heavy black ink, each a
     little askew; card titles sit in yellow caption boxes; in the
@@ -643,6 +676,7 @@ tab goes away. You can also keep the house and leave the avatar out.
   Luna's hills, Golden Gate's and the Linux desktops', Fluent's bloom, the Mac's dunes,
   waves and whirl, visionOS's valley, Card Catalogue's oak table,
   Ink Wash's mountains, Comic's dots, Notebook's ruled page,
+  Noir's blind, Fernery's ferns, Ubuntu's ribbons,
   Party's confetti, Quest's night sky and the rest) shows it whatever background you picked, and
   Preferences says so under Background. Your background comes back when
   you pick another theme.
