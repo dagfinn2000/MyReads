@@ -171,6 +171,50 @@ export const THEMES: ThemeDef[] = [
     pattern:
       "linear-gradient(90deg, transparent 46%, #1d1d1d 46% 54%, transparent 54%), linear-gradient(transparent 46%, #1d1d1d 46% 54%, transparent 54%), conic-gradient(#008a00 0 25%, #d80073 0 50%, #a20025 0 75%, #0050ef 0)",
   },
+  {
+    id: "noir",
+    name: "Noir",
+    mode: "dark",
+    swatch: ["#0d0e11", "#e9dfc9"],
+    pattern:
+      "radial-gradient(circle at 100% 0%, transparent 18%, #0d0e11 74%), repeating-linear-gradient(-22deg, rgb(241 228 198 / 0.5) 0 2.5px, transparent 2.5px 4.5px)",
+    ownBackground: true,
+  },
+  {
+    id: "fernery",
+    name: "Fernery",
+    mode: "dark",
+    swatch: ["#0b1712", "#f3a9a0"],
+    pattern:
+      "radial-gradient(circle at 0% 100%, transparent 0 46%, #0b1712 70%), repeating-linear-gradient(55deg, #2c5a45 0 1.5px, transparent 1.5px 3.5px), repeating-linear-gradient(-35deg, #1d4031 0 1.5px, transparent 1.5px 3.5px)",
+    ownBackground: true,
+  },
+  {
+    id: "gallery",
+    name: "Gallery",
+    mode: "dark",
+    swatch: ["#0f2a2e", "#e3c48a"],
+    pattern:
+      "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='6' y='4' width='12' height='16' fill='%23c9a352'/%3E%3Crect x='7.5' y='5.5' width='9' height='13' fill='%23efe7d6'/%3E%3Crect x='9' y='7' width='6' height='10' fill='%238c3b2a'/%3E%3C/svg%3E\")",
+    ownBackground: true,
+  },
+  {
+    id: "editor",
+    name: "Editor",
+    mode: "dark",
+    swatch: ["#1e1f22", "#4ec9b0"],
+    pattern:
+      "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='7' height='24' fill='%232b2d30'/%3E%3Crect x='9' y='6' width='7' height='2' fill='%23569cd6'/%3E%3Crect x='11' y='10' width='9' height='2' fill='%23dcdcaa'/%3E%3Crect x='11' y='14' width='6' height='2' fill='%23ce9178'/%3E%3Crect x='9' y='18' width='5' height='2' fill='%234ec9b0'/%3E%3C/svg%3E\")",
+  },
+  {
+    id: "ubuntu",
+    name: "Ubuntu",
+    mode: "dark",
+    swatch: ["#2c2c2c", "#f2814b"],
+    pattern:
+      "linear-gradient(90deg, #161616 0 24%, transparent 24%), linear-gradient(transparent 0 16%, #2c2c2c 16% 84%, transparent 84%), radial-gradient(130% 100% at 95% 100%, #f47a3a, #e95420 22%, #77216f 62%, #2c001e)",
+    ownBackground: true,
+  },
 
   // Light palettes
   { id: "solarized-light", name: "Solarized Light", mode: "light", swatch: ["#fdf6e3", "#b58900"] },

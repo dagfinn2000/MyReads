@@ -814,6 +814,155 @@
     --heading-font: "Segoe UI", var(--font-open-sans), "Open Sans", system-ui, sans-serif;
 }
 
+/* Noir: a detective's office in an old black and white film, after dark.
+   Blue-black walls, silver-white text, an ivory light for what is chosen,
+   and the light of a street lamp through a venetian blind falling across
+   the top of the window, which the cards let through a little (see
+   "Beyond colour"). Playfair Display for titles, in italic. */
+[data-theme="noir"] {
+    --background: #0d0e11;
+    --foreground: #ece8e0;
+    --card: #16181c;
+    --card-foreground: #ece8e0;
+    --popover: #1a1c21;
+    --popover-foreground: #ece8e0;
+    --primary: #e9dfc9;
+    --primary-foreground: #0d0e11;
+    --secondary: #22252b;
+    --secondary-foreground: #ece8e0;
+    --muted: #22252b;
+    --muted-foreground: #aaa69e;
+    --accent: #262a31;
+    --accent-foreground: #ece8e0;
+    --destructive: #ff9b8f;
+    --border: #2c2f36;
+    --input: #4a4e57;
+    --ring: #e9dfc9;
+    --radius: 0.25rem;
+    --heading-font: var(--font-playfair), "Playfair Display", Georgia, serif;
+    --page-gradient: url("/themes/noir.svg");
+    --page-size: max(100%, 90rem) auto;
+}
+
+/* Fernery: a Victorian fern house at night. A green so deep it is nearly
+   black, pale sage for quiet text, a blush pink for what is chosen, and
+   fronds of fern unfurling from the lower left corner of the window, the
+   rest of the glass left dark. */
+[data-theme="fernery"] {
+    --background: #0b1712;
+    --foreground: #eef3ec;
+    --card: #12211a;
+    --card-foreground: #eef3ec;
+    --popover: #142519;
+    --popover-foreground: #eef3ec;
+    --primary: #f3a9a0;
+    --primary-foreground: #2a0f0c;
+    --secondary: #1a2d23;
+    --secondary-foreground: #eef3ec;
+    --muted: #1a2d23;
+    --muted-foreground: #a9c2b3;
+    --accent: #1f3529;
+    --accent-foreground: #eef3ec;
+    --destructive: #ffa36b;
+    --border: #24392e;
+    --input: #3d5a4a;
+    --ring: #f3a9a0;
+    --radius: 0.75rem;
+    --heading-font: var(--font-literata), "Literata", Georgia, serif;
+    --page-gradient: url("/themes/fernery.svg");
+    --page-size: max(100%, 80rem) auto;
+}
+
+/* Gallery: a museum's picture gallery after hours. Deep petrol walls lit
+   from above, every cover in the library hung in a gilt frame with a pale
+   mount and a picture light over it, labels beneath like a museum's (see
+   "Beyond colour"), gold for what is chosen and titles in spaced capitals. */
+[data-theme="gallery"] {
+    --background: #0f2a2e;
+    --foreground: #f1ede4;
+    --card: #163439;
+    --card-foreground: #f1ede4;
+    --popover: #18383d;
+    --popover-foreground: #f1ede4;
+    --primary: #e3c48a;
+    --primary-foreground: #1c1406;
+    --secondary: #1d3d42;
+    --secondary-foreground: #f1ede4;
+    --muted: #1d3d42;
+    --muted-foreground: #b0c7c6;
+    --accent: #22464b;
+    --accent-foreground: #f1ede4;
+    --destructive: #ffab91;
+    --border: #2a4d52;
+    --input: #4a6d70;
+    --ring: #e3c48a;
+    --radius: 0.125rem;
+    --heading-font: var(--font-literata), "Literata", Georgia, serif;
+    --page-gradient: radial-gradient(120% 55% at 50% -14%, #143539, transparent 72%);
+    --page-size: 100% 100%;
+}
+
+/* Editor: a code editor late at night, the library open in it like a
+   file. Charcoal greys, light grey text, and teal for what is chosen.
+   Restyled from top to bottom in restyles.css: the page links as the
+   editor's tabs, line numbers down the gutter, a status bar along the foot
+   of the screen and titles, names and counts in the colours code is
+   highlighted in. JetBrains Mono throughout. */
+[data-theme="editor"] {
+    --background: #1e1f22;
+    --foreground: #dfe1e5;
+    --card: #2b2d30;
+    --card-foreground: #dfe1e5;
+    --popover: #2b2d30;
+    --popover-foreground: #dfe1e5;
+    --primary: #4ec9b0;
+    --primary-foreground: #08231d;
+    --secondary: #393b40;
+    --secondary-foreground: #dfe1e5;
+    --muted: #2b2d30;
+    --muted-foreground: #9da3ab;
+    --accent: #393b40;
+    --accent-foreground: #dfe1e5;
+    --destructive: #f48771;
+    --border: #393b40;
+    --input: #4e5157;
+    --ring: #4ec9b0;
+    --radius: 0.25rem;
+    --heading-font: var(--font-jetbrains), "JetBrains Mono", ui-monospace, monospace;
+}
+
+/* Ubuntu in its dark style, Yaru: a charcoal window with a darker header
+   bar, white text, and Ubuntu's orange for what is chosen, a lighter shade
+   of it where it is text on the window. Restyled from top to bottom in
+   restyles.css: the Ubuntu Dock down the left of the screen with the page
+   links as its apps, the black top panel, the page as a window on the
+   aubergine and orange desktop, Ubuntu Sans throughout. The desktop is a
+   file of its own (public/themes). */
+[data-theme="ubuntu"] {
+    --background: #2c2c2c;
+    --foreground: #ffffff;
+    --card: #383838;
+    --card-foreground: #ffffff;
+    --popover: #383838;
+    --popover-foreground: #ffffff;
+    --primary: #f2814b;
+    --primary-foreground: #2c0f00;
+    --secondary: #404040;
+    --secondary-foreground: #ffffff;
+    --muted: #383838;
+    --muted-foreground: #c0bfbc;
+    --accent: #444444;
+    --accent-foreground: #ffffff;
+    --destructive: #ff8a75;
+    --border: #474747;
+    --input: #5a5a5a;
+    --ring: #e95420;
+    --radius: 0.375rem;
+    --heading-font: var(--font-ubuntu), "Ubuntu Sans", Ubuntu, system-ui, sans-serif;
+    --page-gradient: url("/themes/ubuntu.svg");
+    --page-size: cover;
+}
+
 [data-theme="solarized-light"] {
     --background: #fdf6e3;
     --foreground: #657b83;
@@ -2117,6 +2266,110 @@ html[data-own-background] body::before {
 .theme-is-ink-wash .top-bar + main h1 {
   padding-bottom: 0.7rem;
   background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 10'%3E%3Cpath d='M1.5 5.2C3 2.6 9 2.2 20 2.4c22 .3 50 1 72 1.6 9 .3 17 .7 26.5 1.4-8 .6-17 1-26 1.4C69 7.6 41 8 20 8.2 9 8.3 3 8 1.5 5.2Z' fill='%231c1a17' fill-opacity='.82'/%3E%3C/svg%3E") left bottom / 4.75rem 0.45rem no-repeat;
+}
+
+/* Noir: the blind's light comes in from the top right corner of the window,
+   wherever the window is, and falls across the cards as well as the wall:
+   they let a little of it through, so a book passes through the light as
+   the page scrolls. Page titles are in italic, as a film's title card. */
+.theme-is-noir body::before {
+  background-position: right top;
+  background-repeat: no-repeat;
+}
+.theme-is-noir .surface {
+  background-color: rgb(22 24 28 / 0.84);
+}
+.theme-is-noir h1,
+.theme-is-noir .top-bar .wordmark {
+  font-family: var(--font-heading);
+  font-style: italic;
+}
+.theme-is-noir h1 {
+  font-weight: 600;
+}
+
+/* Fernery: the ferns keep to the lower left corner of the window, and the
+   leaves of a frond fall in the left margin on a wide screen. */
+.theme-is-fernery body::before {
+  background-position: left bottom;
+  background-repeat: no-repeat;
+}
+
+/* Gallery: every cover in the library hangs on the wall in a gilt frame
+   around a pale mount, with a little brass picture light over it and its
+   glow on the wall, and the card around it is the wall itself. Under each
+   picture its label: the title in italic, the author in small capitals, as
+   a museum writes them. The book's own page hangs its cover too, in a
+   wider frame. Page titles are spaced capitals, like the gallery's own
+   signs. With 3D covers on, covers are books again and hang unframed. */
+.theme-is-gallery a.surface.flex-col {
+  --f: 1rem;
+  padding: calc(var(--f) * 1.55) calc(var(--f) * 1.05) calc(var(--f) * 0.8);
+  border-color: transparent;
+  box-shadow: none;
+  /* The lamp shines down: its glow fades in below it, not from the card's
+     edge. */
+  background:
+    linear-gradient(var(--background) calc(var(--f) * 0.15), transparent calc(var(--f) * 1.1)) border-box no-repeat,
+    radial-gradient(80% 40% at 50% calc(var(--f) * 0.4), rgb(255 228 172 / 0.14), transparent 78%) border-box no-repeat;
+}
+.theme-is-gallery a.surface.flex-col.p-2 {
+  --f: 0.625rem;
+}
+.theme-is-gallery .lift-cover,
+.theme-is-gallery .hero-cover {
+  --f: 0.75rem;
+}
+.theme-is-gallery .hero-cover {
+  --f: 1.25rem;
+  margin: var(--f) var(--f) calc(var(--f) * 0.6);
+  width: calc(100% - 2 * var(--f));
+}
+.theme-is-gallery:not([data-cover-3d]) :is(a.surface.flex-col, .lift-cover) > .book-cover,
+.theme-is-gallery:not([data-cover-3d]) .hero-cover {
+  border-radius: 0;
+  box-shadow:
+    0 0 0 calc(var(--f) * 0.3) #e9e0cc,
+    0 0 0 calc(var(--f) * 0.38) #4a3413,
+    0 0 0 calc(var(--f) * 0.5) #a88139,
+    0 0 0 calc(var(--f) * 0.58) #d6ba76,
+    0 0 0 calc(var(--f) * 0.7) #96732f,
+    0 0 0 calc(var(--f) * 0.78) #3d2a0f,
+    0 calc(var(--f) * 0.9) calc(var(--f) * 1.2) calc(var(--f) * -0.1) rgb(0 0 0 / 0.55);
+  margin-bottom: calc(var(--f) * 0.55);
+}
+/* The picture light: a brass hood on a short arm over the frame. */
+.theme-is-gallery a.surface.flex-col::before {
+  content: "";
+  position: absolute;
+  top: calc(var(--f) * 0.12);
+  left: 32%;
+  right: 32%;
+  height: calc(var(--f) * 0.34);
+  border-radius: 999px 999px 3px 3px;
+  background: linear-gradient(#f2d999, #a8823a 60%, #6e5222);
+  box-shadow: 0 2px 6px rgb(255 214 140 / 0.35);
+  pointer-events: none;
+}
+.theme-is-gallery a.surface.flex-col {
+  position: relative;
+}
+.theme-is-gallery a.surface.flex-col p.font-heading {
+  font-style: italic;
+}
+.theme-is-gallery a.surface.flex-col p.font-heading + p {
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.theme-is-gallery:not([data-section="book"]) .top-bar + main h1 {
+  font-weight: 400;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.theme-is-gallery[data-section="book"] h1 {
+  font-style: italic;
+  font-weight: 500;
 }
 
 /* One font for the whole page. */
