@@ -6,7 +6,9 @@ import localFont from "next/font/local";
 import {
   Architects_Daughter,
   Bangers,
+  Cabin,
   Courier_Prime,
+  Fraunces,
   Geist,
   Inter,
   JetBrains_Mono,
@@ -95,6 +97,16 @@ const bangers = Bangers({ weight: "400", subsets: ["latin"], variable: "--font-b
 // Roboto for Material You, Android's face, and Ubuntu Sans for Ubuntu.
 const roboto = Roboto({ subsets: ["latin"], variable: "--font-roboto", preload: false });
 const ubuntuSans = Ubuntu_Sans({ subsets: ["latin"], variable: "--font-ubuntu", preload: false });
+// Cabin, drawn after Edward Johnston's and Eric Gill's lettering, for
+// Paperback's covers where Gill Sans isn't installed; Fraunces, soft and a
+// little wonky, for Seventies' headings.
+const cabin = Cabin({ subsets: ["latin"], variable: "--font-cabin", preload: false });
+const fraunces = Fraunces({
+  subsets: ["latin"],
+  axes: ["SOFT", "WONK"],
+  variable: "--font-fraunces",
+  preload: false,
+});
 // DotGothic16 is a Japanese face, which Google Fonts serves in 120-odd
 // slices; through next/font/google each slice was a rule in the CSS every
 // page loads (94 KB of it, for one theme). This is the Latin slice alone
@@ -165,6 +177,8 @@ export default async function RootLayout({
         bangers.variable,
         roboto.variable,
         ubuntuSans.variable,
+        cabin.variable,
+        fraunces.variable,
         pixel.variable,
         setting?.kind === "fixed" && THEME_CLASS_PREFIX + setting.id,
         dark && "dark",

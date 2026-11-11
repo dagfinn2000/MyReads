@@ -8669,7 +8669,11 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
    chosen in Preferences replaces. Headings are set round and soft. Nothing
    is blurred or see-through, so scrolling costs what the default look
    costs. With flat cards (Preferences) panels lie in the page, ringed with
-   a hairline. */
+   a hairline.
+   Graphite is the same soft shaping in the dark: one charcoal for the page
+   and everything on it, the light's edge a faint sheen and the shadows
+   deep, and a rose glaze. It shares every rule here; only the light, the
+   shadow and the few colours below are its own. */
 :root[data-theme="porcelain"] {
   --pc-light: rgb(255 255 255 / 0.9);
   --pc-dark: rgb(158 168 188 / 0.62);
@@ -8681,6 +8685,14 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
   --pc-float: -10px -10px 26px var(--pc-light), 14px 16px 34px rgb(130 142 166 / 0.55);
   --pc-glaze: linear-gradient(145deg, oklch(from var(--primary) calc(l + 0.07) c h), var(--primary) 70%);
   --pc-glaze-hover: linear-gradient(145deg, oklch(from var(--primary) calc(l + 0.11) c h), oklch(from var(--primary) calc(l + 0.03) c h) 70%);
+  --pc-selection: rgb(168 58 92 / 0.22);
+  --pc-edge: rgb(255 255 255 / 0.7);
+  --pc-glint: rgb(255 255 255 / 0.22);
+  --pc-glaze-press: rgb(40 10 25 / 0.35);
+  --pc-glaze-press-sm: rgb(40 10 25 / 0.3);
+  --pc-hover: #edf0f5;
+  --pc-knob: 1px 1px 3px rgb(120 132 156 / 0.7), inset 1px 1px 0 rgb(255 255 255 / 0.8);
+  --pc-overlay: rgb(35 40 54 / 0.28);
   --chart-1: #a83a5c;
   --chart-2: #5b6b8c;
   --chart-3: #d08a9f;
@@ -8694,101 +8706,158 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
 :root[data-theme="porcelain"][data-cards="flat"] {
   --surface-shadow: inset 0 0 0 1px #cdd3dd;
 }
-.theme-is-porcelain ::selection {
-  background: rgb(168 58 92 / 0.22);
+:root[data-theme="graphite"] {
+  --pc-light: rgb(255 255 255 / 0.07);
+  --pc-dark: rgb(0 0 0 / 0.55);
+  --pc-raise: -6px -6px 14px var(--pc-light), 6px 6px 16px var(--pc-dark);
+  --pc-raise-sm: -3px -3px 7px var(--pc-light), 3px 3px 8px var(--pc-dark);
+  --pc-raise-xs: -1px -1px 3px var(--pc-light), 2px 2px 4px var(--pc-dark);
+  --pc-press: inset 3px 3px 7px var(--pc-dark), inset -3px -3px 7px var(--pc-light);
+  --pc-press-sm: inset 2px 2px 4px var(--pc-dark), inset -2px -2px 4px var(--pc-light);
+  --pc-float: -10px -10px 26px rgb(255 255 255 / 0.05), 14px 16px 34px rgb(0 0 0 / 0.6);
+  --pc-glaze: linear-gradient(145deg, oklch(from var(--primary) calc(l + 0.05) c h), var(--primary) 70%);
+  --pc-glaze-hover: linear-gradient(145deg, oklch(from var(--primary) calc(l + 0.08) c h), oklch(from var(--primary) calc(l + 0.02) c h) 70%);
+  --pc-selection: rgb(255 143 174 / 0.28);
+  --pc-edge: rgb(255 255 255 / 0.05);
+  --pc-glint: rgb(255 255 255 / 0.35);
+  --pc-glaze-press: rgb(60 10 25 / 0.4);
+  --pc-glaze-press-sm: rgb(60 10 25 / 0.35);
+  --pc-hover: #30333a;
+  --pc-knob: 1px 1px 3px rgb(0 0 0 / 0.6), inset 1px 1px 0 rgb(255 255 255 / 0.1);
+  --pc-overlay: rgb(0 0 0 / 0.45);
+  --chart-1: #ff8fae;
+  --chart-2: #8fa3c8;
+  --chart-3: #ffc2d3;
+  --chart-4: #5f6b85;
+  --chart-5: #ffad7a;
+  scrollbar-color: #4a4f58 transparent;
 }
-.theme-is-porcelain :is(h1, h2, h3, [data-slot="card-title"], [data-slot="dialog-title"]) {
+:root[data-theme="graphite"]:not([data-cards="flat"]) {
+  --surface-shadow: var(--pc-raise);
+}
+:root[data-theme="graphite"][data-cards="flat"] {
+  --surface-shadow: inset 0 0 0 1px #3a3e46;
+}
+.theme-is-porcelain ::selection,
+.theme-is-graphite ::selection {
+  background: var(--pc-selection);
+}
+.theme-is-porcelain :is(h1, h2, h3, [data-slot="card-title"], [data-slot="dialog-title"]),
+.theme-is-graphite :is(h1, h2, h3, [data-slot="card-title"], [data-slot="dialog-title"]) {
   font-family: var(--heading-font);
   font-weight: 800;
   letter-spacing: -0.005em;
 }
-.theme-is-porcelain .book-backdrop {
+.theme-is-porcelain .book-backdrop,
+.theme-is-graphite .book-backdrop {
   display: none;
 }
 
 /* The top bar: a strip of the page standing a little proud of it; the open
    page's link pressed in, its icon and name glazed. */
-.theme-is-porcelain .top-bar {
+.theme-is-porcelain .top-bar,
+.theme-is-graphite .top-bar {
   border: 0;
   background: var(--background);
   backdrop-filter: none;
-  box-shadow: 0 5px 14px -6px var(--pc-dark), inset 0 -1px 0 rgb(255 255 255 / 0.7);
+  box-shadow: 0 5px 14px -6px var(--pc-dark), inset 0 -1px 0 var(--pc-edge);
   animation: none;
 }
-.theme-is-porcelain .top-bar .wordmark {
+.theme-is-porcelain .top-bar .wordmark,
+.theme-is-graphite .top-bar .wordmark {
   font-family: var(--heading-font);
   font-weight: 800;
   letter-spacing: 0;
 }
-.theme-is-porcelain .top-bar .wordmark > svg {
+.theme-is-porcelain .top-bar .wordmark > svg,
+.theme-is-graphite .top-bar .wordmark > svg {
   color: var(--primary);
 }
-.theme-is-porcelain .top-bar .nav-link[data-size] {
+.theme-is-porcelain .top-bar .nav-link[data-size],
+.theme-is-graphite .top-bar .nav-link[data-size] {
   border-radius: 0.75rem;
 }
-.theme-is-porcelain .top-bar .nav-link[data-size]:hover {
+.theme-is-porcelain .top-bar .nav-link[data-size]:hover,
+.theme-is-graphite .top-bar .nav-link[data-size]:hover {
   color: var(--foreground);
   box-shadow: var(--pc-raise-xs);
 }
 .theme-is-porcelain .top-bar .nav-link[aria-current="page"][data-size],
-.theme-is-porcelain .top-bar .nav-link[aria-current="page"][data-size]:hover {
+.theme-is-graphite .top-bar .nav-link[aria-current="page"][data-size],
+.theme-is-porcelain .top-bar .nav-link[aria-current="page"][data-size]:hover,
+.theme-is-graphite .top-bar .nav-link[aria-current="page"][data-size]:hover {
   color: var(--primary);
   font-weight: 600;
   box-shadow: var(--pc-press-sm);
 }
-.theme-is-porcelain .top-bar .nav-link[aria-current="page"]::after {
+.theme-is-porcelain .top-bar .nav-link[aria-current="page"]::after,
+.theme-is-graphite .top-bar .nav-link[aria-current="page"]::after {
   display: none;
 }
 
 /* Buttons: little slabs of the page, standing up from it and pressed down
    when held; the main one glazed. Flat ones (in the top bar, icons) rise
    only under the pointer. */
-.theme-is-porcelain [data-size][data-variant] {
+.theme-is-porcelain [data-size][data-variant],
+.theme-is-graphite [data-size][data-variant] {
   border: 0;
   border-radius: 0.75rem;
   color: var(--foreground);
   background: transparent;
   box-shadow: var(--pc-raise-sm);
 }
-.theme-is-porcelain [data-size][data-variant]:hover {
+.theme-is-porcelain [data-size][data-variant]:hover,
+.theme-is-graphite [data-size][data-variant]:hover {
   color: var(--primary);
   background: transparent;
 }
-.theme-is-porcelain [data-size][data-variant]:is(:active:not(:disabled), [aria-expanded="true"]) {
+.theme-is-porcelain [data-size][data-variant]:is(:active:not(:disabled), [aria-expanded="true"]),
+.theme-is-graphite [data-size][data-variant]:is(:active:not(:disabled), [aria-expanded="true"]) {
   box-shadow: var(--pc-press-sm);
 }
-.theme-is-porcelain [data-size][data-variant="default"] {
+.theme-is-porcelain [data-size][data-variant="default"],
+.theme-is-graphite [data-size][data-variant="default"] {
   color: var(--primary-foreground);
   background: var(--pc-glaze);
-  box-shadow: var(--pc-raise-sm), inset 1px 1px 0 rgb(255 255 255 / 0.22);
+  box-shadow: var(--pc-raise-sm), inset 1px 1px 0 var(--pc-glint);
 }
-.theme-is-porcelain [data-size][data-variant="default"]:hover {
+.theme-is-porcelain [data-size][data-variant="default"]:hover,
+.theme-is-graphite [data-size][data-variant="default"]:hover {
   color: var(--primary-foreground);
   background: var(--pc-glaze-hover);
 }
-.theme-is-porcelain [data-size][data-variant="default"]:is(:active:not(:disabled), [aria-expanded="true"]) {
+.theme-is-porcelain [data-size][data-variant="default"]:is(:active:not(:disabled), [aria-expanded="true"]),
+.theme-is-graphite [data-size][data-variant="default"]:is(:active:not(:disabled), [aria-expanded="true"]) {
   background: var(--primary);
-  box-shadow: var(--pc-raise-xs), inset 2px 2px 5px rgb(40 10 25 / 0.35);
+  box-shadow: var(--pc-raise-xs), inset 2px 2px 5px var(--pc-glaze-press);
 }
 .theme-is-porcelain [data-size][data-variant="destructive"],
-.theme-is-porcelain [data-size][data-variant="destructive"]:hover {
+.theme-is-graphite [data-size][data-variant="destructive"],
+.theme-is-porcelain [data-size][data-variant="destructive"]:hover,
+.theme-is-graphite [data-size][data-variant="destructive"]:hover {
   color: var(--destructive);
 }
-.theme-is-porcelain [data-size][data-variant="ghost"] {
+.theme-is-porcelain [data-size][data-variant="ghost"],
+.theme-is-graphite [data-size][data-variant="ghost"] {
   box-shadow: none;
 }
-.theme-is-porcelain [data-size][data-variant="ghost"]:hover {
+.theme-is-porcelain [data-size][data-variant="ghost"]:hover,
+.theme-is-graphite [data-size][data-variant="ghost"]:hover {
   box-shadow: var(--pc-raise-xs);
 }
-.theme-is-porcelain [data-size][data-variant="ghost"]:is(:active:not(:disabled), [aria-expanded="true"]) {
+.theme-is-porcelain [data-size][data-variant="ghost"]:is(:active:not(:disabled), [aria-expanded="true"]),
+.theme-is-graphite [data-size][data-variant="ghost"]:is(:active:not(:disabled), [aria-expanded="true"]) {
   box-shadow: var(--pc-press-sm);
 }
 .theme-is-porcelain [data-size][data-variant="link"],
-.theme-is-porcelain [data-size][data-variant="link"]:is(:hover, :active) {
+.theme-is-graphite [data-size][data-variant="link"],
+.theme-is-porcelain [data-size][data-variant="link"]:is(:hover, :active),
+.theme-is-graphite [data-size][data-variant="link"]:is(:hover, :active) {
   color: var(--primary);
   box-shadow: none;
 }
-.theme-is-porcelain :is([data-size][data-variant], [data-slot="select-trigger"], .select-like, [role="tab"], [data-slot="tabs-trigger"], .shelf-tabs > a, .surface):focus-visible {
+.theme-is-porcelain :is([data-size][data-variant], [data-slot="select-trigger"], .select-like, [role="tab"], [data-slot="tabs-trigger"], .shelf-tabs > a, .surface):focus-visible,
+.theme-is-graphite :is([data-size][data-variant], [data-slot="select-trigger"], .select-like, [role="tab"], [data-slot="tabs-trigger"], .shelf-tabs > a, .surface):focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: 3px;
   --tw-ring-shadow: 0 0 #0000;
@@ -8797,38 +8866,49 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
 /* Fields: hollows pressed into the page, a glazed ring round the one being
    typed in. */
 .theme-is-porcelain :is([data-slot="input"], [data-slot="textarea"]),
+.theme-is-graphite :is([data-slot="input"], [data-slot="textarea"]),
 .theme-is-porcelain input:is([type="text"], [type="search"], [type="number"], [type="date"], [type="password"], [type="url"], [type="email"], :not([type])),
-.theme-is-porcelain textarea {
+.theme-is-graphite input:is([type="text"], [type="search"], [type="number"], [type="date"], [type="password"], [type="url"], [type="email"], :not([type])),
+.theme-is-porcelain textarea,
+.theme-is-graphite textarea {
   border: 0;
   border-radius: 0.75rem;
   background: transparent;
   box-shadow: var(--pc-press);
 }
 .theme-is-porcelain input[type="search"],
-.theme-is-porcelain input[placeholder^="Search"] {
+.theme-is-graphite input[type="search"],
+.theme-is-porcelain input[placeholder^="Search"],
+.theme-is-graphite input[placeholder^="Search"] {
   border-radius: 999px;
 }
-.theme-is-porcelain :is([data-slot="input"], [data-slot="textarea"], input, textarea):focus-visible {
+.theme-is-porcelain :is([data-slot="input"], [data-slot="textarea"], input, textarea):focus-visible,
+.theme-is-graphite :is([data-slot="input"], [data-slot="textarea"], input, textarea):focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: 2px;
   --tw-ring-shadow: 0 0 #0000;
   box-shadow: var(--pc-press);
 }
-.theme-is-porcelain :is([data-slot="select-trigger"], .select-like) {
+.theme-is-porcelain :is([data-slot="select-trigger"], .select-like),
+.theme-is-graphite :is([data-slot="select-trigger"], .select-like) {
   border: 0;
   border-radius: 0.75rem;
   background: transparent;
   box-shadow: var(--pc-raise-sm);
 }
-.theme-is-porcelain :is([data-slot="select-trigger"], .select-like)[data-state="open"] {
+.theme-is-porcelain :is([data-slot="select-trigger"], .select-like)[data-state="open"],
+.theme-is-graphite :is([data-slot="select-trigger"], .select-like)[data-state="open"] {
   box-shadow: var(--pc-press-sm);
 }
-.theme-is-porcelain :is([data-slot="select-trigger"], .select-like) > svg:last-child {
+.theme-is-porcelain :is([data-slot="select-trigger"], .select-like) > svg:last-child,
+.theme-is-graphite :is([data-slot="select-trigger"], .select-like) > svg:last-child {
   color: var(--primary);
   opacity: 1;
 }
 .theme-is-porcelain input[type="checkbox"],
-.theme-is-porcelain input[type="radio"] {
+.theme-is-graphite input[type="checkbox"],
+.theme-is-porcelain input[type="radio"],
+.theme-is-graphite input[type="radio"] {
   appearance: none;
   flex: none;
   width: 1.125rem;
@@ -8839,70 +8919,87 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
   background: var(--background);
   box-shadow: var(--pc-press-sm);
 }
-.theme-is-porcelain input[type="radio"] {
+.theme-is-porcelain input[type="radio"],
+.theme-is-graphite input[type="radio"] {
   border-radius: 50%;
 }
-.theme-is-porcelain input[type="checkbox"]:checked {
+.theme-is-porcelain input[type="checkbox"]:checked,
+.theme-is-graphite input[type="checkbox"]:checked {
   background:
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.6 6.3l2.3 2.3 4.5-5' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 80% no-repeat,
     var(--pc-glaze);
   box-shadow: var(--pc-raise-xs);
 }
-.theme-is-porcelain input[type="radio"]:checked {
+.theme-is-porcelain input[type="radio"]:checked,
+.theme-is-graphite input[type="radio"]:checked {
   background: radial-gradient(circle, var(--primary) 0 30%, transparent 34%), var(--background);
 }
-.theme-is-porcelain input:is([type="checkbox"], [type="radio"]):focus-visible {
+.theme-is-porcelain input:is([type="checkbox"], [type="radio"]):focus-visible,
+.theme-is-graphite input:is([type="checkbox"], [type="radio"]):focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: 2px;
 }
-.theme-is-porcelain button[role="switch"] > span:last-child {
+.theme-is-porcelain button[role="switch"] > span:last-child,
+.theme-is-graphite button[role="switch"] > span:last-child {
   border: 0;
   background: var(--background);
   box-shadow: var(--pc-press-sm);
 }
-.theme-is-porcelain button[role="switch"][aria-checked="true"] > span:last-child {
+.theme-is-porcelain button[role="switch"][aria-checked="true"] > span:last-child,
+.theme-is-graphite button[role="switch"][aria-checked="true"] > span:last-child {
   background: var(--pc-glaze);
-  box-shadow: inset 2px 2px 4px rgb(40 10 25 / 0.3);
+  box-shadow: inset 2px 2px 4px var(--pc-glaze-press-sm);
 }
-.theme-is-porcelain button[role="switch"] > span:last-child > span {
+.theme-is-porcelain button[role="switch"] > span:last-child > span,
+.theme-is-graphite button[role="switch"] > span:last-child > span {
   background: var(--background);
-  box-shadow: 1px 1px 3px rgb(120 132 156 / 0.7), inset 1px 1px 0 rgb(255 255 255 / 0.8);
+  box-shadow: var(--pc-knob);
 }
 
 /* Panels and library tiles: the page itself, raised. */
 .theme-is-porcelain [data-slot="card"],
-.theme-is-porcelain .bg-card.border:not(.bulk-bar) {
+.theme-is-graphite [data-slot="card"],
+.theme-is-porcelain .bg-card.border:not(.bulk-bar),
+.theme-is-graphite .bg-card.border:not(.bulk-bar) {
   border: 0;
   border-radius: 1.25rem;
   background: var(--card);
   box-shadow: var(--surface-shadow);
   --tw-ring-shadow: 0 0 #0000;
 }
-.theme-is-porcelain :is([data-slot="card"], .bg-card.border) .bg-card.border {
+.theme-is-porcelain :is([data-slot="card"], .bg-card.border) .bg-card.border,
+.theme-is-graphite :is([data-slot="card"], .bg-card.border) .bg-card.border {
   border-radius: 0.875rem;
   box-shadow: var(--pc-raise-sm);
 }
 .theme-is-porcelain .surface:not([data-slot="card"]):hover,
-.theme-is-porcelain .bg-card.border:not(.surface, .bulk-bar):is(a, button):hover {
-  background: linear-gradient(145deg, #edf0f5, var(--card) 60%);
+.theme-is-graphite .surface:not([data-slot="card"]):hover,
+.theme-is-porcelain .bg-card.border:not(.surface, .bulk-bar):is(a, button):hover,
+.theme-is-graphite .bg-card.border:not(.surface, .bulk-bar):is(a, button):hover {
+  background: linear-gradient(145deg, var(--pc-hover), var(--card) 60%);
 }
-.theme-is-porcelain .bg-card.border.border-red-300 {
+.theme-is-porcelain .bg-card.border.border-red-300,
+.theme-is-graphite .bg-card.border.border-red-300 {
   box-shadow: var(--surface-shadow), inset 0 0 0 1.5px rgb(179 38 30 / 0.45);
 }
-.theme-is-porcelain [data-slot="card-footer"] {
+.theme-is-porcelain [data-slot="card-footer"],
+.theme-is-graphite [data-slot="card-footer"] {
   border-top: 0;
   background: transparent;
 }
-.theme-is-porcelain .surface .book-cover {
+.theme-is-porcelain .surface .book-cover,
+.theme-is-graphite .surface .book-cover {
   border-radius: 0.625rem;
 }
-.theme-is-porcelain .text-muted-foreground\/80 {
+.theme-is-porcelain .text-muted-foreground\/80,
+.theme-is-graphite .text-muted-foreground\/80 {
   color: var(--muted-foreground);
 }
 
 /* Tabs and chips: a groove in the page with the open tab standing up in
    it; a chosen chip pressed in and glazed. */
-.theme-is-porcelain .shelf-tabs {
+.theme-is-porcelain .shelf-tabs,
+.theme-is-graphite .shelf-tabs {
   gap: 0.25rem;
   width: fit-content;
   max-width: 100%;
@@ -8912,7 +9009,9 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
   box-shadow: var(--pc-press);
 }
 .theme-is-porcelain .shelf-tabs > a,
-.theme-is-porcelain [data-slot="tabs-trigger"] {
+.theme-is-graphite .shelf-tabs > a,
+.theme-is-porcelain [data-slot="tabs-trigger"],
+.theme-is-graphite [data-slot="tabs-trigger"] {
   margin: 0;
   border: 0;
   border-radius: 0.8125rem;
@@ -8920,45 +9019,56 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
   box-shadow: none;
 }
 .theme-is-porcelain .shelf-tabs > a:hover,
-.theme-is-porcelain [data-slot="tabs-trigger"]:hover {
+.theme-is-graphite .shelf-tabs > a:hover,
+.theme-is-porcelain [data-slot="tabs-trigger"]:hover,
+.theme-is-graphite [data-slot="tabs-trigger"]:hover {
   color: var(--foreground);
 }
 .theme-is-porcelain .shelf-tabs > a[aria-current="page"],
-.theme-is-porcelain [data-slot="tabs-trigger"][data-state="active"] {
+.theme-is-graphite .shelf-tabs > a[aria-current="page"],
+.theme-is-porcelain [data-slot="tabs-trigger"][data-state="active"],
+.theme-is-graphite [data-slot="tabs-trigger"][data-state="active"] {
   color: var(--primary);
   font-weight: 600;
   background: var(--background);
   box-shadow: var(--pc-raise-xs);
 }
-.theme-is-porcelain [data-slot="tabs-trigger"]::after {
+.theme-is-porcelain [data-slot="tabs-trigger"]::after,
+.theme-is-graphite [data-slot="tabs-trigger"]::after {
   display: none;
 }
-.theme-is-porcelain [data-slot="tabs-list"] {
+.theme-is-porcelain [data-slot="tabs-list"],
+.theme-is-graphite [data-slot="tabs-list"] {
   border-radius: 1rem;
   background: transparent;
   box-shadow: var(--pc-press);
 }
-.theme-is-porcelain .shelf-tabs > a > span {
+.theme-is-porcelain .shelf-tabs > a > span,
+.theme-is-graphite .shelf-tabs > a > span {
   background: transparent;
   box-shadow: var(--pc-press-sm);
 }
-.theme-is-porcelain .shelf-tabs > a[aria-current="page"] > span {
+.theme-is-porcelain .shelf-tabs > a[aria-current="page"] > span,
+.theme-is-graphite .shelf-tabs > a[aria-current="page"] > span {
   color: var(--primary-foreground);
   background: var(--primary);
   box-shadow: none;
 }
-.theme-is-porcelain :is(a, button).rounded-full.border:not(.aspect-square, .border-2) {
+.theme-is-porcelain :is(a, button).rounded-full.border:not(.aspect-square, .border-2),
+.theme-is-graphite :is(a, button).rounded-full.border:not(.aspect-square, .border-2) {
   border-color: transparent;
   background: transparent;
   box-shadow: var(--pc-raise-xs);
 }
-.theme-is-porcelain :is(a, button).rounded-full.border:is([class*="border-primary"], [aria-current="page"], [aria-pressed="true"]):not(.aspect-square, .border-2) {
+.theme-is-porcelain :is(a, button).rounded-full.border:is([class*="border-primary"], [aria-current="page"], [aria-pressed="true"]):not(.aspect-square, .border-2),
+.theme-is-graphite :is(a, button).rounded-full.border:is([class*="border-primary"], [aria-current="page"], [aria-pressed="true"]):not(.aspect-square, .border-2) {
   color: var(--primary);
   font-weight: 600;
   background: transparent;
   box-shadow: var(--pc-press-sm);
 }
-.theme-is-porcelain kbd {
+.theme-is-porcelain kbd,
+.theme-is-graphite kbd {
   border: 0;
   border-radius: 0.375rem;
   background: var(--background);
@@ -8966,62 +9076,82 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
 }
 
 /* Progress: a groove, filled with glaze. */
-.theme-is-porcelain :has(> .bar-grow) {
+.theme-is-porcelain :has(> .bar-grow),
+.theme-is-graphite :has(> .bar-grow) {
   border-radius: 999px;
   background: var(--background);
   box-shadow: var(--pc-press-sm);
 }
-.theme-is-porcelain .bar-grow {
+.theme-is-porcelain .bar-grow,
+.theme-is-graphite .bar-grow {
   border-radius: 999px;
 }
-.theme-is-porcelain .bar-grow[class*="primary"] {
+.theme-is-porcelain .bar-grow[class*="primary"],
+.theme-is-graphite .bar-grow[class*="primary"] {
   background: var(--pc-glaze);
 }
 
 /* Menus, popovers and dialogs: a lighter sheet lifted well off the page,
    the item under the pointer pressed into it. */
-.theme-is-porcelain :is([data-slot="dropdown-menu-content"], [data-slot="popover-content"], [data-slot="select-content"], [data-slot="dropdown-menu-sub-content"]) {
+.theme-is-porcelain :is([data-slot="dropdown-menu-content"], [data-slot="popover-content"], [data-slot="select-content"], [data-slot="dropdown-menu-sub-content"]),
+.theme-is-graphite :is([data-slot="dropdown-menu-content"], [data-slot="popover-content"], [data-slot="select-content"], [data-slot="dropdown-menu-sub-content"]) {
   border: 0;
   border-radius: 1.125rem;
   background: var(--popover);
   box-shadow: var(--pc-float);
   --tw-ring-shadow: 0 0 #0000;
 }
-.theme-is-porcelain :is([data-slot="dropdown-menu-item"], [data-slot="select-item"], [data-slot="dropdown-menu-checkbox-item"], [data-slot="dropdown-menu-radio-item"], [data-slot="dropdown-menu-sub-trigger"]) {
+.theme-is-porcelain :is([data-slot="dropdown-menu-item"], [data-slot="select-item"], [data-slot="dropdown-menu-checkbox-item"], [data-slot="dropdown-menu-radio-item"], [data-slot="dropdown-menu-sub-trigger"]),
+.theme-is-graphite :is([data-slot="dropdown-menu-item"], [data-slot="select-item"], [data-slot="dropdown-menu-checkbox-item"], [data-slot="dropdown-menu-radio-item"], [data-slot="dropdown-menu-sub-trigger"]) {
   border-radius: 0.75rem;
 }
-.theme-is-porcelain :is([data-slot="dropdown-menu-item"], [data-slot="select-item"], [data-slot="dropdown-menu-checkbox-item"], [data-slot="dropdown-menu-radio-item"], [data-slot="dropdown-menu-sub-trigger"]):is(:focus, [data-highlighted]) {
+.theme-is-porcelain :is([data-slot="dropdown-menu-item"], [data-slot="select-item"], [data-slot="dropdown-menu-checkbox-item"], [data-slot="dropdown-menu-radio-item"], [data-slot="dropdown-menu-sub-trigger"]):is(:focus, [data-highlighted]),
+.theme-is-graphite :is([data-slot="dropdown-menu-item"], [data-slot="select-item"], [data-slot="dropdown-menu-checkbox-item"], [data-slot="dropdown-menu-radio-item"], [data-slot="dropdown-menu-sub-trigger"]):is(:focus, [data-highlighted]) {
   color: var(--primary);
   background: transparent;
   box-shadow: var(--pc-press-sm);
 }
-.theme-is-porcelain [data-slot="dialog-overlay"] {
-  background: rgb(35 40 54 / 0.28);
+.theme-is-porcelain [data-slot="dialog-overlay"],
+.theme-is-graphite [data-slot="dialog-overlay"] {
+  background: var(--pc-overlay);
   backdrop-filter: none;
 }
-.theme-is-porcelain [data-slot="dialog-content"] {
+.theme-is-porcelain [data-slot="dialog-content"],
+.theme-is-graphite [data-slot="dialog-content"] {
   border: 0;
   border-radius: 1.75rem;
   background: var(--popover);
   box-shadow: var(--pc-float);
   --tw-ring-shadow: 0 0 #0000;
 }
-.theme-is-porcelain [data-slot="dialog-footer"] {
+.theme-is-porcelain [data-slot="dialog-footer"],
+.theme-is-graphite [data-slot="dialog-footer"] {
   border-top: 0;
   background: transparent;
 }
-.theme-is-porcelain .bulk-bar {
+.theme-is-porcelain .bulk-bar,
+.theme-is-graphite .bulk-bar {
   border: 0;
   border-radius: 1.5rem;
   background: var(--popover);
   box-shadow: var(--pc-float);
 }
-.theme-is-porcelain .auth-backdrop {
+.theme-is-porcelain .auth-backdrop,
+.theme-is-graphite .auth-backdrop {
   display: none;
 }
-.theme-is-porcelain main:has(> .auth-backdrop) .wordmark {
+.theme-is-porcelain main:has(> .auth-backdrop) .wordmark,
+.theme-is-graphite main:has(> .auth-backdrop) .wordmark {
   font-family: var(--heading-font);
   font-weight: 800;
+}
+
+/* Graphite's tick is drawn in the dark of its buttons' lettering, on its
+   lighter glaze. */
+.theme-is-graphite input[type="checkbox"]:checked {
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.6 6.3l2.3 2.3 4.5-5' fill='none' stroke='%232a0c16' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 80% no-repeat,
+    var(--pc-glaze);
 }
 
 /* ── Material You ──────────────────────────────────────────────────────────
@@ -14191,4 +14321,726 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
 }
 .theme-is-ubuntu .auth-corner {
   top: calc(var(--ub-panel) + 0.5rem);
+}
+
+/* ── Haiku ─────────────────────────────────────────────────────────────────
+   The Haiku operating system, heir to BeOS. The desktop is flat blue. The
+   top bar is the Deskbar laid along the top of the screen: soft grey, the
+   wordmark where Haiku's own menu would be, the page links its entries
+   between etched lines (the open page's pressed in) and the bar's other
+   buttons in the sunken tray at its end. Every page is a window: a grey
+   frame and body, and on its top edge the short yellow tab that names it,
+   as wide as its name, with the close box at its left and the zoom box at
+   its right; the resize knob sits in the frame's corner. Inside, buttons
+   are soft grey with a dark frame round the default one; fields are white
+   and edged in blue while they have the keyboard, as everything does
+   that has it; drop-downs are buttons with Haiku's small black arrow;
+   panels are etched boxes; tabs stand on the line they open onto; a ticked
+   box has an X in it; progress bars fill in blue. Menus are grey with the
+   item under the pointer a darker grey, dialogs are windows with tabs of
+   their own. Nothing here blurs, so nothing costs anything as the page
+   scrolls. Noto Sans throughout, which Haiku uses too. */
+:root[data-theme="haiku"] {
+  --hk-font: var(--font-noto-sans), "Noto Sans", "DejaVu Sans", ui-sans-serif, system-ui, sans-serif;
+  --hk-tab: 1.5rem;
+  --hk-frame: 5px;
+  --hk-bar: 2.75rem;
+  /* The window's outline, and the frame's lines inside it. */
+  --hk-edge: #5c5c5c;
+  --hk-frame-light: #f2f2f2;
+  --hk-frame-mid: #d0d0d0;
+  --hk-frame-dark: #8e8e8e;
+  --hk-yellow: linear-gradient(#ffe582, #ffd42e 45%, #ffcb00 55%, #f5c000);
+  --hk-button: linear-gradient(#fdfdfd, #efefef 45%, #e2e2e2 55%, #d6d6d6);
+  --hk-button-hover: linear-gradient(#ffffff, #f6f6f6 45%, #ebebeb 55%, #e0e0e0);
+  --hk-button-down: linear-gradient(#bababa, #c6c6c6 45%, #cecece 55%, #d4d4d4);
+  --hk-focus: #0000e5;
+  --hk-close: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='13'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23fffbe6'/%3E%3Cstop offset='.55' stop-color='%23ffd84a'/%3E%3Cstop offset='1' stop-color='%23d9a300'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect x='.5' y='.5' width='12' height='12' fill='url(%23g)' stroke='%236b5400'/%3E%3C/svg%3E");
+  --hk-zoom: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='13'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23fffbe6'/%3E%3Cstop offset='.55' stop-color='%23ffd84a'/%3E%3Cstop offset='1' stop-color='%23d9a300'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect x='3.5' y='3.5' width='9' height='9' fill='url(%23g)' stroke='%236b5400'/%3E%3Crect x='.5' y='.5' width='7' height='7' fill='url(%23g)' stroke='%236b5400'/%3E%3C/svg%3E");
+  --hk-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M0 0h10L5 6z' fill='%233d3d3d'/%3E%3C/svg%3E");
+  --hk-check: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M2 2l6 6M8 2L2 8' stroke='%231f3f9e' stroke-width='1.6' stroke-linecap='square'/%3E%3C/svg%3E");
+  --hk-grip: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12'%3E%3Cpath d='M11 3L3 11M11 6.5L6.5 11M11 10l-1 1' stroke='%23ffffff'/%3E%3Cpath d='M11 2L2 11M11 5.5L5.5 11M11 9l-2 2' stroke='%237a7a7a'/%3E%3C/svg%3E");
+  --heading-font: var(--hk-font);
+  --surface-shadow: none;
+  --chart-1: #336698;
+  --chart-2: #e0a800;
+  --chart-3: #b8392d;
+  --chart-4: #3f8f3f;
+  --chart-5: #7a7a7a;
+  scrollbar-color: #d6d6d6 #c2c2c2;
+}
+.theme-is-haiku body {
+  font-family: var(--hk-font);
+}
+.theme-is-haiku ::selection {
+  color: #000000;
+  background: #b3cbe6;
+}
+.theme-is-haiku h1 {
+  color: #000000;
+  font-family: var(--hk-font);
+  font-weight: 700;
+  letter-spacing: 0;
+}
+.theme-is-haiku .book-backdrop {
+  display: none;
+}
+
+/* The Deskbar, along the top of the screen. */
+.theme-is-haiku .top-bar {
+  --foreground: #000000;
+  --muted-foreground: #2e2e2e;
+  --accent: rgb(0 0 0 / 0.07);
+  --accent-foreground: #000000;
+  --ring: var(--hk-focus);
+  border: 0;
+  color: #000000;
+  background: linear-gradient(#f4f4f4, #e0e0e0 55%, #d2d2d2);
+  box-shadow: 0 1px var(--hk-edge), inset 0 -1px #b4b4b4;
+  backdrop-filter: none;
+  animation: none;
+}
+.theme-is-haiku .top-bar > div {
+  max-width: none;
+  height: var(--hk-bar);
+  padding: 0;
+  gap: 0;
+}
+/* Entries: the wordmark where Haiku's own menu is, then the pages, each
+   ended by an etched line; the open page's pressed in. */
+.theme-is-haiku .top-bar .wordmark,
+.theme-is-haiku .top-bar .nav-link[data-size] {
+  height: 100%;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  color: #000000;
+  background: transparent;
+  box-shadow: inset -1px 0 #ffffff, inset -2px 0 #9c9c9c;
+}
+.theme-is-haiku .top-bar .wordmark {
+  padding: 0 1.125rem 0 0.875rem;
+  gap: 0.5rem;
+  font-family: var(--hk-font);
+  font-size: 1.0625rem;
+  font-weight: 700;
+}
+.theme-is-haiku .top-bar .wordmark > svg {
+  color: var(--primary);
+}
+.theme-is-haiku .top-bar .nav-link[data-size] {
+  padding-inline: 0.875rem 1rem;
+}
+.theme-is-haiku .top-bar :is(.wordmark, .nav-link[data-size]):hover {
+  color: #000000;
+  background: rgb(255 255 255 / 0.5);
+}
+.theme-is-haiku .top-bar .nav-link[data-size][aria-current="page"],
+.theme-is-haiku .top-bar .nav-link[data-size][aria-current="page"]:hover {
+  background: linear-gradient(#b8b8b8, #c8c8c8 40%, #d0d0d0);
+  box-shadow: inset 1px 1px #8c8c8c, inset -1px 0 #ffffff, inset -2px 0 #9c9c9c;
+}
+.theme-is-haiku .top-bar .wordmark:active {
+  background: linear-gradient(#b8b8b8, #c8c8c8 40%, #d0d0d0);
+}
+.theme-is-haiku .top-bar .nav-link[aria-current="page"]::after {
+  display: none;
+}
+/* The tray: sunk into the bar at its end. */
+.theme-is-haiku .top-bar .ml-auto {
+  height: calc(100% - 0.625rem);
+  margin-right: 0.375rem;
+  padding: 0 0.25rem;
+  gap: 0;
+  border: 1px solid;
+  border-color: #8c8c8c #ffffff #ffffff #8c8c8c;
+  background: #d4d4d4;
+}
+.theme-is-haiku .top-bar .ml-auto [data-size][data-variant] {
+  height: 1.75rem;
+  border: 1px solid transparent;
+  border-radius: 2px;
+  color: #000000;
+  background: transparent;
+  box-shadow: none;
+}
+.theme-is-haiku .top-bar .ml-auto [data-size][data-variant]:is(:hover, [aria-expanded="true"]) {
+  border-color: #9c9c9c;
+  background: var(--hk-button-hover);
+}
+.theme-is-haiku .top-bar .ml-auto .text-muted-foreground {
+  color: #000000;
+}
+.theme-is-haiku .top-bar :is(.nav-link, .wordmark, [data-size][data-variant]):focus-visible {
+  outline: 1px solid var(--hk-focus);
+  outline-offset: -4px;
+  --tw-ring-shadow: 0 0 #0000;
+}
+@media (width < 40rem) {
+  .theme-is-haiku .top-bar .wordmark {
+    padding: 0 0.75rem 0 0.625rem;
+  }
+  .theme-is-haiku .top-bar .nav-link[data-size] {
+    padding-inline: 0.4375rem 0.5rem;
+  }
+  .theme-is-haiku .top-bar .ml-auto {
+    margin-right: 0.25rem;
+    padding: 0 0.125rem;
+  }
+}
+
+/* The window each page sits in: a grey frame of light and dark lines, a
+   grey body, the yellow tab naming the page on its top edge, as wide as
+   the name, and the resize knob in the bottom right corner. */
+.theme-is-haiku .top-bar + main {
+  position: relative;
+  width: calc(100% - 2rem);
+  margin-block: calc(1.125rem + var(--hk-tab)) 1.5rem;
+  padding: calc(var(--hk-frame) + 1.25rem) calc(var(--hk-frame) + 1.25rem) calc(var(--hk-frame) + 1.5rem);
+  border: 1px solid var(--hk-edge);
+  background: var(--background);
+  box-shadow:
+    inset 0 0 0 1px var(--hk-frame-light),
+    inset 0 0 0 calc(var(--hk-frame) - 2px) var(--hk-frame-mid),
+    inset 0 0 0 calc(var(--hk-frame) - 1px) var(--hk-frame-dark);
+}
+.theme-is-haiku .top-bar + main::before {
+  content: "MyReads";
+  content: "MyReads" / "";
+  position: absolute;
+  top: calc(-1 * var(--hk-tab) - 1px);
+  left: -1px;
+  box-sizing: border-box;
+  max-width: calc(100% + 2px);
+  height: var(--hk-tab);
+  padding: 0 2rem 0 1.9375rem;
+  overflow: hidden;
+  border: 1px solid var(--hk-edge);
+  border-bottom: 0;
+  color: #000000;
+  font: 700 0.8125rem/calc(var(--hk-tab) - 1px) var(--hk-font);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  background:
+    var(--hk-close) left 0.5rem center / 13px 13px no-repeat,
+    var(--hk-zoom) right 0.5rem center / 13px 13px no-repeat,
+    var(--hk-yellow);
+  box-shadow: inset 1px 1px #fff3b8, inset -1px 0 #d9a800;
+}
+.theme-is-haiku .top-bar + main::after {
+  content: "";
+  position: absolute;
+  right: -1px;
+  bottom: -1px;
+  width: 1.125rem;
+  height: 1.125rem;
+  border: 1px solid var(--hk-edge);
+  background: var(--hk-grip) right 2px bottom 2px / 12px 12px no-repeat, var(--hk-button);
+  pointer-events: none;
+}
+.theme-is-haiku[data-section="library"] .top-bar + main::before {
+  content: "Library";
+  content: "Library" / "";
+}
+.theme-is-haiku[data-section="book"] .top-bar + main::before {
+  content: "Book";
+  content: "Book" / "";
+}
+.theme-is-haiku[data-section="series"] .top-bar + main::before {
+  content: "Series";
+  content: "Series" / "";
+}
+.theme-is-haiku[data-section="stats"] .top-bar + main::before {
+  content: "Stats";
+  content: "Stats" / "";
+}
+.theme-is-haiku[data-section="reading"] .top-bar + main::before {
+  content: "Now reading";
+  content: "Now reading" / "";
+}
+.theme-is-haiku[data-section="quotes"] .top-bar + main::before {
+  content: "Quotes";
+  content: "Quotes" / "";
+}
+.theme-is-haiku[data-section="room"] .top-bar + main::before {
+  content: "Reading room";
+  content: "Reading room" / "";
+}
+.theme-is-haiku[data-section="account"] .top-bar + main::before {
+  content: "Account";
+  content: "Account" / "";
+}
+.theme-is-haiku:has(.top-bar .nav-link[href="/books/new"][aria-current="page"]) .top-bar + main::before {
+  content: "Add book";
+  content: "Add book" / "";
+}
+.theme-is-haiku:has(.top-bar .nav-link[href="/books/check"][aria-current="page"]) .top-bar + main::before {
+  content: "Check";
+  content: "Check" / "";
+}
+@media (width < 40rem) {
+  :root[data-theme="haiku"] {
+    --hk-frame: 4px;
+  }
+  .theme-is-haiku .top-bar + main {
+    width: calc(100% - 0.5rem);
+    margin-block: calc(0.5rem + var(--hk-tab)) 0.5rem;
+    padding-inline: calc(var(--hk-frame) + 0.75rem);
+  }
+}
+
+/* Buttons: soft grey, a little rounded, a dark frame round the default
+   one; pressed, they darken. */
+.theme-is-haiku [data-size][data-variant] {
+  border: 1px solid #8a8a8a;
+  border-radius: 3px;
+  color: #000000;
+  background: var(--hk-button);
+  box-shadow: inset 0 1px #ffffff;
+  text-shadow: none;
+  transition: none;
+}
+.theme-is-haiku [data-size][data-variant="default"] {
+  box-shadow: inset 0 1px #ffffff, 0 0 0 2px var(--background), 0 0 0 3px #6e6e6e;
+}
+.theme-is-haiku [data-size][data-variant="destructive"] {
+  color: var(--destructive);
+}
+.theme-is-haiku [data-size]:is([data-variant="ghost"], [data-variant="link"]) {
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+}
+.theme-is-haiku [data-size][data-variant="link"] {
+  color: var(--primary);
+}
+.theme-is-haiku [data-size][data-variant]:not([data-variant="ghost"], [data-variant="link"]):is(:hover, [aria-expanded="true"]) {
+  color: #000000;
+  background: var(--hk-button-hover);
+}
+.theme-is-haiku [data-size][data-variant="destructive"]:is(:hover, [aria-expanded="true"]) {
+  color: var(--destructive);
+}
+.theme-is-haiku [data-size][data-variant="ghost"]:is(:hover, [aria-expanded="true"]) {
+  border-color: #9c9c9c;
+  color: #000000;
+  background: var(--hk-button-hover);
+}
+.theme-is-haiku [data-size][data-variant="link"]:hover {
+  background: transparent;
+  text-decoration: underline;
+}
+.theme-is-haiku [data-size]:not([data-variant="ghost"], [data-variant="link"]):active:not(:disabled) {
+  translate: none;
+  background: var(--hk-button-down);
+}
+.theme-is-haiku [data-size][data-variant="ghost"]:active:not(:disabled) {
+  translate: none;
+  background: var(--hk-button-down);
+}
+.theme-is-haiku [data-size][data-variant]:disabled {
+  opacity: 1;
+  color: #8a8a8a;
+}
+.theme-is-haiku [data-size]:not([data-variant="ghost"], [data-variant="link"]):disabled {
+  border-color: #b4b4b4;
+  background: #e2e2e2;
+  box-shadow: none;
+}
+.theme-is-haiku :is([data-size][data-variant], [data-slot="select-trigger"], .select-like, [role="tab"], [data-slot="tabs-trigger"], .shelf-tabs > a):focus-visible {
+  outline: 1px solid var(--hk-focus);
+  outline-offset: -4px;
+  --tw-ring-shadow: 0 0 #0000;
+}
+.theme-is-haiku .surface:focus-visible {
+  outline: 1px solid var(--hk-focus);
+  outline-offset: 2px;
+}
+
+/* Fields: white, a little sunken, edged in blue while they have the
+   keyboard. */
+.theme-is-haiku :is([data-slot="input"], [data-slot="textarea"]),
+.theme-is-haiku input:is([type="text"], [type="search"], [type="number"], [type="date"], [type="password"], [type="url"], [type="email"], :not([type])),
+.theme-is-haiku textarea {
+  border: 1px solid;
+  border-color: #8a8a8a #b8b8b8 #c4c4c4 #8a8a8a;
+  border-radius: 1px;
+  background: #ffffff;
+  box-shadow: inset 1px 1px #e4e4e4;
+}
+.theme-is-haiku :is([data-slot="input"], [data-slot="textarea"], input, textarea):focus-visible {
+  border-color: var(--hk-focus);
+  outline: none;
+  box-shadow: none;
+  --tw-ring-shadow: 0 0 #0000;
+}
+/* A drop-down: a button with the small black arrow at its right, past a
+   line. */
+.theme-is-haiku :is([data-slot="select-trigger"], .select-like) {
+  border: 1px solid #8a8a8a;
+  border-radius: 3px;
+  color: #000000;
+  background:
+    var(--hk-arrow) right 0.5rem center / 0.5625rem 0.375rem no-repeat,
+    linear-gradient(#a8a8a8, #a8a8a8) right 1.5625rem center / 1px 55% no-repeat,
+    var(--hk-button);
+  padding-right: 2.125rem;
+  box-shadow: inset 0 1px #ffffff;
+}
+.theme-is-haiku :is([data-slot="select-trigger"], .select-like):is(:hover, [data-state="open"]) {
+  background:
+    var(--hk-arrow) right 0.5rem center / 0.5625rem 0.375rem no-repeat,
+    linear-gradient(#a8a8a8, #a8a8a8) right 1.5625rem center / 1px 55% no-repeat,
+    var(--hk-button-hover);
+}
+.theme-is-haiku :is([data-slot="select-trigger"], .select-like) > svg:last-child {
+  opacity: 0;
+}
+
+/* Check boxes: a white box with an X when ticked. Radio buttons: a white
+   dot with a blue one in it. */
+.theme-is-haiku input[type="checkbox"],
+.theme-is-haiku input[type="radio"] {
+  appearance: none;
+  flex: none;
+  width: 0.875rem;
+  height: 0.875rem;
+  margin: 0;
+  border: 1px solid;
+  border-color: #6e6e6e #9c9c9c #9c9c9c #6e6e6e;
+  border-radius: 1px;
+  background: linear-gradient(135deg, #e6e6e6, #ffffff 60%);
+}
+.theme-is-haiku input[type="radio"] {
+  border-radius: 50%;
+}
+.theme-is-haiku input:is([type="checkbox"], [type="radio"]):hover {
+  border-color: #4a4a4a;
+}
+.theme-is-haiku input[type="checkbox"]:checked {
+  background: var(--hk-check) center / 85% no-repeat, linear-gradient(135deg, #e6e6e6, #ffffff 60%);
+}
+.theme-is-haiku input[type="radio"]:checked {
+  background: radial-gradient(circle, #1f3f9e 0 2.5px, #4f72c9 3px, transparent 3.5px), linear-gradient(135deg, #e6e6e6, #ffffff 60%);
+}
+.theme-is-haiku input:is([type="checkbox"], [type="radio"]):focus-visible {
+  outline: 1px solid var(--hk-focus);
+  outline-offset: 2px;
+}
+/* Switches, which Haiku doesn't have: a slider's sunken groove, blue when
+   on, and its grey knob. */
+.theme-is-haiku button[role="switch"] > span:last-child {
+  border: 1px solid;
+  border-color: #8a8a8a #c4c4c4 #c4c4c4 #8a8a8a;
+  background: #c4c4c4;
+}
+.theme-is-haiku button[role="switch"][aria-checked="true"] > span:last-child {
+  background: linear-gradient(#5a86c8, #3c6db5);
+}
+.theme-is-haiku button[role="switch"] > span:last-child > span {
+  border: 1px solid #6e6e6e;
+  border-radius: 3px;
+  background: var(--hk-button);
+  box-shadow: inset 0 1px #ffffff;
+}
+
+/* Panels: Haiku's etched boxes, a dark line with a light one beside it,
+   on the window's grey. Library tiles: white, like Tracker's list. */
+.theme-is-haiku [data-slot="card"] {
+  border: 1px solid #a0a0a0;
+  border-radius: 2px;
+  background: transparent;
+  box-shadow: inset 1px 1px #f6f6f6, 1px 1px #f6f6f6;
+  --tw-ring-shadow: 0 0 #0000;
+}
+.theme-is-haiku [data-slot="card-title"] {
+  color: #000000;
+  font-family: var(--hk-font);
+  font-size: 0.9375rem;
+  font-weight: 700;
+}
+.theme-is-haiku [data-slot="card-footer"] {
+  border-top: 1px solid #a0a0a0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: inset 0 1px #f6f6f6;
+}
+.theme-is-haiku .surface:not([data-slot="card"]) {
+  border: 1px solid #9c9c9c;
+  border-radius: 2px;
+  background: #ffffff;
+  box-shadow: none;
+}
+.theme-is-haiku .surface:not([data-slot="card"]):hover {
+  border-color: #336698;
+  background: #eef3f9;
+  box-shadow: inset 0 0 0 1px #336698;
+  transform: none;
+}
+.theme-is-haiku .surface .book-cover {
+  border-radius: 0;
+  box-shadow: 1px 1px 0 #6e6e6e, 3px 3px 4px rgb(0 0 0 / 0.18);
+}
+
+/* Tabs: grey, standing on the line they open onto, the open one in front
+   and the colour of what's under it. */
+.theme-is-haiku .shelf-tabs {
+  gap: 0;
+  padding-left: 0.25rem;
+  border-bottom: 1px solid #8a8a8a;
+}
+.theme-is-haiku .shelf-tabs > a,
+.theme-is-haiku [data-slot="tabs-trigger"] {
+  position: relative;
+  margin: 3px 0 -1px;
+  padding: 0.25rem 0.75rem;
+  border: 1px solid #8a8a8a;
+  border-bottom-color: transparent;
+  border-radius: 4px 4px 0 0;
+  color: #000000;
+  background: linear-gradient(#e4e4e4, #cbcbcb);
+  box-shadow: inset 1px 1px #f4f4f4;
+}
+.theme-is-haiku .shelf-tabs > a + a,
+.theme-is-haiku [data-slot="tabs-trigger"] + [data-slot="tabs-trigger"] {
+  margin-left: -1px;
+}
+.theme-is-haiku .shelf-tabs > a:hover,
+.theme-is-haiku [data-slot="tabs-trigger"]:hover {
+  background: linear-gradient(#eeeeee, #d6d6d6);
+}
+.theme-is-haiku .shelf-tabs > a[aria-current="page"],
+.theme-is-haiku [data-slot="tabs-trigger"][data-state="active"] {
+  z-index: 1;
+  margin-top: 0;
+  padding-bottom: 0.375rem;
+  border-color: #8a8a8a #8a8a8a var(--background);
+  font-weight: 400;
+  background: linear-gradient(#f6f6f6, var(--background) 70%);
+}
+.theme-is-haiku .shelf-tabs > a > span {
+  border-radius: 2px;
+  background: rgb(0 0 0 / 0.08);
+}
+.theme-is-haiku [data-slot="tabs-list"] {
+  border-radius: 0;
+  background: transparent;
+  box-shadow: inset 0 -1px #8a8a8a;
+}
+.theme-is-haiku [data-slot="tabs-trigger"]::after {
+  display: none;
+}
+/* Chips: small buttons, the chosen one pressed in. */
+.theme-is-haiku :is(a, button).rounded-full.border:not(.aspect-square, .border-2) {
+  border-color: #8a8a8a;
+  border-radius: 3px;
+  color: #000000;
+  background: var(--hk-button);
+  box-shadow: inset 0 1px #ffffff;
+}
+.theme-is-haiku :is(a, button).rounded-full.border:not(.aspect-square, .border-2):hover {
+  background: var(--hk-button-hover);
+}
+.theme-is-haiku :is(a, button).rounded-full.border:is([class*="border-primary"], [aria-current="page"], [aria-pressed="true"]):not(.aspect-square, .border-2) {
+  border-color: #5c5c5c;
+  background: var(--hk-button-down);
+  box-shadow: inset 1px 1px 2px rgb(0 0 0 / 0.22);
+}
+.theme-is-haiku kbd {
+  border: 1px solid #8a8a8a;
+  border-radius: 3px;
+  color: #000000;
+  background: var(--hk-button);
+}
+
+/* Progress: blue in a sunken trough. */
+.theme-is-haiku :has(> .bar-grow) {
+  height: 0.625rem;
+  border: 1px solid;
+  border-color: #8a8a8a #e6e6e6 #e6e6e6 #8a8a8a;
+  border-radius: 0;
+  background: #f4f4f4;
+}
+.theme-is-haiku .bar-grow {
+  border-radius: 0;
+}
+.theme-is-haiku .bar-grow[class*="primary"] {
+  background: linear-gradient(#8db6e6, #4f86cc 45%, #3a71b8 55%, #3266a8);
+}
+
+/* Menus: grey with a dark edge, the item under the pointer a darker
+   grey. */
+.theme-is-haiku :is([data-slot="dropdown-menu-content"], [data-slot="select-content"], [data-slot="dropdown-menu-sub-content"], [data-slot="popover-content"]) {
+  border: 1px solid var(--hk-edge);
+  border-radius: 0;
+  background: #d8d8d8;
+  box-shadow: inset 1px 1px #f2f2f2, 2px 2px 4px rgb(0 0 0 / 0.28);
+  --tw-ring-shadow: 0 0 #0000;
+}
+.theme-is-haiku :is([data-slot="dropdown-menu-item"], [data-slot="select-item"], [data-slot="dropdown-menu-checkbox-item"], [data-slot="dropdown-menu-radio-item"], [data-slot="dropdown-menu-sub-trigger"]) {
+  border-radius: 0;
+}
+.theme-is-haiku :is([data-slot="dropdown-menu-item"], [data-slot="select-item"], [data-slot="dropdown-menu-checkbox-item"], [data-slot="dropdown-menu-radio-item"], [data-slot="dropdown-menu-sub-trigger"]):is(:focus, [data-highlighted]) {
+  --muted-foreground: #1e1e1e;
+  color: #000000;
+  background: #a9a9a9;
+}
+.theme-is-haiku [data-slot="dropdown-menu-separator"] {
+  background: #9c9c9c;
+  box-shadow: 0 1px #f2f2f2;
+}
+
+/* Dialogs: windows too, the tab naming them and holding the close box. The
+   window is drawn in the box's own background, under the tab's band, so
+   it stays put when a long dialog scrolls. */
+.theme-is-haiku [data-slot="dialog-overlay"] {
+  background: rgb(0 0 0 / 0.16);
+  backdrop-filter: none;
+}
+.theme-is-haiku [data-slot="dialog-content"],
+.theme-is-haiku main:has(> .auth-backdrop) [data-slot="card"] {
+  padding: calc(var(--hk-tab) + var(--hk-frame) + 1rem) calc(var(--hk-frame) + 1.25rem) calc(var(--hk-frame) + 1.25rem);
+  border: 0;
+  border-radius: 0;
+  background:
+    linear-gradient(#d8d8d8, #d8d8d8) var(--hk-frame) calc(var(--hk-tab) + var(--hk-frame)) / calc(100% - 2 * var(--hk-frame)) calc(100% - var(--hk-tab) - 2 * var(--hk-frame)) no-repeat,
+    linear-gradient(var(--hk-frame-dark), var(--hk-frame-dark)) calc(var(--hk-frame) - 1px) calc(var(--hk-tab) + var(--hk-frame) - 1px) / calc(100% - 2 * var(--hk-frame) + 2px) calc(100% - var(--hk-tab) - 2 * var(--hk-frame) + 2px) no-repeat,
+    linear-gradient(var(--hk-frame-mid), var(--hk-frame-mid)) 2px calc(var(--hk-tab) + 2px) / calc(100% - 4px) calc(100% - var(--hk-tab) - 4px) no-repeat,
+    linear-gradient(var(--hk-frame-light), var(--hk-frame-light)) 1px calc(var(--hk-tab) + 1px) / calc(100% - 2px) calc(100% - var(--hk-tab) - 2px) no-repeat,
+    linear-gradient(var(--hk-edge), var(--hk-edge)) 0 var(--hk-tab) / 100% calc(100% - var(--hk-tab)) no-repeat;
+  box-shadow: none;
+  --tw-ring-shadow: 0 0 #0000;
+}
+/* A dialog's title is its tab. */
+.theme-is-haiku [data-slot="dialog-content"] > [data-slot="dialog-header"]:first-child > [data-slot="dialog-title"]:first-child,
+.theme-is-haiku main:has(> .auth-backdrop) [data-slot="card"]::before {
+  position: absolute;
+  top: 0;
+  left: 0;
+  box-sizing: border-box;
+  max-width: 100%;
+  height: calc(var(--hk-tab) + 1px);
+  padding: 0 2rem 0 1.9375rem;
+  overflow: hidden;
+  border: 1px solid var(--hk-edge);
+  border-bottom: 0;
+  color: #000000;
+  font: 700 0.8125rem/var(--hk-tab) var(--hk-font);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  background:
+    var(--hk-zoom) right 0.5rem center / 13px 13px no-repeat,
+    var(--hk-yellow);
+  box-shadow: inset 1px 1px #fff3b8, inset -1px 0 #d9a800;
+}
+/* A dialog with no title of its own: a window with no tab. */
+.theme-is-haiku [data-slot="dialog-content"]:not(:has(> [data-slot="dialog-header"]:first-child > [data-slot="dialog-title"]:first-child)) {
+  --hk-tab: 0px;
+}
+.theme-is-haiku [data-slot="dialog-content"] > [data-slot="dialog-close"][data-size] {
+  top: calc((var(--hk-tab) - 13px) / 2 + 1px);
+  right: auto;
+  left: calc(0.5rem + 1px);
+  width: 13px;
+  height: 13px;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: var(--hk-close) center / 13px 13px no-repeat;
+  box-shadow: none;
+  opacity: 1;
+}
+.theme-is-haiku [data-slot="dialog-content"] > [data-slot="dialog-close"][data-size]:is(:hover, :active) {
+  border: 0;
+  background: var(--hk-close) center / 13px 13px no-repeat;
+}
+.theme-is-haiku [data-slot="dialog-content"] > [data-slot="dialog-close"] svg {
+  display: none;
+}
+.theme-is-haiku [data-slot="dialog-content"]:not(:has(> [data-slot="dialog-header"]:first-child > [data-slot="dialog-title"]:first-child)) > [data-slot="dialog-close"][data-size] {
+  top: calc(var(--hk-frame) + 0.5rem);
+  right: calc(var(--hk-frame) + 0.5rem);
+  left: auto;
+}
+.theme-is-haiku [data-slot="dialog-footer"] {
+  border-top: 0;
+  border-radius: 0;
+  background: transparent;
+}
+.theme-is-haiku .bulk-bar {
+  border: 1px solid var(--hk-edge);
+  border-radius: 0;
+  background: var(--background);
+  box-shadow:
+    inset 0 0 0 1px var(--hk-frame-light),
+    inset 0 0 0 calc(var(--hk-frame) - 2px) var(--hk-frame-mid),
+    inset 0 0 0 calc(var(--hk-frame) - 1px) var(--hk-frame-dark),
+    3px 3px 10px rgb(0 0 0 / 0.3);
+}
+
+/* Scrollbars: a grey trough, a grey thumb with grip lines. */
+[data-theme="haiku"]::-webkit-scrollbar,
+.theme-is-haiku ::-webkit-scrollbar {
+  width: 14px;
+  height: 14px;
+}
+[data-theme="haiku"]::-webkit-scrollbar-track,
+.theme-is-haiku ::-webkit-scrollbar-track {
+  background: linear-gradient(90deg, #a8a8a8, #c4c4c4 3px, #cccccc);
+}
+[data-theme="haiku"]::-webkit-scrollbar-thumb,
+.theme-is-haiku ::-webkit-scrollbar-thumb {
+  border: 1px solid #7a7a7a;
+  border-radius: 2px;
+  background:
+    repeating-linear-gradient(transparent 0 2px, #8a8a8a 2px 3px, #ffffff 3px 4px) center / 6px 10px no-repeat,
+    linear-gradient(90deg, #f6f6f6, #dcdcdc);
+}
+[data-theme="haiku"]::-webkit-scrollbar-thumb:horizontal,
+.theme-is-haiku ::-webkit-scrollbar-thumb:horizontal {
+  background:
+    repeating-linear-gradient(90deg, transparent 0 2px, #8a8a8a 2px 3px, #ffffff 3px 4px) center / 10px 6px no-repeat,
+    linear-gradient(#f6f6f6, #dcdcdc);
+}
+[data-theme="haiku"]::-webkit-scrollbar-corner,
+.theme-is-haiku ::-webkit-scrollbar-corner {
+  background: #d8d8d8;
+}
+
+/* The sign-in pages: a window on the blue desktop, with no Deskbar. */
+.theme-is-haiku .auth-backdrop {
+  display: none;
+}
+.theme-is-haiku main:has(> .auth-backdrop) .wordmark {
+  color: #ffffff;
+  font-family: var(--hk-font);
+  font-weight: 700;
+  text-shadow: 1px 1px 0 rgb(0 0 0 / 0.35);
+}
+.theme-is-haiku main:has(> .auth-backdrop) > .grid > svg {
+  color: #ffcb00;
+}
+.theme-is-haiku main:has(> .auth-backdrop) > .grid > svg .auth-shelf-board {
+  fill: #e8e8e8;
+}
+.theme-is-haiku main:has(> .auth-backdrop) [data-slot="card"] {
+  position: relative;
+  padding-inline: var(--hk-frame);
+}
+.theme-is-haiku main:has(> .auth-backdrop) [data-slot="card"]::before {
+  content: "MyReads";
+  content: "MyReads" / "";
+  background:
+    var(--hk-close) left 0.5rem center / 13px 13px no-repeat,
+    var(--hk-zoom) right 0.5rem center / 13px 13px no-repeat,
+    var(--hk-yellow);
+}
+.theme-is-haiku main:has(> .auth-backdrop) [data-slot="card"] > [data-slot="card-header"]:first-child {
+  margin-top: 0;
+  padding-top: 0;
+}
+/* The palette button, alone on the desktop: white until it's pointed at. */
+.theme-is-haiku .auth-corner [data-size][data-variant="ghost"]:not(:hover, [aria-expanded="true"]) {
+  color: #ffffff;
 }
