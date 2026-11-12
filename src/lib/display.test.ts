@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   formatDate,
   formatFileSize,
+  formatLongDay,
   formatNumber,
   formatShortDay,
   formatWeekdayDay,
@@ -107,5 +108,18 @@ describe("formatShortDay", () => {
   it("abbreviates for a menu", () => {
     expect(formatShortDay("2026-10-10")).toBe("Sat 10 Oct");
     expect(formatShortDay("2026-10-10", "mmm-d-y")).toBe("Sat, Oct 10");
+  });
+
+  it("can add the year", () => {
+    expect(formatShortDay("2025-11-04", undefined, true)).toBe("Tue 4 Nov 2025");
+    expect(formatShortDay("2025-11-04", "mm/dd/y", true)).toBe("Tue, Nov 4, 2025");
+  });
+});
+
+describe("formatLongDay", () => {
+  it("writes the day out in full", () => {
+    expect(formatLongDay("2025-11-04")).toBe("Tuesday 4 November 2025");
+    expect(formatLongDay("2025-11-04", "mmm-d-y")).toBe("Tuesday, November 4, 2025");
+    expect(formatLongDay("2025-11-04", "iso")).toBe("Tuesday 4 November 2025");
   });
 });

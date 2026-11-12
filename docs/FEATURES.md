@@ -191,9 +191,13 @@ page by page.
 
 ## Stats
 
-- Books read per year, pages read, ratings, genres and formats, and a
-  calendar of the days you read. Look at all time, this year, the last 12
-  months or the last 30 days.
+- Books read per year, pages read, ratings, genres and formats. Look at
+  all time, this year, the last 12 months or the last 30 days.
+- **Reading days:** a calendar with a square for every day, darker the
+  more you read. It shows the last 12 months or any year you read in, and
+  can go by pages or, with the timer, by time. Above it are your current
+  and longest streaks: point at one (or tap it) and its days light up.
+  Tap a day to see the books you read that day.
 - **Reading habits:** which days of the week you read most, pages on an
   average reading day, how long a book takes you from start to finish, and
   with the timer your average sitting and pages an hour.

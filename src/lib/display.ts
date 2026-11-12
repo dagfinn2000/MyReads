@@ -169,10 +169,21 @@ export function formatWeekdayDay(d: Date, prefs?: FormatPrefs): string {
   return monthFirst(prefs?.dateFormat) ? `${weekday}, ${month} ${day}` : `${weekday} ${day} ${month}`;
 }
 
-/** A recent day in a short menu: "Sat 10 Oct", or "Sat, Oct 10". */
-export function formatShortDay(key: string, format?: DateFormat): string {
-  const [, m, day] = key.split("-").map(Number);
+/** A recent day in a short menu: "Sat 10 Oct", or "Sat, Oct 10". With
+ *  the year: "Sat 10 Oct 2026", or "Sat, Oct 10, 2026". */
+export function formatShortDay(key: string, format?: DateFormat, withYear = false): string {
+  const [y, m, day] = key.split("-").map(Number);
   const weekday = WEEKDAYS[keyToUtcDate(key).getUTCDay()].slice(0, 3);
   const month = MONTHS_SHORT[m - 1];
-  return monthFirst(format) ? `${weekday}, ${month} ${day}` : `${weekday} ${day} ${month}`;
+  if (monthFirst(format)) return `${weekday}, ${month} ${day}${withYear ? `, ${y}` : ""}`;
+  return `${weekday} ${day} ${month}${withYear ? ` ${y}` : ""}`;
+}
+
+/** A day written out in full: "Tuesday 4 November 2025", or "Tuesday,
+ *  November 4, 2025" for the month-first date styles. */
+export function formatLongDay(key: string, format?: DateFormat): string {
+  const [y, m, day] = key.split("-").map(Number);
+  const weekday = WEEKDAYS[keyToUtcDate(key).getUTCDay()];
+  const month = MONTHS_LONG[m - 1];
+  return monthFirst(format) ? `${weekday}, ${month} ${day}, ${y}` : `${weekday} ${day} ${month} ${y}`;
 }

@@ -2,15 +2,27 @@ import type { HeatmapScale } from "@/lib/preferences";
 
 /**
  * Colour steps for the reading calendar: a day with at least t[0] pages
- * gets the second shade, t[1] the third, t[2] the darkest. Any reading at
- * all gets the first shade.
+ * (or minutes) gets the second shade, t[1] the third, t[2] the darkest. Any
+ * reading at all gets the first shade.
  */
 export type Thresholds = [number, number, number];
 
-const FIXED: Record<Exclude<HeatmapScale, "auto">, Thresholds> = {
-  standard: [20, 50, 100],
-  gentle: [10, 25, 50],
-  heavy: [50, 100, 200],
+/** What the calendar is shaded by: pages logged, or time read with the
+ *  timer. */
+export type HeatmapUnit = "pages" | "minutes";
+
+const FIXED: Record<HeatmapUnit, Record<Exclude<HeatmapScale, "auto">, Thresholds>> = {
+  pages: {
+    standard: [20, 50, 100],
+    gentle: [10, 25, 50],
+    heavy: [50, 100, 200],
+  },
+  // A quarter of an hour, half an hour, an hour.
+  minutes: {
+    standard: [15, 30, 60],
+    gentle: [10, 20, 30],
+    heavy: [30, 60, 120],
+  },
 };
 
 /**
@@ -22,10 +34,12 @@ const FIXED: Record<Exclude<HeatmapScale, "auto">, Thresholds> = {
 export function heatmapThresholds(
   scale: HeatmapScale,
   dayTotals: Iterable<number>,
+  unit: HeatmapUnit = "pages",
 ): Thresholds {
-  if (scale !== "auto") return FIXED[scale] ?? FIXED.standard;
+  const fixed = FIXED[unit];
+  if (scale !== "auto") return fixed[scale] ?? fixed.standard;
   const days = [...dayTotals].filter((p) => p > 0).sort((a, b) => a - b);
-  if (days.length === 0) return FIXED.standard;
+  if (days.length === 0) return fixed.standard;
   const median = days[Math.floor(days.length / 2)];
   const half = Math.max(1, Math.round(median / 2));
   const typical = Math.max(half + 1, Math.round(median));
@@ -42,12 +56,13 @@ export function heatmapLevel(pages: number, t: Thresholds): number {
 }
 
 /** Tooltip for each legend shade, lightest first. */
-export function heatmapLegend(t: Thresholds): string[] {
+export function heatmapLegend(t: Thresholds, unit: HeatmapUnit = "pages"): string[] {
+  const u = unit === "pages" ? "pages" : "min";
   return [
     "No reading",
-    `Under ${t[0]} pages`,
-    `${t[0]}–${t[1] - 1} pages`,
-    `${t[1]}–${t[2] - 1} pages`,
-    `${t[2]}+ pages`,
+    `Under ${t[0]} ${u}`,
+    `${t[0]}–${t[1] - 1} ${u}`,
+    `${t[1]}–${t[2] - 1} ${u}`,
+    `${t[2]}+ ${u}`,
   ];
 }

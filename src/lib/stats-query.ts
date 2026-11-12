@@ -136,31 +136,35 @@ export async function loadStatsInputs(
   return { books, reads, logDays, lastLogDates };
 }
 
-/** Minutes read on one day, from audiobooks or from the rest. */
+/** Minutes read on one day in one book. */
 export interface DayMinutes {
   /** "2026-05-12", in the reader's zone. */
   day: string;
+  bookId: string;
   audiobook: boolean;
   minutes: number;
 }
 
 /**
- * Minutes read per calendar day in the reader's zone, from the log entries
- * that carry a time (the reading timer, or a time typed in), with
- * audiobooks apart so Stats can leave them out (Preferences > What counts)
- * while the daily goal counts them. Untimed entries are left out, so a
- * reader who never times anything gets nothing back.
+ * Minutes read per calendar day and book in the reader's zone, from the
+ * log entries that carry a time (the reading timer, or a time typed in),
+ * marked by whether the book is an audiobook so Stats can leave those out
+ * (Preferences > What counts) while the daily goal counts them. Untimed
+ * entries are left out, so a reader who never times anything gets nothing
+ * back. Most callers only want each day's total (dayMinuteTotals); the
+ * reading calendar also says which book the time went to.
  */
 export async function minutesByDayForUser(userId: string, timeZone: string): Promise<DayMinutes[]> {
   return prisma.$queryRaw<DayMinutes[]>`
     SELECT
       to_char((pe."date" AT TIME ZONE 'UTC') AT TIME ZONE ${timeZone}, 'YYYY-MM-DD') AS day,
+      pe."bookId" AS "bookId",
       (b."format" = 'AUDIOBOOK') AS audiobook,
       SUM(pe."minutes")::int AS minutes
     FROM "ProgressEntry" pe
     JOIN "Book" b ON b."id" = pe."bookId"
     WHERE b."userId" = ${userId} AND pe."minutes" IS NOT NULL
-    GROUP BY 1, 2
+    GROUP BY 1, 2, 3
   `;
 }
 

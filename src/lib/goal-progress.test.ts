@@ -36,9 +36,9 @@ describe("goalReadingDays", () => {
     { bookId: "audio", day: "2026-10-04", pages: 30, current: true },
   ];
   const minutes = [
-    { day: "2026-10-02", audiobook: false, minutes: 0 },
-    { day: "2026-10-03", audiobook: false, minutes: 15 },
-    { day: "2026-10-05", audiobook: true, minutes: 40 },
+    { day: "2026-10-02", bookId: "paper", audiobook: false, minutes: 0 },
+    { day: "2026-10-03", bookId: "paper", audiobook: false, minutes: 15 },
+    { day: "2026-10-05", bookId: "audio", audiobook: true, minutes: 40 },
   ];
   const audio = new Set(["audio"]);
 
