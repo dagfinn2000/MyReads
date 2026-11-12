@@ -27,7 +27,9 @@ server.
   Ebooks can also go by percent, and audiobooks by time listened.
 - Time your reading, set a daily goal in pages or minutes, get a reminder
   at a time you choose, and keep your own list of what to read next.
-- Save quotes, or import your Kindle highlights.
+- Write notes as you read, tied to a page or a chapter, and save quotes
+  or import your Kindle highlights. A book's page lays them out in the
+  order of the book.
 
 **Organise your library**
 

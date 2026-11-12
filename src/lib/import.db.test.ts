@@ -58,6 +58,48 @@ describe("importLibrary", () => {
     }
   });
 
+  it("restores notes and chapters, and drops a chapter it can't use rather than the book", async () => {
+    const res = await importLibrary(
+      userId,
+      payload([
+        book({
+          quotes: [
+            { text: "Life before death.", page: 42, chapter: "  Chapter  4 " },
+            { text: "Strength before weakness.", chapter: "c".repeat(500) },
+            { text: "Journey before destination.", chapter: 7 },
+          ],
+          notes: [
+            { text: "  A thought  ", page: 10, chapter: "Prologue", createdAt: "2026-01-02T10:00:00.000Z" },
+            { text: "" }, // nothing to keep
+          ],
+        }),
+      ]),
+    );
+    // A note with no text is dropped on its own.
+    expect(res).toMatchObject({ booksCreated: 1, quotesRestored: 3, notesRestored: 1 });
+
+    const restored = await prisma.book.findFirstOrThrow({
+      where: { userId },
+      include: { quotes: { orderBy: { text: "asc" } }, notes: true },
+    });
+    expect(restored.quotes.map((q) => [q.text, q.chapter])).toEqual([
+      ["Journey before destination.", null],
+      ["Life before death.", "Chapter 4"],
+      ["Strength before weakness.", null],
+    ]);
+    expect(restored.notes).toHaveLength(1);
+    expect(restored.notes[0]).toMatchObject({ text: "A thought", page: 10, chapter: "Prologue" });
+    expect(restored.notes[0].createdAt.toISOString()).toBe("2026-01-02T10:00:00.000Z");
+
+    // An older backup has no notes at all, and no chapters.
+    await prisma.book.deleteMany({ where: { userId } });
+    const older = await importLibrary(
+      userId,
+      payload([book({ quotes: [{ text: "Life before death.", page: 42 }] })]),
+    );
+    expect(older).toMatchObject({ booksCreated: 1, quotesRestored: 1, notesRestored: 0 });
+  });
+
   it("restores a book with its quotes, reads and progress", async () => {
     const res = await importLibrary(
       userId,

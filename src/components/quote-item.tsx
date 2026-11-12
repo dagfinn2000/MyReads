@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Pencil } from "lucide-react";
+import { chapterLabel } from "@/lib/book-notes";
 import { formatDate } from "@/lib/display";
 import { BookCover } from "@/components/book-card";
 import { usePreferences } from "@/components/preferences-provider";
@@ -15,6 +16,7 @@ export interface QuoteItemQuote {
   id: string;
   text: string;
   page: number | null;
+  chapter: string | null;
   note: string | null;
   createdAt: Date;
   book: { id: string; title: string; authors: string[]; coverUrl: string | null };
@@ -43,6 +45,10 @@ export function QuoteItem({ quote, showBook }: { quote: QuoteItemQuote; showBook
   }, [editing]);
 
   const added = `added ${formatDate(quote.createdAt, prefs)}`;
+  // Where in the book: its page and chapter, either or both.
+  const place = [quote.page != null ? `p. ${quote.page}` : null, chapterLabel(quote.chapter)]
+    .filter(Boolean)
+    .join(" · ");
 
   return (
     <Card>
@@ -76,14 +82,14 @@ export function QuoteItem({ quote, showBook }: { quote: QuoteItemQuote; showBook
                     </span>
                     <span className="block truncate text-xs text-muted-foreground">
                       {quote.book.authors.join(", ")}
-                      {quote.page != null && ` · p. ${quote.page}`}
+                      {place && ` · ${place}`}
                       {` · ${added}`}
                     </span>
                   </span>
                 </Link>
               ) : (
                 <p className="min-w-0 flex-1 truncate text-xs text-muted-foreground tabular-nums">
-                  {quote.page != null ? `p. ${quote.page} · ${added}` : added}
+                  {place ? `${place} · ${added}` : added}
                 </p>
               )}
               <span className="flex shrink-0 items-center gap-1">

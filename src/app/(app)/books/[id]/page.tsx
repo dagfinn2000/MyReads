@@ -28,7 +28,7 @@ import { BookShelvesCard } from "@/components/book-shelves-card";
 import { CloseBookButton } from "@/components/close-book-button";
 import { DeleteBookButton } from "@/components/delete-book-button";
 import { FindItAt } from "@/components/find-it-at";
-import { QuotesCard } from "@/components/quotes-card";
+import { BookNotesCard } from "@/components/book-notes-card";
 import { LendingCard } from "@/components/lending-card";
 import { showsLendingCard } from "@/lib/loans";
 import { ReadHistoryCard } from "@/components/read-history-card";
@@ -70,9 +70,9 @@ export default async function BookDetailPage({
     omit: { searchText: true, reviewSearchText: true, fieldSearchText: true },
     include: {
       shelves: { select: { id: true } },
-      quotes: {
-        orderBy: [{ page: { sort: "asc", nulls: "last" } }, { createdAt: "asc" }],
-      },
+      // Both laid out in book order by the Notes & quotes card.
+      quotes: true,
+      notes: true,
       // Oldest pass first; undated reads are presumed oldest.
       reads: {
         orderBy: [
@@ -147,13 +147,27 @@ export default async function BookDetailPage({
     lending: showsLendingCard(book.ownership, book.loans.length) ? (
       <LendingCard bookId={book.id} ownership={book.ownership} loans={book.loans} />
     ) : null,
-    quotes: <QuotesCard book={book} quotes={book.quotes} />,
+    quotes: (
+      <BookNotesCard
+        book={{
+          id: book.id,
+          title: book.title,
+          authors: book.authors,
+          coverUrl: book.coverUrl,
+          pageCount: book.pageCount,
+          currentPage: book.currentPage,
+          status: book.status,
+        }}
+        quotes={book.quotes}
+        notes={book.notes}
+      />
+    ),
   };
   const arranged = arrangeBookCards(prefs, {
     reading: book.status === ReadingStatus.READING || !!book.review?.trim(),
     history: book.reads.length > 0,
     lending: book.loans.some((l) => l.returnedAt === null),
-    quotes: book.quotes.length > 0,
+    quotes: book.quotes.length > 0 || book.notes.length > 0,
   });
 
   return (

@@ -38,7 +38,7 @@ export function DeleteAccount({ bookCount }: { bookCount: number }) {
         <TriangleAlert className="mt-0.5 size-4 shrink-0" />
         <span>
           This permanently deletes your account and all {bookCount} book
-          {bookCount === 1 ? "" : "s"} — reading history, quotes, shelves,
+          {bookCount === 1 ? "" : "s"} — reading history, notes, quotes, shelves,
           goals, covers, everything. There is no undo. Consider downloading a
           backup first.
         </span>

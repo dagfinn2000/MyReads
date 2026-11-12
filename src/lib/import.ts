@@ -21,6 +21,7 @@ import { customStatusOf } from "@/lib/statuses";
 import { cleanFieldValues } from "@/lib/book-fields";
 import { fieldColumns } from "@/lib/field-values";
 import { MAX_ENTRY_MINUTES } from "@/lib/reading-time";
+import { CHAPTER_MAX, tidyChapter } from "@/lib/book-notes";
 import {
   MAX_SAVED_VIEWS,
   SAVED_VIEW_NAME_MAX,
@@ -75,12 +76,32 @@ const dateField = z
     return Number.isNaN(d.getTime()) ? null : d;
   });
 
+/** A quote's or a note's chapter: additive, and one too long to be a
+ *  chapter is dropped rather than costing the book. */
+const importedChapter = z
+  .string()
+  .nullable()
+  .optional()
+  .transform((s) => tidyChapter(s))
+  .refine((s) => s === null || s.length <= CHAPTER_MAX)
+  .catch(null);
+
 /** Quotes are additive (version-1 exports without them parse to []). */
 const importedQuoteSchema = z.object({
   text: z.string().trim().min(1).max(5000),
   page: z.number().int().min(0).max(100000).nullable().optional().catch(null),
+  chapter: importedChapter,
   note: z.string().trim().max(2000).nullable().optional(),
   createdAt: dateField,
+});
+
+/** The reader's own notes on a book: additive too. */
+const importedNoteSchema = z.object({
+  text: z.string().trim().min(1).max(5000),
+  page: z.number().int().min(0).max(100000).nullable().optional().catch(null),
+  chapter: importedChapter,
+  createdAt: dateField,
+  updatedAt: dateField,
 });
 
 /** Past reads are additive too (exports without them parse to []). */
@@ -160,6 +181,17 @@ const importedBookSchema = z.object({
   fields: z.unknown().optional(),
   shelves: shelfNames,
   quotes: z.array(importedQuoteSchema).catch([]),
+  // One by one, like shelf names: a note that won't do is dropped on its
+  // own rather than taking the book's other notes with it.
+  notes: z
+    .array(z.unknown())
+    .catch([])
+    .transform((notes) =>
+      notes.flatMap((note) => {
+        const parsed = importedNoteSchema.safeParse(note);
+        return parsed.success ? [parsed.data] : [];
+      }),
+    ),
   reads: z.array(importedReadSchema).catch([]),
   progress: z.array(importedProgressSchema).catch([]),
   loans: z.array(importedLoanSchema).catch([]),
@@ -271,6 +303,7 @@ export interface ImportSummary {
   settingsRestored: boolean;
   coversRestored: number;
   quotesRestored: number;
+  notesRestored: number;
   readsRestored: number;
   progressRestored: number;
   loansRestored: number;
@@ -593,6 +626,7 @@ export async function importLibrary(
   let booksCreated = 0;
   let coversRestored = 0;
   let quotesRestored = 0;
+  let notesRestored = 0;
   let readsRestored = 0;
   let progressRestored = 0;
   let loansRestored = 0;
@@ -672,9 +706,19 @@ export async function importLibrary(
         quotes: {
           create: b.quotes.map((q) => ({
             text: q.text,
-            page: q.page ?? null,
+            page: q.page || null,
+            chapter: q.chapter,
             note: q.note ?? null,
             ...(q.createdAt && { createdAt: q.createdAt }),
+          })),
+        },
+        notes: {
+          create: b.notes.map((n) => ({
+            text: n.text,
+            page: n.page || null,
+            chapter: n.chapter,
+            ...(n.createdAt && { createdAt: n.createdAt }),
+            ...(n.updatedAt && { updatedAt: n.updatedAt }),
           })),
         },
         reads: {
@@ -712,6 +756,7 @@ export async function importLibrary(
     if (cover.restored) coversRestored++;
     booksCreated++;
     quotesRestored += b.quotes.length;
+    notesRestored += b.notes.length;
     readsRestored += pastReads.length;
     progressRestored += b.progress.filter((e) => e.date != null).length;
     loansRestored += b.loans.length;
@@ -742,6 +787,7 @@ export async function importLibrary(
     settingsRestored,
     coversRestored,
     quotesRestored,
+    notesRestored,
     readsRestored,
     progressRestored,
     loansRestored,

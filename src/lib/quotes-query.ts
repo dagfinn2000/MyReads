@@ -14,6 +14,7 @@ const quoteRowSelect = {
   id: true,
   text: true,
   page: true,
+  chapter: true,
   note: true,
   createdAt: true,
   bookId: true,
@@ -44,6 +45,7 @@ export function buildQuoteWhere(
         // accent-insensitively, like the library search.
         { text: { contains: escapeLike(p.q), mode: "insensitive" as const } },
         { note: { contains: escapeLike(p.q), mode: "insensitive" as const } },
+        { chapter: { contains: escapeLike(p.q), mode: "insensitive" as const } },
         { book: { is: { AND: terms.map((t) => ({ searchText: { contains: t } })) } } },
       ],
     }),

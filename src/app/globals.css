@@ -4542,6 +4542,30 @@ html[data-covers="plain"] .drawn-cover {
   transform-origin: bottom;
   animation: bar-rise 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
 }
+/* Notes & quotes on a book (components/book-notes-card.tsx). A quote's
+   mark is a bookmark with a notch cut in its foot; on the strip of the book
+   the marks drop into place one after another as the page opens, and the
+   one picked from the strip glows a moment in the list. */
+.strip-bookmark {
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 72%, 0 100%);
+}
+@keyframes strip-mark-in {
+  from {
+    opacity: 0;
+    transform: translateY(-7px) scale(0.5);
+  }
+}
+.strip-mark {
+  animation: strip-mark-in 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+  animation-delay: calc(0.15s + var(--i, 0) * 35ms);
+}
+.timeline-entry {
+  transition: background-color 0.6s ease-out;
+}
+.timeline-entry[data-flash] {
+  background-color: color-mix(in oklab, var(--primary) 12%, transparent);
+  transition-duration: 0.15s;
+}
 .gold-medal-in {
   animation: medal-in 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
 }

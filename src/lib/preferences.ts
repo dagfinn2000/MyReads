@@ -288,7 +288,7 @@ export const BOOK_PAGE_CARD_LABELS: Record<(typeof BOOK_PAGE_CARDS)[number], str
   reading: "My reading",
   history: "Read history",
   lending: "Lending",
-  quotes: "Quotes",
+  quotes: "Notes & quotes",
 };
 
 /** A long description in full, or its first lines with a More button. */

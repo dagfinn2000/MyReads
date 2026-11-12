@@ -1107,7 +1107,7 @@ export function PreferencesForm({
           </p>
           {prefs.hiddenNav.includes("quotes") && !prefs.hiddenBookPageCards.includes("quotes") && (
             <p className="text-xs text-muted-foreground">
-              The Quotes card still shows on book pages. You can hide it under Book page below.
+              The Notes &amp; quotes card still shows on book pages. You can hide it under Book page below.
             </p>
           )}
         </OrderList>

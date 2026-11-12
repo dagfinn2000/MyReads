@@ -84,7 +84,19 @@ describe("export -> import round trip", () => {
         searchText: "the final empire brandon sanderson mistborn",
         shelves: { connect: { id: shelf.id } },
         quotes: {
-          create: [{ text: "There's always another secret.", page: 500, note: "!" }],
+          create: [{ text: "There's always another secret.", page: 500, chapter: "38", note: "!" }],
+        },
+        notes: {
+          create: [
+            {
+              text: "Kelsier knows more than he says.",
+              page: 120,
+              chapter: "Chapter 9",
+              createdAt: new Date("2026-01-05T20:00:00.000Z"),
+              updatedAt: new Date("2026-01-06T08:00:00.000Z"),
+            },
+            { text: "Reread the epigraphs.", createdAt: new Date("2026-01-20T21:00:00.000Z") },
+          ],
         },
         reads: {
           create: [
@@ -125,6 +137,7 @@ describe("export -> import round trip", () => {
       booksInvalid: 0,
       shelvesCreated: 1,
       quotesRestored: 1,
+      notesRestored: 2,
       readsRestored: 1,
       progressRestored: 2,
       loansRestored: 2,
@@ -133,7 +146,14 @@ describe("export -> import round trip", () => {
 
     const restored = await prisma.book.findFirstOrThrow({
       where: { userId: targetUserId },
-      include: { shelves: true, quotes: true, reads: true, progress: true, loans: true },
+      include: {
+        shelves: true,
+        quotes: true,
+        notes: { orderBy: { createdAt: "asc" } },
+        reads: true,
+        progress: true,
+        loans: true,
+      },
     });
 
     // Bibliographic data
@@ -162,6 +182,20 @@ describe("export -> import round trip", () => {
     expect(restored.shelves.map((s) => s.name)).toEqual(["Sanderson"]);
     expect(restored.quotes[0].text).toBe("There's always another secret.");
     expect(restored.quotes[0].page).toBe(500);
+    expect(restored.quotes[0].chapter).toBe("38");
+    // Notes, with where they are in the book and when they were written.
+    expect(
+      restored.notes.map((n) => [n.text, n.page, n.chapter, n.createdAt.toISOString(), n.updatedAt.toISOString()]),
+    ).toEqual([
+      [
+        "Kelsier knows more than he says.",
+        120,
+        "Chapter 9",
+        "2026-01-05T20:00:00.000Z",
+        "2026-01-06T08:00:00.000Z",
+      ],
+      ["Reread the epigraphs.", null, null, "2026-01-20T21:00:00.000Z", expect.any(String)],
+    ]);
     expect(restored.reads).toHaveLength(1);
     expect(restored.reads[0].rating).toBe(8);
     expect(restored.reads[0].note).toBe("Read aloud");

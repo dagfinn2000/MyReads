@@ -222,14 +222,27 @@ const NowReadingRow = memo(function NowReadingRow({
           />
           <div className="grid grid-cols-1 gap-1">
             <RecentEntries entries={book.progress} book={book} />
-            {book.progress.length > 0 && (
-              <Link
-                href={`/books/${book.id}#progress-log`}
-                className="justify-self-start text-xs text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
-              >
-                Full log
-              </Link>
-            )}
+            <div className="flex flex-wrap gap-x-3 text-xs text-muted-foreground">
+              {book.progress.length > 0 && (
+                <Link
+                  href={`/books/${book.id}#progress-log`}
+                  className="underline-offset-2 hover:text-foreground hover:underline"
+                >
+                  Full log
+                </Link>
+              )}
+              {/* Opens the book's Notes & quotes card on a new note, its
+                  page box at the page just logged. Not when that card is
+                  hidden, as it then may not be there. */}
+              {!prefs.hiddenBookPageCards.includes("quotes") && (
+                <Link
+                  href={`/books/${book.id}#add-note`}
+                  className="underline-offset-2 hover:text-foreground hover:underline"
+                >
+                  Add a note
+                </Link>
+              )}
+            </div>
           </div>
         </div>
       </CardContent>

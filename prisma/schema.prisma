@@ -266,6 +266,7 @@ model Book {
   fieldSearchText String @default("")
 
   quotes   Quote[]
+  notes    BookNote[]
   reads    Read[]
   progress ProgressEntry[]
   loans    Loan[]
@@ -375,15 +376,39 @@ model Quote {
   bookId String
   book   Book   @relation(fields: [bookId], references: [id], onDelete: Cascade)
 
-  text String
-  page Int?
-  note String?
+  text    String
+  page    Int?
+  /// The chapter it's from, as the reader typed it ("3", "Part Two");
+  /// lib/book-notes.ts matches "3" and "Chapter 3" as one. Null = not said.
+  chapter String?
+  note    String?
 
   createdAt DateTime @default(now())
 
   @@index([bookId])
   /// Quotes are always read newest-first within a book.
   @@index([bookId, createdAt])
+}
+
+/// Something the reader wrote down about a book while reading it: a
+/// thought, a question, a prediction, tied to a page, a chapter, both or
+/// neither. Shown with the book's quotes in book order, along a strip of
+/// the book from first page to last (components/book-notes-card.tsx).
+/// Ownership is derived through the book, as a quote's is.
+model BookNote {
+  id     String @id @default(cuid())
+  bookId String
+  book   Book   @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  text    String
+  page    Int?
+  /// As on a quote: freeform, null = not said.
+  chapter String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([bookId])
 }
 
 /// Caches raw Open Library / Google Books responses so repeated lookups of the

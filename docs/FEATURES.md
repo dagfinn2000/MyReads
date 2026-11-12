@@ -5,7 +5,7 @@ page by page.
 
 - [Adding books](#adding-books)
 - [Reading](#reading)
-- [Quotes](#quotes)
+- [Notes and quotes](#notes-and-quotes)
 - [The library](#the-library)
 - [Stats](#stats)
 - [The reading room](#the-reading-room)
@@ -102,10 +102,25 @@ page by page.
 
 ![Now reading, with the daily goal met, a timer running and the Up next list](now-reading.png)
 
-## Quotes
+## Notes and quotes
 
-- Save favourite quotes with page numbers, and search all of them on the
-  Quotes page.
+- **Notes while you read.** Each book's page has a Notes & quotes card.
+  Write a note (a thought, a question, a guess at what happens next) or
+  save a quote, and give it a page, a chapter, both or neither. While
+  you're reading a book the page box starts at the page you're on, and
+  "Add a note" on Now reading takes you straight there.
+- **In the order of the book.** Notes and quotes line up by page, under
+  the chapters you named. "3", "Ch. 3" and "Chapter 3" count as the same
+  chapter, and the chapter box suggests the ones the book already has. A
+  note with a chapter but no page goes at the end of that chapter, and
+  ones with no page at all come last. All, Notes and Quotes buttons show
+  one kind at a time.
+- **A strip of the book.** Above the list, a bar runs from the first page
+  to the last, with a dot for each note, a bookmark for each quote,
+  chapters shaded in turn, and an arrow at the page you're on. Point at a
+  mark to read it; click it to jump to it in the list.
+- Search all your quotes on the Quotes page, by their text, your note on
+  them, their chapter or the book.
 - **Quote pictures.** The picture button by a quote sets it large with the
   book's title and author under it, to download or, on a phone, share
   straight to another app. Four looks (Paper, Night, the cover's colours
