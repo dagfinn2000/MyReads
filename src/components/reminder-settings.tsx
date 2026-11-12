@@ -71,7 +71,7 @@ async function currentSubscription(): Promise<PushSubscription | null> {
  * Preferences › Reading reminders, the browsers part: turning them on or
  * off in this one, and the list of every browser that has them on, each
  * with a test and a way to stop them there. A browser turns them on by
- * subscribing with its own push service (push-sw.js shows them).
+ * subscribing with its own push service (public/sw.js shows them).
  */
 export function ReminderDevices({
   devices,
@@ -118,7 +118,12 @@ export function ReminderDevices({
         return;
       }
       const key = base64UrlToBytes(res.key);
-      const reg = await navigator.serviceWorker.register("/push-sw.js", { scope: "/" });
+      // The app's own service worker shows them. It's there already in a
+      // production build; a development server doesn't register one, so
+      // reminders get it without keeping pages.
+      const reg =
+        (await navigator.serviceWorker.getRegistration("/")) ??
+        (await navigator.serviceWorker.register("/sw.js", { scope: "/" }));
       await navigator.serviceWorker.ready;
       let sub = await reg.pushManager.getSubscription();
       // Subscribed to another key (the server's was made again): start over.

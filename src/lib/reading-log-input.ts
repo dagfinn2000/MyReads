@@ -42,11 +42,16 @@ const minutesField = z
   .min(1, "Give at least a minute")
   .max(MAX_ENTRY_MINUTES, "That's more than a day of reading");
 
+/** The id a browser gives a log it makes (lib/outbox.ts), so the same log
+ *  sent twice is written once. */
+export const clientIdSchema = z.string().regex(/^[A-Za-z0-9_-]{16,64}$/, "Invalid input");
+
 export const logPageSchema = z.object({
   page: pageField,
   day: dayChoiceSchema.default("today"),
   value: typedValue,
   minutes: minutesField.optional(),
+  clientId: clientIdSchema.optional(),
 });
 
 export const editEntrySchema = z.object({

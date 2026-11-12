@@ -2,10 +2,11 @@
 
 import { Suspense, memo, useCallback, useEffect, useRef, useState, useTransition } from "react";
 import Link from "next/link";
-import { Hourglass } from "lucide-react";
+import { CloudUpload, Hourglass } from "lucide-react";
 import { undoMoveFromReading } from "@/lib/actions/progress";
 import { dayKey } from "@/lib/dates";
 import { lastReadText } from "@/lib/on-this-day";
+import { pendingPage, removeFromOutbox, type OutboxItem, type SentResult } from "@/lib/outbox";
 import { nowReadingPaceText } from "@/lib/pace";
 import { currentPassEntries } from "@/lib/progress";
 import { progressFigure, unitFor } from "@/lib/progress-units";
@@ -14,6 +15,7 @@ import type { UndoMove } from "@/lib/reading-log";
 import { usePreferences } from "@/components/preferences-provider";
 import { BookCover } from "@/components/book-card";
 import { BookLink } from "@/components/book-link";
+import { SENT_EVENT, useOffline, usePendingItems } from "@/components/offline-provider";
 import { RecentEntries, type LogBook } from "@/components/progress-log";
 import { QuickLog, type MovedResult, type QuickLogBook } from "@/components/quick-log";
 import { giveBackTime } from "@/components/reading-timer";
@@ -41,6 +43,11 @@ interface Moved {
  * reader's finger (and losing their focus) would be worse. A book moved to
  * Read or Did Not Finish leaves the page's list, so its row stays here in
  * place as a line with Undo until the visit ends.
+ *
+ * Finished or Stopped without a connection is saved on the device
+ * (lib/outbox.ts): the row becomes a line saying so, whose Undo takes it
+ * back before it's sent. Once it's sent, the line is the usual one, with
+ * the server's Undo.
  */
 export function NowReading({
   books,
@@ -62,6 +69,26 @@ export function NowReading({
   // Rows say "Yesterday" and "Last read 3 days ago": they draw again when
   // the day turns, even if nothing else has changed.
   const today = dayKey(new Date(), usePreferences().timeZone);
+  const offline = useOffline();
+  const queuedMoves = new Map(
+    (offline?.items ?? []).filter((i) => i.kind === "move" && !i.error).map((i) => [i.bookId, i]),
+  );
+  const sentMoves = new Set((offline?.held ?? []).filter((i) => i.kind === "move").map((i) => i.bookId));
+
+  // A Finished or Stopped saved offline has gone: offer the server's Undo.
+  useEffect(() => {
+    const onSent = (e: Event) => {
+      const { written, results } = (e as CustomEvent<{ written: OutboxItem[]; results: SentResult[] }>).detail;
+      for (const item of written) {
+        const result = results.find((r) => r.id === item.id);
+        if (item.kind !== "move" || !result?.ok || !result.undo) continue;
+        const undo = result.undo;
+        setMoved((m) => new Map(m).set(item.bookId, { bookId: item.bookId, message: result.message, undo }));
+      }
+    };
+    window.addEventListener(SENT_EVENT, onSent);
+    return () => window.removeEventListener(SENT_EVENT, onSent);
+  }, []);
 
   const byId = new Map(books.map((b) => [b.id, b]));
   // Books started since the page loaded (another tab, say) go first.
@@ -83,7 +110,16 @@ export function NowReading({
   return (
     <ul className="grid grid-cols-1 gap-3">
       {ids.map((id) => {
-        const book = byId.get(id);
+        const queued = queuedMoves.get(id);
+        if (queued) {
+          return (
+            <li key={id}>
+              <QueuedMoveRow item={queued} onUndone={() => setFocusId(id)} />
+            </li>
+          );
+        }
+        // Just sent: the line with Undo, while the list still has the book.
+        const book = sentMoves.has(id) && moved.has(id) ? undefined : byId.get(id);
         if (book) {
           return (
             <li key={id} className="card-skip card-skip-tall">
@@ -161,20 +197,23 @@ const NowReadingRow = memo(function NowReadingRow({
   const prefs = usePreferences();
   const info = unitFor(book, prefs);
   const pass = currentPassEntries(book.progress, book.dateStarted, prefs.timeZone);
+  // With what this device saved and hasn't sent yet.
+  const saved = usePendingItems(book.id);
+  const kept = [...saved.items, ...saved.held].filter((i) => !i.error);
+  const currentPage = pendingPage(kept, book.id, book.currentPage);
   const pace = nowReadingPaceText({ pass, info, from: prefs.paceFrom, now: new Date(), prefs });
   const speed = speedText(pass, info);
   // Put down for a while? Finished and Stopped are right below. The newest
   // entry, or the start when that's later (a re-read not logged yet).
   const lastEntry = book.progress[book.progress.length - 1]?.date ?? null;
+  const lastKept = kept.length > 0 ? new Date(Math.max(...kept.map((i) => i.at))) : null;
   const quiet = lastReadText(
-    [lastEntry, book.dateStarted].reduce<Date | null>((a, d) => (d && (!a || d > a) ? d : a), null),
+    [lastEntry, book.dateStarted, lastKept].reduce<Date | null>((a, d) => (d && (!a || d > a) ? d : a), null),
     new Date(),
     prefs.timeZone,
   );
   const pct =
-    book.currentPage != null && book.pageCount
-      ? Math.min((book.currentPage / book.pageCount) * 100, 100)
-      : null;
+    currentPage != null && book.pageCount ? Math.min((currentPage / book.pageCount) * 100, 100) : null;
 
   return (
     <Card size="sm">
@@ -208,7 +247,7 @@ const NowReadingRow = memo(function NowReadingRow({
             </div>
           )}
           <div className="flex flex-wrap justify-between gap-x-3 gap-y-0.5 text-xs text-muted-foreground tabular-nums sm:text-sm">
-            <span>{book.currentPage != null ? progressFigure(book.currentPage, info) : "Not started"}</span>
+            <span>{currentPage != null ? progressFigure(currentPage, info) : "Not started"}</span>
             <span className="grid sm:justify-items-end">
               <span>{pace}</span>
               {speed && <span>{speed}</span>}
@@ -286,6 +325,48 @@ function MovedRow({ moved, onUndone }: { moved: Moved; onUndone: () => void }) {
         {pending ? "Undoing…" : "Undo"}
       </Button>
       {error && <span className="w-full text-destructive">{error}</span>}
+    </div>
+  );
+}
+
+/**
+ * A book finished or stopped without a connection: saved on this device
+ * until it's sent. Undo takes it back, and gives the reading timer its
+ * time back.
+ */
+function QueuedMoveRow({ item, onUndone }: { item: OutboxItem; onUndone: () => void }) {
+  const undoRef = useRef<HTMLButtonElement>(null);
+  const offline = useOffline();
+
+  // As with a move that went through: the button pressed went with the row.
+  useEffect(() => {
+    undoRef.current?.focus();
+  }, []);
+
+  const target = item.kind === "move" && item.to === "DNF" ? "Did Not Finish" : "Read";
+  return (
+    <div
+      role="status"
+      className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-xl px-3 py-3 text-sm text-muted-foreground ring-1 ring-foreground/10"
+    >
+      <CloudUpload className="size-4 shrink-0" aria-hidden="true" />
+      <span className="min-w-0 flex-1">
+        {item.title} moves to {target}{" "}
+        {offline?.state === "sending" ? "now." : "once you're back online. It's saved on this device."}
+      </span>
+      <Button
+        ref={undoRef}
+        type="button"
+        variant="ghost"
+        size="sm"
+        onClick={() => {
+          const removed = removeFromOutbox(item.id);
+          if (removed?.minutes) giveBackTime(removed.bookId, removed.minutes);
+          onUndone();
+        }}
+      >
+        Undo
+      </Button>
     </div>
   );
 }

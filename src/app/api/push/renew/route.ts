@@ -4,7 +4,7 @@ import { savePushDevice } from "@/lib/push-devices";
 import { remindersEnabled } from "@/lib/reminders";
 
 /**
- * POST /api/push/renew — from the reminders' service worker (push-sw.js)
+ * POST /api/push/renew — from the service worker (public/sw.js)
  * when the browser's push service moves its subscription to a new address,
  * so reminders keep coming without a visit to Preferences. The body is
  * `{ oldEndpoint, subscription }`; the row for the old address is moved to

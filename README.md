@@ -25,6 +25,8 @@ server.
   the statuses, or add your own, such as Paused.
 - Log the page you're on and see your pace and when you'll finish.
   Ebooks can also go by percent, and audiobooks by time listened.
+- No connection? Keep logging. What you log waits on your phone and is
+  sent by itself when you're back online.
 - Time your reading, set a daily goal in pages or minutes, get a reminder
   at a time you choose, and keep your own list of what to read next.
 - Write notes as you read, tied to a page or a chapter, and save quotes
@@ -75,7 +77,8 @@ server.
   Your settings follow you to every device.
 - The top bar in your own order, keyboard shortcuts, and sounds if you
   want them.
-- Install it on your phone's home screen like an app.
+- Install it on your phone's home screen like an app. It opens offline
+  too.
 
 **Keep it safe**
 
@@ -174,9 +177,9 @@ automatically.
   `DISABLE_REGISTRATION=true` in `.env` and run `docker compose up -d` again
   so nobody else can sign up.
 - **Use HTTPS for the phone features and reminders.** Browsers only allow
-  the barcode camera, reading reminders and installing the app over HTTPS
-  or on `localhost`, so they won't work on a plain `http://192.168.x.x`
-  address. Put MyReads behind a reverse proxy that adds HTTPS, such as
+  the barcode camera, reading reminders, installing the app and opening it
+  offline over HTTPS or on `localhost`, so they won't work on a plain
+  `http://192.168.x.x` address. Put MyReads behind a reverse proxy that adds HTTPS, such as
   Caddy, nginx or Traefik. The barcode camera also needs Chrome or Edge
   (Chrome on Android works). In other browsers, type the ISBN instead.
 - **If you use nginx, let it accept big uploads.** nginx refuses uploads
