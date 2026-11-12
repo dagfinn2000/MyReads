@@ -119,7 +119,7 @@ export default async function AccountPage() {
         </CardHeader>
         <CardContent className="grid gap-3">
           <p className="text-sm text-muted-foreground">
-            Download your library (books, quotes, shelves, goals — cover
+            Download your library (books, notes, quotes, shelves, goals — cover
             images included) as a zip, or restore a backup (zip, or JSON
             from older versions). Restoring merges: books you already have
             are skipped.

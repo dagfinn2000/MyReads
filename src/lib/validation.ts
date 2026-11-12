@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { BookFormat, BookOwnership, ReadingStatus } from "@/lib/enums";
 import { normalizeIsbn } from "@/lib/isbn";
+import { CHAPTER_MAX, tidyChapter } from "@/lib/book-notes";
 
 /**
  * What a stored cover URL may be: a local path ("/api/covers/…") or an
@@ -260,6 +261,19 @@ export const pastReadSchema = z.object({
     .optional(),
 }).superRefine(checkReadDates);
 
+/** Page reference on a quote or a note; empty string/0 means "no page". */
+const entryPage = z.coerce.number().int().min(0).max(100000).nullable().optional().catch(null);
+
+/** The chapter a quote or a note is from, as typed; empty means none. */
+const chapterTooLong = `Keep the chapter to ${CHAPTER_MAX} characters or fewer.`;
+const entryChapter = z
+  .string()
+  .max(2000, chapterTooLong)
+  .transform((s) => tidyChapter(s))
+  .refine((s) => s === null || s.length <= CHAPTER_MAX, chapterTooLong)
+  .nullable()
+  .optional();
+
 /** A quote/highlight from the book detail page. Forms submit strings. */
 export const quoteSchema = z.object({
   text: z
@@ -267,15 +281,8 @@ export const quoteSchema = z.object({
     .trim()
     .min(1, "Quote text is required")
     .max(5000, "Quote must be at most 5000 characters"),
-  /** Page reference; empty string/0 means "no page". */
-  page: z.coerce
-    .number()
-    .int()
-    .min(0)
-    .max(100000)
-    .nullable()
-    .optional()
-    .catch(null),
+  page: entryPage,
+  chapter: entryChapter,
   note: z
     .string()
     .trim()
@@ -283,6 +290,17 @@ export const quoteSchema = z.object({
     .transform((s) => s || null)
     .nullable()
     .optional(),
+});
+
+/** A note of the reader's own on a book, from its Notes & quotes card. */
+export const noteSchema = z.object({
+  text: z
+    .string()
+    .trim()
+    .min(1, "Write the note first.")
+    .max(5000, "Keep the note to 5000 characters or fewer."),
+  page: entryPage,
+  chapter: entryChapter,
 });
 
 /** Highlights from a Kindle's My Clippings.txt, one book's worth (or part

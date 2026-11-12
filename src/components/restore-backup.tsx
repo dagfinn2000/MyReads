@@ -38,6 +38,7 @@ export function RestoreBackup() {
         data.booksInvalid > 0 ? `${data.booksInvalid} invalid` : null,
         data.coversRestored > 0 ? `${n(data.coversRestored, "cover")} restored` : null,
         data.quotesRestored > 0 ? `${n(data.quotesRestored, "quote")} restored` : null,
+        data.notesRestored > 0 ? `${n(data.notesRestored, "note")} restored` : null,
         data.readsRestored > 0 ? `${n(data.readsRestored, "past read")} restored` : null,
         data.progressRestored > 0 ? `${n(data.progressRestored, "progress entry", "progress entries")} restored` : null,
         data.loansRestored > 0 ? `${n(data.loansRestored, "loan")} restored` : null,

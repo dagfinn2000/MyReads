@@ -9,17 +9,17 @@ import { parsePreferences } from "@/lib/preferences";
  * An account's backup zip, made in one place for the Download backup
  * button (/api/export) and the nightly copies on the server, so both are
  * the same file: `library.json` (every book with its shelf names, quotes,
- * read history, reading log and lending records, every shelf, reading
+ * notes, read history, reading log and lending records, every shelf, reading
  * goals, challenges, saved views, and the account's theme, library view
  * and preferences) plus `covers/<file>` for each locally cached cover
  * image, so a restore into a fresh instance brings the covers back too.
  *
- * The JSON inside is still the version-1 export format — quotes, reads,
- * progress, loans, settings, saved views, pages goals, reading-days and
- * monthly goals (`moreGoals`) and challenges are additive
+ * The JSON inside is still the version-1 export format — quotes, notes,
+ * reads, progress, loans, settings, saved views, pages goals, reading-days
+ * and monthly goals (`moreGoals`) and challenges are additive
  * fields (as are a goal's `countRereads`, a book's `lengthMinutes` and
- * `upNextRank`, a past read's `note`, a log entry's `minutes` and a
- * loan's `dueAt`), and `owned` is still written alongside the newer
+ * `upNextRank`, a past read's `note`, a log entry's `minutes`, a quote's
+ * `chapter` and a loan's `dueAt`), and `owned` is still written alongside the newer
  * `ownership` — so unzipping and feeding `library.json` to an older
  * instance keeps working.
  */
@@ -43,7 +43,11 @@ export async function buildBackupZip(userId: string): Promise<BackupZip> {
       include: {
         shelves: { select: { name: true } },
         quotes: {
-          select: { text: true, page: true, note: true, createdAt: true },
+          select: { text: true, page: true, chapter: true, note: true, createdAt: true },
+          orderBy: { createdAt: "asc" },
+        },
+        notes: {
+          select: { text: true, page: true, chapter: true, createdAt: true, updatedAt: true },
           orderBy: { createdAt: "asc" },
         },
         reads: {

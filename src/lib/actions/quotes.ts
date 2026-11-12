@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import type { Prisma } from "@prisma/client";
+import { pagePastTheEnd as pastTheEnd } from "@/lib/book-notes";
 import { quoteKey, type LibraryBookRef } from "@/lib/kindle-clippings";
 import { prisma } from "@/lib/prisma";
 import { idSchema } from "@/lib/reading-log-input";
@@ -9,13 +10,6 @@ import { kindleQuotesSchema, quoteSchema } from "@/lib/validation";
 import { requireUserId } from "@/lib/actions/helpers";
 import type { ActionState } from "@/lib/actions/helpers";
 
-/** Same rule as the reading card: a page past the end is a typo, and the
- *  quote would sort after every other. */
-function pastTheEnd(page: number | null | undefined, pageCount: number | null): string | null {
-  return page && pageCount != null && page > pageCount
-    ? `Page ${page} is past the end of the book (${pageCount} pages)`
-    : null;
-}
 
 /** Add a quote/highlight to a book (the form carries the bookId). */
 export async function addQuote(
@@ -25,9 +19,9 @@ export async function addQuote(
   const userId = await requireUserId();
 
   const bookId = formData.get("bookId");
-  if (typeof bookId !== "string" || !bookId) return { error: "Book not found" };
+  if (!idSchema.safeParse(bookId).success) return { error: "Book not found" };
   const book = await prisma.book.findFirst({
-    where: { id: bookId, userId },
+    where: { id: bookId as string, userId },
     select: { id: true, pageCount: true },
   });
   if (!book) return { error: "Book not found" };
@@ -42,14 +36,15 @@ export async function addQuote(
 
   await prisma.quote.create({
     data: {
-      bookId,
+      bookId: book.id,
       text: data.text,
       page: data.page || null, // 0 = no page reference
+      chapter: data.chapter ?? null,
       note: data.note ?? null,
     },
   });
 
-  revalidatePath(`/books/${bookId}`);
+  revalidatePath(`/books/${book.id}`);
   revalidatePath("/quotes");
   return { success: true };
 }
@@ -61,6 +56,8 @@ export async function updateQuote(
   formData: FormData,
 ): Promise<ActionState> {
   const userId = await requireUserId();
+  // Bound on the client, so not runtime-typed: see importKindleQuotes.
+  if (!idSchema.safeParse(quoteId).success) return { error: "Quote not found" };
 
   const existing = await prisma.quote.findFirst({
     where: { id: quoteId, book: { userId } },
@@ -81,6 +78,8 @@ export async function updateQuote(
     data: {
       text: data.text,
       page: data.page || null,
+      // A form without the box (an older page still open) keeps the chapter.
+      ...(data.chapter !== undefined && { chapter: data.chapter }),
       note: data.note ?? null,
     },
   });
