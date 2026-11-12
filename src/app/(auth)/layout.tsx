@@ -1,3 +1,4 @@
+import { ForgetSavedPages } from "@/components/forget-saved-pages";
 import { ThemePicker } from "@/components/theme-picker";
 
 /** A few books on a shelf, the last one leaning: the sign-in page's
@@ -92,6 +93,7 @@ export default function AuthLayout({
         </p>
       </div>
       {children}
+      <ForgetSavedPages />
     </main>
   );
 }

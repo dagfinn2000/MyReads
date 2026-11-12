@@ -2,7 +2,8 @@ import type { MetadataRoute } from "next";
 
 /**
  * PWA web app manifest — makes the app installable on a phone home screen
- * (handy since barcode-scanning books is naturally a phone flow). Served at
+ * (handy since barcode-scanning books is naturally a phone flow), and with
+ * the service worker (public/sw.js) it opens offline too. Served at
  * /manifest.webmanifest; the middleware exempts it from auth.
  */
 export default function manifest(): MetadataRoute.Manifest {
@@ -11,7 +12,9 @@ export default function manifest(): MetadataRoute.Manifest {
     short_name: "MyReads",
     description: "Personal self-hosted library and reading tracker",
     // The root route sends each reader to their chosen start page.
+    id: "/",
     start_url: "/",
+    scope: "/",
     display: "standalone",
     background_color: "#1e293b",
     theme_color: "#1e293b",

@@ -71,6 +71,28 @@ page by page.
   and time needs the audiobook's length too. Both go on the book's Edit
   page.
 
+### Without a connection
+
+- **Log reading offline.** On a train or a plane, the log on Now reading
+  and on a book's page still works. The page you log, and the time from
+  the reading timer, are saved on your phone or computer, the book's bar
+  moves, and the book lists what's waiting. Finished and Stopped work
+  too, with Undo. Once MyReads can be reached again, it all goes by
+  itself, dated when you logged it, so it counts for the right day.
+- **The app opens offline.** Pages you've opened lately open without a
+  connection, and Now reading always does. They show what they had when
+  you last opened them. A page that wasn't saved lists the ones that
+  were.
+- The top bar says when you're offline, and how many logs are waiting.
+  Tap it to see them, or to send them now.
+- If a log can't be saved when it's sent (the book was finished on
+  another device meanwhile, say), the top bar says so and why, and you
+  can remove it.
+- Opening pages offline needs MyReads over https, or on `localhost`. On a
+  plain http address the pages don't open offline, but a log you make
+  when the wifi drops still waits and goes later.
+- Signing out takes the saved pages off the device.
+
 ### Timer, daily goal and reminders
 
 - **Reading timer.** Press Start timer when you sit down with a book, and
@@ -840,7 +862,8 @@ tab goes away. You can also keep the house and leave the avatar out.
   daily goal, a soft thunk when you add a book and a tick when you rate
   one. Quiet, medium or loud. They only ever answer something you just
   did, and they are made in the browser, with nothing to download.
-- Install MyReads on your phone's home screen like an app.
+- Install MyReads on your phone's home screen like an app. It opens
+  offline too ([Without a connection](#without-a-connection)).
 
 ## Preferences
 

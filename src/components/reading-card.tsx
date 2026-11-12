@@ -7,8 +7,10 @@ import { updateReading } from "@/lib/actions/books";
 import { celebrate } from "@/lib/celebrate";
 import { toDateInputValue } from "@/lib/display";
 import { customStatusOf, statusChoice } from "@/lib/statuses";
+import { usePendingItems } from "@/components/offline-provider";
 import { usePreferences } from "@/components/preferences-provider";
 import { useSound } from "@/components/sounds";
+import { pendingPage } from "@/lib/outbox";
 import { currentPassEntries } from "@/lib/progress";
 import { progressFigure, unitFor } from "@/lib/progress-units";
 import { submitKeepingInput } from "@/lib/submit-form";
@@ -104,7 +106,10 @@ export function ReadingCard({
   // The sparkline shows the current pass; entries from earlier passes still
   // feed the stats heatmap and stay in the log below.
   const passEntries = currentPassEntries(progress, book.dateStarted, prefs.timeZone);
-  const showBar = book.currentPage != null && !!book.pageCount;
+  // The bar goes as far as this device has logged, sent or not.
+  const saved = usePendingItems(book.id);
+  const page = reading ? pendingPage([...saved.items, ...saved.held], book.id, book.currentPage) : book.currentPage;
+  const showBar = page != null && !!book.pageCount;
 
   return (
     <Card>
@@ -120,12 +125,12 @@ export function ReadingCard({
                   <div
                     className="bar-grow h-full rounded-full bg-primary/80"
                     style={{
-                      width: `${Math.min((book.currentPage! / book.pageCount!) * 100, 100)}%`,
+                      width: `${Math.min((page! / book.pageCount!) * 100, 100)}%`,
                     }}
                   />
                 </div>
                 <p className="text-xs text-muted-foreground tabular-nums">
-                  {progressFigure(book.currentPage!, info)}
+                  {progressFigure(page!, info)}
                 </p>
               </div>
             )}

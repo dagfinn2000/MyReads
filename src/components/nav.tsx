@@ -21,6 +21,7 @@ import type { NavItem } from "@/lib/preferences";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { NavLink } from "@/components/nav-link";
+import { SyncStatus } from "@/components/sync-status";
 import { ThemePicker } from "@/components/theme-picker";
 
 const NAV_ICONS: Record<NavItem, LucideIcon> = {
@@ -84,10 +85,13 @@ export async function Nav() {
           );
         })}
         <div className="ml-auto flex items-center gap-0.5 sm:gap-3">
+          {/* Only while offline, or while reading waits to be sent. */}
+          <SyncStatus />
           <Button
             asChild
             variant="ghost"
             size="sm"
+            className="backup-link"
             title="Download library backup (zip incl. covers)"
           >
             {/* Plain <a>: this is a file download, not a client navigation. */}

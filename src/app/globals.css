@@ -5298,6 +5298,16 @@ html {
   animation: loading-sweep 1.8s ease-in-out infinite;
 }
 
+/* Offline on a narrow phone, the top bar's note on the connection
+   (components/sync-status.tsx) takes the backup download's place: there's
+   no downloading a backup without a connection, and the bar has no room
+   for both from 360px with every link shown. */
+@media (width < 420px) {
+  .top-bar:has(.sync-status) .backup-link {
+    display: none;
+  }
+}
+
 /* The sign-in and register pages: a soft wash of the accent colour from
    the top, as the Glow background draws it. */
 .auth-backdrop {

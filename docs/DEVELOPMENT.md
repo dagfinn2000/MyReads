@@ -544,11 +544,33 @@ The reading room's files:
   ([reminders-run.ts](../src/lib/reminders-run.ts)) looks every 5 minutes;
   when a reader's time has come in their zone, it claims the day in
   `User.lastReminderDay` before sending, so a reminder never goes twice.
-  The browsers are `PushDevice` rows, and
-  [public/push-sw.js](../public/push-sw.js) is a service worker that only
-  shows the notification: it caches nothing and handles no page loads.
-  Push addresses come from the browser, so they go through the same
-  network guard as cover downloads.
+  The browsers are `PushDevice` rows, and the service worker
+  ([public/sw.js](../public/sw.js)) shows the notification. Push
+  addresses come from the browser, so they go through the same network
+  guard as cover downloads.
+- **Offline is two halves.** Opening the app without a connection is the
+  service worker's: [public/sw.js](../public/sw.js), registered as
+  `/sw.js?v=<build id>` by
+  [offline-provider.tsx](../src/components/offline-provider.tsx) in a
+  production build only. On install it keeps every script and stylesheet
+  of the build (listed by `/api/offline/assets`), the `/offline` page and
+  Now reading; pages are fetched from the server first and their saved
+  copy shows after 5 seconds or with no connection. The provider asks it
+  to save each page a little after it opens, and Now reading when the app
+  goes to the background. A new build installs a new worker, which drops
+  the old build's caches, and the sign-in page tells it to forget saved
+  pages. Logging offline is the page's: the quick-log row keeps a log it
+  can't send in the browser's storage ([outbox.ts](../src/lib/outbox.ts)),
+  and the provider sends what's waiting to `POST /api/reading/sync`
+  ([reading-sync.ts](../src/lib/reading-sync.ts)), which writes each item
+  with the same code as the logPage and moveFromReading actions
+  ([reading-log-write.ts](../src/lib/reading-log-write.ts)), at the moment
+  it was made. Each log carries an id the browser made
+  (`ProgressEntry.clientId`), so one sent twice, say after the answer was
+  lost on the way back, is written once. To try it, run `npm run build &&
+  npm start`, open a page, then go offline in the browser's developer
+  tools. `public/push-sw.js` is the reminders' worker from before, kept so
+  browsers that still have it registered move over.
 - **Migrations run when the container starts** (`prisma migrate deploy` in
   [docker-entrypoint.sh](../docker-entrypoint.sh)). The first start creates
   the tables, later starts apply anything new, and an up-to-date database is

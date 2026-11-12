@@ -370,8 +370,13 @@ model ProgressEntry {
   /// shown and summed (reading speed, time left, time read); the pages a
   /// day still come from the positions alone.
   minutes Int?
+  /// The id the browser gave this log when it was made, so a log sent again
+  /// (saved offline, or sent while the connection dropped) is written once.
+  /// Null for entries made any other way.
+  clientId String?
 
   @@index([bookId, date])
+  @@unique([bookId, clientId])
 }
 
 /// A copy of this book lent to someone. An open loan (`returnedAt` null) is
