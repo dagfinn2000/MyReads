@@ -1,0 +1,72 @@
+name: Release
+
+# Publishes a GitHub release on request: it tags a commit and posts the
+# notes as the release's text. Run it from the Actions tab (Release > Run
+# workflow) or through the API. The notes are Markdown on several lines,
+# which the Actions tab's one-line box can't hold, so for that the API (or
+# `gh workflow run release.yml -f notes="$(cat notes.md)" …`) is easiest.
+# Tooling only: it runs in GitHub's cloud and never ships with the app.
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "The version to tag, such as v2.2.0 (package.json must say 2.2.0)"
+        required: true
+      title:
+        description: "The release's title"
+        required: true
+      notes:
+        description: "The release notes, in Markdown"
+        required: true
+      target:
+        description: "The commit or branch to tag"
+        required: false
+        default: main
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    # Inputs reach the shell through env only, never pasted into a script.
+    env:
+      TAG: ${{ inputs.tag }}
+      TITLE: ${{ inputs.title }}
+      NOTES: ${{ inputs.notes }}
+      TARGET: ${{ inputs.target }}
+    steps:
+      - name: The tag looks like a version
+        run: |
+          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::The tag must look like v1.2.3, not '$TAG'."
+            exit 1
+          fi
+
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ inputs.target }}
+
+      # A release whose download says another version would confuse
+      # everyone who installs it.
+      - name: package.json has that version
+        run: |
+          version="$(node -p "require('./package.json').version")"
+          if [ "v$version" != "$TAG" ]; then
+            echo "::error::package.json at $TARGET says $version, not ${TAG#v}."
+            exit 1
+          fi
+
+      # Tags the commit checked out (not the branch, which may move on while
+      # this runs). gh refuses if a release with this tag already exists.
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          printf '%s\n' "$NOTES" > "$RUNNER_TEMP/notes.md"
+          gh release create "$TAG" \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$(git rev-parse HEAD)" \
+            --title "$TITLE" \
+            --notes-file "$RUNNER_TEMP/notes.md"
+          echo "Published $TAG at $(git rev-parse --short HEAD)."

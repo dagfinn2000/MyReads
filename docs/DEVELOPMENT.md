@@ -100,6 +100,24 @@ the app can do. When a change adds or changes something a reader can see,
 update FEATURES.md, and the README only when its overview no longer fits.
 Screenshots live in `docs/`, next to FEATURES.md.
 
+## Publishing a release
+
+1. Set the new `version` in `package.json` and `package-lock.json`.
+2. Write the notes from what changed since the last tag
+   (`git log v2.1.0..main`): "Before you upgrade" first, for anything a
+   reader has to know or do, then New, and under Fixed only bugs that the
+   last release had.
+3. Publish it from the Releases page on GitHub, or run the Release
+   workflow ([release.yml](../.github/workflows/release.yml)) with the
+   tag, a title and the notes. The workflow checks that `package.json`
+   has the same version, then tags the commit and publishes the release.
+   Its form in the Actions tab takes one line only, so send multi-line
+   notes from the command line:
+
+   ```bash
+   gh workflow run release.yml -f tag=v2.2.0 -f title="v2.2.0: …" -f notes="$(cat notes.md)"
+   ```
+
 ## Tech stack
 
 - [Next.js 16](https://nextjs.org/) (App Router, TypeScript), built as a
