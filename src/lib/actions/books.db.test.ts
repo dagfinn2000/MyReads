@@ -477,6 +477,29 @@ describe("updateReading and the reading log", () => {
     expect((await progressOf(bk.id)).map((e) => e.page)).toEqual([0, 74, 120]);
   });
 
+  it("saves the plot, characters and writing, and leaves them alone when the form has none", async () => {
+    const bk = await makeBook({ status: ReadingStatus.READ, rating: 8 });
+
+    await updateReading(
+      bk.id,
+      {},
+      form({ status: "READ", rating: "8", plotRating: "9", charactersRating: "6", writingRating: "" }),
+    );
+    let after = await prisma.book.findUniqueOrThrow({ where: { id: bk.id } });
+    expect([after.plotRating, after.charactersRating, after.writingRating]).toEqual([9, 6, null]);
+
+    // With the breakdown switched off the card sends none of them.
+    await updateReading(bk.id, {}, form({ status: "READ", rating: "7" }));
+    after = await prisma.book.findUniqueOrThrow({ where: { id: bk.id } });
+    expect(after.rating).toBe(7);
+    expect([after.plotRating, after.charactersRating, after.writingRating]).toEqual([9, 6, null]);
+
+    // 0 clears one; a value off the scale leaves it as it was.
+    await updateReading(bk.id, {}, form({ status: "READ", rating: "7", plotRating: "0", charactersRating: "11" }));
+    after = await prisma.book.findUniqueOrThrow({ where: { id: bk.id } });
+    expect([after.plotRating, after.charactersRating]).toEqual([null, 6]);
+  });
+
   it("never moves a book being read off its own page", async () => {
     // The quick row logs a book being read; the card has no page box then
     // and sends the page it was rendered with, here from before a log made

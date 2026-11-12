@@ -199,11 +199,24 @@ function checkReadDates(
   }
 }
 
+/** The plot, characters or writing rating (lib/rating-breakdown.ts), 1–10
+ *  half-star units. Left out of the form, as when the breakdown is switched
+ *  off, it stays as it is (undefined); empty or 0 clears it (0). */
+const aspectRating = z
+  .preprocess(
+    (v) => (v === undefined ? undefined : v === "" ? 0 : Number(v)),
+    z.number().int().min(0).max(10).optional(),
+  )
+  .catch(undefined);
+
 /** Personal reading data, editable from the book detail page. */
 export const readingSchema = z.object({
   status: z.enum(ReadingStatus),
   /** 1–10 half-star units; empty string/0 clears the rating. */
   rating: z.coerce.number().int().min(0).max(10).nullable().optional().catch(null),
+  plotRating: aspectRating,
+  charactersRating: aspectRating,
+  writingRating: aspectRating,
   review: z
     .string()
     .trim()

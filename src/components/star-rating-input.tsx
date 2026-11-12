@@ -35,31 +35,57 @@ function pop(el: Element | null | undefined) {
  * Follows the rating style in Preferences: whole stars only (steps of 2),
  * a row of 1–10 buttons, or — with ratings switched off — just the hidden
  * input, so saving the form keeps whatever rating the book already had.
+ *
+ * `label` names what is rated for screen readers ("Plot: 4 stars"), and
+ * `small` draws the stars a size down on wider screens, for the plot,
+ * characters and writing under a book's own rating. On a phone they keep
+ * the full size, which the scrub needs.
  */
 export function StarRatingInput({
   name,
   defaultValue = 0,
+  label,
+  small = false,
 }: {
   name: string;
   defaultValue?: number;
+  label?: string;
+  small?: boolean;
 }) {
   const { ratingStyle } = usePreferences();
   if (ratingStyle === "off") return <input type="hidden" name={name} value={defaultValue} />;
-  if (ratingStyle === "ten") return <TenPointInput name={name} defaultValue={defaultValue} />;
+  if (ratingStyle === "ten") {
+    return <TenPointInput name={name} defaultValue={defaultValue} label={label} />;
+  }
   return (
-    <StarInput name={name} defaultValue={defaultValue} whole={ratingStyle === "whole"} />
+    <StarInput
+      name={name}
+      defaultValue={defaultValue}
+      whole={ratingStyle === "whole"}
+      label={label}
+      small={small}
+    />
   );
+}
+
+/** "Plot: 4 stars", or "4 stars" for the rating itself. */
+function named(label: string | undefined, what: string): string {
+  return label ? `${label}: ${what}` : what;
 }
 
 function StarInput({
   name,
   defaultValue,
   whole,
+  label,
+  small,
 }: {
   name: string;
   defaultValue: number;
   /** Whole stars only: every value is even. */
   whole: boolean;
+  label?: string;
+  small: boolean;
 }) {
   const [value, setValue] = useState(defaultValue);
   const [hover, setHover] = useState<number | null>(null);
@@ -133,7 +159,7 @@ function StarInput({
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerCancel}
       >
-        <StarGraphic value={preview} starClassName="size-8 sm:size-6" />
+        <StarGraphic value={preview} starClassName={small ? "size-8 sm:size-5" : "size-8 sm:size-6"} />
         {/* one hitbox per step — half stars, or whole ones (keyboard
             access + hover preview) */}
         <div className="absolute inset-0 flex">
@@ -144,7 +170,7 @@ function StarInput({
                 key={i}
                 type="button"
                 className={whole ? "h-full w-[20%]" : "h-full w-[10%]"}
-                aria-label={`${v / 2} stars`}
+                aria-label={named(label, `${v / 2} stars`)}
                 onMouseEnter={() => setHover(v)}
                 onFocus={() => setHover(v)}
                 onBlur={() => setHover(null)}
@@ -167,7 +193,7 @@ function StarInput({
           type="button"
           variant="ghost"
           size="icon-sm"
-          title="Clear rating"
+          title={label ? `Clear ${label.toLowerCase()} rating` : "Clear rating"}
           onClick={() => setValue(0)}
         >
           <X data-slot="icon" />
@@ -178,7 +204,15 @@ function StarInput({
 }
 
 /** "Out of 10": ten numbered buttons, the chosen one highlighted. */
-function TenPointInput({ name, defaultValue }: { name: string; defaultValue: number }) {
+function TenPointInput({
+  name,
+  defaultValue,
+  label,
+}: {
+  name: string;
+  defaultValue: number;
+  label?: string;
+}) {
   const [value, setValue] = useState(defaultValue);
   const sound = useSound();
   return (
@@ -189,7 +223,7 @@ function TenPointInput({ name, defaultValue }: { name: string; defaultValue: num
           key={v}
           type="button"
           aria-pressed={value === v}
-          aria-label={`${v} out of 10`}
+          aria-label={named(label, `${v} out of 10`)}
           onClick={(e) => {
             setValue(v);
             pop(e.currentTarget);
@@ -209,7 +243,7 @@ function TenPointInput({ name, defaultValue }: { name: string; defaultValue: num
           type="button"
           variant="ghost"
           size="icon-sm"
-          title="Clear rating"
+          title={label ? `Clear ${label.toLowerCase()} rating` : "Clear rating"}
           onClick={() => setValue(0)}
         >
           <X data-slot="icon" />

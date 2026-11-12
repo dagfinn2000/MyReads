@@ -241,6 +241,7 @@ export const HIDEABLE_STATS = [
   "challenges",
   "heatmap",
   "habits",
+  "ratings",
   "perYear",
   "tags",
   "formats",
@@ -433,6 +434,9 @@ export type Preferences = {
   catalogues: Catalogue[];
 
   ratingStyle: RatingStyle;
+  /** Rate the plot, the characters and the writing too, under a book's
+   *  rating, with the averages on Stats (lib/rating-breakdown.ts). */
+  ratingBreakdown: boolean;
 
   textSize: TextSize;
   longTextFont: LongTextFont;
@@ -623,6 +627,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
   sortAlphabet: "en",
   catalogues: ["openlibrary", "google", "nb"],
   ratingStyle: "half",
+  ratingBreakdown: true,
   textSize: "normal",
   longTextFont: "sans",
   typography: "plain",
@@ -959,6 +964,7 @@ export function parsePreferences(raw: unknown): Preferences {
     // goes back to the default.
     catalogues: catalogues.length > 0 ? catalogues : d.catalogues,
     ratingStyle: pick(RATING_STYLES, obj.ratingStyle, d.ratingStyle),
+    ratingBreakdown: bool(obj.ratingBreakdown, d.ratingBreakdown),
     textSize: pick(TEXT_SIZES, obj.textSize, d.textSize),
     longTextFont: pick(LONG_TEXT_FONTS, obj.longTextFont, d.longTextFont),
     typography: pick(TYPOGRAPHY_STYLES, obj.typography, d.typography),

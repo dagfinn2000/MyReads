@@ -253,6 +253,15 @@ model Book {
   /// against the fields as they stand (lib/book-fields.ts). Null for none.
   fields       Json?
 
+  /// The rating broken down (Preferences › Ratings): the plot, the
+  /// characters and the writing, each 1–10 in the same half-star units as
+  /// `rating`, which stays the reader's own overall verdict rather than
+  /// their average. Kept with the book, like `rating`, when it is read
+  /// again. Null = not rated for that.
+  plotRating       Int?
+  charactersRating Int?
+  writingRating    Int?
+
   /// Denormalized lowercase "title + authors" so search can be a single
   /// case-insensitive `contains` (Prisma can't substring-search String[]).
   searchText String @default("")

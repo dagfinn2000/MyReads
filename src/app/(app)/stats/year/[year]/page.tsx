@@ -29,6 +29,7 @@ import { readingStreaks } from "@/lib/progress";
 import { minutesInWindow } from "@/lib/reading-time";
 import { buildPasses, countWindow, ruleNotes, tally } from "@/lib/stats-count";
 import { yearWindow } from "@/lib/stats-period";
+import { aspectSummaries } from "@/lib/rating-breakdown";
 import {
   dayMinuteTotals,
   dayPageTotals,
@@ -39,7 +40,7 @@ import {
 import { BookCover } from "@/components/book-card";
 import { GoldMedal } from "@/components/gold-medal";
 import { Bar, StatCard } from "@/components/stat-blocks";
-import { Stars } from "@/components/stars";
+import { StarGraphic, Stars } from "@/components/stars";
 import { YearShelf } from "@/components/year-shelf";
 import { YearStoryButton } from "@/components/year-story";
 import {
@@ -354,6 +355,12 @@ export default async function YearInReviewPage({
     ratingCounts.set(f.rating!, (ratingCounts.get(f.rating!) ?? 0) + 1);
   }
   const ratingRows = [...ratingCounts.entries()].sort((a, b) => b[0] - a[0]);
+  // The plot, characters and writing of the books finished, each once.
+  const aspects = prefs.ratingBreakdown
+    ? aspectSummaries([...new Map(finishes.map((f) => [f.book.id, f.book])).values()]).filter(
+        (a) => a.count > 0,
+      )
+    : [];
   const maxRatingCount = ratingRows[0]
     ? Math.max(...ratingRows.map(([, c]) => c))
     : 0;
@@ -622,7 +629,7 @@ export default async function YearInReviewPage({
         </div>
 
         <div className="grid content-start gap-6">
-          {ratings && ratingRows.length > 0 && (
+          {ratings && (ratingRows.length > 0 || aspects.length > 0) && (
             <Card>
               <CardHeader>
                 <CardTitle>Ratings</CardTitle>
@@ -636,6 +643,28 @@ export default async function YearInReviewPage({
                     max={maxRatingCount}
                   />
                 ))}
+                {aspects.length > 0 && (
+                  <dl
+                    className={`grid gap-1.5 text-sm ${ratingRows.length > 0 ? "mt-2 border-t pt-3" : ""}`}
+                  >
+                    {aspects.map((a) => (
+                      <div key={a.key} className="grid grid-cols-[7rem_1fr] items-center gap-2">
+                        <dt className="text-muted-foreground">{a.label}</dt>
+                        <dd className="flex flex-wrap items-center gap-x-2">
+                          <span className="font-medium tabular-nums">
+                            {prefs.ratingStyle === "ten"
+                              ? `${a.average!.toFixed(1)}/10`
+                              : (a.average! / 2).toFixed(1)}
+                          </span>
+                          {prefs.ratingStyle !== "ten" && <StarGraphic value={a.average!} />}
+                          <span className="text-xs text-muted-foreground">
+                            {fmt(a.count)} {a.count === 1 ? "book" : "books"}
+                          </span>
+                        </dd>
+                      </div>
+                    ))}
+                  </dl>
+                )}
               </CardContent>
             </Card>
           )}

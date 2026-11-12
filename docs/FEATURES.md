@@ -48,6 +48,10 @@ page by page.
 - Each book has a status (Want to Read, Currently Reading, Read, Did Not
   Finish), a rating, notes, and start and finish dates. Rate in half
   stars, whole stars or out of 10, or switch ratings off.
+- **Plot, characters and writing:** under a book's rating, open "Plot,
+  characters and writing" to rate each one on its own. Each is optional,
+  and your overall rating stays your own, not their average. Switch them
+  off in Preferences if you don't want them.
 - Rename the four statuses, or add up to 12 of your own, each a kind of
   one of them: "Paused" under Currently Reading, say, or "On my shelf"
   under Want to Read. Each has its own colour, shows in every status
@@ -201,6 +205,11 @@ page by page.
 - **Reading habits:** which days of the week you read most, pages on an
   average reading day, how long a book takes you from start to finish, and
   with the timer your average sitting and pages an hour.
+- **Ratings:** how many books got each rating, the rating you give most,
+  and your average for plot, characters and writing with the book you
+  rated best for each. Once enough books are rated, it also says which of
+  the three your overall rating follows most. The year in review shows the
+  three averages too.
 - Decide what counts in your stats. Pages read can mean a whole book's
   pages when you finish it, or the pages you log as you go. You also
   choose whether books you stop reading count, and how audiobooks count.
@@ -817,7 +826,8 @@ On the Account page:
   percent or time for audiobooks, where your pace comes from, and the
   daily goal.
 - When reading reminders come, and the browsers they come to.
-- The rating style, and what counts in your stats.
+- The rating style, whether to rate plot, characters and writing too,
+  and what counts in your stats.
 - Names for the statuses, and statuses of your own.
 - Fields of your own on every book, and the choices a choice field offers.
 - Which status tabs the library shows, what its search also looks in

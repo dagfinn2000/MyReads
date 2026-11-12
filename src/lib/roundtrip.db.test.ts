@@ -77,6 +77,8 @@ describe("export -> import round trip", () => {
         seriesNumber: 1,
         status: ReadingStatus.READ,
         rating: 9,
+        plotRating: 10,
+        charactersRating: 7,
         review: "Superb.",
         dateStarted: new Date("2026-01-01T00:00:00.000Z"),
         dateFinished: new Date("2026-01-20T00:00:00.000Z"),
@@ -172,6 +174,11 @@ describe("export -> import round trip", () => {
     // Personal reading data
     expect(restored.status).toBe(ReadingStatus.READ);
     expect(restored.rating).toBe(9);
+    expect([restored.plotRating, restored.charactersRating, restored.writingRating]).toEqual([
+      10,
+      7,
+      null,
+    ]);
     expect(restored.review).toBe("Superb.");
     // Rebuilt, so review search finds a restored review.
     expect(restored.reviewSearchText).toBe("superb.");

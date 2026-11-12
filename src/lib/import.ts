@@ -169,6 +169,10 @@ const importedBookSchema = z.object({
   /** Additive: one of the reader's own statuses (lib/statuses.ts). */
   statusKey: z.string().max(16).nullable().optional().catch(null),
   rating: z.number().int().min(1).max(10).nullable().optional().catch(null),
+  /** Additive: the rating broken down (lib/rating-breakdown.ts). */
+  plotRating: z.number().int().min(1).max(10).nullable().optional().catch(null),
+  charactersRating: z.number().int().min(1).max(10).nullable().optional().catch(null),
+  writingRating: z.number().int().min(1).max(10).nullable().optional().catch(null),
   review: z.string().max(20000).nullable().optional(),
   dateStarted: dateField,
   dateFinished: dateField,
@@ -683,6 +687,9 @@ export async function importLibrary(
         status: b.status,
         statusKey: customStatusOf(b, account)?.key ?? null,
         rating: b.rating ?? null,
+        plotRating: b.plotRating ?? null,
+        charactersRating: b.charactersRating ?? null,
+        writingRating: b.writingRating ?? null,
         review: b.review ?? null,
         reviewSearchText: foldForSearch(b.review ?? ""),
         dateStarted: b.dateStarted,

@@ -25,6 +25,7 @@ import { dailyGoalTarget, goalMetDays } from "@/lib/daily-goal";
 import { minutesInWindow } from "@/lib/reading-time";
 import { buildCalendar } from "@/lib/reading-calendar";
 import { readingHabits } from "@/lib/reading-habits";
+import { aspectSummaries, ratingDistribution, ratingLean } from "@/lib/rating-breakdown";
 import {
   booksReadAllTime,
   buildPasses,
@@ -51,6 +52,7 @@ import {
 import { ChallengesCard } from "@/components/challenges-card";
 import { GoalCard } from "@/components/goal-card";
 import { ReadingHabitsCard } from "@/components/reading-habits-card";
+import { RatingsCard } from "@/components/ratings-card";
 import { ReadingHeatmap } from "@/components/reading-heatmap";
 import { Bar, Duration, StatCard } from "@/components/stat-blocks";
 import { StatsPeriodNav } from "@/components/stats-period-nav";
@@ -210,20 +212,34 @@ export default async function StatsPage({
 
   // Average rating: all time, every rated book (any status); in a period,
   // the rated finishes in it.
-  const ratingValues =
+  const ratedBooks =
     period === "all"
-      ? books
-          .filter((b) => !(prefs.statsAudiobooks === "out" && b.format === "AUDIOBOOK"))
-          .flatMap((b) => (b.rating != null ? [b.rating] : []))
-      : counted.flatMap((i) =>
-          i.books > 0 && i.pass.kind === "finished" && i.pass.rating != null
-            ? [i.pass.rating]
-            : [],
-        );
+      ? books.filter((b) => !(prefs.statsAudiobooks === "out" && b.format === "AUDIOBOOK"))
+      : null;
+  const finishes = counted.filter((i) => i.books > 0 && i.pass.kind === "finished");
+  const ratingValues = ratedBooks
+    ? ratedBooks.flatMap((b) => (b.rating != null ? [b.rating] : []))
+    : finishes.flatMap((i) => (i.pass.rating != null ? [i.pass.rating] : []));
   const avgRating =
     ratingValues.length > 0
       ? ratingValues.reduce((sum, r) => sum + r, 0) / ratingValues.length / 2
       : null;
+  // The Ratings card: those ratings across the scale, and the plot,
+  // characters and writing of the same books (each once in a period, however
+  // often it was finished), as the book has them now.
+  const aspectBooks =
+    ratedBooks ?? [...new Map(finishes.map((i) => [i.pass.book.id, i.pass.book])).values()];
+  const ratingsCard = !hidden.has("ratings") && prefs.ratingStyle !== "off" && (
+    <RatingsCard
+      words={words}
+      style={prefs.ratingStyle}
+      buckets={ratingDistribution(ratingValues, prefs.ratingStyle)}
+      aspects={prefs.ratingBreakdown ? aspectSummaries(aspectBooks) : null}
+      lean={prefs.ratingBreakdown ? ratingLean(aspectBooks) : null}
+      fmt={fmt}
+      allTime={period === "all"}
+    />
+  );
 
   // Books per year: every dated pass that counts as a book, re-reads
   // included. A 2026 re-read of an old favourite shows up in 2026.
@@ -498,7 +514,11 @@ export default async function StatsPage({
         />
       )}
 
+      {prefs.ratingBreakdown && ratingsCard}
+
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        {/* Without the breakdown it is only the chart, half the width. */}
+        {!prefs.ratingBreakdown && ratingsCard}
         {!hidden.has("perYear") && (
           <Card>
             <CardHeader>
