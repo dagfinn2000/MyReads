@@ -33,6 +33,7 @@ export const LIBRARY_GROUPS = [
   "format",
   "ownership",
   "tag",
+  "mood",
   "shelf",
   "rating",
 ] as const;

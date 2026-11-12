@@ -54,7 +54,8 @@ import { GoalCard } from "@/components/goal-card";
 import { ReadingHabitsCard } from "@/components/reading-habits-card";
 import { RatingsCard } from "@/components/ratings-card";
 import { ReadingHeatmap } from "@/components/reading-heatmap";
-import { Bar, Duration, StatCard } from "@/components/stat-blocks";
+import { Bar, Duration, MoodBar, StatCard } from "@/components/stat-blocks";
+import { allMoods, bookMoods, offeredMoods } from "@/lib/moods";
 import { StatsPeriodNav } from "@/components/stats-period-nav";
 import { Stars } from "@/components/stars";
 import {
@@ -357,6 +358,20 @@ export default async function StatsPage({
     .slice(0, 10);
   const maxTag = topTags[0]?.[1] ?? 0;
 
+  // Moods, over the same books, most common first. The card only shows
+  // once some book in the library has a mood, so Stats looks as it always
+  // has to a reader who doesn't use them.
+  const usesMoods = books.some((b) => bookMoods(b.moods, prefs).length > 0);
+  const moodCounts = new Map<string, number>();
+  for (const b of breakdownBooks) {
+    for (const m of bookMoods(b.moods, prefs)) moodCounts.set(m.key, (moodCounts.get(m.key) ?? 0) + 1);
+  }
+  const topMoods = allMoods(prefs)
+    .filter((m) => moodCounts.has(m.key))
+    .sort((a, b) => moodCounts.get(b.key)! - moodCounts.get(a.key)!)
+    .slice(0, 10);
+  const maxMood = topMoods.length > 0 ? moodCounts.get(topMoods[0].key)! : 0;
+
   // Format breakdown.
   const formatCounts = new Map<string, number>();
   for (const b of breakdownBooks) {
@@ -480,7 +495,7 @@ export default async function StatsPage({
         <ChallengesCard
           challenges={challengeViews}
           currentYear={currentYear}
-          sources={challengeSources({ tags, shelves, views })}
+          sources={challengeSources({ tags, shelves, views, moods: offeredMoods(prefs) })}
           prefs={prefs}
         />
       )}
@@ -578,6 +593,28 @@ export default async function StatsPage({
               ) : (
                 topTags.map(([tag, count]) => (
                   <Bar key={tag} label={tag} value={count} max={maxTag} />
+                ))
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {usesMoods && !hidden.has("moods") && (
+          <Card>
+            <CardHeader>
+              <CardTitle>
+                Moods
+                {breakdownNote && (
+                  <span className="font-normal text-muted-foreground"> · {breakdownNote}</span>
+                )}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="grid gap-2">
+              {topMoods.length === 0 ? (
+                <p className="text-sm text-muted-foreground">{nothingRead}</p>
+              ) : (
+                topMoods.map((m) => (
+                  <MoodBar key={m.key} mood={m} value={moodCounts.get(m.key)!} max={maxMood} />
                 ))
               )}
             </CardContent>

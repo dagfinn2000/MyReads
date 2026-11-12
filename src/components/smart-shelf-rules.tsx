@@ -10,6 +10,7 @@ import {
 } from "@/lib/actions/smart-shelves";
 import { fieldFilterLabel } from "@/lib/book-fields";
 import { formatNumber } from "@/lib/display";
+import { moodOf } from "@/lib/moods";
 import { describeRules } from "@/lib/smart-shelves";
 import { minRatingLabel } from "@/components/more-filters";
 import { usePreferences } from "@/components/preferences-provider";
@@ -17,9 +18,9 @@ import { Button } from "@/components/ui/button";
 
 /**
  * Smart shelf rules in words (lib/smart-shelves.ts describeRules), worded
- * the reader's way: their status names, rating style, fields and numbers.
- * `shelves` names the reader's own shelves a rule can keep to; entries with
- * rules (smart shelves) are skipped.
+ * the reader's way: their status names, rating style, fields, moods and
+ * numbers. `shelves` names the reader's own shelves a rule can keep to;
+ * entries with rules (smart shelves) are skipped.
  */
 export function useDescribeRules(
   shelves: readonly { id: string; name: string; rules?: string }[],
@@ -37,6 +38,7 @@ export function useDescribeRules(
         ratingLabel: (v) => minRatingLabel(v, prefs.ratingStyle),
         fieldLabel: (f) => fieldFilterLabel(f, prefs.customFields, prefs),
         fmt: (n) => formatNumber(n, prefs),
+        moodName: (key) => moodOf(key, prefs)?.name ?? key,
       }),
     [prefs, shelfNames],
   );

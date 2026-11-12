@@ -29,6 +29,7 @@ import { canonicalViewQuery } from "@/lib/saved-views";
 import { DRAFT_COOKIE, parseDraft } from "@/lib/smart-shelf-draft";
 import { smartRulesQuery } from "@/lib/smart-shelves";
 import { smartShelfCounts, smartShelvesOfBooks } from "@/lib/smart-shelves-query";
+import { allMoods } from "@/lib/moods";
 import { FilterBar, type FilterValues } from "@/components/filter-bar";
 import { LibraryView } from "@/components/library-view";
 import { OverdueNotice } from "@/components/overdue-notice";
@@ -77,6 +78,7 @@ const librarySelect = {
   format: true,
   ownership: true,
   tags: true,
+  moods: true,
 } satisfies Prisma.BookSelect;
 
 /** What the card actually receives: the selected columns plus whether the
@@ -94,6 +96,7 @@ function toCardBook<B extends LibraryBook & { shelves?: unknown }>({
   updatedAt: _updatedAt,
   format: _format,
   tags: _tags,
+  moods: _moods,
   shelves: _shelves,
   ...card
 }: B) {
@@ -150,6 +153,7 @@ export default async function BooksPage({
     openLoans,
     statusCounts,
     tagRows,
+    moodRows,
     shelves,
     user,
     bookFinishes,
@@ -177,6 +181,12 @@ export default async function BooksPage({
       FROM "Book", LATERAL unnest("tags") AS t
       WHERE "userId" = ${userId}
       GROUP BY t`,
+    // The same for moods, for the mood filter's counts.
+    prisma.$queryRaw<{ mood: string; count: number }[]>`
+      SELECT m AS mood, COUNT(*)::int AS count
+      FROM "Book", LATERAL unnest("moods") AS m
+      WHERE "userId" = ${userId}
+      GROUP BY m`,
     prisma.shelf.findMany({
       where: { userId },
       include: { _count: { select: { books: true } } },
@@ -289,6 +299,7 @@ export default async function BooksPage({
     ratingStyle: prefs.ratingStyle,
     shelfOrder: prefs.shelfOrder,
     statusNames: prefs.statusNames,
+    moods: allMoods(prefs),
   };
   const sorted = sortBooks(withLoanFlag, values.sort, values.dir, sortOptions);
   const groups = groupBooks(sorted, values.group, sortOptions);
@@ -337,6 +348,8 @@ export default async function BooksPage({
   const allTags = tagRows.map((r) => r.tag).sort();
   const tagCounts: Record<string, number> = {};
   for (const row of tagRows) tagCounts[row.tag] = row.count;
+  const moodCounts: Record<string, number> = {};
+  for (const row of moodRows) moodCounts[row.mood] = row.count;
 
   // Current params as plain strings, for shelf/status links.
   const flatParams: Record<string, string> = {};
@@ -355,6 +368,8 @@ export default async function BooksPage({
     !!values.author ||
     !!values.tag ||
     !!values.notTag ||
+    !!values.mood ||
+    !!values.notMood ||
     !!values.format ||
     values.owned !== "all" ||
     !!values.minRating ||
@@ -438,6 +453,7 @@ export default async function BooksPage({
         values={values}
         allTags={allTags}
         tagCounts={tagCounts}
+        moodCounts={moodCounts}
         display={accountView}
         ratingStyle={prefs.ratingStyle}
         finishedYears={finishedYears}

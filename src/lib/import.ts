@@ -19,6 +19,7 @@ import { cleanLibraryViewPatch } from "@/lib/library-view";
 import { cleanPreferencesPatch, parsePreferences } from "@/lib/preferences";
 import { customStatusOf } from "@/lib/statuses";
 import { cleanFieldValues } from "@/lib/book-fields";
+import { cleanBookMoods } from "@/lib/moods";
 import { fieldColumns } from "@/lib/field-values";
 import { MAX_ENTRY_MINUTES } from "@/lib/reading-time";
 import { CHAPTER_MAX, tidyChapter } from "@/lib/book-notes";
@@ -158,6 +159,9 @@ const importedBookSchema = z.object({
         .flatMap((t) => t.toLowerCase().split(",").map((s) => s.trim()))
         .filter((t) => t && t.length <= 50),
     ),
+  /** Additive: how the book feels, by mood key (lib/moods.ts), kept where
+   *  the account has those moods once its settings are restored. */
+  moods: z.array(z.unknown()).max(200).catch([]),
   format: z.enum(BookFormat).catch(BookFormat.PHYSICAL),
   /** Legacy field, still written by exports for older instances to read. */
   owned: z.boolean().nullable().optional().catch(null),
@@ -622,9 +626,9 @@ export async function importLibrary(
   });
 
   const settingsRestored = data.settings ? await restoreSettings(userId, data.settings) : false;
-  // The account's own statuses and fields as they now stand: a book keeps
-  // its status of the reader's own, and its fields' values, only where the
-  // account has them (the backup's came with its settings unless the
+  // The account's own statuses, fields and moods as they now stand: a book
+  // keeps its status of the reader's own, its fields' values and its moods
+  // only where the account has them (the backup's came with its settings unless the
   // account already had some).
   const account = parsePreferences(
     (await prisma.user.findUnique({ where: { id: userId }, select: { preferences: true } }))?.preferences,
@@ -725,6 +729,7 @@ export async function importLibrary(
         lengthMinutes: b.lengthMinutes ?? null,
         publishedDate: b.publishedDate ?? null,
         tags: [...new Set(b.tags)],
+        moods: cleanBookMoods(b.moods, account),
         format: b.format,
         ownership: resolveOwnership(b),
         seriesName: b.seriesName ?? null,

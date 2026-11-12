@@ -11,6 +11,7 @@ import { FORMAT_LABELS, OWNERSHIP_LABELS } from "@/lib/display";
 import type { RatingStyle } from "@/lib/preferences";
 import { nextInSeries, seriesKey, type SeriesMember } from "@/lib/series";
 import { statusName, type StatusNames } from "@/lib/statuses";
+import type { Mood } from "@/lib/moods";
 
 /** The fields the sorts read; the page's Prisma select satisfies this
  *  structurally. */
@@ -35,6 +36,8 @@ export interface GroupableBook extends SortableBook {
   format: BookFormat;
   ownership: BookOwnership;
   tags: string[];
+  /** Mood keys (lib/moods.ts). Only needed to group by mood. */
+  moods?: string[];
   /** The shelves the book is on. Only needed to group by shelf. */
   shelves?: { id: string; name: string }[];
 }
@@ -48,6 +51,8 @@ export interface BookGroup<T> {
   detail?: string;
   /** A warning after it ("#3 missing"). */
   note?: string;
+  /** A mood section's icon and tint, drawn before its title. */
+  mood?: Pick<Mood, "icon" | "color">;
 }
 
 /** The reader's sorting rules (Preferences). Everything optional: leaving
@@ -68,6 +73,8 @@ export interface SortOptions {
   shelfOrder?: readonly string[];
   /** The reader's names for the statuses (group by status). */
   statusNames?: StatusNames;
+  /** Every mood the reader has, in their order (group by mood). */
+  moods?: readonly Mood[];
 }
 
 /** Leading articles skipped by `ignoreArticles`: English always (most
@@ -367,6 +374,24 @@ export function groupBooks<T extends GroupableBook>(
       .sort((a, b) => compare(a[0], b[0]))
       .map(([tag, groupBooks]) => ({ key: `tag:${tag}`, title: tag, books: groupBooks }));
     if (untagged.length > 0) sections.push({ key: "tag:none", title: "No tags", books: untagged });
+    return sections;
+  }
+
+  if (group === "mood") {
+    // In the moods' own order, light to dark, then the reader's own; a key
+    // the reader has no mood for counts as none.
+    const known = opts.moods ?? [];
+    const sections: BookGroup<T>[] = known
+      .map((m) => ({
+        key: `mood:${m.key}`,
+        title: m.name,
+        mood: { icon: m.icon, color: m.color },
+        books: books.filter((b) => b.moods?.includes(m.key)),
+      }))
+      .filter((g) => g.books.length > 0);
+    const knownKeys = new Set(known.map((m) => m.key));
+    const none = books.filter((b) => !b.moods?.some((k) => knownKeys.has(k)));
+    if (none.length > 0) sections.push({ key: "mood:none", title: "No mood", books: none });
     return sections;
   }
 

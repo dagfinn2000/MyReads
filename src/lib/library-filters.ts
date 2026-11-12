@@ -6,6 +6,7 @@ import type { SearchField } from "@/lib/preferences";
 import { isStatusKey } from "@/lib/statuses";
 import { parseFieldFilter } from "@/lib/book-fields";
 import { equalsIgnoringCase, searchTerms } from "@/lib/utils";
+import { moodList } from "@/lib/moods";
 
 /**
  * The library view's filter state, as it appears in the URL. Every value is
@@ -29,6 +30,13 @@ export interface LibraryFilters {
   tagMatch: string;
   /** Tags to leave out, comma-joined. */
   notTag: string;
+  /** Moods to include, by key (lib/moods.ts), comma-joined: books with any
+   *  of them, or with all of them when moodMatch is "all". */
+  mood: string;
+  /** "all" or "" (any). Only ever "all" alongside some moods. */
+  moodMatch: string;
+  /** Moods to leave out, comma-joined. */
+  notMood: string;
   format: string;
   owned: string;
   /** Lowest rating, 1–10, or "unrated". */
@@ -164,6 +172,9 @@ export function parseFilters(
   // itself, and "not" is the safer reading.
   const notTag = tagList(param(sp.notTag));
   const tag = tagList(param(sp.tag)).filter((t) => !notTag.includes(t));
+  // Likewise a mood.
+  const notMood = moodList(param(sp.notMood));
+  const mood = moodList(param(sp.mood)).filter((m) => !notMood.includes(m));
   const owned = param(sp.owned);
   const minRating = param(sp.minRating);
   const finished = param(sp.finished);
@@ -178,6 +189,9 @@ export function parseFilters(
     tag: tag.join(","),
     tagMatch: tag.length > 0 && param(sp.tagMatch) === "all" ? "all" : "",
     notTag: notTag.join(","),
+    mood: mood.join(","),
+    moodMatch: mood.length > 0 && param(sp.moodMatch) === "all" ? "all" : "",
+    notMood: notMood.join(","),
     format: param(sp.format),
     owned: (OWNED_FILTERS as readonly string[]).includes(owned) ? owned : "all",
     minRating: minRating === "unrated" || /^([1-9]|10)$/.test(minRating) ? minRating : "",
@@ -294,6 +308,8 @@ export function buildBookWhere(
   const minRating = parseInt(filters.minRating, 10);
   const include = tagList(filters.tag);
   const exclude = tagList(filters.notTag);
+  const moods = moodList(filters.mood);
+  const notMoods = moodList(filters.notMood);
   const terms = searchTerms(filters.q);
 
   // Everything that can't share a top-level key. The status tab owns
@@ -316,6 +332,7 @@ export function buildBookWhere(
   }
 
   if (exclude.length > 0) and.push({ NOT: { tags: { hasSome: exclude } } });
+  if (notMoods.length > 0) and.push({ NOT: { moods: { hasSome: notMoods } } });
 
   if (filters.minRating === "unrated") {
     // Want to Read books are unrated by nature; they'd bury the ones that
@@ -385,6 +402,14 @@ export function buildBookWhere(
             ? { hasEvery: include }
             : { hasSome: include },
     }),
+    ...(moods.length > 0 && {
+      moods:
+        moods.length === 1
+          ? { has: moods[0] }
+          : filters.moodMatch === "all"
+            ? { hasEvery: moods }
+            : { hasSome: moods },
+    }),
     ...(filters.author && { authors: { has: filters.author } }),
     ...(filters.shelfId && { shelves: { some: { id: filters.shelfId } } }),
     ...(filters.series && { seriesName: equalsIgnoringCase(filters.series) }),
@@ -410,17 +435,20 @@ const MISSING_CHIP_LABELS: Record<MissingFilter, string> = {
 
 /**
  * The active filters that have no control of their own on the bar, as
- * chips: author, each tag in or out, finished year, rating, missing detail,
- * series, one of the reader's own fields, pages, year published and when
- * it was added. `ratingLabel` words a minimum rating in the reader's style;
- * `fieldLabel` a field filter, or null when the field it names is gone (and
- * so filters nothing); `fmt` a number.
+ * chips: author, each tag and mood in or out, finished year, rating,
+ * missing detail, series, one of the reader's own fields, pages, year
+ * published and when it was added. `ratingLabel` words a minimum rating
+ * in the reader's style; `fieldLabel` a field filter, or null when the
+ * field it names is gone (and so filters nothing); `fmt` a number;
+ * `moodName` a mood's key, which stands for itself when the reader has no
+ * such mood.
  */
 export function activeFilterChips(
   filters: LibraryFilters,
   ratingLabel: (minRating: string) => string,
   fieldLabel: (field: string) => string | null = () => null,
   fmt: (n: number) => string = String,
+  moodName: (key: string) => string = (key) => key,
 ): FilterChip[] {
   const chips: FilterChip[] = [];
   if (filters.author) {
@@ -441,6 +469,23 @@ export function activeFilterChips(
       id: `notTag:${t}`,
       label: `Not tagged: ${t}`,
       clear: { notTag: exclude.filter((x) => x !== t).join(",") },
+    });
+  }
+  const moods = moodList(filters.mood);
+  for (const m of moods) {
+    const rest = moods.filter((x) => x !== m);
+    chips.push({
+      id: `mood:${m}`,
+      label: `Mood: ${moodName(m)}`,
+      clear: { mood: rest.join(","), moodMatch: rest.length > 0 ? filters.moodMatch : "" },
+    });
+  }
+  const notMoods = moodList(filters.notMood);
+  for (const m of notMoods) {
+    chips.push({
+      id: `notMood:${m}`,
+      label: `Mood: not ${lowerFirst(moodName(m))}`,
+      clear: { notMood: notMoods.filter((x) => x !== m).join(",") },
     });
   }
   if (filters.finished) {
@@ -504,6 +549,11 @@ export function addedLabel(days: number): string {
   const choice = ADDED_CHOICES.find((c) => c.days === days);
   if (choice) return `Added ${choice.label.charAt(0).toLowerCase()}${choice.label.slice(1)}`;
   return days === 1 ? "Added in the last day" : `Added in the last ${days} days`;
+}
+
+/** "Dark" as "dark" inside a sentence; "SF" stays "SF". */
+function lowerFirst(name: string): string {
+  return /^\p{Lu}\p{Ll}/u.test(name) ? name.charAt(0).toLowerCase() + name.slice(1) : name;
 }
 
 /** Tags picked in and out in the tag filter. */

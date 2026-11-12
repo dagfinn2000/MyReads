@@ -164,6 +164,15 @@ page by page.
   The library's search finds text and choices, and More filters finds
   books with or without a value, with a given choice or yes/no, or with a
   number or date in a range.
+- **Moods.** Say how a book feels with "Add moods" under its title: cosy,
+  funny, light-hearted, romantic, hopeful, whimsical, inspiring,
+  adventurous, thoughtful, informative, challenging, emotional, sad,
+  mysterious, tense, spooky or dark, each with its own icon and colour.
+  Then find a book for your mood with the library's Moods filter: any or
+  all of the moods you tick, leaving out the ones you switch to Not. You
+  can also group the library by mood, and a mood on a book's page links
+  to every book that has it. Preferences can hide moods you never use, or
+  add up to 16 of your own.
 - Keep track of the books you've lent out, who has them and since when,
   on each book's Lending card. Give a loan a day it's due back (Preferences
   can fill one in, say a month after you lend it). Past that day the book
@@ -204,7 +213,8 @@ page by page.
   that takes you back to the same spot in the library, with your filters
   still on.
 - Edit many books at once: set their status, format or ownership, add or
-  remove tags, put them on a shelf or take them off it, or delete them.
+  remove tags or a mood, put them on a shelf or take them off it, or
+  delete them.
   Pick the books on screen, or every book that matches your filters.
 - Rename, merge, reorder and hide shelves, and choose which status tabs the
   library shows. Saved views can be renamed and reordered too.
@@ -213,6 +223,8 @@ page by page.
 
 - Books read per year, pages read, ratings, genres and formats. Look at
   all time, this year, the last 12 months or the last 30 days.
+- **Moods:** once your books have moods, a card shows the ones you read
+  most, each linking to its books in the library.
 - **Reading days:** a calendar with a square for every day, darker the
   more you read. It shows the last 12 months or any year you read in, and
   can go by pages or, with the timer, by time. Above it are your current
@@ -253,8 +265,8 @@ page by page.
   reading on 20 days. Twelve month cells show which months made it, and
   this month says how to catch up.
 - **Challenges:** a goal for part of your library, such as "6 classics in
-  2026". Make one from a tag, a shelf or a saved view; it shows the covers
-  of the books that count so far, and a medal once it's done.
+  2026". Make one from a tag, a mood, a shelf or a saved view; it shows
+  the covers of the books that count so far, and a medal once it's done.
 
 ## The reading room
 
@@ -846,6 +858,7 @@ On the Account page:
   and what counts in your stats.
 - Names for the statuses, and statuses of your own.
 - Fields of your own on every book, and the choices a choice field offers.
+- Which moods are offered, and moods of your own with an icon and colour.
 - Which status tabs the library shows, what its search also looks in
   (tags, ISBN, your review), and what Pick for me leaves out.
 - How long you usually lend books for, and whether overdue books remind

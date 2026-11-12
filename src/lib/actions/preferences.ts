@@ -6,6 +6,7 @@ import { requireUserId } from "@/lib/actions/helpers";
 import { cleanPreferencesPatch, type Preferences } from "@/lib/preferences";
 import { forgetLostStatuses } from "@/lib/status-keys";
 import { forgetLostFieldValues } from "@/lib/field-values";
+import { forgetLostMoods } from "@/lib/mood-keys";
 
 /**
  * Saves some preferences on the account. Only the keys in `patch` change.
@@ -30,6 +31,8 @@ export async function savePreferences(patch: Partial<Preferences>): Promise<void
   // Likewise a field removed, or an option taken off a choice field, takes
   // those values off the books.
   if (clean.customFields) await forgetLostFieldValues(prisma, userId, clean.customFields);
+  // And a mood of the reader's own removed comes off its books.
+  if (clean.customMoods) await forgetLostMoods(prisma, userId, clean.customMoods);
 
   // Preferences show up on every page (dates, ratings, the nav, text size),
   // so the whole app is stale after a change.

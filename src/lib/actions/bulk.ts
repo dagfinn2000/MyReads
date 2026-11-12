@@ -21,6 +21,7 @@ import { parseFilters } from "@/lib/library-filters";
 import { resolveBookWhere } from "@/lib/library-where";
 import { settleReadingState } from "@/lib/reading-state";
 import { customStatusOf } from "@/lib/statuses";
+import { moodOf } from "@/lib/moods";
 
 export interface BulkResult {
   count?: number;
@@ -90,8 +91,18 @@ export async function bulkUpdateBooks(input: BulkInput): Promise<BulkResult> {
 
   const parsed = bulkSchema.safeParse(input);
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
-  const { status, statusKey, format, ownership, addShelfId, removeShelfId, addTags, removeTags } =
-    parsed.data;
+  const {
+    status,
+    statusKey,
+    format,
+    ownership,
+    addShelfId,
+    removeShelfId,
+    addTags,
+    removeTags,
+    addMood,
+    removeMood,
+  } = parsed.data;
 
   if (
     !status &&
@@ -100,7 +111,9 @@ export async function bulkUpdateBooks(input: BulkInput): Promise<BulkResult> {
     !addShelfId &&
     !removeShelfId &&
     !addTags?.length &&
-    !removeTags?.length
+    !removeTags?.length &&
+    !addMood &&
+    !removeMood
   ) {
     return { error: "Nothing to apply" };
   }
@@ -149,7 +162,13 @@ export async function bulkUpdateBooks(input: BulkInput): Promise<BulkResult> {
   // as updated. "Apply to 20 books" should either happen or not.
   // Books moved to Read with no finish date follow the "Books I add as Read
   // were finished" preference (New books): today, or no date at all.
-  const prefs = status ? await getPreferences() : null;
+  const prefs = status || addMood || removeMood ? await getPreferences() : null;
+  // Only moods the reader has; a hidden built-in one can still be taken off.
+  if ((addMood || removeMood) && prefs) {
+    if ((addMood && !moodOf(addMood, prefs)) || (removeMood && !moodOf(removeMood, prefs))) {
+      return { error: "Mood not found" };
+    }
+  }
   const undatedFinish = prefs?.addedAsReadFinished === "undated";
   // One of the reader's own statuses, when it is one on `status`.
   const key = status && prefs ? (customStatusOf({ status, statusKey }, prefs)?.key ?? null) : null;
@@ -218,6 +237,24 @@ export async function bulkUpdateBooks(input: BulkInput): Promise<BulkResult> {
       for (const b of owned) {
         const tags = retag(b.tags, addTags ?? [], removeTags ?? []);
         if (tags) await tx.book.update({ where: { id: b.id }, data: { tags } });
+      }
+    }
+
+    // Moods in runs of books, in SQL: only the books that lack the mood
+    // take it, and only the ones that have it lose it.
+    if (addMood) {
+      for (const part of chunk(ownedIds, BULK_CHUNK)) {
+        await tx.book.updateMany({
+          where: { id: { in: part }, userId, NOT: { moods: { has: addMood } } },
+          data: { moods: { push: addMood } },
+        });
+      }
+    }
+    if (removeMood) {
+      for (const part of chunk(ownedIds, BULK_CHUNK)) {
+        await tx.$executeRaw`
+          UPDATE "Book" SET "moods" = array_remove("moods", ${removeMood}), "updatedAt" = now()
+          WHERE "id" = ANY(${part}::text[]) AND "userId" = ${userId} AND ${removeMood} = ANY("moods")`;
       }
     }
 
