@@ -43,6 +43,9 @@ export function canonicalViewQuery(sp: Params): string {
   if (f.missing) params.set("missing", f.missing);
   if (f.series) params.set("series", f.series);
   if (f.field) params.set("field", f.field);
+  if (f.pages) params.set("pages", f.pages);
+  if (f.published) params.set("published", f.published);
+  if (f.added) params.set("added", f.added);
   params.set("group", view.group);
   params.set("sort", view.sort);
   params.set("dir", dir);

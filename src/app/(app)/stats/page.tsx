@@ -139,12 +139,20 @@ export default async function StatsPage({
           orderBy: [{ year: "desc" }, { createdAt: "asc" }],
         })
       : [],
+    // Shelves of both kinds, smart ones after the reader's own.
     showChallenges
-      ? prisma.shelf.findMany({
-          where: { userId },
-          select: { id: true, name: true },
-          orderBy: { name: "asc" },
-        })
+      ? Promise.all([
+          prisma.shelf.findMany({
+            where: { userId },
+            select: { id: true, name: true },
+            orderBy: { name: "asc" },
+          }),
+          prisma.smartShelf.findMany({
+            where: { userId },
+            select: { id: true, name: true },
+            orderBy: { name: "asc" },
+          }),
+        ]).then(([own, smart]) => [...own, ...smart])
       : [],
     showChallenges
       ? prisma.savedView.findMany({

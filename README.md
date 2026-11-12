@@ -35,6 +35,8 @@ server.
 
 - Shelves, tags, series in reading order, formats, what you own or wish
   for, and which books you've lent to whom and when they're due back.
+- Smart shelves that fill themselves, such as "unread sci-fi under 300
+  pages".
 - Fields of your own, such as where a book lives or what it cost.
 - A Series page with how far you are in each series and what's next.
 - Search, filter, sort and group, and save the views you use often.

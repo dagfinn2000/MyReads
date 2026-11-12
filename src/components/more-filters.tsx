@@ -2,7 +2,17 @@
 
 import { useId, useState, type Ref } from "react";
 import { ChevronDown } from "lucide-react";
-import { MISSING_FILTERS, MISSING_LABELS, type LibraryFilters } from "@/lib/library-filters";
+import {
+  ADDED_CHOICES,
+  MAX_PAGES_FILTER,
+  MISSING_FILTERS,
+  MISSING_LABELS,
+  addedLabel,
+  pagesRange,
+  publishedRange,
+  serializeRange,
+  type LibraryFilters,
+} from "@/lib/library-filters";
 import type { RatingStyle } from "@/lib/preferences";
 import {
   parseFieldFilter,
@@ -62,9 +72,10 @@ export function minRatingLabel(value: string, style: RatingStyle): string {
 
 /**
  * The filters most people reach for less often, behind one button: the
- * year a book was finished, rating (including unrated), a missing detail
- * to clean up, and one of the reader's own fields. Each change applies
- * straight away; the menu stays open.
+ * year a book was finished, rating (including unrated), page count, year
+ * published, when it was added, a missing detail to clean up, and one of
+ * the reader's own fields. Each change applies straight away (a range once
+ * its box is left); the menu stays open.
  */
 export function MoreFilters({
   values,
@@ -75,7 +86,10 @@ export function MoreFilters({
   triggerRef,
   className,
 }: {
-  values: Pick<LibraryFilters, "finished" | "minRating" | "missing" | "field">;
+  values: Pick<
+    LibraryFilters,
+    "finished" | "minRating" | "missing" | "field" | "pages" | "published" | "added"
+  >;
   /** Newest first. */
   finishedYears: number[];
   ratingStyle: RatingStyle;
@@ -87,7 +101,24 @@ export function MoreFilters({
   className?: string;
 }) {
   const id = useId();
-  const count = [values.finished, values.minRating, values.missing, values.field].filter(Boolean).length;
+  const count = [
+    values.finished,
+    values.minRating,
+    values.missing,
+    values.field,
+    values.pages,
+    values.published,
+    values.added,
+  ].filter(Boolean).length;
+  const added = values.added || "any";
+  // A span no menu offers (from an old link, say) still shows.
+  const addedOptions = [
+    { value: "any", label: "Any time" },
+    ...ADDED_CHOICES.map((c) => ({ value: String(c.days), label: c.label })),
+    ...(added === "any" || ADDED_CHOICES.some((c) => String(c.days) === added)
+      ? []
+      : [{ value: added, label: addedLabel(Number(added)) }]),
+  ];
   const rating = values.minRating || "all";
   // A filter set under another style (≥ 4.5 stars, say) still shows, so the
   // active filter is never invisible.
@@ -166,6 +197,41 @@ export function MoreFilters({
           </div>
         )}
 
+        <RangeControls
+          // Fresh boxes whenever the filter changes from elsewhere.
+          key={`pages:${values.pages}`}
+          label="Pages"
+          value={pagesRange(values.pages)}
+          max={MAX_PAGES_FILTER}
+          onChange={(pages) => onChange({ pages })}
+        />
+
+        <RangeControls
+          key={`published:${values.published}`}
+          label="Year published"
+          value={publishedRange(values.published)}
+          min={1000}
+          max={2999}
+          placeholders={["1900", "1950"]}
+          onChange={(published) => onChange({ published })}
+        />
+
+        <div className="grid gap-1.5">
+          <Label htmlFor={`${id}-added`}>Added</Label>
+          <Select value={added} onValueChange={(v) => onChange({ added: v === "any" ? "" : v })}>
+            <SelectTrigger id={`${id}-added`} className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {addedOptions.map((o) => (
+                <SelectItem key={o.value} value={o.value}>
+                  {o.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
         <div className="grid gap-1.5">
           <Label htmlFor={`${id}-missing`}>Missing</Label>
           <Select
@@ -197,6 +263,86 @@ export function MoreFilters({
         )}
       </PopoverContent>
     </Popover>
+  );
+}
+
+/**
+ * A from–to pair of whole numbers (pages, years), either end left empty
+ * for "up to" or "or more". Applies when a box is left or Enter pressed.
+ */
+function RangeControls({
+  label,
+  value,
+  min = 0,
+  max,
+  placeholders = ["From", "To"],
+  onChange,
+}: {
+  label: string;
+  value: { min: number | null; max: number | null } | null;
+  /** The ends a box takes; a number outside them leaves that end open. */
+  min?: number;
+  max: number;
+  placeholders?: [string, string];
+  /** The range in the URL's form, "" for none. */
+  onChange: (range: string) => void;
+}) {
+  const id = useId();
+  const [from, setFrom] = useState(value?.min?.toString() ?? "");
+  const [to, setTo] = useState(value?.max?.toString() ?? "");
+  const whole = (s: string) => {
+    const n = Number(s.trim());
+    return s.trim() && Number.isInteger(n) && n >= min && n <= max ? n : null;
+  };
+
+  function commit() {
+    const next = serializeRange(whole(from), whole(to));
+    if (next !== serializeRange(value?.min ?? null, value?.max ?? null)) onChange(next);
+  }
+
+  const boxProps = {
+    type: "number",
+    inputMode: "numeric" as const,
+    min,
+    max,
+    step: 1,
+    className: "min-w-0",
+    onBlur: commit,
+    onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        commit();
+      }
+    },
+  };
+
+  return (
+    <div role="group" aria-labelledby={`${id}-label`} className="grid gap-1.5">
+      <span id={`${id}-label`} className="text-sm leading-none font-medium select-none">
+        {label}
+      </span>
+      <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2">
+        <Input
+          {...boxProps}
+          id={`${id}-from`}
+          aria-label={`${label} from`}
+          placeholder={placeholders[0]}
+          value={from}
+          onChange={(e) => setFrom(e.target.value)}
+        />
+        <span className="text-xs text-muted-foreground" aria-hidden>
+          to
+        </span>
+        <Input
+          {...boxProps}
+          id={`${id}-to`}
+          aria-label={`${label} to`}
+          placeholder={placeholders[1]}
+          value={to}
+          onChange={(e) => setTo(e.target.value)}
+        />
+      </div>
+    </div>
   );
 }
 

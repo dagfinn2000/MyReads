@@ -40,6 +40,12 @@ describe("canonicalViewQuery", () => {
     );
   });
 
+  it("keeps page, year published and added filters, tidied, before the view", () => {
+    expect(canonicalViewQuery({ added: "07", published: "1950..1900", pages: "..300" })).toBe(
+      "pages=..300&published=1900..1950&added=7&group=none&sort=createdAt&dir=desc",
+    );
+  });
+
   it("treats the same tags in any order as one view", () => {
     expect(canonicalViewQuery({ tag: "b,a", notTag: "d,c" })).toBe(
       canonicalViewQuery({ tag: "a,b", notTag: "c,d" }),

@@ -9,14 +9,14 @@ import { parsePreferences } from "@/lib/preferences";
  * An account's backup zip, made in one place for the Download backup
  * button (/api/export) and the nightly copies on the server, so both are
  * the same file: `library.json` (every book with its shelf names, quotes,
- * notes, read history, reading log and lending records, every shelf, reading
- * goals, challenges, saved views, and the account's theme, library view
- * and preferences) plus `covers/<file>` for each locally cached cover
+ * notes, read history, reading log and lending records, every shelf, smart
+ * shelves, reading goals, challenges, saved views, and the account's theme,
+ * library view and preferences) plus `covers/<file>` for each locally cached cover
  * image, so a restore into a fresh instance brings the covers back too.
  *
  * The JSON inside is still the version-1 export format — quotes, notes,
  * reads, progress, loans, settings, saved views, pages goals, reading-days
- * and monthly goals (`moreGoals`) and challenges are additive
+ * and monthly goals (`moreGoals`), challenges and smart shelves are additive
  * fields (as are a goal's `countRereads`, a book's `lengthMinutes`,
  * `upNextRank` and plot, characters and writing ratings, a past read's
  * `note`, a log entry's `minutes`, a quote's `chapter` and a loan's
@@ -37,7 +37,8 @@ export interface BackupZip {
 }
 
 export async function buildBackupZip(userId: string): Promise<BackupZip> {
-  const [books, shelves, readingGoals, user, savedViews, challenges] = await Promise.all([
+  const [books, shelves, readingGoals, user, savedViews, challenges, smartShelves] =
+    await Promise.all([
     prisma.book.findMany({
       where: { userId },
       orderBy: { createdAt: "asc" },
@@ -102,12 +103,20 @@ export async function buildBackupZip(userId: string): Promise<BackupZip> {
       orderBy: [{ year: "asc" }, { createdAt: "asc" }],
       select: { name: true, year: true, target: true, query: true },
     }),
+    prisma.smartShelf.findMany({
+      where: { userId },
+      orderBy: { name: "asc" },
+      select: { id: true, name: true, rules: true },
+    }),
   ]);
 
   const prefs = parsePreferences(user?.preferences);
   // Preferences that list shelves or saved views by id go out by name too,
   // since ids don't survive a move.
   const shelfNames = new Map(shelves.map((s) => [s.id, s.name]));
+  // Smart shelves share the shelf order and hiding, and challenges count
+  // them too; names never repeat across the two kinds.
+  const anyShelfNames = new Map([...shelfNames, ...smartShelves.map((s) => [s.id, s.name] as const)]);
   const viewNames = new Map(savedViews.map((v) => [v.id, v.name]));
   const namesOf = (ids: string[], names: Map<string, string>) =>
     ids.flatMap((id) => names.get(id) ?? []);
@@ -131,9 +140,9 @@ export async function buildBackupZip(userId: string): Promise<BackupZip> {
       .filter((g) => g.unit === "PAGES" && g.span === "YEAR")
       .map(({ unit: _unit, span: _span, ...goal }) => goal),
     moreGoals: readingGoals.filter((g) => g.unit === "DAYS" || g.span !== "YEAR"),
-    // Challenges, with the shelf named like a saved view's.
+    // Challenges, with the shelf (of either kind) named like a saved view's.
     challenges: challenges.map((c) => {
-      const shelfName = shelfNames.get(new URLSearchParams(c.query).get("shelfId") ?? "");
+      const shelfName = anyShelfNames.get(new URLSearchParams(c.query).get("shelfId") ?? "");
       return shelfName ? { ...c, shelfName } : c;
     }),
     // The account's own settings: theme, library view and Preferences. A
@@ -144,8 +153,8 @@ export async function buildBackupZip(userId: string): Promise<BackupZip> {
       libraryView: user?.libraryView ?? null,
       preferences: user?.preferences ?? null,
       defaultViewName: viewNames.get(prefs.defaultViewId) ?? null,
-      shelfOrderNames: namesOf(prefs.shelfOrder, shelfNames),
-      hiddenShelfNames: namesOf(prefs.hiddenShelves, shelfNames),
+      shelfOrderNames: namesOf(prefs.shelfOrder, anyShelfNames),
+      hiddenShelfNames: namesOf(prefs.hiddenShelves, anyShelfNames),
       savedViewOrderNames: namesOf(prefs.savedViewOrder, viewNames),
     },
     // A view kept to one shelf names it too, so a restore can point it at
@@ -153,6 +162,12 @@ export async function buildBackupZip(userId: string): Promise<BackupZip> {
     savedViews: savedViews.map(({ name, query }) => {
       const shelfName = shelfNames.get(new URLSearchParams(query).get("shelfId") ?? "");
       return shelfName ? { name, query, shelfName } : { name, query };
+    }),
+    // Smart shelves, by name, with the shelf their rules keep to named too.
+    // A list of its own: an older MyReads leaves it alone.
+    smartShelves: smartShelves.map(({ name, rules }) => {
+      const shelfName = shelfNames.get(new URLSearchParams(rules).get("shelfId") ?? "");
+      return shelfName ? { name, rules, shelfName } : { name, rules };
     }),
     books: books.map(({
       userId: _userId,

@@ -7,6 +7,8 @@ import { challengeQuery } from "@/lib/challenges";
 import { prisma } from "@/lib/prisma";
 import { idSchema } from "@/lib/reading-log-input";
 import { canonicalViewQueryFromString } from "@/lib/saved-views";
+import { challengesOnShelf, smartShelvesOnShelf } from "@/lib/shelf-references";
+import { smartRulesQuery } from "@/lib/smart-shelves";
 import { equalsIgnoringCase } from "@/lib/utils";
 import { shelfNameSchema } from "@/lib/validation";
 import { requireUserId } from "@/lib/actions/helpers";
@@ -36,6 +38,11 @@ export async function createShelf(
     select: { name: true },
   });
   if (existing) return { error: `You already have a shelf called "${existing.name}"` };
+  const smart = await prisma.smartShelf.findFirst({
+    where: { userId, name: equalsIgnoringCase(name) },
+    select: { name: true },
+  });
+  if (smart) return { error: `You already have a smart shelf called "${smart.name}"` };
 
   const bookId = formData.get("bookId");
   await prisma.shelf.create({
@@ -69,9 +76,9 @@ export interface ShelfRenameResult {
 /**
  * Rename a shelf. A name another of the reader's shelves already has (in
  * any case) merges the two: the books join that shelf, this one goes, and
- * saved views and challenges that filtered on it follow the books.
- * Changing only the case
- * of a shelf's own name just renames it.
+ * saved views, challenges and smart shelves that filtered on it follow
+ * the books. Changing only the case of a shelf's own name just renames it.
+ * A smart shelf's name is refused: the two kinds can't merge.
  */
 export async function renameShelf(shelfId: string, name: string): Promise<ShelfRenameResult> {
   const userId = await requireUserId();
@@ -90,10 +97,17 @@ export async function renameShelf(shelfId: string, name: string): Promise<ShelfR
   if (!source) return { error: "Shelf not found" };
   if (newName === source.name) return { shelfId: source.id, name: source.name };
 
-  const target = await prisma.shelf.findFirst({
-    where: { userId, id: { not: source.id }, name: equalsIgnoringCase(newName) },
-    select: { id: true, name: true },
-  });
+  const [target, smart] = await Promise.all([
+    prisma.shelf.findFirst({
+      where: { userId, id: { not: source.id }, name: equalsIgnoringCase(newName) },
+      select: { id: true, name: true },
+    }),
+    prisma.smartShelf.findFirst({
+      where: { userId, name: equalsIgnoringCase(newName) },
+      select: { name: true },
+    }),
+  ]);
+  if (smart) return { error: `You already have a smart shelf called "${smart.name}"` };
 
   if (!target) {
     try {
@@ -155,6 +169,15 @@ export async function renameShelf(shelfId: string, name: string): Promise<ShelfR
           data: { query: challengeQuery(params.toString()) },
         });
       }
+      // And smart shelves keeping to it.
+      for (const smartShelf of await smartShelvesOnShelf(tx, userId, source.id)) {
+        const params = new URLSearchParams(smartShelf.rules);
+        params.set("shelfId", target.id);
+        await tx.smartShelf.update({
+          where: { id: smartShelf.id },
+          data: { rules: smartRulesQuery(params.toString()) },
+        });
+      }
 
       return tx.book.count({ where: { userId, shelves: { some: { id: target.id } } } });
     },
@@ -165,20 +188,6 @@ export async function renameShelf(shelfId: string, name: string): Promise<ShelfR
   revalidatePath("/account");
   revalidatePath("/stats");
   return { merged: true, shelfId: target.id, name: target.name, count };
-}
-
-/** Challenges whose books are the ones on `shelfId`. */
-async function challengesOnShelf(
-  tx: Prisma.TransactionClient,
-  userId: string,
-  shelfId: string,
-): Promise<{ id: string; query: string }[]> {
-  const found = await tx.challenge.findMany({
-    where: { userId, query: { contains: `shelfId=${shelfId}` } },
-    select: { id: true, query: true },
-  });
-  // `contains` would also match an id that only starts with this one.
-  return found.filter((c) => new URLSearchParams(c.query).get("shelfId") === shelfId);
 }
 
 /**

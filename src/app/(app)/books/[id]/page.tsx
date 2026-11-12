@@ -25,6 +25,7 @@ import { BookBackdrop, BookCover } from "@/components/book-card";
 import { BookDescription } from "@/components/book-description";
 import { BookLink } from "@/components/book-link";
 import { BookShelvesCard } from "@/components/book-shelves-card";
+import { smartShelvesHolding } from "@/lib/smart-shelves-query";
 import { CloseBookButton } from "@/components/close-book-button";
 import { DeleteBookButton } from "@/components/delete-book-button";
 import { FindItAt } from "@/components/find-it-at";
@@ -62,6 +63,12 @@ export default async function BookDetailPage({
     orderBy: { name: "asc" },
   });
   shelvesPromise.catch(() => {});
+  const smartPromise = prisma.smartShelf.findMany({
+    where: { userId },
+    select: { id: true, name: true, rules: true },
+    orderBy: { name: "asc" },
+  });
+  smartPromise.catch(() => {});
 
   const book = await prisma.book.findFirst({
     where: { id, userId },
@@ -93,7 +100,7 @@ export default async function BookDetailPage({
 
   // Sidebar data: every shelf (for the assignment card) and, if this book is
   // part of a series, its siblings ordered by series number.
-  const [allShelves, seriesBooks, upNextPlace] = await Promise.all([
+  const [allShelves, seriesBooks, upNextPlace, smartShelves] = await Promise.all([
     shelvesPromise,
     book.seriesName
       ? prisma.book.findMany({
@@ -115,6 +122,8 @@ export default async function BookDetailPage({
           })
           .then((ahead) => ahead + 1)
       : null,
+    // The smart shelves whose rules hold it.
+    smartPromise.then((all) => smartShelvesHolding(userId, book.id, all, prefs)),
   ]);
 
   // The reader's own fields that this book has a value for, in their order.
@@ -139,6 +148,7 @@ export default async function BookDetailPage({
         // In the reader's own order, as the library's shelf chips are.
         shelves={orderByIds(allShelves, prefs.shelfOrder)}
         memberIds={book.shelves.map((s) => s.id)}
+        smartShelves={orderByIds(smartShelves, prefs.shelfOrder).map(({ id, name }) => ({ id, name }))}
       />
     ),
     reading: <ReadingCard book={book} progress={book.progress} />,

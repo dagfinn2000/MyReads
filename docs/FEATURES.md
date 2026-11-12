@@ -144,6 +144,19 @@ page by page.
 - Custom shelves, tags, series in reading order, format (physical, ebook,
   audiobook) and ownership (owned, wishlist, borrowed from someone, no
   longer have it).
+- **Smart shelves** fill themselves. Make one with New shelf > Smart
+  shelf, then pick its rules with the library's tabs, shelves and filters,
+  for example Want to Read, tagged sci-fi, up to 300 pages. The books
+  below the filters are the ones it will hold. After that, every book that
+  matches is on it, and a book joins or leaves by itself when you change
+  it. You can also turn the filters you have on into a smart shelf from the
+  Save button by the search box.
+  - It sits with your other shelves, marked with sparkles, and shows how
+    many books it holds. Open it and its rules show under the shelves; the
+    pencil on its chip, or Change rules, lets you change them.
+  - A book's Shelves card lists the smart shelves it's on. Group by shelf,
+    challenges and backups include them. Manage shelves renames, reorders,
+    hides and deletes them. Deleting one never changes a book.
 - **Your own fields.** Add up to 20 fields of your own to every book:
   text, a number, a date, yes or no, or a choice from your own list
   ("Where it lives", "Price paid", "Signed", "Edition"). Fill them in on
@@ -157,7 +170,9 @@ page by page.
   turns red, shows under the Overdue filter, and a note on the Library and
   Now reading pages reminds you who has it.
 - Search, filter, sort and group the library. Authors sort by surname, the
-  way a bookshelf is filed.
+  way a bookshelf is filed. More filters also finds books by page count
+  ("up to 300 pages"), the year they came out, and when you added them
+  (in the last week, month, three months or year).
 - **The Series page** shows every series you have, the series you're in
   the middle of first: how much of each you've read, which book is next,
   and an empty place for each number you have no book for. Open it from a
@@ -183,7 +198,8 @@ page by page.
   keep their place as an outline. Point at a spine and it slides out a
   little.
 - Save the searches and filters you use often as views, and open the
-  library on one of them if you like.
+  library on one of them if you like. A view keeps the sort and grouping
+  too; a smart shelf keeps only which books.
 - A book opened from the library has an X in its corner (or press Esc)
   that takes you back to the same spot in the library, with your filters
   still on.
