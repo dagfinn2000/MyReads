@@ -208,6 +208,19 @@ page by page.
   shelf: every book you finished standing spine out in the order you
   finished it, coloured from its cover, with a little brass plate on the
   shelf where each month begins.
+- **Play your year:** the button at the top of a year in review plays the
+  year back as a story, one highlight to a screen: books, pages, hours
+  with the timer, the days you read with your longest streak marked on a
+  calendar, your busiest month, favourite genres, author of the year, top
+  books (or the longest and quickest, with ratings off) and the goal if
+  you reached it. Tap or click to go on, tap the left side to go back, and
+  hold to pause. With animations on it moves along by itself; with them
+  off it waits for you.
+- It ends with a picture of the year to download or, on a phone, share:
+  the year's figures, genres and author over a shelf of every book you
+  finished. Three looks (Paper, Night, or your theme's colours and
+  heading font) and two shapes, tall for a story or square. It's made on
+  your device.
 - Yearly reading goals in books, pages or days you read, with or without
   re-reads. The goal shows whether you're on track, and next year's can be
   set ahead of time.

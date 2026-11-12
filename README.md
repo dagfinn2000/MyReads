@@ -47,7 +47,8 @@ server.
   read with your streaks, and your reading habits.
 - Goals for the year or every month, in books, pages or days you read,
   and challenges such as "6 classics in 2026".
-- A year in review for every year.
+- A year in review for every year, which plays back as a story and ends
+  with a picture of the year to share.
 
 **The reading room**
 

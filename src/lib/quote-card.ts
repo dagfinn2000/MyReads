@@ -149,7 +149,7 @@ interface Look {
 
 /** A small seeded random, so the paper's grain and the night's stars are
  *  the same each time the same quote is drawn. */
-function seeded(seed: number): () => number {
+export function seeded(seed: number): () => number {
   let s = seed >>> 0 || 1;
   return () => {
     s ^= s << 13;
@@ -159,14 +159,14 @@ function seeded(seed: number): () => number {
   };
 }
 
-function seedOf(text: string): number {
+export function seedOf(text: string): number {
   let h = 2166136261;
   for (const ch of text) h = Math.imul(h ^ ch.codePointAt(0)!, 16777619);
   return h >>> 0;
 }
 
 /** Mixes "#rrggbb" towards black (amount < 0) or white (amount > 0). */
-function shade(hex: string, amount: number): string {
+export function shade(hex: string, amount: number): string {
   const n = parseInt(hex.slice(1), 16);
   const target = amount < 0 ? 0 : 255;
   const t = Math.abs(amount);
@@ -175,6 +175,48 @@ function shade(hex: string, amount: number): string {
   const g = mix((n >> 8) & 255);
   const b = mix(n & 255);
   return `rgb(${r} ${g} ${b})`;
+}
+
+/** The colours to write in on Paper and on Night. */
+export const PAPER_INK = { ink: "#2b2118", soft: "#7b6a55", accent: "#a2412e" };
+export const NIGHT_INK = { ink: "#f2ebd9", soft: "#aaa7bd", accent: "#d9b45a" };
+
+/** Cream paper with a fine grain and edges a shade darker, as old paper
+ *  goes (also the year picture's Paper, lib/year-card.ts). */
+export function paintPaper(ctx: CanvasRenderingContext2D, w: number, h: number, rand: () => number): void {
+  ctx.fillStyle = "#f5efe2";
+  ctx.fillRect(0, 0, w, h);
+  // Grain: a scatter of faint flecks.
+  for (let i = 0; i < 2600; i++) {
+    ctx.fillStyle = rand() < 0.5 ? "rgb(120 95 60 / 0.07)" : "rgb(255 255 255 / 0.35)";
+    ctx.fillRect(rand() * w, rand() * h, 1.5, 1.5);
+  }
+  const edge = ctx.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.35, w / 2, h / 2, Math.max(w, h) * 0.75);
+  edge.addColorStop(0, "rgb(160 120 70 / 0)");
+  edge.addColorStop(1, "rgb(160 120 70 / 0.22)");
+  ctx.fillStyle = edge;
+  ctx.fillRect(0, 0, w, h);
+}
+
+/** A deep blue night sky with a scatter of stars and a soft glow. */
+export function paintNight(ctx: CanvasRenderingContext2D, w: number, h: number, rand: () => number): void {
+  const sky = ctx.createLinearGradient(0, 0, w * 0.3, h);
+  sky.addColorStop(0, "#1f2547");
+  sky.addColorStop(1, "#0a0d1c");
+  ctx.fillStyle = sky;
+  ctx.fillRect(0, 0, w, h);
+  for (let i = 0; i < 90; i++) {
+    const r = rand() < 0.9 ? 1.2 : 2.2;
+    ctx.fillStyle = `rgb(255 248 225 / ${0.15 + rand() * 0.45})`;
+    ctx.beginPath();
+    ctx.arc(rand() * w, rand() * h, r, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  const glow = ctx.createRadialGradient(w / 2, h * 0.45, 0, w / 2, h * 0.45, w * 0.7);
+  glow.addColorStop(0, "rgb(120 130 220 / 0.18)");
+  glow.addColorStop(1, "rgb(120 130 220 / 0)");
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, 0, w, h);
 }
 
 /** Paints the background and returns the colours to write in. */
@@ -187,40 +229,12 @@ function paintBackground(
   rand: () => number,
 ): Look {
   if (style === "paper") {
-    ctx.fillStyle = "#f5efe2";
-    ctx.fillRect(0, 0, w, h);
-    // Grain: a scatter of faint flecks.
-    for (let i = 0; i < 2600; i++) {
-      ctx.fillStyle = rand() < 0.5 ? "rgb(120 95 60 / 0.07)" : "rgb(255 255 255 / 0.35)";
-      ctx.fillRect(rand() * w, rand() * h, 1.5, 1.5);
-    }
-    // Edges a shade darker, as old paper goes.
-    const edge = ctx.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.35, w / 2, h / 2, Math.max(w, h) * 0.75);
-    edge.addColorStop(0, "rgb(160 120 70 / 0)");
-    edge.addColorStop(1, "rgb(160 120 70 / 0.22)");
-    ctx.fillStyle = edge;
-    ctx.fillRect(0, 0, w, h);
-    return { ink: "#2b2118", soft: "#7b6a55", accent: "#a2412e", mono: false };
+    paintPaper(ctx, w, h, rand);
+    return { ...PAPER_INK, mono: false };
   }
   if (style === "night") {
-    const sky = ctx.createLinearGradient(0, 0, w * 0.3, h);
-    sky.addColorStop(0, "#1f2547");
-    sky.addColorStop(1, "#0a0d1c");
-    ctx.fillStyle = sky;
-    ctx.fillRect(0, 0, w, h);
-    for (let i = 0; i < 90; i++) {
-      const r = rand() < 0.9 ? 1.2 : 2.2;
-      ctx.fillStyle = `rgb(255 248 225 / ${0.15 + rand() * 0.45})`;
-      ctx.beginPath();
-      ctx.arc(rand() * w, rand() * h, r, 0, Math.PI * 2);
-      ctx.fill();
-    }
-    const glow = ctx.createRadialGradient(w / 2, h * 0.45, 0, w / 2, h * 0.45, w * 0.7);
-    glow.addColorStop(0, "rgb(120 130 220 / 0.18)");
-    glow.addColorStop(1, "rgb(120 130 220 / 0)");
-    ctx.fillStyle = glow;
-    ctx.fillRect(0, 0, w, h);
-    return { ink: "#f2ebd9", soft: "#aaa7bd", accent: "#d9b45a", mono: false };
+    paintNight(ctx, w, h, rand);
+    return { ...NIGHT_INK, mono: false };
   }
   if (style === "cover") {
     const base = /^#[0-9a-f]{6}$/i.test(input.colour) ? input.colour : "#3b4a6b";
@@ -383,7 +397,7 @@ function drawIndexCard(
 }
 
 /** A Measure for `font`, a canvas font with SIZE where the size goes. */
-function measureWith(ctx: CanvasRenderingContext2D, font: string): Measure {
+export function measureWith(ctx: CanvasRenderingContext2D, font: string): Measure {
   return (text, size) => {
     ctx.font = font.replace("SIZE", String(size));
     return ctx.measureText(text).width;
@@ -391,7 +405,7 @@ function measureWith(ctx: CanvasRenderingContext2D, font: string): Measure {
 }
 
 /** The text cut short with an ellipsis to fit `width` in the current font. */
-function clip(ctx: CanvasRenderingContext2D, text: string, width: number): string {
+export function clip(ctx: CanvasRenderingContext2D, text: string, width: number): string {
   if (ctx.measureText(text).width <= width) return text;
   let cut = text;
   while (cut && ctx.measureText(`${cut}…`).width > width) cut = cut.slice(0, -1);
