@@ -44,7 +44,7 @@ server.
 **See your stats**
 
 - Books and pages per year, ratings, genres, a calendar of the days you
-  read, and your reading habits.
+  read with your streaks, and your reading habits.
 - Goals for the year or every month, in books, pages or days you read,
   and challenges such as "6 classics in 2026".
 - A year in review for every year.

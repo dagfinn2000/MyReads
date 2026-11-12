@@ -23,6 +23,7 @@ import {
 import { challengeBooksFor } from "@/lib/challenges-query";
 import { dailyGoalTarget, goalMetDays } from "@/lib/daily-goal";
 import { minutesInWindow } from "@/lib/reading-time";
+import { buildCalendar } from "@/lib/reading-calendar";
 import { readingHabits } from "@/lib/reading-habits";
 import {
   booksReadAllTime,
@@ -153,7 +154,7 @@ export default async function StatsPage({
   ]);
 
   const randomQuote = randomQuotes[0] ?? null;
-  // Pages per day for the reading calendar, from the log loaded above.
+  // Pages per day, from the log loaded above (for the daily goal's days).
   const pageTotals = dayPageTotals(inputs.logDays);
   const { books } = inputs;
   const reading = books.filter((b) => b.status === ReadingStatus.READING);
@@ -183,6 +184,16 @@ export default async function StatsPage({
       dailyGoal.unit === "pages" ? pageTotals : dayMinuteTotals(dayMinutes),
       dailyGoal.amount,
     );
+  // The reading calendar: every reading day, how much, and in which books.
+  const calendar = hidden.has("heatmap")
+    ? null
+    : buildCalendar({
+        logDays: inputs.logDays,
+        dayMinutes,
+        books,
+        statsAudiobooks: prefs.statsAudiobooks,
+        goalDays,
+      });
 
   // Books read: all time it's the books on the Read shelf, each once. In a
   // period it's finishes, re-reads included, so it says "Books finished".
@@ -450,19 +461,26 @@ export default async function StatsPage({
         />
       )}
 
-      {!hidden.has("heatmap") && (
+      {calendar && (
         <Card>
           <CardHeader>
-            <CardTitle>
-              Reading days
-              {/* The calendar is always the last 12 months. */}
-              {(period === "year" || period === "30d") && (
-                <span className="font-normal text-muted-foreground"> · last 12 months</span>
-              )}
-            </CardTitle>
+            <CardTitle>Reading days</CardTitle>
           </CardHeader>
           <CardContent>
-            <ReadingHeatmap totals={pageTotals} goalDays={goalDays ?? undefined} prefs={prefs} />
+            {/* Its own buttons pick the last 12 months or a year; it opens
+                on this year when the page shows this year. */}
+            <ReadingHeatmap
+              key={period}
+              data={calendar}
+              today={todayKey}
+              initialWindow={period === "year" ? currentYear : "recent"}
+              prefs={{
+                weekStart: prefs.weekStart,
+                heatmapScale: prefs.heatmapScale,
+                dateFormat: prefs.dateFormat,
+                numberFormat: prefs.numberFormat,
+              }}
+            />
           </CardContent>
         </Card>
       )}

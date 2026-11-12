@@ -1192,7 +1192,7 @@ export function PreferencesForm({
         </div>
         <Choice
           label="Calendar shading"
-          hint="Pages a day for each shade of the reading calendar."
+          hint="Pages a day for each shade of the reading calendar. Its Time view goes by minutes instead (15, 30 and 60 on Standard)."
           value={prefs.heatmapScale}
           options={[
             { value: "standard", label: "Standard (20, 50, 100 pages)" },

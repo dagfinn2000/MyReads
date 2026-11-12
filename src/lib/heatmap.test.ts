@@ -43,3 +43,26 @@ describe("heatmapLevel", () => {
     ]);
   });
 });
+
+describe("heatmap in minutes", () => {
+  it("has its own fixed steps", () => {
+    expect(heatmapThresholds("standard", [], "minutes")).toEqual([15, 30, 60]);
+    expect(heatmapThresholds("gentle", [], "minutes")).toEqual([10, 20, 30]);
+    expect(heatmapThresholds("heavy", [], "minutes")).toEqual([30, 60, 120]);
+  });
+
+  it("centres auto on the usual day, as for pages", () => {
+    expect(heatmapThresholds("auto", [0, 20, 40, 40, 90], "minutes")).toEqual([20, 40, 80]);
+    expect(heatmapThresholds("auto", [], "minutes")).toEqual([15, 30, 60]);
+  });
+
+  it("describes each shade in minutes", () => {
+    expect(heatmapLegend([15, 30, 60], "minutes")).toEqual([
+      "No reading",
+      "Under 15 min",
+      "15–29 min",
+      "30–59 min",
+      "60+ min",
+    ]);
+  });
+});

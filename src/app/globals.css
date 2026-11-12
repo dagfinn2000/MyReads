@@ -4569,6 +4569,46 @@ html[data-covers="plain"] .drawn-cover {
 .gold-medal-in {
   animation: medal-in 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
 }
+/* The reading calendar on Stats (components/reading-heatmap.tsx). Its
+   squares change colour smoothly when it switches between pages and time,
+   and fade back while a streak is lit. It sweeps in from the left as it
+   opens: one mask moving over the whole calendar rather than an animation
+   for each of its 371 squares. The mask only exists while it moves (it is
+   set in the keyframes), so nothing is left on the calendar afterwards. */
+.heat-cell {
+  transition:
+    background-color 0.35s ease,
+    opacity 0.2s ease;
+}
+.heat-future {
+  background-color: color-mix(in oklab, var(--muted) 45%, transparent);
+}
+.heat-dim {
+  opacity: 0.16;
+}
+.heat-today {
+  box-shadow: inset 0 0 0 1.5px color-mix(in oklab, var(--foreground) 55%, transparent);
+}
+.heat-cell:focus-visible,
+.heat-cell[aria-pressed="true"] {
+  outline: 2px solid var(--foreground);
+  outline-offset: 1px;
+}
+@keyframes heat-reveal {
+  from {
+    mask-image: linear-gradient(90deg, #000 33.4%, transparent 50%);
+    mask-size: 300% 100%;
+    mask-position: 100% 0;
+  }
+  to {
+    mask-image: linear-gradient(90deg, #000 33.4%, transparent 50%);
+    mask-size: 300% 100%;
+    mask-position: 0 0;
+  }
+}
+.heat-reveal {
+  animation: heat-reveal 0.9s cubic-bezier(0.3, 0.6, 0.3, 1) backwards;
+}
 .gold-medal-shine {
   position: absolute;
   inset: 36% 10.4% 4.7%;

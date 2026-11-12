@@ -230,6 +230,12 @@ describe("minutesByDayForUser", () => {
       new Map([["2026-03-02", 75]]),
     );
     expect(dayMinuteTotals(utc, true)).toEqual(new Map([["2026-03-01", 30]]));
+    // Each book apart, for the reading calendar's day view.
+    const oslo = await minutesByDayForUser(TIMED, "Europe/Oslo");
+    expect(oslo.map((r) => [r.day, r.bookId, r.audiobook, r.minutes]).sort()).toEqual([
+      ["2026-03-02", "sq-t1", false, 30],
+      ["2026-03-02", "sq-t2", true, 45],
+    ]);
     // Nobody else's time, and none at all for a reader who never timed.
     expect(await minutesByDayForUser(USER, "UTC")).toEqual([]);
   });
