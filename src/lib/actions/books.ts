@@ -17,6 +17,7 @@ import { calendarDay, dayKey, endOfZonedDay, zonedDayStart } from "@/lib/dates";
 import { currentPassEntries } from "@/lib/progress";
 import { anchorMoment } from "@/lib/reading-log";
 import { settleReadingState } from "@/lib/reading-state";
+import { aspectRatingUpdate } from "@/lib/rating-breakdown";
 import { buildSearchText, foldForSearch } from "@/lib/utils";
 import { AFTER_ADD } from "@/lib/preferences";
 import { parseStatusChoice } from "@/lib/statuses";
@@ -280,6 +281,8 @@ export async function updateReading(
         status: data.status,
         statusKey: choice?.statusKey ?? null,
         rating: data.rating || null, // 0 = cleared
+        // The breakdown, where the form had it (lib/rating-breakdown.ts).
+        ...aspectRatingUpdate(data),
         review: data.review ?? null,
         reviewSearchText: foldForSearch(data.review ?? ""),
         dateStarted,

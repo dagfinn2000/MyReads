@@ -265,6 +265,7 @@ const STATS_LABELS: Record<HideableStat, string> = {
   challenges: "Challenges",
   heatmap: "Reading days calendar",
   habits: "Reading habits",
+  ratings: "Ratings",
   perYear: "Books read per year",
   tags: "Genres & tags",
   formats: "Formats",
@@ -863,6 +864,20 @@ export function PreferencesForm({
           ]}
           onChange={(v) => update({ ratingStyle: v })}
         />
+        {prefs.ratingStyle !== "off" && (
+          <>
+            <Toggle
+              label="Rate the plot, characters and writing too"
+              checked={prefs.ratingBreakdown}
+              onChange={(c) => update({ ratingBreakdown: c })}
+            />
+            <p className="text-xs text-muted-foreground">
+              They go under a book&apos;s rating, each one optional, and Stats
+              shows your averages. Your overall rating stays your own: it
+              isn&apos;t worked out from them.
+            </p>
+          </>
+        )}
       </Section>
 
       <Section title="Theme" id="themes">

@@ -17,11 +17,12 @@ import { parsePreferences } from "@/lib/preferences";
  * The JSON inside is still the version-1 export format — quotes, notes,
  * reads, progress, loans, settings, saved views, pages goals, reading-days
  * and monthly goals (`moreGoals`) and challenges are additive
- * fields (as are a goal's `countRereads`, a book's `lengthMinutes` and
- * `upNextRank`, a past read's `note`, a log entry's `minutes`, a quote's
- * `chapter` and a loan's `dueAt`), and `owned` is still written alongside the newer
- * `ownership` — so unzipping and feeding `library.json` to an older
- * instance keeps working.
+ * fields (as are a goal's `countRereads`, a book's `lengthMinutes`,
+ * `upNextRank` and plot, characters and writing ratings, a past read's
+ * `note`, a log entry's `minutes`, a quote's `chapter` and a loan's
+ * `dueAt`), and `owned` is still written alongside the newer `ownership` —
+ * so unzipping and feeding `library.json` to an older instance keeps
+ * working.
  */
 
 export interface BackupZip {

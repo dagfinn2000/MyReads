@@ -17,6 +17,7 @@ import { FinishedDateField } from "@/components/finished-date-field";
 import { CurrentPageField } from "@/components/progress-input";
 import { QuickLog } from "@/components/quick-log";
 import { StarRatingInput } from "@/components/star-rating-input";
+import { RatingBreakdownInput } from "@/components/rating-breakdown-input";
 import { StatusSelectItems } from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -39,8 +40,10 @@ import {
  * The "my reading of this book" panel on the detail page. On top, progress:
  * the bar in the book's unit, the quick-log row while the book is being
  * read, and the sparkline and pace drawn from the automatic reading log.
- * Then the form for status, star rating, dates and the personal review,
- * which saves through the updateReading server action, and the log itself.
+ * Then the form for status, star rating (with the plot, characters and
+ * writing under it, components/rating-breakdown-input.tsx), dates and the
+ * personal review, which saves through the updateReading server action,
+ * and the log itself.
  *
  * While the book is Currently Reading, progress is logged only through the
  * quick row (its own form, outside this one), and saving the reading form
@@ -89,6 +92,9 @@ export function ReadingCard({
     book.status,
     book.statusKey ?? "",
     book.rating ?? 0,
+    book.plotRating ?? 0,
+    book.charactersRating ?? 0,
+    book.writingRating ?? 0,
     book.dateStarted?.getTime() ?? 0,
     book.dateFinished?.getTime() ?? 0,
     reading ? "reading" : (book.currentPage ?? 0),
@@ -151,6 +157,8 @@ export function ReadingCard({
               <StarRatingInput name="rating" defaultValue={book.rating ?? 0} />
             </div>
           </div>
+
+          <RatingBreakdownInput book={book} />
 
           <div className="flex flex-wrap gap-4">
             <div className="grid gap-2">
