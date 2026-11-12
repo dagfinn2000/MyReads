@@ -5476,6 +5476,277 @@ main:has(form[aria-busy="true"]) .auth-book-move {
   }
 }
 
+/* ── Year story ────────────────────────────────────────────────────────────
+   The year played back as slides (components/year-story.tsx). On a wide
+   screen the stage is a tall card over the dimmed page; on a phone it is
+   the whole screen. It wears the theme's own colours, with a soft wash
+   behind each slide in the colour of one of the year's covers. Entrances
+   play only while motion is allowed; otherwise each slide simply stands as
+   it ends, and the slides wait for a tap. */
+.story-stage {
+  width: 100vw;
+  height: 100dvh;
+}
+@media (min-width: 40rem) {
+  .story-stage {
+    width: min(28rem, calc(100vw - 8rem));
+    height: min(52rem, calc(100dvh - 3rem));
+    border-radius: 1.25rem;
+    box-shadow: 0 30px 80px -20px rgb(0 0 0 / 0.6), 0 0 0 1px rgb(255 255 255 / 0.06);
+  }
+}
+.story-stage {
+  --gx: 85%;
+  --gy: 8%;
+  --hx: 8%;
+  --hy: 92%;
+}
+.story-stage[data-slide="books"],
+.story-stage[data-slide="genres"],
+.story-stage[data-slide="goal"] {
+  --gx: 10%;
+  --gy: 14%;
+  --hx: 95%;
+  --hy: 80%;
+}
+.story-stage[data-slide="pages"],
+.story-stage[data-slide="author"] {
+  --gx: 90%;
+  --gy: 45%;
+  --hx: 0%;
+  --hy: 10%;
+}
+.story-stage[data-slide="days"],
+.story-stage[data-slide="top"] {
+  --gx: 50%;
+  --gy: 0%;
+  --hx: 50%;
+  --hy: 100%;
+}
+.story-glow {
+  position: absolute;
+  inset: -20%;
+  pointer-events: none;
+  background:
+    radial-gradient(closest-side, color-mix(in oklab, var(--glow-a, var(--primary)) var(--glow-strength, 34%), transparent), transparent)
+      var(--gx) var(--gy) / 75% 55% no-repeat,
+    radial-gradient(closest-side, color-mix(in oklab, var(--glow-b, var(--primary)) 22%, transparent), transparent)
+      var(--hx) var(--hy) / 85% 60% no-repeat;
+}
+/* Dark pages need more of the colour for the wash to show at all. */
+.dark .story-glow {
+  --glow-strength: 46%;
+}
+/* Keeps the year legible over the covers around it. */
+.story-hush {
+  background: radial-gradient(closest-side, var(--background) 45%, color-mix(in oklab, var(--background) 70%, transparent) 75%, transparent);
+}
+.story-fan {
+  rotate: var(--fan);
+  translate: var(--shift) 0;
+}
+.story-float {
+  rotate: var(--turn);
+}
+.story-day-streak {
+  background: oklch(0.72 0.16 65);
+  box-shadow: 0 0 6px oklch(0.78 0.16 70 / 0.7);
+}
+html:not(.dark) .story-day-streak {
+  background: oklch(0.64 0.17 55);
+  box-shadow: 0 0 5px oklch(0.7 0.17 60 / 0.55);
+}
+/* A book lying open, its leaves turning from right to left. */
+.story-book {
+  position: relative;
+  width: 6.5rem;
+  height: 4.25rem;
+  perspective: 500px;
+}
+.story-book-page {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50%;
+  border: 1.5px solid color-mix(in oklab, var(--foreground) 45%, transparent);
+  background:
+    repeating-linear-gradient(
+        transparent 0 7px,
+        color-mix(in oklab, var(--foreground) 22%, transparent) 7px 8.5px
+      )
+      50% 50% / 62% 66% no-repeat,
+    color-mix(in oklab, var(--foreground) 4%, var(--background));
+}
+.story-book-left {
+  left: 0;
+  border-radius: 7px 1px 1px 7px;
+}
+.story-book-right,
+.story-leaf {
+  left: 50%;
+  border-radius: 1px 7px 7px 1px;
+}
+.story-leaf {
+  transform-origin: left center;
+  backface-visibility: visible;
+  opacity: 0;
+}
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-motion="off"]) .story-rise {
+    animation: story-rise 650ms cubic-bezier(0.2, 0.7, 0.2, 1) var(--d, 0ms) both;
+  }
+  html:not([data-motion="off"]) .story-pop {
+    animation: story-pop 520ms cubic-bezier(0.2, 0.8, 0.3, 1.2) var(--d, 0ms) both;
+  }
+  html:not([data-motion="off"]) .story-drop {
+    animation: story-drop 800ms cubic-bezier(0.2, 0.8, 0.3, 1) var(--d, 0ms) both;
+  }
+  html:not([data-motion="off"]) .story-grow {
+    transform-origin: bottom;
+    animation: story-grow 700ms cubic-bezier(0.2, 0.7, 0.2, 1) var(--d, 0ms) both;
+  }
+  html:not([data-motion="off"]) .story-fan {
+    animation: story-fan 900ms cubic-bezier(0.2, 0.8, 0.3, 1) var(--d, 0ms) both;
+  }
+  html:not([data-motion="off"]) .story-float {
+    animation:
+      story-float-in 900ms cubic-bezier(0.2, 0.7, 0.2, 1) var(--d, 0ms) both,
+      story-bob 6s ease-in-out calc(var(--d, 0ms) + 900ms) infinite alternate;
+  }
+  html:not([data-motion="off"]) .story-day-streak {
+    animation: story-light 600ms ease-out var(--d, 0ms) both;
+  }
+  html:not([data-motion="off"]) .story-glow {
+    animation:
+      story-glow-in 900ms ease-out both,
+      story-drift 14s ease-in-out 900ms infinite alternate;
+  }
+  html:not([data-motion="off"]) .story-fill-run {
+    animation-name: story-fill;
+    animation-timing-function: linear;
+    animation-fill-mode: forwards;
+  }
+  html:not([data-motion="off"]) .story-leaf {
+    animation: story-leaf 4.5s cubic-bezier(0.45, 0.05, 0.35, 1) calc(600ms + var(--leaf) * 1.5s) infinite;
+  }
+  html:not([data-motion="off"]) .story-hand-minute {
+    animation: story-hand 1.8s cubic-bezier(0.25, 0.6, 0.2, 1) 300ms both;
+  }
+  html:not([data-motion="off"]) .story-hand-hour {
+    animation: story-hand-slow 1.8s cubic-bezier(0.25, 0.6, 0.2, 1) 300ms both;
+  }
+}
+.story-hand-minute,
+.story-hand-hour {
+  transform-box: view-box;
+  transform-origin: 50% 50%;
+}
+.story-hand-minute {
+  rotate: 60deg;
+}
+.story-hand-hour {
+  rotate: 305deg;
+}
+@keyframes story-rise {
+  from {
+    opacity: 0;
+    translate: 0 14px;
+  }
+}
+@keyframes story-pop {
+  from {
+    opacity: 0;
+    scale: 0.6;
+  }
+}
+@keyframes story-drop {
+  from {
+    opacity: 0;
+    translate: 0 -28px;
+    rotate: -3deg;
+  }
+  70% {
+    opacity: 1;
+    translate: 0 3px;
+  }
+}
+@keyframes story-grow {
+  from {
+    scale: 1 0;
+  }
+}
+@keyframes story-fan {
+  from {
+    opacity: 0;
+    rotate: 0deg;
+    translate: 0 24px;
+  }
+}
+@keyframes story-float-in {
+  from {
+    opacity: 0;
+    scale: 0.9;
+  }
+}
+@keyframes story-bob {
+  to {
+    translate: 0 -10px;
+  }
+}
+@keyframes story-light {
+  from {
+    background: color-mix(in oklab, var(--foreground) 55%, transparent);
+    box-shadow: none;
+  }
+  50% {
+    scale: 1.6;
+  }
+}
+@keyframes story-glow-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes story-drift {
+  to {
+    translate: 4% -3%;
+  }
+}
+@keyframes story-fill {
+  from {
+    scale: 0 1;
+  }
+  to {
+    scale: 1 1;
+  }
+}
+@keyframes story-leaf {
+  0% {
+    opacity: 1;
+    transform: rotateY(0deg);
+  }
+  45%,
+  70% {
+    opacity: 1;
+    transform: rotateY(-180deg);
+  }
+  71%,
+  100% {
+    opacity: 0;
+    transform: rotateY(-180deg);
+  }
+}
+@keyframes story-hand {
+  from {
+    rotate: -660deg;
+  }
+}
+@keyframes story-hand-slow {
+  from {
+    rotate: 245deg;
+  }
+}
+
 /* ── Theme changes ─────────────────────────────────────────────────────────
    For the frame a theme changes in (data-theme-changing, set by
    applyThemeSetting in lib/themes.ts), what would ease from the old

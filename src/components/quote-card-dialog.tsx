@@ -23,6 +23,14 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  canSharePictures,
+  canvasPicture,
+  downloadPicture,
+  pictureFonts,
+  sharePicture,
+  useCoverImage,
+} from "@/lib/picture-share";
 import { cn } from "@/lib/utils";
 
 /** The look and shape last used, kept in this browser only. */
@@ -90,44 +98,6 @@ function loadChoice(): { style: QuoteCardStyle; shape: QuoteCardShape } {
   }
 }
 
-/** The app's book face as the canvas must name it (next/font gives it a
- *  name of its own), and a typewriter face. */
-function cardFonts(): CardFonts {
-  const literata = getComputedStyle(document.documentElement).getPropertyValue("--font-literata").trim();
-  return {
-    serif: `${literata ? `${literata}, ` : ""}Georgia, serif`,
-    mono: `"SF Mono", "Cascadia Mono", "Roboto Mono", Menlo, Consolas, "Courier New", monospace`,
-  };
-}
-
-/** Whether this device can hand a picture to another app (phones, mostly). */
-function canSharePictures(): boolean {
-  try {
-    const probe = new File([new Uint8Array(1)], "quote.png", { type: "image/png" });
-    return !!navigator.canShare?.({ files: [probe] });
-  } catch {
-    return false;
-  }
-}
-
-/** The cover image, if it can be drawn: covers on this server always can,
- *  another site's only when it allows it. */
-function useCoverImage(url: string | null): HTMLImageElement | null {
-  const [image, setImage] = useState<HTMLImageElement | null>(null);
-  useEffect(() => {
-    if (!url) return;
-    let live = true;
-    const img = new Image();
-    if (!url.startsWith("/")) img.crossOrigin = "anonymous";
-    img.onload = () => live && setImage(img);
-    img.src = url;
-    return () => {
-      live = false;
-    };
-  }, [url]);
-  return url ? image : null;
-}
-
 function QuoteCardDialog({ quote, book }: { quote: CardQuote; book: CardBook }) {
   const [choice, setChoice] = useState(loadChoice);
   const [fonts, setFonts] = useState<CardFonts | null>(null);
@@ -142,7 +112,7 @@ function QuoteCardDialog({ quote, book }: { quote: CardQuote; book: CardBook }) 
   // The faces load before the first drawing, or the canvas would use a
   // stand-in and never redraw.
   useEffect(() => {
-    const f = cardFonts();
+    const f: CardFonts = pictureFonts();
     const ready = Promise.all(
       ["italic 400 40px", "400 40px", "600 40px"].map((weight) =>
         document.fonts.load(`${weight} ${f.serif}`).catch(() => []),
@@ -176,38 +146,18 @@ function QuoteCardDialog({ quote, book }: { quote: CardQuote; book: CardBook }) 
     }
   }
 
-  function picture(): Promise<Blob | null> {
-    return new Promise((resolve) => {
-      const canvas = canvasRef.current;
-      if (!canvas) return resolve(null);
-      canvas.toBlob(resolve, "image/png");
-    });
-  }
-
   async function download() {
     setBusy(true);
-    const blob = await picture();
+    const blob = await canvasPicture(canvasRef.current);
     setBusy(false);
-    if (!blob) return;
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = quoteCardFileName(book.title);
-    link.click();
-    setTimeout(() => URL.revokeObjectURL(url), 10_000);
+    if (blob) downloadPicture(blob, quoteCardFileName(book.title));
   }
 
   async function share() {
     setBusy(true);
-    const blob = await picture();
+    const blob = await canvasPicture(canvasRef.current);
     setBusy(false);
-    if (!blob) return;
-    const file = new File([blob], quoteCardFileName(book.title), { type: "image/png" });
-    try {
-      await navigator.share({ files: [file], title: book.title });
-    } catch {
-      // Cancelled, or the other app said no: nothing to do.
-    }
+    if (blob) await sharePicture(blob, quoteCardFileName(book.title), book.title);
   }
 
   return (

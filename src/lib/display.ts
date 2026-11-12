@@ -169,6 +169,14 @@ export function formatWeekdayDay(d: Date, prefs?: FormatPrefs): string {
   return monthFirst(prefs?.dateFormat) ? `${weekday}, ${month} ${day}` : `${weekday} ${day} ${month}`;
 }
 
+/** "7 Apr", or "Apr 7" for the month-first formats: a day in a year
+ *  already named. */
+export function formatDayMonth(key: string, format?: DateFormat): string {
+  const [, m, day] = key.split("-").map(Number);
+  const month = MONTHS_SHORT[m - 1];
+  return monthFirst(format) ? `${month} ${day}` : `${day} ${month}`;
+}
+
 /** A recent day in a short menu: "Sat 10 Oct", or "Sat, Oct 10". With
  *  the year: "Sat 10 Oct 2026", or "Sat, Oct 10, 2026". */
 export function formatShortDay(key: string, format?: DateFormat, withYear = false): string {

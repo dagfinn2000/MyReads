@@ -41,6 +41,13 @@ import { GoldMedal } from "@/components/gold-medal";
 import { Bar, StatCard } from "@/components/stat-blocks";
 import { Stars } from "@/components/stars";
 import { YearShelf } from "@/components/year-shelf";
+import { YearStoryButton } from "@/components/year-story";
+import {
+  hasStory,
+  type WrappedBook,
+  type WrappedFinish,
+  type YearWrapped,
+} from "@/lib/year-wrapped";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -249,7 +256,7 @@ export default async function YearInReviewPage({
     </Card>
   );
 
-  const header = (
+  const header = (story?: React.ReactNode) => (
     <div className="flex flex-wrap items-center gap-3">
       <Button asChild variant="ghost" size="sm">
         <Link href="/stats">
@@ -261,6 +268,7 @@ export default async function YearInReviewPage({
         {year} in books
       </h1>
       <span className="ml-auto flex items-center gap-1">
+        {story && <span className="mr-2">{story}</span>}
         {year > FIRST_YEAR && (
           <Button asChild variant="ghost" size="icon-sm" title={`${year - 1} in books`}>
             <Link href={`/stats/year/${year - 1}`}>
@@ -282,7 +290,7 @@ export default async function YearInReviewPage({
   if (counted.length === 0 && yearDays.length === 0) {
     return (
       <div className="grid grid-cols-1 gap-6">
-        {header}
+        {header()}
         <p className="text-sm text-muted-foreground">
           Nothing finished in {year}. No dated reads landed in this year.
         </p>
@@ -379,9 +387,44 @@ export default async function YearInReviewPage({
     ? formatDate(new Date(`${biggestDay[0]}T00:00:00Z`), prefs)
     : null;
 
+  // The year as a story (components/year-story.tsx), from the same numbers.
+  const daysToRead = (f: Finish) =>
+    f.dateStarted && f.dateStarted <= f.dateFinished
+      ? Math.max(1, Math.round((f.dateFinished.getTime() - f.dateStarted.getTime()) / 86_400_000))
+      : null;
+  const storyBook = (b: StatsBook): WrappedBook => ({
+    id: b.id,
+    title: b.title,
+    authors: b.authors,
+    coverUrl: b.coverUrl,
+    pageCount: b.pageCount,
+  });
+  const storyFinish = (f: Finish): WrappedFinish => ({
+    book: storyBook(f.book),
+    day: f.day,
+    rating: f.rating,
+    days: daysToRead(f),
+  });
+  const wrapped: YearWrapped = {
+    year,
+    current: clock.when === "current",
+    books: totals.books,
+    bookWord: prefs.statsStoppedBooks === "book" ? "read" : "finished",
+    rereads: totals.rereads,
+    pages: totals.pages,
+    minutes: timeRead,
+    days: yearDays.map(([key]) => key),
+    months: perMonth,
+    genres: topTags.slice(0, 3).map(([tag, count]) => ({ tag, count })),
+    finishes: finishes.map(storyFinish),
+    top: ratings ? topRated.slice(0, 5).map(storyFinish) : [],
+    ratings,
+    goal: goal && goalMet ? { done: goalDone, target: goal.target, unit: goal.unit } : null,
+  };
+
   return (
     <div className="grid grid-cols-1 gap-6">
-      {header}
+      {header(hasStory(wrapped) && <YearStoryButton wrapped={wrapped} />)}
 
       <div className={`grid grid-cols-2 gap-4 max-lg:[&>:last-child:nth-child(odd)]:col-span-2 ${ratings ? "lg:grid-cols-4" : "lg:grid-cols-3"}`}>
         <StatCard
