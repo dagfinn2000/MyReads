@@ -12,6 +12,7 @@ export const statsBookSelect = {
   coverUrl: true,
   pageCount: true,
   tags: true,
+  moods: true,
   format: true,
   status: true,
   rating: true,

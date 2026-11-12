@@ -11,6 +11,8 @@ import {
   challengeQuery,
 } from "@/lib/challenges";
 import { idSchema } from "@/lib/reading-log-input";
+import { getPreferences } from "@/lib/current-user";
+import { isMoodKey, moodOf } from "@/lib/moods";
 
 const fieldsSchema = z.object({
   name: z.string().trim().max(CHALLENGE_NAME_MAX),
@@ -26,9 +28,9 @@ export interface ChallengeFormState {
 /**
  * The slice of the library a menu choice means, as a query string: a saved
  * view's filters, one shelf (either kind: a smart shelf's books are the
- * ones its rules hold at the time), or one tag. Views and shelves are
- * looked up in the reader's own account. Null when it names nothing they
- * have.
+ * ones its rules hold at the time), one tag or one mood. Views, shelves
+ * and moods are looked up in the reader's own account. Null when it names
+ * nothing they have.
  */
 async function sourceQuery(userId: string, source: string): Promise<string | null> {
   const [kind, ...rest] = source.split(":");
@@ -55,10 +57,16 @@ async function sourceQuery(userId: string, source: string): Promise<string | nul
     const query = challengeQuery(new URLSearchParams({ tag: value }).toString());
     return new URLSearchParams(query).get("tag") === value.trim() ? query : null;
   }
+  if (kind === "mood") {
+    // One of the reader's moods.
+    if (!isMoodKey(value) || !moodOf(value, await getPreferences())) return null;
+    return challengeQuery(new URLSearchParams({ mood: value }).toString());
+  }
   return null;
 }
 
-/** Start a challenge: so many books from a view, shelf or tag in a year. */
+/** Start a challenge: so many books from a view, shelf, tag or mood in a
+ *  year. */
 export async function createChallenge(
   _prev: ChallengeFormState,
   formData: FormData,

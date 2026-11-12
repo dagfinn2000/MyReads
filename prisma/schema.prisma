@@ -239,6 +239,10 @@ model Book {
   /// Kept as a string because metadata APIs return partial dates ("1999", "2003-07").
   publishedDate String?
   tags          String[]   @default([])
+  /// How the book feels: keys of the built-in moods and the reader's own
+  /// (lib/moods.ts), in no particular order. A key no longer known is
+  /// ignored wherever moods are shown.
+  moods         String[]   @default([])
   format        BookFormat @default(PHYSICAL)
   ownership     BookOwnership @default(OWNED)
   /// Freeform series name (e.g. "Mistborn Era 1"); groups books together.
@@ -311,6 +315,8 @@ model Book {
   @@index([userId, isbn])
   /// Tag filter uses array containment, which a btree cannot serve.
   @@index([tags], type: Gin)
+  /// So does the mood filter.
+  @@index([moods], type: Gin)
   /// Library search is a substring match (LIKE '%…%'); the series lookup is
   /// ILIKE. Both need trigrams — see the 20260728020000 migration.
   @@index([searchText(ops: raw("gin_trgm_ops"))], type: Gin, map: "Book_searchText_trgm_idx")

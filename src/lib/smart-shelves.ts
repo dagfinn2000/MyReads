@@ -65,6 +65,8 @@ export function describeRules(
     ratingLabel: (minRating: string) => string;
     fieldLabel?: (field: string) => string | null;
     fmt?: (n: number) => string;
+    /** A mood's name by its key. */
+    moodName?: (key: string) => string;
   },
 ): string[] {
   const f = parseFilters(Object.fromEntries(new URLSearchParams(rules)));
@@ -84,7 +86,7 @@ export function describeRules(
   const format = Object.values(BookFormat).find((x) => x === f.format);
   if (format) out.push(FORMAT_LABELS[format]);
   if (Object.hasOwn(OWNED_RULES, f.owned)) out.push(OWNED_RULES[f.owned]);
-  for (const chip of activeFilterChips(f, o.ratingLabel, o.fieldLabel, o.fmt)) {
+  for (const chip of activeFilterChips(f, o.ratingLabel, o.fieldLabel, o.fmt, o.moodName)) {
     out.push(chip.label);
   }
   return out;

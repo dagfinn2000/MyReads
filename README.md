@@ -38,6 +38,7 @@ server.
 - Smart shelves that fill themselves, such as "unread sci-fi under 300
   pages".
 - Fields of your own, such as where a book lives or what it cost.
+- Moods such as cosy, funny or dark, to find a book for the mood you're in.
 - A Series page with how far you are in each series and what's next.
 - Search, filter, sort and group, and save the views you use often.
 - Show the library as cards, covers, a bookshelf or a list, and edit many

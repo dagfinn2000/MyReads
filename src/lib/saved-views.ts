@@ -1,5 +1,6 @@
 import { parseFilters, tagList } from "@/lib/library-filters";
 import { naturalDir, parseLibraryView } from "@/lib/library-view";
+import { moodList } from "@/lib/moods";
 
 /** Most saved views one account can keep. Chips above the library stop
  *  being useful long before this; it only stops a runaway client. */
@@ -26,6 +27,7 @@ export function canonicalViewQuery(sp: Params): string {
   // A sort without a direction opens the way the library would open it.
   const dir = !first(sp.dir) && first(sp.sort) ? naturalDir(view.sort) : view.dir;
   const sorted = (list: string) => tagList(list).sort().join(",");
+  const sortedMoods = (list: string) => moodList(list).sort().join(",");
 
   const params = new URLSearchParams();
   if (f.shelf && f.shelf !== "all") params.set("shelf", f.shelf);
@@ -36,6 +38,9 @@ export function canonicalViewQuery(sp: Params): string {
   if (f.tag) params.set("tag", sorted(f.tag));
   if (f.tag && f.tagMatch === "all") params.set("tagMatch", "all");
   if (f.notTag) params.set("notTag", sorted(f.notTag));
+  if (f.mood) params.set("mood", sortedMoods(f.mood));
+  if (f.mood && f.moodMatch === "all") params.set("moodMatch", "all");
+  if (f.notMood) params.set("notMood", sortedMoods(f.notMood));
   if (f.format && f.format !== "all") params.set("format", f.format);
   if (f.owned && f.owned !== "all") params.set("owned", f.owned);
   if (f.minRating && f.minRating !== "all") params.set("minRating", f.minRating);

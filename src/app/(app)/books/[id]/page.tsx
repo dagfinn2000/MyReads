@@ -30,6 +30,7 @@ import { CloseBookButton } from "@/components/close-book-button";
 import { DeleteBookButton } from "@/components/delete-book-button";
 import { FindItAt } from "@/components/find-it-at";
 import { BookNotesCard } from "@/components/book-notes-card";
+import { BookMoods } from "@/components/book-moods";
 import { LendingCard } from "@/components/lending-card";
 import { showsLendingCard } from "@/lib/loans";
 import { ReadHistoryCard } from "@/components/read-history-card";
@@ -265,6 +266,8 @@ export default async function BookDetailPage({
               ),
             )}
           </div>
+
+          <BookMoods bookId={book.id} moods={book.moods} />
 
           {/* Each fact sits after a hairline, with its label in small
               capitals above the value (globals.css, `.book-facts`). */}

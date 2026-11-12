@@ -46,6 +46,8 @@ export function challengeSources(o: {
   tags: string[];
   shelves: { id: string; name: string }[];
   views: { id: string; name: string }[];
+  /** The moods the reader offers (lib/moods.ts). */
+  moods?: { key: string; name: string }[];
 }): { group: string; sources: ChallengeSource[] }[] {
   const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
   return [
@@ -60,6 +62,10 @@ export function challengeSources(o: {
     {
       group: "Tags",
       sources: o.tags.map((t) => ({ value: `tag:${t}`, label: t, name: cap(t) })),
+    },
+    {
+      group: "Moods",
+      sources: (o.moods ?? []).map((m) => ({ value: `mood:${m.key}`, label: m.name, name: m.name })),
     },
   ].filter((g) => g.sources.length > 0);
 }

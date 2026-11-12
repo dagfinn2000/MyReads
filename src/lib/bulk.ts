@@ -92,6 +92,9 @@ export const bulkSchema = z
     removeShelfId: z.string().max(64).optional(),
     addTags: tagList,
     removeTags: tagList,
+    /** A mood's key (lib/moods.ts) to put on, or take off, every book. */
+    addMood: z.string().max(16).optional(),
+    removeMood: z.string().max(16).optional(),
   })
   .superRefine((data, ctx) => {
     oneTarget(data, ctx);

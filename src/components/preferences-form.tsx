@@ -54,6 +54,7 @@ import { PartThemesForm } from "@/components/part-themes-form";
 import { playSample } from "@/components/sounds";
 import { StatusSettings } from "@/components/status-settings";
 import { FieldSettings } from "@/components/field-settings";
+import { MoodSettings } from "@/components/mood-settings";
 import { ReminderDevices, type ReminderDevice } from "@/components/reminder-settings";
 import { TagRulesList } from "@/components/tag-rules-list";
 import { Button } from "@/components/ui/button";
@@ -268,6 +269,7 @@ const STATS_LABELS: Record<HideableStat, string> = {
   ratings: "Ratings",
   perYear: "Books read per year",
   tags: "Genres & tags",
+  moods: "Moods",
   formats: "Formats",
   quote: "From your quotes",
 };
@@ -804,6 +806,10 @@ export function PreferencesForm({
 
       <Section title="Book fields" id="fields">
         <FieldSettings prefs={prefs} update={update} />
+      </Section>
+
+      <Section title="Moods" id="moods">
+        <MoodSettings prefs={prefs} update={update} />
       </Section>
 
       {savedViews.length > 0 && (

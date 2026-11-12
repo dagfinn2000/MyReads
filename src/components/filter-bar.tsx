@@ -18,6 +18,7 @@ import { naturalDir, type LibraryDisplay } from "@/lib/library-view";
 import type { RatingStyle } from "@/lib/preferences";
 import { canonicalViewQuery } from "@/lib/saved-views";
 import { fieldFilterLabel } from "@/lib/book-fields";
+import { allMoods, moodList, moodOf, offeredMoods } from "@/lib/moods";
 import { ActiveFilterChips } from "@/components/active-filter-chips";
 import { LibraryViewMenu } from "@/components/library-view-menu";
 import { ManageTagsDialog } from "@/components/manage-tags-dialog";
@@ -25,6 +26,7 @@ import { MoreFilters, minRatingLabel } from "@/components/more-filters";
 import { usePreferences } from "@/components/preferences-provider";
 import { SaveViewDialog } from "@/components/save-view-dialog";
 import { TagFilter } from "@/components/tag-filter";
+import { MoodFilter } from "@/components/mood-filter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -45,6 +47,10 @@ export interface FilterValues {
   tag: string;
   tagMatch: string;
   notTag: string;
+  /** Mood keys, comma-joined, like tags. */
+  mood: string;
+  moodMatch: string;
+  notMood: string;
   format: string;
   /** Ownership filter: "all" | "owned" | "wishlist" | "borrowed" |
    *  "given_away" | "lent" | "overdue". Keeps the `owned` name so old links
@@ -89,6 +95,7 @@ const GROUP_OPTIONS = [
   { value: "format", label: "Group by format", short: "Format" },
   { value: "ownership", label: "Group by ownership", short: "Ownership" },
   { value: "tag", label: "Group by tag", short: "Tag" },
+  { value: "mood", label: "Group by mood", short: "Mood" },
   { value: "shelf", label: "Group by shelf", short: "Shelf" },
   { value: "rating", label: "Group by rating", short: "Rating" },
 ];
@@ -204,6 +211,7 @@ const BarSelect = memo(function BarSelect({
 // changes: typing a search redraws the box and the Save view button, which
 // saves what it says, and nothing else.
 const MemoTagFilter = memo(TagFilter);
+const MemoMoodFilter = memo(MoodFilter);
 const MemoManageTags = memo(ManageTagsDialog);
 const MemoMoreFilters = memo(MoreFilters);
 const MemoViewMenu = memo(LibraryViewMenu);
@@ -218,6 +226,7 @@ export function FilterBar({
   values,
   allTags,
   tagCounts,
+  moodCounts,
   display,
   ratingStyle,
   finishedYears,
@@ -226,6 +235,8 @@ export function FilterBar({
   allTags: string[];
   /** Books per tag, for the tag list and the manage-tags dialog. */
   tagCounts: Record<string, number>;
+  /** Books per mood key, for the mood list. */
+  moodCounts: Record<string, number>;
   /** Card size, layout and card details, for the View menu. */
   display: LibraryDisplay;
   ratingStyle: RatingStyle;
@@ -273,6 +284,9 @@ export function FilterBar({
     if (next.tag && next.tag !== "all") params.set("tag", next.tag);
     if (next.tag && next.tagMatch === "all") params.set("tagMatch", "all");
     if (next.notTag) params.set("notTag", next.notTag);
+    if (next.mood) params.set("mood", next.mood);
+    if (next.mood && next.moodMatch === "all") params.set("moodMatch", "all");
+    if (next.notMood) params.set("notMood", next.notMood);
     if (next.format && next.format !== "all") params.set("format", next.format);
     if (next.owned && next.owned !== "all") params.set("owned", next.owned);
     if (next.minRating && next.minRating !== "all")
@@ -326,6 +340,9 @@ export function FilterBar({
         tag: "",
         tagMatch: "",
         notTag: "",
+        mood: "",
+        moodMatch: "",
+        notMood: "",
         finished: "",
         minRating: "",
         missing: "",
@@ -387,9 +404,20 @@ export function FilterBar({
         (v) => minRatingLabel(v, ratingStyle),
         (field) => fieldFilterLabel(field, prefs.customFields, prefs),
         (n) => formatNumber(n, prefs),
+        (key) => moodOf(key, prefs)?.name ?? key,
       ),
     [current, ratingStyle, prefs],
   );
+  // The moods the filter lists: the ones offered, and a hidden one the
+  // address names, so it can be unticked.
+  const filterMoods = useMemo(() => {
+    const named = new Set([...moodList(current.mood), ...moodList(current.notMood)]);
+    const offered = offeredMoods(prefs);
+    return [
+      ...offered,
+      ...allMoods(prefs).filter((m) => named.has(m.key) && !offered.includes(m)),
+    ];
+  }, [prefs, current.mood, current.notMood]);
   const group = GROUP_OPTIONS.find((o) => o.value === current.group);
   // Made once per grouping, so the list can skip redrawing.
   const groupValue = useMemo(
@@ -450,6 +478,16 @@ export function FilterBar({
           className={`${HALF_ROW} sm:w-36`}
         />
         <MemoManageTags tagCounts={tagCounts} />
+
+        <MemoMoodFilter
+          moods={filterMoods}
+          moodCounts={moodCounts}
+          mood={current.mood}
+          notMood={current.notMood}
+          moodMatch={current.moodMatch}
+          onChange={go}
+          className={`${HALF_ROW} sm:w-36`}
+        />
 
         <BarSelect
           value={current.format || "all"}

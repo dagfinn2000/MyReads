@@ -1,4 +1,8 @@
 import type { LucideIcon } from "lucide-react";
+import Link from "next/link";
+import { MOOD_BAR, moodHref, type Mood } from "@/lib/moods";
+import { cn } from "@/lib/utils";
+import { MoodIcon } from "@/components/mood-icon";
 import { Card, CardContent } from "@/components/ui/card";
 
 /** Simple horizontal CSS bar — no chart library needed at this scale. */
@@ -15,6 +19,35 @@ export function Bar({ label, value, max }: { label: string; value: number; max: 
       </div>
       <span className="text-right tabular-nums">{value}</span>
     </div>
+  );
+}
+
+/** A mood's row on Stats: its icon and name, a bar in its own tint, and
+ *  the count, the whole row a link to the library's books with it. */
+export function MoodBar({
+  mood,
+  value,
+  max,
+}: {
+  mood: Mood;
+  value: number;
+  max: number;
+}) {
+  const pct = max > 0 ? Math.max((value / max) * 100, 2) : 0;
+  return (
+    <Link
+      href={moodHref(mood.key)}
+      className="-mx-1 grid grid-cols-[7rem_1fr_2.5rem] items-center gap-2 rounded-md px-1 text-sm hover:bg-muted/60"
+    >
+      <span className="flex min-w-0 items-center gap-1.5 text-muted-foreground">
+        <MoodIcon mood={mood} />
+        <span className="truncate">{mood.name}</span>
+      </span>
+      <div className="h-2.5 rounded-full bg-muted">
+        <div className={cn("bar-grow h-full rounded-full", MOOD_BAR[mood.color])} style={{ width: `${pct}%` }} />
+      </div>
+      <span className="text-right tabular-nums">{value}</span>
+    </Link>
   );
 }
 

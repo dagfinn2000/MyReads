@@ -27,6 +27,8 @@ import {
   type BookCardBook,
 } from "@/components/book-card";
 import { BookSpine, spineColourOf } from "@/components/book-spine";
+import { MoodIcon } from "@/components/mood-icon";
+import { allMoods, offeredMoods, type Mood } from "@/lib/moods";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -59,6 +61,8 @@ export interface LibraryGroup {
   note?: string;
   /** Where the title links: a series' card on the Series page. */
   href?: string;
+  /** A mood section's icon and tint. */
+  mood?: Pick<Mood, "icon" | "color">;
 }
 
 /** How many more cards each "Show more" asks the server for. */
@@ -170,6 +174,7 @@ export function LibraryView({
   const [selected, setSelected] = useState<ReadonlySet<string>>(new Set());
   const [status, setStatus] = useState("keep");
   const [shelfId, setShelfId] = useState("keep");
+  const [moodChange, setMoodChange] = useState("keep");
   const [format, setFormat] = useState("keep");
   const [ownership, setOwnership] = useState("keep");
   const [tags, setTags] = useState("");
@@ -233,6 +238,7 @@ export function LibraryView({
     clearSelection();
     setStatus("keep");
     setShelfId("keep");
+    setMoodChange("keep");
     setFormat("keep");
     setOwnership("keep");
     setTags("");
@@ -266,9 +272,12 @@ export function LibraryView({
     const dropTags = splitTags(removeTags);
     // The shelf select's values are "add:<id>" and "remove:<id>".
     const [shelfAction, shelfTarget] = shelfId.split(":");
+    // The mood select's likewise: "add:cosy", "remove:cosy".
+    const [moodAction, moodTarget] = moodChange.split(":");
     if (
       status === "keep" &&
       shelfId === "keep" &&
+      moodChange === "keep" &&
       format === "keep" &&
       ownership === "keep" &&
       addTags.length === 0 &&
@@ -287,6 +296,8 @@ export function LibraryView({
         ownership: ownership === "keep" ? undefined : (ownership as BookOwnership),
         addShelfId: shelfAction === "add" ? shelfTarget : undefined,
         removeShelfId: shelfAction === "remove" ? shelfTarget : undefined,
+        addMood: moodAction === "add" ? moodTarget : undefined,
+        removeMood: moodAction === "remove" ? moodTarget : undefined,
         addTags: addTags.length ? addTags : undefined,
         removeTags: dropTags.length ? dropTags : undefined,
       });
@@ -467,7 +478,10 @@ export function LibraryView({
                     {g.title}
                   </Link>
                 ) : (
-                  <span className="min-w-0 wrap-anywhere">{g.title}</span>
+                  <span className="min-w-0 wrap-anywhere">
+                    {g.mood && <MoodIcon mood={g.mood} className="mr-1.5 inline size-[1em] align-[-0.125em]" />}
+                    {g.title}
+                  </span>
                 )}
                 <span className="text-sm font-normal text-muted-foreground tabular-nums">
                   {/* The group's real size, even when only part of it is
@@ -591,20 +605,42 @@ export function LibraryView({
                 ))}
               </SelectContent>
             </Select>
-            <Input
-              value={tags}
-              onChange={(e) => setTags(e.target.value)}
-              placeholder="Add tags, comma separated"
-              aria-label="Add tags, comma separated"
-              className="col-span-2"
-            />
-            <Input
-              value={removeTags}
-              onChange={(e) => setRemoveTags(e.target.value)}
-              placeholder="Remove tags, comma separated"
-              aria-label="Remove tags, comma separated"
-              className="col-span-2"
-            />
+            {/* The mood and the tags share a row from sm up, so the four
+                menus above stay one row. */}
+            <div className="col-span-2 grid grid-cols-1 gap-2 sm:col-span-4 sm:grid-cols-[minmax(0,2fr)_minmax(0,3fr)_minmax(0,3fr)]">
+              <Select value={moodChange} onValueChange={setMoodChange}>
+                <SelectTrigger aria-label="Mood" className="w-full min-w-0">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="keep">Mood: don&apos;t change</SelectItem>
+                  {offeredMoods(prefs).map((m) => (
+                    <SelectItem key={m.key} value={`add:${m.key}`}>
+                      <MoodIcon mood={m} className="size-4" />
+                      Add “{m.name}”
+                    </SelectItem>
+                  ))}
+                  {allMoods(prefs).map((m) => (
+                    <SelectItem key={`remove-${m.key}`} value={`remove:${m.key}`}>
+                      <MoodIcon mood={m} className="size-4" />
+                      Take off “{m.name}”
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Input
+                value={tags}
+                onChange={(e) => setTags(e.target.value)}
+                placeholder="Add tags, comma separated"
+                aria-label="Add tags, comma separated"
+              />
+              <Input
+                value={removeTags}
+                onChange={(e) => setRemoveTags(e.target.value)}
+                placeholder="Remove tags, comma separated"
+                aria-label="Remove tags, comma separated"
+              />
+            </div>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <Button

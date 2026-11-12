@@ -60,6 +60,7 @@ import { SOUND_SETTINGS, SOUND_VOLUMES, type SoundSetting, type SoundVolume } fr
 import { parsePartThemes, type PartThemes } from "@/lib/themes";
 import { parseCustomStatuses, parseStatusNames, type CustomStatus, type StatusNames } from "@/lib/statuses";
 import { parseBookFields, type BookField } from "@/lib/book-fields";
+import { parseCustomMoods, parseHiddenMoods, type CustomMood } from "@/lib/moods";
 
 /**
  * Per-account preferences — everything on the Account page's Preferences
@@ -244,6 +245,7 @@ export const HIDEABLE_STATS = [
   "ratings",
   "perYear",
   "tags",
+  "moods",
   "formats",
   "quote",
 ] as const;
@@ -533,6 +535,11 @@ export type Preferences = {
   customStatuses: CustomStatus[];
   /** The reader's own book fields (lib/book-fields.ts). */
   customFields: BookField[];
+  /** Built-in moods no longer offered for books or in the library's
+   *  filter (lib/moods.ts). A book that has one still shows it. */
+  hiddenMoods: string[];
+  /** Moods of the reader's own, after the built-in ones. */
+  customMoods: CustomMood[];
 
   // Stats
   statsPagesRead: StatsPagesRead;
@@ -679,6 +686,8 @@ export const DEFAULT_PREFERENCES: Preferences = {
   statusNames: {},
   customStatuses: [],
   customFields: [],
+  hiddenMoods: [],
+  customMoods: [],
   statsPagesRead: "finished",
   statsStoppedBooks: "none",
   statsAudiobooks: "full",
@@ -1024,6 +1033,8 @@ export function parsePreferences(raw: unknown): Preferences {
     statusNames: parseStatusNames(obj.statusNames),
     customStatuses: parseCustomStatuses(obj.customStatuses),
     customFields: parseBookFields(obj.customFields),
+    hiddenMoods: parseHiddenMoods(obj.hiddenMoods),
+    customMoods: parseCustomMoods(obj.customMoods),
     statsPagesRead: pick(STATS_PAGES_READ, obj.statsPagesRead, d.statsPagesRead),
     statsStoppedBooks: pick(STATS_STOPPED_BOOKS, obj.statsStoppedBooks, d.statsStoppedBooks),
     statsAudiobooks: pick(STATS_AUDIOBOOKS, obj.statsAudiobooks, d.statsAudiobooks),
