@@ -25,8 +25,10 @@ export interface ChallengeFormState {
 
 /**
  * The slice of the library a menu choice means, as a query string: a saved
- * view's filters, one shelf, or one tag. Views and shelves are looked up in
- * the reader's own account. Null when it names nothing they have.
+ * view's filters, one shelf (either kind: a smart shelf's books are the
+ * ones its rules hold at the time), or one tag. Views and shelves are
+ * looked up in the reader's own account. Null when it names nothing they
+ * have.
  */
 async function sourceQuery(userId: string, source: string): Promise<string | null> {
   const [kind, ...rest] = source.split(":");
@@ -39,7 +41,11 @@ async function sourceQuery(userId: string, source: string): Promise<string | nul
     return view ? challengeQuery(view.query) : null;
   }
   if (kind === "shelf" && idSchema.safeParse(value).success) {
-    const shelf = await prisma.shelf.findFirst({ where: { id: value, userId }, select: { id: true } });
+    const [own, smart] = await Promise.all([
+      prisma.shelf.findFirst({ where: { id: value, userId }, select: { id: true } }),
+      prisma.smartShelf.findFirst({ where: { id: value, userId }, select: { id: true } }),
+    ]);
+    const shelf = own ?? smart;
     return shelf ? challengeQuery(new URLSearchParams({ shelfId: shelf.id }).toString()) : null;
   }
   if (kind === "tag") {

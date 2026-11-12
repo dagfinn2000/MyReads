@@ -2,10 +2,14 @@ import { describe, expect, it } from "vitest";
 import { ReadingStatus } from "@/lib/enums";
 import {
   activeFilterChips,
+  addedLabel,
   buildBookWhere,
   finishedYearRanges,
   isbnFragment,
+  pagesLabel,
   parseFilters,
+  parseRange,
+  publishedLabel,
   searchPlaceholder,
   setTagState,
   tagList,
@@ -222,6 +226,72 @@ describe("buildBookWhere", () => {
         ],
       },
     ]);
+  });
+});
+
+describe("page, year published and added filters", () => {
+  it("reads ranges with either end open, the right way round", () => {
+    expect(parseRange("200..400", 0, 1000)).toEqual({ min: 200, max: 400 });
+    expect(parseRange("..300", 0, 1000)).toEqual({ min: null, max: 300 });
+    expect(parseRange("500..", 0, 1000)).toEqual({ min: 500, max: null });
+    expect(parseRange("400..200", 0, 1000)).toEqual({ min: 200, max: 400 });
+    for (const bad of ["", "..", "300", "1..2..3", "-5..10", "1.5..3", "..2000", "a..b"]) {
+      expect(parseRange(bad, 0, 1000)).toBeNull();
+    }
+  });
+
+  it("keeps only ranges and spans the library knows, tidied", () => {
+    expect(parseFilters({ pages: "0300..0100" }).pages).toBe("100..300");
+    expect(parseFilters({ pages: "..300" }).pages).toBe("..300");
+    expect(parseFilters({ pages: "lots" }).pages).toBe("");
+    expect(parseFilters({ published: "1900..1950" }).published).toBe("1900..1950");
+    expect(parseFilters({ published: "..999" }).published).toBe("");
+    expect(parseFilters({ added: "30" }).added).toBe("30");
+    expect(parseFilters({ added: "030" }).added).toBe("30");
+    for (const bad of ["0", "3651", "-7", "7d", "1e3"]) expect(parseFilters({ added: bad }).added).toBe("");
+  });
+
+  it("finds books in a page range, never ones without a page count", () => {
+    expect(where({ pages: "..300" }).AND).toEqual([{ pageCount: { gte: 1, lte: 300 } }]);
+    expect(where({ pages: "500.." }).AND).toEqual([{ pageCount: { gte: 500 } }]);
+    expect(where({ pages: "0..100" }).AND).toEqual([{ pageCount: { gte: 1, lte: 100 } }]);
+  });
+
+  it("takes the published years' books looked up ahead, and none without them", () => {
+    expect(where({ published: "1900..1950" }, { publishedIds: ["b1", "b2"] }).AND).toEqual([
+      { id: { in: ["b1", "b2"] } },
+    ]);
+    expect(where({ published: "1900..1950" }).AND).toEqual([{ id: { in: [] } }]);
+  });
+
+  it("counts added days back from now", () => {
+    const now = new Date("2026-11-12T12:00:00Z");
+    expect(where({ added: "7" }, { now }).AND).toEqual([
+      { createdAt: { gte: new Date("2026-11-05T12:00:00Z") } },
+    ]);
+  });
+
+  it("words each as a chip", () => {
+    const chips = activeFilterChips(
+      parseFilters({ pages: "..300", published: "1900..1950", added: "30" }),
+      String,
+      () => null,
+      (n) => n.toLocaleString("en-US"),
+    );
+    expect(chips.map((c) => [c.label, c.clear])).toEqual([
+      ["Up to 300 pages", { pages: "" }],
+      ["Published 1900–1950", { published: "" }],
+      ["Added in the last month", { added: "" }],
+    ]);
+    expect(pagesLabel({ min: 1000, max: null }, (n) => n.toLocaleString("en-US"))).toBe(
+      "1,000 pages or more",
+    );
+    expect(pagesLabel({ min: 200, max: 400 })).toBe("200–400 pages");
+    expect(publishedLabel({ min: null, max: 1950 })).toBe("Published in or before 1950");
+    expect(publishedLabel({ min: 2020, max: null })).toBe("Published in 2020 or later");
+    expect(publishedLabel({ min: 1999, max: 1999 })).toBe("Published in 1999");
+    expect(addedLabel(7)).toBe("Added in the last week");
+    expect(addedLabel(14)).toBe("Added in the last 14 days");
   });
 });
 

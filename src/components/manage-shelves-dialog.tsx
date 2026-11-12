@@ -3,9 +3,20 @@
 import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { ReadingStatus } from "@/lib/enums";
-import { ArrowDown, ArrowUp, Eye, EyeOff, Pencil, Settings2, Trash2 } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowUp,
+  Eye,
+  EyeOff,
+  ListFilter,
+  Pencil,
+  Settings2,
+  Sparkles,
+  Trash2,
+} from "lucide-react";
 import { savePreferences } from "@/lib/actions/preferences";
 import { deleteShelf, renameShelf } from "@/lib/actions/shelves";
+import { deleteSmartShelf, renameSmartShelf } from "@/lib/actions/smart-shelves";
 import { formatNumber } from "@/lib/display";
 import { statusName } from "@/lib/statuses";
 import { moveId, orderByIds } from "@/lib/library-order";
@@ -28,8 +39,10 @@ const STATUSES = Object.values(ReadingStatus);
 /**
  * Shelf housekeeping behind the "Manage shelves" chip: rename a shelf
  * (renaming onto another shelf's name merges the two), move it up or down
- * the chip row, hide it from the row, or delete it. Also which status tabs
- * the library shows, the same setting as in Preferences.
+ * the chip row, hide it from the row, or delete it. Smart shelves are in
+ * the same list, with a button to change their rules; they never merge.
+ * Also which status tabs the library shows, the same setting as in
+ * Preferences.
  *
  * Order and hiding are preferences (shelfOrder, hiddenShelves), so the
  * dialog shows each change at once and saves it behind the scenes; the
@@ -39,6 +52,7 @@ export function ManageShelvesDialog({
   shelves,
   activeShelfId,
   shelfHref,
+  onEditRules,
 }: {
   /** Every shelf, in chip order, hidden ones included. */
   shelves: ShelfInfo[];
@@ -46,9 +60,12 @@ export function ManageShelvesDialog({
   activeShelfId: string;
   /** The library address for a shelf, or for all shelves. */
   shelfHref: (shelfId: string | null) => string;
+  /** Opens a smart shelf's rules in the filter bar. */
+  onEditRules: (shelf: ShelfInfo) => void;
 }) {
   const router = useRouter();
   const prefs = usePreferences();
+  const [open, setOpen] = useState(false);
   const [pending, startTransition] = useTransition();
   const [editing, setEditing] = useState<string | null>(null);
   const [newName, setNewName] = useState("");
@@ -75,6 +92,7 @@ export function ManageShelvesDialog({
   }
 
   function onOpenChange(open: boolean) {
+    setOpen(open);
     reset();
     setMessage(null);
     if (!open) return;
@@ -164,6 +182,20 @@ export function ManageShelvesDialog({
       cancel(`[data-rename="${shelf.id}"]`);
       return;
     }
+    if (shelf.rules !== undefined) {
+      startTransition(async () => {
+        const res = await renameSmartShelf(shelf.id, to);
+        if (res.error) {
+          setMessage(res.error);
+          return;
+        }
+        reset();
+        setMessage(`Renamed “${shelf.name}” to “${res.name}”.`);
+        focusSoon(`[data-rename="${shelf.id}"]`);
+        router.refresh();
+      });
+      return;
+    }
     startTransition(async () => {
       const res = await renameShelf(shelf.id, to);
       if (res.error || !res.shelfId) {
@@ -193,7 +225,8 @@ export function ManageShelvesDialog({
 
   function submitDelete(shelf: ShelfInfo) {
     startTransition(async () => {
-      await deleteShelf(shelf.id);
+      if (shelf.rules !== undefined) await deleteSmartShelf(shelf.id);
+      else await deleteShelf(shelf.id);
       reset();
       setMessage(`Deleted “${shelf.name}”.`);
       removeRow(shelf.id);
@@ -203,7 +236,7 @@ export function ManageShelvesDialog({
   }
 
   return (
-    <Dialog onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
         <button
           type="button"
@@ -233,6 +266,7 @@ export function ManageShelvesDialog({
           <DialogDescription>
             Rename, reorder or hide shelves. Renaming a shelf to an existing
             name merges the two. Hidden shelves still show on book pages.
+            Smart shelves (with sparkles) fill themselves from their rules.
           </DialogDescription>
         </DialogHeader>
 
@@ -243,6 +277,7 @@ export function ManageShelvesDialog({
             <ul className="grid max-h-80 gap-1 overflow-y-auto pr-1">
               {rows.map((shelf, i) => {
                 const isHidden = hidden.includes(shelf.id);
+                const smart = shelf.rules !== undefined;
                 const n = shelf.bookCount;
                 const books = `${formatNumber(n, prefs)} book${n === 1 ? "" : "s"}`;
                 return (
@@ -285,9 +320,11 @@ export function ManageShelvesDialog({
                       <>
                         <span className="min-w-0 flex-1 basis-40 text-sm">
                           Delete “{shelf.name}”?{" "}
-                          {n === 0
-                            ? "It has no books."
-                            : `Its ${books} ${n === 1 ? "stays" : "stay"} in your library.`}
+                          {smart
+                            ? "Only its rules go; its books stay in your library."
+                            : n === 0
+                              ? "It has no books."
+                              : `Its ${books} ${n === 1 ? "stays" : "stay"} in your library.`}
                         </span>
                         <span className="flex gap-1">
                           <Button
@@ -311,12 +348,18 @@ export function ManageShelvesDialog({
                       <>
                         <span className="grid min-w-0 flex-1 basis-28">
                           <span
-                            className={cn("truncate text-sm", isHidden && "text-muted-foreground")}
+                            className={cn(
+                              "flex min-w-0 items-center gap-1.5 text-sm",
+                              isHidden && "text-muted-foreground",
+                            )}
                           >
-                            {shelf.name}
+                            {smart && (
+                              <Sparkles aria-hidden className="size-3.5 shrink-0 text-primary" />
+                            )}
+                            <span className="truncate">{shelf.name}</span>
                           </span>
                           <span className="text-xs text-muted-foreground tabular-nums">
-                            {books}
+                            {smart ? `Smart shelf · ${books}` : books}
                             {isHidden && " · hidden"}
                           </span>
                         </span>
@@ -336,6 +379,21 @@ export function ManageShelvesDialog({
                           >
                             <Pencil />
                           </Button>
+                          {smart && (
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="size-8"
+                              title="Change rules"
+                              aria-label={`Change the rules of “${shelf.name}”`}
+                              onClick={() => {
+                                setOpen(false);
+                                onEditRules(shelf);
+                              }}
+                            >
+                              <ListFilter />
+                            </Button>
+                          )}
                           <Button
                             size="icon"
                             variant="ghost"

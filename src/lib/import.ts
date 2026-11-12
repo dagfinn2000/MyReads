@@ -28,6 +28,7 @@ import {
   canonicalViewQueryFromString,
 } from "@/lib/saved-views";
 import { parseThemeSetting, serializeThemeSetting } from "@/lib/themes";
+import { MAX_SMART_SHELVES, smartRulesQuery } from "@/lib/smart-shelves";
 
 /**
  * Restore of a MyReads export — either the `library.json` from a zip backup
@@ -44,7 +45,7 @@ import { parseThemeSetting, serializeThemeSetting } from "@/lib/themes";
  * Account settings (theme, library view, Preferences) are filled in only
  * where this account hasn't set them: a restore onto a fresh account brings
  * the old setup back, and one onto a live account never undoes choices
- * made since. Saved views merge by name like shelves.
+ * made since. Saved views and smart shelves merge by name like shelves.
  */
 
 /**
@@ -280,6 +281,15 @@ const exportPayloadSchema = z.object({
     .nullable()
     .optional()
     .catch(null),
+  /** Smart shelves. Additive. */
+  smartShelves: eachOf(
+    z.object({
+      name: shelfNameSchema,
+      rules: z.string().max(4000),
+      /** The shelf the rules' `shelfId` named, as for saved views. */
+      shelfName: z.string().trim().min(1).max(50).optional().catch(undefined),
+    }),
+  ),
   savedViews: z
     .array(
       z.object({
@@ -299,6 +309,7 @@ export interface ImportSummary {
   booksSkipped: number;
   booksInvalid: number;
   shelvesCreated: number;
+  smartShelvesRestored: number;
   goalsRestored: number;
   challengesRestored: number;
   savedViewsRestored: number;
@@ -479,6 +490,40 @@ export async function importLibrary(
     for (const s of refreshed) shelfIdByName.set(shelfKey(s.name), s.id);
   }
 
+  // Smart shelves: the ones whose names are new here (no shelf of either
+  // kind has them), up to the cap, with the shelf their rules keep to found
+  // by name. One whose shelf can't be found is left out: without it, it
+  // would hold far more than it did.
+  const existingSmart = await prisma.smartShelf.findMany({
+    where: { userId },
+    select: { id: true, name: true },
+  });
+  const takenNames = new Set([...shelfIdByName.keys(), ...existingSmart.map((s) => shelfKey(s.name))]);
+  const newSmart = data.smartShelves
+    .flatMap((s) => {
+      if (takenNames.has(shelfKey(s.name))) return [];
+      const params = new URLSearchParams(smartRulesQuery(s.rules));
+      if (params.get("shelfId")) {
+        const id = s.shelfName ? shelfIdByName.get(shelfKey(s.shelfName)) : undefined;
+        if (!id) return [];
+        params.set("shelfId", id);
+      }
+      const rules = smartRulesQuery(params.toString());
+      if (!rules) return [];
+      takenNames.add(shelfKey(s.name));
+      return [{ userId, name: s.name, rules }];
+    })
+    .slice(0, Math.max(0, MAX_SMART_SHELVES - existingSmart.length));
+  const smartCreated = await prisma.smartShelf.createMany({ data: newSmart, skipDuplicates: true });
+  // Every smart shelf by name, for challenges and the shelf order.
+  const smartIdByName = new Map(
+    (await prisma.smartShelf.findMany({ where: { userId }, select: { id: true, name: true } })).map(
+      (s) => [shelfKey(s.name), s.id],
+    ),
+  );
+  const anyShelfId = (name: string) =>
+    shelfIdByName.get(shelfKey(name)) ?? smartIdByName.get(shelfKey(name));
+
   // Reading goals: upsert per year and span, concurrently — they're
   // independent. A year has one goal for the year and one for each month;
   // where a backup lists two for the same, the last wins.
@@ -527,16 +572,17 @@ export async function importLibrary(
     return canonicalViewQueryFromString(params.toString());
   };
   // Challenges: the ones not here yet, up to the cap, each pointed at its
-  // shelf found by name.
+  // shelf (of either kind) found by name.
   // A challenge kept to a shelf that can't be found here is left out:
   // dropping the shelf, as a saved view does, would count every book.
+  const ownSmartIds = new Set(smartIdByName.values());
   const restoredChallengeQuery = (c: { query: string; shelfName?: string }) => {
     const params = new URLSearchParams(c.query);
     const oldId = params.get("shelfId");
     if (oldId) {
       const id = c.shelfName
-        ? shelfIdByName.get(shelfKey(c.shelfName))
-        : ownShelfIds.has(oldId)
+        ? anyShelfId(c.shelfName)
+        : ownShelfIds.has(oldId) || ownSmartIds.has(oldId)
           ? oldId
           : undefined;
       if (!id) return null;
@@ -788,6 +834,7 @@ export async function importLibrary(
     booksSkipped,
     booksInvalid,
     shelvesCreated,
+    smartShelvesRestored: smartCreated.count,
     goalsRestored: goals.length,
     challengesRestored: challengesCreated.count,
     savedViewsRestored: viewsCreated.count,
@@ -859,11 +906,16 @@ async function restoreSettings(
   } = cleanPreferencesPatch(settings.preferences);
   const prefAdds: Record<string, unknown> = missing(storedPrefs, backupPrefs);
 
-  const [shelves, views] = await Promise.all([
+  const [shelves, smartShelves, views] = await Promise.all([
     prisma.shelf.findMany({ where: { userId }, select: { id: true, name: true } }),
+    prisma.smartShelf.findMany({ where: { userId }, select: { id: true, name: true } }),
     prisma.savedView.findMany({ where: { userId }, select: { id: true, name: true } }),
   ]);
-  const shelfIds = new Map(shelves.map((s) => [shelfKey(s.name), s.id]));
+  // Smart shelves share the shelf order and hiding; a shelf of the
+  // reader's own wins a name both kinds have.
+  const shelfIds = new Map(
+    [...smartShelves, ...shelves].map((s) => [shelfKey(s.name), s.id] as const),
+  );
   const viewIds = new Map(views.map((v) => [v.name, v.id]));
   const idsOf = (
     names: string[] | undefined,

@@ -41,6 +41,12 @@ export interface LibraryFilters {
   /** One of the reader's own fields (lib/book-fields.ts parseFieldFilter):
    *  "id" has a value, "id!" none, "id=value", or "id:min..max". */
   field: string;
+  /** Page count, "min..max", either end left open ("..300", "500.."). */
+  pages: string;
+  /** Year published, "min..max" like pages ("..1950"). */
+  published: string;
+  /** Added in the last so many days ("30"). */
+  added: string;
 }
 
 /** A URL parameter as a string. Null bytes are dropped: Postgres refuses
@@ -72,6 +78,63 @@ export const MISSING_LABELS: Record<MissingFilter, string> = {
   isbn: "ISBN",
   tags: "Tags",
 };
+
+/** Highest page count a pages filter takes. */
+export const MAX_PAGES_FILTER = 100_000;
+/** Most days back "Added" reaches: ten years. */
+export const MAX_ADDED_DAYS = 3650;
+
+/** The "Added" choices More filters offers, in days. */
+export const ADDED_CHOICES = [
+  { days: 7, label: "In the last week" },
+  { days: 30, label: "In the last month" },
+  { days: 90, label: "In the last 3 months" },
+  { days: 365, label: "In the last year" },
+] as const;
+
+/** A whole-number range as the URL has it ("200..400", "..300", "500.."),
+ *  each end inclusive. Null for anything else, an empty range, or ends
+ *  outside lo..hi. */
+export function parseRange(
+  s: string,
+  lo: number,
+  hi: number,
+): { min: number | null; max: number | null } | null {
+  const m = /^(\d{0,6})\.\.(\d{0,6})$/.exec(s);
+  if (!m || (!m[1] && !m[2])) return null;
+  const min = m[1] ? Number(m[1]) : null;
+  const max = m[2] ? Number(m[2]) : null;
+  if (min !== null && (min < lo || min > hi)) return null;
+  if (max !== null && (max < lo || max > hi)) return null;
+  // Typed the wrong way round: read it the way it was meant.
+  if (min !== null && max !== null && min > max) return { min: max, max: min };
+  return { min, max };
+}
+
+/** A range back in the URL's form, or "" for no range. */
+export function serializeRange(min: number | null, max: number | null): string {
+  return min === null && max === null ? "" : `${min ?? ""}..${max ?? ""}`;
+}
+
+/** Years "Published" takes: four digits, as publishedYear reads them. */
+const MIN_YEAR = 1000;
+const MAX_YEAR = 2999;
+
+/** A range param as stored: normalized, or "" when it isn't one. */
+function rangeParam(s: string, lo: number, hi: number): string {
+  const r = parseRange(s, lo, hi);
+  return r ? serializeRange(r.min, r.max) : "";
+}
+
+/** The "pages" filter as a range, or null for none. */
+export function pagesRange(s: string) {
+  return parseRange(s, 0, MAX_PAGES_FILTER);
+}
+
+/** The "published" filter as a range of years, or null for none. */
+export function publishedRange(s: string) {
+  return parseRange(s, MIN_YEAR, MAX_YEAR);
+}
 
 /** Most tags one filter list keeps; the rest of a longer list is dropped. */
 export const MAX_FILTER_TAGS = 50;
@@ -105,6 +168,7 @@ export function parseFilters(
   const minRating = param(sp.minRating);
   const finished = param(sp.finished);
   const missing = param(sp.missing);
+  const added = param(sp.added);
   return {
     shelf: param(sp.shelf) || "all",
     statusKey: isStatusKey(param(sp.statusKey)) ? param(sp.statusKey) : "",
@@ -122,6 +186,12 @@ export function parseFilters(
     missing: (MISSING_FILTERS as readonly string[]).includes(missing) ? missing : "",
     series: param(sp.series),
     field: parseFieldFilter(param(sp.field)) ? param(sp.field) : "",
+    pages: rangeParam(param(sp.pages), 0, MAX_PAGES_FILTER),
+    published: rangeParam(param(sp.published), MIN_YEAR, MAX_YEAR),
+    added:
+      /^\d{1,4}$/.test(added) && Number(added) >= 1 && Number(added) <= MAX_ADDED_DAYS
+        ? String(Number(added))
+        : "",
   };
 }
 
@@ -166,6 +236,11 @@ export interface WhereContext {
   /** The field filter as a `where` (library-where.ts fieldFilterWhere),
    *  which needs the reader's fields to read. */
   fieldWhere?: Prisma.BookWhereInput;
+  /** For "Published": the books whose published date has a year in the
+   *  range (publishedYear's rule, which a Prisma filter can't express). */
+  publishedIds?: string[];
+  /** The time "Added in the last N days" counts back from. */
+  now?: Date;
 }
 
 /**
@@ -255,6 +330,25 @@ export function buildBookWhere(
 
   if (filters.field && ctx.fieldWhere) and.push(ctx.fieldWhere);
 
+  const pages = pagesRange(filters.pages);
+  if (pages) {
+    // A book with no page count (or 0, as "Missing: page count" reads it)
+    // is in no page range, rather than among the shortest.
+    and.push({
+      pageCount: {
+        gte: Math.max(pages.min ?? 1, 1),
+        ...(pages.max !== null && { lte: pages.max }),
+      },
+    });
+  }
+  if (publishedRange(filters.published)) {
+    and.push({ id: { in: ctx.publishedIds ?? [] } });
+  }
+  if (filters.added) {
+    const since = (ctx.now ?? new Date()).getTime() - Number(filters.added) * 24 * 60 * 60 * 1000;
+    and.push({ createdAt: { gte: new Date(since) } });
+  }
+
   if (filters.finished) {
     // The current pass counts once the book is Read; archived passes
     // always do. The same finishes Stats counts per year.
@@ -316,15 +410,17 @@ const MISSING_CHIP_LABELS: Record<MissingFilter, string> = {
 
 /**
  * The active filters that have no control of their own on the bar, as
- * chips: author, each tag in or out, finished year, rating, missing detail
- * series and one of the reader's own fields. `ratingLabel` words a minimum
- * rating in the reader's style; `fieldLabel` a field filter, or null when
- * the field it names is gone (and so filters nothing).
+ * chips: author, each tag in or out, finished year, rating, missing detail,
+ * series, one of the reader's own fields, pages, year published and when
+ * it was added. `ratingLabel` words a minimum rating in the reader's style;
+ * `fieldLabel` a field filter, or null when the field it names is gone (and
+ * so filters nothing); `fmt` a number.
  */
 export function activeFilterChips(
   filters: LibraryFilters,
   ratingLabel: (minRating: string) => string,
   fieldLabel: (field: string) => string | null = () => null,
+  fmt: (n: number) => string = String,
 ): FilterChip[] {
   const chips: FilterChip[] = [];
   if (filters.author) {
@@ -369,7 +465,45 @@ export function activeFilterChips(
   }
   const field = filters.field ? fieldLabel(filters.field) : null;
   if (field) chips.push({ id: "field", label: field, clear: { field: "" } });
+  const pages = pagesRange(filters.pages);
+  if (pages) chips.push({ id: "pages", label: pagesLabel(pages, fmt), clear: { pages: "" } });
+  const published = publishedRange(filters.published);
+  if (published) {
+    chips.push({ id: "published", label: publishedLabel(published), clear: { published: "" } });
+  }
+  if (filters.added) {
+    chips.push({ id: "added", label: addedLabel(Number(filters.added)), clear: { added: "" } });
+  }
   return chips;
+}
+
+type Range = { min: number | null; max: number | null };
+
+/** A page range in words: "Up to 300 pages", "500 pages or more",
+ *  "200–400 pages". `fmt` writes a number the reader's way. */
+export function pagesLabel(r: Range, fmt: (n: number) => string = String): string {
+  if (r.min !== null && r.max !== null) {
+    return r.min === r.max ? `${fmt(r.min)} pages` : `${fmt(r.min)}–${fmt(r.max)} pages`;
+  }
+  if (r.max !== null) return `Up to ${fmt(r.max)} pages`;
+  return `${fmt(r.min ?? 0)} pages or more`;
+}
+
+/** A range of years in words: "Published 1900–1950", "Published in or
+ *  before 1950", "Published in 2020 or later". */
+export function publishedLabel(r: Range): string {
+  if (r.min !== null && r.max !== null) {
+    return r.min === r.max ? `Published in ${r.min}` : `Published ${r.min}–${r.max}`;
+  }
+  if (r.max !== null) return `Published in or before ${r.max}`;
+  return `Published in ${r.min} or later`;
+}
+
+/** "Added in the last month", or so many days for a value no menu offers. */
+export function addedLabel(days: number): string {
+  const choice = ADDED_CHOICES.find((c) => c.days === days);
+  if (choice) return `Added ${choice.label.charAt(0).toLowerCase()}${choice.label.slice(1)}`;
+  return days === 1 ? "Added in the last day" : `Added in the last ${days} days`;
 }
 
 /** Tags picked in and out in the tag filter. */

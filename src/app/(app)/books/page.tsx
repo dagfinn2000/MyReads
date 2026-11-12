@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import type { Prisma } from "@prisma/client";
 import { ReadingStatus } from "@/lib/enums";
@@ -25,12 +26,16 @@ import { seriesAnchor } from "@/lib/series-list";
 import { isOverdue } from "@/lib/loans";
 import { overdueReminder } from "@/lib/overdue-query";
 import { canonicalViewQuery } from "@/lib/saved-views";
+import { DRAFT_COOKIE, parseDraft } from "@/lib/smart-shelf-draft";
+import { smartRulesQuery } from "@/lib/smart-shelves";
+import { smartShelfCounts, smartShelvesOfBooks } from "@/lib/smart-shelves-query";
 import { FilterBar, type FilterValues } from "@/components/filter-bar";
 import { LibraryView } from "@/components/library-view";
 import { OverdueNotice } from "@/components/overdue-notice";
 import { SavedViewChips } from "@/components/saved-view-chips";
 import { ShelfChips } from "@/components/shelf-chips";
 import { ShelfTabs } from "@/components/shelf-tabs";
+import { SmartShelfDraftBar } from "@/components/smart-shelf-rules";
 import { Button } from "@/components/ui/button";
 
 export const dynamic = "force-dynamic";
@@ -140,8 +145,18 @@ export default async function BooksPage({
     MAX_PAGE_SIZE,
   );
 
-  const [books, openLoans, statusCounts, tagRows, shelves, user, bookFinishes, pastFinishes] =
-    await Promise.all([
+  const [
+    books,
+    openLoans,
+    statusCounts,
+    tagRows,
+    shelves,
+    user,
+    bookFinishes,
+    pastFinishes,
+    smartShelves,
+    jar,
+  ] = await Promise.all([
     prisma.book.findMany({ where, select: librarySelect }),
     // Which copies are out: the library's open loans, fetched alongside the
     // books. Selecting them through the books made Prisma send a second
@@ -182,7 +197,15 @@ export default async function BooksPage({
       _min: { dateFinished: true },
       _max: { dateFinished: true },
     }),
+    prisma.smartShelf.findMany({
+      where: { userId },
+      select: { id: true, name: true, rules: true },
+      orderBy: { name: "asc" },
+    }),
+    cookies(),
   ]);
+  // A smart shelf whose rules are being chosen, if any.
+  const draft = parseDraft(jar.get(DRAFT_COOKIE)?.value);
 
   const accountView = user?.libraryView ?? parseLibraryView(null);
   // Sort and grouping from the account only fill in a param-less visit; the
@@ -217,18 +240,28 @@ export default async function BooksPage({
   }
 
   // Group by shelf needs each book's shelves: one query over the shelves
-  // rather than a join on every book in every other view.
+  // rather than a join on every book in every other view. Smart shelves
+  // are asked which of the books on screen they hold.
   const shelvesOf = new Map<string, { id: string; name: string }[]>();
-  if (values.group === "shelf") {
-    const memberships = await prisma.shelf.findMany({
-      where: { userId },
-      select: { id: true, name: true, books: { select: { id: true } } },
-    });
-    for (const s of memberships) {
-      for (const b of s.books) {
-        shelvesOf.set(b.id, [...(shelvesOf.get(b.id) ?? []), { id: s.id, name: s.name }]);
-      }
+  const [memberships, smartMembers, smartCounts] = await Promise.all([
+    values.group === "shelf"
+      ? prisma.shelf.findMany({
+          where: { userId },
+          select: { id: true, name: true, books: { select: { id: true } } },
+        })
+      : [],
+    values.group === "shelf" && smartShelves.length > 0
+      ? smartShelvesOfBooks(userId, where, smartShelves, prefs)
+      : new Map<string, { id: string; name: string }[]>(),
+    smartShelfCounts(userId, smartShelves, prefs),
+  ]);
+  for (const s of memberships) {
+    for (const b of s.books) {
+      shelvesOf.set(b.id, [...(shelvesOf.get(b.id) ?? []), { id: s.id, name: s.name }]);
     }
+  }
+  for (const [bookId, list] of smartMembers) {
+    shelvesOf.set(bookId, [...(shelvesOf.get(bookId) ?? []), ...list]);
   }
 
   // Sort and group the whole filtered set — the shelf-filing rules need every
@@ -328,7 +361,27 @@ export default async function BooksPage({
     !!values.finished ||
     !!values.missing ||
     !!values.shelfId ||
-    !!values.series;
+    !!values.series ||
+    !!values.field ||
+    !!values.pages ||
+    !!values.published ||
+    !!values.added;
+
+  // Shelves of both kinds, by name, for the chip row (which applies the
+  // reader's order). Without smart shelves, exactly the database's order.
+  const handShelves = shelves.map((s) => ({ id: s.id, name: s.name, bookCount: s._count.books }));
+  const chipShelves =
+    smartShelves.length === 0
+      ? handShelves
+      : [
+          ...handShelves,
+          ...smartShelves.map((s) => ({
+            id: s.id,
+            name: s.name,
+            bookCount: smartCounts.get(s.id) ?? 0,
+            rules: s.rules,
+          })),
+        ].sort((a, b) => a.name.localeCompare(b.name, prefs.sortAlphabet || undefined));
 
   return (
     <div className="grid grid-cols-1 gap-4">
@@ -359,14 +412,19 @@ export default async function BooksPage({
         statuses={prefs}
       />
       <ShelfChips
-        shelves={shelves.map((s) => ({
-          id: s.id,
-          name: s.name,
-          bookCount: s._count.books,
-        }))}
+        shelves={chipShelves}
         activeShelfId={values.shelfId}
         searchParams={flatParams}
       />
+      {draft && (
+        <SmartShelfDraftBar
+          draft={draft}
+          rules={smartRulesQuery(new URLSearchParams(flatParams).toString())}
+          matching={sorted.length}
+          shelves={chipShelves}
+          view={{ group: values.group, sort: values.sort, dir: values.dir }}
+        />
+      )}
       <SavedViewChips
         views={orderByIds(savedViews, prefs.savedViewOrder)}
         currentQuery={canonicalViewQuery({ ...flatParams, ...values })}

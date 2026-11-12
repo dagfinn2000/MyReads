@@ -1,6 +1,8 @@
 "use client";
 
 import { useActionState, useOptimistic, useRef, useState, useTransition } from "react";
+import Link from "next/link";
+import { Sparkles } from "lucide-react";
 import { createShelf, toggleBookShelf } from "@/lib/actions/shelves";
 import type { ActionState } from "@/lib/actions/helpers";
 import { submitKeepingInput } from "@/lib/submit-form";
@@ -30,15 +32,21 @@ import {
  * the shelves the book is on, and the rest go in an "Add to a shelf" menu.
  * A shelf ticked or unticked here stays listed until the page is left, so a
  * checkbox never vanishes from under the pointer or keyboard focus.
+ *
+ * The smart shelves the book's details put it on follow, as links: they
+ * fill themselves, so there's nothing to tick.
  */
 export function BookShelvesCard({
   bookId,
   shelves,
   memberIds,
+  smartShelves = [],
 }: {
   bookId: string;
   shelves: { id: string; name: string }[];
   memberIds: string[];
+  /** The smart shelves holding this book, in the reader's order. */
+  smartShelves?: { id: string; name: string }[];
 }) {
   const { shelvesCard } = usePreferences();
   const [pendingIds, setOptimistic] = useOptimistic(
@@ -96,7 +104,9 @@ export function BookShelvesCard({
       <CardContent className="grid gap-3">
         {shelves.length === 0 && (
           <p className="text-sm text-muted-foreground">
-            No shelves yet — create one below.
+            {smartShelves.length > 0
+              ? "No shelves of your own yet — create one below."
+              : "No shelves yet — create one below."}
           </p>
         )}
         {mine && shelves.length > 0 && listed.length === 0 && (
@@ -125,6 +135,23 @@ export function BookShelvesCard({
             );
           })}
         </div>
+
+        {smartShelves.length > 0 && (
+          <div className="flex flex-wrap items-center gap-1.5 text-sm">
+            <span className="mr-0.5 text-muted-foreground">On smart shelves:</span>
+            {smartShelves.map((s) => (
+              <Link
+                key={s.id}
+                href={`/books?shelfId=${encodeURIComponent(s.id)}`}
+                prefetch={false}
+                className="inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 transition-colors hover:border-ring/60"
+              >
+                <Sparkles aria-hidden className="size-3 text-primary" />
+                {s.name}
+              </Link>
+            ))}
+          </div>
+        )}
 
         {others.length > 0 && (
           <Select value="" onValueChange={add}>

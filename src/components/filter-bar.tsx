@@ -12,7 +12,7 @@ import {
   Search,
 } from "lucide-react";
 import { rememberLibraryView } from "@/lib/actions/library-view";
-import { FORMAT_LABELS } from "@/lib/display";
+import { FORMAT_LABELS, formatNumber } from "@/lib/display";
 import { activeFilterChips, searchPlaceholder } from "@/lib/library-filters";
 import { naturalDir, type LibraryDisplay } from "@/lib/library-view";
 import type { RatingStyle } from "@/lib/preferences";
@@ -56,6 +56,12 @@ export interface FilterValues {
   series: string;
   /** One of the reader's own fields (lib/book-fields.ts parseFieldFilter). */
   field: string;
+  /** Page count range, "min..max" (lib/library-filters.ts parseRange). */
+  pages: string;
+  /** Year published range, likewise. */
+  published: string;
+  /** Added in the last so many days. */
+  added: string;
   group: string;
   sort: string;
   dir: string;
@@ -275,6 +281,9 @@ export function FilterBar({
     if (next.missing) params.set("missing", next.missing);
     if (next.series) params.set("series", next.series);
     if (next.field) params.set("field", next.field);
+    if (next.pages) params.set("pages", next.pages);
+    if (next.published) params.set("published", next.published);
+    if (next.added) params.set("added", next.added);
     // View params are always explicit in the URL, so the page never has to
     // guess between "reset to default" and "no preference stated" — the
     // account-saved view only fills in on param-less visits (the nav link).
@@ -322,6 +331,9 @@ export function FilterBar({
         missing: "",
         series: "",
         field: "",
+        pages: "",
+        published: "",
+        added: "",
       }),
     [go],
   );
@@ -374,6 +386,7 @@ export function FilterBar({
         current,
         (v) => minRatingLabel(v, ratingStyle),
         (field) => fieldFilterLabel(field, prefs.customFields, prefs),
+        (n) => formatNumber(n, prefs),
       ),
     [current, ratingStyle, prefs],
   );

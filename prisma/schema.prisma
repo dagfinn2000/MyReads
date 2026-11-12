@@ -78,6 +78,7 @@ model User {
   createdAt       DateTime      @default(now())
   books           Book[]
   shelves         Shelf[]
+  smartShelves    SmartShelf[]
   readingGoals    ReadingGoal[]
   savedViews      SavedView[]
   challenges      Challenge[]
@@ -195,6 +196,25 @@ model Shelf {
   name      String
   createdAt DateTime @default(now())
   books     Book[]
+
+  @@unique([userId, name])
+}
+
+/// A shelf that fills itself ("Unread sci-fi under 300 pages"): every book
+/// matching its rules is on it, now and later, and none can be put on it by
+/// hand. Shown with the reader's shelves, in the same order and hiding
+/// (Preferences.shelfOrder, hiddenShelves); a name is never shared with a
+/// shelf of either kind. See lib/smart-shelves.ts.
+model SmartShelf {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  /// The rules: the library filters that pick its books, as a /books query
+  /// string rebuilt from the parsed filters (smartRulesQuery), without the
+  /// sort or grouping. A `shelfId` in it names a shelf of the reader's own.
+  rules     String
+  createdAt DateTime @default(now())
 
   @@unique([userId, name])
 }
