@@ -58,18 +58,12 @@ server.
 
 **Make it yours**
 
-- 92 colour themes, as many dark as light, a few with a picture,
-  outlines or a font of their own, and twenty-seven that restyle the
-  whole app (Desktop 95 turns it into a 1995 desktop, Luna into Windows
-  XP, Aero into Windows 7's glass, Metro into Windows 8's tiles, Fluent
-  into Windows 11's glass, Mojave, Big Sur and Ventura into the Mac of
-  2018, 2020 and 2022, Golden Gate into macOS's Liquid Glass, visionOS
-  into a window floating over a valley, Material You into Android,
-  Porcelain and Graphite into soft porcelain shaped by light, KDE
-  Plasma, GNOME, Ubuntu and Hyprland into the Linux desktops, Haiku into
-  its yellow-tabbed windows, Editor into a code editor, Card Catalogue
-  into a library's card drawers and Comic into a comic book). 26 background textures. On some of the textures rain
-  falls, snow drifts or stars twinkle.
+- 92 colour themes, as many dark as light, some with a picture or a
+  font of their own. Twenty-seven restyle the whole app: a 1995 desktop,
+  Windows, the Mac, Android, the Linux desktops, a code editor, a card
+  catalogue, a comic book and more.
+- 26 background textures. On some of them rain falls, snow drifts or
+  stars twinkle.
 - A theme for one device or one part of the app, and your own CSS.
 - Preferences for date formats, time zone, sorting, fonts and much more.
   Your settings follow you to every device.
