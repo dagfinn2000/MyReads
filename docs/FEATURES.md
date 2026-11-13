@@ -444,7 +444,7 @@ tab goes away. You can also keep the house and leave the avatar out.
 
 ## Look and feel
 
-- 150 colour themes, 69 light, 69 dark and the Silly set, or a light
+- 190 colour themes, 86 light, 86 dark and the Silly set, or a light
   and a dark one that switch with your
   device, with an accent colour of your own on top if you like. Your
   choice follows you to every device you sign in on, unless you give one
@@ -460,7 +460,7 @@ tab goes away. You can also keep the house and leave the avatar out.
   Leadlight, whose pictures crowded the page. If you had one of them you
   now have the theme nearest to it (Porcelain, Ink Wash and Material You
   for those three).
-- Thirty-seven of the themes put together colours you rarely see side by
+- Thirty-eight of the themes put together colours you rarely see side by
   side, each pairing only once (point at one in the palette menu and it
   names its two colours):
   - Dark: Bordeaux (wine red and sea-glass green), Riviera (ultramarine
@@ -482,8 +482,8 @@ tab goes away. You can also keep the house and leave the avatar out.
     teal), Alpine (sky blue and forest green), Mint Chocolate (mint green
     and chocolate), Cornflower (cornflower blue and claret), Hydrangea
     (dusty rose and cobalt), Crocus (khaki and blue-violet), Heather
-    (mauve and navy), Sloe (sea grey and plum) and Wisteria (lavender and
-    spruce green).
+    (mauve and navy), Sloe (sea grey and plum), Wisteria (lavender and
+    spruce green) and Lagoon (aqua and violet).
 - Ten more are different kinds of theme rather than new colours:
   - Blueprint (white lines on blueprint blue) and Chalkboard (chalk and
     yellow on a green board), each in just two colours.
@@ -612,14 +612,78 @@ tab goes away. You can also keep the house and leave the avatar out.
     nearly black, pale rose gold) and Crystal (clear glass in a dark
     room, with a faint band of rainbow light across the corner and the
     spectrum along the top of every pane).
+- Forty more, some of every kind, seventeen light, seventeen dark and six
+  silly:
+  - Plain: Melon (a warm apricot page, burnt orange for what is chosen)
+    and Oxblood (the deep red-brown of old leather, each card a little
+    lighter, pale coral for what is chosen).
+  - For easy reading. Hyperlegible and Hyperlegible Dark set every word
+    in Atkinson Hyperlegible, the face the Braille Institute drew so that
+    letters easily mixed up (I, l and 1; O and 0; b, d, p and q) look
+    nothing alike, set a little wider, with links underlined and a thick
+    outline on whatever the keyboard is on. The light one is a cool white
+    that doesn't glare, the dark one a soft charcoal, never pure black,
+    so letters don't smear. Eye Care is the pale bean green many readers
+    set their screens to for long hours, with no white anywhere.
+  - Glass: Reeded (light) and Fluted (dark) make every card a pane of
+    reeded glass, its fine upright ribs catching the light, over coral
+    and aqua or an ember glow and sea green; Dichroic (dark) is near
+    black glass whose rim turns from cyan to magenta to gold round each
+    card.
+  - A colour pair, Lagoon (aqua and violet).
+  - Design and craft. Light: Scrapbook (each book stuck down with a strip
+    of patterned paper tape, a different tape in turn, and handwritten
+    headings), Risograph (two inks, fluorescent pink and blue, a hair out
+    of register in the page titles, and a corner of pink dots on every
+    card) and Papercut (every card cut from white paper and laid over
+    sheets of coral and sunflower yellow on a sky blue page). Dark:
+    Kintsugi (a dark iron glaze, the corner of every book broken off and
+    mended with gold, a different break in turn), Neon Sign (page titles
+    and the open page's link bent in glowing pink-red tube on a
+    blue-black wall), Letterboard (grooved black felt, page titles in
+    white capitals, cards in an oak frame), Chesterfield (bottle green
+    leather tufted in diamonds, brass studs round every card) and Tweed
+    (brown herringbone, every card edged with a rust running stitch).
+  - Paper and print. Light: Illuminated (vellum, the first letter of
+    every page title in red on a square of gold leaf, a red and lapis
+    rule under the top bar), Sticky Notes (every book on a crooked
+    yellow, pink, blue or green note on a grey wall) and Mimeograph
+    (everything in a spirit duplicator's violet ink on yellowed school
+    paper, page titles typed and a little soft). Dark: Photo Album
+    (black album pages, every cover held by four photo corners), Night
+    Mail (Airmail's other side, deep navy with the envelope's red and
+    blue stripes) and Dog-Ear Dark (Dog-Ear's turned-down corners on
+    dark plum paper).
+  - Scenes, each picture kept to an edge of the window. Light: Balloons
+    (hot-air balloons drifting up the right edge of a dawn sky), Lemon
+    Tree (a lemon branch hanging in over the top right corner of a
+    whitewashed wall), Dunes (sand dunes along the foot of the window
+    under an apricot sky) and Poppies (red poppies rising from the
+    bottom left corner of a linen page). Dark: Deep Sea (jellyfish
+    glowing in the top right corner of dark water) and Constellations
+    (a star chart in fine gold lines in the top right corner of an
+    indigo night).
+  - Desktops and screens, which restyle the whole app (see below):
+    Bitmap and Dot Matrix in light, 8-Bit, Departures and Teletext in
+    dark.
+  - Six more in the Silly set (see below).
 - The Silly set, listed apart at the bottom of the palette menu as "not
   recommended": Blue Screen, Glowstick, Hot Dog Stand, Toxic, Desktop 95,
   Under Construction (a hazard-striped top bar and Comic Sans), Ugly
   Sweater (green cards on knitted red), Spreadsheet (gridlines and a
-  green ribbon), Party (confetti), Camouflage, Quest and Comic. They are as easy to
+  green ribbon), Party (confetti), Camouflage, Quest, Comic, Receipt
+  (every book a slip torn off a till roll, all in a till's monospace),
+  Picnic (a red gingham blanket, books set out like plates and a line
+  of ants marching along under the top bar), Vaporwave (pastel pink and
+  teal, a striped sun setting over a grid, italic capitals and dialogs
+  as windows from a 1998 computer), Bowling Alley (the carpet on cosmic
+  night, neon titles and pink neon round every card), Lava Lamp (purple,
+  with blobs of orange and pink wax rising slowly up the side of the
+  window) and Gothic (black, blackletter page titles and red dripping
+  from the top bar). They are as easy to
   read as the rest, only nobody should want them. Hover over one in the
   menu for a word about it.
-- **Thirty-one themes restyle the whole app**, not just its colours: the top
+- **Thirty-six themes restyle the whole app**, not just its colours: the top
   bar, cards, buttons, fields, menus, dialogs, tabs, progress bars, type
   and the picture behind the page all take after what the theme is named
   for. The rest stay as they were.
@@ -892,6 +956,33 @@ tab goes away. You can also keep the house and leave the avatar out.
     ticked box has an X in it, whatever has the keyboard is edged in
     blue, progress fills in blue, and dialogs are windows with tabs of
     their own. Signed out, the form is a window on the blue desktop.
+  - Bitmap (new, light): a one-bit desktop of 1984, black and white and
+    nothing between. The top bar is a white menu bar ruled off in black,
+    page titles, the app's name and menus are in pixel lettering, every
+    card is ruled in black with a hard shadow, and menus and dialogs
+    carry a title bar of fine stripes. Greys are drawn as dither and
+    covers show in greys, as such a screen would show them.
+  - Dot Matrix (new, light): the screen of an old handheld games machine,
+    four shades of green and no more. The page is the pale green screen
+    under a faint grid of its pixels, the top bar the dark grey bezel
+    with the app's name lettered on it, and everything has pixel
+    lettering and square edges two pixels thick, with covers tinted into
+    the screen's greens.
+  - 8-Bit (new, dark): a home computer of 1982, just switched on. Its
+    violet-blue screen sits inside a lighter border that runs round the
+    whole window, titles are in its chunky capitals, and every page's
+    title is followed by READY. and a block cursor.
+  - Departures (new, dark): a station's split-flap board. Every page's
+    title is spelt out on a row of flaps, one letter to a flap with the
+    split across its middle and a few blank flaps after it, the top bar
+    is the board's black frame with the page links lettered like its
+    column headings, and amber, as for a train running late, marks what
+    is chosen.
+  - Teletext (new, dark): the news on a television in 1985. A black
+    screen and blocky lettering, every page's title in yellow capitals on
+    a band of blue, the top bar headed with a page number, a thin band of
+    colour along the top of each book in turn (red, green, yellow, blue,
+    magenta, cyan) and cyan for what is chosen.
 - A theme with a picture of its own (Desktop 95's desktop, Aero's,
   Luna's hills, Golden Gate's and the Linux desktops', Fluent's bloom, the Mac's dunes,
   waves and whirl, visionOS's valley, Card Catalogue's oak table,
@@ -900,7 +991,11 @@ tab goes away. You can also keep the house and leave the avatar out.
   Sunroom's sunlight, Rooftops' roofs, Eclipse's sky, Lamplight's lamp,
   Fireflies' meadow, the soft skies behind the glass themes, Meadow's
   sunlight, Cocoa's warmth,
-  Party's confetti, Quest's night sky and the rest) shows it whatever background you picked, and
+  Party's confetti, Quest's night sky, the balloons, the lemon branch,
+  the dunes, the poppies, the jellyfish, the star chart, Chesterfield's
+  leather, Tweed's herringbone, Letterboard's felt, the glow behind
+  Reeded, Fluted and Dichroic, Picnic's gingham, Vaporwave's sunset,
+  the bowling alley's carpet, the lava lamp and the rest) shows it whatever background you picked, and
   Preferences says so under Background. Your background comes back when
   you pick another theme.
 - A theme for each part of the app if you like: Stats in one theme, the
