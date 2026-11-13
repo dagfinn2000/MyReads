@@ -444,15 +444,18 @@ tab goes away. You can also keep the house and leave the avatar out.
 
 ## Look and feel
 
-- 108 colour themes, 48 light, 48 dark and the Silly set, or a light
+- 124 colour themes, 56 light, 56 dark and the Silly set, or a light
   and a dark one that switch with your
   device, with an accent colour of your own on top if you like. Your
   choice follows you to every device you sign in on, unless you give one
   phone or computer a theme of its own ("Only on this device" in the
-  palette menu). The palette menu shows each theme as a small round
+  palette menu). The palette menu sorts them by kind: Plain, Easy
+  reading, Glass, Colour pairs, Design and craft, Paper and print,
+  Scenes, Desktops and screens, and the Silly set last, with the light
+  ones of each kind before the dark. It shows each theme as a small round
   swatch, the page colour with the accent as a dot (and the theme's
-  picture or outline, if it has one): point at one to see its name, or
-  tap it to try it. No two themes look alike: fourteen that were too
+  picture or outline, if it has one): point at one to see its name (and,
+  for some, a word about it), or tap it to try it. No two themes look alike: fourteen that were too
   close to others were retired, and so were Sea Glass, Contour and
   Leadlight, whose pictures crowded the page. If you had one of them you
   now have the theme nearest to it (Porcelain, Ink Wash and Material You
@@ -560,6 +563,39 @@ tab goes away. You can also keep the house and leave the avatar out.
     copper), Carbon (near black, every card drawn in a line of light
     that fades from its top edge to coral at its foot) and Cocoa (a warm
     chocolate brown with soft headings and sky blue for what is chosen).
+- Sixteen more fill the gaps the others left, eight light and eight dark:
+  - For easy reading. Colour Safe Light and Colour Safe Dark are for
+    colour blindness, in the Okabe-Ito colours that read the same to
+    every kind of colour vision: blue for what is chosen and orange or
+    yellow for focus, never red against green. Status badges, moods and
+    charts follow (greens turn bluish green and reds vermilion), links
+    in text are underlined and focus is a solid outline, so nothing
+    depends on colour alone. Night Light is for reading in bed: amber on
+    near black, with no blue in any colour on the page, and covers,
+    badges, charts and the reading room turned amber too. Sepia Light is
+    Sepia's warm e-reader page in light, everything in the book face.
+  - The other side of a theme that only came in one mode. Light:
+    Terminal Light (dark green type on a paper-white screen, with
+    Terminal's prompt, cursor, double-lined boxes and bracketed buttons),
+    Whiteprint (Blueprint's blue lines on white squared paper, with its
+    lettering, dimension lines and title block), Whiteboard (a glossy
+    white board catching the window's light, headings in marker, green
+    marker for what is chosen and the board's aluminium frame for the
+    top bar) and Art Deco Light (ivory card stock, midnight blue and
+    gold, every card framed twice in gold). Dark: E-Paper Dark (an
+    e-reader in dark mode, no colour and no shadows), Letterpress Dark
+    (black cotton card printed in cream, every card pressed into it),
+    Newsprint Dark (a newspaper's night edition: charcoal newsprint with
+    all of Newsprint's masthead, rules, halftones and coupons) and
+    Notebook Dark (a black notebook written in white gel pen, with
+    Notebook's margin, holes, tape and sticky notes).
+  - More glass, so that both modes have each colour of glass. Light:
+    Jade (pale green glass in daylight, cinnabar red for what is chosen)
+    and Amber (amber glass in the sun with a honey glow low in the
+    corner, deep teal). Dark: Garnet (rose glass on a red so deep it is
+    nearly black, pale rose gold) and Crystal (clear glass in a dark
+    room, with a faint band of rainbow light across the corner and the
+    spectrum along the top of every pane).
 - The Silly set, listed apart at the bottom of the palette menu as "not
   recommended": Blue Screen, Glowstick, Hot Dog Stand, Toxic, Desktop 95,
   Under Construction (a hazard-striped top bar and Comic Sans), Ugly
@@ -567,7 +603,7 @@ tab goes away. You can also keep the house and leave the avatar out.
   green ribbon), Party (confetti), Camouflage, Quest and Comic. They are as easy to
   read as the rest, only nobody should want them. Hover over one in the
   menu for a word about it.
-- **Twenty-seven themes restyle the whole app**, not just its colours: the top
+- **Thirty-one themes restyle the whole app**, not just its colours: the top
   bar, cards, buttons, fields, menus, dialogs, tabs, progress bars, type
   and the picture behind the page all take after what the theme is named
   for. The rest stay as they were.
@@ -577,17 +613,19 @@ tab goes away. You can also keep the house and leave the avatar out.
     fields are sunken, and the scrollbars have arrow buttons.
   - Terminal: a green screen with glowing text and faint scan lines, a
     prompt and a blinking cursor in each page's title, boxes drawn in
-    double lines and buttons in brackets.
+    double lines and buttons in brackets. Terminal Light is the same on
+    a paper-white screen.
   - Newsprint: a broadsheet, with the wordmark as a blackletter masthead
     over a dateline, headlines in a heavy serif, sections under rules,
     covers printed as halftones until you point at them and dialogs cut
-    out like coupons.
+    out like coupons. Newsprint Dark is its night edition.
   - Blueprint: an architect's drawing on squared paper, with hand
     lettering, dimension lines under the titles, corner marks on cards,
-    cyanotype covers and a title block naming each page.
+    cyanotype covers and a title block naming each page. Whiteprint is
+    the same drawing in blue lines on white.
   - Notebook: an exercise book, in handwriting, with the red margin and
     punched holes, freehand boxes, books taped in and menus on sticky
-    notes.
+    notes. Notebook Dark is a black notebook written in white.
   - Quest (in the Silly set): the menus of an old role-playing game,
     with blue windows in white frames, pixel letters, a gold pointer on
     whatever you're choosing and reading progress as an experience bar,

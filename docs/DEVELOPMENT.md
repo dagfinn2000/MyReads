@@ -222,9 +222,13 @@ The reading room's files:
   (not the ones ported from other apps) must reach 11:1 contrast for text
   on the page and at least 4.5:1 for muted text, buttons, the accent on
   the page and the danger colour on cards, and the same test checks it.
-  An entry with a `silly` line joins the Silly set: it goes last in
-  `THEMES`, and the palette menu and Preferences list it under its own
-  heading, below Light and Dark.
+  Every entry names its kind in `category`, one of `THEME_CATEGORIES`,
+  which are the palette menu's headings (light themes before dark under
+  each), and can carry a short `note` the menu shows when you point at
+  it. An entry with a `silly` line joins the Silly set: it goes last in
+  `THEMES`, in the Silly category, under its own heading at the foot of
+  the menu. Keep as many dark themes as light (Silly aside); a test
+  counts them.
 - **A theme can bring more than colours.** In its block, `--radius` gives
   it corners of its own and `--heading-font` a heading face (Corners and
   Headings in Preferences only override them when set to something other
@@ -242,9 +246,15 @@ The reading room's files:
 - **A few themes restyle everything.** Desktop 95, Terminal, Newsprint,
   Blueprint, Notebook, Quest, Pinstripe, Aero, Golden Gate, KDE Plasma,
   GNOME, Hyprland, Fluent, visionOS, Porcelain, Material You, Mojave,
-  Big Sur, Ventura, Luna, Metro, Card Catalogue, Comic, Editor and
-  Ubuntu start from a colour block like any theme, and [restyles.css](../src/app/restyles.css) reshapes the
-  app for them, one section per theme. Its rules aim at shadcn's
+  Big Sur, Ventura, Luna, Metro, Card Catalogue, Comic, Editor, Ubuntu
+  and Haiku start from a colour block like any theme, and [restyles.css](../src/app/restyles.css) reshapes the
+  app for them, one section per theme. A theme's other side shares its
+  section (Graphite with Porcelain, Terminal Light with Terminal,
+  Whiteprint with Blueprint, Newsprint Dark and Notebook Dark with
+  theirs): every selector names both themes, and each colour the
+  section would hard-code is a custom property set on both themes'
+  `:root`, with the twin's own values in a block of its own after it. A
+  test fails if a twin misses a selector its original has. Its rules aim at shadcn's
   `data-slot` attributes and buttons by `data-size` and `data-variant`:
   a button inside a Radix trigger (`asChild`) wears the trigger's
   `data-slot` (`dialog-trigger`, `popover-trigger`) instead of

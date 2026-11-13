@@ -2702,6 +2702,480 @@
     --page-gradient: radial-gradient(120% 70% at 50% 0%, #2c1f19 0%, rgb(44 31 25 / 0) 100%), linear-gradient(#211713, #211713);
 }
 
+/* ── Filling the gaps ──────────────────────────────────────────────────────
+   Sixteen more, eight light and eight dark, each filling a gap the others
+   left: a theme for colour blindness in each mode, a night theme with no
+   blue light and a light sepia page for easy reading; the other side of a
+   theme that only came in one mode (Terminal, Blueprint, Chalkboard and
+   Art Deco in light, E-Paper, Newsprint, Letterpress and Notebook in
+   dark), sharing its rules where it has any; and four more panes of glass
+   so that both modes have each glass's hue: Jade and Amber in light,
+   Garnet and Crystal in dark. */
+
+/* Sepia Light: Sepia's light side, the warm page an e-reader calls sepia.
+   Deep brown text on a sepia page, everything set in the book face, and
+   an old-gold brown for what is chosen. */
+[data-theme="sepia-light"] {
+    --background: #efe2c8;
+    --foreground: #2b1d10;
+    --card: #f6ecd8;
+    --card-foreground: #2b1d10;
+    --popover: #f8f0de;
+    --popover-foreground: #2b1d10;
+    --primary: #6e4a12;
+    --primary-foreground: #fff8ea;
+    --secondary: #e9dbbd;
+    --secondary-foreground: #2b1d10;
+    --muted: #e9dbbd;
+    --muted-foreground: #594630;
+    --accent: #e6d5b4;
+    --accent-foreground: #2b1d10;
+    --destructive: #8a2410;
+    --border: #dccaa6;
+    --input: #c2ab82;
+    --ring: #6e4a12;
+    --heading-font: var(--font-literata), "Literata", Georgia, serif;
+}
+
+/* Night Light: for reading in bed. Not one colour on the page has any
+   blue in it: text, accent and lines are amber on near black, and covers,
+   badges and charts are turned amber too (see "Beyond colour"). A theme
+   of its own picture, plain dark, so a Background with blue in it can't
+   show through. */
+[data-theme="night-light"] {
+    --background: #120a00;
+    --foreground: #ffbb00;
+    --card: #1a0f00;
+    --card-foreground: #ffbb00;
+    --popover: #1d1100;
+    --popover-foreground: #ffbb00;
+    --primary: #ff8c00;
+    --primary-foreground: #120a00;
+    --secondary: #261800;
+    --secondary-foreground: #ffbb00;
+    --muted: #261800;
+    --muted-foreground: #d98f00;
+    --accent: #2b1b00;
+    --accent-foreground: #ffbb00;
+    --destructive: #ff5a00;
+    --border: #4a2e00;
+    --input: #6b4400;
+    --ring: #ff8c00;
+    --heading-font: var(--font-literata), "Literata", Georgia, serif;
+    --color-amber-500: #ff9d00;
+    --chart-1: #ff8c00;
+    --chart-2: #ffbb00;
+    --chart-3: #b86400;
+    --chart-4: #ffdd00;
+    --chart-5: #7a4200;
+    --page-gradient: radial-gradient(90% 55% at 50% 0%, #1c1000 0%, rgb(28 16 0 / 0) 100%), linear-gradient(#120a00, #120a00);
+}
+
+/* Colour Safe Light: for colour blindness. Its colours are the
+   Okabe-Ito set, which reads the same to every kind of colour vision:
+   blue for what is chosen and orange for focus, never red against green.
+   Greens across the app turn bluish green, reds vermilion, and links are
+   underlined so nothing is told apart by colour alone (see "Beyond
+   colour"). A blue top bar. */
+[data-theme="colour-safe-light"] {
+    --background: #f1f0ec;
+    --foreground: #16181b;
+    --card: #ffffff;
+    --card-foreground: #16181b;
+    --popover: #ffffff;
+    --popover-foreground: #16181b;
+    --primary: #00639b;
+    --primary-foreground: #ffffff;
+    --secondary: #e7e6e1;
+    --secondary-foreground: #16181b;
+    --muted: #e7e6e1;
+    --muted-foreground: #46484c;
+    --accent: #e4ecf2;
+    --accent-foreground: #16181b;
+    --destructive: #823200;
+    --border: #d5d3cc;
+    --input: #b1aea6;
+    --ring: #b86e00;
+    --radius: 0.5rem;
+    --chart-1: #0072b2;
+    --chart-2: #e69f00;
+    --chart-3: #009e73;
+    --chart-4: #cc79a7;
+    --chart-5: #56b4e9;
+}
+
+/* Colour Safe Dark: the same in the dark. Sky blue for what is chosen,
+   yellow for focus, vermilion for danger. */
+[data-theme="colour-safe-dark"] {
+    --background: #14171b;
+    --foreground: #eef0f2;
+    --card: #1d2126;
+    --card-foreground: #eef0f2;
+    --popover: #20252a;
+    --popover-foreground: #eef0f2;
+    --primary: #56b4e9;
+    --primary-foreground: #0b1520;
+    --secondary: #252a30;
+    --secondary-foreground: #eef0f2;
+    --muted: #252a30;
+    --muted-foreground: #b3b9c0;
+    --accent: #262c33;
+    --accent-foreground: #eef0f2;
+    --destructive: #ff8a4d;
+    --border: #343a42;
+    --input: #59616b;
+    --ring: #f0e442;
+    --radius: 0.5rem;
+    --chart-1: #56b4e9;
+    --chart-2: #e69f00;
+    --chart-3: #009e73;
+    --chart-4: #cc79a7;
+    --chart-5: #f0e442;
+}
+
+/* Terminal Light: Terminal's light side, a paper-white screen. Dark
+   green type on a pale green-white screen, and Terminal's prompt, cursor,
+   double-lined boxes and bracketed buttons (restyles.css). */
+[data-theme="terminal-light"] {
+    --background: #eef4ec;
+    --foreground: #0b3818;
+    --card: #f4f8f2;
+    --card-foreground: #0b3818;
+    --popover: #f4f8f2;
+    --popover-foreground: #0b3818;
+    --primary: #0d5426;
+    --primary-foreground: #eef4ec;
+    --secondary: #e0ebdd;
+    --secondary-foreground: #0b3818;
+    --muted: #e0ebdd;
+    --muted-foreground: #2a6339;
+    --accent: #e0ebdd;
+    --accent-foreground: #0b3818;
+    --destructive: #a3221b;
+    --border: #a9cdb2;
+    --input: #7faf8b;
+    --ring: #0d5426;
+    --radius: 0;
+    --heading-font: ui-monospace, "SF Mono", "Cascadia Mono", "Roboto Mono", Menlo, Consolas, monospace;
+    --page-gradient: radial-gradient(120% 90% at 50% 40%, #f6faf4, #eef4ec 62%, #e3ebe1);
+}
+
+/* Whiteprint: Blueprint's light side. The print that took over from the
+   blueprint drew blue lines on white paper; this is that sheet, squared,
+   with Blueprint's lettering, dimension lines and title block
+   (restyles.css). */
+[data-theme="whiteprint"] {
+    --background: #eef1f8;
+    --foreground: #12275a;
+    --card: #f5f7fb;
+    --card-foreground: #12275a;
+    --popover: #f7f8fb;
+    --popover-foreground: #12275a;
+    --primary: #1b3887;
+    --primary-foreground: #ffffff;
+    --secondary: #e3e8f2;
+    --secondary-foreground: #12275a;
+    --muted: #e3e8f2;
+    --muted-foreground: #364c84;
+    --accent: #e3e8f2;
+    --accent-foreground: #12275a;
+    --destructive: #a3221b;
+    --border: #a5b5d8;
+    --input: #7d93c4;
+    --ring: #1b3887;
+    --radius: 0.125rem;
+    --heading-font: ui-monospace, "SF Mono", "Cascadia Mono", "Roboto Mono", Menlo, Consolas, monospace;
+    --page-gradient: linear-gradient(rgb(27 56 135 / 0.12) 1px, transparent 1px), linear-gradient(90deg, rgb(27 56 135 / 0.12) 1px, transparent 1px), linear-gradient(rgb(27 56 135 / 0.05) 1px, transparent 1px), linear-gradient(90deg, rgb(27 56 135 / 0.05) 1px, transparent 1px), radial-gradient(110% 80% at 50% 30%, #f3f5fa, #eef1f8 60%, #e6eaf4);
+    --page-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px, 100% 100%;
+}
+
+/* Whiteboard: Chalkboard's light side. A glossy white board with the
+   window's light caught across it, headings written in marker, a green
+   marker for what is chosen and a red one for danger, and the top bar
+   the board's aluminium frame (see "Beyond colour"). */
+[data-theme="whiteboard"] {
+    --background: #edf0f1;
+    --foreground: #15181b;
+    --card: #fbfcfc;
+    --card-foreground: #15181b;
+    --popover: #ffffff;
+    --popover-foreground: #15181b;
+    --primary: #12703a;
+    --primary-foreground: #ffffff;
+    --secondary: #e3e7e9;
+    --secondary-foreground: #15181b;
+    --muted: #e3e7e9;
+    --muted-foreground: #485157;
+    --accent: #e1e6e9;
+    --accent-foreground: #15181b;
+    --destructive: #c0271e;
+    --border: #ccd3d7;
+    --input: #a8b2b8;
+    --ring: #12703a;
+    --radius: 0.5rem;
+    --heading-font: var(--font-hand), var(--font-nunito), ui-rounded, sans-serif;
+    --page-gradient: linear-gradient(112deg, rgb(255 255 255 / 0) 18%, rgb(255 255 255 / 0.75) 24%, rgb(255 255 255 / 0) 31%, rgb(255 255 255 / 0) 36%, rgb(255 255 255 / 0.5) 39%, rgb(255 255 255 / 0) 44%), linear-gradient(180deg, #f1f3f4 0%, #e9edee 100%);
+}
+
+/* Art Deco Light: Art Deco's light side, a 1920s menu card. Ivory card
+   stock, midnight-blue type, gold rules: every card framed twice in gold,
+   a double gold line under the top bar, and buttons in midnight blue with
+   gold lettering. */
+[data-theme="art-deco-light"] {
+    --background: #f4eee0;
+    --foreground: #0f1830;
+    --card: #faf6ec;
+    --card-foreground: #0f1830;
+    --popover: #faf6ec;
+    --popover-foreground: #0f1830;
+    --primary: #121f4a;
+    --primary-foreground: #f0d48a;
+    --secondary: #ebe3cf;
+    --secondary-foreground: #0f1830;
+    --muted: #ebe3cf;
+    --muted-foreground: #4a4433;
+    --accent: #e9dfc8;
+    --accent-foreground: #0f1830;
+    --destructive: #a3241c;
+    --border: #c9a656;
+    --input: #b0924a;
+    --ring: #121f4a;
+    --radius: 0;
+}
+
+/* Jade: Emerald's light side, green glass in daylight. Two soft glows of
+   jade behind the page, every card a pane of pale green glass whose edge
+   shows green, as thick glass does, and cinnabar red, the colour of a
+   carved seal, for what is chosen. */
+[data-theme="jade"] {
+    --background: #e4f1ee;
+    --foreground: #0f2622;
+    --card: #f2f9f7;
+    --card-foreground: #0f2622;
+    --popover: #f4faf8;
+    --popover-foreground: #0f2622;
+    --primary: #a33a1e;
+    --primary-foreground: #ffffff;
+    --secondary: #e5f0ec;
+    --secondary-foreground: #0f2622;
+    --muted: #e5f0ec;
+    --muted-foreground: #3a5852;
+    --accent: #dbebe6;
+    --accent-foreground: #0f2622;
+    --destructive: #9b1b4a;
+    --border: #c2dad3;
+    --input: #a2c3b9;
+    --ring: #a33a1e;
+    --radius: 0.875rem;
+    --glass: rgb(242 252 248 / 0.55);
+    --glass-edge: rgb(150 205 185 / 0.75);
+    --glass-menu: rgb(242 250 247 / 0.8);
+    --glass-bar: rgb(238 248 244 / 0.6);
+    --page-gradient: radial-gradient(60% 55% at 100% 0%, #bfe3d6 0%, rgb(191 227 214 / 0) 100%), radial-gradient(60% 55% at 0% 100%, #c9e6e3 0%, rgb(201 230 227 / 0) 100%), linear-gradient(180deg, #e6f2ef 0%, #eef6f3 55%, #e4f0ed 100%);
+}
+
+/* Amber: Smoke's light side, amber glass in the sun. A warm cream behind
+   the page with a honey glow low in the right corner, every card a pane
+   of amber glass glowing faintly gold from its edges in, and a deep teal
+   for what is chosen. */
+[data-theme="amber"] {
+    --background: #f3e6d0;
+    --foreground: #2a1c0d;
+    --card: #fdf6ea;
+    --card-foreground: #2a1c0d;
+    --popover: #fdf7ec;
+    --popover-foreground: #2a1c0d;
+    --primary: #0c5862;
+    --primary-foreground: #ffffff;
+    --secondary: #f4e9d6;
+    --secondary-foreground: #2a1c0d;
+    --muted: #f4e9d6;
+    --muted-foreground: #5a4630;
+    --accent: #efe1c8;
+    --accent-foreground: #2a1c0d;
+    --destructive: #a8261b;
+    --border: #e6d2b0;
+    --input: #cfb68c;
+    --ring: #0c5862;
+    --radius: 0.75rem;
+    --glass: rgb(255 247 232 / 0.55);
+    --glass-edge: rgb(255 250 240 / 0.9);
+    --glass-menu: rgb(253 246 234 / 0.82);
+    --glass-bar: rgb(250 240 222 / 0.6);
+    --page-gradient: radial-gradient(55% 45% at 100% 100%, rgb(238 164 72 / 0.34) 0%, rgb(238 164 72 / 0) 100%), radial-gradient(50% 45% at 0% 0%, rgb(255 226 168 / 0.55) 0%, rgb(255 226 168 / 0) 100%), linear-gradient(180deg, #f6ead6 0%, #f2e4cc 100%);
+}
+
+/* Garnet: Rose Quartz's dark side, rose glass at night. A red so deep it
+   is nearly black, with a crimson glow up to the left and a rose one down
+   to the right, every card a pane of rose-tinted glass with a bevel, and
+   a pale rose gold for what is chosen. Danger is a warm gold, as red
+   would vanish into the page. */
+[data-theme="garnet"] {
+    --background: #1a0d10;
+    --foreground: #fae9eb;
+    --card: #2a1418;
+    --card-foreground: #fae9eb;
+    --popover: #2c161a;
+    --popover-foreground: #fae9eb;
+    --primary: #ffc4b8;
+    --primary-foreground: #1a0d10;
+    --secondary: #2b1519;
+    --secondary-foreground: #fae9eb;
+    --muted: #2b1519;
+    --muted-foreground: #cfa6ab;
+    --accent: #351a1f;
+    --accent-foreground: #fae9eb;
+    --destructive: #ffd166;
+    --border: #44232a;
+    --input: #6c434b;
+    --ring: #ffc4b8;
+    --radius: 1rem;
+    --glass: rgb(255 120 150 / 0.06);
+    --glass-edge: rgb(255 180 195 / 0.16);
+    --glass-menu: rgb(42 19 25 / 0.82);
+    --glass-bar: rgb(26 12 16 / 0.6);
+    --page-gradient: radial-gradient(60% 50% at 0% 0%, rgb(160 30 60 / 0.32) 0%, rgb(160 30 60 / 0) 100%), radial-gradient(55% 50% at 100% 100%, rgb(200 80 110 / 0.22) 0%, rgb(200 80 110 / 0) 100%), linear-gradient(180deg, #1c0e11 0%, #180b0f 100%);
+}
+
+/* Crystal: Prism's dark side, clear glass in a dark room. A faint band
+   of rainbow light across the top right corner of the window, every card
+   a clear pane with the spectrum caught along its top, and a pale violet
+   for what is chosen. */
+[data-theme="crystal"] {
+    --background: #101116;
+    --foreground: #f0f0f6;
+    --card: #1a1c23;
+    --card-foreground: #f0f0f6;
+    --popover: #1c1e25;
+    --popover-foreground: #f0f0f6;
+    --primary: #d4c4ff;
+    --primary-foreground: #101116;
+    --secondary: #1d1f27;
+    --secondary-foreground: #f0f0f6;
+    --muted: #1d1f27;
+    --muted-foreground: #aeb0c0;
+    --accent: #24262f;
+    --accent-foreground: #f0f0f6;
+    --destructive: #ff8f8f;
+    --border: #2e3039;
+    --input: #555766;
+    --ring: #d4c4ff;
+    --radius: 0.75rem;
+    --glass: rgb(255 255 255 / 0.04);
+    --glass-edge: rgb(255 255 255 / 0.14);
+    --glass-menu: rgb(26 28 35 / 0.82);
+    --glass-bar: rgb(16 17 22 / 0.6);
+}
+
+/* E-Paper Dark: E-Paper's dark side, an e-reader in dark mode. Light grey
+   ink on a dark grey screen, no colour and no shadows, covers in greys,
+   badges outlined and everything in the book face (see "Beyond colour"). */
+[data-theme="e-paper-dark"] {
+    --background: #191917;
+    --foreground: #e6e4dc;
+    --card: #20201d;
+    --card-foreground: #e6e4dc;
+    --popover: #232320;
+    --popover-foreground: #e6e4dc;
+    --primary: #dcd9cf;
+    --primary-foreground: #191917;
+    --secondary: #282825;
+    --secondary-foreground: #e6e4dc;
+    --muted: #282825;
+    --muted-foreground: #b5b2a8;
+    --accent: #2d2d2a;
+    --accent-foreground: #e6e4dc;
+    --destructive: #ff9d8f;
+    --border: #484843;
+    --input: #6a6963;
+    --ring: #dcd9cf;
+    --radius: 0.25rem;
+    --heading-font: var(--font-literata), "Literata", Georgia, serif;
+    --color-amber-500: #d4d2c9;
+}
+
+/* Letterpress Dark: Letterpress's dark side, black cotton card printed in
+   cream. Every card is pressed into the sheet, and a pale moss green for
+   what is chosen. */
+[data-theme="letterpress-dark"] {
+    --background: #22211a;
+    --foreground: #f0ebdc;
+    --card: #1c1b15;
+    --card-foreground: #f0ebdc;
+    --popover: #2b2a22;
+    --popover-foreground: #f0ebdc;
+    --primary: #c5d08e;
+    --primary-foreground: #1c1b15;
+    --secondary: #2a2921;
+    --secondary-foreground: #f0ebdc;
+    --muted: #2a2921;
+    --muted-foreground: #bcb59f;
+    --accent: #2e2d24;
+    --accent-foreground: #f0ebdc;
+    --destructive: #ff9f8f;
+    --border: #3a382e;
+    --input: #5f5b4b;
+    --ring: #c5d08e;
+    --radius: 0.5rem;
+    --heading-font: var(--font-literata), "Literata", Georgia, serif;
+}
+
+/* Newsprint Dark: Newsprint's dark side, a newspaper's night edition.
+   Charcoal newsprint with its grain, off-white type and one red, and
+   Newsprint's masthead, headlines, rules, halftone covers and coupons
+   (restyles.css). */
+[data-theme="newsprint-dark"] {
+    --background: #1c1c1a;
+    --foreground: #ecebe6;
+    --card: #242422;
+    --card-foreground: #ecebe6;
+    --popover: #242422;
+    --popover-foreground: #ecebe6;
+    --primary: #ff8a94;
+    --primary-foreground: #1c1c1a;
+    --secondary: #2c2c29;
+    --secondary-foreground: #ecebe6;
+    --muted: #2c2c29;
+    --muted-foreground: #b8b7b0;
+    --accent: #2c2c29;
+    --accent-foreground: #ecebe6;
+    --destructive: #ff9aa3;
+    --border: #44443f;
+    --input: #44443f;
+    --ring: #ff8a94;
+    --radius: 0;
+    --heading-font: var(--font-literata), ui-serif, Georgia, serif;
+    --page-gradient: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.9 0 0 0 0 0.9 0 0 0 0 0.86 0.22 0 0 0 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    --page-size: 220px 220px;
+}
+
+/* Notebook Dark: Notebook's dark side, a black-paged notebook written in
+   with a white gel pen. Grey ruled lines, a pink margin, and Notebook's
+   handwriting, freehand boxes, taped-in books and sticky notes
+   (restyles.css). */
+[data-theme="notebook-dark"] {
+    --background: #1b1d24;
+    --foreground: #e8ecfb;
+    --card: #22252d;
+    --card-foreground: #e8ecfb;
+    --popover: #22252d;
+    --popover-foreground: #e8ecfb;
+    --primary: #ff7d92;
+    --primary-foreground: #1b1d24;
+    --secondary: #272a33;
+    --secondary-foreground: #e8ecfb;
+    --muted: #272a33;
+    --muted-foreground: #b2b9d6;
+    --accent: #272a33;
+    --accent-foreground: #e8ecfb;
+    --destructive: #ffa0b0;
+    --border: #3b4152;
+    --input: #3b4152;
+    --ring: #ff7d92;
+    --heading-font: var(--font-nunito), ui-rounded, ui-sans-serif, system-ui, sans-serif;
+    --page-gradient: repeating-linear-gradient(transparent 0 31px, #2c3140 31px 32px);
+}
+
 /* ── The Silly set ─────────────────────────────────────────────────────────
    Themes nobody should pick, listed apart in the palette menu. They are
    absurd on purpose but hold the same contrast as the rest, so the app
@@ -3376,35 +3850,47 @@ html[data-own-background] body::before {
 
 /* E-Paper: an e-reader's screen shows no colour and draws no shadows, so
    covers are in greys, badges are outlined, cards are edged with a
-   hairline, and everything is set in the book face. */
-:root[data-theme="e-paper"]:not([data-cards="flat"]) {
+   hairline, and everything is set in the book face. E-Paper Dark is the
+   same screen in dark mode, its covers a little dimmed. */
+:root[data-theme="e-paper"]:not([data-cards="flat"]),
+:root[data-theme="e-paper-dark"]:not([data-cards="flat"]) {
   --surface-shadow: none;
 }
-.theme-is-e-paper body {
+.theme-is-e-paper body,
+.theme-is-e-paper-dark body {
   font-family: var(--font-literata), "Literata", Georgia, serif;
 }
 .theme-is-e-paper .book-cover img {
   filter: grayscale(1) contrast(1.04);
 }
-.theme-is-e-paper .drawn-cover {
+.theme-is-e-paper-dark .book-cover img {
+  filter: grayscale(1) contrast(1.04) brightness(0.85);
+}
+.theme-is-e-paper .drawn-cover,
+.theme-is-e-paper-dark .drawn-cover {
   background: hsl(0 0% var(--cover-light));
   color: hsl(0 0% 94%);
 }
-.theme-is-e-paper .drawn-cover-frame {
+.theme-is-e-paper .drawn-cover-frame,
+.theme-is-e-paper-dark .drawn-cover-frame {
   border-color: hsl(0 0% 90% / 0.45);
 }
-.theme-is-e-paper .book-backdrop {
+.theme-is-e-paper .book-backdrop,
+.theme-is-e-paper-dark .book-backdrop {
   display: none;
 }
-.theme-is-e-paper [data-slot="badge"]:not([data-variant="default"]) {
+.theme-is-e-paper [data-slot="badge"]:not([data-variant="default"]),
+.theme-is-e-paper-dark [data-slot="badge"]:not([data-variant="default"]) {
   border-color: currentColor;
   color: var(--foreground);
   background: transparent;
 }
-.theme-is-e-paper [data-slot="badge"] > [class*="rounded-full"] {
+.theme-is-e-paper [data-slot="badge"] > [class*="rounded-full"],
+.theme-is-e-paper-dark [data-slot="badge"] > [class*="rounded-full"] {
   background: currentColor;
 }
-.theme-is-e-paper .surface {
+.theme-is-e-paper .surface,
+.theme-is-e-paper-dark .surface {
   border-color: var(--border);
 }
 
@@ -3701,10 +4187,11 @@ html[data-own-background] body::before {
   }
 }
 
-/* Glass: Frost, Daybreak, Rose Quartz and Prism in light, Midnight, Smoke,
-   Dusk and Emerald in dark. Cards and library tiles are panes of glass over
-   the soft light behind the page. That light is already soft, so a pane is
-   only see-through, with nothing to blur again as the page scrolls; menus,
+/* Glass: Frost, Daybreak, Rose Quartz, Prism, Jade and Amber in light,
+   Midnight, Smoke, Dusk, Emerald, Garnet and Crystal in dark. Cards and
+   library tiles are panes of glass over the soft light behind the page.
+   That light is already soft, so a pane is only see-through, with nothing
+   to blur again as the page scrolls; menus,
    lists and dialogs, which open over writing, are blurred like the top
    bar. Each theme's block sets the panes (--glass), their rim
    (--glass-edge), the menus (--glass-menu) and the top bar (--glass-bar);
@@ -3717,7 +4204,11 @@ html[data-own-background] body::before {
 .theme-is-midnight .surface,
 .theme-is-smoke .surface,
 .theme-is-dusk .surface,
-.theme-is-emerald .surface {
+.theme-is-emerald .surface,
+.theme-is-jade .surface,
+.theme-is-amber .surface,
+.theme-is-garnet .surface,
+.theme-is-crystal .surface {
   background-color: var(--glass);
   border-color: var(--glass-edge);
 }
@@ -3728,7 +4219,11 @@ html[data-own-background] body::before {
 .theme-is-midnight [data-slot="card"],
 .theme-is-smoke [data-slot="card"],
 .theme-is-dusk [data-slot="card"],
-.theme-is-emerald [data-slot="card"] {
+.theme-is-emerald [data-slot="card"],
+.theme-is-jade [data-slot="card"],
+.theme-is-amber [data-slot="card"],
+.theme-is-garnet [data-slot="card"],
+.theme-is-crystal [data-slot="card"] {
   --tw-ring-color: var(--glass-edge);
 }
 .theme-is-frost :is([data-slot="popover-content"], [data-slot="dropdown-menu-content"], [data-slot="dropdown-menu-sub-content"], [data-slot="select-content"], [data-slot="dialog-content"]),
@@ -3738,7 +4233,11 @@ html[data-own-background] body::before {
 .theme-is-midnight :is([data-slot="popover-content"], [data-slot="dropdown-menu-content"], [data-slot="dropdown-menu-sub-content"], [data-slot="select-content"], [data-slot="dialog-content"]),
 .theme-is-smoke :is([data-slot="popover-content"], [data-slot="dropdown-menu-content"], [data-slot="dropdown-menu-sub-content"], [data-slot="select-content"], [data-slot="dialog-content"]),
 .theme-is-dusk :is([data-slot="popover-content"], [data-slot="dropdown-menu-content"], [data-slot="dropdown-menu-sub-content"], [data-slot="select-content"], [data-slot="dialog-content"]),
-.theme-is-emerald :is([data-slot="popover-content"], [data-slot="dropdown-menu-content"], [data-slot="dropdown-menu-sub-content"], [data-slot="select-content"], [data-slot="dialog-content"]) {
+.theme-is-emerald :is([data-slot="popover-content"], [data-slot="dropdown-menu-content"], [data-slot="dropdown-menu-sub-content"], [data-slot="select-content"], [data-slot="dialog-content"]),
+.theme-is-jade :is([data-slot="popover-content"], [data-slot="dropdown-menu-content"], [data-slot="dropdown-menu-sub-content"], [data-slot="select-content"], [data-slot="dialog-content"]),
+.theme-is-amber :is([data-slot="popover-content"], [data-slot="dropdown-menu-content"], [data-slot="dropdown-menu-sub-content"], [data-slot="select-content"], [data-slot="dialog-content"]),
+.theme-is-garnet :is([data-slot="popover-content"], [data-slot="dropdown-menu-content"], [data-slot="dropdown-menu-sub-content"], [data-slot="select-content"], [data-slot="dialog-content"]),
+.theme-is-crystal :is([data-slot="popover-content"], [data-slot="dropdown-menu-content"], [data-slot="dropdown-menu-sub-content"], [data-slot="select-content"], [data-slot="dialog-content"]) {
   background-color: var(--glass-menu);
   backdrop-filter: blur(22px) saturate(1.5);
 }
@@ -3749,7 +4248,11 @@ html[data-own-background] body::before {
 .theme-is-midnight .top-bar,
 .theme-is-smoke .top-bar,
 .theme-is-dusk .top-bar,
-.theme-is-emerald .top-bar {
+.theme-is-emerald .top-bar,
+.theme-is-jade .top-bar,
+.theme-is-amber .top-bar,
+.theme-is-garnet .top-bar,
+.theme-is-crystal .top-bar {
   background-color: var(--glass-bar);
   border-bottom-color: var(--glass-edge);
 }
@@ -3801,6 +4304,30 @@ html[data-own-background] body::before {
 :root[data-theme="emerald"][data-cards="flat"] {
   --surface-shadow: inset 0 1px 0 rgb(200 255 225 / 0.16), inset 0 0 0 3px rgb(140 255 200 / 0.035);
 }
+:root[data-theme="jade"]:not([data-cards="flat"]) {
+  --surface-shadow: inset 0 1px 0 rgb(255 255 255 / 0.95), inset 0 0 0 3px rgb(255 255 255 / 0.22), inset 0 -2px 0 rgb(70 160 130 / 0.16), 0 1px 2px rgb(20 70 55 / 0.06), 0 14px 30px -18px rgb(20 70 55 / 0.3);
+}
+:root[data-theme="jade"][data-cards="flat"] {
+  --surface-shadow: inset 0 1px 0 rgb(255 255 255 / 0.95), inset 0 0 0 3px rgb(255 255 255 / 0.22), inset 0 -2px 0 rgb(70 160 130 / 0.16);
+}
+:root[data-theme="amber"]:not([data-cards="flat"]) {
+  --surface-shadow: inset 0 1px 0 rgb(255 255 255 / 0.9), inset 0 0 22px rgb(236 160 60 / 0.16), 0 1px 2px rgb(90 55 20 / 0.06), 0 14px 30px -18px rgb(90 55 20 / 0.3);
+}
+:root[data-theme="amber"][data-cards="flat"] {
+  --surface-shadow: inset 0 1px 0 rgb(255 255 255 / 0.9), inset 0 0 22px rgb(236 160 60 / 0.16);
+}
+:root[data-theme="garnet"]:not([data-cards="flat"]) {
+  --surface-shadow: inset 0 1px 0 rgb(255 205 215 / 0.14), inset 0 0 0 3px rgb(255 150 175 / 0.04), inset 0 -1px 0 rgb(0 0 0 / 0.3), 0 18px 40px -20px rgb(8 0 3 / 0.8);
+}
+:root[data-theme="garnet"][data-cards="flat"] {
+  --surface-shadow: inset 0 1px 0 rgb(255 205 215 / 0.14), inset 0 0 0 3px rgb(255 150 175 / 0.04), inset 0 -1px 0 rgb(0 0 0 / 0.3);
+}
+:root[data-theme="crystal"]:not([data-cards="flat"]) {
+  --surface-shadow: inset 0 -1px 0 rgb(255 255 255 / 0.05), 0 18px 40px -20px rgb(0 0 0 / 0.8);
+}
+:root[data-theme="crystal"][data-cards="flat"] {
+  --surface-shadow: inset 0 -1px 0 rgb(255 255 255 / 0.05);
+}
 /* The rims above, and those of Letterpress, Pebble, Copper and Carbon
    below, are set outside Tailwind's layers, so a library tile's own hover
    rim is given back here. */
@@ -3812,7 +4339,12 @@ html[data-own-background] body::before {
 .theme-is-smoke a.surface:hover,
 .theme-is-dusk a.surface:hover,
 .theme-is-emerald a.surface:hover,
+.theme-is-jade a.surface:hover,
+.theme-is-amber a.surface:hover,
+.theme-is-garnet a.surface:hover,
+.theme-is-crystal a.surface:hover,
 .theme-is-letterpress a.surface:hover,
+.theme-is-letterpress-dark a.surface:hover,
 .theme-is-pebble a.surface:hover,
 .theme-is-copper a.surface:hover,
 .theme-is-carbon a.surface:hover {
@@ -3820,13 +4352,20 @@ html[data-own-background] body::before {
 }
 /* Frost's panes are milky, with frost creeping in from their edges;
    Daybreak's and Dusk's catch the low sun along their foot; Rose Quartz's
-   are rose-tinted with a bevel; Emerald's green with a bevel. Prism's
-   are clear, with the spectrum caught along the top edge, and the beam
-   itself lies across the top right corner of the window, faint enough
-   that writing over it reads as on white. */
+   and Garnet's are rose-tinted with a bevel; Emerald's green with a bevel,
+   and Jade's green at the rim and along the foot, as thick glass shows its
+   colour at its edge; Amber's glow gold from their edges in. Prism's and
+   Crystal's are clear, with the spectrum caught along the top edge, and
+   the beam itself lies across the top right corner of the window, faint
+   enough that writing over it reads as on plain white, or plain dark. */
 .theme-is-prism .surface {
   background-image: linear-gradient(90deg, rgb(255 150 150 / 0.6), rgb(255 210 120 / 0.6) 25%, rgb(130 220 155 / 0.6) 50%, rgb(125 185 255 / 0.6) 75%, rgb(190 145 255 / 0.6));
   background-size: 100% 2px;
+  background-repeat: no-repeat;
+}
+.theme-is-crystal .surface {
+  background-image: linear-gradient(90deg, rgb(255 150 150 / 0.42), rgb(255 210 120 / 0.42) 25%, rgb(130 220 155 / 0.42) 50%, rgb(125 185 255 / 0.42) 75%, rgb(190 145 255 / 0.42));
+  background-size: 100% 1px;
   background-repeat: no-repeat;
 }
 .theme-is-prism body::after {
@@ -3841,6 +4380,18 @@ html[data-own-background] body::before {
   background-image: linear-gradient(124deg, rgb(255 255 255 / 0) 34%, rgb(255 160 160 / 0.26) 42%, rgb(255 218 140 / 0.26) 47%, rgb(150 228 172 / 0.26) 52%, rgb(140 196 255 / 0.26) 57%, rgb(198 164 255 / 0.26) 62%, rgb(255 255 255 / 0) 70%);
   mask-image: radial-gradient(farthest-side at 100% 0%, #000 30%, transparent 100%);
 }
+.theme-is-crystal body::after {
+  content: "";
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: min(75vw, 64rem);
+  height: min(75vh, 44rem);
+  z-index: -1;
+  pointer-events: none;
+  background-image: linear-gradient(124deg, rgb(255 255 255 / 0) 34%, rgb(255 140 140 / 0.1) 42%, rgb(255 205 120 / 0.1) 47%, rgb(130 220 160 / 0.1) 52%, rgb(120 180 255 / 0.1) 57%, rgb(185 150 255 / 0.1) 62%, rgb(255 255 255 / 0) 70%);
+  mask-image: radial-gradient(farthest-side at 100% 0%, #000 30%, transparent 100%);
+}
 
 /* Celadon: every card glazed, with a gloss across its top and the glaze
    pooling a little darker along its foot. */
@@ -3853,18 +4404,28 @@ html[data-own-background] body::before {
 
 /* Letterpress: every card pressed into the paper, its shadow inside its
    top edge and a catch of light below it, and page titles printed into
-   the sheet. Flat cards (Preferences) keep their hairline instead. */
-.theme-is-letterpress:not([data-cards="flat"]) .surface {
+   the sheet. Flat cards (Preferences) keep their hairline instead.
+   Letterpress Dark presses into black card the same way, its shadow
+   deeper and the catch of light fainter. */
+.theme-is-letterpress:not([data-cards="flat"]) .surface,
+.theme-is-letterpress-dark:not([data-cards="flat"]) .surface {
   border-color: transparent;
 }
-.theme-is-letterpress:not([data-cards="flat"]) [data-slot="card"] {
+.theme-is-letterpress:not([data-cards="flat"]) [data-slot="card"],
+.theme-is-letterpress-dark:not([data-cards="flat"]) [data-slot="card"] {
   --tw-ring-color: transparent;
 }
 :root[data-theme="letterpress"]:not([data-cards="flat"]) {
   --surface-shadow: inset 0 2px 4px rgb(60 50 30 / 0.16), inset 0 0 0 1px rgb(60 50 30 / 0.06), 0 1px 0 rgb(255 255 255 / 0.95);
 }
+:root[data-theme="letterpress-dark"]:not([data-cards="flat"]) {
+  --surface-shadow: inset 0 2px 5px rgb(0 0 0 / 0.5), inset 0 0 0 1px rgb(0 0 0 / 0.22), 0 1px 0 rgb(255 250 230 / 0.07);
+}
 .theme-is-letterpress h1 {
   text-shadow: 0 1px 0 rgb(255 255 255 / 0.9);
+}
+.theme-is-letterpress-dark h1 {
+  text-shadow: 0 -1px 0 rgb(0 0 0 / 0.6), 0 1px 0 rgb(255 250 230 / 0.08);
 }
 
 /* Pebble: every card a smooth stone, lit from above and shaded below. */
@@ -3918,6 +4479,274 @@ html[data-own-background] body::before {
 }
 :root[data-theme="carbon"]:not([data-cards="flat"]) {
   --surface-shadow: 0 18px 40px -22px rgb(0 0 0 / 0.9);
+}
+
+/* Sepia Light: everything in the book face, like a reading page. */
+.theme-is-sepia-light body {
+  font-family: var(--font-literata), "Literata", Georgia, serif;
+}
+
+/* Night Light: no colour on the page has any blue in it. Covers, the
+   room and the avatar are turned to amber: to greys first, then toned
+   and pushed so far that their blue drops to nothing. The app's other
+   colours (status and mood badges, notices, dots) are amber, gold, olive
+   and a red-orange instead, each kept apart from the others. */
+.theme-is-night-light {
+  accent-color: var(--primary);
+  caret-color: var(--primary);
+  scrollbar-color: #4a2e00 transparent;
+  --color-amber-50: #ffe600;
+  --color-amber-100: #ffd800;
+  --color-amber-200: #ffc800;
+  --color-amber-300: #ffb400;
+  --color-amber-400: #ffa000;
+  --color-amber-500: #ff9200;
+  --color-amber-600: #e07800;
+  --color-amber-700: #a35500;
+  --color-amber-900: #4a2700;
+  --color-amber-950: #2e1800;
+  --color-emerald-50: #fff200;
+  --color-emerald-100: #ffee00;
+  --color-emerald-200: #ffe000;
+  --color-emerald-300: #ffd400;
+  --color-emerald-400: #ffc400;
+  --color-emerald-600: #c48c00;
+  --color-emerald-700: #8f6600;
+  --color-emerald-900: #423000;
+  --color-emerald-950: #291d00;
+  --color-indigo-100: #ffd800;
+  --color-indigo-200: #ffc800;
+  --color-indigo-400: #ffa000;
+  --color-indigo-500: #ff9200;
+  --color-indigo-600: #e07800;
+  --color-indigo-900: #4a2700;
+  --color-indigo-950: #2e1800;
+  --color-lime-100: #ffee00;
+  --color-lime-200: #ffe000;
+  --color-lime-400: #ffc400;
+  --color-lime-500: #f0b000;
+  --color-lime-600: #c48c00;
+  --color-lime-900: #423000;
+  --color-lime-950: #291d00;
+  --color-orange-100: #ffd800;
+  --color-orange-200: #ffc800;
+  --color-orange-400: #ffa000;
+  --color-orange-500: #ff9200;
+  --color-orange-600: #e07800;
+  --color-orange-900: #4a2700;
+  --color-orange-950: #2e1800;
+  --color-pink-100: #ffc000;
+  --color-pink-200: #ff9c00;
+  --color-pink-400: #ff6a00;
+  --color-pink-500: #ff5000;
+  --color-pink-600: #d93d00;
+  --color-pink-900: #4d1500;
+  --color-pink-950: #2e0c00;
+  --color-red-50: #ffd200;
+  --color-red-300: #ff8400;
+  --color-red-400: #ff6a00;
+  --color-red-600: #d93d00;
+  --color-red-700: #a62e00;
+  --color-red-900: #4d1500;
+  --color-red-950: #2e0c00;
+  --color-rose-100: #ffc000;
+  --color-rose-200: #ff9c00;
+  --color-rose-400: #ff6a00;
+  --color-rose-500: #ff5000;
+  --color-rose-600: #d93d00;
+  --color-rose-900: #4d1500;
+  --color-rose-950: #2e0c00;
+  --color-sky-50: #f0e800;
+  --color-sky-100: #e6d900;
+  --color-sky-200: #d4c000;
+  --color-sky-300: #bfa900;
+  --color-sky-400: #a89400;
+  --color-sky-500: #8f7e00;
+  --color-sky-600: #756700;
+  --color-sky-900: #2c2600;
+  --color-sky-950: #1c1800;
+  --color-slate-100: #e6d900;
+  --color-slate-200: #d4c000;
+  --color-slate-400: #a89400;
+  --color-slate-500: #8f7e00;
+  --color-slate-800: #3d3500;
+  --color-slate-900: #2c2600;
+  --color-teal-100: #ffee00;
+  --color-teal-200: #ffe000;
+  --color-teal-400: #ffc400;
+  --color-teal-500: #f0b000;
+  --color-teal-600: #c48c00;
+  --color-teal-900: #423000;
+  --color-teal-950: #291d00;
+  --color-violet-100: #ffc000;
+  --color-violet-200: #ff9c00;
+  --color-violet-400: #ff6a00;
+  --color-violet-500: #ff5000;
+  --color-violet-600: #d93d00;
+  --color-violet-900: #4d1500;
+  --color-violet-950: #2e0c00;
+}
+.theme-is-night-light ::selection {
+  color: #ffbb00;
+  background: #6b3800;
+}
+.theme-is-night-light :is(.book-cover, .hero-cover, .room-scene) {
+  filter: grayscale(1) sepia(1) saturate(6) brightness(0.8);
+}
+.theme-is-night-light .room-scene .room-scene {
+  filter: none;
+}
+.theme-is-night-light .book-backdrop {
+  display: none;
+}
+
+/* Colour Safe: every colour the app uses for a meaning is one of the
+   Okabe-Ito set, which every kind of colour vision tells apart: reds
+   turn vermilion, greens bluish green, yellow-greens yellow, violets and
+   pinks a reddish purple. Links in text are underlined, the open page's
+   mark is thicker, and focus is a solid ring in orange (yellow in the
+   dark) as well as the usual glow, so nothing hangs on colour alone.
+   Light has a blue top bar. */
+.theme-is-colour-safe-light,
+.theme-is-colour-safe-dark {
+  --color-amber-50: oklch(98.7% 0.022 76.8);
+  --color-amber-100: oklch(96.2% 0.059 76.8);
+  --color-amber-200: oklch(92.4% 0.12 76.8);
+  --color-amber-300: oklch(87.9% 0.169 76.8);
+  --color-amber-400: oklch(82.8% 0.189 76.8);
+  --color-amber-500: oklch(76.9% 0.188 76.8);
+  --color-amber-600: oklch(66.6% 0.179 76.8);
+  --color-amber-700: oklch(55.5% 0.163 76.8);
+  --color-amber-900: oklch(41.4% 0.112 76.8);
+  --color-amber-950: oklch(27.9% 0.077 76.8);
+  --color-emerald-50: oklch(97.9% 0.021 165.5);
+  --color-emerald-100: oklch(95% 0.052 165.5);
+  --color-emerald-200: oklch(90.5% 0.093 165.5);
+  --color-emerald-300: oklch(84.5% 0.143 165.5);
+  --color-emerald-400: oklch(76.5% 0.177 165.5);
+  --color-emerald-600: oklch(59.6% 0.145 165.5);
+  --color-emerald-700: oklch(50.8% 0.118 165.5);
+  --color-emerald-900: oklch(37.8% 0.077 165.5);
+  --color-emerald-950: oklch(26.2% 0.051 165.5);
+  --color-indigo-100: oklch(93% 0.034 244.0);
+  --color-indigo-200: oklch(87% 0.065 244.0);
+  --color-indigo-400: oklch(67.3% 0.182 244.0);
+  --color-indigo-500: oklch(58.5% 0.2 244.0);
+  --color-indigo-600: oklch(51.1% 0.2 244.0);
+  --color-indigo-900: oklch(35.9% 0.144 244.0);
+  --color-indigo-950: oklch(25.7% 0.09 244.0);
+  --color-lime-100: oklch(96.7% 0.067 105.0);
+  --color-lime-200: oklch(93.8% 0.127 105.0);
+  --color-lime-400: oklch(84.1% 0.2 105.0);
+  --color-lime-500: oklch(76.8% 0.2 105.0);
+  --color-lime-600: oklch(64.8% 0.2 105.0);
+  --color-lime-900: oklch(40.5% 0.101 105.0);
+  --color-lime-950: oklch(27.4% 0.072 105.0);
+  --color-orange-100: oklch(95.4% 0.038 47.5);
+  --color-orange-200: oklch(90.1% 0.076 47.5);
+  --color-orange-400: oklch(75% 0.183 47.5);
+  --color-orange-500: oklch(70.5% 0.2 47.5);
+  --color-orange-600: oklch(64.6% 0.2 47.5);
+  --color-orange-900: oklch(40.8% 0.123 47.5);
+  --color-orange-950: oklch(26.6% 0.079 47.5);
+  --color-pink-100: oklch(94.8% 0.028 346.3);
+  --color-pink-200: oklch(89.9% 0.061 346.3);
+  --color-pink-400: oklch(71.8% 0.2 346.3);
+  --color-pink-500: oklch(65.6% 0.2 346.3);
+  --color-pink-600: oklch(59.2% 0.2 346.3);
+  --color-pink-900: oklch(40.8% 0.153 346.3);
+  --color-pink-950: oklch(28.4% 0.109 346.3);
+  --color-red-50: oklch(97.1% 0.013 47.5);
+  --color-red-300: oklch(80.8% 0.114 47.5);
+  --color-red-400: oklch(70.4% 0.191 47.5);
+  --color-red-600: oklch(57.7% 0.2 47.5);
+  --color-red-700: oklch(50.5% 0.2 47.5);
+  --color-red-900: oklch(39.6% 0.141 47.5);
+  --color-red-950: oklch(25.8% 0.092 47.5);
+  --color-rose-100: oklch(94.1% 0.03 47.5);
+  --color-rose-200: oklch(89.2% 0.058 47.5);
+  --color-rose-400: oklch(71.2% 0.194 47.5);
+  --color-rose-500: oklch(64.5% 0.2 47.5);
+  --color-rose-600: oklch(58.6% 0.2 47.5);
+  --color-rose-900: oklch(41% 0.159 47.5);
+  --color-rose-950: oklch(27.1% 0.105 47.5);
+  --color-sky-50: oklch(97.7% 0.013 236.2);
+  --color-sky-100: oklch(95.1% 0.026 236.2);
+  --color-sky-200: oklch(90.1% 0.058 236.2);
+  --color-sky-300: oklch(82.8% 0.111 236.2);
+  --color-sky-400: oklch(74.6% 0.16 236.2);
+  --color-sky-500: oklch(68.5% 0.169 236.2);
+  --color-sky-600: oklch(58.8% 0.158 236.2);
+  --color-sky-900: oklch(39.1% 0.09 236.2);
+  --color-sky-950: oklch(29.3% 0.066 236.2);
+  --color-teal-100: oklch(95.3% 0.051 165.5);
+  --color-teal-200: oklch(91% 0.096 165.5);
+  --color-teal-400: oklch(77.7% 0.152 165.5);
+  --color-teal-500: oklch(70.4% 0.14 165.5);
+  --color-teal-600: oklch(60% 0.118 165.5);
+  --color-teal-900: oklch(38.6% 0.063 165.5);
+  --color-teal-950: oklch(27.7% 0.046 165.5);
+  --color-violet-100: oklch(94.3% 0.029 346.3);
+  --color-violet-200: oklch(89.4% 0.057 346.3);
+  --color-violet-400: oklch(70.2% 0.183 346.3);
+  --color-violet-500: oklch(60.6% 0.2 346.3);
+  --color-violet-600: oklch(54.1% 0.2 346.3);
+  --color-violet-900: oklch(38% 0.189 346.3);
+  --color-violet-950: oklch(28.3% 0.141 346.3);
+}
+.theme-is-colour-safe-light main :is(p, li, dd, td) a:not([data-size], [data-slot], .surface),
+.theme-is-colour-safe-dark main :is(p, li, dd, td) a:not([data-size], [data-slot], .surface) {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+.theme-is-colour-safe-light :focus-visible,
+.theme-is-colour-safe-dark :focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+.theme-is-colour-safe-light .nav-link[aria-current="page"]::after,
+.theme-is-colour-safe-dark .nav-link[aria-current="page"]::after {
+  height: 3px;
+  background: var(--ring);
+}
+.theme-is-colour-safe-light .top-bar {
+  --background: #00527f;
+  --foreground: #ffffff;
+  --muted-foreground: #d4e6f1;
+  --accent: #0d6496;
+  --accent-foreground: #ffffff;
+  --border: #00527f;
+  --primary: #ffffff;
+  --primary-foreground: #00527f;
+  --ring: #f0e442;
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+/* Whiteboard: the top bar is the board's aluminium frame, brushed and
+   catching the light along its top edge. */
+.theme-is-whiteboard .top-bar {
+  border-bottom: 1px solid #97a1a7;
+  background: linear-gradient(180deg, #f5f7f8 0%, #dde2e5 45%, #cbd2d6 100%);
+  box-shadow: inset 0 1px 0 #ffffff, 0 1px 0 rgb(255 255 255 / 0.7);
+}
+
+/* Art Deco Light: every card and dialog framed twice in gold, library
+   tiles once, and a double gold line under the top bar. */
+.theme-is-art-deco-light .surface {
+  border-color: #c9a656;
+}
+.theme-is-art-deco-light :is([data-slot="card"], [data-slot="dialog-content"]) {
+  --tw-ring-color: #c9a656;
+  outline: 1px solid rgb(201 166 86 / 0.7);
+  outline-offset: -5px;
+}
+.theme-is-art-deco-light .top-bar {
+  border-bottom: 3px double #c9a656;
+}
+.theme-is-art-deco-light a.surface:hover {
+  border-color: #a8852f;
 }
 
 /* One font for the whole page. */
