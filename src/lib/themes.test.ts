@@ -221,6 +221,14 @@ describe("THEMES", () => {
     expect(themeLine(silly)).toBe(silly.silly);
   });
 
+  it("names the two colours of every colour pair, each pairing once", () => {
+    const pairs = THEMES.filter((t) => t.category === "pairs");
+    expect(pairs.length).toBeGreaterThanOrEqual(21);
+    for (const t of pairs) expect(t.note, t.id).toMatch(/^[\w -]+ and [\w -]+$/);
+    expect(new Set(pairs.map((t) => t.note)).size).toBe(pairs.length);
+    expect(themeLine(THEMES.find((t) => t.id === "woodblock")!)).toBe("Dark theme · Prussian blue and vermilion");
+  });
+
   it("keeps every trace of blue out of Night Light", () => {
     // Its palette, and the amber it gives the app's other colours.
     const rule = css.match(/\.theme-is-night-light \{([^}]*)\}/)?.[1] ?? "";

@@ -243,10 +243,11 @@
     --heading-font: var(--font-literata), ui-serif, Georgia, serif;
 }
 
-/* Bordeaux, Riviera, Rhubarb and Majorelle pair a page with an accent
-   from across the colour wheel, where the other themes keep the accent
-   close to the page's own hue (or neutral). Each pairing is one that works
-   in rooms and on book jackets but is rare on a screen. */
+/* The colour pairs (Bordeaux to Mulberry in dark, Rhubarb to Canyon in
+   light) pair a page with an accent from across the colour wheel, where
+   the other themes keep the accent close to the page's own hue (or
+   neutral). Each pairing is one that works in rooms and on book jackets
+   but is rare on a screen, and no two use the same one. */
 
 /* Wine-dark red with sea-glass green. No other dark is red at all. Danger
    is coral, as a red would vanish into the page. */
@@ -394,6 +395,119 @@
     --border: #52267d;
     --input: #52267d;
     --ring: #ffd24d;
+}
+
+/* Deep moss green with camellia pink, glossy leaves and the flower. Danger
+   is amber, as pink is already taken. */
+[data-theme="camellia"] {
+    --background: #10240f;
+    --foreground: #f1f5ec;
+    --card: #183117;
+    --card-foreground: #f1f5ec;
+    --popover: #183117;
+    --popover-foreground: #f1f5ec;
+    --primary: #ffa6c3;
+    --primary-foreground: #10240f;
+    --secondary: #173416;
+    --secondary-foreground: #f1f5ec;
+    --muted: #173416;
+    --muted-foreground: #bbc3b7;
+    --accent: #173416;
+    --accent-foreground: #f1f5ec;
+    --destructive: #ffc46b;
+    --border: #1e441d;
+    --input: #1e441d;
+    --ring: #ffa6c3;
+}
+
+/* Dark bronze with turquoise, the glaze of old Egyptian faience on its
+   metal mount. */
+[data-theme="faience"] {
+    --background: #2a210d;
+    --foreground: #f6efe0;
+    --card: #372c15;
+    --card-foreground: #f6efe0;
+    --popover: #372c15;
+    --popover-foreground: #f6efe0;
+    --primary: #48d1c4;
+    --primary-foreground: #2a210d;
+    --secondary: #3c2f12;
+    --secondary-foreground: #f6efe0;
+    --muted: #3c2f12;
+    --muted-foreground: #c5bead;
+    --accent: #3c2f12;
+    --accent-foreground: #f6efe0;
+    --destructive: #ff9a85;
+    --border: #4d3d18;
+    --input: #4d3d18;
+    --ring: #48d1c4;
+}
+
+/* Prussian blue with vermilion, the two inks of an old Japanese woodblock
+   print. Danger is gold, as red would be the accent. */
+[data-theme="woodblock"] {
+    --background: #072a45;
+    --foreground: #edf4fa;
+    --card: #0f3654;
+    --card-foreground: #edf4fa;
+    --popover: #0f3654;
+    --popover-foreground: #edf4fa;
+    --primary: #ff6b4a;
+    --primary-foreground: #072a45;
+    --secondary: #09375a;
+    --secondary-foreground: #edf4fa;
+    --muted: #09375a;
+    --muted-foreground: #b6c4cf;
+    --accent: #09375a;
+    --accent-foreground: #edf4fa;
+    --destructive: #ffd166;
+    --border: #0b436f;
+    --input: #0b436f;
+    --ring: #ff6b4a;
+}
+
+/* Peacock green-blue with mustard, the eye of a peacock's feather. */
+[data-theme="peacock"] {
+    --background: #06302f;
+    --foreground: #f4fcfa;
+    --card: #0d3d3b;
+    --card-foreground: #f4fcfa;
+    --popover: #0d3d3b;
+    --popover-foreground: #f4fcfa;
+    --primary: #f2b631;
+    --primary-foreground: #06302f;
+    --secondary: #094443;
+    --secondary-foreground: #f4fcfa;
+    --muted: #094443;
+    --muted-foreground: #bbcbc9;
+    --accent: #094443;
+    --accent-foreground: #f4fcfa;
+    --destructive: #ff9a85;
+    --border: #0b5957;
+    --input: #0b5957;
+    --ring: #f2b631;
+}
+
+/* Mulberry purple with sky blue, the fruit against a summer sky. */
+[data-theme="mulberry"] {
+    --background: #26122a;
+    --foreground: #f7ebf6;
+    --card: #341a39;
+    --card-foreground: #f7ebf6;
+    --popover: #341a39;
+    --popover-foreground: #f7ebf6;
+    --primary: #8ccfff;
+    --primary-foreground: #26122a;
+    --secondary: #35193a;
+    --secondary-foreground: #f7ebf6;
+    --muted: #35193a;
+    --muted-foreground: #c5b7c5;
+    --accent: #35193a;
+    --accent-foreground: #f7ebf6;
+    --destructive: #ffa385;
+    --border: #43204a;
+    --input: #43204a;
+    --ring: #8ccfff;
 }
 
 /* The next ten differ in kind rather than hue: two duotones (Blueprint,
@@ -1424,6 +1538,118 @@
     --border: #f0bd7e;
     --input: #f0bd7e;
     --ring: #ad0f68;
+}
+
+/* Orchid pink with olive, the flower and the moss on the bark it grows on. */
+[data-theme="orchid"] {
+    --background: #ecc5e8;
+    --foreground: #241023;
+    --card: #f6e3f3;
+    --card-foreground: #241023;
+    --popover: #f6e3f3;
+    --popover-foreground: #241023;
+    --primary: #55550f;
+    --primary-foreground: #ffffff;
+    --secondary: #e8b0e2;
+    --secondary-foreground: #241023;
+    --muted: #e8b0e2;
+    --muted-foreground: #5a4158;
+    --accent: #e8b0e2;
+    --accent-foreground: #241023;
+    --destructive: #a3141e;
+    --border: #e19dda;
+    --input: #e19dda;
+    --ring: #55550f;
+}
+
+/* Pistachio green with raspberry, two ices in one cone. */
+[data-theme="pistachio"] {
+    --background: #d9eab5;
+    --foreground: #17240d;
+    --card: #ecf5d9;
+    --card-foreground: #17240d;
+    --popover: #ecf5d9;
+    --popover-foreground: #17240d;
+    --primary: #a3164f;
+    --primary-foreground: #ffffff;
+    --secondary: #d0e79f;
+    --secondary-foreground: #17240d;
+    --muted: #d0e79f;
+    --muted-foreground: #3e4c2f;
+    --accent: #d0e79f;
+    --accent-foreground: #17240d;
+    --destructive: #9a3412;
+    --border: #c5e08c;
+    --input: #c5e08c;
+    --ring: #a3164f;
+}
+
+/* Custard yellow with plum, a pudding. Softer and warmer than Majorelle's
+   lemon. */
+[data-theme="custard"] {
+    --background: #f7ecb5;
+    --foreground: #2a1a24;
+    --card: #fbf5d8;
+    --card-foreground: #2a1a24;
+    --popover: #fbf5d8;
+    --popover-foreground: #2a1a24;
+    --primary: #6b1f5e;
+    --primary-foreground: #ffffff;
+    --secondary: #f7e89c;
+    --secondary-foreground: #2a1a24;
+    --muted: #f7e89c;
+    --muted-foreground: #61534b;
+    --accent: #f7e89c;
+    --accent-foreground: #2a1a24;
+    --destructive: #a3241c;
+    --border: #f3e186;
+    --input: #f3e186;
+    --ring: #6b1f5e;
+}
+
+/* Periwinkle blue with rust, like a rusted gate in a bed of periwinkles.
+   Bluer than Lilac, more violet than Cyanotype. */
+[data-theme="periwinkle"] {
+    --background: #c9d2f2;
+    --foreground: #11162e;
+    --card: #e4e8fa;
+    --card-foreground: #11162e;
+    --popover: #e4e8fa;
+    --popover-foreground: #11162e;
+    --primary: #923800;
+    --primary-foreground: #ffffff;
+    --secondary: #b3c0ef;
+    --secondary-foreground: #11162e;
+    --muted: #b3c0ef;
+    --muted-foreground: #434963;
+    --accent: #b3c0ef;
+    --accent-foreground: #11162e;
+    --destructive: #a0183c;
+    --border: #9fafe9;
+    --input: #9fafe9;
+    --ring: #923800;
+}
+
+/* Canyon clay with deep teal, red rock and the river at the bottom of it. */
+[data-theme="canyon"] {
+    --background: #e4c9b4;
+    --foreground: #1e140d;
+    --card: #f2e3d7;
+    --card-foreground: #1e140d;
+    --popover: #f2e3d7;
+    --popover-foreground: #1e140d;
+    --primary: #0b5a5e;
+    --primary-foreground: #ffffff;
+    --secondary: #e0bb9f;
+    --secondary-foreground: #1e140d;
+    --muted: #e0bb9f;
+    --muted-foreground: #53453a;
+    --accent: #e0bb9f;
+    --accent-foreground: #1e140d;
+    --destructive: #a3241c;
+    --border: #d8ae8d;
+    --input: #d8ae8d;
+    --ring: #0b5a5e;
 }
 
 /* Black on white with black outlines on every card, field and chip: High
