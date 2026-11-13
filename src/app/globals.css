@@ -2440,7 +2440,7 @@
     --secondary: #ebe8e3;
     --secondary-foreground: #22201c;
     --muted: #ebe8e3;
-    --muted-foreground: #57524a;
+    --muted-foreground: #4f4a42;
     --accent: #e0dcd5;
     --accent-foreground: #22201c;
     --destructive: #a3241c;
@@ -2554,7 +2554,7 @@
     --secondary: #2a2540;
     --secondary-foreground: #f2edf7;
     --muted: #2a2540;
-    --muted-foreground: #b6aec8;
+    --muted-foreground: #c6bfd7;
     --accent: #322b4a;
     --accent-foreground: #f2edf7;
     --destructive: #ff8a8a;
@@ -2566,7 +2566,7 @@
     --glass-edge: rgb(255 230 240 / 0.13);
     --glass-menu: rgb(36 30 58 / 0.8);
     --glass-bar: rgb(24 21 44 / 0.55);
-    --page-gradient: radial-gradient(70% 30% at 50% 104%, rgb(226 110 82 / 0.3) 0%, rgb(226 110 82 / 0) 100%), linear-gradient(180deg, #17152b 0%, #1c1833 40%, #2a1b3a 75%, #3a1f37 100%);
+    --page-gradient: radial-gradient(70% 30% at 50% 104%, rgb(226 110 82 / 0.24) 0%, rgb(226 110 82 / 0) 100%), linear-gradient(180deg, #17152b 0%, #1c1833 40%, #271a37 75%, #331c33 100%);
 }
 
 /* Emerald: green glass. A deep green behind the page with two soft
