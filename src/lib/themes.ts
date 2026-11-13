@@ -11,11 +11,11 @@
  * monochromes, high contrast in both modes, greyscale with one red, mixed
  * pastels, brown paper, blue-ink text. The newest are set apart by more
  * than colour: a picture behind the page, cards in a second colour,
- * outlined cards with hard shadows, a top bar of its own (see "Beyond
- * colour" in globals.css). Last is the Silly set, absurd on purpose, which
- * the palette menu lists apart. Themes that turned out to be lookalikes of
- * another, or too busy to live with, were retired; RETIRED_THEMES sends
- * their readers to the closest one left.
+ * outlined cards with hard shadows, cards under glass, a top bar of its
+ * own (see "Beyond colour" in globals.css). Last is the Silly set, absurd
+ * on purpose, which the palette menu lists apart. Themes that turned out
+ * to be lookalikes of another, or too busy to live with, were retired;
+ * RETIRED_THEMES sends their readers to the closest one left.
  * Dark-mode themes additionally get the `dark` class on <html> so Tailwind
  * `dark:` variants (status badges etc.) follow along.
  */
@@ -282,6 +282,75 @@ export const THEMES: ThemeDef[] = [
     pattern:
       "radial-gradient(circle at 36% 34%, #3b3f47 0 22%, transparent 48%), radial-gradient(circle at 66% 68%, #15171b 0 18%, transparent 46%)",
   },
+  {
+    id: "midnight",
+    name: "Midnight",
+    mode: "dark",
+    swatch: ["#0c1828", "#a6dcff"],
+    pattern:
+      "radial-gradient(circle at 15% 10%, rgb(48 96 180 / 0.75), transparent 62%), radial-gradient(circle at 90% 90%, rgb(104 72 184 / 0.65), transparent 62%)",
+    ownBackground: true,
+  },
+  {
+    id: "smoke",
+    name: "Smoke",
+    mode: "dark",
+    swatch: ["#1c1a19", "#ecc9a8"],
+    pattern:
+      "radial-gradient(circle at 90% 90%, rgb(196 116 48 / 0.6), transparent 62%), radial-gradient(circle at 10% 10%, rgb(140 128 116 / 0.3), transparent 55%)",
+    ownBackground: true,
+  },
+  {
+    id: "dusk",
+    name: "Dusk",
+    mode: "dark",
+    swatch: ["#1b1830", "#f4b6a6"],
+    pattern:
+      "linear-gradient(180deg, #17152b 0%, #2a1b3a 55%, #6a2c3a 100%)",
+    ownBackground: true,
+  },
+  {
+    id: "emerald",
+    name: "Emerald",
+    mode: "dark",
+    swatch: ["#0a1f19", "#c8f2dc"],
+    pattern:
+      "radial-gradient(circle at 85% 10%, rgb(30 150 100 / 0.65), transparent 62%), radial-gradient(circle at 10% 90%, rgb(16 112 96 / 0.6), transparent 62%)",
+    ownBackground: true,
+  },
+  {
+    id: "velvet",
+    name: "Velvet",
+    mode: "dark",
+    swatch: ["#24121c", "#f2b8c6"],
+    pattern:
+      "radial-gradient(circle at 30% 22%, rgb(255 200 222 / 0.2), transparent 55%), linear-gradient(180deg, transparent 50%, rgb(0 0 0 / 0.25))",
+  },
+  {
+    id: "copper",
+    name: "Copper",
+    mode: "dark",
+    swatch: ["#17242a", "#e8a07a"],
+    pattern:
+      "radial-gradient(circle, transparent 0 60%, #e8a07a 63% 68%, transparent 71%)",
+  },
+  {
+    id: "carbon",
+    name: "Carbon",
+    mode: "dark",
+    swatch: ["#0e0f10", "#ff9b85"],
+    pattern:
+      "radial-gradient(circle at 50% 35%, transparent 0 58%, rgb(255 255 255 / 0.4) 61% 64%, transparent 67%)",
+  },
+  {
+    id: "cocoa",
+    name: "Cocoa",
+    mode: "dark",
+    swatch: ["#231814", "#a9d3ee"],
+    pattern:
+      "radial-gradient(120% 70% at 50% 0%, #3d2c23, transparent 75%)",
+    ownBackground: true,
+  },
 
   // Light palettes
   { id: "solarized-light", name: "Solarized Light", mode: "light", swatch: ["#fdf6e3", "#b58900"] },
@@ -520,6 +589,74 @@ export const THEMES: ThemeDef[] = [
     swatch: ["#d8d8d8", "#285889"],
     pattern:
       "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' fill='%23336698'/%3E%3Cpath d='M4 5.5h9v3H4z' fill='%23ffcb00' stroke='%23555' stroke-width='.5'/%3E%3Cpath d='M4 8.5h20V24H4z' fill='%23d8d8d8' stroke='%23555' stroke-width='.5'/%3E%3C/svg%3E\")",
+    ownBackground: true,
+  },
+  {
+    id: "frost",
+    name: "Frost",
+    mode: "light",
+    swatch: ["#dfeaf4", "#4a4f7d"],
+    pattern:
+      "radial-gradient(circle at 85% 12%, #bcd4f0, transparent 62%), radial-gradient(circle at 12% 90%, #d6d0f0, transparent 62%)",
+    ownBackground: true,
+  },
+  {
+    id: "daybreak",
+    name: "Daybreak",
+    mode: "light",
+    swatch: ["#f1e9e4", "#7d4c12"],
+    pattern:
+      "linear-gradient(180deg, #e2e4f3 0%, #f6ece8 55%, #fdcfa2 100%)",
+    ownBackground: true,
+  },
+  {
+    id: "rose-quartz",
+    name: "Rose Quartz",
+    mode: "light",
+    swatch: ["#f5e5e3", "#8e2f4f"],
+    pattern:
+      "radial-gradient(circle at 15% 15%, #f2c9d0, transparent 62%), radial-gradient(circle at 88% 88%, #e4cdec, transparent 62%)",
+    ownBackground: true,
+  },
+  {
+    id: "prism",
+    name: "Prism",
+    mode: "light",
+    swatch: ["#f4f4f7", "#5b3fc4"],
+    pattern:
+      "linear-gradient(124deg, transparent 28%, rgb(255 160 160 / 0.7) 38%, rgb(255 218 140 / 0.7) 46%, rgb(150 228 172 / 0.7) 54%, rgb(140 196 255 / 0.7) 62%, rgb(198 164 255 / 0.7) 70%, transparent 80%)",
+  },
+  {
+    id: "celadon",
+    name: "Celadon",
+    mode: "light",
+    swatch: ["#dde8e3", "#1f6650"],
+    pattern:
+      "linear-gradient(180deg, rgb(255 255 255 / 0.75), transparent 55%)",
+  },
+  {
+    id: "letterpress",
+    name: "Letterpress",
+    mode: "light",
+    swatch: ["#f2efe8", "#4e5a1c"],
+    pattern:
+      "radial-gradient(circle at 50% 38%, transparent 0 52%, rgb(60 50 30 / 0.2) 72%)",
+  },
+  {
+    id: "pebble",
+    name: "Pebble",
+    mode: "light",
+    swatch: ["#e5e1db", "#3e5a6e"],
+    pattern:
+      "radial-gradient(circle at 35% 28%, rgb(255 255 255 / 0.8), transparent 55%), radial-gradient(circle at 65% 80%, rgb(110 95 75 / 0.15), transparent 50%)",
+  },
+  {
+    id: "meadow",
+    name: "Meadow",
+    mode: "light",
+    swatch: ["#ebf0dc", "#2f55a4"],
+    pattern:
+      "linear-gradient(180deg, #f6f3d2 0%, #e6eed8 60%, #dfe9cf 100%)",
     ownBackground: true,
   },
   // The Silly set

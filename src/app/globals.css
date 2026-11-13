@@ -2245,6 +2245,463 @@
     --page-size: 100% 100%;
 }
 
+/* ── Calm themes ───────────────────────────────────────────────────────────
+   Eight light and eight dark themes kept quiet: no picture behind the page
+   but light and soft colour, and half of them under glass. */
+
+/* Frost: frosted glass on a winter morning. A cold, pale sky behind the
+   page, blue up to the right and a breath of lilac down to the left, and
+   every card, menu and the top bar a pane of milky glass with frost
+   creeping in from its edges (see "Glass" under "Beyond colour"). A
+   slate indigo for what is chosen. */
+[data-theme="frost"] {
+    --background: #dfeaf4;
+    --foreground: #142036;
+    --card: #f6f9fc;
+    --card-foreground: #142036;
+    --popover: #f8fafd;
+    --popover-foreground: #142036;
+    --primary: #4a4f7d;
+    --primary-foreground: #ffffff;
+    --secondary: #e7eef6;
+    --secondary-foreground: #142036;
+    --muted: #e7eef6;
+    --muted-foreground: #435069;
+    --accent: #e2eaf4;
+    --accent-foreground: #142036;
+    --destructive: #b3261e;
+    --border: #cbd7e6;
+    --input: #b2c0d4;
+    --ring: #4a4f7d;
+    --radius: 1rem;
+    --glass: rgb(255 255 255 / 0.58);
+    --glass-edge: rgb(255 255 255 / 0.9);
+    --glass-menu: rgb(248 251 254 / 0.78);
+    --glass-bar: rgb(246 250 254 / 0.6);
+    --page-gradient: radial-gradient(70% 60% at 100% 0%, #c8dcf2 0%, rgb(200 220 242 / 0) 100%), radial-gradient(60% 55% at 0% 100%, #dcd8f2 0%, rgb(220 216 242 / 0) 100%), linear-gradient(180deg, #e3ecf6 0%, #eef3f9 55%, #e8edf7 100%);
+}
+
+/* Daybreak: clear glass at first light. The sky behind the page is still
+   a cool lavender overhead and warms to peach at the foot, where the sun
+   is coming up; the glass cards catch that warm light along their lower
+   edge. Bronze for what is chosen. */
+[data-theme="daybreak"] {
+    --background: #f1e9e4;
+    --foreground: #2a1e18;
+    --card: #fdfaf7;
+    --card-foreground: #2a1e18;
+    --popover: #fdfaf7;
+    --popover-foreground: #2a1e18;
+    --primary: #7d4c12;
+    --primary-foreground: #ffffff;
+    --secondary: #f4ece6;
+    --secondary-foreground: #2a1e18;
+    --muted: #f4ece6;
+    --muted-foreground: #5d4939;
+    --accent: #efe5dd;
+    --accent-foreground: #2a1e18;
+    --destructive: #a8261b;
+    --border: #e5d6ca;
+    --input: #cfbcab;
+    --ring: #7d4c12;
+    --radius: 0.875rem;
+    --glass: rgb(255 255 255 / 0.46);
+    --glass-edge: rgb(255 255 255 / 0.85);
+    --glass-menu: rgb(253 250 247 / 0.8);
+    --glass-bar: rgb(246 244 250 / 0.55);
+    --page-gradient: radial-gradient(60% 34% at 50% 104%, #fdd2a8 0%, rgb(253 210 168 / 0) 100%), linear-gradient(180deg, #e2e4f3 0%, #ece8f1 30%, #f6ece8 62%, #fbe2cf 100%);
+}
+
+/* Rose Quartz: polished pink quartz. A soft blush and lilac glow behind
+   the page, and every card a slab of rose-tinted glass with a bright
+   bevelled edge. Deep rose for what is chosen. */
+[data-theme="rose-quartz"] {
+    --background: #f5e5e3;
+    --foreground: #2e1a20;
+    --card: #fdf5f4;
+    --card-foreground: #2e1a20;
+    --popover: #fdf6f5;
+    --popover-foreground: #2e1a20;
+    --primary: #8e2f4f;
+    --primary-foreground: #ffffff;
+    --secondary: #f6e8e7;
+    --secondary-foreground: #2e1a20;
+    --muted: #f6e8e7;
+    --muted-foreground: #6a4450;
+    --accent: #f1dfdf;
+    --accent-foreground: #2e1a20;
+    --destructive: #a8261b;
+    --border: #ead2d3;
+    --input: #d9bbbf;
+    --ring: #8e2f4f;
+    --radius: 1rem;
+    --glass: rgb(255 244 245 / 0.55);
+    --glass-edge: rgb(255 255 255 / 0.85);
+    --glass-menu: rgb(253 245 245 / 0.8);
+    --glass-bar: rgb(252 240 241 / 0.6);
+    --page-gradient: radial-gradient(65% 55% at 0% 0%, #f5d3d8 0%, rgb(245 211 216 / 0) 100%), radial-gradient(60% 60% at 100% 100%, #e9d6ee 0%, rgb(233 214 238 / 0) 100%), linear-gradient(160deg, #f7e7e5 0%, #f8eeec 50%, #f2e6ec 100%);
+}
+
+/* Prism: clear glass in a white room, where a beam of sunlight through a
+   prism lays a soft band of colours across the top right corner of the
+   window. Every card is a clear pane with that spectrum caught along its
+   top edge. Violet for what is chosen. */
+[data-theme="prism"] {
+    --background: #f4f4f7;
+    --foreground: #16161f;
+    --card: #ffffff;
+    --card-foreground: #16161f;
+    --popover: #ffffff;
+    --popover-foreground: #16161f;
+    --primary: #5b3fc4;
+    --primary-foreground: #ffffff;
+    --secondary: #ececf3;
+    --secondary-foreground: #16161f;
+    --muted: #ececf3;
+    --muted-foreground: #4e4e66;
+    --accent: #e9e9f2;
+    --accent-foreground: #16161f;
+    --destructive: #b3261e;
+    --border: #e0e0ea;
+    --input: #c6c6d6;
+    --ring: #5b3fc4;
+    --radius: 0.75rem;
+    --glass: rgb(255 255 255 / 0.72);
+    --glass-edge: rgb(255 255 255 / 0.95);
+    --glass-menu: rgb(255 255 255 / 0.82);
+    --glass-bar: rgb(250 250 252 / 0.7);
+}
+
+/* Celadon: the grey-green glaze of old Chinese stoneware. A pale celadon
+   page, and every card glazed: a soft gloss across its top and the glaze
+   pooling a little darker at its foot (see "Beyond colour"). Deep jade
+   for what is chosen. */
+[data-theme="celadon"] {
+    --background: #dde8e3;
+    --foreground: #13241f;
+    --card: #eef5f2;
+    --card-foreground: #13241f;
+    --popover: #f2f7f5;
+    --popover-foreground: #13241f;
+    --primary: #1f6650;
+    --primary-foreground: #ffffff;
+    --secondary: #e3ece8;
+    --secondary-foreground: #13241f;
+    --muted: #e3ece8;
+    --muted-foreground: #42574e;
+    --accent: #d5e3dd;
+    --accent-foreground: #13241f;
+    --destructive: #a8261b;
+    --border: #c4d5ce;
+    --input: #a7bdb3;
+    --ring: #1f6650;
+    --radius: 0.875rem;
+}
+
+/* Letterpress: thick cotton paper, printed by hand. Every card is
+   pressed into the sheet rather than lying on it, page titles sit in the
+   bite of the type, and the ink is a deep moss green. Headings in a book
+   face. */
+[data-theme="letterpress"] {
+    --background: #f2efe8;
+    --foreground: #1d1c17;
+    --card: #e9e5dc;
+    --card-foreground: #1d1c17;
+    --popover: #fbfaf6;
+    --popover-foreground: #1d1c17;
+    --primary: #4e5a1c;
+    --primary-foreground: #ffffff;
+    --secondary: #e8e4da;
+    --secondary-foreground: #1d1c17;
+    --muted: #e8e4da;
+    --muted-foreground: #545040;
+    --accent: #e4dfd3;
+    --accent-foreground: #1d1c17;
+    --destructive: #a3241c;
+    --border: #dcd6c8;
+    --input: #c2bcab;
+    --ring: #4e5a1c;
+    --radius: 0.5rem;
+    --heading-font: var(--font-literata), "Literata", Georgia, serif;
+}
+
+/* Pebble: smooth stones from a river bed. A warm stone grey page, and
+   every card a pebble: very round, lit softly from above and shaded
+   underneath. Slate blue for what is chosen. */
+[data-theme="pebble"] {
+    --background: #e5e1db;
+    --foreground: #22201c;
+    --card: #f2f0ec;
+    --card-foreground: #22201c;
+    --popover: #f5f3f0;
+    --popover-foreground: #22201c;
+    --primary: #3e5a6e;
+    --primary-foreground: #ffffff;
+    --secondary: #ebe8e3;
+    --secondary-foreground: #22201c;
+    --muted: #ebe8e3;
+    --muted-foreground: #4f4a42;
+    --accent: #e0dcd5;
+    --accent-foreground: #22201c;
+    --destructive: #a3241c;
+    --border: #d5d0c8;
+    --input: #bdb6ab;
+    --ring: #3e5a6e;
+    --radius: 1.5rem;
+}
+
+/* Meadow: a summer field. Pale grass green, a little warmer at the top
+   where the sun is, cards the soft blue of cornflowers, and cornflower
+   blue for what is chosen. */
+[data-theme="meadow"] {
+    --background: #ebf0dc;
+    --foreground: #1b2414;
+    --card: #f3f6fd;
+    --card-foreground: #1b2414;
+    --popover: #f6f8fd;
+    --popover-foreground: #1b2414;
+    --primary: #2f55a4;
+    --primary-foreground: #ffffff;
+    --secondary: #e3ead3;
+    --secondary-foreground: #1b2414;
+    --muted: #e3ead3;
+    --muted-foreground: #48543d;
+    --accent: #dde6cb;
+    --accent-foreground: #1b2414;
+    --destructive: #a8261b;
+    --border: #d1dabd;
+    --input: #b6c3a0;
+    --ring: #2f55a4;
+    --radius: 0.875rem;
+    --page-gradient: linear-gradient(180deg, #f3f2d9 0%, #edf1dc 35%, #e6eed8 100%);
+}
+
+/* Midnight: frosted glass at night. A deep blue sky behind the page
+   with two soft glows in it, blue up to the left and violet down to the
+   right, and every card, menu and the top bar a pane of frosted glass.
+   Ice blue for what is chosen. */
+[data-theme="midnight"] {
+    --background: #0c1828;
+    --foreground: #e8eefa;
+    --card: #16243a;
+    --card-foreground: #e8eefa;
+    --popover: #142238;
+    --popover-foreground: #e8eefa;
+    --primary: #a6dcff;
+    --primary-foreground: #0c1828;
+    --secondary: #18263d;
+    --secondary-foreground: #e8eefa;
+    --muted: #18263d;
+    --muted-foreground: #a3b2cc;
+    --accent: #1d2c45;
+    --accent-foreground: #e8eefa;
+    --destructive: #ff9aa6;
+    --border: #26364f;
+    --input: #4a5d7e;
+    --ring: #a6dcff;
+    --radius: 1rem;
+    --glass: rgb(170 200 255 / 0.07);
+    --glass-edge: rgb(200 220 255 / 0.14);
+    --glass-menu: rgb(22 36 58 / 0.78);
+    --glass-bar: rgb(14 26 44 / 0.55);
+    --page-gradient: radial-gradient(60% 55% at 8% 0%, rgb(48 96 180 / 0.42) 0%, rgb(48 96 180 / 0) 100%), radial-gradient(55% 50% at 100% 100%, rgb(104 72 184 / 0.34) 0%, rgb(104 72 184 / 0) 100%), linear-gradient(180deg, #0c1828 0%, #0d1730 100%);
+}
+
+/* Smoke: smoked glass. Warm charcoal behind the page with an amber glow
+   low in the right corner, like a lamp in another room, and every card a
+   pane of darker, smoked glass with a fine light rim. Champagne for what
+   is chosen. */
+[data-theme="smoke"] {
+    --background: #1c1a19;
+    --foreground: #f2ece6;
+    --card: #272423;
+    --card-foreground: #f2ece6;
+    --popover: #2a2725;
+    --popover-foreground: #f2ece6;
+    --primary: #ecc9a8;
+    --primary-foreground: #1c1a19;
+    --secondary: #2a2726;
+    --secondary-foreground: #f2ece6;
+    --muted: #2a2726;
+    --muted-foreground: #b5aca3;
+    --accent: #332f2c;
+    --accent-foreground: #f2ece6;
+    --destructive: #ff8f84;
+    --border: #3a3532;
+    --input: #5e5650;
+    --ring: #ecc9a8;
+    --radius: 0.75rem;
+    --glass: rgb(8 6 5 / 0.42);
+    --glass-edge: rgb(255 236 214 / 0.11);
+    --glass-menu: rgb(30 27 25 / 0.82);
+    --glass-bar: rgb(20 18 17 / 0.6);
+    --page-gradient: radial-gradient(55% 45% at 100% 100%, rgb(196 116 48 / 0.3) 0%, rgb(196 116 48 / 0) 100%), radial-gradient(50% 45% at 0% 0%, rgb(140 128 116 / 0.16) 0%, rgb(140 128 116 / 0) 100%), linear-gradient(180deg, #1e1c1b 0%, #1a1817 100%);
+}
+
+/* Dusk: clear glass just after sunset. The sky behind the page is deep
+   indigo overhead and turns to plum and a last ember glow at the foot;
+   the glass cards catch that glow along their lower edge. Soft coral for
+   what is chosen. */
+[data-theme="dusk"] {
+    --background: #1b1830;
+    --foreground: #f2edf7;
+    --card: #29243f;
+    --card-foreground: #f2edf7;
+    --popover: #2a2541;
+    --popover-foreground: #f2edf7;
+    --primary: #f4b6a6;
+    --primary-foreground: #1b1830;
+    --secondary: #2a2540;
+    --secondary-foreground: #f2edf7;
+    --muted: #2a2540;
+    --muted-foreground: #c6bfd7;
+    --accent: #322b4a;
+    --accent-foreground: #f2edf7;
+    --destructive: #ff8a8a;
+    --border: #3a3352;
+    --input: #5c5478;
+    --ring: #f4b6a6;
+    --radius: 0.875rem;
+    --glass: rgb(255 255 255 / 0.055);
+    --glass-edge: rgb(255 230 240 / 0.13);
+    --glass-menu: rgb(36 30 58 / 0.8);
+    --glass-bar: rgb(24 21 44 / 0.55);
+    --page-gradient: radial-gradient(70% 30% at 50% 104%, rgb(226 110 82 / 0.24) 0%, rgb(226 110 82 / 0) 100%), linear-gradient(180deg, #17152b 0%, #1c1833 40%, #271a37 75%, #331c33 100%);
+}
+
+/* Emerald: green glass. A deep green behind the page with two soft
+   glows of emerald light, and every card a pane of green-tinted glass
+   with a bevelled edge. Pale mint for what is chosen. */
+[data-theme="emerald"] {
+    --background: #0a1f19;
+    --foreground: #e6f5ee;
+    --card: #113026;
+    --card-foreground: #e6f5ee;
+    --popover: #12301f;
+    --popover-foreground: #e6f5ee;
+    --primary: #c8f2dc;
+    --primary-foreground: #0a1f19;
+    --secondary: #12291f;
+    --secondary-foreground: #e6f5ee;
+    --muted: #12291f;
+    --muted-foreground: #9fc2b2;
+    --accent: #163528;
+    --accent-foreground: #e6f5ee;
+    --destructive: #ff9a8f;
+    --border: #1f3d31;
+    --input: #3f6656;
+    --ring: #c8f2dc;
+    --radius: 0.875rem;
+    --glass: rgb(120 255 190 / 0.055);
+    --glass-edge: rgb(170 255 215 / 0.14);
+    --glass-menu: rgb(16 44 34 / 0.8);
+    --glass-bar: rgb(10 30 24 / 0.55);
+    --page-gradient: radial-gradient(55% 50% at 92% 0%, rgb(30 150 100 / 0.32) 0%, rgb(30 150 100 / 0) 100%), radial-gradient(55% 50% at 0% 100%, rgb(16 112 96 / 0.3) 0%, rgb(16 112 96 / 0) 100%), linear-gradient(180deg, #0a1f19 0%, #0a1c18 100%);
+}
+
+/* Velvet: a wine-red velvet with the nap catching the light. Every card
+   has a soft sheen across its top and deepens towards its foot, titles
+   are in Playfair Display, and a blush pink for what is chosen. */
+[data-theme="velvet"] {
+    --background: #24121c;
+    --foreground: #f7e9ef;
+    --card: #331a28;
+    --card-foreground: #f7e9ef;
+    --popover: #361c2b;
+    --popover-foreground: #f7e9ef;
+    --primary: #f2b8c6;
+    --primary-foreground: #24121c;
+    --secondary: #34202b;
+    --secondary-foreground: #f7e9ef;
+    --muted: #34202b;
+    --muted-foreground: #c4a6b4;
+    --accent: #3d2433;
+    --accent-foreground: #f7e9ef;
+    --destructive: #ffa08a;
+    --border: #4a2c3c;
+    --input: #6e4a5c;
+    --ring: #f2b8c6;
+    --radius: 0.75rem;
+    --heading-font: var(--font-playfair), "Playfair Display", Georgia, serif;
+}
+
+/* Copper: copper and verdigris. A deep blue-green page, the colour copper
+   weathers to, and every card edged in bright copper with its glint
+   along the top. Copper for what is chosen. */
+[data-theme="copper"] {
+    --background: #17242a;
+    --foreground: #e9f0ef;
+    --card: #1f3038;
+    --card-foreground: #e9f0ef;
+    --popover: #213239;
+    --popover-foreground: #e9f0ef;
+    --primary: #e8a07a;
+    --primary-foreground: #17242a;
+    --secondary: #213238;
+    --secondary-foreground: #e9f0ef;
+    --muted: #213238;
+    --muted-foreground: #a6bab8;
+    --accent: #263a42;
+    --accent-foreground: #e9f0ef;
+    --destructive: #ff9a9a;
+    --border: #2e4650;
+    --input: #4f6a73;
+    --ring: #e8a07a;
+    --radius: 0.5rem;
+}
+
+/* Carbon: near black, with every card drawn in a fine line of light
+   that is brightest along its top edge and fades as it goes down, warmed
+   with coral at the foot. Coral for what is chosen. */
+[data-theme="carbon"] {
+    --background: #0e0f10;
+    --foreground: #ededee;
+    --card: #16171a;
+    --card-foreground: #ededee;
+    --popover: #1a1b1e;
+    --popover-foreground: #ededee;
+    --primary: #ff9b85;
+    --primary-foreground: #0e0f10;
+    --secondary: #1b1c1f;
+    --secondary-foreground: #ededee;
+    --muted: #1b1c1f;
+    --muted-foreground: #a3a4a8;
+    --accent: #222327;
+    --accent-foreground: #ededee;
+    --destructive: #ff8fb0;
+    --border: #2a2b2f;
+    --input: #505259;
+    --ring: #ff9b85;
+    --radius: 0.75rem;
+}
+
+/* Cocoa: a cup of hot chocolate. A deep warm brown, a little lighter at
+   the top of the window, rounded corners and soft headings, and a pale
+   sky blue for what is chosen. */
+[data-theme="cocoa"] {
+    --background: #231814;
+    --foreground: #f5ebe4;
+    --card: #30221c;
+    --card-foreground: #f5ebe4;
+    --popover: #33241e;
+    --popover-foreground: #f5ebe4;
+    --primary: #a9d3ee;
+    --primary-foreground: #231814;
+    --secondary: #33251f;
+    --secondary-foreground: #f5ebe4;
+    --muted: #33251f;
+    --muted-foreground: #c2ada0;
+    --accent: #3b2b23;
+    --accent-foreground: #f5ebe4;
+    --destructive: #ff9a8a;
+    --border: #46342a;
+    --input: #6c5547;
+    --ring: #a9d3ee;
+    --radius: 1rem;
+    --heading-font: var(--font-nunito), ui-rounded, ui-sans-serif, system-ui, sans-serif;
+    --page-gradient: radial-gradient(120% 70% at 50% 0%, #2c1f19 0%, rgb(44 31 25 / 0) 100%), linear-gradient(#211713, #211713);
+}
+
 /* ── The Silly set ─────────────────────────────────────────────────────────
    Themes nobody should pick, listed apart in the palette menu. They are
    absurd on purpose but hold the same contrast as the rest, so the app
@@ -3242,6 +3699,225 @@ html[data-own-background] body::before {
   html:not([data-motion="off"]).theme-is-fireflies body::after {
     animation: firefly-glow 9.5s ease-in-out -4s infinite reverse;
   }
+}
+
+/* Glass: Frost, Daybreak, Rose Quartz and Prism in light, Midnight, Smoke,
+   Dusk and Emerald in dark. Cards and library tiles are panes of glass over
+   the soft light behind the page. That light is already soft, so a pane is
+   only see-through, with nothing to blur again as the page scrolls; menus,
+   lists and dialogs, which open over writing, are blurred like the top
+   bar. Each theme's block sets the panes (--glass), their rim
+   (--glass-edge), the menus (--glass-menu) and the top bar (--glass-bar);
+   the light on each pane's edges is its own, below. With flat cards
+   (Preferences) the panes keep that light and lose only their shadow. */
+.theme-is-frost .surface,
+.theme-is-daybreak .surface,
+.theme-is-rose-quartz .surface,
+.theme-is-prism .surface,
+.theme-is-midnight .surface,
+.theme-is-smoke .surface,
+.theme-is-dusk .surface,
+.theme-is-emerald .surface {
+  background-color: var(--glass);
+  border-color: var(--glass-edge);
+}
+.theme-is-frost [data-slot="card"],
+.theme-is-daybreak [data-slot="card"],
+.theme-is-rose-quartz [data-slot="card"],
+.theme-is-prism [data-slot="card"],
+.theme-is-midnight [data-slot="card"],
+.theme-is-smoke [data-slot="card"],
+.theme-is-dusk [data-slot="card"],
+.theme-is-emerald [data-slot="card"] {
+  --tw-ring-color: var(--glass-edge);
+}
+.theme-is-frost :is([data-slot="popover-content"], [data-slot="dropdown-menu-content"], [data-slot="dropdown-menu-sub-content"], [data-slot="select-content"], [data-slot="dialog-content"]),
+.theme-is-daybreak :is([data-slot="popover-content"], [data-slot="dropdown-menu-content"], [data-slot="dropdown-menu-sub-content"], [data-slot="select-content"], [data-slot="dialog-content"]),
+.theme-is-rose-quartz :is([data-slot="popover-content"], [data-slot="dropdown-menu-content"], [data-slot="dropdown-menu-sub-content"], [data-slot="select-content"], [data-slot="dialog-content"]),
+.theme-is-prism :is([data-slot="popover-content"], [data-slot="dropdown-menu-content"], [data-slot="dropdown-menu-sub-content"], [data-slot="select-content"], [data-slot="dialog-content"]),
+.theme-is-midnight :is([data-slot="popover-content"], [data-slot="dropdown-menu-content"], [data-slot="dropdown-menu-sub-content"], [data-slot="select-content"], [data-slot="dialog-content"]),
+.theme-is-smoke :is([data-slot="popover-content"], [data-slot="dropdown-menu-content"], [data-slot="dropdown-menu-sub-content"], [data-slot="select-content"], [data-slot="dialog-content"]),
+.theme-is-dusk :is([data-slot="popover-content"], [data-slot="dropdown-menu-content"], [data-slot="dropdown-menu-sub-content"], [data-slot="select-content"], [data-slot="dialog-content"]),
+.theme-is-emerald :is([data-slot="popover-content"], [data-slot="dropdown-menu-content"], [data-slot="dropdown-menu-sub-content"], [data-slot="select-content"], [data-slot="dialog-content"]) {
+  background-color: var(--glass-menu);
+  backdrop-filter: blur(22px) saturate(1.5);
+}
+.theme-is-frost .top-bar,
+.theme-is-daybreak .top-bar,
+.theme-is-rose-quartz .top-bar,
+.theme-is-prism .top-bar,
+.theme-is-midnight .top-bar,
+.theme-is-smoke .top-bar,
+.theme-is-dusk .top-bar,
+.theme-is-emerald .top-bar {
+  background-color: var(--glass-bar);
+  border-bottom-color: var(--glass-edge);
+}
+:root[data-theme="frost"]:not([data-cards="flat"]) {
+  --surface-shadow: inset 0 1px 0 rgb(255 255 255 / 0.95), inset 0 0 18px rgb(255 255 255 / 0.6), 0 1px 2px rgb(40 60 100 / 0.06), 0 14px 32px -18px rgb(40 60 100 / 0.32);
+}
+:root[data-theme="frost"][data-cards="flat"] {
+  --surface-shadow: inset 0 1px 0 rgb(255 255 255 / 0.95), inset 0 0 18px rgb(255 255 255 / 0.6);
+}
+:root[data-theme="daybreak"]:not([data-cards="flat"]) {
+  --surface-shadow: inset 0 1px 0 rgb(255 255 255 / 0.95), inset 0 -1px 0 rgb(255 192 140 / 0.9), inset 0 -16px 20px -16px rgb(255 176 116 / 0.32), 0 1px 2px rgb(90 60 40 / 0.06), 0 14px 30px -18px rgb(90 60 40 / 0.3);
+}
+:root[data-theme="daybreak"][data-cards="flat"] {
+  --surface-shadow: inset 0 1px 0 rgb(255 255 255 / 0.95), inset 0 -1px 0 rgb(255 192 140 / 0.9), inset 0 -16px 20px -16px rgb(255 176 116 / 0.32);
+}
+:root[data-theme="rose-quartz"]:not([data-cards="flat"]) {
+  --surface-shadow: inset 0 1px 0 rgb(255 255 255 / 0.95), inset 0 0 0 3px rgb(255 255 255 / 0.24), inset 0 -1px 0 rgb(170 90 110 / 0.16), 0 1px 2px rgb(120 50 70 / 0.06), 0 14px 30px -18px rgb(120 50 70 / 0.3);
+}
+:root[data-theme="rose-quartz"][data-cards="flat"] {
+  --surface-shadow: inset 0 1px 0 rgb(255 255 255 / 0.95), inset 0 0 0 3px rgb(255 255 255 / 0.24), inset 0 -1px 0 rgb(170 90 110 / 0.16);
+}
+:root[data-theme="prism"]:not([data-cards="flat"]) {
+  --surface-shadow: inset 0 -1px 0 rgb(255 255 255 / 0.9), 0 1px 2px rgb(30 30 60 / 0.05), 0 16px 34px -20px rgb(40 30 90 / 0.28);
+}
+:root[data-theme="prism"][data-cards="flat"] {
+  --surface-shadow: inset 0 -1px 0 rgb(255 255 255 / 0.9);
+}
+:root[data-theme="midnight"]:not([data-cards="flat"]) {
+  --surface-shadow: inset 0 1px 0 rgb(220 235 255 / 0.13), 0 18px 40px -20px rgb(0 0 12 / 0.75);
+}
+:root[data-theme="midnight"][data-cards="flat"] {
+  --surface-shadow: inset 0 1px 0 rgb(220 235 255 / 0.13);
+}
+:root[data-theme="smoke"]:not([data-cards="flat"]) {
+  --surface-shadow: inset 0 1px 0 rgb(255 236 214 / 0.09), 0 18px 40px -20px rgb(0 0 0 / 0.7);
+}
+:root[data-theme="smoke"][data-cards="flat"] {
+  --surface-shadow: inset 0 1px 0 rgb(255 236 214 / 0.09);
+}
+:root[data-theme="dusk"]:not([data-cards="flat"]) {
+  --surface-shadow: inset 0 1px 0 rgb(255 255 255 / 0.09), inset 0 -1px 0 rgb(255 160 130 / 0.3), inset 0 -18px 24px -20px rgb(255 140 110 / 0.2), 0 18px 40px -20px rgb(4 0 16 / 0.75);
+}
+:root[data-theme="dusk"][data-cards="flat"] {
+  --surface-shadow: inset 0 1px 0 rgb(255 255 255 / 0.09), inset 0 -1px 0 rgb(255 160 130 / 0.3), inset 0 -18px 24px -20px rgb(255 140 110 / 0.2);
+}
+:root[data-theme="emerald"]:not([data-cards="flat"]) {
+  --surface-shadow: inset 0 1px 0 rgb(200 255 225 / 0.16), inset 0 0 0 3px rgb(140 255 200 / 0.035), 0 18px 40px -20px rgb(0 10 6 / 0.75);
+}
+:root[data-theme="emerald"][data-cards="flat"] {
+  --surface-shadow: inset 0 1px 0 rgb(200 255 225 / 0.16), inset 0 0 0 3px rgb(140 255 200 / 0.035);
+}
+/* The rims above, and those of Letterpress, Pebble, Copper and Carbon
+   below, are set outside Tailwind's layers, so a library tile's own hover
+   rim is given back here. */
+.theme-is-frost a.surface:hover,
+.theme-is-daybreak a.surface:hover,
+.theme-is-rose-quartz a.surface:hover,
+.theme-is-prism a.surface:hover,
+.theme-is-midnight a.surface:hover,
+.theme-is-smoke a.surface:hover,
+.theme-is-dusk a.surface:hover,
+.theme-is-emerald a.surface:hover,
+.theme-is-letterpress a.surface:hover,
+.theme-is-pebble a.surface:hover,
+.theme-is-copper a.surface:hover,
+.theme-is-carbon a.surface:hover {
+  border-color: color-mix(in oklab, var(--ring) 60%, transparent);
+}
+/* Frost's panes are milky, with frost creeping in from their edges;
+   Daybreak's and Dusk's catch the low sun along their foot; Rose Quartz's
+   are rose-tinted with a bevel; Emerald's green with a bevel. Prism's
+   are clear, with the spectrum caught along the top edge, and the beam
+   itself lies across the top right corner of the window, faint enough
+   that writing over it reads as on white. */
+.theme-is-prism .surface {
+  background-image: linear-gradient(90deg, rgb(255 150 150 / 0.6), rgb(255 210 120 / 0.6) 25%, rgb(130 220 155 / 0.6) 50%, rgb(125 185 255 / 0.6) 75%, rgb(190 145 255 / 0.6));
+  background-size: 100% 2px;
+  background-repeat: no-repeat;
+}
+.theme-is-prism body::after {
+  content: "";
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: min(75vw, 64rem);
+  height: min(75vh, 44rem);
+  z-index: -1;
+  pointer-events: none;
+  background-image: linear-gradient(124deg, rgb(255 255 255 / 0) 34%, rgb(255 160 160 / 0.26) 42%, rgb(255 218 140 / 0.26) 47%, rgb(150 228 172 / 0.26) 52%, rgb(140 196 255 / 0.26) 57%, rgb(198 164 255 / 0.26) 62%, rgb(255 255 255 / 0) 70%);
+  mask-image: radial-gradient(farthest-side at 100% 0%, #000 30%, transparent 100%);
+}
+
+/* Celadon: every card glazed, with a gloss across its top and the glaze
+   pooling a little darker along its foot. */
+.theme-is-celadon .surface {
+  background-image: linear-gradient(180deg, rgb(255 255 255 / 0.6), rgb(255 255 255 / 0) 2.75rem);
+}
+:root[data-theme="celadon"]:not([data-cards="flat"]) {
+  --surface-shadow: inset 0 1px 0 rgb(255 255 255 / 0.95), inset 0 -3px 6px -2px rgb(40 96 80 / 0.14), 0 1px 2px rgb(30 70 60 / 0.08), 0 12px 26px -16px rgb(30 70 60 / 0.32);
+}
+
+/* Letterpress: every card pressed into the paper, its shadow inside its
+   top edge and a catch of light below it, and page titles printed into
+   the sheet. Flat cards (Preferences) keep their hairline instead. */
+.theme-is-letterpress:not([data-cards="flat"]) .surface {
+  border-color: transparent;
+}
+.theme-is-letterpress:not([data-cards="flat"]) [data-slot="card"] {
+  --tw-ring-color: transparent;
+}
+:root[data-theme="letterpress"]:not([data-cards="flat"]) {
+  --surface-shadow: inset 0 2px 4px rgb(60 50 30 / 0.16), inset 0 0 0 1px rgb(60 50 30 / 0.06), 0 1px 0 rgb(255 255 255 / 0.95);
+}
+.theme-is-letterpress h1 {
+  text-shadow: 0 1px 0 rgb(255 255 255 / 0.9);
+}
+
+/* Pebble: every card a smooth stone, lit from above and shaded below. */
+.theme-is-pebble .surface {
+  background-image: linear-gradient(165deg, rgb(255 255 255 / 0.6) 0%, rgb(255 255 255 / 0) 45%, rgb(110 95 75 / 0.07) 100%);
+}
+.theme-is-pebble:not([data-cards="flat"]) .surface {
+  border-color: transparent;
+}
+.theme-is-pebble:not([data-cards="flat"]) [data-slot="card"] {
+  --tw-ring-color: transparent;
+}
+:root[data-theme="pebble"]:not([data-cards="flat"]) {
+  --surface-shadow: inset 0 1px 1px rgb(255 255 255 / 0.9), inset 0 -2px 5px rgb(90 75 55 / 0.1), 0 2px 4px rgb(70 60 45 / 0.08), 0 16px 32px -18px rgb(70 60 45 / 0.38);
+}
+
+/* Velvet: a sheen across the top of every card where the nap catches the
+   light, deepening towards its foot. */
+.theme-is-velvet .surface {
+  background-image: radial-gradient(130% 90% at 25% 0%, rgb(255 200 222 / 0.08) 0%, rgb(255 200 222 / 0) 60%), linear-gradient(180deg, rgb(0 0 0 / 0) 55%, rgb(0 0 0 / 0.16) 100%);
+}
+:root[data-theme="velvet"]:not([data-cards="flat"]) {
+  --surface-shadow: inset 0 1px 0 rgb(255 205 225 / 0.08), 0 18px 36px -18px rgb(0 0 0 / 0.8);
+}
+
+/* Copper: every card edged in copper with its glint along the top, and a
+   copper line under the top bar. */
+.theme-is-copper .surface {
+  border-color: rgb(232 160 122 / 0.34);
+  background-image: linear-gradient(180deg, rgb(240 170 130 / 0.09), rgb(240 170 130 / 0) 2.5rem);
+}
+.theme-is-copper [data-slot="card"] {
+  --tw-ring-color: rgb(232 160 122 / 0.34);
+}
+.theme-is-copper .top-bar {
+  border-bottom-color: rgb(232 160 122 / 0.4);
+}
+:root[data-theme="copper"]:not([data-cards="flat"]) {
+  --surface-shadow: inset 0 1px 0 rgb(255 196 160 / 0.22), 0 14px 30px -16px rgb(0 0 0 / 0.6);
+}
+
+/* Carbon: every card drawn in a line of light, brightest along the top
+   and fading down to a warm coral at the foot. The line is a gradient
+   under a clear border; the card's own colour is laid inside it. */
+.theme-is-carbon .surface {
+  border: 1px solid transparent;
+  background: linear-gradient(var(--card), var(--card)) padding-box, linear-gradient(180deg, rgb(255 255 255 / 0.26), rgb(255 255 255 / 0.07) 40%, rgb(255 155 133 / 0.2)) border-box;
+}
+.theme-is-carbon [data-slot="card"] {
+  --tw-ring-color: transparent;
+}
+:root[data-theme="carbon"]:not([data-cards="flat"]) {
+  --surface-shadow: 0 18px 40px -22px rgb(0 0 0 / 0.9);
 }
 
 /* One font for the whole page. */

@@ -66,10 +66,10 @@ server.
 
 **Make it yours**
 
-- 92 colour themes, as many dark as light, some with a picture or a
-  font of their own. Twenty-seven restyle the whole app: a 1995 desktop,
-  Windows, the Mac, Android, the Linux desktops, a code editor, a card
-  catalogue, a comic book and more.
+- 108 colour themes, as many dark as light, some under glass, some with
+  a picture or a font of their own. Twenty-seven restyle the whole app:
+  a 1995 desktop, Windows, the Mac, Android, the Linux desktops, a code
+  editor, a card catalogue, a comic book and more.
 - 26 background textures. On some of them rain falls, snow drifts or
   stars twinkle.
 - A theme for one device or one part of the app, and your own CSS.
