@@ -444,7 +444,7 @@ tab goes away. You can also keep the house and leave the avatar out.
 
 ## Look and feel
 
-- 124 colour themes, 56 light, 56 dark and the Silly set, or a light
+- 134 colour themes, 61 light, 61 dark and the Silly set, or a light
   and a dark one that switch with your
   device, with an accent colour of your own on top if you like. Your
   choice follows you to every device you sign in on, unless you give one
@@ -460,14 +460,22 @@ tab goes away. You can also keep the house and leave the avatar out.
   Leadlight, whose pictures crowded the page. If you had one of them you
   now have the theme nearest to it (Porcelain, Ink Wash and Material You
   for those three).
-- Eleven of the themes put together colours you rarely see side by side:
+- Twenty-one of the themes put together colours you rarely see side by
+  side, each pairing only once (point at one in the palette menu and it
+  names its two colours):
   - Dark: Bordeaux (wine red and sea-glass green), Riviera (ultramarine
     and peach), Provence (olive and lavender), Terracotta (clay and sky
-    blue), Dragonfruit (magenta and lime) and Iris (royal purple and
-    saffron).
+    blue), Dragonfruit (magenta and lime), Iris (royal purple and
+    saffron), Camellia (moss green and camellia pink), Faience (bronze
+    and turquoise), Woodblock (Prussian blue and vermilion, the inks of
+    a Japanese print), Peacock (peacock green-blue and mustard) and
+    Mulberry (mulberry and sky blue).
   - Light: Rhubarb (pink and green), Majorelle (lemon yellow and cobalt),
-    Lido (aqua and red), Absinthe (chartreuse and aubergine) and Marigold
-    (orange and magenta).
+    Lido (aqua and red), Absinthe (chartreuse and aubergine), Marigold
+    (orange and magenta), Orchid (orchid pink and olive), Pistachio
+    (pistachio green and raspberry), Custard (custard yellow and plum),
+    Periwinkle (periwinkle blue and rust) and Canyon (red clay and deep
+    teal).
 - Ten more are different kinds of theme rather than new colours:
   - Blueprint (white lines on blueprint blue) and Chalkboard (chalk and
     yellow on a green board), each in just two colours.
