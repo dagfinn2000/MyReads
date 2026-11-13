@@ -66,7 +66,7 @@ server.
 
 **Make it yours**
 
-- 134 colour themes, as many dark as light and sorted by kind, some
+- 150 colour themes, as many dark as light and sorted by kind, some
   under glass, some with a picture or a font of their own, and ones for
   colour blindness and for reading in bed. Thirty-one restyle the whole app:
   a 1995 desktop, Windows, the Mac, Android, the Linux desktops, a code
