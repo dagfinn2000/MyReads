@@ -3762,6 +3762,934 @@
     --page-gradient: repeating-linear-gradient(transparent 0 31px, #2c3140 31px 32px);
 }
 
+/* ── More of every kind ────────────────────────────────────────────────────
+   Thirty-four more, seventeen light and seventeen dark, a few of every kind
+   in the palette menu. Almost every page colour is taken by now, so most
+   of these are told apart by a shape, a texture or a picture of their own
+   (under "Beyond colour", or restyles.css for the screens). */
+
+/* Melon: the inside of a cantaloupe. A warm apricot page, cream-orange
+   cards, and a burnt orange deep enough to read on it for what is chosen.
+   Danger is raspberry, as the page is orange. */
+[data-theme="melon"] {
+    --background: #ffc29e;
+    --foreground: #1f0e06;
+    --card: #ffe1cc;
+    --card-foreground: #1f0e06;
+    --popover: #ffe1cc;
+    --popover-foreground: #1f0e06;
+    --primary: #81300f;
+    --primary-foreground: #ffffff;
+    --secondary: #f3b896;
+    --secondary-foreground: #1f0e06;
+    --muted: #f3b896;
+    --muted-foreground: #593d2e;
+    --accent: #ecb391;
+    --accent-foreground: #1f0e06;
+    --destructive: #8c0f3c;
+    --border: #e2ab8a;
+    --input: #c39175;
+    --ring: #81300f;
+}
+
+/* Oxblood: the deep red-brown of old leather. The page and cards in
+   that one colour, a little lighter for each card, and a pale coral for what
+   is chosen. Danger is amber, as the page is red. */
+[data-theme="oxblood"] {
+    --background: #400d07;
+    --foreground: #fff1ec;
+    --card: #4f150e;
+    --card-foreground: #fff1ec;
+    --popover: #4f150e;
+    --popover-foreground: #fff1ec;
+    --primary: #ffab9a;
+    --primary-foreground: #400d07;
+    --secondary: #4e1e18;
+    --secondary-foreground: #fff1ec;
+    --muted: #4e1e18;
+    --muted-foreground: #e8c4bb;
+    --accent: #552620;
+    --accent-foreground: #fff1ec;
+    --destructive: #ffd27a;
+    --border: #5f312c;
+    --input: #855f59;
+    --ring: #ffab9a;
+}
+
+/* Hyperlegible: for eyes that tire or blur. Every word in Atkinson
+   Hyperlegible, a face the Braille Institute drew so that letters easily
+   mixed up (I, l and 1; O and 0; b, d, p and q) look nothing alike, set a
+   little wider, with links underlined and a thick, solid outline on what
+   the keyboard is on (see "Beyond colour"). A cool white page that doesn't
+   glare and a deep rust for what is chosen. */
+[data-theme="hyperlegible"] {
+    --background: #f4f7fa;
+    --foreground: #0e1116;
+    --card: #ffffff;
+    --card-foreground: #0e1116;
+    --popover: #ffffff;
+    --popover-foreground: #0e1116;
+    --primary: #7a2e00;
+    --primary-foreground: #ffffff;
+    --secondary: #e7eaed;
+    --secondary-foreground: #0e1116;
+    --muted: #e7eaed;
+    --muted-foreground: #4a4d51;
+    --accent: #e0e3e7;
+    --accent-foreground: #0e1116;
+    --destructive: #b3261e;
+    --border: #d6d9dc;
+    --input: #b6b9bc;
+    --ring: #7a2e00;
+    --heading-font: var(--font-hyperlegible), "Atkinson Hyperlegible", ui-sans-serif, system-ui, sans-serif;
+    --radius: 0.5rem;
+}
+
+/* Hyperlegible Dark: Hyperlegible's face and spacing on a soft charcoal
+   page, never pure black so letters don't smear, with off-white text and a
+   clear aqua for what is chosen. */
+[data-theme="hyperlegible-dark"] {
+    --background: #1c2024;
+    --foreground: #f2f4f5;
+    --card: #262b30;
+    --card-foreground: #f2f4f5;
+    --popover: #262b30;
+    --popover-foreground: #f2f4f5;
+    --primary: #7fe0e8;
+    --primary-foreground: #1c2024;
+    --secondary: #2c3034;
+    --secondary-foreground: #f2f4f5;
+    --muted: #2c3034;
+    --muted-foreground: #bfc1c3;
+    --accent: #34373b;
+    --accent-foreground: #f2f4f5;
+    --destructive: #ff9a8f;
+    --border: #3e4245;
+    --input: #5c656e;
+    --ring: #7fe0e8;
+    --heading-font: var(--font-hyperlegible), "Atkinson Hyperlegible", ui-sans-serif, system-ui, sans-serif;
+    --radius: 0.5rem;
+}
+
+/* Eye Care: the pale bean green many readers set their screens to for
+   long hours, as it is easy on tired eyes. No white anywhere, cards a shade
+   lighter than the page, and a quiet slate blue for what is chosen. */
+[data-theme="eye-care"] {
+    --background: #c3eac9;
+    --foreground: #0a1a0e;
+    --card: #d9f2dc;
+    --card-foreground: #0a1a0e;
+    --popover: #dcf3df;
+    --popover-foreground: #0a1a0e;
+    --primary: #24506e;
+    --primary-foreground: #eaf7ec;
+    --secondary: #b9dfbf;
+    --secondary-foreground: #0a1a0e;
+    --muted: #b9dfbf;
+    --muted-foreground: #3a503f;
+    --accent: #b3d8b9;
+    --accent-foreground: #0a1a0e;
+    --destructive: #9a2016;
+    --border: #abcfb1;
+    --input: #91b297;
+    --ring: #24506e;
+}
+
+/* Reeded: fluted glass, the kind with fine upright ribs. A pale page lit
+   coral from the top left and aqua from the bottom right, and every card a
+   pane of reeded glass over it, its ribs catching the light in thin
+   upright lines (see "Glass" under "Beyond colour"). Aubergine for what is
+   chosen. */
+[data-theme="reeded"] {
+    --background: #eef0ef;
+    --foreground: #13191c;
+    --card: #f7f8f8;
+    --card-foreground: #13191c;
+    --popover: #f7f8f8;
+    --popover-foreground: #13191c;
+    --primary: #5a1f4a;
+    --primary-foreground: #ffffff;
+    --secondary: #e2e4e3;
+    --secondary-foreground: #13191c;
+    --muted: #e2e4e3;
+    --muted-foreground: #4c5153;
+    --accent: #dbdedd;
+    --accent-foreground: #13191c;
+    --destructive: #b3261e;
+    --border: #d2d4d4;
+    --input: #b3b6b6;
+    --ring: #5a1f4a;
+    --radius: 0.875rem;
+    --glass: rgb(255 255 255 / 0.5);
+    --glass-edge: rgb(255 255 255 / 0.85);
+    --glass-menu: rgb(250 251 251 / 0.8);
+    --glass-bar: rgb(248 250 250 / 0.62);
+    --page-gradient: radial-gradient(60% 55% at 0% 0%, #ffd9cc 0%, rgb(255 217 204 / 0) 100%), radial-gradient(65% 60% at 100% 100%, #cdeeea 0%, rgb(205 238 234 / 0) 100%), linear-gradient(180deg, #eef0ef 0%, #f1f2f1 100%);
+}
+
+/* Fluted: Reeded at night. The same ribbed panes over a dark page with an
+   ember glow up to the left and a deep sea green down to the right, and a
+   pale aqua for what is chosen. */
+[data-theme="fluted"] {
+    --background: #11191b;
+    --foreground: #eef5f4;
+    --card: #1b2427;
+    --card-foreground: #eef5f4;
+    --popover: #1b2427;
+    --popover-foreground: #eef5f4;
+    --primary: #8fe0d8;
+    --primary-foreground: #11191b;
+    --secondary: #22292b;
+    --secondary-foreground: #eef5f4;
+    --muted: #22292b;
+    --muted-foreground: #b9c0c0;
+    --accent: #293133;
+    --accent-foreground: #eef5f4;
+    --destructive: #ffa09a;
+    --border: #343c3e;
+    --input: #4f5f62;
+    --ring: #8fe0d8;
+    --radius: 0.875rem;
+    --glass: rgb(30 40 43 / 0.55);
+    --glass-edge: rgb(200 235 230 / 0.14);
+    --glass-menu: rgb(24 33 36 / 0.82);
+    --glass-bar: rgb(17 25 27 / 0.62);
+    --page-gradient: radial-gradient(60% 55% at 0% 0%, #3a2420 0%, rgb(58 36 32 / 0) 100%), radial-gradient(65% 60% at 100% 100%, #123532 0%, rgb(18 53 50 / 0) 100%), linear-gradient(180deg, #11191b 0%, #0f1618 100%);
+}
+
+/* Dichroic: the art glass that shows one colour looking through it and
+   another at its edge. Near-black panes with a rim that turns from cyan to
+   magenta to gold around each card (see "Glass" under "Beyond colour"),
+   over a violet glow up to the right and a teal one down to the left, and
+   magenta pink for what is chosen. */
+[data-theme="dichroic"] {
+    --background: #0f1014;
+    --foreground: #f5f3f8;
+    --card: #18191f;
+    --card-foreground: #f5f3f8;
+    --popover: #18191f;
+    --popover-foreground: #f5f3f8;
+    --primary: #ff9ee8;
+    --primary-foreground: #0f1014;
+    --secondary: #202125;
+    --secondary-foreground: #f5f3f8;
+    --muted: #202125;
+    --muted-foreground: #bebdc1;
+    --accent: #28292d;
+    --accent-foreground: #f5f3f8;
+    --destructive: #ffb36b;
+    --border: #343438;
+    --input: #55565f;
+    --ring: #ff9ee8;
+    --radius: 1rem;
+    --glass: rgb(26 27 34 / 0.62);
+    --glass-edge: rgb(255 255 255 / 0.08);
+    --glass-menu: rgb(22 23 30 / 0.84);
+    --glass-bar: rgb(15 16 20 / 0.64);
+    --page-gradient: radial-gradient(55% 50% at 100% 0%, #1f1030 0%, rgb(31 16 48 / 0) 100%), radial-gradient(60% 55% at 0% 100%, #0c2a2e 0%, rgb(12 42 46 / 0) 100%), linear-gradient(180deg, #0f1014 0%, #0e0f13 100%);
+}
+
+/* Aqua with violet, a shallow lagoon and the sea urchins in it. */
+[data-theme="lagoon"] {
+    --background: #8bd9c9;
+    --foreground: #04100e;
+    --card: #c9eee5;
+    --card-foreground: #04100e;
+    --popover: #c9eee5;
+    --popover-foreground: #04100e;
+    --primary: #512b92;
+    --primary-foreground: #ffffff;
+    --secondary: #84cebf;
+    --secondary-foreground: #04100e;
+    --muted: #84cebf;
+    --muted-foreground: #27443f;
+    --accent: #80c8b9;
+    --accent-foreground: #04100e;
+    --destructive: #9a1c16;
+    --border: #79bfb1;
+    --input: #67a397;
+    --ring: #512b92;
+}
+
+/* Scrapbook: a scrapbook's cream card stock, each book stuck down on a
+   white page with a strip of patterned paper tape across its top, a little
+   askew and a different tape on each (see "Beyond colour"), handwritten
+   headings, and moss green for what is chosen. */
+[data-theme="scrapbook"] {
+    --background: #efe8db;
+    --foreground: #1d1a15;
+    --card: #fdfbf7;
+    --card-foreground: #1d1a15;
+    --popover: #fdfbf7;
+    --popover-foreground: #1d1a15;
+    --primary: #2f5e2a;
+    --primary-foreground: #ffffff;
+    --secondary: #e3ddd0;
+    --secondary-foreground: #1d1a15;
+    --muted: #e3ddd0;
+    --muted-foreground: #545048;
+    --accent: #ddd6ca;
+    --accent-foreground: #1d1a15;
+    --destructive: #a3261c;
+    --border: #d4cdc1;
+    --input: #b6b0a6;
+    --ring: #2f5e2a;
+    --radius: 0.25rem;
+    --heading-font: var(--font-hand), "Patrick Hand", var(--font-nunito), ui-rounded, sans-serif;
+}
+
+/* Risograph: a zine run off a risograph in two inks, fluorescent pink and
+   blue, that never quite line up. Page titles in bold blue with the pink
+   printed a hair off to one side, a corner of pink dots on every card (see
+   "Beyond colour"), plain white paper, and the pink, deepened to read, for
+   what is chosen. */
+[data-theme="risograph"] {
+    --background: #f7f6f2;
+    --foreground: #101a33;
+    --card: #ffffff;
+    --card-foreground: #101a33;
+    --popover: #ffffff;
+    --popover-foreground: #101a33;
+    --primary: #c2186b;
+    --primary-foreground: #ffffff;
+    --secondary: #eaeae7;
+    --secondary-foreground: #101a33;
+    --muted: #eaeae7;
+    --muted-foreground: #4c5365;
+    --accent: #e3e3e2;
+    --accent-foreground: #101a33;
+    --destructive: #a3261c;
+    --border: #d9d9d9;
+    --input: #b9bbbe;
+    --ring: #c2186b;
+    --radius: 0.125rem;
+    --heading-font: var(--font-inter), Inter, ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Papercut: layered paper art. A sky blue sheet for the page, and every card
+   cut from white paper and laid over a sheet of coral and one of sunflower
+   yellow, each cut a little larger and set a little lower, with a soft
+   shadow between the layers (see "Beyond colour"). Magenta for what is
+   chosen. */
+[data-theme="papercut"] {
+    --background: #c8ecf5;
+    --foreground: #0b161a;
+    --card: #ffffff;
+    --card-foreground: #0b161a;
+    --popover: #ffffff;
+    --popover-foreground: #0b161a;
+    --primary: #9b1460;
+    --primary-foreground: #ffffff;
+    --secondary: #bee0e9;
+    --secondary-foreground: #0b161a;
+    --muted: #bee0e9;
+    --muted-foreground: #3c4e53;
+    --accent: #b8dae2;
+    --accent-foreground: #0b161a;
+    --destructive: #a3261c;
+    --border: #afd0d9;
+    --input: #95b2ba;
+    --ring: #9b1460;
+    --radius: 0.375rem;
+}
+
+/* Kintsugi: a dark iron glaze, cracked and mended with gold. Every card
+   carries a seam of gold across one corner, a different break on each (see
+   "Beyond colour"), and gold for what is chosen. */
+[data-theme="kintsugi"] {
+    --background: #1a120d;
+    --foreground: #f6efe6;
+    --card: #241913;
+    --card-foreground: #f6efe6;
+    --popover: #241913;
+    --popover-foreground: #f6efe6;
+    --primary: #e2b65a;
+    --primary-foreground: #1a120d;
+    --secondary: #2b231d;
+    --secondary-foreground: #f6efe6;
+    --muted: #2b231d;
+    --muted-foreground: #c1bab2;
+    --accent: #322a25;
+    --accent-foreground: #f6efe6;
+    --destructive: #ff9a8a;
+    --border: #3d3530;
+    --input: #69625b;
+    --ring: #e2b65a;
+    --radius: 0.75rem;
+    --heading-font: var(--font-literata), "Literata", Georgia, serif;
+}
+
+/* Neon Sign: a sign in a dark window. Page titles and the app's name bent in
+   glowing tube, rounded and lit pink-red, the active page's link lit too
+   (see "Beyond colour"), on a blue-black wall. Danger is amber, as the
+   neon is red. */
+[data-theme="neon-sign"] {
+    --background: #0e0f16;
+    --foreground: #f6f3f8;
+    --card: #171822;
+    --card-foreground: #f6f3f8;
+    --popover: #171822;
+    --popover-foreground: #f6f3f8;
+    --primary: #ff4d6d;
+    --primary-foreground: #0e0f16;
+    --secondary: #1f2027;
+    --secondary-foreground: #f6f3f8;
+    --muted: #1f2027;
+    --muted-foreground: #bebcc2;
+    --accent: #28282f;
+    --accent-foreground: #f6f3f8;
+    --destructive: #ffd166;
+    --border: #33333a;
+    --input: #55566a;
+    --ring: #ff4d6d;
+    --radius: 0.75rem;
+    --heading-font: var(--font-nunito), ui-rounded, ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Letterboard: the felt board a café spells its menu out on. Black felt
+   with its grooves across the page, page titles in white capitals pushed
+   in between them, and cards in an oak frame (see "Beyond colour"). */
+[data-theme="letterboard"] {
+    --background: #161616;
+    --foreground: #f5f5f0;
+    --card: #202020;
+    --card-foreground: #f5f5f0;
+    --popover: #202020;
+    --popover-foreground: #f5f5f0;
+    --primary: #f5f5f0;
+    --primary-foreground: #161616;
+    --secondary: #272726;
+    --secondary-foreground: #f5f5f0;
+    --muted: #272726;
+    --muted-foreground: #bfbfbc;
+    --accent: #2f2f2e;
+    --accent-foreground: #f5f5f0;
+    --destructive: #ff8a80;
+    --border: #3a3a39;
+    --input: #5e5e5c;
+    --ring: #f5f5f0;
+    --radius: 0.25rem;
+    --page-gradient: repeating-linear-gradient(180deg, rgb(0 0 0 / 0.42) 0 2px, rgb(255 255 255 / 0.025) 2px 3px, transparent 3px 22px), linear-gradient(#161616, #161616);
+}
+
+/* Chesterfield: a buttoned leather sofa in bottle green. The page tufted
+   in diamonds with a button sunk at each corner, brass studs round every
+   card and the cream of the brass for what is chosen (see "Beyond
+   colour"). */
+[data-theme="chesterfield"] {
+    --background: #12261c;
+    --foreground: #f3efe4;
+    --card: #183024;
+    --card-foreground: #f3efe4;
+    --popover: #183024;
+    --popover-foreground: #f3efe4;
+    --primary: #e7d3a6;
+    --primary-foreground: #12261c;
+    --secondary: #23352b;
+    --secondary-foreground: #f3efe4;
+    --muted: #23352b;
+    --muted-foreground: #bdbfb4;
+    --accent: #2b3c32;
+    --accent-foreground: #f3efe4;
+    --destructive: #ffa08f;
+    --border: #36463c;
+    --input: #54685d;
+    --ring: #e7d3a6;
+    --radius: 0.5rem;
+    --heading-font: var(--font-playfair), "Playfair Display", Georgia, serif;
+    --page-gradient: radial-gradient(circle at 50% 50%, #0b1a12 0 2px, rgb(11 26 18 / 0) 3.5px), radial-gradient(circle at 0 0, #0b1a12 0 2px, rgb(11 26 18 / 0) 3.5px), linear-gradient(45deg, rgb(255 255 255 / 0) 46%, rgb(0 0 0 / 0.28) 49.5% 50.5%, rgb(255 255 255 / 0.03) 52%, rgb(255 255 255 / 0) 56%), linear-gradient(-45deg, rgb(255 255 255 / 0) 46%, rgb(0 0 0 / 0.28) 49.5% 50.5%, rgb(255 255 255 / 0.03) 52%, rgb(255 255 255 / 0) 56%), radial-gradient(70% 70% at 50% 50%, #17301f 0%, #12261c 100%);
+    --page-size: 64px 64px;
+}
+
+/* Tweed: a brown herringbone jacket. The page woven in herringbone, its
+   rows of slanted stitches turning one way and then the other, cards edged
+   with a rust selvedge stitch (see "Beyond colour") and the rust of the
+   fleck in the wool for what is chosen. */
+[data-theme="tweed"] {
+    --background: #2a1b0b;
+    --foreground: #f7efe4;
+    --card: #352412;
+    --card-foreground: #f7efe4;
+    --popover: #352412;
+    --popover-foreground: #f7efe4;
+    --primary: #e0894a;
+    --primary-foreground: #2a1b0b;
+    --secondary: #392b1b;
+    --secondary-foreground: #f7efe4;
+    --muted: #392b1b;
+    --muted-foreground: #c6bcb0;
+    --accent: #413223;
+    --accent-foreground: #f7efe4;
+    --destructive: #ff9a8a;
+    --border: #4b3d2e;
+    --input: #6a5a48;
+    --ring: #e0894a;
+    --radius: 0.375rem;
+    --page-gradient: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 10'%3E%3Cg fill='none'%3E%3Cpath d='M0 -10L14 -20M14 -15.0L28 -5.0M0 0L14 -10M14 -5.0L28 5.0M0 10L14 0M14 5.0L28 15.0M0 20L14 10M14 15.0L28 25.0M0 30L14 20M14 25.0L28 35.0' stroke='%23ffeed6' stroke-opacity='0.055' stroke-width='3.2'/%3E%3Cpath d='M0 -7.8L14 -17.8M14 -12.8L28 -2.8M0 2.2L14 -7.8M14 -2.8L28 7.2M0 12.2L14 2.2M14 7.2L28 17.2M0 22.2L14 12.2M14 17.2L28 27.2M0 32.2L14 22.2M14 27.2L28 37.2' stroke='%23000000' stroke-opacity='0.32' stroke-width='1.1'/%3E%3C/g%3E%3Cpath d='M14 0V10' stroke='%23000000' stroke-opacity='0.18' stroke-width='0.8'/%3E%3C/svg%3E"), linear-gradient(#2a1b0b, #2a1b0b);
+    --page-size: 28px 10px, auto;
+}
+
+/* Illuminated: a page from a manuscript. Vellum, the first letter of every
+   page title set in gold leaf with a red initial on it, a thin red and blue
+   rule under the top bar (see "Beyond colour"), and lapis blue for what is
+   chosen. */
+[data-theme="illuminated"] {
+    --background: #efe6d2;
+    --foreground: #1b140a;
+    --card: #f8f2e4;
+    --card-foreground: #1b140a;
+    --popover: #f8f2e4;
+    --popover-foreground: #1b140a;
+    --primary: #23379b;
+    --primary-foreground: #ffffff;
+    --secondary: #e3dac7;
+    --secondary-foreground: #1b140a;
+    --muted: #e3dac7;
+    --muted-foreground: #524b3e;
+    --accent: #ddd4c1;
+    --accent-foreground: #1b140a;
+    --destructive: #a3261c;
+    --border: #d3cbb8;
+    --input: #b6ad9c;
+    --ring: #23379b;
+    --radius: 0.25rem;
+    --heading-font: var(--font-literata), "Literata", Georgia, serif;
+}
+
+/* Sticky Notes: a wall of them. Every book on its own square note, yellow,
+   pink, blue or green, each a little crooked and lifting at its foot (see
+   "Beyond colour"), on a pale grey wall, with handwritten headings and
+   navy for what is chosen. */
+[data-theme="sticky-notes"] {
+    --background: #e7e9ec;
+    --foreground: #15181d;
+    --card: #fff3a6;
+    --card-foreground: #15181d;
+    --popover: #ffffff;
+    --popover-foreground: #15181d;
+    --primary: #1f2a44;
+    --primary-foreground: #ffffff;
+    --secondary: #eceef1;
+    --secondary-foreground: #15181d;
+    --muted: #f2e48a;
+    --muted-foreground: #4a4636;
+    --accent: #d5d7da;
+    --accent-foreground: #15181d;
+    --destructive: #a3261c;
+    --border: #ccced1;
+    --input: #aeb1b4;
+    --ring: #1f2a44;
+    --radius: 0.125rem;
+    --heading-font: var(--font-hand), "Patrick Hand", var(--font-nunito), ui-rounded, sans-serif;
+}
+
+/* Mimeograph: a copy from the school's spirit duplicator. Every word in
+   its violet ink, page titles typed and a little soft at the edges (see
+   "Beyond colour"), on pale, slightly yellowed paper. */
+[data-theme="mimeograph"] {
+    --background: #f3f0e4;
+    --foreground: #2a1159;
+    --card: #fbf9f2;
+    --card-foreground: #2a1159;
+    --popover: #fbf9f2;
+    --popover-foreground: #2a1159;
+    --primary: #4b1f9e;
+    --primary-foreground: #ffffff;
+    --secondary: #e8e4dc;
+    --secondary-foreground: #2a1159;
+    --muted: #e8e4dc;
+    --muted-foreground: #584a7a;
+    --accent: #e2ddd8;
+    --accent-foreground: #2a1159;
+    --destructive: #a3261c;
+    --border: #d9d3d2;
+    --input: #bdb4be;
+    --ring: #4b1f9e;
+    --radius: 0.125rem;
+    --heading-font: var(--font-typewriter), "Courier Prime", ui-monospace, monospace;
+}
+
+/* Photo Album: black album pages. Every cover held by four paper photo
+   corners, titles written under it in white pencil (see "Beyond colour"),
+   and the cream of an old print's border for what is chosen. */
+[data-theme="photo-album"] {
+    --background: #19191b;
+    --foreground: #f4f1ea;
+    --card: #232226;
+    --card-foreground: #f4f1ea;
+    --popover: #232226;
+    --popover-foreground: #f4f1ea;
+    --primary: #f2ead8;
+    --primary-foreground: #19191b;
+    --secondary: #29292b;
+    --secondary-foreground: #f4f1ea;
+    --muted: #29292b;
+    --muted-foreground: #bfbdb8;
+    --accent: #313132;
+    --accent-foreground: #f4f1ea;
+    --destructive: #ff8f86;
+    --border: #3c3c3c;
+    --input: #5e5c62;
+    --ring: #f2ead8;
+    --radius: 0.125rem;
+    --heading-font: var(--font-hand), "Patrick Hand", var(--font-nunito), ui-rounded, sans-serif;
+}
+
+/* Night Mail: a letter written late. Airmail's thin paper turned to deep
+   navy, the envelope's red and blue stripes along the top bar and round
+   dialogs as in Airmail (see "Beyond colour"), and a soft red for what is
+   chosen. Danger is amber, as red is the accent. */
+[data-theme="night-mail"] {
+    --background: #0f1830;
+    --foreground: #f1f4fb;
+    --card: #16213d;
+    --card-foreground: #f1f4fb;
+    --popover: #16213d;
+    --popover-foreground: #f1f4fb;
+    --primary: #ff8a8a;
+    --primary-foreground: #0f1830;
+    --secondary: #20283f;
+    --secondary-foreground: #f1f4fb;
+    --muted: #20283f;
+    --muted-foreground: #bbbfca;
+    --accent: #283046;
+    --accent-foreground: #f1f4fb;
+    --destructive: #ffd27a;
+    --border: #333b50;
+    --input: #4f5a76;
+    --ring: #ff8a8a;
+    --radius: 0.25rem;
+}
+
+/* Dog-Ear Dark: Dog-Ear's turned-down corners on dark plum paper, the back
+   of each fold catching a little light, and a pale bottle green for what is
+   chosen. */
+[data-theme="dog-ear-dark"] {
+    --background: #211c24;
+    --foreground: #f3eff5;
+    --card: #2c2630;
+    --card-foreground: #f3eff5;
+    --popover: #2c2630;
+    --popover-foreground: #f3eff5;
+    --primary: #8fd4bd;
+    --primary-foreground: #211c24;
+    --secondary: #312c34;
+    --secondary-foreground: #f3eff5;
+    --muted: #312c34;
+    --muted-foreground: #c1bcc3;
+    --accent: #38333b;
+    --accent-foreground: #f3eff5;
+    --destructive: #ff9a8f;
+    --border: #433e45;
+    --input: #5f5764;
+    --ring: #8fd4bd;
+    --radius: 0.375rem;
+    --heading-font: var(--font-literata), "Literata", Georgia, serif;
+}
+
+/* Balloons: a morning with hot-air balloons up. A sky going from pale blue
+   to the peach of sunrise, three balloons drifting high on the right where
+   the page is empty (public/themes, drawn by scripts/scene-pictures.mjs),
+   and the navy of the sky still left in the west for what is chosen. */
+[data-theme="balloons"] {
+    --background: #fbeee6;
+    --foreground: #141824;
+    --card: #fffaf7;
+    --card-foreground: #141824;
+    --popover: #fffaf7;
+    --popover-foreground: #141824;
+    --primary: #1f3a7a;
+    --primary-foreground: #ffffff;
+    --secondary: #eee2db;
+    --secondary-foreground: #141824;
+    --muted: #eee2db;
+    --muted-foreground: #505056;
+    --accent: #e7dcd6;
+    --accent-foreground: #141824;
+    --destructive: #a3261c;
+    --border: #ddd2cd;
+    --input: #bdb4b2;
+    --ring: #1f3a7a;
+    --radius: 0.75rem;
+    --page-gradient: url("/themes/balloons.svg"), linear-gradient(180deg, #e6f0f8 0%, #f6eee9 55%, #fde3d4 100%);
+    --page-size: min(100%, 90rem) auto, 100% 100%;
+}
+
+/* Lemon Tree: a whitewashed wall in the south, a lemon branch hanging in
+   over the top right corner with its leaves and fruit (public/themes, drawn
+   by scripts/scene-pictures.mjs), and the leaves' green for what is
+   chosen. */
+[data-theme="lemon-tree"] {
+    --background: #fbf9ef;
+    --foreground: #1b1c12;
+    --card: #ffffff;
+    --card-foreground: #1b1c12;
+    --popover: #ffffff;
+    --popover-foreground: #1b1c12;
+    --primary: #2d5a1b;
+    --primary-foreground: #ffffff;
+    --secondary: #efede3;
+    --secondary-foreground: #1b1c12;
+    --muted: #efede3;
+    --muted-foreground: #55554b;
+    --accent: #e8e6dc;
+    --accent-foreground: #1b1c12;
+    --destructive: #a3261c;
+    --border: #dedcd2;
+    --input: #bfbdb3;
+    --ring: #2d5a1b;
+    --radius: 0.5rem;
+    --page-gradient: url("/themes/lemon-tree.svg");
+    --page-size: clamp(11rem, 20vw, 19rem) auto;
+}
+
+/* Dunes: a desert at noon. A pale apricot sky, the long curves of sand
+   dunes along the foot of the window, lit on one side and shaded on the
+   other (public/themes, drawn by scripts/scene-pictures.mjs), and the
+   indigo of a desert robe for what is chosen. */
+[data-theme="dunes"] {
+    --background: #fae0c8;
+    --foreground: #1d130a;
+    --card: #fdf1e6;
+    --card-foreground: #1d130a;
+    --popover: #fdf1e6;
+    --popover-foreground: #1d130a;
+    --primary: #2e2a7a;
+    --primary-foreground: #ffffff;
+    --secondary: #eed5be;
+    --secondary-foreground: #1d130a;
+    --muted: #eed5be;
+    --muted-foreground: #56483b;
+    --accent: #e7cfb8;
+    --accent-foreground: #1d130a;
+    --destructive: #a3261c;
+    --border: #ddc5af;
+    --input: #bea995;
+    --ring: #2e2a7a;
+    --radius: 0.625rem;
+    --page-gradient: url("/themes/dunes.svg"), linear-gradient(180deg, #fbe9da 0%, #fae0c8 100%);
+    --page-size: max(100%, 80rem) auto, 100% 100%;
+}
+
+/* Poppies: a few red poppies on tall stems rising from the bottom left
+   corner of a pale linen page (public/themes, drawn by
+   scripts/scene-pictures.mjs), and the poppies' red for what is chosen.
+   Danger is burnt orange, as red is the accent. */
+[data-theme="poppies"] {
+    --background: #f7f6ef;
+    --foreground: #1a1a14;
+    --card: #ffffff;
+    --card-foreground: #1a1a14;
+    --popover: #ffffff;
+    --popover-foreground: #1a1a14;
+    --primary: #a8201a;
+    --primary-foreground: #ffffff;
+    --secondary: #ebeae3;
+    --secondary-foreground: #1a1a14;
+    --muted: #ebeae3;
+    --muted-foreground: #53534d;
+    --accent: #e4e3dc;
+    --accent-foreground: #1a1a14;
+    --destructive: #8f3c00;
+    --border: #dad9d3;
+    --input: #bbbbb4;
+    --ring: #a8201a;
+    --radius: 0.5rem;
+    --page-gradient: url("/themes/poppies.svg");
+    --page-size: clamp(14rem, 24vw, 22rem) auto;
+}
+
+/* Deep Sea: far below where the light reaches. Dark water going darker
+   towards the foot, three jellyfish glowing as they drift in the top right
+   corner (public/themes, drawn by scripts/scene-pictures.mjs), and their
+   cyan glow for what is chosen. */
+[data-theme="deep-sea"] {
+    --background: #04121c;
+    --foreground: #eaf6fb;
+    --card: #0a1c28;
+    --card-foreground: #eaf6fb;
+    --popover: #0a1c28;
+    --popover-foreground: #eaf6fb;
+    --primary: #7ef0ff;
+    --primary-foreground: #04121c;
+    --secondary: #15232d;
+    --secondary-foreground: #eaf6fb;
+    --muted: #15232d;
+    --muted-foreground: #b3bfc5;
+    --accent: #1d2b35;
+    --accent-foreground: #eaf6fb;
+    --destructive: #ff9a8f;
+    --border: #293640;
+    --input: #3f5966;
+    --ring: #7ef0ff;
+    --radius: 0.75rem;
+    --page-gradient: url("/themes/deep-sea.svg"), linear-gradient(180deg, #072030 0%, #04121c 60%, #020a10 100%);
+    --page-size: clamp(16rem, 30vw, 28rem) auto, 100% 100%;
+}
+
+/* Constellations: an old star chart. A deep indigo night, a few
+   constellations drawn in the top right corner with their stars joined by
+   fine gold lines (public/themes, drawn by scripts/scene-pictures.mjs),
+   and starlight gold for what is chosen. */
+[data-theme="constellations"] {
+    --background: #120d2e;
+    --foreground: #f4f1fb;
+    --card: #1b1640;
+    --card-foreground: #f4f1fb;
+    --popover: #1b1640;
+    --popover-foreground: #f4f1fb;
+    --primary: #f5d77a;
+    --primary-foreground: #120d2e;
+    --secondary: #231e3d;
+    --secondary-foreground: #f4f1fb;
+    --muted: #231e3d;
+    --muted-foreground: #bebaca;
+    --accent: #2b2645;
+    --accent-foreground: #f4f1fb;
+    --destructive: #ff9a8f;
+    --border: #36314f;
+    --input: #544c7a;
+    --ring: #f5d77a;
+    --radius: 0.5rem;
+    --page-gradient: url("/themes/constellations.svg");
+    --page-size: clamp(18rem, 34vw, 32rem) auto;
+}
+
+/* Bitmap: a one-bit desktop from 1984, black and white and nothing between.
+   A dithered top bar, menus and dialogs with a striped title bar and a hard
+   shadow, every card ruled in black, pixel headings and a black bar for
+   what is chosen (see restyles.css). Danger keeps a dark red. */
+[data-theme="bitmap"] {
+    --background: #ffffff;
+    --foreground: #000000;
+    --card: #ffffff;
+    --card-foreground: #000000;
+    --popover: #ffffff;
+    --popover-foreground: #000000;
+    --primary: #000000;
+    --primary-foreground: #ffffff;
+    --secondary: #eeeeee;
+    --secondary-foreground: #000000;
+    --muted: #e6e6e6;
+    --muted-foreground: #333333;
+    --accent: #e6e6e6;
+    --accent-foreground: #000000;
+    --destructive: #9b0000;
+    --border: #000000;
+    --input: #000000;
+    --ring: #000000;
+    --radius: 0;
+    --heading-font: var(--font-pixel), "DotGothic16", ui-monospace, monospace;
+}
+
+/* Dot Matrix: the screen of an old handheld games machine, four shades of
+   green and no more. The page a pale pea green under a faint grid of pixels,
+   the top bar the screen's dark bezel, pixel lettering and chunky square
+   edges (see restyles.css). */
+[data-theme="dot-matrix"] {
+    --background: #c8d49a;
+    --foreground: #081505;
+    --card: #d6e0ac;
+    --card-foreground: #081505;
+    --popover: #d6e0ac;
+    --popover-foreground: #081505;
+    --primary: #2c4a1c;
+    --primary-foreground: #d6e0ac;
+    --secondary: #bccb8c;
+    --secondary-foreground: #081505;
+    --muted: #b6c487;
+    --muted-foreground: #2a3a18;
+    --accent: #b6c487;
+    --accent-foreground: #081505;
+    --destructive: #6e2410;
+    --border: #8a9a5c;
+    --input: #5f7040;
+    --ring: #2c4a1c;
+    --radius: 0;
+    --heading-font: var(--font-pixel), "DotGothic16", ui-monospace, monospace;
+}
+
+/* 8-Bit: a home computer of 1982 switched on. Its dark violet-blue screen
+   inside a lighter border round the whole window, chunky capitals for
+   titles, READY. under each page's title, a block cursor and pale violet
+   for what is chosen (see restyles.css). */
+[data-theme="eight-bit"] {
+    --background: #352879;
+    --foreground: #ffffff;
+    --card: #2d2270;
+    --card-foreground: #ffffff;
+    --popover: #2d2270;
+    --popover-foreground: #ffffff;
+    --primary: #b8b0ff;
+    --primary-foreground: #352879;
+    --secondary: #443883;
+    --secondary-foreground: #ffffff;
+    --muted: #443883;
+    --muted-foreground: #cfc8ff;
+    --accent: #4b4088;
+    --accent-foreground: #ffffff;
+    --destructive: #ffb38a;
+    --border: #6c5eb5;
+    --input: #8076c8;
+    --ring: #b8b0ff;
+    --radius: 0;
+    --heading-font: var(--font-vt323), VT323, ui-monospace, monospace;
+}
+
+/* Departures: the split-flap board at a station. Every page title on its
+   own row of flaps, one letter to a flap with the split across the middle,
+   the top bar the board's frame, and the amber of a delayed train for what
+   is chosen (see restyles.css). */
+[data-theme="departures"] {
+    --background: #121316;
+    --foreground: #f5f5f2;
+    --card: #1c1d21;
+    --card-foreground: #f5f5f2;
+    --popover: #1c1d21;
+    --popover-foreground: #f5f5f2;
+    --primary: #ffad33;
+    --primary-foreground: #121316;
+    --secondary: #232426;
+    --secondary-foreground: #f5f5f2;
+    --muted: #232426;
+    --muted-foreground: #bfbfbd;
+    --accent: #2b2c2e;
+    --accent-foreground: #f5f5f2;
+    --destructive: #ff8f86;
+    --border: #363739;
+    --input: #58595e;
+    --ring: #ffad33;
+    --radius: 0.25rem;
+    --heading-font: var(--font-jetbrains), "JetBrains Mono", ui-monospace, monospace;
+}
+
+/* Teletext: the news on a television in 1985. Black screen, blocky
+   lettering, every page title on a blue band in yellow, the top bar a page
+   number and the time, cyan for what is chosen and yellow small print
+   (see restyles.css). */
+[data-theme="teletext"] {
+    --background: #000000;
+    --foreground: #ffffff;
+    --card: #0a0a0a;
+    --card-foreground: #ffffff;
+    --popover: #0a0a0a;
+    --popover-foreground: #ffffff;
+    --primary: #00ffff;
+    --primary-foreground: #000000;
+    --secondary: #141414;
+    --secondary-foreground: #ffffff;
+    --muted: #141414;
+    --muted-foreground: #ffff66;
+    --accent: #1c1c1c;
+    --accent-foreground: #ffffff;
+    --destructive: #ff6b6b;
+    --border: #3a3a3a;
+    --input: #707070;
+    --ring: #00ffff;
+    --radius: 0;
+    --heading-font: var(--font-vt323), VT323, ui-monospace, monospace;
+}
+
 /* ── The Silly set ─────────────────────────────────────────────────────────
    Themes nobody should pick, listed apart in the palette menu. They are
    absurd on purpose but hold the same contrast as the rest, so the app
@@ -4076,6 +5004,165 @@
     --page-size: 100% 100%, 10px 10px, 14px 14px;
 }
 
+/* A shop's till roll: thermal paper, every card torn off with a zigzag
+   edge, all in a till's monospace with dashed lines between, and the
+   faded grey of the print for what is chosen. */
+[data-theme="receipt"] {
+    --background: #f4f4f2;
+    --foreground: #1a1a1a;
+    --card: #fdfdfb;
+    --card-foreground: #1a1a1a;
+    --popover: #fdfdfb;
+    --popover-foreground: #1a1a1a;
+    --primary: #2b2b2b;
+    --primary-foreground: #ffffff;
+    --secondary: #e8e8e6;
+    --secondary-foreground: #1a1a1a;
+    --muted: #e8e8e6;
+    --muted-foreground: #535352;
+    --accent: #e1e1e0;
+    --accent-foreground: #1a1a1a;
+    --destructive: #a3261c;
+    --border: #d8d8d6;
+    --input: #b9b9b8;
+    --ring: #2b2b2b;
+    --radius: 0;
+    --heading-font: var(--font-typewriter), "Courier Prime", ui-monospace, monospace;
+}
+
+/* A red gingham picnic blanket for a page, cards on it like plates, and a
+   line of ants marching along under the top bar. */
+[data-theme="picnic"] {
+    --background: #fdf8f0;
+    --foreground: #1f1414;
+    --card: #ffffff;
+    --card-foreground: #1f1414;
+    --popover: #ffffff;
+    --popover-foreground: #1f1414;
+    --primary: #c4141c;
+    --primary-foreground: #ffffff;
+    --secondary: #f1ebe4;
+    --secondary-foreground: #1f1414;
+    --muted: #f1ebe4;
+    --muted-foreground: #463c3a;
+    --accent: #eae5dd;
+    --accent-foreground: #1f1414;
+    --destructive: #8f3c00;
+    --border: #e0dad3;
+    --input: #c1bab5;
+    --ring: #c4141c;
+    --radius: 0.75rem;
+    --page-gradient: linear-gradient(90deg, rgb(214 40 40 / 0.16) 50%, rgb(214 40 40 / 0) 50%), linear-gradient(rgb(214 40 40 / 0.16) 50%, rgb(214 40 40 / 0) 50%), linear-gradient(#fdf8f0, #fdf8f0);
+    --page-size: 48px 48px, 48px 48px, auto;
+}
+
+/* Pastel pink and teal fading into lilac, a sunset sun with stripes cut
+   through it setting low on the right, a perspective grid along the foot,
+   titles in wide-spaced italic serif and windows from a 1998 computer for
+   dialogs. */
+[data-theme="vaporwave"] {
+    --background: #f9d9ec;
+    --foreground: #1c0f2e;
+    --card: #fdf0f7;
+    --card-foreground: #1c0f2e;
+    --popover: #fdf0f7;
+    --popover-foreground: #1c0f2e;
+    --primary: #006872;
+    --primary-foreground: #ffffff;
+    --secondary: #edcee2;
+    --secondary-foreground: #1c0f2e;
+    --muted: #edcee2;
+    --muted-foreground: #55445f;
+    --accent: #e6c8dc;
+    --accent-foreground: #1c0f2e;
+    --destructive: #a3261c;
+    --border: #dcbfd3;
+    --input: #bda2b9;
+    --ring: #006872;
+    --radius: 0;
+    --heading-font: var(--font-playfair), "Playfair Display", Georgia, serif;
+    --page-gradient: url("/themes/vaporwave.svg"), linear-gradient(180deg, #d7f2f4 0%, #f9d9ec 45%, #e3d6fb 100%);
+    --page-size: max(100%, 80rem) auto, 100% 100%;
+}
+
+/* The carpet at the bowling alley on cosmic night: black, with neon
+   squiggles, stars and planets in cyan, pink, yellow and green all over it. */
+[data-theme="bowling-alley"] {
+    --background: #0a0614;
+    --foreground: #f6f2ff;
+    --card: #160e26;
+    --card-foreground: #f6f2ff;
+    --popover: #160e26;
+    --popover-foreground: #f6f2ff;
+    --primary: #39f0ff;
+    --primary-foreground: #0a0614;
+    --secondary: #1c1826;
+    --secondary-foreground: #f6f2ff;
+    --muted: #1c1826;
+    --muted-foreground: #bdb9c7;
+    --accent: #24202e;
+    --accent-foreground: #f6f2ff;
+    --destructive: #ffd166;
+    --border: #302c3a;
+    --input: #5a4f78;
+    --ring: #39f0ff;
+    --radius: 1rem;
+    --heading-font: var(--font-bangers), Bangers, var(--font-nunito), ui-rounded, sans-serif;
+    --page-gradient: url("/themes/bowling-alley.svg"), linear-gradient(#0a0614, #0a0614);
+    --page-size: 360px auto, auto;
+}
+
+/* Purple liquid with blobs of orange and pink wax rising through it, which
+   rise, very slowly, up the side of the window while it is open. */
+[data-theme="lava-lamp"] {
+    --background: #2a0a3a;
+    --foreground: #fff0f6;
+    --card: #3a1250;
+    --card-foreground: #fff0f6;
+    --popover: #3a1250;
+    --popover-foreground: #fff0f6;
+    --primary: #ff8a3d;
+    --primary-foreground: #2a0a3a;
+    --secondary: #3a1b48;
+    --secondary-foreground: #fff0f6;
+    --muted: #3a1b48;
+    --muted-foreground: #e8c8dc;
+    --accent: #41234f;
+    --accent-foreground: #fff0f6;
+    --destructive: #ffd166;
+    --border: #4c2f58;
+    --input: #7a5a8c;
+    --ring: #ff8a3d;
+    --radius: 1.5rem;
+    --heading-font: var(--font-fraunces), Fraunces, Georgia, serif;
+    --page-gradient: radial-gradient(14rem 18rem at 92% 108%, rgb(255 138 61 / 0.5) 0%, rgb(255 138 61 / 0) 100%), radial-gradient(9rem 12rem at 97% 60%, rgb(255 94 168 / 0.38) 0%, rgb(255 94 168 / 0) 100%), radial-gradient(10rem 8rem at 4% -4%, rgb(255 138 61 / 0.32) 0%, rgb(255 138 61 / 0) 100%), linear-gradient(180deg, #2a0a3a 0%, #3b0d42 100%);
+}
+
+/* Black, blackletter titles, blood red for what is chosen, and red dripping
+   from the foot of the top bar. */
+[data-theme="gothic"] {
+    --background: #0a0708;
+    --foreground: #f4ecee;
+    --card: #151012;
+    --card-foreground: #f4ecee;
+    --popover: #151012;
+    --popover-foreground: #f4ecee;
+    --primary: #ff3344;
+    --primary-foreground: #0a0708;
+    --secondary: #1c1819;
+    --secondary-foreground: #f4ecee;
+    --muted: #1c1819;
+    --muted-foreground: #bcb5b7;
+    --accent: #242021;
+    --accent-foreground: #f4ecee;
+    --destructive: #ffa64d;
+    --border: #2f2c2d;
+    --input: #5a4c50;
+    --ring: #ff3344;
+    --radius: 0;
+    --heading-font: var(--font-playfair), "Playfair Display", Georgia, serif;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -4372,18 +5459,25 @@ html[data-own-background] body::before {
   padding: 0.875rem;
 }
 
-/* Airmail: the stripes of an airmail envelope, red and blue on white,
-   along the foot of the top bar and round the edge of a dialog. */
-.theme-is-airmail .top-bar {
+/* Airmail and Night Mail: the stripes of an airmail envelope, red and
+   blue on white, along the foot of the top bar and round the edge of a
+   dialog. */
+.theme-is-airmail .top-bar,
+.theme-is-night-mail .top-bar {
   border-bottom: 6px solid transparent;
   border-image: repeating-linear-gradient(-45deg, #c8102e 0 12px, #ffffff 12px 18px, #1d3a8a 18px 30px, #ffffff 30px 36px) 6;
 }
-.theme-is-airmail [data-slot="dialog-content"] {
+.theme-is-airmail [data-slot="dialog-content"],
+.theme-is-night-mail [data-slot="dialog-content"] {
   border: 7px solid transparent;
   border-image: repeating-linear-gradient(-45deg, #c8102e 0 12px, #ffffff 12px 18px, #1d3a8a 18px 30px, #ffffff 30px 36px) 7;
 }
 .theme-is-airmail h1 {
   color: #1d3a8a;
+}
+/* Night Mail's titles in the pale blue of the envelope's stripe. */
+.theme-is-night-mail h1 {
+  color: #a9bfff;
 }
 
 /* Paperback: the top bar is the cover's top band, black lettering on
@@ -4480,22 +5574,38 @@ html[data-own-background] body::before {
   border-color: var(--border);
 }
 
-/* Dog-Ear: each book's card has its top corner turned down. The corner
-   is cut away from the card, and the flap lies folded over on it, the
-   back of the page a shade darker and curling up off the card a little,
-   with its own small shadow. Under the pointer the corner turns down a
-   little further. */
-.theme-is-dog-ear a.surface.flex-col {
+/* Dog-Ear and Dog-Ear Dark: each book's card has its top corner turned
+   down. The corner is cut away from the card, and the flap lies folded
+   over on it, the back of the page a shade darker and curling up off the
+   card a little, with its own small shadow. Under the pointer the corner
+   turns down a little further. The dark side's paper is plum, the back of
+   its fold catching a little light. */
+.theme-is-dog-ear {
+  --de-back: #cdbfd0, #e3dae4 30%, #f3eef4 49.5%;
+  --de-shade: 60 40 70;
+  --de-lift: 0.1;
+  --de-drop: 0.3;
+}
+.theme-is-dog-ear-dark {
+  --de-back: #3a3240, #4d4454 30%, #5f5566 49.5%;
+  --de-shade: 0 0 0;
+  --de-lift: 0.3;
+  --de-drop: 0.55;
+}
+.theme-is-dog-ear a.surface.flex-col,
+.theme-is-dog-ear-dark a.surface.flex-col {
   --fold: 2rem;
   position: relative;
   border-color: transparent;
-  box-shadow: 0 1px 2px rgb(60 40 70 / 0.1), 0 6px 12px -8px rgb(60 40 70 / 0.3);
+  box-shadow: 0 1px 2px rgb(var(--de-shade) / var(--de-lift)), 0 6px 12px -8px rgb(var(--de-shade) / var(--de-drop));
   background: linear-gradient(225deg, transparent calc(var(--fold) * 0.7071 - 0.5px), var(--card) calc(var(--fold) * 0.7071)) border-box;
 }
-.theme-is-dog-ear a.surface.flex-col.p-2 {
+.theme-is-dog-ear a.surface.flex-col.p-2,
+.theme-is-dog-ear-dark a.surface.flex-col.p-2 {
   --fold: 1.375rem;
 }
-.theme-is-dog-ear a.surface.flex-col::before {
+.theme-is-dog-ear a.surface.flex-col::before,
+.theme-is-dog-ear-dark a.surface.flex-col::before {
   content: "";
   position: absolute;
   top: 0;
@@ -4503,15 +5613,17 @@ html[data-own-background] body::before {
   width: var(--fold);
   height: var(--fold);
   border-bottom-left-radius: 0.375rem;
-  background: linear-gradient(45deg, #cdbfd0, #e3dae4 30%, #f3eef4 49.5%, transparent 50%);
-  box-shadow: -2px 3px 4px -2px rgb(60 40 70 / 0.35);
+  background: linear-gradient(45deg, var(--de-back), transparent 50%);
+  box-shadow: -2px 3px 4px -2px rgb(var(--de-shade) / calc(var(--de-drop) + 0.05));
   pointer-events: none;
 }
-.theme-is-dog-ear a.surface.flex-col:hover {
+.theme-is-dog-ear a.surface.flex-col:hover,
+.theme-is-dog-ear-dark a.surface.flex-col:hover {
   --fold: 2.5rem;
-  box-shadow: 0 1px 2px rgb(60 40 70 / 0.1), 0 12px 20px -12px rgb(60 40 70 / 0.4);
+  box-shadow: 0 1px 2px rgb(var(--de-shade) / var(--de-lift)), 0 12px 20px -12px rgb(var(--de-shade) / calc(var(--de-drop) + 0.1));
 }
-.theme-is-dog-ear a.surface.flex-col.p-2:hover {
+.theme-is-dog-ear a.surface.flex-col.p-2:hover,
+.theme-is-dog-ear-dark a.surface.flex-col.p-2:hover {
   --fold: 1.75rem;
 }
 
@@ -4773,8 +5885,9 @@ html[data-own-background] body::before {
   }
 }
 
-/* Glass: Frost, Daybreak, Rose Quartz, Prism, Jade and Amber in light,
-   Midnight, Smoke, Dusk, Emerald, Garnet and Crystal in dark. Cards and
+/* Glass: Frost, Daybreak, Rose Quartz, Prism, Jade, Amber and Reeded in
+   light, Midnight, Smoke, Dusk, Emerald, Garnet, Crystal, Fluted and
+   Dichroic in dark. Cards and
    library tiles are panes of glass over the soft light behind the page.
    That light is already soft, so a pane is only see-through, with nothing
    to blur again as the page scrolls; menus,
@@ -4794,7 +5907,10 @@ html[data-own-background] body::before {
 .theme-is-jade .surface,
 .theme-is-amber .surface,
 .theme-is-garnet .surface,
-.theme-is-crystal .surface {
+.theme-is-crystal .surface,
+.theme-is-reeded .surface,
+.theme-is-fluted .surface,
+.theme-is-dichroic .surface {
   background-color: var(--glass);
   border-color: var(--glass-edge);
 }
@@ -4809,7 +5925,10 @@ html[data-own-background] body::before {
 .theme-is-jade [data-slot="card"],
 .theme-is-amber [data-slot="card"],
 .theme-is-garnet [data-slot="card"],
-.theme-is-crystal [data-slot="card"] {
+.theme-is-crystal [data-slot="card"],
+.theme-is-reeded [data-slot="card"],
+.theme-is-fluted [data-slot="card"],
+.theme-is-dichroic [data-slot="card"] {
   --tw-ring-color: var(--glass-edge);
 }
 .theme-is-frost :is([data-slot="popover-content"], [data-slot="dropdown-menu-content"], [data-slot="dropdown-menu-sub-content"], [data-slot="select-content"], [data-slot="dialog-content"]),
@@ -4823,7 +5942,10 @@ html[data-own-background] body::before {
 .theme-is-jade :is([data-slot="popover-content"], [data-slot="dropdown-menu-content"], [data-slot="dropdown-menu-sub-content"], [data-slot="select-content"], [data-slot="dialog-content"]),
 .theme-is-amber :is([data-slot="popover-content"], [data-slot="dropdown-menu-content"], [data-slot="dropdown-menu-sub-content"], [data-slot="select-content"], [data-slot="dialog-content"]),
 .theme-is-garnet :is([data-slot="popover-content"], [data-slot="dropdown-menu-content"], [data-slot="dropdown-menu-sub-content"], [data-slot="select-content"], [data-slot="dialog-content"]),
-.theme-is-crystal :is([data-slot="popover-content"], [data-slot="dropdown-menu-content"], [data-slot="dropdown-menu-sub-content"], [data-slot="select-content"], [data-slot="dialog-content"]) {
+.theme-is-crystal :is([data-slot="popover-content"], [data-slot="dropdown-menu-content"], [data-slot="dropdown-menu-sub-content"], [data-slot="select-content"], [data-slot="dialog-content"]),
+.theme-is-reeded :is([data-slot="popover-content"], [data-slot="dropdown-menu-content"], [data-slot="dropdown-menu-sub-content"], [data-slot="select-content"], [data-slot="dialog-content"]),
+.theme-is-fluted :is([data-slot="popover-content"], [data-slot="dropdown-menu-content"], [data-slot="dropdown-menu-sub-content"], [data-slot="select-content"], [data-slot="dialog-content"]),
+.theme-is-dichroic :is([data-slot="popover-content"], [data-slot="dropdown-menu-content"], [data-slot="dropdown-menu-sub-content"], [data-slot="select-content"], [data-slot="dialog-content"]) {
   background-color: var(--glass-menu);
   backdrop-filter: blur(22px) saturate(1.5);
 }
@@ -4838,7 +5960,10 @@ html[data-own-background] body::before {
 .theme-is-jade .top-bar,
 .theme-is-amber .top-bar,
 .theme-is-garnet .top-bar,
-.theme-is-crystal .top-bar {
+.theme-is-crystal .top-bar,
+.theme-is-reeded .top-bar,
+.theme-is-fluted .top-bar,
+.theme-is-dichroic .top-bar {
   background-color: var(--glass-bar);
   border-bottom-color: var(--glass-edge);
 }
@@ -4929,6 +6054,9 @@ html[data-own-background] body::before {
 .theme-is-amber a.surface:hover,
 .theme-is-garnet a.surface:hover,
 .theme-is-crystal a.surface:hover,
+.theme-is-reeded a.surface:hover,
+.theme-is-fluted a.surface:hover,
+.theme-is-dichroic a.surface:hover,
 .theme-is-letterpress a.surface:hover,
 .theme-is-letterpress-dark a.surface:hover,
 .theme-is-pebble a.surface:hover,
@@ -5344,6 +6472,532 @@ html[data-own-background] body::before {
 }
 .theme-is-spreadsheet body {
   font-family: Calibri, Carlito, "Segoe UI", ui-sans-serif, system-ui, sans-serif;
+}
+
+/* ── More of every kind: their shapes ─────────────────────────────────────
+   The rules that tell apart the themes in "More of every kind". The
+   screens' looks are in restyles.css. */
+
+/* Hyperlegible and Hyperlegible Dark: every word in Atkinson Hyperlegible,
+   a touch more space between letters, words and lines, links in writing
+   underlined, and a thick solid outline round whatever the keyboard is on,
+   so it can't be lost. */
+.theme-is-hyperlegible body,
+.theme-is-hyperlegible-dark body {
+  font-family: var(--font-hyperlegible), "Atkinson Hyperlegible", ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: 0.012em;
+  word-spacing: 0.06em;
+}
+.theme-is-hyperlegible :is(p, li, dd) a:not([class*="bg-"]),
+.theme-is-hyperlegible-dark :is(p, li, dd) a:not([class*="bg-"]) {
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+  text-decoration-thickness: 1px;
+}
+.theme-is-hyperlegible :focus-visible,
+.theme-is-hyperlegible-dark :focus-visible {
+  outline: 3px solid var(--ring);
+  outline-offset: 2px;
+}
+.theme-is-hyperlegible :is(p, li),
+.theme-is-hyperlegible-dark :is(p, li) {
+  line-height: 1.6;
+}
+
+/* Reeded and Fluted: each pane's fine upright ribs, a line of light and a
+   line of shade in turn, over whatever glow is behind it. Dichroic's
+   panes keep a rim that shifts colour round them: cyan along the top and
+   left, gold along the bottom and right, magenta where they meet. */
+.theme-is-reeded .surface {
+  background-image: repeating-linear-gradient(90deg, rgb(255 255 255 / 0) 0 4px, rgb(255 255 255 / 0.55) 4px 5px, rgb(255 255 255 / 0) 5px 6px, rgb(20 40 40 / 0.035) 6px 8px);
+}
+.theme-is-fluted .surface {
+  background-image: repeating-linear-gradient(90deg, rgb(255 255 255 / 0) 0 4px, rgb(220 255 250 / 0.07) 4px 5px, rgb(255 255 255 / 0) 5px 6px, rgb(0 0 0 / 0.14) 6px 8px);
+}
+:root[data-theme="reeded"]:not([data-cards="flat"]) {
+  --surface-shadow: inset 0 1px 0 rgb(255 255 255 / 0.95), 0 1px 2px rgb(30 50 50 / 0.06), 0 14px 30px -18px rgb(30 50 50 / 0.3);
+}
+:root[data-theme="reeded"][data-cards="flat"] {
+  --surface-shadow: inset 0 1px 0 rgb(255 255 255 / 0.95);
+}
+:root[data-theme="fluted"]:not([data-cards="flat"]) {
+  --surface-shadow: inset 0 1px 0 rgb(220 255 250 / 0.14), 0 18px 40px -20px rgb(0 0 0 / 0.75);
+}
+:root[data-theme="fluted"][data-cards="flat"] {
+  --surface-shadow: inset 0 1px 0 rgb(220 255 250 / 0.14);
+}
+:root[data-theme="dichroic"]:not([data-cards="flat"]) {
+  --surface-shadow: inset 1px 1px 0 rgb(78 230 255 / 0.55), inset -1px -1px 0 rgb(255 211 107 / 0.55), inset 0 0 0 1px rgb(255 106 213 / 0.35), inset 0 0 22px rgb(255 106 213 / 0.07), 0 18px 40px -20px rgb(0 0 0 / 0.8);
+}
+:root[data-theme="dichroic"][data-cards="flat"] {
+  --surface-shadow: inset 1px 1px 0 rgb(78 230 255 / 0.55), inset -1px -1px 0 rgb(255 211 107 / 0.55), inset 0 0 0 1px rgb(255 106 213 / 0.35), inset 0 0 22px rgb(255 106 213 / 0.07);
+}
+
+/* Scrapbook: a strip of paper tape across the top of each book, torn at
+   both ends, a little askew, and one of four tapes in turn: coral stripes,
+   mint with white spots, mustard gingham and blue with white dashes. */
+.theme-is-scrapbook a.surface.flex-col {
+  position: relative;
+  --tape: repeating-linear-gradient(90deg, rgb(240 140 120 / 0.82) 0 6px, rgb(250 196 178 / 0.82) 6px 12px);
+  --tape-turn: -4deg;
+}
+.theme-is-scrapbook a.surface.flex-col::before {
+  content: "";
+  position: absolute;
+  top: -0.55rem;
+  left: 50%;
+  z-index: 2;
+  width: min(4.75rem, 60%);
+  height: 1.15rem;
+  translate: -50% 0;
+  rotate: var(--tape-turn);
+  background: var(--tape);
+  clip-path: polygon(0 0, 100% 0, 96% 20%, 100% 40%, 96% 60%, 100% 80%, 97% 100%, 0 100%, 4% 80%, 0 60%, 4% 40%, 0 20%);
+  pointer-events: none;
+}
+.theme-is-scrapbook .card-in:nth-child(4n + 2) a.surface.flex-col {
+  --tape: radial-gradient(circle, rgb(255 255 255 / 0.75) 1.4px, transparent 1.9px) 0 0 / 8px 8px, rgb(140 205 185 / 0.85);
+  --tape-turn: 3deg;
+}
+.theme-is-scrapbook .card-in:nth-child(4n + 3) a.surface.flex-col {
+  --tape: linear-gradient(90deg, rgb(255 255 255 / 0.32) 50%, transparent 50%) 0 0 / 8px 8px, linear-gradient(rgb(255 255 255 / 0.32) 50%, transparent 50%) 0 0 / 8px 8px, rgb(230 186 86 / 0.85);
+  --tape-turn: -2deg;
+}
+.theme-is-scrapbook .card-in:nth-child(4n) a.surface.flex-col {
+  --tape: repeating-linear-gradient(-60deg, rgb(255 255 255 / 0) 0 6px, rgb(255 255 255 / 0.55) 6px 8px), rgb(140 172 222 / 0.85);
+  --tape-turn: 5deg;
+}
+:root[data-theme="scrapbook"]:not([data-cards="flat"]) {
+  --surface-shadow: 0 1px 2px rgb(70 50 20 / 0.12), 0 8px 16px -10px rgb(70 50 20 / 0.35);
+}
+
+/* Risograph: page titles and the app's name in the blue ink with the pink
+   printed a hair off to one side, a rule in both inks under the top bar,
+   and a corner of pink halftone dots on every card, fading as they go. */
+.theme-is-risograph h1,
+.theme-is-risograph .wordmark {
+  color: #005a99;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  text-shadow: 0.045em 0.035em 0 rgb(255 72 176 / 0.75);
+}
+.theme-is-risograph .top-bar {
+  border-bottom: 3px solid #0078bf;
+  box-shadow: 2px 3px 0 rgb(255 72 176 / 0.7);
+}
+.theme-is-risograph .surface {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 56 56'%3E%3Cg fill='%23ff48b0' fill-opacity='.55'%3E%3Ccircle cx='52' cy='4' r='2.6'/%3E%3Ccircle cx='44' cy='4' r='2.2'/%3E%3Ccircle cx='52' cy='12' r='2.2'/%3E%3Ccircle cx='36' cy='4' r='1.8'/%3E%3Ccircle cx='44' cy='12' r='1.9'/%3E%3Ccircle cx='52' cy='20' r='1.8'/%3E%3Ccircle cx='28' cy='4' r='1.3'/%3E%3Ccircle cx='36' cy='12' r='1.5'/%3E%3Ccircle cx='44' cy='20' r='1.5'/%3E%3Ccircle cx='52' cy='28' r='1.3'/%3E%3Ccircle cx='20' cy='4' r='.9'/%3E%3Ccircle cx='28' cy='12' r='1.1'/%3E%3Ccircle cx='36' cy='20' r='1.1'/%3E%3Ccircle cx='44' cy='28' r='1.1'/%3E%3Ccircle cx='52' cy='36' r='.9'/%3E%3Ccircle cx='20' cy='12' r='.6'/%3E%3Ccircle cx='28' cy='20' r='.7'/%3E%3Ccircle cx='36' cy='28' r='.7'/%3E%3Ccircle cx='44' cy='36' r='.7'/%3E%3Ccircle cx='52' cy='44' r='.6'/%3E%3C/g%3E%3C/svg%3E");
+  background-position: right top;
+  background-repeat: no-repeat;
+  background-size: 3.5rem 3.5rem;
+}
+
+/* Papercut: every card cut from white paper and laid over a sheet of
+   coral and one of sunflower yellow, each a little lower and to the right,
+   with a soft shadow between the layers. Flat cards (Preferences) keep
+   the sheets and lose the shadows. */
+:root[data-theme="papercut"]:not([data-cards="flat"]) {
+  --surface-shadow: 0 1px 3px rgb(20 50 60 / 0.2), 4px 5px 0 #ffb199, 5px 7px 5px -1px rgb(20 50 60 / 0.16), 8px 10px 0 #ffd45c, 9px 12px 8px -2px rgb(20 50 60 / 0.2);
+}
+:root[data-theme="papercut"][data-cards="flat"] {
+  --surface-shadow: 4px 5px 0 #ffb199, 8px 10px 0 #ffd45c;
+}
+.theme-is-papercut .surface {
+  border-color: transparent;
+}
+.theme-is-papercut a.surface:hover {
+  border-color: color-mix(in oklab, var(--ring) 60%, transparent);
+}
+
+/* Kintsugi: every book's corner broken off and mended with gold, the seam
+   running over the cover's corner too, and one of three breaks in turn.
+   Other cards carry a smaller seam in their corner, under what is on them,
+   and page titles rest on a short gold seam. */
+.theme-is-kintsugi .surface {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 60'%3E%3Cg fill='none' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M30 0 33 8 29 14 38 19 42 28 52 30 60 36M38 19 45 13' stroke='%23b8892e' stroke-width='2.6'/%3E%3Cpath d='M30 0 33 8 29 14 38 19 42 28 52 30 60 36M38 19 45 13' stroke='%23f6d488' stroke-width='1'/%3E%3C/g%3E%3C/svg%3E");
+  background-position: right top;
+  background-repeat: no-repeat;
+  background-size: 2.75rem 2.75rem;
+}
+.theme-is-kintsugi a.surface.flex-col {
+  position: relative;
+  --seam: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 60'%3E%3Cg fill='none' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M17 0 23 9 21 17 32 22 37 31 46 33 51 40 60 43M32 22 39 15 40 7' stroke='%23b8892e' stroke-width='2.6'/%3E%3Cpath d='M17 0 23 9 21 17 32 22 37 31 46 33 51 40 60 43M32 22 39 15 40 7' stroke='%23f6d488' stroke-width='1'/%3E%3C/g%3E%3C/svg%3E");
+  background-image: none;
+}
+.theme-is-kintsugi a.surface.flex-col::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 2;
+  width: 3.25rem;
+  height: 3.25rem;
+  background: var(--seam) 0 0 / 100% 100% no-repeat;
+  pointer-events: none;
+}
+.theme-is-kintsugi .card-in:nth-child(3n + 2) a.surface.flex-col {
+  --seam: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 60'%3E%3Cg fill='none' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M41 0 38 12 45 19 44 30 52 36 55 46 60 52M44 30 37 37' stroke='%23b8892e' stroke-width='2.6'/%3E%3Cpath d='M41 0 38 12 45 19 44 30 52 36 55 46 60 52M44 30 37 37' stroke='%23f6d488' stroke-width='1'/%3E%3C/g%3E%3C/svg%3E");
+}
+.theme-is-kintsugi .card-in:nth-child(3n) a.surface.flex-col::after {
+  right: auto;
+  left: 0;
+  scale: -1 1;
+}
+.theme-is-kintsugi .top-bar + main h1 {
+  padding-bottom: 0.55rem;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 8'%3E%3Cpath d='M1 4 12 2.5 19 5 31 3 38 6 52 3.5 60 5 72 2.6 79 4' fill='none' stroke='%23e2b65a' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") left bottom / 5rem 0.5rem no-repeat;
+}
+
+/* Neon Sign: page titles and the app's name bent in glowing tube, and the
+   link to the page you're on lit the same way. */
+.theme-is-neon-sign h1,
+.theme-is-neon-sign .wordmark {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  color: #ffe3e8;
+  text-shadow: 0 0 1px #ffffff, 0 0 6px #ff4d6d, 0 0 16px rgb(255 77 109 / 0.75), 0 0 34px rgb(255 77 109 / 0.4);
+}
+.theme-is-neon-sign .top-bar .nav-link[aria-current="page"] {
+  color: #ffe3e8;
+  text-shadow: 0 0 6px #ff4d6d, 0 0 14px rgb(255 77 109 / 0.6);
+}
+
+/* Letterboard: the felt's grooves run across the page (its picture),
+   page titles are pushed in between them in white capitals, cards and
+   the top bar's foot are framed in oak. */
+.theme-is-letterboard h1 {
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-shadow: 0 1px 0 rgb(0 0 0 / 0.8), 0 -1px 0 rgb(255 255 255 / 0.08);
+}
+.theme-is-letterboard .top-bar {
+  border-bottom: 6px solid transparent;
+  border-image: linear-gradient(180deg, #b98552, #8a5a30 60%, #6a4322) 6;
+}
+.theme-is-letterboard .surface {
+  border-color: #6f4a2a;
+}
+.theme-is-letterboard a.surface:hover {
+  border-color: #b98552;
+}
+
+/* Chesterfield: the page is buttoned leather (its picture), and every card
+   is edged with a row of brass studs just inside its rim. */
+.theme-is-chesterfield .surface {
+  outline: 3px dotted #b8954f;
+  outline-offset: -6px;
+}
+
+/* Tweed: the page is woven in herringbone (its picture), and every card is
+   edged with a rust running stitch just inside its rim. */
+.theme-is-tweed .surface {
+  outline: 1.5px dashed rgb(224 137 74 / 0.55);
+  outline-offset: -5px;
+}
+
+/* Illuminated: the first letter of every page title in red on a square of
+   gold leaf, writing in the book face, and a thin rule of red and lapis
+   along the foot of the top bar. */
+.theme-is-illuminated body {
+  font-family: var(--font-literata), "Literata", Georgia, serif;
+}
+.theme-is-illuminated h1::first-letter {
+  margin-right: 0.06em;
+  padding: 0 0.12em;
+  border: 1px solid #8f6a14;
+  border-radius: 2px;
+  color: #8f1d14;
+  font-family: var(--font-fraktur), "UnifrakturMaguntia", Georgia, serif;
+  font-size: 1.3em;
+  font-weight: 400;
+  background: linear-gradient(135deg, #f6e19a, #d9b44a 45%, #b38a26);
+}
+.theme-is-illuminated .top-bar {
+  border-bottom: 4px solid transparent;
+  border-image: linear-gradient(180deg, #a3261c 0 1.5px, transparent 1.5px 2.5px, #23379b 2.5px) 4;
+}
+
+/* Sticky Notes: every book on a square note, yellow, pink, blue or green in
+   turn, a little crooked, with its foot curling up off the wall. */
+.theme-is-sticky-notes a.surface.flex-col {
+  --note: #fff09a;
+  --muted: #efdd70;
+  border-color: transparent;
+  background-color: var(--note);
+  background-image: linear-gradient(180deg, rgb(255 255 255 / 0) 78%, rgb(90 70 0 / 0.05));
+  rotate: -1deg;
+}
+.theme-is-sticky-notes .card-in:nth-child(4n + 2) a.surface.flex-col {
+  --note: #ffd0de;
+  --muted: #f2adc2;
+  rotate: 1.2deg;
+}
+.theme-is-sticky-notes .card-in:nth-child(4n + 3) a.surface.flex-col {
+  --note: #cfe6ff;
+  --muted: #a9cdf2;
+  rotate: -0.6deg;
+}
+.theme-is-sticky-notes .card-in:nth-child(4n) a.surface.flex-col {
+  --note: #d6f3c4;
+  --muted: #b2e09a;
+  rotate: 0.8deg;
+}
+.theme-is-sticky-notes a.surface.flex-col:hover {
+  border-color: transparent;
+}
+:root[data-theme="sticky-notes"]:not([data-cards="flat"]) {
+  --surface-shadow: 0 1px 1px rgb(0 0 0 / 0.08), 0 12px 12px -10px rgb(0 0 0 / 0.32);
+}
+
+/* Mimeograph: page titles typed, the violet ink a little soft at its
+   edges as a spirit duplicator leaves it. */
+.theme-is-mimeograph h1,
+.theme-is-mimeograph .wordmark {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  text-shadow: 0 0 0.6px rgb(75 31 158 / 0.9), 0 0 2px rgb(75 31 158 / 0.35);
+}
+
+/* Photo Album: four black paper photo corners hold every cover, each with a
+   catch of light along its edge. With 3D covers on, covers are books
+   again and need no corners. */
+.theme-is-photo-album .book-cover {
+  --corner: 1.1rem;
+}
+.theme-is-photo-album a.surface.flex-col.p-2 .book-cover {
+  --corner: 0.75rem;
+}
+.theme-is-photo-album a.surface:not(.flex-col) .book-cover {
+  --corner: 0.5rem;
+}
+.theme-is-photo-album .hero-cover {
+  --corner: 1.75rem;
+}
+.theme-is-photo-album:not([data-cover-3d]) .book-cover::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  --c: #0b0b0c 0 calc(50% - 0.5px), rgb(255 255 255 / 0.32) calc(50% - 0.5px) 50%, transparent 50%;
+  background:
+    linear-gradient(135deg, var(--c)) left top / var(--corner) var(--corner) no-repeat,
+    linear-gradient(225deg, var(--c)) right top / var(--corner) var(--corner) no-repeat,
+    linear-gradient(45deg, var(--c)) left bottom / var(--corner) var(--corner) no-repeat,
+    linear-gradient(315deg, var(--c)) right bottom / var(--corner) var(--corner) no-repeat;
+}
+.theme-is-photo-album:not([data-cover-3d]) .book-cover {
+  border-radius: 0;
+}
+.theme-is-photo-album .surface {
+  border-color: transparent;
+}
+.theme-is-photo-album a.surface:hover {
+  border-color: color-mix(in oklab, var(--ring) 40%, transparent);
+}
+
+/* The scenes: where each picture sits in the window. */
+.theme-is-balloons body::before {
+  background-position: right top, 0 0;
+  background-repeat: no-repeat;
+}
+.theme-is-lemon-tree body::before,
+.theme-is-deep-sea body::before,
+.theme-is-constellations body::before {
+  background-position: right top, 0 0;
+  background-repeat: no-repeat;
+}
+.theme-is-dunes body::before {
+  background-position: center bottom, 0 0;
+  background-repeat: no-repeat;
+}
+.theme-is-poppies body::before {
+  background-position: left bottom;
+  background-repeat: no-repeat;
+}
+/* Below a wide window there is no margin for the poppies, so writing
+   passes over them: a wash of the page's linen pales them to a watercolour
+   and they come in smaller. */
+@media (max-width: 64rem) {
+  .theme-is-poppies {
+    --page-gradient: linear-gradient(rgb(247 246 239 / 0.62), rgb(247 246 239 / 0.62)), url("/themes/poppies.svg");
+    --page-size: auto, 9rem auto;
+  }
+  .theme-is-poppies body::before {
+    background-position: 0 0, left bottom;
+  }
+}
+
+/* The Silly set's new shapes. Receipt: every book a slip torn off a till
+   roll, zigzag at both ends, and everything in a till's monospace with a
+   dashed rule under page titles. */
+.theme-is-receipt body {
+  font-family: var(--font-typewriter), "Courier Prime", ui-monospace, monospace;
+}
+.theme-is-receipt .top-bar + main h1 {
+  padding-bottom: 0.4rem;
+  border-bottom: 2px dashed currentColor;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.theme-is-receipt .surface {
+  border-style: dashed;
+}
+.theme-is-receipt :is([data-slot="select-trigger"], .select-like, [data-slot="input"], input) {
+  letter-spacing: -0.03em;
+}
+.theme-is-receipt a.surface.flex-col {
+  padding-block: 0.875rem;
+  border: 0;
+  border-radius: 0;
+  clip-path: polygon(0% 0, 4.167% 0.4rem, 8.333% 0, 12.5% 0.4rem, 16.67% 0, 20.83% 0.4rem, 25% 0, 29.17% 0.4rem, 33.33% 0, 37.5% 0.4rem, 41.67% 0, 45.83% 0.4rem, 50% 0, 54.17% 0.4rem, 58.33% 0, 62.5% 0.4rem, 66.67% 0, 70.83% 0.4rem, 75% 0, 79.17% 0.4rem, 83.33% 0, 87.5% 0.4rem, 91.67% 0, 95.83% 0.4rem, 100% 0, 100% 100%, 95.83% calc(100% - 0.4rem), 91.67% 100%, 87.5% calc(100% - 0.4rem), 83.33% 100%, 79.17% calc(100% - 0.4rem), 75% 100%, 70.83% calc(100% - 0.4rem), 66.67% 100%, 62.5% calc(100% - 0.4rem), 58.33% 100%, 54.17% calc(100% - 0.4rem), 50% 100%, 45.83% calc(100% - 0.4rem), 41.67% 100%, 37.5% calc(100% - 0.4rem), 33.33% 100%, 29.17% calc(100% - 0.4rem), 25% 100%, 20.83% calc(100% - 0.4rem), 16.67% 100%, 12.5% calc(100% - 0.4rem), 8.333% 100%, 4.167% calc(100% - 0.4rem), 0% 100%);
+}
+:root[data-theme="receipt"]:not([data-cards="flat"]) {
+  --surface-shadow: none;
+}
+
+/* Picnic: cards set out like plates, a faint line round each just inside
+   its rim, and a line of ants marching along under the top bar (still
+   when animations are off). */
+:root[data-theme="picnic"]:not([data-cards="flat"]) {
+  --surface-shadow: inset 0 0 0 6px #ffffff, inset 0 0 0 7px rgb(196 20 28 / 0.14), 0 6px 14px -6px rgb(90 20 20 / 0.3);
+}
+.theme-is-picnic .surface {
+  border-color: rgb(196 20 28 / 0.16);
+}
+.theme-is-picnic .top-bar::after {
+  content: "";
+  position: absolute;
+  top: calc(100% + 3px);
+  left: 0;
+  right: 0;
+  height: 14px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 34 14'%3E%3Cg fill='none' stroke='%233a2418' stroke-width='.9' stroke-linecap='round'%3E%3Cpath d='M13 7 10 2.6M14 7 14.6 2.2M15 7 18.4 2.8M13 7 10 11.4M14 7 14.6 11.8M15 7 18.4 11.2M20.6 5.2 23.6 2.4M21 6 24.8 4.6'/%3E%3C/g%3E%3Cg fill='%233a2418'%3E%3Cellipse cx='8' cy='7' rx='4.2' ry='3'/%3E%3Cellipse cx='14' cy='7' rx='2.4' ry='1.8'/%3E%3Ccircle cx='19.2' cy='6.6' r='2.2'/%3E%3C/g%3E%3C/svg%3E") 0 0 / 34px 14px repeat-x;
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-motion="off"]).theme-is-picnic .top-bar::after {
+    left: -34px;
+    animation: picnic-ants 1.8s linear infinite;
+  }
+}
+@keyframes picnic-ants {
+  to {
+    transform: translateX(34px);
+  }
+}
+
+/* Vaporwave: the sun and the grid sit along the foot of the window (its
+   picture), page titles are in wide-spaced italic capitals with a cyan
+   shadow, and every dialog is a window from a 1998 computer, a navy to
+   blue title bar across its top and bevelled grey edges. */
+.theme-is-vaporwave body::before {
+  background-position: center bottom, 0 0;
+  background-repeat: no-repeat;
+}
+.theme-is-vaporwave h1,
+.theme-is-vaporwave .wordmark {
+  color: #5b1a78;
+  font-family: var(--font-heading);
+  font-style: italic;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-shadow: 2px 2px 0 #7ff3f8;
+}
+.theme-is-vaporwave .top-bar + main h1 {
+  text-transform: uppercase;
+}
+.theme-is-vaporwave[data-section="book"] .top-bar + main h1 {
+  letter-spacing: 0.06em;
+  text-transform: none;
+}
+.theme-is-vaporwave [data-slot="dialog-content"] {
+  padding-top: 2.75rem;
+  border: 2px solid;
+  border-color: #ffffff #7a7a7a #7a7a7a #ffffff;
+  background: linear-gradient(90deg, #000080, #1084d0) 0 0 / 100% 1.6rem no-repeat, var(--popover);
+}
+.theme-is-vaporwave [data-slot="dialog-content"] > [data-slot="dialog-close"] {
+  top: 0.2rem;
+  color: #ffffff;
+}
+
+/* Bowling Alley: the carpet is the page (its picture); page titles in
+   cyan neon, and every card ringed in pink neon. */
+.theme-is-bowling-alley h1,
+.theme-is-bowling-alley .wordmark {
+  color: #8ff7ff;
+  font-family: var(--font-heading);
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  text-shadow: 0 0 8px rgb(57 240 255 / 0.7), 2px 2px 0 #ff4fd8;
+}
+.theme-is-bowling-alley .surface {
+  border-color: rgb(255 79 216 / 0.6);
+}
+.theme-is-bowling-alley a.surface:hover {
+  border-color: #39f0ff;
+}
+:root[data-theme="bowling-alley"]:not([data-cards="flat"]) {
+  --surface-shadow: 0 0 16px rgb(255 79 216 / 0.22);
+}
+
+/* Lava Lamp: blobs of orange and pink wax rise up the right side of the
+   window, very slowly, while animations are on. They come round again
+   from the foot, so they never run out. */
+.theme-is-lava-lamp body::after {
+  content: "";
+  position: fixed;
+  right: 0;
+  bottom: -100vh;
+  z-index: -1;
+  width: min(15rem, 32vw);
+  height: 200vh;
+  background:
+    radial-gradient(38% 8% at 62% 82%, rgb(255 138 61 / 0.42), rgb(255 138 61 / 0) 70%),
+    radial-gradient(30% 6% at 34% 58%, rgb(255 94 168 / 0.36), rgb(255 94 168 / 0) 70%),
+    radial-gradient(34% 7% at 70% 34%, rgb(255 138 61 / 0.36), rgb(255 138 61 / 0) 70%),
+    radial-gradient(26% 5% at 40% 10%, rgb(255 94 168 / 0.32), rgb(255 94 168 / 0) 70%);
+  background-size: 100% 100vh;
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-motion="off"]).theme-is-lava-lamp body::after {
+    animation: lava-rise 70s linear infinite;
+  }
+}
+@keyframes lava-rise {
+  to {
+    transform: translateY(-100vh);
+  }
+}
+.theme-is-lava-lamp h1 {
+  font-family: var(--font-heading);
+  font-variation-settings: "SOFT" 100, "WONK" 1;
+  font-weight: 700;
+}
+
+/* Gothic: red dripping from the foot of the top bar, and page titles in
+   blackletter. */
+.theme-is-gothic .top-bar {
+  border-bottom: 3px solid #8a0a1e;
+}
+.theme-is-gothic .top-bar::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  height: 1.5rem;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 24'%3E%3Cpath d='M0 0H180V3C172 3 171 6 171 10C171 13 169 14 167.5 14C166 14 164 13 164 10C164 6 162 3 150 3C138 3 136 5 136 16C136 20 134 22 132 22C130 22 128 20 128 16C128 6 126 3 110 3C96 3 95 5 95 7C95 9 93.5 10 92 10C90.5 10 89 9 89 7C89 4 86 3 70 3C56 3 54 6 54 12C54 15 52.5 17 50.5 17C48.5 17 47 15 47 12C47 6 45 3 30 3C18 3 16 4 16 6C16 8 14.8 9 13.5 9C12.2 9 11 8 11 6C11 4 9 3 0 3Z' fill='%238a0a1e'/%3E%3C/svg%3E") 0 0 / 180px 1.5rem repeat-x;
+  pointer-events: none;
+}
+.theme-is-gothic h1,
+.theme-is-gothic .wordmark {
+  font-family: var(--font-fraktur), "UnifrakturMaguntia", Georgia, serif;
+  font-weight: 400;
+  letter-spacing: 0.01em;
 }
 
 /* ── Reading preferences ───────────────────────────────────────────────────

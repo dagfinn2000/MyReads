@@ -66,11 +66,12 @@ server.
 
 **Make it yours**
 
-- 150 colour themes, as many dark as light and sorted by kind, some
+- 190 colour themes, as many dark as light and sorted by kind, some
   under glass, some with a picture or a font of their own, and ones for
-  colour blindness and for reading in bed. Thirty-one restyle the whole app:
-  a 1995 desktop, Windows, the Mac, Android, the Linux desktops, a code
-  editor, a card catalogue, a comic book and more.
+  colour blindness, low vision and reading in bed. Thirty-six restyle the
+  whole app: a 1995 desktop, Windows, the Mac, Android, the Linux
+  desktops, a code editor, a station's departures board, teletext, a card
+  catalogue, a comic book and more.
 - 26 background textures. On some of them rain falls, snow drifts or
   stars twinkle.
 - A theme for one device or one part of the app, and your own CSS.

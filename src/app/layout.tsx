@@ -5,6 +5,7 @@ import "./restyles.css";
 import localFont from "next/font/local";
 import {
   Architects_Daughter,
+  Atkinson_Hyperlegible,
   Bangers,
   Cabin,
   Courier_Prime,
@@ -107,6 +108,15 @@ const fraunces = Fraunces({
   variable: "--font-fraunces",
   preload: false,
 });
+// Atkinson Hyperlegible, drawn by the Braille Institute for readers with
+// low vision, for the Hyperlegible themes.
+const hyperlegible = Atkinson_Hyperlegible({
+  weight: ["400", "700"],
+  style: ["normal", "italic"],
+  subsets: ["latin"],
+  variable: "--font-hyperlegible",
+  preload: false,
+});
 // DotGothic16 is a Japanese face, which Google Fonts serves in 120-odd
 // slices; through next/font/google each slice was a rule in the CSS every
 // page loads (94 KB of it, for one theme). This is the Latin slice alone
@@ -179,6 +189,7 @@ export default async function RootLayout({
         ubuntuSans.variable,
         cabin.variable,
         fraunces.variable,
+        hyperlegible.variable,
         pixel.variable,
         setting?.kind === "fixed" && THEME_CLASS_PREFIX + setting.id,
         dark && "dark",

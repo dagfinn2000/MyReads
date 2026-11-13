@@ -246,8 +246,9 @@ The reading room's files:
 - **A few themes restyle everything.** Desktop 95, Terminal, Newsprint,
   Blueprint, Notebook, Quest, Pinstripe, Aero, Golden Gate, KDE Plasma,
   GNOME, Hyprland, Fluent, visionOS, Porcelain, Material You, Mojave,
-  Big Sur, Ventura, Luna, Metro, Card Catalogue, Comic, Editor, Ubuntu
-  and Haiku start from a colour block like any theme, and [restyles.css](../src/app/restyles.css) reshapes the
+  Big Sur, Ventura, Luna, Metro, Card Catalogue, Comic, Editor, Ubuntu,
+  Haiku, Bitmap, Dot Matrix, 8-Bit, Departures and Teletext start from a
+  colour block like any theme, and [restyles.css](../src/app/restyles.css) reshapes the
   app for them, one section per theme. A theme's other side shares its
   section (Graphite with Porcelain, Terminal Light with Terminal,
   Whiteprint with Blueprint, Newsprint Dark and Notebook Dark with
@@ -363,6 +364,13 @@ The reading room's files:
   muted text to read on it. Metro colours the library's tiles by their place in the
   grid; each tile sits in a wrapper (`.card-in`), so the rule counts the
   wrapper (`:nth-child(8n + 2) > .surface`), not the tile.
+  The pictures of Balloons, Lemon Tree, Dunes, Poppies, Deep Sea,
+  Constellations, Vaporwave and Bowling Alley all come from
+  [scene-pictures.mjs](../scripts/scene-pictures.mjs), seeded the same
+  way. The scenes keep to an edge or a corner of the window, where the
+  page's margin is, because the selects and the tab bar are see-through
+  and a picture behind them crowds the controls; Bowling Alley's carpet
+  is a tile, kept dim enough to read over.
 - **A theme is retired, never just deleted.** Take out its block and
   entry and add it to `RETIRED_THEMES` in
   [themes.ts](../src/lib/themes.ts) with the theme that replaces it, of
