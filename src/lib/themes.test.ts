@@ -9,6 +9,7 @@ import {
   THEME_CLASS_PREFIX,
   THEME_INIT_SCRIPT,
   THEME_BACKGROUNDS,
+  THEME_CATEGORIES,
   THEME_STORAGE_KEY,
   THEMES,
   applyThemeSetting,
@@ -17,6 +18,8 @@ import {
   sectionOf,
   serializeThemeSetting,
   syncPageTheme,
+  themeLine,
+  themesOfCategory,
 } from "@/lib/themes";
 
 describe("parseThemeSetting", () => {
@@ -184,6 +187,80 @@ describe("THEMES", () => {
     const first = THEMES.findIndex((t) => t.silly);
     expect(first).toBeGreaterThan(0);
     expect(THEMES.slice(first).every((t) => t.silly)).toBe(true);
+  });
+
+  it("has as many dark themes as light ones, the Silly set aside", () => {
+    const count = (mode: string) => THEMES.filter((t) => t.mode === mode && !t.silly).length;
+    expect(count("dark")).toBe(count("light"));
+  });
+
+  it("sorts every theme into a kind, the Silly set into its own", () => {
+    const kinds = THEME_CATEGORIES.map((c) => c.id);
+    for (const t of THEMES) {
+      expect(kinds, t.id).toContain(t.category);
+      expect(t.category === "silly", t.id).toBe(!!t.silly);
+    }
+    // Each kind has themes, and the menu shows each theme exactly once.
+    const shown = kinds.flatMap((kind) => themesOfCategory(THEMES, kind));
+    for (const kind of kinds) expect(themesOfCategory(THEMES, kind).length, kind).toBeGreaterThan(0);
+    expect(shown.map((t) => t.id).sort()).toEqual(THEMES.map((t) => t.id).sort());
+    expect(THEME_CATEGORIES.at(-1)?.id).toBe("silly");
+  });
+
+  it("shows a kind's light themes before its dark ones", () => {
+    for (const { id } of THEME_CATEGORIES) {
+      const modes = themesOfCategory(THEMES, id).map((t) => t.mode);
+      expect(modes.join(" "), id).toMatch(/^(light ?)*(dark ?)*$/);
+    }
+  });
+
+  it("names the theme under the pointer, with its note", () => {
+    expect(themeLine({ ...THEMES[0], note: undefined })).toBe("Light theme");
+    expect(themeLine(THEMES.find((t) => t.id === "whiteprint")!)).toBe("Light theme · the light side of Blueprint");
+    const silly = THEMES.find((t) => t.silly)!;
+    expect(themeLine(silly)).toBe(silly.silly);
+  });
+
+  it("keeps every trace of blue out of Night Light", () => {
+    // Its palette, and the amber it gives the app's other colours.
+    const rule = css.match(/\.theme-is-night-light \{([^}]*)\}/)?.[1] ?? "";
+    const colours = [...(blocks.get("night-light") ?? "").matchAll(/#[0-9a-f]{6}\b/gi), ...rule.matchAll(/#[0-9a-f]{6}\b/gi)].map((m) => m[0]);
+    expect(colours.length).toBeGreaterThan(100);
+    for (const c of colours) expect(c.slice(5).toLowerCase(), c).toBe("00");
+  });
+
+  it("gives the other side of a restyled theme every rule the first one has", () => {
+    const pairs = [
+      ["terminal", "terminal-light", "restyles.css"],
+      ["blueprint", "whiteprint", "restyles.css"],
+      ["newsprint", "newsprint-dark", "restyles.css"],
+      ["notebook", "notebook-dark", "restyles.css"],
+      ["e-paper", "e-paper-dark", "globals.css"],
+    ];
+    // Every selector in each file, read once.
+    const all = new Map<string, string[]>();
+    for (const file of new Set(pairs.map((p) => p[2]))) {
+      const text = readFileSync(path.resolve(__dirname, "../app", file), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+      all.set(
+        file,
+        [...text.matchAll(/([^{};]+)\{/g)].flatMap((m) => m[1].split(",")).map((s) => s.trim()),
+      );
+    }
+    for (const [first, second, file] of pairs) {
+      const selectors = (id: string) => {
+        const name = `theme-is-${id}(?![\\w-])|data-theme="${id}"`;
+        const one = new RegExp(name);
+        const every = new RegExp(name, "g");
+        return all
+          .get(file)!
+          .filter((s) => one.test(s))
+          .map((s) => s.replace(every, "X"));
+      };
+      const theirs = new Set(selectors(second));
+      expect(theirs.size, second).toBeGreaterThan(5);
+      // The second may have rules of its own (its colours), never fewer.
+      expect(selectors(first).filter((s) => !theirs.has(s)), second).toEqual([]);
+    }
   });
 });
 

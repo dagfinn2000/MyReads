@@ -66,8 +66,9 @@ server.
 
 **Make it yours**
 
-- 108 colour themes, as many dark as light, some under glass, some with
-  a picture or a font of their own. Twenty-seven restyle the whole app:
+- 124 colour themes, as many dark as light and sorted by kind, some
+  under glass, some with a picture or a font of their own, and ones for
+  colour blindness and for reading in bed. Thirty-one restyle the whole app:
   a 1995 desktop, Windows, the Mac, Android, the Linux desktops, a code
   editor, a card catalogue, a comic book and more.
 - 26 background textures. On some of them rain falls, snow drifts or
@@ -135,7 +136,7 @@ lamplight, each with a room added upstairs.
 
 ![The reading room as a castle in winter, in a dark theme](docs/room-dark.png)
 
-**Themes**: a dark theme, and the theme picker (here on Macaron).
+**Themes**: a dark theme, and the theme picker, sorted by kind (here on Frost).
 
 ![Library in a dark theme](docs/library-dark.png)
 

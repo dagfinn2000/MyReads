@@ -1,15 +1,8 @@
 "use client";
 
 import { useState, type KeyboardEvent } from "react";
-import { THEMES, type ThemeDef } from "@/lib/themes";
+import { THEME_CATEGORIES, THEMES, themeLine, themesOfCategory, type ThemeDef } from "@/lib/themes";
 import { cn } from "@/lib/utils";
-
-/** The groups the swatches come in, each under its heading. */
-const GROUPS: { label: string; hint?: string; has: (t: ThemeDef) => boolean }[] = [
-  { label: "Light", has: (t) => t.mode === "light" && !t.silly },
-  { label: "Dark", has: (t) => t.mode === "dark" && !t.silly },
-  { label: "Silly", hint: "not recommended", has: (t) => !!t.silly },
-];
 
 /** Moves focus to the next swatch in the arrow's direction: along the row,
  *  or to the nearest one in the row above or below. */
@@ -41,9 +34,10 @@ function move(e: KeyboardEvent<HTMLDivElement>) {
 }
 
 /**
- * Themes as small round swatches, eight to a row, under Light, Dark and
- * Silly headings: the theme's page colour (and pattern, if it has one)
- * with its accent as a dot. Names don't fit under swatches this small, so
+ * Themes as small round swatches, eight to a row, under a heading for
+ * each kind of theme (THEME_CATEGORIES), the light ones first and then
+ * the dark: the theme's page colour (and pattern, if it has one) with its
+ * accent as a dot. Names don't fit under swatches this small, so
  * the lines above them name the swatch under the pointer or the keyboard
  * (and tell a silly one's joke), and otherwise show `caption`, what's
  * chosen now. On a phone a tap picks the theme, and the lines then name
@@ -74,7 +68,7 @@ export function ThemeSwatches({
         <p className="truncate text-sm font-medium">{shown?.name ?? caption}</p>
         <p className="truncate text-xs text-muted-foreground">
           {shown ? (
-            (shown.silly ?? `${shown.mode === "light" ? "Light" : "Dark"} theme`)
+            themeLine(shown)
           ) : (
             <>
               <span className="pointer-coarse:hidden">Point at a colour for its name</span>
@@ -83,14 +77,14 @@ export function ThemeSwatches({
           )}
         </p>
       </div>
-      {GROUPS.map((group) => {
-        const members = themes.filter(group.has);
+      {THEME_CATEGORIES.map((group) => {
+        const members = themesOfCategory(themes, group.id);
         if (members.length === 0) return null;
         return (
-          <div key={group.label}>
+          <div key={group.id}>
             <p className="mt-2 mb-1 px-0.5 text-xs text-muted-foreground">
               <span className="font-medium text-foreground">{group.label}</span>
-              {group.hint && ` · ${group.hint}`}
+              {"hint" in group && ` · ${group.hint}`}
             </p>
             <div className="grid grid-cols-8 gap-1.5">
               {members.map((t) => (
