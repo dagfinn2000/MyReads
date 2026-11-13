@@ -444,7 +444,7 @@ tab goes away. You can also keep the house and leave the avatar out.
 
 ## Look and feel
 
-- 92 colour themes, 40 light, 40 dark and the Silly set, or a light
+- 108 colour themes, 48 light, 48 dark and the Silly set, or a light
   and a dark one that switch with your
   device, with an accent colour of your own on top if you like. Your
   choice follows you to every device you sign in on, unless you give one
@@ -534,6 +534,32 @@ tab goes away. You can also keep the house and leave the avatar out.
     (a dark green meadow at night with fireflies glowing up and fading
     in the lower part of the window; with Animations off they simply
     glow).
+- Sixteen calm ones, eight light and eight dark, with nothing behind the
+  page but soft light and colour:
+  - Under glass. Every card, library tile, menu and dialog, and the top
+    bar, is a pane of glass over soft light. Light: Frost (milky glass
+    on a cold blue morning sky, frost creeping in from each pane's
+    edges), Daybreak (clear glass on a sky going from lavender overhead
+    to peach at the foot, the panes catching that warm light along
+    their lower edge), Rose Quartz (rose-tinted glass with a bevelled
+    edge on blush and lilac) and Prism (clear glass in a white room,
+    with a faint band of rainbow light across the top right corner and
+    the spectrum caught along the top of every pane). Dark: Midnight
+    (frosted glass on a deep blue night with soft blue and violet
+    glows), Smoke (darker, smoked glass on warm charcoal with an amber
+    glow low in the corner), Dusk (clear glass on a sky going from
+    indigo to plum and a last ember glow at the foot) and Emerald
+    (green glass on deep green).
+  - Light, each with a touch of its own: Celadon (a grey-green glaze,
+    every card glossy along its top), Letterpress (cotton paper, every
+    card pressed into the sheet, moss green ink and serif headings),
+    Pebble (warm stone grey, very round cards shaded like river stones)
+    and Meadow (pale grass green with cornflower blue cards).
+  - Dark: Velvet (wine red with a sheen across every card, headings in
+    Playfair Display), Copper (deep verdigris, every card edged in
+    copper), Carbon (near black, every card drawn in a line of light
+    that fades from its top edge to coral at its foot) and Cocoa (a warm
+    chocolate brown with soft headings and sky blue for what is chosen).
 - The Silly set, listed apart at the bottom of the palette menu as "not
   recommended": Blue Screen, Glowstick, Hot Dog Stand, Toxic, Desktop 95,
   Under Construction (a hazard-striped top bar and Comic Sans), Ugly
@@ -818,7 +844,8 @@ tab goes away. You can also keep the house and leave the avatar out.
   Ink Wash's mountains, Comic's dots, Notebook's ruled page,
   Noir's blind, Fernery's ferns, Ubuntu's ribbons, Haiku's blue,
   Sunroom's sunlight, Rooftops' roofs, Eclipse's sky, Lamplight's lamp,
-  Fireflies' meadow,
+  Fireflies' meadow, the soft skies behind the glass themes, Meadow's
+  sunlight, Cocoa's warmth,
   Party's confetti, Quest's night sky and the rest) shows it whatever background you picked, and
   Preferences says so under Background. Your background comes back when
   you pick another theme.
