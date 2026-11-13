@@ -243,7 +243,7 @@
     --heading-font: var(--font-literata), ui-serif, Georgia, serif;
 }
 
-/* The colour pairs (Bordeaux to Mulberry in dark, Rhubarb to Canyon in
+/* The colour pairs (Bordeaux to Fig in dark, Rhubarb to Wisteria in
    light) pair a page with an accent from across the colour wheel, where
    the other themes keep the accent close to the page's own hue (or
    neutral). Each pairing is one that works in rooms and on book jackets
@@ -508,6 +508,187 @@
     --border: #43204a;
     --input: #43204a;
     --ring: #8ccfff;
+}
+
+/* Chestnut brown with rose pink, a box of chocolates and its ribbon.
+   Danger is gold, as pink is the accent. */
+[data-theme="chestnut"] {
+    --background: #462900;
+    --foreground: #fefdfc;
+    --card: #553200;
+    --card-foreground: #fefdfc;
+    --popover: #553200;
+    --popover-foreground: #fefdfc;
+    --primary: #ffadc0;
+    --primary-foreground: #462900;
+    --secondary: #5d3600;
+    --secondary-foreground: #fefdfc;
+    --muted: #5d3600;
+    --muted-foreground: #d2cac0;
+    --accent: #5d3600;
+    --accent-foreground: #fefdfc;
+    --destructive: #ffd166;
+    --border: #744400;
+    --input: #744400;
+    --ring: #ffadc0;
+}
+
+/* Cranberry red with periwinkle, a winter berry under a cold blue sky.
+   Danger is amber, as red is the page. */
+[data-theme="cranberry"] {
+    --background: #571a28;
+    --foreground: #fcf8f8;
+    --card: #631e2d;
+    --card-foreground: #fcf8f8;
+    --popover: #631e2d;
+    --popover-foreground: #fcf8f8;
+    --primary: #b4bcff;
+    --primary-foreground: #571a28;
+    --secondary: #691f30;
+    --secondary-foreground: #fcf8f8;
+    --muted: #691f30;
+    --muted-foreground: #d4c3c6;
+    --accent: #691f30;
+    --accent-foreground: #fcf8f8;
+    --destructive: #ffc46b;
+    --border: #7a2538;
+    --input: #7a2538;
+    --ring: #b4bcff;
+}
+
+/* Dusky rosewood with lemon yellow, the quince fruit and its old wood. */
+[data-theme="quince"] {
+    --background: #3e2a2d;
+    --foreground: #fdfafa;
+    --card: #4a3236;
+    --card-foreground: #fdfafa;
+    --popover: #4a3236;
+    --popover-foreground: #fdfafa;
+    --primary: #f2e46b;
+    --primary-foreground: #3e2a2d;
+    --secondary: #4c3337;
+    --secondary-foreground: #fdfafa;
+    --muted: #4c3337;
+    --muted-foreground: #cfc8c9;
+    --accent: #4c3337;
+    --accent-foreground: #fdfafa;
+    --destructive: #ffa385;
+    --border: #593d41;
+    --input: #593d41;
+    --ring: #f2e46b;
+}
+
+/* Dusky violet with mint, a thistle head and its leaves. */
+[data-theme="thistle"] {
+    --background: #36274e;
+    --foreground: #f9f8fc;
+    --card: #3f2e5c;
+    --card-foreground: #f9f8fc;
+    --popover: #3f2e5c;
+    --popover-foreground: #f9f8fc;
+    --primary: #8eeec4;
+    --primary-foreground: #36274e;
+    --secondary: #412f5d;
+    --secondary-foreground: #f9f8fc;
+    --muted: #412f5d;
+    --muted-foreground: #cac6d2;
+    --accent: #412f5d;
+    --accent-foreground: #f9f8fc;
+    --destructive: #ffa385;
+    --border: #4b366d;
+    --input: #4b366d;
+    --ring: #8eeec4;
+}
+
+/* Forest green with apricot, ripe fruit among the leaves. Danger is pink-
+   red, as orange is the accent. */
+[data-theme="orchard"] {
+    --background: #103a1c;
+    --foreground: #fafdfb;
+    --card: #124220;
+    --card-foreground: #fafdfb;
+    --popover: #124220;
+    --popover-foreground: #fafdfb;
+    --primary: #ffbe8a;
+    --primary-foreground: #103a1c;
+    --secondary: #154c25;
+    --secondary-foreground: #fafdfb;
+    --muted: #154c25;
+    --muted-foreground: #c2cec5;
+    --accent: #154c25;
+    --accent-foreground: #fafdfb;
+    --destructive: #ffa3b4;
+    --border: #1a5e2d;
+    --input: #1a5e2d;
+    --ring: #ffbe8a;
+}
+
+/* Petrol blue with orchid pink, a sea anemone in deep water. Danger is
+   amber. */
+[data-theme="anemone"] {
+    --background: #103545;
+    --foreground: #f9fbfc;
+    --card: #123d4f;
+    --card-foreground: #f9fbfc;
+    --popover: #123d4f;
+    --popover-foreground: #f9fbfc;
+    --primary: #f2a9e6;
+    --primary-foreground: #103545;
+    --secondary: #144358;
+    --secondary-foreground: #f9fbfc;
+    --muted: #144358;
+    --muted-foreground: #c1cbd0;
+    --accent: #144358;
+    --accent-foreground: #f9fbfc;
+    --destructive: #ffbf6b;
+    --border: #19526a;
+    --input: #19526a;
+    --ring: #f2a9e6;
+}
+
+/* Indigo with chartreuse, a glow-worm on a summer night. */
+[data-theme="indigo"] {
+    --background: #232d54;
+    --foreground: #f9f9fc;
+    --card: #293562;
+    --card-foreground: #f9f9fc;
+    --popover: #293562;
+    --popover-foreground: #f9f9fc;
+    --primary: #d0ec6a;
+    --primary-foreground: #232d54;
+    --secondary: #2a3664;
+    --secondary-foreground: #f9f9fc;
+    --muted: #2a3664;
+    --muted-foreground: #c6c8d4;
+    --accent: #2a3664;
+    --accent-foreground: #f9f9fc;
+    --destructive: #ffa385;
+    --border: #313e74;
+    --input: #313e74;
+    --ring: #d0ec6a;
+}
+
+/* Plum with coral, a fig split open. Danger is gold, as coral is the
+   accent. */
+[data-theme="fig"] {
+    --background: #412638;
+    --foreground: #fdfafc;
+    --card: #4e2e43;
+    --card-foreground: #fdfafc;
+    --popover: #4e2e43;
+    --popover-foreground: #fdfafc;
+    --primary: #ff9e80;
+    --primary-foreground: #412638;
+    --secondary: #4f2e44;
+    --secondary-foreground: #fdfafc;
+    --muted: #4f2e44;
+    --muted-foreground: #d0c7cd;
+    --accent: #4f2e44;
+    --accent-foreground: #fdfafc;
+    --destructive: #ffd166;
+    --border: #5e3751;
+    --input: #5e3751;
+    --ring: #ff9e80;
 }
 
 /* The next ten differ in kind rather than hue: two duotones (Blueprint,
@@ -1650,6 +1831,185 @@
     --border: #d8ae8d;
     --input: #d8ae8d;
     --ring: #0b5a5e;
+}
+
+/* Sky blue with forest green, a clear day over the pines. */
+[data-theme="alpine"] {
+    --background: #90cfe4;
+    --foreground: #050b0d;
+    --card: #cde9f3;
+    --card-foreground: #050b0d;
+    --popover: #cde9f3;
+    --popover-foreground: #050b0d;
+    --primary: #1d5534;
+    --primary-foreground: #ffffff;
+    --secondary: #78c8e2;
+    --secondary-foreground: #050b0d;
+    --muted: #78c8e2;
+    --muted-foreground: #2b4047;
+    --accent: #78c8e2;
+    --accent-foreground: #050b0d;
+    --destructive: #972119;
+    --border: #65bedc;
+    --input: #65bedc;
+    --ring: #1d5534;
+}
+
+/* Mint green with chocolate brown, the ice cream. */
+[data-theme="mint-chocolate"] {
+    --background: #a4d1ac;
+    --foreground: #050d07;
+    --card: #d6eada;
+    --card-foreground: #050d07;
+    --popover: #d6eada;
+    --popover-foreground: #050d07;
+    --primary: #5a3218;
+    --primary-foreground: #ffffff;
+    --secondary: #90cc9a;
+    --secondary-foreground: #050d07;
+    --muted: #90cc9a;
+    --muted-foreground: #304234;
+    --accent: #90cc9a;
+    --accent-foreground: #050d07;
+    --destructive: #972119;
+    --border: #80c28c;
+    --input: #80c28c;
+    --ring: #5a3218;
+}
+
+/* Cornflower blue with claret, a summer field and a glass of wine. Danger
+   is burnt orange, as red is the accent. */
+[data-theme="cornflower"] {
+    --background: #a2c8f0;
+    --foreground: #04080c;
+    --card: #d5e6f8;
+    --card-foreground: #04080c;
+    --popover: #d5e6f8;
+    --popover-foreground: #04080c;
+    --primary: #7a1430;
+    --primary-foreground: #ffffff;
+    --secondary: #89bbef;
+    --secondary-foreground: #04080c;
+    --muted: #89bbef;
+    --muted-foreground: #2f3c4a;
+    --accent: #89bbef;
+    --accent-foreground: #04080c;
+    --destructive: #863400;
+    --border: #74aeeb;
+    --input: #74aeeb;
+    --ring: #7a1430;
+}
+
+/* Dusty rose with cobalt, the two colours one hydrangea bush can bloom in. */
+[data-theme="hydrangea"] {
+    --background: #edb2ba;
+    --foreground: #080304;
+    --card: #f7dce0;
+    --card-foreground: #080304;
+    --popover: #f7dce0;
+    --popover-foreground: #080304;
+    --primary: #1f3a9e;
+    --primary-foreground: #ffffff;
+    --secondary: #eb9ba6;
+    --secondary-foreground: #080304;
+    --muted: #eb9ba6;
+    --muted-foreground: #463235;
+    --accent: #eb9ba6;
+    --accent-foreground: #080304;
+    --destructive: #932018;
+    --border: #e58794;
+    --input: #e58794;
+    --ring: #1f3a9e;
+}
+
+/* Dry-grass khaki with blue-violet, crocuses coming up through last year's
+   lawn. */
+[data-theme="crocus"] {
+    --background: #c5c7a2;
+    --foreground: #080803;
+    --card: #e5e6d5;
+    --card-foreground: #080803;
+    --popover: #e5e6d5;
+    --popover-foreground: #080803;
+    --primary: #3a2a96;
+    --primary-foreground: #ffffff;
+    --secondary: #bec18f;
+    --secondary-foreground: #080803;
+    --muted: #bec18f;
+    --muted-foreground: #3b3c2e;
+    --accent: #bec18f;
+    --accent-foreground: #080803;
+    --destructive: #972119;
+    --border: #b3b680;
+    --input: #b3b680;
+    --ring: #3a2a96;
+}
+
+/* Heather mauve with navy, a moor under a darkening sky. */
+[data-theme="heather"] {
+    --background: #d0bdcd;
+    --foreground: #090308;
+    --card: #eae1e9;
+    --card-foreground: #090308;
+    --popover: #eae1e9;
+    --popover-foreground: #090308;
+    --primary: #1a2b66;
+    --primary-foreground: #ffffff;
+    --secondary: #c8abc4;
+    --secondary-foreground: #090308;
+    --muted: #c8abc4;
+    --muted-foreground: #3f353d;
+    --accent: #c8abc4;
+    --accent-foreground: #090308;
+    --destructive: #932018;
+    --border: #bc9eb8;
+    --input: #bc9eb8;
+    --ring: #1a2b66;
+}
+
+/* Sea grey-green with plum, sloes on a blackthorn hedge by the coast. */
+[data-theme="sloe"] {
+    --background: #afcbc8;
+    --foreground: #040b0a;
+    --card: #dbe8e6;
+    --card-foreground: #040b0a;
+    --popover: #dbe8e6;
+    --popover-foreground: #040b0a;
+    --primary: #5e1f4f;
+    --primary-foreground: #ffffff;
+    --secondary: #9cc4c0;
+    --secondary-foreground: #040b0a;
+    --muted: #9cc4c0;
+    --muted-foreground: #323f3d;
+    --accent: #9cc4c0;
+    --accent-foreground: #040b0a;
+    --destructive: #972119;
+    --border: #8eb9b4;
+    --input: #8eb9b4;
+    --ring: #5e1f4f;
+}
+
+/* Lavender with spruce green, wisteria and its leaves over a garden wall.
+   Bluer than Lilac. */
+[data-theme="wisteria"] {
+    --background: #c3bdef;
+    --foreground: #05040c;
+    --card: #e4e1f8;
+    --card-foreground: #05040c;
+    --popover: #e4e1f8;
+    --popover-foreground: #05040c;
+    --primary: #134a3c;
+    --primary-foreground: #ffffff;
+    --secondary: #afa6ec;
+    --secondary-foreground: #05040c;
+    --muted: #afa6ec;
+    --muted-foreground: #383649;
+    --accent: #afa6ec;
+    --accent-foreground: #05040c;
+    --destructive: #932018;
+    --border: #9d93e6;
+    --input: #9d93e6;
+    --ring: #134a3c;
 }
 
 /* Black on white with black outlines on every card, field and chip: High

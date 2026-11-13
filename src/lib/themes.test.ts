@@ -223,7 +223,7 @@ describe("THEMES", () => {
 
   it("names the two colours of every colour pair, each pairing once", () => {
     const pairs = THEMES.filter((t) => t.category === "pairs");
-    expect(pairs.length).toBeGreaterThanOrEqual(21);
+    expect(pairs.length).toBeGreaterThanOrEqual(37);
     for (const t of pairs) expect(t.note, t.id).toMatch(/^[\w -]+ and [\w -]+$/);
     expect(new Set(pairs.map((t) => t.note)).size).toBe(pairs.length);
     expect(themeLine(THEMES.find((t) => t.id === "woodblock")!)).toBe("Dark theme · Prussian blue and vermilion");
