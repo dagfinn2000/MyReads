@@ -1568,14 +1568,14 @@ export const SECTIONS = [
 
 /**
  * The section a path is in, or "" outside them (the sign-in pages). Add
- * book and Check count as the library; a book's page and its edit page as
+ * book, Check and Tidy up count as the library; a book's page and its edit page as
  * "book". Self-contained, like applyThemeSetting below: the pre-paint
  * script runs its source.
  */
 export function sectionOf(pathname: string): string {
   const parts = pathname.split("/");
   if (parts[1] === "books") {
-    return parts[2] && parts[2] !== "new" && parts[2] !== "check" ? "book" : "library";
+    return parts[2] && parts[2] !== "new" && parts[2] !== "check" && parts[2] !== "tidy" ? "book" : "library";
   }
   return ["series", "authors", "stats", "reading", "quotes", "room", "account"].indexOf(parts[1]) > -1
     ? parts[1]

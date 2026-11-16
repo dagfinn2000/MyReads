@@ -222,6 +222,15 @@ page by page.
   the whole library. With nothing typed it lists the books you're
   reading and every page. When no title matches, the author or series
   comes first, so "le guin" lands on Ursula K. Le Guin.
+- **Tidy up** (beside Add book in the library) lists the books that could
+  use a little care: ones that look like the same book twice (the same
+  ISBN, or the same title by the same writer), books on Currently Reading
+  with nothing logged for two months, missing covers, page counts and
+  authors, and reads without a finish date. Put a forgotten book down or
+  back on the pile from there, or leave anything alone and it stops
+  showing. **Fill from the catalogues** looks up every book with an ISBN
+  and fills in its cover and page count where they're missing, never
+  replacing what you set.
 - Search, filter, sort and group the library. Authors sort by surname, the
   way a bookshelf is filed. More filters also finds books by page count
   ("up to 300 pages"), the year they came out, and when you added them

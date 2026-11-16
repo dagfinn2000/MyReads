@@ -61,6 +61,7 @@ import { parsePartThemes, type PartThemes } from "@/lib/themes";
 import { parseCustomStatuses, parseStatusNames, type CustomStatus, type StatusNames } from "@/lib/statuses";
 import { parseBookFields, type BookField } from "@/lib/book-fields";
 import { parseCustomMoods, parseHiddenMoods, type CustomMood } from "@/lib/moods";
+import { parseTidySkips } from "@/lib/tidy";
 
 /**
  * Per-account preferences — everything on the Account page's Preferences
@@ -421,6 +422,9 @@ export type Preferences = {
   tagRenames: TagRename[];
   /** Imported subjects never copied as tags. */
   tagSkips: string[];
+  /** What the reader left alone on Tidy up (lib/tidy.ts): "cover:<id>",
+   *  "dup:<id>+<id>" and so on. */
+  tidySkipped: string[];
   addedAsReadFinished: AddedAsReadFinished;
   afterAdd: AfterAdd;
 
@@ -629,6 +633,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
   importTagsMode: "all",
   tagRenames: [],
   tagSkips: [],
+  tidySkipped: [],
   addedAsReadFinished: "today",
   afterAdd: "open",
   dateFormat: "d-mmm-y",
@@ -959,6 +964,7 @@ export function parsePreferences(raw: unknown): Preferences {
     ),
     tagRenames: parseTagRenames(obj.tagRenames),
     tagSkips: parseTagSkips(obj.tagSkips),
+    tidySkipped: parseTidySkips(obj.tidySkipped),
     addedAsReadFinished: pick(
       ADDED_AS_READ_FINISHED,
       obj.addedAsReadFinished,
