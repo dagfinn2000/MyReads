@@ -642,7 +642,7 @@ describe("book-page settings", () => {
     );
     const user = await prisma.user.findUniqueOrThrow({ where: { id: userId } });
     expect(user.preferences).toEqual({
-      bookPageCards: ["reading", "shelves", "history", "lending", "quotes"],
+      bookPageCards: ["reading", "shelves", "history", "lending", "quotes", "similar"],
       hiddenBookPageCards: ["lending"],
       findLinks: [{ name: "Library", url: "https://lib.example/?q={isbn}" }],
     });

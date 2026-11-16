@@ -222,6 +222,12 @@ page by page.
   way a bookshelf is filed. More filters also finds books by page count
   ("up to 300 pages"), the year they came out, and when you added them
   (in the last week, month, three months or year).
+- **More like this:** at the foot of a book's page, up to eight books from
+  your own shelves that share its genres and tags, moods or author, each
+  saying what it shares. A tag few of your books have counts for more than
+  one most of them have, books still to read come first (marked To read),
+  books you put down stay out, and a series shows one of its books. Hide
+  or move the card in Preferences, like the page's other cards.
 - **The Series page** shows every series you have, the series you're in
   the middle of first: how much of each you've read, which book is next,
   and an empty place for each number you have no book for. Open it from a

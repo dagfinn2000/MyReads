@@ -7,6 +7,7 @@ import { prisma } from "@/lib/prisma";
 import { seriesAnchor } from "@/lib/series-list";
 import { getPreferences, getSession } from "@/lib/current-user";
 import { arrangeBookCards, FORCED_CARD_NOTES, takesDropCap } from "@/lib/book-page";
+import { similarBooks } from "@/lib/similar-books";
 import { orderByIds } from "@/lib/library-order";
 import type { BookPageCard } from "@/lib/preferences";
 import {
@@ -37,6 +38,7 @@ import { ReadHistoryCard } from "@/components/read-history-card";
 import { ReadingCard } from "@/components/reading-card";
 import { StatusBadge } from "@/components/status-badge";
 import { UpNextButton } from "@/components/up-next-button";
+import { SimilarBooksCard } from "@/components/similar-books-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { equalsIgnoringCase } from "@/lib/utils";
@@ -101,7 +103,41 @@ export default async function BookDetailPage({
 
   // Sidebar data: every shelf (for the assignment card) and, if this book is
   // part of a series, its siblings ordered by series number.
-  const [allShelves, seriesBooks, upNextPlace, smartShelves] = await Promise.all([
+  // More like this: books that share a tag, a mood or an author with this
+  // one, and how many books there are (which says how rare a tag is).
+  const showSimilar =
+    !prefs.hiddenBookPageCards.includes("similar") &&
+    (book.tags.length > 0 || book.moods.length > 0 || book.authors.length > 0);
+  const similarPromise = showSimilar
+    ? Promise.all([
+        prisma.book.findMany({
+          where: {
+            userId,
+            id: { not: book.id },
+            OR: [
+              ...(book.tags.length ? [{ tags: { hasSome: book.tags } }] : []),
+              ...(book.moods.length ? [{ moods: { hasSome: book.moods } }] : []),
+              ...(book.authors.length ? [{ authors: { hasSome: book.authors } }] : []),
+            ],
+          },
+          select: {
+            id: true,
+            title: true,
+            authors: true,
+            coverUrl: true,
+            tags: true,
+            moods: true,
+            seriesName: true,
+            pageCount: true,
+            status: true,
+            rating: true,
+          },
+        }),
+        prisma.book.count({ where: { userId } }),
+      ]).then(([candidates, total]) => similarBooks(book, candidates, total))
+    : Promise.resolve([]);
+
+  const [allShelves, seriesBooks, upNextPlace, smartShelves, similar] = await Promise.all([
     shelvesPromise,
     book.seriesName
       ? prisma.book.findMany({
@@ -125,6 +161,7 @@ export default async function BookDetailPage({
       : null,
     // The smart shelves whose rules hold it.
     smartPromise.then((all) => smartShelvesHolding(userId, book.id, all, prefs)),
+    similarPromise,
   ]);
 
   // The reader's own fields that this book has a value for, in their order.
@@ -178,6 +215,8 @@ export default async function BookDetailPage({
         notes={book.notes}
       />
     ),
+    // Left out when nothing is alike enough.
+    similar: similar.length > 0 ? <SimilarBooksCard similar={similar} prefs={prefs} /> : null,
   };
   const arranged = arrangeBookCards(prefs, {
     reading: book.status === ReadingStatus.READING || !!book.review?.trim(),
