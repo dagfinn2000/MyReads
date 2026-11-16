@@ -277,6 +277,7 @@ describe("sectionOf", () => {
     expect(sectionOf("/books")).toBe("library");
     expect(sectionOf("/books/new")).toBe("library");
     expect(sectionOf("/books/check")).toBe("library");
+    expect(sectionOf("/books/tidy")).toBe("library");
     expect(sectionOf("/books/cm123")).toBe("book");
     expect(sectionOf("/books/cm123/edit")).toBe("book");
     expect(sectionOf("/series")).toBe("series");

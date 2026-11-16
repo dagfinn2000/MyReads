@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import type { Prisma } from "@prisma/client";
 import { ReadingStatus } from "@/lib/enums";
-import { LibraryBig, Plus } from "lucide-react";
+import { LibraryBig, Plus, Sparkles } from "lucide-react";
 import { BULK_MAX_IDS } from "@/lib/bulk";
 import { orderByIds } from "@/lib/library-order";
 import { prisma } from "@/lib/prisma";
@@ -427,12 +427,20 @@ export default async function BooksPage({
       )}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold tracking-tight">Library</h1>
-        <Button asChild>
-          <Link href="/books/new">
-            <Plus data-slot="icon" />
-            Add book
-          </Link>
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button asChild variant="ghost">
+            <Link href="/books/tidy" title="Books missing a cover or page count, maybe-duplicates and more">
+              <Sparkles data-slot="icon" />
+              Tidy up
+            </Link>
+          </Button>
+          <Button asChild>
+            <Link href="/books/new">
+              <Plus data-slot="icon" />
+              Add book
+            </Link>
+          </Button>
+        </div>
       </div>
 
       <ShelfTabs

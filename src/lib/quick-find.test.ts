@@ -131,6 +131,7 @@ describe("matchShelves and pages", () => {
     expect(matchPages(pages, "settings").map((p) => p.key)).toEqual(["account"]);
     expect(matchPages(pages, "year in").map((p) => p.href)).toEqual(["/stats/year/2026"]);
     expect(matchPages(pages, "authors").map((p) => p.key)).toContain("authors");
+    expect(matchPages(pages, "duplicates").map((p) => p.href)).toEqual(["/books/tidy"]);
   });
 });
 

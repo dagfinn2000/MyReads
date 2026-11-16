@@ -173,7 +173,7 @@ export interface QuickPage {
 }
 
 /** Every page quick find can open: the top-bar pages (a hidden one too),
- *  Preferences, and this year's review. */
+ *  Preferences, Tidy up, and this year's review. */
 export function quickPages(year: number): QuickPage[] {
   const aka: Partial<Record<string, string[]>> = {
     library: ["books", "shelves"],
@@ -191,6 +191,12 @@ export function quickPages(year: number): QuickPage[] {
       aka: aka[item] ?? [],
     })),
     { key: "account", label: "Preferences", href: "/account", aka: ["account", "settings", "theme", "backup"] },
+    {
+      key: "tidy",
+      label: "Tidy up",
+      href: "/books/tidy",
+      aka: ["clean up", "duplicates", "missing covers", "page counts"],
+    },
     { key: "year", label: `${year} in review`, href: `/stats/year/${year}`, aka: ["year in review", "wrapped"] },
   ];
 }
