@@ -664,7 +664,7 @@ describe("top-bar settings", () => {
     });
     const user = await prisma.user.findUniqueOrThrow({ where: { id: userId } });
     expect(user.preferences).toEqual({
-      navOrder: ["series", "stats", "library", "reading", "add", "check", "quotes", "room"],
+      navOrder: ["series", "stats", "library", "reading", "add", "check", "quotes", "room", "authors"],
       shownNav: ["series"],
       hiddenNav: ["check"],
     });

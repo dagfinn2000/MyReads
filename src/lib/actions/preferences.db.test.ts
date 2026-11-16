@@ -79,7 +79,7 @@ describe("savePreferences", () => {
       shownNav: ["series", "library"],
     } as unknown as Parameters<typeof savePreferences>[0]);
     expect(await storedPreferences()).toEqual({
-      navOrder: ["room", "library", "reading", "add", "check", "quotes", "stats", "series"],
+      navOrder: ["room", "library", "reading", "add", "check", "quotes", "stats", "series", "authors"],
       shownNav: ["series"],
     });
   });
