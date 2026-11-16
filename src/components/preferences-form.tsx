@@ -266,6 +266,7 @@ const STATS_LABELS: Record<HideableStat, string> = {
   challenges: "Challenges",
   heatmap: "Reading days calendar",
   habits: "Reading habits",
+  pile: "Your to-read pile",
   ratings: "Ratings",
   perYear: "Books read per year",
   tags: "Genres & tags",
