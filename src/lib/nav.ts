@@ -12,6 +12,7 @@ export const NAV_LINKS: Record<NavItem, { href: string; label: string; title: st
   stats: { href: "/stats", label: "Stats", title: "Stats" },
   room: { href: "/room", label: "Room", title: "Reading room" },
   series: { href: "/series", label: "Series", title: "Series" },
+  authors: { href: "/authors", label: "Authors", title: "Authors" },
 };
 
 /** How many links the bar was laid out for. With more, it tightens up

@@ -165,6 +165,10 @@
   content: "Series - MyReads";
   content: "Series - MyReads" / "";
 }
+.theme-is-desktop-95[data-section="authors"] .top-bar + main::before {
+  content: "Authors - MyReads";
+  content: "Authors - MyReads" / "";
+}
 .theme-is-desktop-95[data-section="stats"] .top-bar + main::before {
   content: "Stats - MyReads";
   content: "Stats - MyReads" / "";
@@ -2038,6 +2042,11 @@
   content: "MyReads  |  Drawing: Series  |  Scale 1:1  |  Sheet 1 of 1";
   content: "MyReads  |  Drawing: Series  |  Scale 1:1  |  Sheet 1 of 1" / "";
 }
+.theme-is-blueprint[data-section="authors"] .top-bar + main::after,
+.theme-is-whiteprint[data-section="authors"] .top-bar + main::after {
+  content: "MyReads  |  Drawing: Authors  |  Scale 1:1  |  Sheet 1 of 1";
+  content: "MyReads  |  Drawing: Authors  |  Scale 1:1  |  Sheet 1 of 1" / "";
+}
 .theme-is-blueprint[data-section="stats"] .top-bar + main::after,
 .theme-is-whiteprint[data-section="stats"] .top-bar + main::after {
   content: "MyReads  |  Drawing: Stats  |  Scale 1:1  |  Sheet 1 of 1";
@@ -3521,6 +3530,10 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
   content: "Series - MyReads";
   content: "Series - MyReads" / "";
 }
+.theme-is-aero[data-section="authors"] .top-bar + main::before {
+  content: "Authors - MyReads";
+  content: "Authors - MyReads" / "";
+}
 .theme-is-aero[data-section="stats"] .top-bar + main::before {
   content: "Stats - MyReads";
   content: "Stats - MyReads" / "";
@@ -4976,6 +4989,10 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
 .theme-is-kde-plasma[data-section="series"] .top-bar > div::before {
   content: "Series — MyReads";
   content: "Series — MyReads" / "";
+}
+.theme-is-kde-plasma[data-section="authors"] .top-bar > div::before {
+  content: "Authors — MyReads";
+  content: "Authors — MyReads" / "";
 }
 .theme-is-kde-plasma[data-section="stats"] .top-bar > div::before {
   content: "Stats — MyReads";
@@ -7104,6 +7121,10 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
     content: "Series · MyReads";
     content: "Series · MyReads" / "";
   }
+  .theme-is-hyprland[data-section="authors"] .top-bar > div::after {
+    content: "Authors · MyReads";
+    content: "Authors · MyReads" / "";
+  }
   .theme-is-hyprland[data-section="account"] .top-bar > div::after {
     content: "Account · MyReads";
     content: "Account · MyReads" / "";
@@ -7894,6 +7915,10 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
 .theme-is-fluent[data-section="series"]::before {
   content: "Series - MyReads";
   content: "Series - MyReads" / "";
+}
+.theme-is-fluent[data-section="authors"]::before {
+  content: "Authors - MyReads";
+  content: "Authors - MyReads" / "";
 }
 .theme-is-fluent[data-section="stats"]::before {
   content: "Stats - MyReads";
@@ -10144,6 +10169,9 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
 :is(.theme-is-mojave, .theme-is-big-sur, .theme-is-ventura)[data-section="series"] {
   --mac-title: "Series";
 }
+:is(.theme-is-mojave, .theme-is-big-sur, .theme-is-ventura)[data-section="authors"] {
+  --mac-title: "Authors";
+}
 :is(.theme-is-mojave, .theme-is-big-sur, .theme-is-ventura)[data-section="stats"] {
   --mac-title: "Stats";
 }
@@ -11535,6 +11563,18 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
     linear-gradient(#9b5de5 0 0) calc(var(--vt-u) * 12.1) calc(var(--vt-u) * 2.6) / calc(var(--vt-u) * 1.35) calc(var(--vt-u) * 6) no-repeat,
     var(--vt-window);
 }
+.theme-is-ventura .top-bar .nav-link[href="/authors"]::before {
+  background:
+    linear-gradient(#e76f51 0 0) calc(var(--vt-u) * 1.4) calc(var(--vt-u) * 1.9) / calc(var(--vt-u) * 1.6) calc(var(--vt-u) * 2.2) no-repeat,
+    linear-gradient(#3a3a3c 0 0) calc(var(--vt-u) * 3.6) calc(var(--vt-u) * 2.4) / calc(var(--vt-u) * 6.5) calc(var(--vt-u) * 0.6) no-repeat,
+    linear-gradient(#c9c6c1 0 0) calc(var(--vt-u) * 3.6) calc(var(--vt-u) * 3.4) / calc(var(--vt-u) * 9) calc(var(--vt-u) * 0.45) no-repeat,
+    linear-gradient(#6d9dc5 0 0) calc(var(--vt-u) * 1.4) calc(var(--vt-u) * 4.8) / calc(var(--vt-u) * 1.6) calc(var(--vt-u) * 2.2) no-repeat,
+    linear-gradient(#3a3a3c 0 0) calc(var(--vt-u) * 3.6) calc(var(--vt-u) * 5.3) / calc(var(--vt-u) * 5) calc(var(--vt-u) * 0.6) no-repeat,
+    linear-gradient(#c9c6c1 0 0) calc(var(--vt-u) * 3.6) calc(var(--vt-u) * 6.3) / calc(var(--vt-u) * 8) calc(var(--vt-u) * 0.45) no-repeat,
+    linear-gradient(#f6bd60 0 0) calc(var(--vt-u) * 1.4) calc(var(--vt-u) * 7.7) / calc(var(--vt-u) * 1.6) calc(var(--vt-u) * 2.2) no-repeat,
+    linear-gradient(#3a3a3c 0 0) calc(var(--vt-u) * 3.6) calc(var(--vt-u) * 8.2) / calc(var(--vt-u) * 7) calc(var(--vt-u) * 0.6) no-repeat,
+    var(--vt-window);
+}
 /* Its page's icon on a tile at the corner. */
 .theme-is-ventura .top-bar .nav-link > svg {
   position: absolute;
@@ -11953,6 +11993,10 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
 .theme-is-luna[data-section="series"] .top-bar + main::before {
   content: "Series";
   content: "Series" / "";
+}
+.theme-is-luna[data-section="authors"] .top-bar + main::before {
+  content: "Authors";
+  content: "Authors" / "";
 }
 .theme-is-luna[data-section="stats"] .top-bar + main::before {
   content: "Stats";
@@ -13964,7 +14008,8 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
   color: #c586c0;
 }
 .theme-is-editor .top-bar .nav-link[href="/room"] > svg,
-.theme-is-editor .top-bar .nav-link[href="/series"] > svg {
+.theme-is-editor .top-bar .nav-link[href="/series"] > svg,
+.theme-is-editor .top-bar .nav-link[href="/authors"] > svg {
   color: var(--primary);
 }
 .theme-is-editor .top-bar .ml-auto {
@@ -14002,6 +14047,10 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
 .theme-is-editor[data-section="series"] .top-bar + main::before {
   content: "myreads › series.md";
   content: "myreads › series.md" / "";
+}
+.theme-is-editor[data-section="authors"] .top-bar + main::before {
+  content: "myreads › authors.md";
+  content: "myreads › authors.md" / "";
 }
 .theme-is-editor[data-section="stats"] .top-bar + main::before {
   content: "myreads › stats.md";
@@ -14436,6 +14485,9 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
 .theme-is-ubuntu .top-bar .nav-link[href="/series"]::before {
   background: linear-gradient(#8f83e8, #5a4cc2);
 }
+.theme-is-ubuntu .top-bar .nav-link[href="/authors"]::before {
+  background: linear-gradient(#f29c5a, #c4602a);
+}
 /* The open page's dot, at the dock's edge. */
 .theme-is-ubuntu .top-bar .nav-link[aria-current="page"]::after {
   inset: 50% auto auto -0.375rem;
@@ -14505,6 +14557,10 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
 .theme-is-ubuntu[data-section="series"] .top-bar + main::before {
   content: "Series";
   content: "Series" / "";
+}
+.theme-is-ubuntu[data-section="authors"] .top-bar + main::before {
+  content: "Authors";
+  content: "Authors" / "";
 }
 .theme-is-ubuntu[data-section="stats"] .top-bar + main::before {
   content: "Stats";
@@ -14979,6 +15035,10 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
 .theme-is-haiku[data-section="series"] .top-bar + main::before {
   content: "Series";
   content: "Series" / "";
+}
+.theme-is-haiku[data-section="authors"] .top-bar + main::before {
+  content: "Authors";
+  content: "Authors" / "";
 }
 .theme-is-haiku[data-section="stats"] .top-bar + main::before {
   content: "Stats";

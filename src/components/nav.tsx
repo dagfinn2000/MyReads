@@ -5,6 +5,7 @@ import {
   BookOpen,
   BookOpenText,
   ChartColumn,
+  Feather,
   HardDriveDownload,
   LibraryBig,
   LogOut,
@@ -33,6 +34,7 @@ const NAV_ICONS: Record<NavItem, LucideIcon> = {
   stats: ChartColumn,
   room: Armchair,
   series: BookCopy,
+  authors: Feather,
 };
 
 /** Top navigation for authenticated pages. Server component — reads the
@@ -44,6 +46,8 @@ export async function Nav() {
   const [session, prefs] = await Promise.all([getSession(), getPreferences()]);
   const links = topBarLinks(prefs);
   const crowded = links.length > ROOMY_NAV_LINKS;
+  // A ninth link (Series and Authors both on) needs a few pixels more again.
+  const packed = links.length > ROOMY_NAV_LINKS + 1;
 
   return (
     <header className="top-bar sticky top-0 z-40 border-b bg-background/75 backdrop-blur-md backdrop-saturate-150">
@@ -56,13 +60,17 @@ export async function Nav() {
           and 28px as an icon, so then the labels wait for 1120px and,
           below 400px, the icons close up by a pixel each side. The phone
           paddings are two ranges, not one overriding the other: Tailwind
-          puts max-[400px] ahead of max-sm, so max-sm would win. */}
+          puts max-[400px] ahead of max-sm, so max-sm would win. A ninth
+          (Authors as well) waits for 1200px, the links close up again
+          below 420px and up to 720px, and the account name stays out. */}
       <div
         className={cn(
           "mx-auto flex h-14 max-w-6xl items-center gap-0.5 px-3 sm:gap-1 sm:px-4",
-          crowded
-            ? "max-[400px]:[&_[data-slot=button]]:px-1 min-[400px]:max-sm:[&_[data-slot=button]]:px-[5px]"
-            : "max-sm:[&_[data-slot=button]]:px-[5px]",
+          packed
+            ? "max-[420px]:gap-0 max-[420px]:[&_[data-slot=button]]:px-[3px] min-[420px]:max-sm:[&_[data-slot=button]]:px-[5px] sm:max-[720px]:[&_[data-slot=button]]:px-[6px]"
+            : crowded
+              ? "max-[400px]:[&_[data-slot=button]]:px-1 min-[400px]:max-sm:[&_[data-slot=button]]:px-[5px]"
+              : "max-sm:[&_[data-slot=button]]:px-[5px]",
         )}
       >
         <Link
@@ -78,7 +86,15 @@ export async function Nav() {
           return (
             <NavLink key={item} href={href} title={title}>
               <Icon data-slot="icon" />
-              <span className={crowded ? "hidden min-[1120px]:inline" : "hidden lg:inline"}>
+              <span
+                className={
+                  packed
+                    ? "hidden min-[1200px]:inline"
+                    : crowded
+                      ? "hidden min-[1120px]:inline"
+                      : "hidden lg:inline"
+                }
+              >
                 {label}
               </span>
             </NavLink>
@@ -104,7 +120,9 @@ export async function Nav() {
           <Button asChild variant="ghost" size="sm" title="Account">
             <Link href="/account">
               <UserRound data-slot="icon" />
-              <span className="hidden text-muted-foreground xl:inline">
+              {/* With nine links the bar has no room for the name at any
+                  width: it never grows past max-w-6xl. */}
+              <span className={cn("hidden text-muted-foreground", !packed && "xl:inline")}>
                 {session?.user?.name}
               </span>
             </Link>

@@ -20,6 +20,7 @@ export const GO_KEYS: Record<Exclude<NavItem, "add">, string> = {
   stats: "s",
   room: "m",
   series: "e",
+  authors: "a",
 };
 
 export type ShortcutAction =

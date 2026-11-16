@@ -230,7 +230,7 @@ describe("parsePreferences: the newer settings", () => {
     // order leaves out follow in the bar's own order.
     expect(
       parsePreferences({ navOrder: ["stats", "bogus", 7, "library", "stats", "series"] }).navOrder,
-    ).toEqual(["stats", "library", "series", "reading", "add", "check", "quotes", "room"]);
+    ).toEqual(["stats", "library", "series", "reading", "add", "check", "quotes", "room", "authors"]);
     const reversed = [...NAV_ITEMS].reverse();
     expect(parsePreferences({ navOrder: reversed }).navOrder).toEqual(reversed);
   });

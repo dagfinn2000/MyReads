@@ -215,6 +215,7 @@ export const NAV_ITEMS = [
   "stats",
   "room",
   "series",
+  "authors",
 ] as const;
 
 export const NAV_ITEM_LABELS: Record<(typeof NAV_ITEMS)[number], string> = {
@@ -226,6 +227,7 @@ export const NAV_ITEM_LABELS: Record<(typeof NAV_ITEMS)[number], string> = {
   stats: "Stats",
   room: "Reading room",
   series: "Series",
+  authors: "Authors",
 };
 
 /** Top-bar links that can be hidden. Library, Add book and Stats are always
@@ -234,7 +236,7 @@ export const HIDEABLE_NAV = ["reading", "check", "quotes", "room"] as const;
 
 /** Top-bar links that stay out of the bar until they're turned on, so the
  *  bar is what it always was for anyone who never does. */
-export const OPTIONAL_NAV = ["series"] as const;
+export const OPTIONAL_NAV = ["series", "authors"] as const;
 
 /** Cards on the stats page that can be hidden. */
 export const HIDEABLE_STATS = [
