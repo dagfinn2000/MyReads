@@ -6,6 +6,7 @@ import { NAV_LINKS, topBarLinks } from "@/lib/nav";
 import type { NavItem } from "@/lib/preferences";
 import { readShortcut, shortcutGroups, type Pending } from "@/lib/shortcuts";
 import { usePreferences } from "@/components/preferences-provider";
+import { openQuickFind, useIsMac } from "@/components/quick-find";
 import {
   Dialog,
   DialogContent,
@@ -90,6 +91,7 @@ export function KeyboardShortcuts() {
         ctrlKey: e.ctrlKey,
         metaKey: e.metaKey,
         altKey: e.altKey,
+        shiftKey: e.shiftKey,
         repeat: e.repeat,
         isComposing: e.isComposing,
         defaultPrevented: e.defaultPrevented,
@@ -111,6 +113,9 @@ export function KeyboardShortcuts() {
     stopWaiting.current?.();
     stopWaiting.current = null;
     switch (action.type) {
+      case "find":
+        openQuickFind();
+        break;
       case "help":
         returnFocus.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
         setOpen(true);
@@ -190,6 +195,7 @@ export function ShortcutsDialog({
   onOpenChange?: (open: boolean) => void;
   onCloseAutoFocus?: (e: Event) => void;
 }) {
+  const mac = useIsMac();
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
@@ -202,7 +208,7 @@ export function ShortcutsDialog({
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4">
-          {shortcutGroups(links).map((group) => (
+          {shortcutGroups(links, mac).map((group) => (
             <section key={group.title} className="grid gap-1.5">
               <h3 className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
                 {group.title}
@@ -214,7 +220,7 @@ export function ShortcutsDialog({
                     <dd className="flex shrink-0 items-center gap-1.5 text-xs text-muted-foreground">
                       {item.keys.map((key, i) => (
                         <Fragment key={key}>
-                          {i > 0 && <span>then</span>}
+                          {i > 0 && <span>{item.together ? "+" : "then"}</span>}
                           <Kbd>{key}</Kbd>
                         </Fragment>
                       ))}
