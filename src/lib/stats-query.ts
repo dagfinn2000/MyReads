@@ -22,6 +22,7 @@ export const statsBookSelect = {
   dateStarted: true,
   dateFinished: true,
   currentPage: true,
+  createdAt: true,
 } as const satisfies Prisma.BookSelect;
 
 export type StatsBook = Prisma.BookGetPayload<{ select: typeof statsBookSelect }>;

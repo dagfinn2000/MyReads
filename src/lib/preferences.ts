@@ -244,6 +244,7 @@ export const HIDEABLE_STATS = [
   "challenges",
   "heatmap",
   "habits",
+  "pile",
   "ratings",
   "perYear",
   "tags",

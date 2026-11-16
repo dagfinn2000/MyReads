@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { ReadingStatus } from "@/lib/enums";
 import { prisma } from "@/lib/prisma";
 import { getPreferences, getSession } from "@/lib/current-user";
-import { dayKey } from "@/lib/dates";
+import { dayKey, shiftDayKey } from "@/lib/dates";
 import { FORMAT_LABELS, formatDayKey, formatNumber } from "@/lib/display";
 import { goalPace, splitGoals, yearClock } from "@/lib/goals";
 import {
@@ -25,6 +25,7 @@ import { dailyGoalTarget, goalMetDays } from "@/lib/daily-goal";
 import { minutesInWindow } from "@/lib/reading-time";
 import { buildCalendar } from "@/lib/reading-calendar";
 import { readingHabits } from "@/lib/reading-habits";
+import { pileSummary } from "@/lib/to-read-pile";
 import { aspectSummaries, ratingDistribution, ratingLean } from "@/lib/rating-breakdown";
 import {
   booksReadAllTime,
@@ -54,6 +55,7 @@ import { GoalCard } from "@/components/goal-card";
 import { ReadingHabitsCard } from "@/components/reading-habits-card";
 import { RatingsCard } from "@/components/ratings-card";
 import { ReadingHeatmap } from "@/components/reading-heatmap";
+import { ToReadPileCard } from "@/components/to-read-pile-card";
 import { Bar, Duration, MoodBar, StatCard } from "@/components/stat-blocks";
 import { allMoods, bookMoods, offeredMoods } from "@/lib/moods";
 import { StatsPeriodNav } from "@/components/stats-period-nav";
@@ -348,6 +350,13 @@ export default async function StatsPage({
     },
   );
 
+  // The to-read pile: how it grew over twelve months, and how long it lasts
+  // at the pace of the last twelve (books read by the cards' rules).
+  const pile = hidden.has("pile") ? null : pileSummary(books, new Date(), prefs.timeZone);
+  const pilePace = pile
+    ? tally(countWindow(passes, { from: shiftDayKey(todayKey, -364), to: todayKey }, prefs)).books
+    : 0;
+
   // Genre/tag breakdown, top 10.
   const tagCounts = new Map<string, number>();
   for (const b of breakdownBooks) {
@@ -534,6 +543,26 @@ export default async function StatsPage({
               ? "Log your reading as you go, and this shows when you read."
               : "Nothing logged in this period."
           }
+        />
+      )}
+
+      {pile && (
+        <ToReadPileCard
+          // Only what the covers show goes to the browser.
+          pile={{
+            ...pile,
+            oldest: pile.oldest.map((b) => ({
+              id: b.id,
+              title: b.title,
+              authors: b.authors,
+              coverUrl: b.coverUrl,
+              status: b.status,
+              createdAt: b.createdAt,
+              dateStarted: b.dateStarted,
+              dateFinished: b.dateFinished,
+            })),
+          }}
+          perYear={pilePace}
         />
       )}
 

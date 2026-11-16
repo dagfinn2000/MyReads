@@ -291,6 +291,10 @@ page by page.
 - **Reading habits:** which days of the week you read most, pages on an
   average reading day, how long a book takes you from start to finish, and
   with the timer your average sitting and pages an hour.
+- **Your to-read pile:** how many books wait on Want to Read, a small line
+  of the pile over the last twelve months, how many you added and started
+  in that time, and how long the pile lasts at your pace. Bars show how
+  long the books have waited, beside the three that have waited longest.
 - **Ratings:** how many books got each rating, the rating you give most,
   and your average for plot, characters and writing with the book you
   rated best for each. Once enough books are rated, it also says which of
