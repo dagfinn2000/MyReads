@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/actions/helpers";
 import { calendarDay, dayKey } from "@/lib/dates";
 import { formatDate } from "@/lib/display";
+import { parseStopReason } from "@/lib/stop-reasons";
 import { currentPassEntries } from "@/lib/progress";
 import { pastTheEnd, unitFor } from "@/lib/progress-units";
 import {
@@ -351,6 +352,8 @@ export async function undoMoveFromReading(
         dateFinished: from === "READ" ? null : book.dateFinished,
         currentPage,
         timesRead: book._count.reads,
+        // Back to reading, a reason for stopping no longer holds.
+        stopReason: null,
       },
     });
     return returned;
@@ -358,4 +361,24 @@ export async function undoMoveFromReading(
 
   revalidateReading(id.data);
   return minutes ? { minutes } : {};
+}
+
+/**
+ * Why a book was put down (lib/stop-reasons.ts), from the chips Now reading
+ * shows after Stopped. Only a book that is Did Not Finish keeps a reason;
+ * null clears it.
+ */
+export async function setStopReason(bookId: string, reason: string | null): Promise<{ error?: string }> {
+  const userId = await requireUserId();
+  const id = idSchema.safeParse(bookId);
+  if (!id.success) return { error: "Book not found" };
+  const stopReason = reason === null ? null : parseStopReason(reason);
+  if (reason !== null && !stopReason) return { error: "Invalid input" };
+  const { count } = await prisma.book.updateMany({
+    where: { id: id.data, userId, status: ReadingStatus.DNF },
+    data: { stopReason },
+  });
+  if (count === 0) return { error: "This book isn't in Did Not Finish any more." };
+  revalidateReading(id.data);
+  return {};
 }

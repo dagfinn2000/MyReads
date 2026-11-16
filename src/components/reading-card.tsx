@@ -14,6 +14,7 @@ import { pendingPage } from "@/lib/outbox";
 import { currentPassEntries } from "@/lib/progress";
 import { finishByLine, finishByState, keepsFinishBy } from "@/lib/finish-by";
 import { pagesPerDay } from "@/lib/pace";
+import { STOP_REASONS, STOP_REASON_LABELS, parseStopReason } from "@/lib/stop-reasons";
 import { FinishByNote } from "@/components/finish-by-note";
 import { progressFigure, unitFor } from "@/lib/progress-units";
 import { submitKeepingInput } from "@/lib/submit-form";
@@ -37,6 +38,7 @@ import {
 import {
   Select,
   SelectContent,
+  SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -104,6 +106,7 @@ export function ReadingCard({
     book.dateFinished?.getTime() ?? 0,
     reading ? "reading" : (book.currentPage ?? 0),
     book.finishBy?.getTime() ?? 0,
+    book.stopReason ?? "",
     book.review ?? "",
   ].join("|");
 
@@ -175,6 +178,25 @@ export function ReadingCard({
                 </SelectContent>
               </Select>
             </div>
+            {book.status === ReadingStatus.DNF && (
+              <div className="grid gap-2">
+                <Label htmlFor="stopReason">Why you stopped</Label>
+                <Select name="stopReason" defaultValue={parseStopReason(book.stopReason) ?? "none"}>
+                  <SelectTrigger id="stopReason" className="w-48">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {/* Radix needs a value for "not said". */}
+                    <SelectItem value="none">Not said</SelectItem>
+                    {STOP_REASONS.map((r) => (
+                      <SelectItem key={r} value={r}>
+                        {STOP_REASON_LABELS[r]}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             <div className="grid gap-2">
               <Label>Rating</Label>
               <StarRatingInput name="rating" defaultValue={book.rating ?? 0} />

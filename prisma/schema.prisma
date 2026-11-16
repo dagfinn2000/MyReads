@@ -274,6 +274,10 @@ model Book {
   /// and cleared when it's finished or put down (lib/finish-by.ts). Null =
   /// no such day.
   finishBy     DateTime?
+  /// Why the book was put down: a key of STOP_REASONS in
+  /// lib/stop-reasons.ts ("slow", "not-now", ...). Kept only while the book
+  /// is DNF; any move off it clears it. Null = not said.
+  stopReason   String?
   /// Who or where a borrowed copy is from ("the library", "Anna"). Only
   /// shown while `ownership` is BORROWED; kept if it changes, so a copy
   /// borrowed again remembers. Null = not said.

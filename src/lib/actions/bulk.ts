@@ -209,6 +209,9 @@ export async function bulkUpdateBooks(input: BulkInput): Promise<BulkResult> {
             // Finished or put down, the finish-by day goes; so does one
             // left over from before, on a book coming back from either.
             ...((!keepsFinishBy(status) || !keepsFinishBy(b.status)) && { finishBy: null }),
+            // Off Did Not Finish, or newly put down, the book has no reason
+            // for stopping (books already there were skipped above).
+            stopReason: null,
           },
         });
       }

@@ -58,6 +58,10 @@ page by page.
   menu and on the book's badge, and gets its own chip under its tab in
   the library. Stats, goals and challenges count a book on one of your
   own as the status it is a kind of. No two statuses can share a name.
+- **Why you stopped:** after Stopped on Now reading, one tap says why
+  (too slow, not for me, didn't like the writing, lost interest, too long,
+  not the right time, or something else). It's optional, and a stopped
+  book's page has the same menu. Picking the book up again forgets it.
 - Re-reads are kept as history and count in your stats.
 
 ### Logging your reading
@@ -299,6 +303,9 @@ page by page.
   of the pile over the last twelve months, how many you added and started
   in that time, and how long the pile lasts at your pace. Bars show how
   long the books have waited, beside the three that have waited longest.
+- **Why you stopped:** once you've put a book down, the reasons you gave,
+  how far in books get put down, the genres you put down most, and the
+  books you stopped because it wasn't the right time.
 - **Ratings:** how many books got each rating, the rating you give most,
   and your average for plot, characters and writing with the book you
   rated best for each. Once enough books are rated, it also says which of

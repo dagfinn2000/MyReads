@@ -251,6 +251,7 @@ export const HIDEABLE_STATS = [
   "tags",
   "moods",
   "formats",
+  "stopped",
   "quote",
 ] as const;
 

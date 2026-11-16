@@ -273,6 +273,7 @@ const STATS_LABELS: Record<HideableStat, string> = {
   tags: "Genres & tags",
   moods: "Moods",
   formats: "Formats",
+  stopped: "Why you stopped",
   quote: "From your quotes",
 };
 
