@@ -209,6 +209,18 @@ page by page.
   and an empty place for each number you have no book for. Open it from a
   series heading in the library or "What's next in the series" on a
   book's page, or put it in the top bar from Preferences.
+- **The Authors page** lists every author in your library, the ones you've
+  read most first: how many of their books you've read, a cover for each
+  in the order you read them (then the ones still waiting), the rating you
+  give them on average, the pages you've read of theirs, when you read
+  them, and which of their books to read next (your Up next list first,
+  then the next in a series of theirs, then the one that has waited
+  longest). Order them A to Z, by your ratings or by what you read lately;
+  show only the authors with books waiting, or the ones you haven't read
+  yet; or find one by name. An author heading in the library (group by
+  author) opens their card, and their name on the card shows all their
+  books in the library. Put Authors in the top bar from Preferences (then
+  `g` and `a` opens it too).
 - "Pick for me" opens a random book from the ones on screen, keeping to
   your filters. On the All tab it picks from Want to Read first. In
   Preferences you can have it pick only books you have, or only the next
@@ -1072,7 +1084,7 @@ On the Account page:
 - The book page: which cards show and in what order, long descriptions in
   full or cut short, and your own "Find it at" links.
 - Which page opens first, and the top bar: its links in your own order,
-  with Now reading, Check and Quotes left out or Series added if you like
+  with Now reading, Check and Quotes left out or Series and Authors added if you like
   (phones get the same links, as icons). Also which cards show on the
   Stats page.
 - The reading room and your avatar, on or off.

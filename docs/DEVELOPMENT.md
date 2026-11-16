@@ -140,8 +140,8 @@ src/
 │  ├─ (auth)/          login and register pages
 │  ├─ (app)/           pages behind login: books (the library), books/new,
 │  │                   books/[id], books/[id]/edit, books/check, reading
-│  │                   (Now reading), quotes, series, room (the reading
-│  │                   room), stats, stats/year/[year], account
+│  │                   (Now reading), quotes, series, authors, room (the
+│  │                   reading room), stats, stats/year/[year], account
 │  └─ api/             what the browser calls directly: sign-in and
 │                      registration, catalogue search and covers, the
 │                      library check, cover upload and serving, backups,

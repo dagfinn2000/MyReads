@@ -1558,6 +1558,7 @@ export const SECTIONS = [
   "library",
   "book",
   "series",
+  "authors",
   "stats",
   "reading",
   "quotes",
@@ -1576,7 +1577,7 @@ export function sectionOf(pathname: string): string {
   if (parts[1] === "books") {
     return parts[2] && parts[2] !== "new" && parts[2] !== "check" ? "book" : "library";
   }
-  return ["series", "stats", "reading", "quotes", "room", "account"].indexOf(parts[1]) > -1
+  return ["series", "authors", "stats", "reading", "quotes", "room", "account"].indexOf(parts[1]) > -1
     ? parts[1]
     : "";
 }
@@ -1587,11 +1588,12 @@ export type ThemePart = (typeof THEME_PARTS)[number];
 export type PartThemes = Partial<Record<ThemePart, string>>;
 
 /** Which part's theme each section shows: the library's covers its books
- *  and the Series page too. */
+ *  and the Series and Authors pages too. */
 export const PART_OF_SECTION: Record<(typeof SECTIONS)[number], ThemePart> = {
   library: "library",
   book: "library",
   series: "library",
+  authors: "library",
   stats: "stats",
   reading: "reading",
   quotes: "quotes",

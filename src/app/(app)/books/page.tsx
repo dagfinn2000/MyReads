@@ -23,6 +23,7 @@ import { naturalDir, parseLibraryView } from "@/lib/library-view";
 import { seriesKey } from "@/lib/series";
 import { customStatusOf } from "@/lib/statuses";
 import { seriesAnchor } from "@/lib/series-list";
+import { authorAnchor } from "@/lib/authors-list";
 import { isOverdue } from "@/lib/loans";
 import { overdueReminder } from "@/lib/overdue-query";
 import { canonicalViewQuery } from "@/lib/saved-views";
@@ -331,6 +332,17 @@ export default async function BooksPage({
           href: `/series#${seriesAnchor(g.title)}`,
         });
       }
+    }
+  }
+
+  // Author headings link to the author's card on the Authors page, found
+  // by name there (only the first few dozen authors show without a search).
+  if (sliced && values.group === "author") {
+    for (const g of sliced.groups) {
+      if (g.key === "author:none") continue;
+      Object.assign(g, {
+        href: `/authors?q=${encodeURIComponent(g.title)}#${authorAnchor(g.title)}`,
+      });
     }
   }
 

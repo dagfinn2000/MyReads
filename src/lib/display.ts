@@ -116,6 +116,23 @@ export function formatDecimal(n: number, prefs?: FormatPrefs): string {
   return f.format(n);
 }
 
+const oneDecimalFormatters = new Map<NumberFormat, Intl.NumberFormat>();
+
+/** An average with exactly one decimal ("4.0", "3.8"), in the chosen
+ *  number style. */
+export function formatOneDecimal(n: number, prefs?: FormatPrefs): string {
+  const format = prefs?.numberFormat ?? "comma";
+  let f = oneDecimalFormatters.get(format);
+  if (!f) {
+    f = new Intl.NumberFormat(NUMBER_LOCALES[format], {
+      minimumFractionDigits: 1,
+      maximumFractionDigits: 1,
+    });
+    oneDecimalFormatters.set(format, f);
+  }
+  return f.format(n);
+}
+
 const sizeFormatters = new Map<NumberFormat, Intl.NumberFormat>();
 
 const SIZE_UNITS = ["KB", "MB", "GB", "TB"];

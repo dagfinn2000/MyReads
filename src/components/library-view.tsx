@@ -59,7 +59,8 @@ export interface LibraryGroup {
   detail?: string;
   /** A warning after it: "#3 missing". */
   note?: string;
-  /** Where the title links: a series' card on the Series page. */
+  /** Where the title links: a series' card on the Series page, or an
+   *  author's on the Authors page. */
   href?: string;
   /** A mood section's icon and tint. */
   mood?: Pick<Mood, "icon" | "color">;
@@ -473,7 +474,7 @@ export function LibraryView({
                     href={g.href}
                     prefetch={false}
                     className="min-w-0 wrap-anywhere hover:underline"
-                    title={`${g.title} on the Series page`}
+                    title={`${g.title} on the ${g.key.startsWith("author:") ? "Authors" : "Series"} page`}
                   >
                     {g.title}
                   </Link>
