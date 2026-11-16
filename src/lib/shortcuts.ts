@@ -25,6 +25,7 @@ export const GO_KEYS: Record<Exclude<NavItem, "add">, string> = {
 
 export type ShortcutAction =
   | { type: "help" }
+  | { type: "find" }
   | { type: "search" }
   | { type: "go"; to: NavItem }
   | { type: "edit"; href: string };
@@ -35,6 +36,7 @@ export type KeyPress = {
   ctrlKey: boolean;
   metaKey: boolean;
   altKey: boolean;
+  shiftKey?: boolean;
   /** Held down and repeating. */
   repeat: boolean;
   /** Part of a word being composed (Japanese input, say). */
@@ -72,6 +74,19 @@ export function bookIdFromPath(pathname: string): string | null {
   return id;
 }
 
+/** Ctrl+K or ⌘K, without Alt or Shift (Ctrl+Shift+K opens Firefox's
+ *  console). */
+export function isQuickFindKey(
+  press: Pick<KeyPress, "key" | "ctrlKey" | "metaKey" | "altKey" | "shiftKey">,
+): boolean {
+  return (
+    (press.ctrlKey || press.metaKey) &&
+    !press.altKey &&
+    !press.shiftKey &&
+    press.key.toLowerCase() === "k"
+  );
+}
+
 /**
  * What a key press does, and whether g is still waiting afterwards. Keys
  * are left alone, for the page and the browser, while someone types, while
@@ -87,6 +102,13 @@ export function readShortcut(
 ): { action: ShortcutAction | null; pending: Pending } {
   if (HELD_KEYS.has(press.key)) return { action: null, pending };
   const none = { action: null, pending: null };
+  // Ctrl+K (⌘K on a Mac) opens quick find, even from a text field: the
+  // keys can't be typing.
+  if (isQuickFindKey(press)) {
+    return press.repeat || press.isComposing || press.defaultPrevented || press.overlay
+      ? none
+      : { action: { type: "find" }, pending: null };
+  }
   if (
     press.ctrlKey ||
     press.metaKey ||
@@ -125,17 +147,19 @@ export function readShortcut(
 
 export type ShortcutGroup = {
   title: string;
-  /** Keys pressed one after the other, and what they do. */
-  items: { keys: string[]; label: string }[];
+  /** Keys pressed one after the other (or, `together`, held down at
+   *  once), and what they do. */
+  items: { keys: string[]; label: string; together?: boolean }[];
 };
 
 /** The shortcuts dialog's list: the g keys only for the links this reader
- *  has, in the order their top bar shows them. */
-export function shortcutGroups(links: readonly NavItem[]): ShortcutGroup[] {
+ *  has, in the order their top bar shows them. `mac` names ⌘ for Ctrl. */
+export function shortcutGroups(links: readonly NavItem[], mac = false): ShortcutGroup[] {
   return [
     {
       title: "Anywhere",
       items: [
+        { keys: [mac ? "⌘" : "Ctrl", "K"], label: "Find a book, author or page", together: true },
         { keys: ["?"], label: "Show these shortcuts" },
         { keys: ["/"], label: "Search the library" },
         { keys: ["n"], label: "Add a book" },

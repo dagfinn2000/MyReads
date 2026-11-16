@@ -5,6 +5,7 @@ import { Nav } from "@/components/nav";
 import { OfflineProvider } from "@/components/offline-provider";
 import { OwnCss } from "@/components/own-css";
 import { PreferencesProvider } from "@/components/preferences-provider";
+import { QuickFind } from "@/components/quick-find";
 import { SoundUnlock } from "@/components/sounds";
 import { ThemeSync } from "@/components/theme-sync";
 import { buildId } from "@/lib/build-id";
@@ -13,7 +14,8 @@ import { START_PAGE_PATHS } from "@/lib/preferences";
 import { parseThemeSetting, serializeThemeSetting } from "@/lib/themes";
 
 /** Shared shell for all authenticated pages: top nav + centered content,
- *  and the keyboard shortcuts, which only show when ? asks for them. Last,
+ *  the keyboard shortcuts, which only show when ? asks for them, and quick
+ *  find, which shows for Ctrl+K or the top bar's magnifier. Last,
  *  the reader's own CSS, after everything else. Around it all, what keeps
  *  the app going offline (components/offline-provider.tsx). */
 export default async function AppLayout({
@@ -38,6 +40,7 @@ export default async function AppLayout({
           {children}
         </main>
         <KeyboardShortcuts />
+        <QuickFind />
         <SoundUnlock />
         <CoverTilt />
         <ThemeSync

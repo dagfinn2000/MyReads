@@ -2214,6 +2214,15 @@
 .theme-is-notebook-dark .top-bar .nav-link {
   font-size: 1rem;
 }
+/* Eight links (Series on) or nine (Authors too) take a smaller hand. */
+.theme-is-notebook .top-bar > div:has(> a:nth-of-type(9)) .nav-link,
+.theme-is-notebook-dark .top-bar > div:has(> a:nth-of-type(9)) .nav-link {
+  font-size: 0.9375rem;
+}
+.theme-is-notebook .top-bar > div:has(> a:nth-of-type(10)) .nav-link,
+.theme-is-notebook-dark .top-bar > div:has(> a:nth-of-type(10)) .nav-link {
+  font-size: 0.875rem;
+}
 .theme-is-notebook .top-bar .nav-link[aria-current="page"],
 .theme-is-notebook-dark .top-bar .nav-link[aria-current="page"] {
   background: var(--nb-highlight);
@@ -12610,6 +12619,9 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
   .theme-is-metro .top-bar .nav-link > svg {
     display: none;
   }
+  .theme-is-metro .top-bar > div:has(> a:nth-of-type(10)) .nav-link {
+    font-size: 1.25rem;
+  }
 }
 .theme-is-metro .top-bar .nav-link:hover {
   color: #d0d0d0;
@@ -13975,6 +13987,10 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
   border-right: 1px solid #1e1f22;
   padding-inline: 0.875rem;
   font-weight: 400;
+}
+/* Nine tabs (Series and Authors both on) fit the bar a little narrower. */
+.theme-is-editor .top-bar > div:has(> a:nth-of-type(10)) .nav-link[data-size] {
+  padding-inline: 0.5rem;
 }
 .theme-is-editor .top-bar .nav-link[data-size]:first-of-type {
   border-left: 1px solid #1e1f22;
@@ -15764,6 +15780,10 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
 .theme-is-eight-bit .wordmark {
   font-size: 1.25rem;
 }
+/* Nine links (Series and Authors both on) take a smaller size to fit. */
+.theme-is-eight-bit .top-bar > div:has(> a:nth-of-type(10)) .nav-link {
+  font-size: 1.0625rem;
+}
 .theme-is-eight-bit .top-bar .nav-link[aria-current="page"] {
   color: #6c5eb5;
   background: #ffffff;
@@ -15886,6 +15906,9 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
 }
 .theme-is-teletext .nav-link {
   font-size: 1.125rem;
+}
+.theme-is-teletext .top-bar > div:has(> a:nth-of-type(10)) .nav-link {
+  font-size: 1rem;
 }
 .theme-is-teletext .top-bar {
   border-bottom: 0;

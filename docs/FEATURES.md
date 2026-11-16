@@ -211,6 +211,13 @@ page by page.
 - Mark a book as Borrowed and say who it's from (the library, a friend).
   Its page says "Borrowed from …", and its Finish by day reads as the
   day it's due back.
+- **Quick find:** press Ctrl+K (⌘K on a Mac) on any page, or the
+  magnifier in the top bar, and type a few letters. Books, authors,
+  series, shelves and pages that match show as you type: arrow keys and
+  Enter open one (Ctrl+Enter in a new tab), and the last line searches
+  the whole library. With nothing typed it lists the books you're
+  reading and every page. When no title matches, the author or series
+  comes first, so "le guin" lands on Ursula K. Le Guin.
 - Search, filter, sort and group the library. Authors sort by surname, the
   way a bookshelf is filed. More filters also finds books by page count
   ("up to 300 pages"), the year they came out, and when you added them
@@ -1100,8 +1107,9 @@ On the Account page:
   Stats page.
 - The reading room and your avatar, on or off.
 - Keyboard shortcuts on a computer, on unless you turn them off: `?` lists
-  them, `/` searches the library, `n` adds a book, `g` and a letter goes to
-  a page in your top bar, and `e` edits the book whose page you're on.
+  them, Ctrl+K (⌘K) opens quick find, `/` searches the library, `n` adds a
+  book, `g` and a letter goes to a page in your top bar, and `e` edits the
+  book whose page you're on.
 
 ## Backups
 

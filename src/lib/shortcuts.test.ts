@@ -122,6 +122,32 @@ describe("readShortcut", () => {
     }
   });
 
+  it("opens quick find with Ctrl+K or Cmd+K, even from a text field", () => {
+    const find = { action: { type: "find" }, pending: null };
+    expect(readShortcut(press("k", { ctrlKey: true }), null, 0, everyLink)).toEqual(find);
+    expect(readShortcut(press("k", { metaKey: true, typing: true }), null, 0, everyLink)).toEqual(find);
+    // Caps Lock on.
+    expect(readShortcut(press("K", { ctrlKey: true }), null, 0, everyLink)).toEqual(find);
+    // It ends a wait after g, rather than counting as g's second key.
+    expect(readShortcut(press("k", { ctrlKey: true }), 0, 100, everyLink)).toEqual(find);
+  });
+
+  it("leaves Ctrl+K alone over a dialog, with Shift or Alt, or held down", () => {
+    const none = { action: null, pending: null };
+    for (const over of [
+      { overlay: true },
+      { shiftKey: true },
+      { altKey: true },
+      { repeat: true },
+      { isComposing: true },
+      { defaultPrevented: true },
+    ]) {
+      expect(readShortcut(press("k", { ctrlKey: true, ...over }), null, 0, everyLink)).toEqual(none);
+    }
+    // Plain k is nothing.
+    expect(readShortcut(press("k"), null, 0, everyLink)).toEqual(none);
+  });
+
   it("leaves capitals and other keys alone", () => {
     for (const key of ["N", "G", "E", "Escape", "Enter", " ", "ArrowDown", "k"]) {
       expect(sequence([key]).action).toBeNull();
@@ -155,6 +181,13 @@ describe("shortcutGroups", () => {
       "g q",
       "g e",
     ]);
+  });
+
+  it("names Ctrl, or ⌘ on a Mac, for quick find's keys held together", () => {
+    const find = (mac: boolean) =>
+      shortcutGroups(topBarLinks(DEFAULT_PREFERENCES), mac)[0].items.find((i) => i.together);
+    expect(find(false)).toMatchObject({ keys: ["Ctrl", "K"], together: true });
+    expect(find(true)?.keys).toEqual(["⌘", "K"]);
   });
 
   it("gives every link but Add book its own letter", () => {

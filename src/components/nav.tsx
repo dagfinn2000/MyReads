@@ -1,41 +1,15 @@
 import Link from "next/link";
-import {
-  Armchair,
-  BookCopy,
-  BookOpen,
-  BookOpenText,
-  ChartColumn,
-  Feather,
-  HardDriveDownload,
-  LibraryBig,
-  LogOut,
-  Plus,
-  Quote,
-  ScanSearch,
-  UserRound,
-  type LucideIcon,
-} from "lucide-react";
+import { BookOpen, HardDriveDownload, LogOut, UserRound } from "lucide-react";
 import { signOut } from "@/auth";
 import { getPreferences, getSession } from "@/lib/current-user";
 import { NAV_LINKS, ROOMY_NAV_LINKS, topBarLinks } from "@/lib/nav";
-import type { NavItem } from "@/lib/preferences";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { NAV_ICONS } from "@/components/nav-icons";
 import { NavLink } from "@/components/nav-link";
+import { QuickFindButton } from "@/components/quick-find";
 import { SyncStatus } from "@/components/sync-status";
 import { ThemePicker } from "@/components/theme-picker";
-
-const NAV_ICONS: Record<NavItem, LucideIcon> = {
-  library: LibraryBig,
-  reading: BookOpenText,
-  add: Plus,
-  check: ScanSearch,
-  quotes: Quote,
-  stats: ChartColumn,
-  room: Armchair,
-  series: BookCopy,
-  authors: Feather,
-};
 
 /** Top navigation for authenticated pages. Server component — reads the
  *  session directly and signs out via a server action. The links come in
@@ -78,7 +52,9 @@ export async function Nav() {
           className="wordmark mr-1 flex items-center gap-2 text-lg sm:mr-4"
         >
           <BookOpen className="size-5" />
-          <span className="hidden min-[480px]:inline">MyReads</span>
+          <span className={packed ? "hidden min-[500px]:inline" : "hidden min-[480px]:inline"}>
+            MyReads
+          </span>
         </Link>
         {links.map((item) => {
           const { href, label, title } = NAV_LINKS[item];
@@ -100,14 +76,25 @@ export async function Nav() {
             </NavLink>
           );
         })}
-        <div className="ml-auto flex items-center gap-0.5 sm:gap-3">
+        <div
+          className={cn(
+            "ml-auto flex items-center gap-0.5",
+            // Labelled, nine links leave less room between these.
+            packed ? "sm:max-[1199px]:gap-3 min-[1200px]:gap-1.5" : "sm:gap-3",
+          )}
+        >
           {/* Only while offline, or while reading waits to be sent. */}
           <SyncStatus />
+          {/* Where the bar has room for it: phones have the library's
+              search box instead. */}
+          <QuickFindButton className="max-md:hidden" />
           <Button
             asChild
             variant="ghost"
             size="sm"
-            className="backup-link"
+            // The Account page's Backup card has it too, for the narrowest
+            // phones, where nine links leave no room for it.
+            className={cn("backup-link", packed && "max-[339px]:hidden")}
             title="Download library backup (zip incl. covers)"
           >
             {/* Plain <a>: this is a file download, not a client navigation. */}
@@ -120,9 +107,9 @@ export async function Nav() {
           <Button asChild variant="ghost" size="sm" title="Account">
             <Link href="/account">
               <UserRound data-slot="icon" />
-              {/* With nine links the bar has no room for the name at any
-                  width: it never grows past max-w-6xl. */}
-              <span className={cn("hidden text-muted-foreground", !packed && "xl:inline")}>
+              {/* With eight links or more the bar has no room for the name
+                  at any width: it never grows past max-w-6xl. */}
+              <span className={cn("hidden text-muted-foreground", !crowded && "xl:inline")}>
                 {session?.user?.name}
               </span>
             </Link>
