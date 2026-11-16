@@ -1,7 +1,7 @@
 import { Fragment } from "react";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { BookFormat, ReadingStatus } from "@/lib/enums";
+import { BookFormat, BookOwnership, ReadingStatus } from "@/lib/enums";
 import { Library, Pencil, Repeat } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { seriesAnchor } from "@/lib/series-list";
@@ -156,7 +156,12 @@ export default async function BookDetailPage({
     history: <ReadHistoryCard book={book} reads={book.reads} />,
     // A wishlist copy with no loan history has nothing to show.
     lending: showsLendingCard(book.ownership, book.loans.length) ? (
-      <LendingCard bookId={book.id} ownership={book.ownership} loans={book.loans} />
+      <LendingCard
+        bookId={book.id}
+        ownership={book.ownership}
+        borrowedFrom={book.borrowedFrom}
+        loans={book.loans}
+      />
     ) : null,
     quotes: (
       <BookNotesCard
@@ -241,8 +246,12 @@ export default async function BookDetailPage({
               <UpNextButton bookId={book.id} place={upNextPlace} />
             )}
             <Badge variant="secondary">{FORMAT_LABELS[book.format]}</Badge>
-            <Badge variant="outline">
-              {OWNERSHIP_BADGE_LABELS[book.ownership]}
+            <Badge variant="outline" className="max-w-full">
+              <span className="truncate">
+                {book.ownership === BookOwnership.BORROWED && book.borrowedFrom
+                  ? `Borrowed from ${book.borrowedFrom}`
+                  : OWNERSHIP_BADGE_LABELS[book.ownership]}
+              </span>
             </Badge>
             {book.timesRead > 1 && (
               <Badge variant="outline">

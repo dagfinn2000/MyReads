@@ -246,6 +246,42 @@ describe("export -> import round trip", () => {
     ]);
   });
 
+  it("keeps a finish-by day (for books to read or being read) and who a copy is from", async () => {
+    await prisma.book.createMany({
+      data: [
+        {
+          userId: sourceUserId,
+          title: "Library book",
+          status: ReadingStatus.READING,
+          ownership: BookOwnership.BORROWED,
+          borrowedFrom: "Deichman",
+          finishBy: new Date("2026-12-03T00:00:00Z"),
+        },
+        // A day left on a finished book means nothing.
+        {
+          userId: sourceUserId,
+          title: "Read one",
+          status: ReadingStatus.READ,
+          finishBy: new Date("2026-01-01T00:00:00Z"),
+        },
+      ],
+    });
+    await importLibrary(targetUserId, await exportLibrary());
+    const restored = await prisma.book.findMany({
+      where: { userId: targetUserId },
+      select: { title: true, finishBy: true, borrowedFrom: true },
+      orderBy: { title: "asc" },
+    });
+    expect(restored).toEqual([
+      {
+        title: "Library book",
+        finishBy: new Date("2026-12-03T00:00:00Z"),
+        borrowedFrom: "Deichman",
+      },
+      { title: "Read one", finishBy: null, borrowedFrom: null },
+    ]);
+  });
+
   it("still writes the legacy `owned` boolean for older instances", async () => {
     // The export format promises an older build can read this file, and
     // `owned` is the only ownership vocabulary such a build has.

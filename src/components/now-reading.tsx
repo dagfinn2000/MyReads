@@ -7,7 +7,9 @@ import { undoMoveFromReading } from "@/lib/actions/progress";
 import { dayKey } from "@/lib/dates";
 import { lastReadText } from "@/lib/on-this-day";
 import { pendingPage, removeFromOutbox, type OutboxItem, type SentResult } from "@/lib/outbox";
-import { nowReadingPaceText } from "@/lib/pace";
+import { nowReadingPaceText, pagesPerDay } from "@/lib/pace";
+import { finishByLine, finishByState } from "@/lib/finish-by";
+import { BookOwnership } from "@/lib/enums";
 import { currentPassEntries } from "@/lib/progress";
 import { progressFigure, unitFor } from "@/lib/progress-units";
 import { speedText } from "@/lib/reading-time";
@@ -15,6 +17,7 @@ import type { UndoMove } from "@/lib/reading-log";
 import { usePreferences } from "@/components/preferences-provider";
 import { BookCover } from "@/components/book-card";
 import { BookLink } from "@/components/book-link";
+import { FinishByNote } from "@/components/finish-by-note";
 import { SENT_EVENT, useOffline, usePendingItems } from "@/components/offline-provider";
 import { RecentEntries, type LogBook } from "@/components/progress-log";
 import { QuickLog, type MovedResult, type QuickLogBook } from "@/components/quick-log";
@@ -25,6 +28,10 @@ import { Card, CardContent } from "@/components/ui/card";
 export interface NowReadingBook extends QuickLogBook, LogBook {
   authors: string[];
   coverUrl: string | null;
+  /** The day to finish it by (lib/finish-by.ts), and whether it's a
+   *  borrowed copy, whose day reads as its due date. */
+  finishBy: Date | null;
+  ownership: BookOwnership;
   progress: { id: string; page: number; date: Date; minutes: number | null }[];
 }
 
@@ -214,6 +221,13 @@ const NowReadingRow = memo(function NowReadingRow({
   );
   const pct =
     currentPage != null && book.pageCount ? Math.min((currentPage / book.pageCount) * 100, 100) : null;
+  const now = new Date();
+  const deadline = finishByState(
+    { ...book, currentPage },
+    pagesPerDay(pass, prefs.paceFrom, now, prefs.timeZone),
+    now,
+    prefs.timeZone,
+  );
 
   return (
     <Card size="sm">
@@ -234,11 +248,26 @@ const NowReadingRow = memo(function NowReadingRow({
             {book.authors.length > 0 && (
               <p className="truncate text-sm text-muted-foreground">{book.authors.join(", ")}</p>
             )}
-            {quiet && (
-              <p className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
-                <Hourglass className="size-3" aria-hidden="true" />
-                {quiet}
-              </p>
+            {(quiet || deadline) && (
+              <div className="mt-1.5 flex flex-wrap items-start gap-1.5">
+                {deadline && (
+                  <FinishByNote
+                    line={finishByLine(
+                      deadline,
+                      info,
+                      now,
+                      prefs,
+                      book.ownership === BookOwnership.BORROWED,
+                    )}
+                  />
+                )}
+                {quiet && (
+                  <p className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+                    <Hourglass className="size-3" aria-hidden="true" />
+                    {quiet}
+                  </p>
+                )}
+              </div>
             )}
           </div>
           {pct !== null && (

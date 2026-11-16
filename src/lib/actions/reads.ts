@@ -76,6 +76,8 @@ export async function readAgain(bookId: string): Promise<void> {
         dateStarted: now,
         dateFinished: null,
         currentPage: null,
+        // A day to finish the last read by means nothing for this one.
+        finishBy: null,
       },
     }),
     prisma.progressEntry.create({

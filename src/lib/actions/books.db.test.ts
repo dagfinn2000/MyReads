@@ -742,3 +742,94 @@ describe("deleteBook", () => {
     expect(await prisma.book.findUnique({ where: { id: bk.id } })).not.toBeNull();
   });
 });
+
+describe("finish by and borrowed from", () => {
+  it("saves who a borrowed copy is from and its day, and no lender for a copy you own", async () => {
+    await redirectOf(
+      createBook(
+        {},
+        form({
+          ...bookFields,
+          ownership: "BORROWED",
+          borrowedFrom: " the library ",
+          finishBy: "2026-12-03",
+          status: "WANT_TO_READ",
+        }),
+      ),
+    );
+    const book = await prisma.book.findFirstOrThrow({ where: { userId } });
+    expect(book.borrowedFrom).toBe("the library");
+    expect(book.finishBy).toEqual(new Date("2026-12-03T00:00:00Z"));
+
+    await redirectOf(
+      createBook({}, form({ ...bookFields, title: "Mine", borrowedFrom: "Anna", finishBy: "2026-12-03" })),
+    );
+    const mine = await prisma.book.findFirstOrThrow({ where: { userId, title: "Mine" } });
+    expect(mine.borrowedFrom).toBeNull();
+    // A day to finish by is anyone's (the reading card sets it for any book).
+    expect(mine.finishBy).toEqual(new Date("2026-12-03T00:00:00Z"));
+  });
+
+  it("gives a book added as Read no day to finish by", async () => {
+    await redirectOf(
+      createBook(
+        {},
+        form({ ...bookFields, ownership: "BORROWED", finishBy: "2026-12-03", status: "READ" }),
+      ),
+    );
+    expect((await prisma.book.findFirstOrThrow({ where: { userId } })).finishBy).toBeNull();
+  });
+
+  it("edits both while borrowed, and leaves them be when the form has no boxes", async () => {
+    const bk = await makeBook({ ownership: "BORROWED", borrowedFrom: "Anna" });
+    await redirectOf(
+      updateBook(
+        bk.id,
+        {},
+        form({ ...bookFields, ownership: "BORROWED", borrowedFrom: "", finishBy: "2026-12-24" }),
+      ),
+    );
+    let after = await prisma.book.findUniqueOrThrow({ where: { id: bk.id } });
+    expect(after.borrowedFrom).toBeNull();
+    expect(after.finishBy).toEqual(new Date("2026-12-24T00:00:00Z"));
+
+    // Owned now: no boxes, so both stay.
+    await prisma.book.update({ where: { id: bk.id }, data: { borrowedFrom: "Anna" } });
+    await redirectOf(updateBook(bk.id, {}, form({ ...bookFields, ownership: "OWNED" })));
+    after = await prisma.book.findUniqueOrThrow({ where: { id: bk.id } });
+    expect(after.borrowedFrom).toBe("Anna");
+    expect(after.finishBy).toEqual(new Date("2026-12-24T00:00:00Z"));
+  });
+
+  it("sets, keeps and clears the day from the reading card, and lets it go on finishing", async () => {
+    const bk = await makeBook({ status: ReadingStatus.READING, dateStarted: new Date() });
+    await updateReading(bk.id, {}, form({ status: "READING", finishBy: "2026-12-01" }));
+    let after = await prisma.book.findUniqueOrThrow({ where: { id: bk.id } });
+    expect(after.finishBy).toEqual(new Date("2026-12-01T00:00:00Z"));
+
+    // A card without the box (none is drawn for some statuses) changes nothing.
+    await updateReading(bk.id, {}, form({ status: "READING", review: "Good so far" }));
+    after = await prisma.book.findUniqueOrThrow({ where: { id: bk.id } });
+    expect(after.finishBy).toEqual(new Date("2026-12-01T00:00:00Z"));
+
+    await updateReading(bk.id, {}, form({ status: "READING", finishBy: "" }));
+    after = await prisma.book.findUniqueOrThrow({ where: { id: bk.id } });
+    expect(after.finishBy).toBeNull();
+
+    await updateReading(bk.id, {}, form({ status: "READING", finishBy: "2026-12-01" }));
+    await updateReading(bk.id, {}, form({ status: "READ", finishBy: "2026-12-01" }));
+    after = await prisma.book.findUniqueOrThrow({ where: { id: bk.id } });
+    expect(after.finishBy).toBeNull();
+  });
+
+  it("starts a book back from Read without the old day", async () => {
+    const bk = await makeBook({
+      status: ReadingStatus.READ,
+      timesRead: 1,
+      dateFinished: new Date("2026-01-02T00:00:00Z"),
+      finishBy: new Date("2026-01-01T00:00:00Z"),
+    });
+    await updateReading(bk.id, {}, form({ status: "WANT_TO_READ" }));
+    expect((await prisma.book.findUniqueOrThrow({ where: { id: bk.id } })).finishBy).toBeNull();
+  });
+});

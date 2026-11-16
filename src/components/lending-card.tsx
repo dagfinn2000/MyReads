@@ -41,10 +41,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 export function LendingCard({
   bookId,
   ownership,
+  borrowedFrom,
   loans,
 }: {
   bookId: string;
   ownership: BookOwnership;
+  /** Who a borrowed copy is from, if the reader said. */
+  borrowedFrom?: string | null;
   /** Newest first. */
   loans: Loan[];
 }) {
@@ -122,7 +125,11 @@ export function LendingCard({
           </div>
         ) : (
           !formOpen && (
-            <p className="text-sm text-muted-foreground">{LENDING_NOTE[mode]}</p>
+            <p className="text-sm text-muted-foreground">
+              {mode === "borrowed" && borrowedFrom
+                ? `Borrowed from ${borrowedFrom}. It isn't yours to lend.`
+                : LENDING_NOTE[mode]}
+            </p>
           )
         )}
 

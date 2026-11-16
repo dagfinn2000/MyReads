@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import type { Prisma } from "@prisma/client";
-import { BookFormat, ReadingStatus } from "@/lib/enums";
+import { BookFormat, BookOwnership, ReadingStatus } from "@/lib/enums";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { idSchema } from "@/lib/reading-log-input";
@@ -17,6 +17,7 @@ import { calendarDay, dayKey, endOfZonedDay, zonedDayStart } from "@/lib/dates";
 import { currentPassEntries } from "@/lib/progress";
 import { anchorMoment } from "@/lib/reading-log";
 import { settleReadingState } from "@/lib/reading-state";
+import { keepsFinishBy } from "@/lib/finish-by";
 import { aspectRatingUpdate } from "@/lib/rating-breakdown";
 import { buildSearchText, foldForSearch } from "@/lib/utils";
 import { AFTER_ADD } from "@/lib/preferences";
@@ -101,6 +102,8 @@ export async function createBook(
       seriesNumber: data.seriesNumber ?? null,
       format: data.format,
       ownership: data.ownership,
+      borrowedFrom: data.ownership === BookOwnership.BORROWED ? (data.borrowedFrom ?? null) : null,
+      finishBy: keepsFinishBy(reading.status) ? (data.finishBy ?? null) : null,
       openLibraryId: data.openLibraryId ?? null,
       status: reading.status,
       statusKey: reading.status === status ? choice.statusKey : null,
@@ -153,7 +156,7 @@ export async function updateBook(
 
   const existing = await prisma.book.findFirst({
     where: { id: bookId, userId },
-    select: { coverUrl: true, fields: true, currentPage: true },
+    select: { coverUrl: true, fields: true, currentPage: true, status: true },
   });
   if (!existing) return { error: "Book not found" };
 
@@ -194,6 +197,12 @@ export async function updateBook(
       seriesNumber: data.seriesNumber ?? null,
       format: data.format,
       ownership: data.ownership,
+      // Only sent while the copy is borrowed (book-form.tsx): otherwise
+      // both stay as they were.
+      ...(data.borrowedFrom !== undefined && { borrowedFrom: data.borrowedFrom }),
+      ...(data.finishBy !== undefined && {
+        finishBy: keepsFinishBy(existing.status) ? data.finishBy : null,
+      }),
       // Submitted by the form and validated by bookSchema, but previously
       // dropped here — the only field of the schema the update ignored.
       openLibraryId: data.openLibraryId ?? null,
@@ -271,6 +280,17 @@ export async function updateReading(
     return { error: `Page ${currentPage} is past the end of the book (${existing.pageCount} pages)` };
   }
 
+  // Finishing or stopping lets the finish-by day go. A book coming back
+  // from Read or Did Not Finish starts without one, unless the card sent
+  // one; otherwise the card's box says (absent = as it was).
+  const finishBy = !keepsFinishBy(data.status)
+    ? null
+    : data.finishBy !== undefined
+      ? data.finishBy
+      : keepsFinishBy(existing.status)
+        ? undefined
+        : null;
+
   // The book update and its automatic reading-log entries land together —
   // a page-0 anchor without the page change it anchors (or vice versa)
   // would corrupt the pass bookkeeping.
@@ -289,6 +309,7 @@ export async function updateReading(
         dateFinished,
         timesRead,
         currentPage,
+        ...(finishBy !== undefined && { finishBy }),
         // Starting a book (or finishing, stopping) takes it off Up next.
         ...(data.status !== ReadingStatus.WANT_TO_READ && { upNextRank: null }),
       },

@@ -268,6 +268,16 @@ model Book {
   /// Where you are in the book right now. Kept for READING and DNF
   /// ("stopped at p. 218"); cleared when the book is finished or reshelved.
   currentPage  Int?
+  /// The day the reader means to finish it by (a book club, a library's
+  /// due date): a calendar day, saved as midnight UTC like every date typed
+  /// into a date field. Shown only while the book is to read or being read,
+  /// and cleared when it's finished or put down (lib/finish-by.ts). Null =
+  /// no such day.
+  finishBy     DateTime?
+  /// Who or where a borrowed copy is from ("the library", "Anna"). Only
+  /// shown while `ownership` is BORROWED; kept if it changes, so a copy
+  /// borrowed again remembers. Null = not said.
+  borrowedFrom String?
   /// Place on the reader's own Up next list on Now reading, lowest first;
   /// null when it isn't on it. Only Want to Read books show there, and
   /// starting a book takes it off.

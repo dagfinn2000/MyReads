@@ -8,6 +8,7 @@ import type { ActionState } from "@/lib/actions/helpers";
 import type { CatalogueDiffRow, CatalogueValues } from "@/lib/catalogue-values";
 import { FORMAT_LABELS, OWNERSHIP_LABELS, toDateInputValue } from "@/lib/display";
 import type { FieldValues } from "@/lib/book-fields";
+import { keepsFinishBy } from "@/lib/finish-by";
 import type { AfterAdd } from "@/lib/preferences";
 import type { SoundEvent } from "@/lib/sounds";
 import type { TagImportSettings } from "@/lib/tag-rules";
@@ -48,6 +49,10 @@ export interface BookFormValues {
   seriesNumber?: string;
   format?: BookFormat;
   ownership?: BookOwnership;
+  /** Who a borrowed copy is from. */
+  borrowedFrom?: string;
+  /** "YYYY-MM-DD": the day to finish it by (lib/finish-by.ts). */
+  finishBy?: string;
   status?: ReadingStatus;
   openLibraryId?: string;
   /** Values of the reader's own fields (lib/book-fields.ts). */
@@ -364,6 +369,41 @@ export function BookForm({
             </Select>
           </div>
         </div>
+
+        {/* A borrowed copy: who it's from, and the day to finish it by
+            (its due date, say), which Now reading counts down to. Sent
+            only while it's borrowed, so changing that leaves both as they
+            were; the day only for a book to read or being read. */}
+        {ownership === BookOwnership.BORROWED && (
+          <div className="flex flex-wrap items-start gap-4">
+            <div className="grid min-w-0 flex-1 basis-56 gap-2 sm:max-w-xs">
+              <Label htmlFor="borrowedFrom">Borrowed from</Label>
+              <Input
+                id="borrowedFrom"
+                name="borrowedFrom"
+                maxLength={200}
+                placeholder="The library, a friend"
+                defaultValue={initial.borrowedFrom ?? ""}
+              />
+            </div>
+            {keepsFinishBy(status) && (
+              <div className="grid gap-2">
+                <Label htmlFor="finishBy">Finish by</Label>
+                <Input
+                  id="finishBy"
+                  name="finishBy"
+                  type="date"
+                  className="w-40"
+                  defaultValue={initial.finishBy ?? ""}
+                  aria-describedby="finishBy-hint"
+                />
+                <p id="finishBy-hint" className="text-xs text-muted-foreground">
+                  The day it&apos;s due back, say.
+                </p>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Keyed on the shelf, so switching shelves starts its fields
             afresh. */}

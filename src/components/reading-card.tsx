@@ -2,7 +2,7 @@
 
 import { useActionState, useEffect, useEffectEvent, useRef } from "react";
 import type { Book, ProgressEntry } from "@prisma/client";
-import { ReadingStatus } from "@/lib/enums";
+import { BookOwnership, ReadingStatus } from "@/lib/enums";
 import { updateReading } from "@/lib/actions/books";
 import { celebrate } from "@/lib/celebrate";
 import { toDateInputValue } from "@/lib/display";
@@ -12,6 +12,9 @@ import { usePreferences } from "@/components/preferences-provider";
 import { useSound } from "@/components/sounds";
 import { pendingPage } from "@/lib/outbox";
 import { currentPassEntries } from "@/lib/progress";
+import { finishByLine, finishByState, keepsFinishBy } from "@/lib/finish-by";
+import { pagesPerDay } from "@/lib/pace";
+import { FinishByNote } from "@/components/finish-by-note";
 import { progressFigure, unitFor } from "@/lib/progress-units";
 import { submitKeepingInput } from "@/lib/submit-form";
 import { ProgressChart, ProgressLog } from "@/components/progress-log";
@@ -100,6 +103,7 @@ export function ReadingCard({
     book.dateStarted?.getTime() ?? 0,
     book.dateFinished?.getTime() ?? 0,
     reading ? "reading" : (book.currentPage ?? 0),
+    book.finishBy?.getTime() ?? 0,
     book.review ?? "",
   ].join("|");
 
@@ -110,6 +114,14 @@ export function ReadingCard({
   const saved = usePendingItems(book.id);
   const page = reading ? pendingPage([...saved.items, ...saved.held], book.id, book.currentPage) : book.currentPage;
   const showBar = page != null && !!book.pageCount;
+  // The day to finish by, and what it takes from the page this device is on.
+  const now = new Date();
+  const deadline = finishByState(
+    { ...book, currentPage: page },
+    reading ? pagesPerDay(passEntries, prefs.paceFrom, now, prefs.timeZone) : null,
+    now,
+    prefs.timeZone,
+  );
 
   return (
     <Card>
@@ -117,6 +129,12 @@ export function ReadingCard({
         <CardTitle>My reading</CardTitle>
       </CardHeader>
       <CardContent className="grid gap-4">
+        {deadline && (
+          <FinishByNote
+            className="justify-self-start"
+            line={finishByLine(deadline, info, now, prefs, book.ownership === BookOwnership.BORROWED)}
+          />
+        )}
         {(showBar || reading || passEntries.length >= 2) && (
           <div className="grid gap-3">
             {showBar && (
@@ -180,6 +198,18 @@ export function ReadingCard({
               defaultDate={toDateInputValue(book.dateFinished, prefs.timeZone)}
               defaultUnknown={book.status === ReadingStatus.READ && !book.dateFinished}
             />
+            {keepsFinishBy(book.status) && (
+              <div className="grid gap-2">
+                <Label htmlFor="finishBy">Finish by</Label>
+                <Input
+                  id="finishBy"
+                  name="finishBy"
+                  type="date"
+                  className="w-40"
+                  defaultValue={toDateInputValue(book.finishBy, prefs.timeZone)}
+                />
+              </div>
+            )}
             {reading ? (
               // Ignored while the book is still being read (the server keeps
               // its own page); it matters only if another tab has moved the

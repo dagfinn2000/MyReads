@@ -158,6 +158,18 @@ export const bookSchema = z.object({
   /** Defaults to OWNED so a form that omits the field (or sends something
    *  unexpected) still saves as an ordinary book on your shelf. */
   ownership: z.enum(BookOwnership).catch(BookOwnership.OWNED),
+  /** Who a borrowed copy is from. The form has the box only while the
+   *  ownership is Borrowed: left out, it stays as it was. Blank clears it. */
+  borrowedFrom: z
+    .string()
+    .trim()
+    .max(200, "Keep who it's borrowed from to 200 characters or fewer")
+    .transform((s) => s || null)
+    .nullable()
+    .optional(),
+  /** The day to finish it by, from the box the form has for a borrowed
+   *  copy. Left out, it stays as it was; blank clears it. */
+  finishBy: finishByField(),
   openLibraryId: z
     .string()
     .trim()
@@ -165,6 +177,18 @@ export const bookSchema = z.object({
     .nullable()
     .optional(),
 });
+
+/** A finish-by day (lib/finish-by.ts): left out = unchanged (undefined),
+ *  blank or unreadable = none (null), else the day. Any day will do, past
+ *  ones too: a book club that has already met is still worth knowing. */
+function finishByField() {
+  return z
+    .string()
+    .max(40)
+    .optional()
+    .catch(undefined)
+    .transform((v) => (v === undefined ? undefined : parseDateOrNull(v)));
+}
 
 /** "" → null, unparseable → null, otherwise a valid Date. */
 function parseDateOrNull(s: string): Date | null {
@@ -243,6 +267,9 @@ export const readingSchema = z.object({
     .nullable()
     .optional()
     .catch(null),
+  /** The day to finish by, while the book is to read or being read; the
+   *  card has no box otherwise, and finishing or stopping clears it. */
+  finishBy: finishByField(),
   /** The "Don't remember" box next to the finish date: a ticked checkbox
    *  sends "on", an unticked one sends nothing. */
   finishedUnknown: z.preprocess((v) => v === "on" || v === "true" || v === true, z.boolean()),

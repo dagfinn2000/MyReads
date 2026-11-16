@@ -1,7 +1,7 @@
 import { Fragment } from "react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ReadingStatus } from "@/lib/enums";
+import { BookOwnership, ReadingStatus } from "@/lib/enums";
 import { BookOpenText } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { getPreferences, getSession } from "@/lib/current-user";
@@ -11,6 +11,8 @@ import { formatWeekdayDay } from "@/lib/display";
 import { onThisDay } from "@/lib/on-this-day";
 import { onThisDayCandidates } from "@/lib/on-this-day-query";
 import { overdueReminder } from "@/lib/overdue-query";
+import { finishByLine, finishBySoon, finishByState } from "@/lib/finish-by";
+import { unitFor } from "@/lib/progress-units";
 import {
   bookDayPageTotalsForUser,
   dayMinuteTotals,
@@ -21,6 +23,7 @@ import { upNext, upNextWithPicks } from "@/lib/up-next";
 import { BookCover } from "@/components/book-card";
 import { BookLink } from "@/components/book-link";
 import { DailyGoalRing } from "@/components/daily-goal-ring";
+import { FinishByNote } from "@/components/finish-by-note";
 import { NowReading } from "@/components/now-reading";
 import { OnThisDayCard } from "@/components/on-this-day-card";
 import { OverdueNotice } from "@/components/overdue-notice";
@@ -61,6 +64,8 @@ export default async function NowReadingPage() {
         lengthMinutes: true,
         currentPage: true,
         dateStarted: true,
+        finishBy: true,
+        ownership: true,
         // Oldest first, page breaking same-instant ties (the anchor first).
         progress: {
           orderBy: [{ date: "asc" }, { page: "asc" }],
@@ -80,6 +85,13 @@ export default async function NowReadingPage() {
         seriesName: true,
         seriesNumber: true,
         upNextRank: true,
+        // For "Finish by" (lib/finish-by.ts).
+        finishBy: true,
+        ownership: true,
+        format: true,
+        pageCount: true,
+        lengthMinutes: true,
+        currentPage: true,
       },
       orderBy: [{ createdAt: "desc" }, { id: "asc" }],
     }),
@@ -106,6 +118,16 @@ export default async function NowReadingPage() {
   const lastTouched = (b: (typeof reading)[number]) =>
     (b.progress[b.progress.length - 1]?.date ?? b.dateStarted)?.getTime() ?? 0;
   reading.sort((a, b) => lastTouched(b) - lastTouched(a) || a.title.localeCompare(b.title));
+
+  // Books still to start whose finish-by day is near or past, soonest
+  // first: there's no row of theirs above to say so.
+  const now = new Date();
+  const dueSoon = wantToRead
+    .flatMap((b) => {
+      const state = finishByState(b, null, now, prefs.timeZone);
+      return state && finishBySoon(state) ? [{ book: b, state }] : [];
+    })
+    .sort((a, b) => a.state.due.localeCompare(b.state.due) || a.book.title.localeCompare(b.book.title));
 
   const { picks, suggested } = upNextWithPicks(wantToRead, seriesBooks, UP_NEXT);
   const next = [...picks, ...suggested];
@@ -162,6 +184,39 @@ export default async function NowReadingPage() {
           </div>
         }
       />
+
+      {dueSoon.length > 0 && (
+        <section className="grid min-w-0 gap-2" aria-labelledby="finish-soon">
+          <h2 id="finish-soon" className="text-sm font-medium text-muted-foreground">
+            To start soon
+          </h2>
+          <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            {dueSoon.map(({ book: b, state }) => (
+              <li key={b.id}>
+                <BookLink
+                  bookId={b.id}
+                  className="lift-cover flex items-start gap-3 rounded-lg border bg-card p-2.5 text-card-foreground"
+                >
+                  <BookCover book={b} className="cover-shadow aspect-[2/3] w-10 shrink-0" />
+                  <span className="grid min-w-0 gap-1">
+                    <span className="truncate font-heading text-sm font-medium">{b.title}</span>
+                    <FinishByNote
+                      className="justify-self-start"
+                      line={finishByLine(
+                        state,
+                        unitFor(b, prefs),
+                        now,
+                        prefs,
+                        b.ownership === BookOwnership.BORROWED,
+                      )}
+                    />
+                  </span>
+                </BookLink>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <OnThisDayCard {...onThisDay(memories.events, memories.quotes, todayKey, prefs.timeZone)} />
 
