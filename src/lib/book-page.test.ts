@@ -15,11 +15,12 @@ describe("arrangeBookCards", () => {
       { key: "history", forced: false },
       { key: "lending", forced: false },
       { key: "quotes", forced: false },
+      { key: "similar", forced: false },
     ]);
   });
 
   it("follows the reader's order", () => {
-    const order: BookPageCard[] = ["reading", "quotes", "shelves", "lending", "history"];
+    const order: BookPageCard[] = ["reading", "similar", "quotes", "shelves", "lending", "history"];
     expect(arrangeBookCards(prefs(order), {}).map((c) => c.key)).toEqual(order);
   });
 
@@ -30,6 +31,7 @@ describe("arrangeBookCards", () => {
       "shelves",
       "history",
       "lending",
+      "similar",
     ]);
   });
 
@@ -37,7 +39,7 @@ describe("arrangeBookCards", () => {
     const arranged = arrangeBookCards(prefs(undefined, ["lending", "quotes"]), {
       lending: false,
     });
-    expect(arranged.map((c) => c.key)).toEqual(["shelves", "reading", "history"]);
+    expect(arranged.map((c) => c.key)).toEqual(["shelves", "reading", "history", "similar"]);
   });
 
   it("keeps a hidden Lending card with an open loan, in its place", () => {
@@ -49,12 +51,13 @@ describe("arrangeBookCards", () => {
       { key: "shelves", forced: false },
       { key: "history", forced: false },
       { key: "quotes", forced: false },
+      { key: "similar", forced: false },
     ]);
   });
 
   it("keeps hidden Quotes, Read history and My reading that have content", () => {
     const arranged = arrangeBookCards(
-      prefs(undefined, ["reading", "history", "quotes", "lending", "shelves"]),
+      prefs(undefined, ["reading", "history", "quotes", "lending", "shelves", "similar"]),
       { reading: true, history: true, quotes: true, lending: false },
     );
     expect(arranged).toEqual([
@@ -64,9 +67,13 @@ describe("arrangeBookCards", () => {
     ]);
   });
 
-  it("never forces the Shelves card", () => {
-    const arranged = arrangeBookCards(prefs(undefined, ["shelves"]), { shelves: true });
+  it("never forces the Shelves card, or More like this", () => {
+    const arranged = arrangeBookCards(prefs(undefined, ["shelves", "similar"]), {
+      shelves: true,
+      similar: true,
+    });
     expect(arranged.map((c) => c.key)).not.toContain("shelves");
+    expect(arranged.map((c) => c.key)).not.toContain("similar");
   });
 
   it("can leave the page with no cards at all", () => {

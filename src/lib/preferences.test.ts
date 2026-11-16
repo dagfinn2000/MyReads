@@ -209,12 +209,13 @@ describe("parsePreferences: the newer settings", () => {
 
   it("always lists every book-page card once", () => {
     expect(parsePreferences({ bookPageCards: ["quotes", "bogus", "quotes"] }).bookPageCards).toEqual(
-      ["quotes", "shelves", "reading", "history", "lending"],
+      ["quotes", "shelves", "reading", "history", "lending", "similar"],
     );
+    // A stored order from before More like this gets it at the end.
     expect(
       parsePreferences({ bookPageCards: ["lending", "history", "reading", "shelves", "quotes"] })
         .bookPageCards,
-    ).toEqual(["lending", "history", "reading", "shelves", "quotes"]);
+    ).toEqual(["lending", "history", "reading", "shelves", "quotes", "similar"]);
     expect(parsePreferences({ bookPageCards: "quotes" }).bookPageCards).toEqual([
       ...BOOK_PAGE_CARDS,
     ]);

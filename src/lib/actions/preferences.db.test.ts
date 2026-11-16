@@ -69,7 +69,7 @@ describe("savePreferences", () => {
     } as unknown as Parameters<typeof savePreferences>[0]);
     expect(await storedPreferences()).toEqual({
       findLinks: [{ name: "Library", url: "https://lib.example/search?q={isbn}" }],
-      bookPageCards: ["quotes", "shelves", "reading", "history", "lending"],
+      bookPageCards: ["quotes", "shelves", "reading", "history", "lending", "similar"],
     });
   });
 

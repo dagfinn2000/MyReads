@@ -286,7 +286,7 @@ export const DAILY_GOAL_PAGES = ["5", "10", "15", "20", "25", "30", "40", "50", 
 export const DAILY_GOAL_MINUTES = ["5", "10", "15", "20", "30", "45", "60", "90", "120"] as const;
 
 /** Cards on a book's page, in their default order. */
-export const BOOK_PAGE_CARDS = ["shelves", "reading", "history", "lending", "quotes"] as const;
+export const BOOK_PAGE_CARDS = ["shelves", "reading", "history", "lending", "quotes", "similar"] as const;
 
 export const BOOK_PAGE_CARD_LABELS: Record<(typeof BOOK_PAGE_CARDS)[number], string> = {
   shelves: "Shelves",
@@ -294,6 +294,7 @@ export const BOOK_PAGE_CARD_LABELS: Record<(typeof BOOK_PAGE_CARDS)[number], str
   history: "Read history",
   lending: "Lending",
   quotes: "Notes & quotes",
+  similar: "More like this",
 };
 
 /** A long description in full, or its first lines with a More button. */
