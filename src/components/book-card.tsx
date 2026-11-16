@@ -2,11 +2,13 @@ import type { Book } from "@prisma/client";
 import { BookOwnership, ReadingStatus } from "@/lib/enums";
 import {
   ArrowLeftRight,
+  CalendarClock,
   Gift,
   HandHeart,
   Heart,
   type LucideIcon,
 } from "lucide-react";
+import type { FinishSoon } from "@/lib/finish-by";
 import { BookLink } from "@/components/book-link";
 import { SpriteIcon } from "@/components/icon-sprite";
 import { Badge } from "@/components/ui/badge";
@@ -172,6 +174,8 @@ export type BookCardBook = Pick<
   lentOut?: boolean;
   /** Lent out and past the day it was due back. */
   overdue?: boolean;
+  /** A finish-by day close by, or past (lib/finish-by.ts). */
+  finishSoon?: FinishSoon;
   /** For the details the View menu can add: an ownership badge, and a list
    *  row's date. */
   ownership?: BookOwnership;
@@ -219,6 +223,29 @@ function LentBadge({ overdue }: { overdue?: boolean }) {
     >
       <HandHeart className="size-3" />
       Lent
+    </Badge>
+  );
+}
+
+/** "By Fri 21 Nov", or "Late" once the finish-by day has gone. */
+function FinishSoonBadge({ soon }: { soon: FinishSoon }) {
+  return soon.late ? (
+    <Badge
+      variant="outline"
+      className="border-rose-400 text-[10px] text-rose-700 dark:border-rose-700 dark:text-rose-300"
+      title={`Past its finish-by day, ${soon.day}`}
+    >
+      <CalendarClock className="size-3" />
+      Late
+    </Badge>
+  ) : (
+    <Badge
+      variant="outline"
+      className="border-amber-400 text-[10px] text-amber-700 dark:text-amber-300"
+      title={`To finish by ${soon.day}`}
+    >
+      <CalendarClock className="size-3" />
+      By {soon.day}
     </Badge>
   );
 }
@@ -319,6 +346,7 @@ export function BookRow({
         {details.showRating && book.rating ? <Stars value={book.rating} /> : null}
         {details.showOwnership && book.ownership && <OwnershipBadge ownership={book.ownership} />}
         {book.lentOut && <LentBadge overdue={book.overdue} />}
+            {book.finishSoon && <FinishSoonBadge soon={book.finishSoon} />}
         {details.showStatus && (
           <StatusBadge status={book.status} statusKey={book.statusKey} className="hidden text-[10px] sm:inline-flex" />
         )}
@@ -388,6 +416,7 @@ export function BookCard({
               <OwnershipBadge ownership={book.ownership} />
             )}
             {book.lentOut && <LentBadge overdue={book.overdue} />}
+            {book.finishSoon && <FinishSoonBadge soon={book.finishSoon} />}
             {details.showStatus && (
               <StatusBadge status={book.status} statusKey={book.statusKey} className="text-[10px]" />
             )}

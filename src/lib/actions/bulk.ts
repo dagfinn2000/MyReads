@@ -20,6 +20,7 @@ import { getPreferences } from "@/lib/current-user";
 import { parseFilters } from "@/lib/library-filters";
 import { resolveBookWhere } from "@/lib/library-where";
 import { settleReadingState } from "@/lib/reading-state";
+import { keepsFinishBy } from "@/lib/finish-by";
 import { customStatusOf } from "@/lib/statuses";
 import { moodOf } from "@/lib/moods";
 
@@ -205,6 +206,9 @@ export async function bulkUpdateBooks(input: BulkInput): Promise<BulkResult> {
             ...next,
             statusKey: key,
             ...(status !== ReadingStatus.WANT_TO_READ && { upNextRank: null }),
+            // Finished or put down, the finish-by day goes; so does one
+            // left over from before, on a book coming back from either.
+            ...((!keepsFinishBy(status) || !keepsFinishBy(b.status)) && { finishBy: null }),
           },
         });
       }

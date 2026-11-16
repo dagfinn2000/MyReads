@@ -66,6 +66,14 @@ page by page.
   for today or an earlier day. Each book shows your pace and when you're
   likely to finish. A book you haven't logged for two weeks says when
   you last read it.
+- **Finish by:** give a book a day to have it read by, a book club's
+  meeting or a library's due date, on its reading card. The book then
+  says how much a day it takes from today (in pages, percent or time),
+  turns green when your pace gets there and amber when it doesn't, and
+  red once the day has passed. Books still to start whose day is two
+  weeks off or less show under To start soon on Now reading, and the
+  library marks them with the day. Finishing or putting a book down
+  clears its day.
 - In Preferences you can log ebooks in percent, and audiobooks in percent
   or in hours and minutes listened. Percent needs the book's page count,
   and time needs the audiobook's length too. Both go on the book's Edit
@@ -200,6 +208,9 @@ page by page.
   can fill one in, say a month after you lend it). Past that day the book
   turns red, shows under the Overdue filter, and a note on the Library and
   Now reading pages reminds you who has it.
+- Mark a book as Borrowed and say who it's from (the library, a friend).
+  Its page says "Borrowed from …", and its Finish by day reads as the
+  day it's due back.
 - Search, filter, sort and group the library. Authors sort by surname, the
   way a bookshelf is filed. More filters also finds books by page count
   ("up to 300 pages"), the year they came out, and when you added them

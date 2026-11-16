@@ -4,6 +4,7 @@ import { updateBook } from "@/lib/actions/books";
 import { getPreferences, getSession } from "@/lib/current-user";
 import { tagImportFor } from "@/lib/user-tags";
 import { cleanFieldValues } from "@/lib/book-fields";
+import { toDateInputValue } from "@/lib/display";
 import { BookForm } from "@/components/book-form";
 
 export const dynamic = "force-dynamic";
@@ -65,6 +66,11 @@ export default async function EditBookPage({
           seriesNumber: book.seriesNumber?.toString() ?? "",
           format: book.format,
           ownership: book.ownership,
+          borrowedFrom: book.borrowedFrom ?? "",
+          finishBy: toDateInputValue(book.finishBy, prefs.timeZone),
+          // Not editable here (the reading card is), but it says whether a
+          // finish-by day means anything.
+          status: book.status,
           openLibraryId: book.openLibraryId ?? "",
           fields: cleanFieldValues(book.fields, prefs.customFields),
         }}

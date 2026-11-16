@@ -24,6 +24,7 @@ import { seriesKey } from "@/lib/series";
 import { customStatusOf } from "@/lib/statuses";
 import { seriesAnchor } from "@/lib/series-list";
 import { authorAnchor } from "@/lib/authors-list";
+import { finishSoonBadge, type FinishSoon } from "@/lib/finish-by";
 import { isOverdue } from "@/lib/loans";
 import { overdueReminder } from "@/lib/overdue-query";
 import { canonicalViewQuery } from "@/lib/saved-views";
@@ -80,6 +81,8 @@ const librarySelect = {
   ownership: true,
   tags: true,
   moods: true,
+  // Turned into the card's finish-by badge here (finishSoon).
+  finishBy: true,
 } satisfies Prisma.BookSelect;
 
 /** What the card actually receives: the selected columns plus whether the
@@ -87,6 +90,7 @@ const librarySelect = {
 type LibraryBook = Prisma.BookGetPayload<{ select: typeof librarySelect }> & {
   lentOut: boolean;
   overdue: boolean;
+  finishSoon?: FinishSoon;
 };
 
 /** A book as its card gets it: the fields only sorting and grouping read
@@ -99,6 +103,7 @@ function toCardBook<B extends LibraryBook & { shelves?: unknown }>({
   tags: _tags,
   moods: _moods,
   shelves: _shelves,
+  finishBy: _finishBy,
   ...card
 }: B) {
   return card;
@@ -288,6 +293,7 @@ export default async function BooksPage({
     ...b,
     lentOut: lent.has(b.id),
     overdue: late.has(b.id),
+    finishSoon: finishSoonBadge(b, now, prefs),
     shelves: shelvesOf.get(b.id) ?? [],
   }));
   const overdueNote = await overdueReminder(userId, prefs, openLoans);

@@ -103,6 +103,22 @@ describe("read history bookkeeping", () => {
     expect(after.progress[0].page).toBe(0);
   });
 
+  it("readAgain starts the new pass without an old finish-by day", async () => {
+    // A finished book shouldn't have one, but a day left over (from a
+    // Finished tap on Now reading, which keeps it for Undo) mustn't come
+    // back with the re-read.
+    const bk = await makeBook({
+      status: ReadingStatus.READ,
+      dateFinished: new Date("2026-01-10T00:00:00.000Z"),
+      timesRead: 1,
+      finishBy: new Date("2026-01-12T00:00:00.000Z"),
+    });
+    await readAgain(bk.id);
+    const after = await prisma.book.findUniqueOrThrow({ where: { id: bk.id } });
+    expect(after.status).toBe(ReadingStatus.READING);
+    expect(after.finishBy).toBeNull();
+  });
+
   it("readAgain does nothing to a book that isn't finished", async () => {
     const bk = await makeBook({ status: ReadingStatus.READING });
     await readAgain(bk.id);
@@ -279,6 +295,23 @@ describe("bulkUpdateBooks", () => {
     expect(after.status).toBe(ReadingStatus.WANT_TO_READ);
     expect(after.timesRead).toBe(0);
     expect(after.currentPage).toBeNull();
+  });
+
+  it("keeps a finish-by day from to-read to reading, and drops it on finishing", async () => {
+    const due = new Date("2026-12-01T00:00:00.000Z");
+    const [toRead, reading] = await Promise.all([
+      makeBook({ status: ReadingStatus.WANT_TO_READ, finishBy: due }),
+      makeBook({ status: ReadingStatus.READING, finishBy: due }),
+    ]);
+    await bulkUpdateBooks({ bookIds: [toRead.id], status: ReadingStatus.READING });
+    await bulkUpdateBooks({ bookIds: [reading.id], status: ReadingStatus.READ });
+
+    const [a, b] = await Promise.all([
+      prisma.book.findUniqueOrThrow({ where: { id: toRead.id } }),
+      prisma.book.findUniqueOrThrow({ where: { id: reading.id } }),
+    ]);
+    expect(a.finishBy?.toISOString()).toBe(due.toISOString());
+    expect(b.finishBy).toBeNull();
   });
 
   it("merges tags instead of appending duplicates", async () => {

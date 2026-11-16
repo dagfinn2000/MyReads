@@ -30,6 +30,7 @@ import {
 } from "@/lib/saved-views";
 import { parseThemeSetting, serializeThemeSetting } from "@/lib/themes";
 import { MAX_SMART_SHELVES, smartRulesQuery } from "@/lib/smart-shelves";
+import { keepsFinishBy } from "@/lib/finish-by";
 
 /**
  * Restore of a MyReads export — either the `library.json` from a zip backup
@@ -185,6 +186,10 @@ const importedBookSchema = z.object({
   currentPage: z.number().int().min(0).max(100000).nullable().optional().catch(null),
   /** Additive: the book's place on the reader's own Up next list. */
   upNextRank: z.number().int().min(1).max(1_000_000).nullable().optional().catch(null),
+  /** Additive: the day to finish it by (lib/finish-by.ts). */
+  finishBy: dateField,
+  /** Additive: who a borrowed copy is from. */
+  borrowedFrom: z.string().trim().max(200).nullable().optional().catch(null),
   /** Additive: values of the reader's own fields, by field id, checked
    *  against the account's fields once its settings are restored. */
   fields: z.unknown().optional(),
@@ -748,6 +753,8 @@ export async function importLibrary(
         timesRead,
         currentPage: b.currentPage ?? null,
         upNextRank: b.status === ReadingStatus.WANT_TO_READ ? (b.upNextRank ?? null) : null,
+        finishBy: keepsFinishBy(b.status) ? (b.finishBy ?? null) : null,
+        borrowedFrom: b.borrowedFrom || null,
         searchText: buildSearchText(b.title, b.authors, b.seriesName),
         ...fieldColumns(cleanFieldValues(b.fields, account.customFields), account.customFields),
         // Preserve "date added" ordering from the original library.
