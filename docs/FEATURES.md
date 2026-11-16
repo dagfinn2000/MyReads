@@ -288,6 +288,10 @@ page by page.
   can go by pages or, with the timer, by time. Above it are your current
   and longest streaks: point at one (or tap it) and its days light up.
   Tap a day to see the books you read that day.
+- **This year against last:** books, pages, reading days, time and your
+  average rating so far this year beside last year by the same day, with
+  how many books this year's pace comes to. Below them, both years' books
+  as two lines through the year; point at a day for both counts.
 - **Reading habits:** which days of the week you read most, pages on an
   average reading day, how long a book takes you from start to finish, and
   with the timer your average sitting and pages an hour.

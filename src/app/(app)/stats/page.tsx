@@ -26,6 +26,7 @@ import { minutesInWindow } from "@/lib/reading-time";
 import { buildCalendar } from "@/lib/reading-calendar";
 import { readingHabits } from "@/lib/reading-habits";
 import { pileSummary } from "@/lib/to-read-pile";
+import { yearVersus } from "@/lib/year-versus";
 import { aspectSummaries, ratingDistribution, ratingLean } from "@/lib/rating-breakdown";
 import {
   booksReadAllTime,
@@ -56,6 +57,7 @@ import { ReadingHabitsCard } from "@/components/reading-habits-card";
 import { RatingsCard } from "@/components/ratings-card";
 import { ReadingHeatmap } from "@/components/reading-heatmap";
 import { ToReadPileCard } from "@/components/to-read-pile-card";
+import { YearVersusCard } from "@/components/year-versus-card";
 import { Bar, Duration, MoodBar, StatCard } from "@/components/stat-blocks";
 import { allMoods, bookMoods, offeredMoods } from "@/lib/moods";
 import { StatsPeriodNav } from "@/components/stats-period-nav";
@@ -350,6 +352,12 @@ export default async function StatsPage({
     },
   );
 
+  // This year so far against last year by the same day, by the same rules
+  // as the cards. Only once last year has something in it.
+  const versus = hidden.has("versus")
+    ? null
+    : yearVersus(passes, todayKey, prefs, goalContext.readingDays, timed ? minutesByDay : null);
+
   // The to-read pile: how it grew over twelve months, and how long it lasts
   // at the pace of the last twelve (books read by the cards' rules).
   const pile = hidden.has("pile") ? null : pileSummary(books, new Date(), prefs.timeZone);
@@ -532,6 +540,8 @@ export default async function StatsPage({
           </CardContent>
         </Card>
       )}
+
+      {versus && <YearVersusCard versus={versus} />}
 
       {!hidden.has("habits") && (
         <ReadingHabitsCard
