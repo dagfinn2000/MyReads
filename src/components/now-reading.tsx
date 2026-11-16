@@ -20,6 +20,7 @@ import { BookLink } from "@/components/book-link";
 import { FinishByNote } from "@/components/finish-by-note";
 import { SENT_EVENT, useOffline, usePendingItems } from "@/components/offline-provider";
 import { RecentEntries, type LogBook } from "@/components/progress-log";
+import { StopReasonChips } from "@/components/stop-reason-chips";
 import { QuickLog, type MovedResult, type QuickLogBook } from "@/components/quick-log";
 import { giveBackTime } from "@/components/reading-timer";
 import { Button } from "@/components/ui/button";
@@ -354,6 +355,7 @@ function MovedRow({ moved, onUndone }: { moved: Moved; onUndone: () => void }) {
         {pending ? "Undoing…" : "Undo"}
       </Button>
       {error && <span className="w-full text-destructive">{error}</span>}
+      {moved.undo.from === "DNF" && <StopReasonChips bookId={moved.bookId} />}
     </div>
   );
 }

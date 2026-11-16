@@ -31,6 +31,7 @@ import {
 import { parseThemeSetting, serializeThemeSetting } from "@/lib/themes";
 import { MAX_SMART_SHELVES, smartRulesQuery } from "@/lib/smart-shelves";
 import { keepsFinishBy } from "@/lib/finish-by";
+import { parseStopReason } from "@/lib/stop-reasons";
 
 /**
  * Restore of a MyReads export — either the `library.json` from a zip backup
@@ -190,6 +191,9 @@ const importedBookSchema = z.object({
   finishBy: dateField,
   /** Additive: who a borrowed copy is from. */
   borrowedFrom: z.string().trim().max(200).nullable().optional().catch(null),
+  /** Additive: why a book was put down (lib/stop-reasons.ts); an unknown
+   *  key is dropped. */
+  stopReason: z.unknown().optional().transform(parseStopReason),
   /** Additive: values of the reader's own fields, by field id, checked
    *  against the account's fields once its settings are restored. */
   fields: z.unknown().optional(),
@@ -755,6 +759,7 @@ export async function importLibrary(
         upNextRank: b.status === ReadingStatus.WANT_TO_READ ? (b.upNextRank ?? null) : null,
         finishBy: keepsFinishBy(b.status) ? (b.finishBy ?? null) : null,
         borrowedFrom: b.borrowedFrom || null,
+        stopReason: b.status === ReadingStatus.DNF ? b.stopReason : null,
         searchText: buildSearchText(b.title, b.authors, b.seriesName),
         ...fieldColumns(cleanFieldValues(b.fields, account.customFields), account.customFields),
         // Preserve "date added" ordering from the original library.

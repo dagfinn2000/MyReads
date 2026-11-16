@@ -290,6 +290,13 @@ export async function updateReading(
       : keepsFinishBy(existing.status)
         ? undefined
         : null;
+  // Why it was put down holds only while it stays put down: the card's menu
+  // (there only on a book already stopped) says, or it stays as it was. A
+  // book newly stopped here starts without one.
+  const stopReason =
+    data.status !== ReadingStatus.DNF || existing.status !== ReadingStatus.DNF
+      ? null
+      : data.stopReason;
 
   // The book update and its automatic reading-log entries land together —
   // a page-0 anchor without the page change it anchors (or vice versa)
@@ -310,6 +317,7 @@ export async function updateReading(
         timesRead,
         currentPage,
         ...(finishBy !== undefined && { finishBy }),
+        ...(stopReason !== undefined && { stopReason }),
         // Starting a book (or finishing, stopping) takes it off Up next.
         ...(data.status !== ReadingStatus.WANT_TO_READ && { upNextRank: null }),
       },

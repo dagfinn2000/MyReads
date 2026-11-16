@@ -27,6 +27,7 @@ import { buildCalendar } from "@/lib/reading-calendar";
 import { readingHabits } from "@/lib/reading-habits";
 import { pileSummary } from "@/lib/to-read-pile";
 import { yearVersus } from "@/lib/year-versus";
+import { stopSummary } from "@/lib/stop-reasons";
 import { aspectSummaries, ratingDistribution, ratingLean } from "@/lib/rating-breakdown";
 import {
   booksReadAllTime,
@@ -58,6 +59,7 @@ import { RatingsCard } from "@/components/ratings-card";
 import { ReadingHeatmap } from "@/components/reading-heatmap";
 import { ToReadPileCard } from "@/components/to-read-pile-card";
 import { YearVersusCard } from "@/components/year-versus-card";
+import { StoppedCard } from "@/components/stopped-card";
 import { Bar, Duration, MoodBar, StatCard } from "@/components/stat-blocks";
 import { allMoods, bookMoods, offeredMoods } from "@/lib/moods";
 import { StatsPeriodNav } from "@/components/stats-period-nav";
@@ -389,6 +391,12 @@ export default async function StatsPage({
     .slice(0, 10);
   const maxMood = topMoods.length > 0 ? moodCounts.get(topMoods[0].key)! : 0;
 
+  // Why books were put down: every book on Did Not Finish now, once there
+  // is one.
+  const stoppedBooks = books.filter((b) => b.status === ReadingStatus.DNF);
+  const stopped =
+    hidden.has("stopped") || stoppedBooks.length === 0 ? null : stopSummary(stoppedBooks);
+
   // Format breakdown.
   const formatCounts = new Map<string, number>();
   for (const b of breakdownBooks) {
@@ -682,6 +690,8 @@ export default async function StatsPage({
             </CardContent>
           </Card>
         )}
+
+        {stopped && <StoppedCard summary={stopped} fmt={fmt} />}
 
         {randomQuote && !hidden.has("quote") && (
           <Card>

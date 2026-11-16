@@ -302,6 +302,8 @@ export async function moveFromReadingAs(
         dateFinished: next.dateFinished,
         timesRead: next.timesRead,
         currentPage: next.currentPage,
+        // A fresh stop starts without a reason; Now reading asks for one.
+        stopReason: null,
       },
     });
     // An untracked read (no entries) logs nothing, as in logProgress.

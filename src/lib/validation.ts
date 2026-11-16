@@ -2,6 +2,7 @@ import { z } from "zod";
 import { BookFormat, BookOwnership, ReadingStatus } from "@/lib/enums";
 import { normalizeIsbn } from "@/lib/isbn";
 import { CHAPTER_MAX, tidyChapter } from "@/lib/book-notes";
+import { parseStopReason } from "@/lib/stop-reasons";
 
 /**
  * What a stored cover URL may be: a local path ("/api/covers/…") or an
@@ -270,6 +271,14 @@ export const readingSchema = z.object({
   /** The day to finish by, while the book is to read or being read; the
    *  card has no box otherwise, and finishing or stopping clears it. */
   finishBy: finishByField(),
+  /** Why it was put down, from the menu the card has while the book is Did
+   *  Not Finish: a reason's key, or "none". Left out, it stays as it was. */
+  stopReason: z
+    .string()
+    .max(40)
+    .optional()
+    .catch(undefined)
+    .transform((v) => (v === undefined ? undefined : parseStopReason(v))),
   /** The "Don't remember" box next to the finish date: a ticked checkbox
    *  sends "on", an unticked one sends nothing. */
   finishedUnknown: z.preprocess((v) => v === "on" || v === "true" || v === true, z.boolean()),
