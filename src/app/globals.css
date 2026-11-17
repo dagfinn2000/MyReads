@@ -8406,6 +8406,64 @@ html[data-covers="plain"] .drawn-cover {
   animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
+/* ── Page turns ────────────────────────────────────────────────────────────
+   Moving to another section from the top bar turns the page like a book's
+   (lib/page-turn.ts). The browser holds a picture of the old page over the
+   new one. Going on (page-turn-on), the old page lifts at its right edge
+   and turns away over the left, as if round a spine, darkening as it tips
+   from the light; the new page under it comes out of its shadow. Going
+   back (page-turn-back), the new page turns in from the left over the old.
+   The top bar is pictured on its own, so it stays put like the binding.
+   Seen in perspective from in front, a turning page swings towards you and
+   out past the left edge, which a page a few screens deep keeps gentle. */
+html.page-turn .top-bar {
+  view-transition-name: top-bar;
+}
+html.page-turn::view-transition-old(root),
+html.page-turn::view-transition-new(root) {
+  mix-blend-mode: normal;
+  transform-origin: left center;
+  animation-duration: 0.55s;
+  animation-fill-mode: both;
+}
+html.page-turn-on::view-transition-old(root) {
+  z-index: 1;
+  animation-name: page-turn-away;
+  animation-timing-function: cubic-bezier(0.45, 0.05, 0.6, 1);
+}
+html.page-turn-on::view-transition-new(root) {
+  animation-name: page-turn-shade;
+  animation-timing-function: ease-out;
+}
+html.page-turn-back::view-transition-new(root) {
+  z-index: 1;
+  animation-name: page-turn-away;
+  animation-direction: reverse;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.55, 0.95);
+}
+html.page-turn-back::view-transition-old(root) {
+  animation-name: page-turn-shade;
+  animation-direction: reverse;
+  animation-timing-function: ease-in;
+}
+@keyframes page-turn-away {
+  from {
+    transform: perspective(300vw) rotateY(0deg);
+    filter: brightness(1);
+    box-shadow: 0 0 0 rgb(0 0 0 / 0);
+  }
+  to {
+    transform: perspective(300vw) rotateY(-90deg);
+    filter: brightness(0.72);
+    box-shadow: 0 0 5rem rgb(0 0 0 / 0.35);
+  }
+}
+@keyframes page-turn-shade {
+  from {
+    filter: brightness(0.86);
+  }
+}
+
 /* Words and ticks on the app's amber (a series' "Next" and "Reading" tags
    and its read ticks). Themes repaint that amber, from Newsprint's black
    to Blueprint's white, so what goes on it is worked out from it: a deep
