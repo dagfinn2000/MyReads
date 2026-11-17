@@ -25,6 +25,7 @@ import { customStatusOf } from "@/lib/statuses";
 import { seriesAnchor } from "@/lib/series-list";
 import { authorAnchor } from "@/lib/authors-list";
 import { finishSoonBadge, type FinishSoon } from "@/lib/finish-by";
+import { shelfWear, type ShelfWear } from "@/lib/shelf-wear";
 import { isOverdue } from "@/lib/loans";
 import { overdueReminder } from "@/lib/overdue-query";
 import { canonicalViewQuery } from "@/lib/saved-views";
@@ -83,6 +84,9 @@ const librarySelect = {
   moods: true,
   // Turned into the card's finish-by badge here (finishSoon).
   finishBy: true,
+  // With the rating, the dates and createdAt: its shelf wear
+  // (lib/shelf-wear.ts).
+  timesRead: true,
 } satisfies Prisma.BookSelect;
 
 /** What the card actually receives: the selected columns plus whether the
@@ -104,9 +108,18 @@ function toCardBook<B extends LibraryBook & { shelves?: unknown }>({
   moods: _moods,
   shelves: _shelves,
   finishBy: _finishBy,
+  timesRead: _timesRead,
   ...card
 }: B) {
   return card;
+}
+
+/** A card's shelf wear, as plain fields so an unchanged card compares
+ *  equal (components/library-view.tsx); none at all for a book without. */
+function wearFields(wear: ShelfWear | undefined) {
+  return wear && (wear.dust || wear.worn)
+    ? { dust: wear.dust, worn: wear.worn, wearNote: wear.note }
+    : {};
 }
 
 export default async function BooksPage({
@@ -318,6 +331,26 @@ export default async function BooksPage({
     ? [...new Map(sliced.groups.flatMap((g) => g.books).map((b) => [b.id, b])).values()]
     : sorted.slice(0, limit);
 
+  // Shelf wear for the books on screen: dust needs a book's newest log,
+  // asked for only where one can be newer than its dates (lib/shelf-wear.ts).
+  const wearOf = new Map<string, ShelfWear>();
+  if (prefs.shelfWear === "on") {
+    const logged = visibleBooks
+      .filter((b) => b.status === ReadingStatus.READING || b.status === ReadingStatus.DNF)
+      .map((b) => b.id);
+    const lastLogs =
+      logged.length > 0
+        ? await prisma.progressEntry.groupBy({
+            by: ["bookId"],
+            where: { bookId: { in: logged } },
+            _max: { date: true },
+          })
+        : [];
+    const lastLog = new Map(lastLogs.map((l) => [l.bookId, l._max.date]));
+    for (const b of visibleBooks) wearOf.set(b.id, shelfWear(b, lastLog.get(b.id) ?? null, now));
+  }
+  const toCard = (b: (typeof visibleBooks)[number]) => ({ ...toCardBook(b), ...wearFields(wearOf.get(b.id)) });
+
   // Series headings say how far through each series the reader is. That
   // takes the whole library: on the Want to Read tab, the books already
   // read aren't on screen.
@@ -488,9 +521,9 @@ export default async function BooksPage({
       {/* Mounted even when nothing matches, so a bulk change that empties
           the view still shows how it went (LibraryView shows `empty`). */}
       <LibraryView
-        books={visibleBooks.map(toCardBook)}
+        books={visibleBooks.map(toCard)}
         groups={
-          sliced?.groups.map((g) => ({ ...g, books: g.books.map(toCardBook) })) ?? null
+          sliced?.groups.map((g) => ({ ...g, books: g.books.map(toCard) })) ?? null
         }
         limit={limit}
         maxLimit={MAX_PAGE_SIZE}

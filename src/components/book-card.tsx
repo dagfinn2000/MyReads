@@ -22,6 +22,7 @@ import {
   type FormatPrefs,
 } from "@/lib/display";
 import { coverArt } from "@/lib/cover-art";
+import { dustGrain } from "@/lib/shelf-wear";
 import { coverAt, coverSrcSet, hasCoverCopies } from "@/lib/cover-src";
 import type { LibraryDisplay } from "@/lib/library-view";
 import { cn } from "@/lib/utils";
@@ -37,6 +38,8 @@ export function BookCover({
   flightTarget,
   tilt = false,
   reading,
+  wear,
+  wearTitle = true,
 }: {
   book: Pick<Book, "title" | "coverUrl"> & { authors?: string[] };
   className?: string;
@@ -50,12 +53,19 @@ export function BookCover({
   /** Where the reader is, for a book being read: a bookmark ribbon hangs
    *  down the cover to there (ProgressRibbon). */
   reading?: ReadingAt | null;
+  /** Its shelf wear (lib/shelf-wear.ts): dust and wear drawn over the
+   *  cover, and what they mean under the pointer unless `wearTitle` is
+   *  false (where the link around it names the book that way). */
+  wear?: CoverWear;
+  wearTitle?: boolean;
 }) {
+  const worn = !!wear && (!!wear.dust || !!wear.worn);
   return (
     <div
       className={cn("book-cover relative overflow-hidden rounded-md bg-muted", className)}
       data-cover-for={flightTarget}
       data-tilt={tilt ? "" : undefined}
+      title={worn && wearTitle && wear.wearNote ? wear.wearNote : undefined}
     >
       {book.coverUrl ? (
         // eslint-disable-next-line @next/next/no-img-element
@@ -75,10 +85,23 @@ export function BookCover({
       ) : (
         <MissingCover title={book.title} author={book.authors?.[0]} />
       )}
+      {worn && (
+        <span
+          className="cover-wear"
+          data-dust={wear.dust || undefined}
+          data-worn={wear.worn || undefined}
+          data-grain={dustGrain(book.title)}
+          aria-hidden="true"
+        />
+      )}
       {reading && <ProgressRibbon at={reading} />}
     </div>
   );
 }
+
+/** A book's shelf wear as cards carry it (lib/shelf-wear.ts): dust and
+ *  wear from 0 to 3, and what they mean. */
+export type CoverWear = { dust?: number; worn?: number; wearNote?: string };
 
 /** How far into a book the reader is: a page of so many. */
 export type ReadingAt = { page: number; of: number };
@@ -211,7 +234,7 @@ export type BookCardBook = Pick<
   ownership?: BookOwnership;
   createdAt?: Date;
   dateFinished?: Date | null;
-};
+} & CoverWear;
 
 /** Which details a card or row shows (the library's View menu). */
 export type CardDetails = Pick<
@@ -357,7 +380,12 @@ export function BookRow({
       bookId={book.id}
       className="surface lift group flex items-center gap-3 rounded-lg border bg-card p-2 shadow-(--surface-shadow) transition-colors hover:border-ring/60"
     >
-      <BookCover book={book} className="aspect-[2/3] w-10 shrink-0" reading={readingAt(book)} />
+      <BookCover
+        book={book}
+        className="aspect-[2/3] w-10 shrink-0"
+        reading={readingAt(book)}
+        wear={book}
+      />
       <div className="grid min-w-0 flex-1 gap-0.5">
         <p className="truncate font-heading text-sm font-medium group-hover:underline">
           {book.title}
@@ -415,7 +443,13 @@ export function BookCard({
         compact ? "gap-1.5 p-2" : "gap-2 p-3",
       )}
     >
-      <BookCover book={book} className="aspect-[2/3] w-full" tilt reading={readingAt(book)} />
+      <BookCover
+        book={book}
+        className="aspect-[2/3] w-full"
+        tilt
+        reading={readingAt(book)}
+        wear={book}
+      />
       {progress !== null && (
         <div
           className="cover-bar -mt-1 h-1.5 rounded-full bg-muted"
@@ -476,6 +510,7 @@ export function BookCoverTile({ book, compact = false }: { book: BookCardBook; c
         className="cover-shadow aspect-[2/3] w-full"
         tilt
         reading={readingAt(book)}
+        wear={book}
       />
       {progress !== null && (
         <div
@@ -504,13 +539,16 @@ export function BookCoverTile({ book, compact = false }: { book: BookCardBook; c
  *  (globals.css). The title shows on hover and to screen readers. */
 export function BookOnShelf({ book }: { book: BookCardBook }) {
   const byline = book.authors.length ? ` by ${book.authors.join(", ")}` : "";
+  const note = book.wearNote ? `\n${book.wearNote}` : "";
   return (
-    <BookLink bookId={book.id} className="lift-cover block" title={`${book.title}${byline}`}>
+    <BookLink bookId={book.id} className="lift-cover block" title={`${book.title}${byline}${note}`}>
       <BookCover
         book={book}
         className="cover-shadow aspect-[2/3] w-full"
         tilt
         reading={readingAt(book)}
+        wear={book}
+        wearTitle={false}
       />
       <span className="sr-only">{book.title}</span>
     </BookLink>

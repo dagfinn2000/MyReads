@@ -270,6 +270,15 @@ page by page.
   the start, the foot of the cover at the end. Point at it for the page.
   Preferences > Appearance picks crimson, navy, green or gold, or the plain
   bar under the cover instead.
+- **Shelf wear.** Books show how they've been treated. One nobody has
+  touched for a year or more (started, logged or finished; for a book on
+  the pile, since it was added) gathers a faint film of dust, a little more
+  at two years and four. A favourite, read again and again or rated 4½
+  stars or more, looks well worn: creases down the hinge, the colour rubbed
+  off its corners, a corner once folded back. In the Spines view the dust
+  lies along the tops of the books and favourites have cracked spines.
+  Point at a cover to see why. Preferences > Appearance can keep every
+  book like new.
 - **Covers that follow the pointer.** With a mouse or trackpad, a cover in
   the library or on a book's page leans back where the pointer rests on
   it, as if pressed, and catches a soft light under the pointer, then eases

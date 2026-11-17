@@ -211,6 +211,7 @@ export default async function RootLayout({
       data-background-motion={prefs?.backgroundMotion}
       data-cover-tilt={prefs?.coverTilt}
       data-ribbon={prefs?.progressRibbon}
+      data-shelf-wear={prefs?.shelfWear}
       data-book-backdrop={prefs?.bookBackdrop}
       // Themes for parts of the app, which the pre-paint script picks from.
       data-theme-parts={

@@ -6,6 +6,8 @@ import { BookLink } from "@/components/book-link";
 import { usePreferences } from "@/components/preferences-provider";
 import { drawnSpineHex, spineAuthor, spineInk, spineShape } from "@/lib/book-spine";
 import { bookStatusName } from "@/lib/statuses";
+import { dustGrain } from "@/lib/shelf-wear";
+import type { CoverWear } from "@/components/book-card";
 import { cn } from "@/lib/utils";
 
 /** What a spine needs to know about its book. */
@@ -17,7 +19,7 @@ export type SpineBook = Pick<
   ownership?: BookOwnership;
   /** Lent out right now. */
   lentOut?: boolean;
-};
+} & CoverWear;
 
 /** The spine's colour: its cover's main colour once read
  *  (lib/cover-colours.ts), else its drawn cover's. */
@@ -63,6 +65,7 @@ export function BookSpine({
   if (book.ownership === BookOwnership.WISHLIST) notes.push("on your wishlist");
   else if (book.ownership === BookOwnership.GIVEN_AWAY) notes.push("given away");
   else if (book.lentOut) notes.push("lent out");
+  if (book.wearNote) notes.push(book.wearNote);
   const label = ownLabel ?? `${book.title}${byline}. ${notes.join(" · ")}`;
 
   return (
@@ -90,6 +93,14 @@ export function BookSpine({
       >
         <span className="spine-title">{book.title}</span>
         {author && <span className="spine-author">{author}</span>}
+        {(!!book.dust || !!book.worn) && (
+          <span
+            className="spine-wear"
+            data-dust={book.dust || undefined}
+            data-worn={book.worn || undefined}
+            data-grain={dustGrain(book.title)}
+          />
+        )}
       </span>
       {reading && <span className="spine-bookmark" aria-hidden="true" />}
     </BookLink>

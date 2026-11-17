@@ -205,6 +205,10 @@ export const COVER_TILTS = ["on", "off"] as const;
  *  replaced (components/book-card.tsx, globals.css "Bookmark ribbons"). */
 export const PROGRESS_RIBBONS = ["crimson", "navy", "green", "gold", "bar"] as const;
 
+/** Whether books show how they've been treated (lib/shelf-wear.ts): dust on
+ *  ones untouched for a year or more, wear on well-read favourites. */
+export const SHELF_WEARS = ["on", "off"] as const;
+
 /** Colour steps for the reading calendar (see lib/heatmap.ts). */
 export const HEATMAP_SCALES = ["standard", "gentle", "heavy", "auto"] as const;
 
@@ -387,6 +391,7 @@ export type Background = (typeof BACKGROUNDS)[number];
 export type BackgroundMotion = (typeof BACKGROUND_MOTIONS)[number];
 export type CoverTilt = (typeof COVER_TILTS)[number];
 export type ProgressRibbon = (typeof PROGRESS_RIBBONS)[number];
+export type ShelfWearSetting = (typeof SHELF_WEARS)[number];
 export type HeatmapScale = (typeof HEATMAP_SCALES)[number];
 export type StartPage = (typeof START_PAGES)[number];
 export type NavItem = (typeof NAV_ITEMS)[number];
@@ -473,6 +478,7 @@ export type Preferences = {
   backgroundMotion: BackgroundMotion;
   coverTilt: CoverTilt;
   progressRibbon: ProgressRibbon;
+  shelfWear: ShelfWearSetting;
   bookBackdrop: BookBackdrop;
   /** Themes for parts of the app (lib/themes.ts THEME_PARTS), as stored
    *  theme settings. A part left out shows the theme used everywhere. */
@@ -668,6 +674,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
   backgroundMotion: "moving",
   coverTilt: "on",
   progressRibbon: "crimson",
+  shelfWear: "on",
   bookBackdrop: "cover",
   partThemes: {},
   ownCss: "",
@@ -1009,6 +1016,7 @@ export function parsePreferences(raw: unknown): Preferences {
     backgroundMotion: pick(BACKGROUND_MOTIONS, obj.backgroundMotion, d.backgroundMotion),
     coverTilt: pick(COVER_TILTS, obj.coverTilt, d.coverTilt),
     progressRibbon: pick(PROGRESS_RIBBONS, obj.progressRibbon, d.progressRibbon),
+    shelfWear: pick(SHELF_WEARS, obj.shelfWear, d.shelfWear),
     bookBackdrop: pick(BOOK_BACKDROPS, obj.bookBackdrop, d.bookBackdrop),
     partThemes: parsePartThemes(obj.partThemes),
     ownCss: parseOwnCss(obj.ownCss),
