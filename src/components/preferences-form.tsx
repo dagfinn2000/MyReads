@@ -1009,7 +1009,7 @@ export function PreferencesForm({
         />
         <Choice
           label="Moving backgrounds"
-          hint="Falling rain and snow, twinkling stars, drifting aurora and ripples."
+          hint="Falling rain and snow, twinkling stars, drifting aurora and ripples, and the forest themes’ fireflies and leaves."
           value={prefs.backgroundMotion}
           options={[
             { value: "moving", label: "On" },

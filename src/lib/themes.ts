@@ -60,6 +60,11 @@ export interface ThemeDef {
    *  block), which shows instead of the Background chosen in Preferences
    *  while this theme is on. */
   ownBackground?: true;
+  /** Brings things that move over its picture too (fireflies in Wildwood,
+   *  falling leaves in Birchwood), drawn by components/background-scene.tsx
+   *  in place of the Background's scene; they hold still while motion is
+   *  off. */
+  scene?: "fireflies" | "leaves";
 }
 
 /** A kind's themes in the order the menu shows them: the light ones
@@ -1243,6 +1248,30 @@ export const THEMES: ThemeDef[] = [
     ownBackground: true,
   },
   {
+    id: "birchwood",
+    name: "Birchwood",
+    mode: "light",
+    category: "scenes",
+    note: "a birch wood on a sunny morning",
+    swatch: ["#f1f3e9", "#1d5c5a"],
+    pattern:
+      "repeating-linear-gradient(90deg, transparent 0 20%, #fbfbf5 20% 30%, transparent 30% 58%, #fbfbf5 58% 66%, transparent 66% 100%), radial-gradient(circle at 30% 0%, #b9d68a 0 30%, transparent 46%)",
+    ownBackground: true,
+    scene: "leaves",
+  },
+  {
+    id: "wildwood",
+    name: "Wildwood",
+    mode: "dark",
+    category: "scenes",
+    note: "deep in a forest at night, fireflies among the trees",
+    swatch: ["#08130f", "#f2c45a"],
+    pattern:
+      "radial-gradient(circle at 26% 76%, #fff3b0 0 3%, rgb(242 196 90 / 0.45) 7%, transparent 13%), radial-gradient(circle at 78% 26%, #fff3b0 0 2.5%, rgb(242 196 90 / 0.4) 6%, transparent 11%), linear-gradient(90deg, transparent 6%, #020604 6% 20%, transparent 20% 82%, #020604 82% 92%, transparent 92%), linear-gradient(105deg, transparent 40%, rgb(184 226 207 / 0.14) 46% 56%, transparent 62%), linear-gradient(#08130f, #17302a)",
+    ownBackground: true,
+    scene: "fireflies",
+  },
+  {
     id: "bitmap",
     name: "Bitmap",
     mode: "light",
@@ -1514,6 +1543,12 @@ export const DARK_THEME_IDS = THEMES.filter((t) => t.mode === "dark").map(
 /** The themes with a picture of their own behind the page, which wins
  *  over the Background chosen in Preferences. */
 export const OWN_BACKGROUND_IDS = THEMES.filter((t) => t.ownBackground).map((t) => t.id);
+
+/** The themes that bring moving things of their own over their picture,
+ *  and which (components/background-scene.tsx draws them). */
+export const THEME_SCENES: Record<string, string> = Object.fromEntries(
+  THEMES.filter((t) => t.scene).map((t) => [t.id, t.scene!]),
+);
 
 /** Each theme's page background, for the browser's title bar colour
  *  (the installed app's top bar on a phone). */

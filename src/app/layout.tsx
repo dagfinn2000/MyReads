@@ -34,6 +34,7 @@ import {
   DARK_THEME_IDS,
   THEME_CLASS_PREFIX,
   THEME_INIT_SCRIPT,
+  THEME_SCENES,
   parseThemeSetting,
 } from "@/lib/themes";
 
@@ -230,7 +231,9 @@ export default async function RootLayout({
             match. Must stay ahead of {children}. */}
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         <BackgroundScene
-          background={prefs?.background ?? "plain"}
+          background={
+            (setting?.kind === "fixed" && THEME_SCENES[setting.id]) || (prefs?.background ?? "plain")
+          }
           timeZone={prefs?.timeZone ?? ""}
           sky={sky}
         />

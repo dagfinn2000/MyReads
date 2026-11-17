@@ -1,5 +1,6 @@
 /**
- * Keeps the moving backgrounds (components/background-scene.tsx) cheap to
+ * Keeps the moving backgrounds (components/background-scene.tsx), and the
+ * fireflies and leaves two themes bring of their own, cheap to
  * run. Their animations are written in CSS (globals.css, "Moving
  * backgrounds"), which also decides when they may play; once each one is
  * running, this hands it over to a Web Animation that carries on from
@@ -34,6 +35,11 @@ const BEATS: Record<string, number> = {
   "bg-glint": 50,
   // The aurora drifts a few pixels a second, so under a pixel a step.
   "bg-drift": 100,
+  // Wildwood's fireflies wander at most a pixel a step, and flash over a
+  // second or more.
+  "bg-firefly-flash": 50,
+  "bg-firefly-x": 50,
+  "bg-firefly-y": 50,
 };
 
 /** Left with CSS: a shooting star moves somewhere new each time it loops,

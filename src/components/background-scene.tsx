@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { handOverSceneMotion } from "@/lib/scene-motion";
 import { skyAt, skyStyle } from "@/lib/sky";
+import { THEME_SCENES } from "@/lib/themes";
 
 /**
  * What lies and moves behind the pages for the backgrounds that are
@@ -33,20 +34,23 @@ import { skyAt, skyStyle } from "@/lib/sky";
  * The background is read from <html> rather than taken as a prop alone, so
  * a change in Preferences (which sets the attribute at once) shows here
  * straight away too. A theme with a picture of its own behind the page
- * (`data-own-background`) replaces it, and then there is no scene.
+ * (`data-own-background`) replaces it, and then there is no scene, unless
+ * the theme brings one of its own (lib/themes.ts, `scene`): the fireflies
+ * of Wildwood, or Birchwood's falling leaves.
  */
 
 const subscribe = (fn: () => void) => {
   const observer = new MutationObserver(fn);
   observer.observe(document.documentElement, {
     attributes: true,
-    attributeFilter: ["data-background", "data-own-background"],
+    attributeFilter: ["data-background", "data-own-background", "data-theme"],
   });
   return () => observer.disconnect();
 };
 const readBackground = () => {
   const root = document.documentElement;
-  return root.hasAttribute("data-own-background") ? "plain" : (root.dataset.background ?? "plain");
+  if (root.hasAttribute("data-own-background")) return THEME_SCENES[root.dataset.theme ?? ""] ?? "plain";
+  return root.dataset.background ?? "plain";
 };
 
 /** Raindrops on the pond: where each lands, how often, and when first. */
@@ -144,6 +148,52 @@ const STARS = (() => {
   }));
 })();
 
+/** Wildwood's fireflies, low among the trees for the most part. Each one
+ *  wanders on its own slow loop, side to side (--wx over --sx) and up and
+ *  down (--wy over --sy) at paces that never meet, so its path doesn't
+ *  repeat, and flashes on its own beat (--t). The far ones are smaller and
+ *  dimmer. --o is how bright each glows while nothing may move. */
+const FIREFLIES = (() => {
+  const rand = seeded(43);
+  return scatter(rand, 36).map(({ x, y }) => {
+    const near = rand() < 0.5;
+    return style({
+      left: `${fixed(x)}%`,
+      top: `${fixed(20 + 76 * (y / 100) ** 0.75)}%`,
+      "--size": `${fixed(near ? between(rand, 18, 28) : between(rand, 9, 14), 1)}px`,
+      "--o": fixed(near ? between(rand, 0.7, 1) : between(rand, 0.35, 0.6)),
+      "--t": `${fixed(between(rand, 4, 9), 1)}s`,
+      "--p": fixed(rand(), 3),
+      "--wx": `${fixed(between(rand, 16, 48), 1)}px`,
+      "--sx": `${fixed(between(rand, 9, 19), 1)}s`,
+      "--px": fixed(rand(), 3),
+      "--wy": `${fixed(between(rand, 10, 32), 1)}px`,
+      "--sy": `${fixed(between(rand, 6.5, 14), 1)}s`,
+      "--py": fixed(rand(), 3),
+    });
+  });
+})();
+
+/** Birchwood's leaves, now and then one coming down, rocking from side to
+ *  side as it falls: a few, each its own size, colour and pace. */
+const LEAVES = (() => {
+  const rand = seeded(59);
+  const colours = ["#9cc46a", "#c9d16a", "#e2c25a", "#b8cf74", "#d8a94c"];
+  return scatter(rand, 15).map(({ x }) =>
+    style({
+      left: `${fixed(x)}%`,
+      "--size": `${fixed(between(rand, 11, 17), 1)}px`,
+      "--leaf": colours[Math.floor(rand() * colours.length)],
+      "--t": `${fixed(between(rand, 24, 40), 1)}s`,
+      "--p": fixed(rand(), 3),
+      "--sway": `${fixed(between(rand, 22, 48), 1)}px`,
+      "--rock": `${fixed(between(rand, 25, 50))}deg`,
+      "--s": `${fixed(between(rand, 3.2, 5.6), 1)}s`,
+      "--sp": fixed(rand(), 3),
+    }),
+  );
+})();
+
 export function BackgroundScene({
   background,
   timeZone,
@@ -217,6 +267,24 @@ export function BackgroundScene({
           <Stars />
           <ShootingStars count={3} />
         </>
+      );
+      break;
+    case "fireflies":
+      scene = (
+        <b className="bg-many">
+          {FIREFLIES.map((s, i) => (
+            <i key={i} className="bg-firefly" style={s} />
+          ))}
+        </b>
+      );
+      break;
+    case "leaves":
+      scene = (
+        <b className="bg-many">
+          {LEAVES.map((s, i) => (
+            <i key={i} className="bg-falling-leaf" style={s} />
+          ))}
+        </b>
       );
       break;
     case "aurora":

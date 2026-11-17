@@ -525,7 +525,7 @@ tab goes away. You can also keep the house and leave the avatar out.
 
 ## Look and feel
 
-- 190 colour themes, 86 light, 86 dark and the Silly set, or a light
+- 192 colour themes, 87 light, 87 dark and the Silly set, or a light
   and a dark one that switch with your
   device, with an accent colour of your own on top if you like. Your
   choice follows you to every device you sign in on, unless you give one
@@ -748,6 +748,23 @@ tab goes away. You can also keep the house and leave the avatar out.
     Bitmap and Dot Matrix in light, 8-Bit, Departures and Teletext in
     dark.
   - Six more in the Silly set (see below).
+- Two forests, the one scene that fills the whole window, with things
+  in it that move:
+  - Wildwood (dark): deep in a forest at night. Old trunks crowd in from
+    the edges and stand back into the dark, moonlight comes down through
+    the leaves in pale shafts, mist lies low among the ferns, mushrooms
+    glow faintly at the roots, and fireflies drift between the trees,
+    each lighting up now and then. Gold for what is chosen.
+  - Birchwood (light): a birch wood on a sunny morning. White trunks
+    marked in black, sunlight slanting down through fresh green leaves,
+    ferns and wood anemones along the foot, and now and then a leaf
+    coming down. Spruce green for what is chosen. The nearest birches keep
+    to the margins beside the page, so their black marks never sit under
+    writing.
+  - Cards in both are a little see-through, so the forest stays behind
+    them. With animations off (Preferences, or the device asking for less
+    motion), or Moving backgrounds off, the fireflies glow where they are
+    and the leaves hang still.
 - The Silly set, listed apart at the bottom of the palette menu as "not
   recommended": Blue Screen, Glowstick, Hot Dog Stand, Toxic, Desktop 95,
   Under Construction (a hazard-striped top bar and Comic Sans), Ugly
@@ -1073,7 +1090,8 @@ tab goes away. You can also keep the house and leave the avatar out.
   Fireflies' meadow, the soft skies behind the glass themes, Meadow's
   sunlight, Cocoa's warmth,
   Party's confetti, Quest's night sky, the balloons, the lemon branch,
-  the dunes, the poppies, the jellyfish, the star chart, Chesterfield's
+  the dunes, the poppies, the jellyfish, the star chart, the two forests,
+  Chesterfield's
   leather, Tweed's herringbone, Letterboard's felt, the glow behind
   Reeded, Fluted and Dichroic, Picnic's gingham, Vaporwave's sunset,
   the bowling alley's carpet, the lava lamp and the rest) shows it whatever background you picked, and

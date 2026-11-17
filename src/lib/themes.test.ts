@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
@@ -9,6 +9,7 @@ import {
   THEME_CLASS_PREFIX,
   THEME_INIT_SCRIPT,
   THEME_BACKGROUNDS,
+  THEME_SCENES,
   THEME_CATEGORIES,
   THEME_STORAGE_KEY,
   THEMES,
@@ -160,6 +161,40 @@ describe("THEMES", () => {
     // scripts/golden-gate-pictures.mjs draws them once instead.
     const picture = readFileSync(path.resolve(__dirname, "../../public/themes/golden-gate.svg"), "utf8");
     expect(picture).not.toContain("<filter");
+  });
+
+  it("brings moving things of its own only over a picture of its own, and shows them only under itself", () => {
+    // The scene takes the Background's place, which only a theme with its
+    // own picture covers; globals.css shows it under that theme alone.
+    const css = readFileSync(path.resolve(__dirname, "../app/globals.css"), "utf8");
+    const withScenes = THEMES.filter((t) => t.scene);
+    expect(withScenes.map((t) => t.id).sort()).toEqual(["birchwood", "wildwood"]);
+    for (const t of withScenes) {
+      expect(t.ownBackground, t.id).toBe(true);
+      expect(THEME_SCENES[t.id]).toBe(t.scene);
+      expect(css).toContain(`.theme-is-${t.id} .bg-scene[data-scene="${t.scene}"]`);
+    }
+  });
+
+  it("moves the forests' fireflies and leaves only while animations may play", () => {
+    const css = readFileSync(path.resolve(__dirname, "../app/globals.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+    const moving = [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)].filter(
+      ([, selector, body]) => /\.bg-(firefly|falling-leaf)\b/.test(selector) && /(^|;|\s)animation:/.test(body),
+    );
+    expect(moving.length).toBe(2);
+    for (const [, selector] of moving) {
+      expect(selector).toContain(':not([data-motion="off"], [data-background-motion="still"])');
+      // …and inside the block for devices that don't ask for less motion.
+      const before = css.slice(0, css.indexOf(selector));
+      expect(before.lastIndexOf("@media (prefers-reduced-motion: no-preference)")).toBeGreaterThan(before.lastIndexOf("}\n}"));
+    }
+  });
+
+  it("draws the forests' pictures with no filter to run as the page paints", () => {
+    const dir = path.resolve(__dirname, "../../public/themes");
+    const forest = readdirSync(dir).filter((f) => /^(wildwood|birchwood)-.*\.svg$/.test(f));
+    expect(forest.length).toBe(14);
+    for (const f of forest) expect(readFileSync(path.join(dir, f), "utf8"), f).not.toContain("<filter");
   });
 
   it("replaces each retired theme with one of its own kind that exists", () => {
