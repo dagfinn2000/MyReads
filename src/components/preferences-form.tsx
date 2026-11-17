@@ -119,6 +119,7 @@ const HTML_ATTRIBUTES: Partial<Record<keyof Preferences, string>> = {
   backgroundMotion: "data-background-motion",
   coverTilt: "data-cover-tilt",
   progressRibbon: "data-ribbon",
+  shelfWear: "data-shelf-wear",
   bookBackdrop: "data-book-backdrop",
 };
 
@@ -923,6 +924,16 @@ export function PreferencesForm({
             { value: "bar", label: "A plain bar under the cover" },
           ]}
           onChange={(v) => update({ progressRibbon: v })}
+        />
+        <Choice
+          label="Shelf wear"
+          hint="Books untouched for a year or more gather a little dust, and ones read again and again, or rated 4½ stars or more, look well worn."
+          value={prefs.shelfWear}
+          options={[
+            { value: "on", label: "Show it" },
+            { value: "off", label: "Keep every book like new" },
+          ]}
+          onChange={(v) => update({ shelfWear: v })}
         />
         <Choice
           label="Corners"

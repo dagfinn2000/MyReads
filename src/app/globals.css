@@ -8630,6 +8630,158 @@ html[data-ribbon="bar"] .cover-ribbon {
   );
 }
 
+/* ── Shelf wear ────────────────────────────────────────────────────────────
+   How a book has been treated shows on its cover (BookCover in
+   components/book-card.tsx, lib/shelf-wear.ts). A book untouched for a year
+   or more gathers dust (data-dust 1-3, at one, two and four years): a pale
+   film, thickest along the top where dust settles, under a scatter of fine
+   specks (one of three scatterings, data-grain, so neighbours differ). A
+   well-read favourite is worn (data-worn 1-3): creases down the hinge by
+   the spine, the colour rubbed off at the fore-edge corners and down the
+   spine's edge, and on the most worn a corner once folded back. The
+   pictures come from scripts/shelf-wear-pictures.mjs. The Spines view has
+   its own version, below: dust on the top of the book and reading creases
+   across the spine. "Shelf wear" in Preferences (data-shelf-wear) turns it
+   off. Nothing here moves. */
+html[data-shelf-wear="off"] .cover-wear,
+html[data-shelf-wear="off"] .spine-wear {
+  display: none;
+}
+.cover-wear,
+.spine-wear {
+  --dust-ink: 226 219 204;
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.cover-wear[data-dust="1"],
+.spine-wear[data-dust="1"] {
+  --film: 0.07;
+  --specks: 0.55;
+}
+.cover-wear[data-dust="2"],
+.spine-wear[data-dust="2"] {
+  --film: 0.13;
+  --specks: 0.8;
+}
+.cover-wear[data-dust="3"],
+.spine-wear[data-dust="3"] {
+  --film: 0.17;
+  --specks: 1;
+}
+.cover-wear[data-dust] {
+  background:
+    linear-gradient(
+      to bottom,
+      rgb(var(--dust-ink) / calc(var(--film) * 3)),
+      rgb(var(--dust-ink) / 0) clamp(2px, 2.5cqi, 5px)
+    ),
+    linear-gradient(
+      to bottom,
+      rgb(var(--dust-ink) / calc(var(--film) * 1.5)),
+      rgb(var(--dust-ink) / var(--film)) 35%,
+      rgb(var(--dust-ink) / calc(var(--film) * 0.55))
+    );
+}
+.cover-wear[data-dust]::before,
+.spine-wear[data-dust]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: var(--specks);
+  background: url("/textures/wear-dust-a.svg") 0 0 / 100% 100% no-repeat;
+}
+:is(.cover-wear, .spine-wear)[data-grain="1"]::before {
+  background-image: url("/textures/wear-dust-b.svg");
+}
+:is(.cover-wear, .spine-wear)[data-grain="2"]::before {
+  background-image: url("/textures/wear-dust-c.svg");
+}
+.cover-wear[data-worn]::after {
+  --rub: 252 248 238;
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    var(--creases) 0 0 / 100% 100% no-repeat,
+    radial-gradient(circle at 100% 0, rgb(var(--rub) / var(--rubbed)), rgb(var(--rub) / 0) var(--corner)),
+    radial-gradient(circle at 100% 100%, rgb(var(--rub) / var(--rubbed)), rgb(var(--rub) / 0) var(--corner)),
+    radial-gradient(circle at 0 100%, rgb(var(--rub) / calc(var(--rubbed) * 0.6)), rgb(var(--rub) / 0) calc(var(--corner) * 0.7)),
+    linear-gradient(to right, rgb(var(--rub) / calc(var(--rubbed) * 0.7)), rgb(var(--rub) / 0) 3.5%);
+}
+.cover-wear[data-worn="1"] {
+  --creases: url("/textures/wear-cover-1.svg");
+  --rubbed: 0.2;
+  --corner: 7cqi;
+}
+.cover-wear[data-worn="2"] {
+  --creases: url("/textures/wear-cover-2.svg");
+  --rubbed: 0.28;
+  --corner: 10cqi;
+}
+.cover-wear[data-worn="3"] {
+  --creases: url("/textures/wear-cover-3.svg");
+  --rubbed: 0.36;
+  --corner: 13cqi;
+}
+/* On a spine: dust lies along the top of the book and films the spine, and
+   wear is reading creases across it (over the lettering, which cracks with
+   it) and its head and foot rubbed pale. The specks keep the size they
+   have on a cover, taking a different stretch of the picture on each. */
+.spine-wear {
+  z-index: 2;
+}
+/* A book that's away keeps its place as an outline, with nothing on it. */
+.book-spine[data-away] .spine-wear {
+  display: none;
+}
+.spine-wear[data-dust] {
+  background:
+    linear-gradient(
+      to bottom,
+      rgb(var(--dust-ink) / calc(var(--film) * 4)),
+      rgb(var(--dust-ink) / calc(var(--film) * 1.2)) 3px,
+      rgb(var(--dust-ink) / var(--film)) 25%,
+      rgb(var(--dust-ink) / calc(var(--film) * 0.5))
+    );
+}
+.spine-wear[data-dust]::before {
+  background-size: 12.5rem 18.75rem;
+  background-position: 0 0;
+}
+.spine-wear[data-grain="1"]::before {
+  background-position: -3rem 0;
+}
+.spine-wear[data-grain="2"]::before {
+  background-position: -6rem 0;
+}
+.spine-wear[data-worn]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    var(--creases) 0 0 / 100% 100% no-repeat,
+    linear-gradient(
+      to bottom,
+      rgb(252 248 238 / var(--rubbed)),
+      rgb(252 248 238 / 0) 3%,
+      rgb(252 248 238 / 0) 97%,
+      rgb(252 248 238 / var(--rubbed))
+    );
+}
+.spine-wear[data-worn="1"] {
+  --creases: url("/textures/wear-spine-1.svg");
+  --rubbed: 0.18;
+}
+.spine-wear[data-worn="2"] {
+  --creases: url("/textures/wear-spine-2.svg");
+  --rubbed: 0.26;
+}
+.spine-wear[data-worn="3"] {
+  --creases: url("/textures/wear-spine-3.svg");
+  --rubbed: 0.34;
+}
+
 /* ── Spines ────────────────────────────────────────────────────────────────
    The library's Spines view and the shelf on a Year in review
    (components/book-spine.tsx): books standing spine out in a bookcase.

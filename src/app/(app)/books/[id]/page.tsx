@@ -22,6 +22,7 @@ import {
 } from "@/lib/display";
 import { AuthorLinks } from "@/components/author-links";
 import { formatLength } from "@/lib/progress-units";
+import { shelfWear } from "@/lib/shelf-wear";
 import { BookBackdrop, BookCover, readingAt } from "@/components/book-card";
 import { BookDescription } from "@/components/book-description";
 import { BookLink } from "@/components/book-link";
@@ -100,6 +101,11 @@ export default async function BookDetailPage({
     },
   });
   if (!book) notFound();
+
+  // Dust and wear on its cover (lib/shelf-wear.ts); the log is oldest first.
+  const shelf =
+    prefs.shelfWear === "on" ? shelfWear(book, book.progress.at(-1)?.date ?? null, new Date()) : null;
+  const wear = shelf ? { dust: shelf.dust, worn: shelf.worn, wearNote: shelf.note } : undefined;
 
   // Sidebar data: every shelf (for the assignment card) and, if this book is
   // part of a series, its siblings ordered by series number.
@@ -244,6 +250,7 @@ export default async function BookDetailPage({
             flightTarget={book.id}
             tilt
             reading={readingAt(book)}
+            wear={wear}
           />
           <div className="flex gap-2">
             <Button asChild variant="outline" size="sm">
