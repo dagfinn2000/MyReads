@@ -279,6 +279,13 @@ page by page.
   lies along the tops of the books and favourites have cracked spines.
   Point at a cover to see why. Preferences > Appearance can keep every
   book like new.
+- **Stickers on covers.** Pin stickers and stamps on a book's cover from
+  its page (the Stickers button under the cover): Signed, First edition, A
+  gift, Re-read, Loved, Book club, Award winner, Bargain, Rare and Holiday
+  read. Each goes on a little crooked, the same way every time, and in the
+  order you pinned them: the library shows the first two on small covers
+  and up to four on big ones, on cards, bare covers and the bookshelf.
+  They go into backups with the book.
 - **Covers that follow the pointer.** With a mouse or trackpad, a cover in
   the library or on a book's page leans back where the pointer rests on
   it, as if pressed, and catches a soft light under the pointer, then eases

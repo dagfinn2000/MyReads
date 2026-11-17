@@ -87,6 +87,8 @@ const librarySelect = {
   // With the rating, the dates and createdAt: its shelf wear
   // (lib/shelf-wear.ts).
   timesRead: true,
+  // Pinned on the cover (lib/stickers.ts).
+  stickers: true,
 } satisfies Prisma.BookSelect;
 
 /** What the card actually receives: the selected columns plus whether the
@@ -109,9 +111,11 @@ function toCardBook<B extends LibraryBook & { shelves?: unknown }>({
   shelves: _shelves,
   finishBy: _finishBy,
   timesRead: _timesRead,
+  stickers,
   ...card
 }: B) {
-  return card;
+  // Most books have none: no empty list for each of them.
+  return stickers.length > 0 ? { ...card, stickers } : card;
 }
 
 /** A card's shelf wear, as plain fields so an unchanged card compares

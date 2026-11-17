@@ -11,6 +11,7 @@ import {
 import type { FinishSoon } from "@/lib/finish-by";
 import { BookLink } from "@/components/book-link";
 import { SpriteIcon } from "@/components/icon-sprite";
+import { CoverStickers } from "@/components/cover-stickers";
 import { Badge } from "@/components/ui/badge";
 import { Stars } from "@/components/stars";
 import { StatusBadge } from "@/components/status-badge";
@@ -40,6 +41,8 @@ export function BookCover({
   reading,
   wear,
   wearTitle = true,
+  stickers,
+  freshStickers,
 }: {
   book: Pick<Book, "title" | "coverUrl"> & { authors?: string[] };
   className?: string;
@@ -58,6 +61,10 @@ export function BookCover({
    *  false (where the link around it names the book that way). */
   wear?: CoverWear;
   wearTitle?: boolean;
+  /** Stickers pinned on it (components/cover-stickers.tsx), and any pinned
+   *  just now, which press on. */
+  stickers?: readonly string[];
+  freshStickers?: readonly string[];
 }) {
   const worn = !!wear && (!!wear.dust || !!wear.worn);
   return (
@@ -93,6 +100,9 @@ export function BookCover({
           data-grain={dustGrain(book.title)}
           aria-hidden="true"
         />
+      )}
+      {stickers && stickers.length > 0 && (
+        <CoverStickers title={book.title} stickers={stickers} fresh={freshStickers} />
       )}
       {reading && <ProgressRibbon at={reading} />}
     </div>
@@ -234,6 +244,8 @@ export type BookCardBook = Pick<
   ownership?: BookOwnership;
   createdAt?: Date;
   dateFinished?: Date | null;
+  /** Pinned on its cover (lib/stickers.ts); left out when there are none. */
+  stickers?: string[];
 } & CoverWear;
 
 /** Which details a card or row shows (the library's View menu). */
@@ -449,6 +461,7 @@ export function BookCard({
         tilt
         reading={readingAt(book)}
         wear={book}
+        stickers={book.stickers}
       />
       {progress !== null && (
         <div
@@ -511,6 +524,7 @@ export function BookCoverTile({ book, compact = false }: { book: BookCardBook; c
         tilt
         reading={readingAt(book)}
         wear={book}
+        stickers={book.stickers}
       />
       {progress !== null && (
         <div
@@ -549,6 +563,7 @@ export function BookOnShelf({ book }: { book: BookCardBook }) {
         reading={readingAt(book)}
         wear={book}
         wearTitle={false}
+        stickers={book.stickers}
       />
       <span className="sr-only">{book.title}</span>
     </BookLink>
