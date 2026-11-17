@@ -1,5 +1,6 @@
 import { BackupReminder } from "@/components/backup-reminder";
 import { CoverTilt } from "@/components/cover-tilt";
+import { StickerSprite } from "@/components/cover-stickers";
 import { KeyboardShortcuts } from "@/components/keyboard-shortcuts";
 import { Nav } from "@/components/nav";
 import { OfflineProvider } from "@/components/offline-provider";
@@ -34,6 +35,8 @@ export default async function AppLayout({
         swVersion={buildId()}
         startPath={START_PAGE_PATHS[prefs.startPage]}
       >
+        {/* The stickers covers can wear, drawn once (cover-stickers.tsx). */}
+        <StickerSprite />
         <Nav />
         <main className="mx-auto max-w-6xl px-4 py-6">
           <BackupReminder />

@@ -24,6 +24,7 @@ import { AuthorLinks } from "@/components/author-links";
 import { formatLength } from "@/lib/progress-units";
 import { shelfWear } from "@/lib/shelf-wear";
 import { BookBackdrop, BookCover, readingAt } from "@/components/book-card";
+import { BookPageCover } from "@/components/book-page-cover";
 import { BookDescription } from "@/components/book-description";
 import { BookLink } from "@/components/book-link";
 import { BookShelvesCard } from "@/components/book-shelves-card";
@@ -242,26 +243,21 @@ export default async function BookDetailPage({
           viewport. */}
       <div className="book-page relative grid grid-cols-1 gap-6 md:grid-cols-[240px_minmax(0,1fr)]">
         <CloseBookButton bookId={book.id} />
-        <div className="grid content-start gap-3">
-          <BookCover
-            book={book}
-            className="hero-cover aspect-[2/3] w-full max-w-60"
-            loading="eager"
-            flightTarget={book.id}
-            tilt
-            reading={readingAt(book)}
-            wear={wear}
-          />
-          <div className="flex gap-2">
-            <Button asChild variant="outline" size="sm">
-              <Link href={`/books/${book.id}/edit`}>
-                <Pencil data-slot="icon" />
-                Edit
-              </Link>
-            </Button>
-            <DeleteBookButton bookId={book.id} title={book.title} />
-          </div>
-        </div>
+        <BookPageCover
+          bookId={book.id}
+          book={{ title: book.title, coverUrl: book.coverUrl, authors: book.authors }}
+          reading={readingAt(book)}
+          wear={wear}
+          stickers={book.stickers}
+        >
+          <Button asChild variant="outline" size="sm">
+            <Link href={`/books/${book.id}/edit`}>
+              <Pencil data-slot="icon" />
+              Edit
+            </Link>
+          </Button>
+          <DeleteBookButton bookId={book.id} title={book.title} />
+        </BookPageCover>
 
         <div className="grid grid-cols-1 content-start gap-4">
           {/* A title, author or series with no spaces to break at wraps

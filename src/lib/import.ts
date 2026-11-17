@@ -20,6 +20,7 @@ import { cleanPreferencesPatch, parsePreferences } from "@/lib/preferences";
 import { customStatusOf } from "@/lib/statuses";
 import { cleanFieldValues } from "@/lib/book-fields";
 import { cleanBookMoods } from "@/lib/moods";
+import { cleanStickers } from "@/lib/stickers";
 import { fieldColumns } from "@/lib/field-values";
 import { MAX_ENTRY_MINUTES } from "@/lib/reading-time";
 import { CHAPTER_MAX, tidyChapter } from "@/lib/book-notes";
@@ -164,6 +165,9 @@ const importedBookSchema = z.object({
   /** Additive: how the book feels, by mood key (lib/moods.ts), kept where
    *  the account has those moods once its settings are restored. */
   moods: z.array(z.unknown()).max(200).catch([]),
+  /** Additive: stickers pinned on the cover (lib/stickers.ts); unknown
+   *  ones are dropped. */
+  stickers: z.array(z.unknown()).max(200).catch([]),
   format: z.enum(BookFormat).catch(BookFormat.PHYSICAL),
   /** Legacy field, still written by exports for older instances to read. */
   owned: z.boolean().nullable().optional().catch(null),
@@ -739,6 +743,7 @@ export async function importLibrary(
         publishedDate: b.publishedDate ?? null,
         tags: [...new Set(b.tags)],
         moods: cleanBookMoods(b.moods, account),
+        stickers: cleanStickers(b.stickers),
         format: b.format,
         ownership: resolveOwnership(b),
         seriesName: b.seriesName ?? null,

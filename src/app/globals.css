@@ -8782,6 +8782,72 @@ html[data-shelf-wear="off"] .spine-wear {
   --rubbed: 0.34;
 }
 
+/* ── Stickers ──────────────────────────────────────────────────────────────
+   Stickers and stamps pinned on a cover (components/cover-stickers.tsx):
+   each about a third of the cover's width, a little off straight, the
+   first at the top right, then the bottom right, the bottom left and the
+   top left. Stickers have a white die-cut edge (in the art) and sit on the
+   cover with a soft shadow. A cover
+   under 7.5rem wide has room for two, and the smallest (list rows, Now
+   reading) none. One pinned just now presses on with a small bounce. */
+.cover-stickers {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.cover-sticker {
+  position: absolute;
+  width: clamp(1.75rem, 31cqi, 5.25rem);
+  height: auto;
+  filter: drop-shadow(0 1px 0.5px rgb(0 0 0 / 0.3)) drop-shadow(0 2px 3px rgb(0 0 0 / 0.18));
+}
+.cover-sticker[data-at="0"] {
+  top: 6cqi;
+  right: 5cqi;
+}
+.cover-sticker[data-at="1"] {
+  right: 6cqi;
+  bottom: 6cqi;
+}
+.cover-sticker[data-at="2"] {
+  bottom: 9cqi;
+  left: 7cqi;
+}
+.cover-sticker[data-at="3"] {
+  top: 34cqi;
+  left: 6cqi;
+}
+@container (width < 7.5rem) {
+  .cover-sticker:is([data-at="2"], [data-at="3"]) {
+    display: none;
+  }
+}
+@container (width < 5.5rem) {
+  .cover-stickers {
+    display: none;
+  }
+}
+@keyframes sticker-on {
+  0% {
+    opacity: 0;
+    scale: 1.6;
+  }
+  55% {
+    opacity: 1;
+    scale: 0.94;
+  }
+  80% {
+    scale: 1.03;
+  }
+}
+.cover-sticker.is-fresh {
+  animation: sticker-on 0.42s cubic-bezier(0.3, 0.7, 0.4, 1) backwards;
+}
+/* In the picker, a small shadow so the white edge shows on a white menu. */
+.sticker-choice {
+  filter: drop-shadow(0 0.5px 1px rgb(0 0 0 / 0.35));
+}
+
 /* ── Spines ────────────────────────────────────────────────────────────────
    The library's Spines view and the shelf on a Year in review
    (components/book-spine.tsx): books standing spine out in a bookcase.

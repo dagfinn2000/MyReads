@@ -243,6 +243,10 @@ model Book {
   /// (lib/moods.ts), in no particular order. A key no longer known is
   /// ignored wherever moods are shown.
   moods         String[]   @default([])
+  /// Stickers and stamps pinned on the cover ("signed", "gift", ...): keys
+  /// of STICKERS in lib/stickers.ts, in the order they were pinned. A key
+  /// no longer known is ignored.
+  stickers      String[]   @default([])
   format        BookFormat @default(PHYSICAL)
   ownership     BookOwnership @default(OWNED)
   /// Freeform series name (e.g. "Mistborn Era 1"); groups books together.
