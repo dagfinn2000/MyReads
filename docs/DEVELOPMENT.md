@@ -370,7 +370,16 @@ The reading room's files:
   way. The scenes keep to an edge or a corner of the window, where the
   page's margin is, because the selects and the tab bar are see-through
   and a picture behind them crowds the controls; Bowling Alley's carpet
-  is a tile, kept dim enough to read over.
+  is a tile, kept dim enough to read over. Wildwood and Birchwood are
+  drawn by [forest-pictures.mjs](../scripts/forest-pictures.mjs) in
+  layers (far trunks, nearer trunks, light, floor, the nearest trunks at
+  each edge, leaves overhead), which `--page-size` and the
+  `.theme-is-<id> body::before` rule size and place one by one; the
+  strips repeat across the window, each a different width. Their
+  fireflies and falling leaves are elements of their own
+  ([background-scene.tsx](../src/components/background-scene.tsx)), set
+  by `scene` on the theme in `lib/themes.ts`, and run on the same rules as
+  the moving backgrounds.
 - **A theme is retired, never just deleted.** Take out its block and
   entry and add it to `RETIRED_THEMES` in
   [themes.ts](../src/lib/themes.ts) with the theme that replaces it, of

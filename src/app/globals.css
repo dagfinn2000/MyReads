@@ -4555,6 +4555,69 @@
     --page-size: clamp(18rem, 34vw, 32rem) auto;
 }
 
+/* Birchwood: a birch wood on a sunny morning. White trunks marked in black
+   at every depth, the far ones paler in the haze, sunlight slanting down
+   through fresh green leaves, ferns and wood anemones along the foot, and
+   now and then a leaf coming down (components/background-scene.tsx);
+   pictures in public/themes, drawn by scripts/forest-pictures.mjs. A deep
+   spruce green for what is chosen. */
+[data-theme="birchwood"] {
+    --background: #f1f3e9;
+    --foreground: #18241a;
+    --card: #fbfcf7;
+    --card-foreground: #18241a;
+    --popover: #fbfcf7;
+    --popover-foreground: #18241a;
+    --primary: #1d5c5a;
+    --primary-foreground: #ffffff;
+    --secondary: #e4eadb;
+    --secondary-foreground: #18241a;
+    --muted: #e4eadb;
+    --muted-foreground: #3f4e3f;
+    --accent: #dce6d0;
+    --accent-foreground: #18241a;
+    --destructive: #b3261e;
+    --border: #d2dbc6;
+    --input: #c3ccb6;
+    --ring: #1d5c5a;
+    --radius: 0.75rem;
+    --heading-font: var(--font-fraunces), Fraunces, Georgia, serif;
+    --page-gradient: url("/themes/birchwood-canopy.svg"), url("/themes/birchwood-light.svg"), url("/themes/birchwood-left.svg"), url("/themes/birchwood-right.svg"), url("/themes/birchwood-floor.svg"), url("/themes/birchwood-mid.svg"), url("/themes/birchwood-far.svg"), linear-gradient(180deg, #e2ebd5 0%, #eef2e5 24%, #f2f4ea 58%, #eaefdd 84%, #e0e8d0 100%);
+    --page-size: auto clamp(8rem, 26vh, 15rem), 100% 100%, auto 100%, auto 100%, auto clamp(7rem, 20vh, 13rem), auto 100%, auto 100%, 100% 100%;
+}
+
+/* Wildwood: deep in a forest at night. Old trunks crowding in from the
+   edges and standing back into the dark, moonlight coming down through
+   the leaves in pale shafts, mist lying low among the ferns, mushrooms
+   glowing faintly at the roots, and fireflies drifting and blinking
+   among the trees (components/background-scene.tsx); pictures in
+   public/themes, drawn by scripts/forest-pictures.mjs. The fireflies'
+   warm gold for what is chosen. */
+[data-theme="wildwood"] {
+    --background: #08130f;
+    --foreground: #eef2e4;
+    --card: #0e1c17;
+    --card-foreground: #eef2e4;
+    --popover: #10201a;
+    --popover-foreground: #eef2e4;
+    --primary: #f2c45a;
+    --primary-foreground: #1c1403;
+    --secondary: #16281f;
+    --secondary-foreground: #eef2e4;
+    --muted: #16281f;
+    --muted-foreground: #b8cbbc;
+    --accent: #1c3128;
+    --accent-foreground: #eef2e4;
+    --destructive: #ff9d85;
+    --border: #233a30;
+    --input: #45604f;
+    --ring: #f2c45a;
+    --radius: 0.75rem;
+    --heading-font: var(--font-fraunces), Fraunces, Georgia, serif;
+    --page-gradient: url("/themes/wildwood-canopy.svg"), url("/themes/wildwood-light.svg"), url("/themes/wildwood-left.svg"), url("/themes/wildwood-right.svg"), url("/themes/wildwood-floor.svg"), url("/themes/wildwood-mid.svg"), url("/themes/wildwood-far.svg"), linear-gradient(180deg, #050d0b 0%, #0a1712 20%, #0f211b 50%, #13271f 74%, #0b1612 100%);
+    --page-size: auto clamp(9rem, 30vh, 17rem), 100% 100%, auto 100%, auto 100%, auto clamp(8rem, 22vh, 14rem), auto 100%, auto 100%, 100% 100%;
+}
+
 /* Bitmap: a one-bit desktop from 1984, black and white and nothing between.
    A dithered top bar, menus and dialogs with a striped title bar and a hard
    shadow, every card ruled in black, pixel headings and a black bar for
@@ -6808,6 +6871,44 @@ html[data-own-background] body::before {
   background-position: right top, 0 0;
   background-repeat: no-repeat;
 }
+/* The forests: leaves along the top, the nearest trunks at either edge,
+   ferns along the foot, and the trunks behind them in strips that repeat
+   across the window, each strip a different width so they never repeat in
+   step. On a phone the nearest trunks of the night wood stand mostly beyond
+   its edges, so only their sides frame the page. */
+.theme-is-wildwood body::before,
+.theme-is-birchwood body::before {
+  background-position: left top, 0 0, left bottom, right bottom, left bottom, 30% 0, 0 0, 0 0;
+  background-repeat: repeat-x, no-repeat, no-repeat, no-repeat, repeat-x, repeat-x, repeat-x, no-repeat;
+}
+@media (max-width: 40rem) {
+  .theme-is-wildwood body::before {
+    background-position: left top, 0 0, left -9rem bottom, right -9.5rem bottom, left bottom, 30% 0, 0 0, 0 0;
+  }
+}
+/* The nearest birches are marked in black, which no writing could be read
+   over, so they keep to the margins beside the page: each stands with its
+   inner side at the page's edge (the page is 72rem wide at most, with 1rem
+   inside it), out of sight where there is no margin, as on a phone. */
+.theme-is-birchwood body::before {
+  background-position:
+    left top,
+    0 0,
+    left calc(max(1rem, 50vw - 35rem) - 20vh - 0.5rem) bottom,
+    right calc(max(1rem, 50vw - 35rem) - 21vh - 0.5rem) bottom,
+    left bottom,
+    30% 0,
+    0 0,
+    0 0;
+}
+/* Cards are a little see-through, so the forest is still there behind
+   them, darkened in the night wood and paled in the birch wood. */
+.theme-is-wildwood .surface {
+  background-color: rgb(14 28 23 / 0.84);
+}
+.theme-is-birchwood .surface {
+  background-color: rgb(251 252 247 / 0.88);
+}
 .theme-is-dunes body::before {
   background-position: center bottom, 0 0;
   background-repeat: no-repeat;
@@ -7903,6 +8004,113 @@ html.dark[data-background="ripples"] body,
   50% {
     opacity: 1;
     scale: 1;
+  }
+}
+/* The scenes two themes bring of their own (lib/themes.ts, `scene`), over
+   their pictures: Wildwood's fireflies and Birchwood's falling leaves.
+   Each shows only under its own theme, picture or no picture behind it,
+   and while nothing may move they stay where they are: the fireflies
+   glowing, each as bright as its --o, and the leaves hanging in the air.
+   On a smaller window two in three of them show, on a phone one in three
+   (.bg-many). */
+:root .bg-scene:is([data-scene="fireflies"], [data-scene="leaves"]) {
+  display: none;
+}
+.theme-is-wildwood .bg-scene[data-scene="fireflies"],
+.theme-is-birchwood .bg-scene[data-scene="leaves"] {
+  display: block;
+}
+/* A firefly: a bright point in a warm glow that fades into the dark. It
+   wanders on two slow loops at once, side to side on `translate` and up
+   and down on `transform`, and flashes now and then: dark most of its
+   loop but for a faint glimmer, lighting up quickly, glowing a moment and
+   fading slowly. */
+.bg-firefly {
+  width: var(--size);
+  height: var(--size);
+  margin: calc(var(--size) / -2) 0 0 calc(var(--size) / -2);
+  border-radius: 50%;
+  background: radial-gradient(closest-side, #fffde0 0 12%, rgb(255 232 130 / 0.78) 24%, rgb(226 222 108 / 0.26) 52%, transparent);
+  opacity: var(--o);
+}
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-motion="off"], [data-background-motion="still"]) .bg-firefly {
+    animation:
+      bg-firefly-flash var(--t) linear calc(var(--p) * var(--t) * -1) infinite,
+      bg-firefly-x var(--sx) ease-in-out calc(var(--px) * var(--sx) * -1) infinite alternate,
+      bg-firefly-y var(--sy) ease-in-out calc(var(--py) * var(--sy) * -1) infinite alternate;
+  }
+}
+/* The dark stretches are held in single steps: eased between two equal
+   frames, Chrome would still redraw the screen every frame. */
+@keyframes bg-firefly-flash {
+  0% {
+    opacity: 0.14;
+    animation-timing-function: step-end;
+  }
+  40% {
+    opacity: 0.14;
+    animation-timing-function: ease-out;
+  }
+  48% {
+    opacity: 1;
+    animation-timing-function: linear;
+  }
+  56% {
+    opacity: 0.9;
+    animation-timing-function: ease-in;
+  }
+  80% {
+    opacity: 0.14;
+    animation-timing-function: step-end;
+  }
+  100% {
+    opacity: 0.14;
+  }
+}
+@keyframes bg-firefly-x {
+  from {
+    translate: calc(var(--wx) * -1) 0;
+  }
+  to {
+    translate: var(--wx) 0;
+  }
+}
+@keyframes bg-firefly-y {
+  from {
+    transform: translateY(calc(var(--wy) * -1));
+  }
+  to {
+    transform: translateY(var(--wy));
+  }
+}
+/* A falling leaf: a small birch leaf, pointed at both ends, a little
+   lighter along its middle. It comes down the window at its own pace,
+   swinging from side to side as it falls and tipping into each swing, the
+   way a leaf rocks on the air. Still, it hangs where it was. */
+.bg-falling-leaf {
+  top: 0;
+  width: var(--size);
+  height: calc(var(--size) * 0.62);
+  border-radius: 0 100%;
+  background: linear-gradient(160deg, color-mix(in oklab, var(--leaf) 70%, white) 0 18%, var(--leaf) 45%, color-mix(in oklab, var(--leaf) 80%, #4a5a20));
+  translate: 0 calc(var(--p) * 124vh - 12vh);
+  rotate: calc(var(--rock) * 0.4);
+  opacity: 0.9;
+}
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-motion="off"], [data-background-motion="still"]) .bg-falling-leaf {
+    animation:
+      bg-snow-fall var(--t) linear calc(var(--p) * var(--t) * -1) infinite,
+      bg-leaf-rock var(--s) ease-in-out calc(var(--sp) * var(--s) * -1) infinite alternate;
+  }
+}
+@keyframes bg-leaf-rock {
+  from {
+    transform: translateX(calc(var(--sway) * -1)) rotate(calc(var(--rock) * -1));
+  }
+  to {
+    transform: translateX(var(--sway)) rotate(var(--rock));
   }
 }
 /* A streak about a second long, then nothing for the rest of the loop.
