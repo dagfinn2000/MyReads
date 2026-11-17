@@ -119,6 +119,11 @@ export const HEADING_FONTS = ["sans", "serif", "rounded"] as const;
  *  reduced motion, whatever this says (see globals.css and lib/motion.ts). */
 export const MOTIONS = ["on", "off"] as const;
 
+/** What moving between the app's sections looks like (lib/page-turn.ts):
+ *  the page turns like a book's, or the new page simply fades up. Only while
+ *  animations are allowed. */
+export const PAGE_CHANGES = ["turn", "fade"] as const;
+
 /** What happens on screen when you finish a book or reach a goal
  *  (lib/celebrate.ts): a burst of confetti, fireworks, gold sparkles,
  *  petals falling, or nothing. Only while animations are allowed. */
@@ -381,6 +386,7 @@ export type LongTextFont = (typeof LONG_TEXT_FONTS)[number];
 export type Typography = (typeof TYPOGRAPHY_STYLES)[number];
 export type HeadingFont = (typeof HEADING_FONTS)[number];
 export type Motion = (typeof MOTIONS)[number];
+export type PageChange = (typeof PAGE_CHANGES)[number];
 export type Celebration = (typeof CELEBRATIONS)[number];
 export type CoverArtStyle = (typeof COVER_ARTS)[number];
 export type Accent = (typeof ACCENTS)[number];
@@ -469,6 +475,7 @@ export type Preferences = {
 
   // Appearance
   motion: Motion;
+  pageChange: PageChange;
   celebration: Celebration;
   coverArt: CoverArtStyle;
   accent: Accent;
@@ -665,6 +672,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
   typography: "plain",
   headingFont: "sans",
   motion: "on",
+  pageChange: "turn",
   celebration: "confetti",
   coverArt: "drawn",
   accent: "theme",
@@ -1007,6 +1015,7 @@ export function parsePreferences(raw: unknown): Preferences {
     typography: pick(TYPOGRAPHY_STYLES, obj.typography, d.typography),
     headingFont: pick(HEADING_FONTS, obj.headingFont, d.headingFont),
     motion: pick(MOTIONS, obj.motion, d.motion),
+    pageChange: pick(PAGE_CHANGES, obj.pageChange, d.pageChange),
     celebration: pick(CELEBRATIONS, obj.celebration, d.celebration),
     coverArt: pick(COVER_ARTS, obj.coverArt, d.coverArt),
     accent: pick(ACCENTS, obj.accent, d.accent),

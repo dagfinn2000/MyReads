@@ -3,6 +3,7 @@
 import { Fragment, useEffect, useEffectEvent, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { NAV_LINKS, topBarLinks } from "@/lib/nav";
+import { turnPage } from "@/lib/page-turn";
 import type { NavItem } from "@/lib/preferences";
 import { readShortcut, shortcutGroups, type Pending } from "@/lib/shortcuts";
 import { usePreferences } from "@/components/preferences-provider";
@@ -123,9 +124,11 @@ export function KeyboardShortcuts() {
       case "search":
         stopWaiting.current = focusLibrarySearch(() => router.push(NAV_LINKS.library.href));
         break;
-      case "go":
-        router.push(NAV_LINKS[action.to].href);
+      case "go": {
+        const href = NAV_LINKS[action.to].href;
+        if (!turnPage(href, () => router.push(href))) router.push(href);
         break;
+      }
       case "edit":
         router.push(action.href);
         break;

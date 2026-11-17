@@ -110,6 +110,7 @@ const HTML_ATTRIBUTES: Partial<Record<keyof Preferences, string>> = {
   headingFont: "data-heading-font",
   typography: "data-typography",
   motion: "data-motion",
+  pageChange: "data-page-change",
   celebration: "data-celebration",
   coverArt: "data-covers",
   accent: "data-accent",
@@ -979,6 +980,16 @@ export function PreferencesForm({
             { value: "off", label: "Off" },
           ]}
           onChange={(v) => update({ motion: v })}
+        />
+        <Choice
+          label="Moving between pages"
+          hint="Going to another page from the top bar."
+          value={prefs.pageChange}
+          options={[
+            { value: "turn", label: "Turn the page, like a book’s" },
+            { value: "fade", label: "Fade the new page in" },
+          ]}
+          onChange={(v) => update({ pageChange: v })}
         />
         <Choice
           label="Celebrations"

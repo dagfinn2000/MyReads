@@ -1090,7 +1090,7 @@ tab goes away. You can also keep the house and leave the avatar out.
   star now and then shoots across the sky). The light shifts on Aurora,
   and drops ripple the pond on Ripples. Sky changes colour with the time
   of day where you are.
-- A little motion: pages fade in, a book's cover flies to its page and
+- A little motion: pages turn or fade in, a book's cover flies to its page and
   back into its place in the library when you close it, bars fill up,
   finishing a book or reaching your goal sets off a celebration, and the
   reading room's fire flickers.
@@ -1105,6 +1105,12 @@ tab goes away. You can also keep the house and leave the avatar out.
   twinkling out from where you clicked, blossom petals drifting down, or
   nothing at all. Picking one plays it, so you can see it before your next
   finished book.
+- **Page turns.** Going to another page from the top bar (or its g
+  shortcuts) turns the page like a book's: the old page lifts at its
+  right edge and turns away over the left, out of the light, and the new
+  one comes out of its shadow underneath. Going back along the bar, the
+  new page turns in from the left instead. The top bar stays put, like the
+  binding. Preferences > Motion can have new pages simply fade in.
 - Animations can be turned off, or only the backgrounds kept still. They
   stay off when your device asks for reduced motion.
 - **Book typography.** Choose "Like a printed book" in Preferences > Text
@@ -1148,8 +1154,9 @@ On the Account page:
   them: a few themes have their own), flat, raised or frosted
   cards, the background texture, and a wash of the cover's colours behind
   the top of each book's page.
-- Animations on or off, how a finished book is celebrated, whether the
-  moving backgrounds move, and whether covers follow the pointer.
+- Animations on or off, whether pages turn or fade, how a finished book
+  is celebrated, whether the moving backgrounds move, and whether covers
+  follow the pointer.
 - The book page: which cards show and in what order, long descriptions in
   full or cut short, and your own "Find it at" links.
 - Which page opens first, and the top bar: its links in your own order,
