@@ -36,7 +36,10 @@ export async function Nav() {
           paddings are two ranges, not one overriding the other: Tailwind
           puts max-[400px] ahead of max-sm, so max-sm would win. A ninth
           (Authors as well) waits for 1200px, the links close up again
-          below 420px and up to 720px, and the account name stays out. */}
+          below 420px and up to 720px, and the account name stays out.
+          When the row is still too wide, as with a restyled theme's
+          bigger buttons or on a 320px phone, the links give up some of
+          their padding to make room (globals.css, "Top bar"). */}
       <div
         className={cn(
           "mx-auto flex h-14 max-w-6xl items-center gap-0.5 px-3 sm:gap-1 sm:px-4",

@@ -8981,6 +8981,20 @@ html[data-covers="plain"] .book-backdrop[data-drawn] {
     animation-range: 0 4rem;
   }
 }
+/* Short of room, the links give up some of the space between their icons
+   rather than push the bar past the screen's edge. A flex item won't
+   shrink below its content unless told to, and the restyled themes
+   (restyles.css) draw wider buttons than components/nav.tsx counts on:
+   borders, larger icons, a dock's even squares. The icon keeps its size
+   and stays centred, so where everything already fits nothing moves.
+   Below lg only, as the labels wait for that or wider, and a label
+   squeezed would spill onto its neighbours. */
+@media (width < 64rem) {
+  .top-bar > div > .nav-link[data-size] {
+    flex-shrink: 1;
+    min-width: 0;
+  }
+}
 /* The app's name, in the book face used for drawn covers. */
 .wordmark {
   font-family: var(--font-literata), ui-serif, Georgia, serif;
