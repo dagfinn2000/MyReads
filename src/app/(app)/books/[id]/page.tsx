@@ -22,7 +22,7 @@ import {
 } from "@/lib/display";
 import { AuthorLinks } from "@/components/author-links";
 import { formatLength } from "@/lib/progress-units";
-import { BookBackdrop, BookCover } from "@/components/book-card";
+import { BookBackdrop, BookCover, readingAt } from "@/components/book-card";
 import { BookDescription } from "@/components/book-description";
 import { BookLink } from "@/components/book-link";
 import { BookShelvesCard } from "@/components/book-shelves-card";
@@ -243,6 +243,7 @@ export default async function BookDetailPage({
             loading="eager"
             flightTarget={book.id}
             tilt
+            reading={readingAt(book)}
           />
           <div className="flex gap-2">
             <Button asChild variant="outline" size="sm">

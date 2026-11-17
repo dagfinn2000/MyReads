@@ -8564,6 +8564,72 @@ html[data-cover-3d] .book-cover::after {
   );
 }
 
+/* ── Bookmark ribbons ──────────────────────────────────────────────────────
+   A book being read wears a satin ribbon on its cover (ProgressRibbon in
+   components/book-card.tsx): it comes out of the top of the book near the
+   fore-edge and hangs as far down the cover as the reader has got, from a
+   short tail on page one to the cover's foot on the last page, ending in a
+   forked tip. It slides out of the book as the page opens. The satin is
+   one colour shaded across its width, darker where it leaves the book, and
+   it casts a small shadow on the cover. Sizes are in cqi (the cover's
+   width), so a list row's tiny cover gets a thread and the book page's
+   cover a proper ribbon. "Reading progress on covers" in Preferences
+   (data-ribbon on <html>) picks the colour, or the plain bar under the
+   cover (.cover-bar) that the ribbon replaced. The Spines view's bookmark
+   takes the same colour. */
+html {
+  --ribbon: #a3172f;
+}
+html[data-ribbon="navy"] {
+  --ribbon: #22396b;
+}
+html[data-ribbon="green"] {
+  --ribbon: #1d6140;
+}
+html[data-ribbon="gold"] {
+  --ribbon: #b48424;
+}
+html:not([data-ribbon="bar"]) .cover-bar,
+html[data-ribbon="bar"] .cover-ribbon {
+  display: none;
+}
+@keyframes ribbon-in {
+  from {
+    transform: translateY(-100%);
+  }
+}
+.cover-ribbon {
+  position: absolute;
+  top: 0;
+  right: 12%;
+  width: clamp(3px, 7.5cqi, 1rem);
+  height: calc(16% + var(--ribbon-at, 0) * 84%);
+  filter: drop-shadow(0.5px 1px 1px rgb(0 0 0 / 0.45));
+  animation: ribbon-in 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+}
+.cover-ribbon::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to bottom, rgb(0 0 0 / 0.4), rgb(0 0 0 / 0) clamp(3px, 4cqi, 0.6rem)),
+    linear-gradient(
+      to right,
+      color-mix(in oklab, var(--ribbon), black 34%),
+      var(--ribbon) 20%,
+      color-mix(in oklab, var(--ribbon), white 30%) 44%,
+      var(--ribbon) 62%,
+      color-mix(in oklab, var(--ribbon), black 24%)
+    );
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% 100%,
+    50% calc(100% - clamp(2px, 5cqi, 0.7rem)),
+    0 100%
+  );
+}
+
 /* ── Spines ────────────────────────────────────────────────────────────────
    The library's Spines view and the shelf on a Year in review
    (components/book-spine.tsx): books standing spine out in a bookcase.
@@ -8796,9 +8862,22 @@ html[data-cover-3d] .book-cover::after {
   width: min(0.75rem, 46%);
   height: 1.375rem;
   translate: -50% 0;
+  background: linear-gradient(
+    to right,
+    color-mix(in oklab, var(--ribbon), black 34%),
+    var(--ribbon) 20%,
+    color-mix(in oklab, var(--ribbon), white 30%) 44%,
+    var(--ribbon) 62%,
+    color-mix(in oklab, var(--ribbon), black 24%)
+  );
+  /* The ribbon's forked tip, sticking up out of the book. */
+  clip-path: polygon(0 0, 50% 0.3rem, 100% 0, 100% 100%, 0 100%);
+}
+html[data-ribbon="bar"] .spine-bookmark {
   border-radius: 2px 2px 0 0;
   background: var(--primary);
   box-shadow: inset -1px 0 0 rgb(0 0 0 / 0.15);
+  clip-path: none;
 }
 /* The year's shelf (components/year-shelf.tsx): a little room between
    months, and a brass plate on the board under each month's first book. */

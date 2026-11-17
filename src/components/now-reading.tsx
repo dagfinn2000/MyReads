@@ -234,7 +234,11 @@ const NowReadingRow = memo(function NowReadingRow({
     <Card size="sm">
       <CardContent className="grid grid-cols-[3.5rem_minmax(0,1fr)] gap-3 sm:grid-cols-[4.5rem_minmax(0,1fr)]">
         <BookLink bookId={book.id} className="lift-cover self-start" title={book.title}>
-          <BookCover book={book} className="cover-shadow aspect-[2/3] w-full" />
+          <BookCover
+            book={book}
+            className="cover-shadow aspect-[2/3] w-full"
+            reading={currentPage != null && book.pageCount ? { page: currentPage, of: book.pageCount } : null}
+          />
         </BookLink>
         {/* grid-cols-1 (minmax(0,1fr)): a bare grid's column grew to fit the
             widest log row, which pushed the pencils past the card's edge on
