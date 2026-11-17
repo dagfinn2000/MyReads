@@ -118,6 +118,7 @@ const HTML_ATTRIBUTES: Partial<Record<keyof Preferences, string>> = {
   background: "data-background",
   backgroundMotion: "data-background-motion",
   coverTilt: "data-cover-tilt",
+  progressRibbon: "data-ribbon",
   bookBackdrop: "data-book-backdrop",
 };
 
@@ -909,6 +910,19 @@ export function PreferencesForm({
             { value: "plain", label: "A plain grey box" },
           ]}
           onChange={(v) => update({ coverArt: v })}
+        />
+        <Choice
+          label="Reading progress on covers"
+          hint="A ribbon hangs from the top of a book you’re reading, down to how far you’ve got."
+          value={prefs.progressRibbon}
+          options={[
+            { value: "crimson", label: "A crimson bookmark ribbon" },
+            { value: "navy", label: "A navy bookmark ribbon" },
+            { value: "green", label: "A green bookmark ribbon" },
+            { value: "gold", label: "A gold bookmark ribbon" },
+            { value: "bar", label: "A plain bar under the cover" },
+          ]}
+          onChange={(v) => update({ progressRibbon: v })}
         />
         <Choice
           label="Corners"

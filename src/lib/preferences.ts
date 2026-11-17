@@ -199,6 +199,12 @@ export const BACKGROUND_MOTIONS = ["moving", "still"] as const;
  *  mouse or trackpad, and never when animations are off. */
 export const COVER_TILTS = ["on", "off"] as const;
 
+/** How a book being read shows how far along it is on its cover: a satin
+ *  bookmark ribbon hanging from the top of the cover down to where the
+ *  reader is, in one of four colours, or the plain bar under the cover it
+ *  replaced (components/book-card.tsx, globals.css "Bookmark ribbons"). */
+export const PROGRESS_RIBBONS = ["crimson", "navy", "green", "gold", "bar"] as const;
+
 /** Colour steps for the reading calendar (see lib/heatmap.ts). */
 export const HEATMAP_SCALES = ["standard", "gentle", "heavy", "auto"] as const;
 
@@ -380,6 +386,7 @@ export type BookBackdrop = (typeof BOOK_BACKDROPS)[number];
 export type Background = (typeof BACKGROUNDS)[number];
 export type BackgroundMotion = (typeof BACKGROUND_MOTIONS)[number];
 export type CoverTilt = (typeof COVER_TILTS)[number];
+export type ProgressRibbon = (typeof PROGRESS_RIBBONS)[number];
 export type HeatmapScale = (typeof HEATMAP_SCALES)[number];
 export type StartPage = (typeof START_PAGES)[number];
 export type NavItem = (typeof NAV_ITEMS)[number];
@@ -465,6 +472,7 @@ export type Preferences = {
   background: Background;
   backgroundMotion: BackgroundMotion;
   coverTilt: CoverTilt;
+  progressRibbon: ProgressRibbon;
   bookBackdrop: BookBackdrop;
   /** Themes for parts of the app (lib/themes.ts THEME_PARTS), as stored
    *  theme settings. A part left out shows the theme used everywhere. */
@@ -659,6 +667,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
   background: "plain",
   backgroundMotion: "moving",
   coverTilt: "on",
+  progressRibbon: "crimson",
   bookBackdrop: "cover",
   partThemes: {},
   ownCss: "",
@@ -999,6 +1008,7 @@ export function parsePreferences(raw: unknown): Preferences {
     background: pick(BACKGROUNDS, obj.background, d.background),
     backgroundMotion: pick(BACKGROUND_MOTIONS, obj.backgroundMotion, d.backgroundMotion),
     coverTilt: pick(COVER_TILTS, obj.coverTilt, d.coverTilt),
+    progressRibbon: pick(PROGRESS_RIBBONS, obj.progressRibbon, d.progressRibbon),
     bookBackdrop: pick(BOOK_BACKDROPS, obj.bookBackdrop, d.bookBackdrop),
     partThemes: parsePartThemes(obj.partThemes),
     ownCss: parseOwnCss(obj.ownCss),

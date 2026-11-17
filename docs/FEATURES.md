@@ -265,6 +265,11 @@ page by page.
 - Show the library as cards, bare covers or a bookshelf, in three sizes, or
   as a list, and choose what each book shows. Covers can look like little
   hardbacks, and books without a cover get one drawn with their title.
+- **Bookmark ribbons.** A book you're reading has a satin ribbon hanging
+  from the top of its cover, down as far as you've got: a short tail at
+  the start, the foot of the cover at the end. Point at it for the page.
+  Preferences > Appearance picks crimson, navy, green or gold, or the plain
+  bar under the cover instead.
 - **Covers that follow the pointer.** With a mouse or trackpad, a cover in
   the library or on a book's page leans back where the pointer rests on
   it, as if pressed, and catches a soft light under the pointer, then eases
@@ -273,7 +278,7 @@ page by page.
 - **Spines.** Or stand the books spine out in a bookcase, coloured from
   their covers, with the title running down each spine and the author's
   surname at the foot. Thick books are wider, heights and bindings vary
-  (gilt bands, a label, leather, plain cloth), a bookmark peeks out of the
+  (gilt bands, a label, leather, plain cloth), the ribbon peeks out of the
   books you're reading, and books on your wishlist, lent out or given away
   keep their place as an outline. Point at a spine and it slides out a
   little.

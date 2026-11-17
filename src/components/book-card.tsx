@@ -36,6 +36,7 @@ export function BookCover({
   loading = "lazy",
   flightTarget,
   tilt = false,
+  reading,
 }: {
   book: Pick<Book, "title" | "coverUrl"> & { authors?: string[] };
   className?: string;
@@ -46,6 +47,9 @@ export function BookCover({
   /** Tilts toward the pointer and catches the light
    *  (components/cover-tilt.tsx). */
   tilt?: boolean;
+  /** Where the reader is, for a book being read: a bookmark ribbon hangs
+   *  down the cover to there (ProgressRibbon). */
+  reading?: ReadingAt | null;
 }) {
   return (
     <div
@@ -71,7 +75,33 @@ export function BookCover({
       ) : (
         <MissingCover title={book.title} author={book.authors?.[0]} />
       )}
+      {reading && <ProgressRibbon at={reading} />}
     </div>
+  );
+}
+
+/** How far into a book the reader is: a page of so many. */
+export type ReadingAt = { page: number; of: number };
+
+/**
+ * A satin bookmark ribbon on a book being read: it comes out of the top of
+ * the book near the fore-edge and hangs down the cover as far as the reader
+ * has got, from a short tail at the start to the foot of the cover at the
+ * end, with a forked tip (globals.css, "Bookmark ribbons"). Its colour, or
+ * the plain bar under the cover in its place, follows "Reading progress on
+ * covers" in Preferences (`data-ribbon` on <html>). The exact page shows
+ * under the pointer; the bar beside it, when there is one, says it to
+ * screen readers as it always did.
+ */
+function ProgressRibbon({ at }: { at: ReadingAt }) {
+  const share = at.of > 0 ? Math.min(Math.max(at.page / at.of, 0), 1) : 0;
+  return (
+    <span
+      className="cover-ribbon"
+      style={{ "--ribbon-at": share.toFixed(3) } as React.CSSProperties}
+      title={`Page ${at.page} of ${at.of}`}
+      aria-hidden="true"
+    />
   );
 }
 
@@ -200,8 +230,17 @@ const ALL_DETAILS: CardDetails = {
 
 /** Reading progress as 0–1 while a book is being read, else null. */
 function readingProgress(book: BookCardBook): number | null {
+  const at = readingAt(book);
+  return at ? Math.min(at.page / at.of, 1) : null;
+}
+
+/** The page a book being read is at, of how many; null for any other
+ *  book, or one without both numbers. */
+export function readingAt(
+  book: Pick<Book, "status" | "currentPage" | "pageCount">,
+): ReadingAt | null {
   return book.status === ReadingStatus.READING && book.currentPage != null && book.pageCount
-    ? Math.min(book.currentPage / book.pageCount, 1)
+    ? { page: book.currentPage, of: book.pageCount }
     : null;
 }
 
@@ -318,7 +357,7 @@ export function BookRow({
       bookId={book.id}
       className="surface lift group flex items-center gap-3 rounded-lg border bg-card p-2 shadow-(--surface-shadow) transition-colors hover:border-ring/60"
     >
-      <BookCover book={book} className="aspect-[2/3] w-10 shrink-0" />
+      <BookCover book={book} className="aspect-[2/3] w-10 shrink-0" reading={readingAt(book)} />
       <div className="grid min-w-0 flex-1 gap-0.5">
         <p className="truncate font-heading text-sm font-medium group-hover:underline">
           {book.title}
@@ -332,7 +371,7 @@ export function BookRow({
         {facts && <p className="truncate text-xs text-muted-foreground tabular-nums">{facts}</p>}
         {progress !== null && (
           <div
-            className="mt-0.5 h-1 max-w-40 rounded-full bg-muted"
+            className="cover-bar mt-0.5 h-1 max-w-40 rounded-full bg-muted"
             title={`Page ${book.currentPage} of ${book.pageCount}`}
           >
             <div
@@ -376,10 +415,10 @@ export function BookCard({
         compact ? "gap-1.5 p-2" : "gap-2 p-3",
       )}
     >
-      <BookCover book={book} className="aspect-[2/3] w-full" tilt />
+      <BookCover book={book} className="aspect-[2/3] w-full" tilt reading={readingAt(book)} />
       {progress !== null && (
         <div
-          className="-mt-1 h-1.5 rounded-full bg-muted"
+          className="cover-bar -mt-1 h-1.5 rounded-full bg-muted"
           title={`Page ${book.currentPage} of ${book.pageCount}`}
         >
           <div
@@ -432,10 +471,15 @@ export function BookCoverTile({ book, compact = false }: { book: BookCardBook; c
   const progress = readingProgress(book);
   return (
     <BookLink bookId={book.id} className="lift-cover group flex flex-col gap-1.5">
-      <BookCover book={book} className="cover-shadow aspect-[2/3] w-full" tilt />
+      <BookCover
+        book={book}
+        className="cover-shadow aspect-[2/3] w-full"
+        tilt
+        reading={readingAt(book)}
+      />
       {progress !== null && (
         <div
-          className="h-1 rounded-full bg-muted"
+          className="cover-bar h-1 rounded-full bg-muted"
           title={`Page ${book.currentPage} of ${book.pageCount}`}
         >
           <div
@@ -462,7 +506,12 @@ export function BookOnShelf({ book }: { book: BookCardBook }) {
   const byline = book.authors.length ? ` by ${book.authors.join(", ")}` : "";
   return (
     <BookLink bookId={book.id} className="lift-cover block" title={`${book.title}${byline}`}>
-      <BookCover book={book} className="cover-shadow aspect-[2/3] w-full" tilt />
+      <BookCover
+        book={book}
+        className="cover-shadow aspect-[2/3] w-full"
+        tilt
+        reading={readingAt(book)}
+      />
       <span className="sr-only">{book.title}</span>
     </BookLink>
   );

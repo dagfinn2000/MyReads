@@ -59,6 +59,9 @@ describe("parsePreferences", () => {
     expect(parsePreferences({}).celebration).toBe("confetti");
     expect(parsePreferences({ coverTilt: "off" }).coverTilt).toBe("off");
     expect(parsePreferences({ coverTilt: "wobbly" }).coverTilt).toBe("on");
+    expect(parsePreferences({}).progressRibbon).toBe("crimson");
+    expect(parsePreferences({ progressRibbon: "bar" }).progressRibbon).toBe("bar");
+    expect(parsePreferences({ progressRibbon: "plaid" }).progressRibbon).toBe("crimson");
     expect(parsePreferences({ coverArt: "plain" }).coverArt).toBe("plain");
     expect(parsePreferences({ coverArt: 3 }).coverArt).toBe("drawn");
     expect(parsePreferences({ accent: "teal" }).accent).toBe("teal");
