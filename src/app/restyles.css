@@ -8106,21 +8106,42 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
 .theme-is-fluent .bulk-bar {
   bottom: calc(var(--fl-bottom) + 0.75rem);
 }
+@media (40rem <= width < 64rem) {
+  /* A tablet's taskbar: the icons stay in the middle but keep clear of
+     the tray, as wide again on the left, closing up a little (globals.css,
+     Top bar) where they would have run under it. Nine icons close up from
+     their gaps first. */
+  .theme-is-fluent .top-bar > div {
+    padding-inline: 11rem;
+  }
+  .theme-is-fluent .top-bar > div:has(> a:nth-of-type(10)) {
+    gap: 0;
+  }
+}
+@media (48rem <= width < 64rem) {
+  /* Where the tray has the search button too. */
+  .theme-is-fluent .top-bar > div {
+    padding-inline: 13.5rem;
+  }
+}
 @media (width < 40rem) {
-  /* Nine icons and the tray in a phone's width: the tray joins the row. */
+  /* Nine icons and the tray in a phone's width: the tray joins the row,
+     every icon one of a line of even slots that close up together when
+     the row is short of room, rather than the links alone giving way. */
   .theme-is-fluent .top-bar > div {
     justify-content: space-between;
     gap: 0;
     padding-inline: 0.25rem;
   }
-  .theme-is-fluent .top-bar .ml-auto {
-    position: static;
-    margin: 0;
+  .theme-is-fluent .top-bar .ml-auto,
+  .theme-is-fluent .top-bar .ml-auto > form {
+    display: contents;
   }
   .theme-is-fluent .top-bar :is(.wordmark, .nav-link),
   .theme-is-fluent .top-bar .ml-auto [data-size][data-variant] {
+    flex: 0 1 2rem;
     width: 2rem;
-    min-width: 2rem;
+    min-width: 0;
     padding: 0;
   }
   .theme-is-fluent .top-bar :is(.wordmark, .nav-link) svg {
@@ -8799,9 +8820,10 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
   }
   .theme-is-vision .top-bar :is(.wordmark, .nav-link),
   .theme-is-vision .top-bar .ml-auto [data-size][data-variant] {
+    flex: 0 1 1.875rem;
     justify-content: center;
     width: 1.875rem;
-    min-width: 1.875rem;
+    min-width: 0;
     height: 3rem;
     padding: 0;
   }
@@ -8816,11 +8838,12 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
     padding: 0;
     clip-path: inset(50%);
   }
-  .theme-is-vision .top-bar .ml-auto {
-    position: static;
-    translate: none;
-    padding: 0;
-    gap: 0;
+  /* The toolbar's buttons join the tab bar, each in a slot of its own, so
+     that every slot closes up a little alike when the bar is short of
+     room. */
+  .theme-is-vision .top-bar .ml-auto,
+  .theme-is-vision .top-bar .ml-auto > form {
+    display: contents;
   }
   .theme-is-vision .top-bar .ml-auto::before {
     display: none;
@@ -10594,6 +10617,20 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
 }
 .theme-is-mojave .top-bar .ml-auto .text-muted-foreground {
   color: #e9e9eb;
+}
+@media (40rem <= width < 64rem) {
+  /* On a tablet the segmented control stays in the middle but keeps clear
+     of the buttons at the right, as far in from either side, its segments
+     narrowing (globals.css, Top bar) where it would have run under them. */
+  .theme-is-mojave .top-bar > div {
+    padding-inline: 11.25rem;
+  }
+}
+@media (48rem <= width < 64rem) {
+  /* Where the search button joins them. */
+  .theme-is-mojave .top-bar > div {
+    padding-inline: 14rem;
+  }
 }
 @media (width < 40rem) {
   /* The phone's window: the toolbar alone at the top, the links filling
