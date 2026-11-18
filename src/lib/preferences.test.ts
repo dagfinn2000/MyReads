@@ -63,6 +63,9 @@ describe("parsePreferences", () => {
     expect(parsePreferences({ progressRibbon: "bar" }).progressRibbon).toBe("bar");
     expect(parsePreferences({ progressRibbon: "plaid" }).progressRibbon).toBe("crimson");
     expect(parsePreferences({}).shelfWear).toBe("on");
+    expect(parsePreferences({}).timeOfDay).toBe("on");
+    expect(parsePreferences({ timeOfDay: "off" }).timeOfDay).toBe("off");
+    expect(parsePreferences({ timeOfDay: "sideways" }).timeOfDay).toBe("on");
     expect(parsePreferences({}).upNextLook).toBe("pile");
     expect(parsePreferences({ upNextLook: "covers" }).upNextLook).toBe("covers");
     expect(parsePreferences({ upNextLook: "sideways" }).upNextLook).toBe("pile");

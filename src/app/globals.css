@@ -8685,6 +8685,87 @@ html[data-covers="plain"] .drawn-cover {
   }
 }
 
+/* ── Time of day ───────────────────────────────────────────────────────────
+   The light of the hour where the reader is (lib/daylight.ts; Preferences >
+   Appearance > Light through the day, data-time-light). The root layout
+   puts the phase on <html> (data-daylight: day, dawn, dusk or night) with
+   --dl-warm, how much low warm light there is, and --dl-night, how far
+   into the night, and components/daylight.tsx keeps them current. By day
+   nothing here applies.
+
+   Over a scene (a moving background but Sky, or a theme under Scenes) a
+   wash lies between the scene and the page: a warm glow rising from the
+   foot of the window, amber at dusk and rose at dawn; and at night the dark
+   drawing in from the edges and corners, cooler and deeper on a dark
+   theme. The middle, where the page's words are, is left all but alone, so
+   nothing written straight on the page loses contrast.
+
+   The reading room's house takes the same light as a filter: warmer and
+   golden at dusk, rosier at dawn, dimmer and greyer at night. Its lamps,
+   the fire's glow, fireflies and falling snow are left out of it, so the
+   lights stay bright as the house dims around them. */
+.daylight {
+  --dl-glow: 255 148 66;
+  --dl-dark: 10 14 40;
+  --dl-glow-strength: 0.2;
+  --dl-edge: 0.3;
+  --dl-wash: 0.03;
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      to top,
+      rgb(var(--dl-glow) / calc(var(--dl-warm, 0) * var(--dl-glow-strength))),
+      rgb(var(--dl-glow) / calc(var(--dl-warm, 0) * var(--dl-glow-strength) * 0.35)) 30%,
+      transparent 62%
+    ),
+    radial-gradient(
+      ellipse 85% 75% at 50% 45%,
+      transparent 52%,
+      rgb(var(--dl-dark) / calc(var(--dl-night, 0) * var(--dl-edge))) 100%
+    ),
+    linear-gradient(rgb(var(--dl-dark) / calc(var(--dl-night, 0) * var(--dl-wash))) 0 0);
+}
+.dark .daylight {
+  --dl-dark: 2 4 16;
+  --dl-glow-strength: 0.24;
+  --dl-edge: 0.5;
+  --dl-wash: 0.12;
+}
+html[data-daylight="dawn"] .daylight {
+  --dl-glow: 255 146 160;
+}
+html:not([data-time-light="on"]) .daylight,
+html[data-daylight="day"] .daylight {
+  display: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-motion="off"]) .daylight {
+    animation: daylight-in 1.2s ease-out backwards;
+  }
+}
+@keyframes daylight-in {
+  from {
+    opacity: 0;
+  }
+}
+html[data-time-light="on"]:is([data-daylight="dawn"], [data-daylight="dusk"], [data-daylight="night"])
+  .room-scene
+  > :is(svg.room-abs, .room-abs:not(.room-fireflies), .room-floor) {
+  filter: sepia(calc(var(--dl-warm, 0) * 0.32))
+    saturate(calc(1 + var(--dl-warm, 0) * 0.25 - var(--dl-night, 0) * 0.3))
+    hue-rotate(calc(var(--dl-warm, 0) * var(--dl-room-hue, 0deg)))
+    brightness(calc(1 - var(--dl-night, 0) * var(--dl-room-dim, 0.24)));
+}
+html[data-daylight="dawn"] .room-scene {
+  --dl-room-hue: -14deg;
+}
+.dark .room-scene {
+  --dl-room-dim: 0.14;
+}
+
 /* ── Page turns ────────────────────────────────────────────────────────────
    Moving to another section from the top bar turns the page like a book's
    (lib/page-turn.ts). The browser holds a picture of the old page over the
