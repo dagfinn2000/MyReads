@@ -1132,6 +1132,11 @@ tab goes away. You can also keep the house and leave the avatar out.
   twinkling out from where you clicked, blossom petals drifting down, or
   nothing at all. Picking one plays it, so you can see it before your next
   finished book.
+- **Loose pages.** Finishing a book also shakes a few pages loose from it:
+  printed pages, each with its page number, thrown up from where you
+  finished it, that turn over and flutter down the screen the way a sheet
+  of paper falls, gliding side to side. Preferences > Motion can leave
+  finishing to the celebration alone.
 - **Page turns.** Going to another page from the top bar (or its g
   shortcuts) turns the page like a book's: the old page lifts at its
   right edge and turns away over the left, out of the light, and the new
@@ -1183,8 +1188,8 @@ On the Account page:
   the top of each book's page, and whether spines fill with colour as you
   read.
 - Animations on or off, whether pages turn or fade, how a finished book
-  is celebrated, whether the moving backgrounds move, and whether covers
-  follow the pointer.
+  is celebrated and whether loose pages flutter down, whether the moving
+  backgrounds move, and whether covers follow the pointer.
 - The book page: which cards show and in what order, long descriptions in
   full or cut short, and your own "Find it at" links.
 - Which page opens first, and the top bar: its links in your own order,

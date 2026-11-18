@@ -215,6 +215,7 @@ export default async function RootLayout({
       data-ribbon={prefs?.progressRibbon}
       data-shelf-wear={prefs?.shelfWear}
       data-book-backdrop={prefs?.bookBackdrop}
+      data-finish-pages={prefs?.finishPages}
       data-spine-fill={prefs?.spineFill}
       data-ink-stats={prefs?.inkStats}
       // Themes for parts of the app, which the pre-paint script picks from.

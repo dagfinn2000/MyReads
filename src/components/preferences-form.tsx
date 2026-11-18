@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { BookFormat, BookOwnership, ReadingStatus } from "@/lib/enums";
 import { ArrowDown, ArrowUp, Pencil, Trash2, Volume2 } from "lucide-react";
 import { savePreferences } from "@/lib/actions/preferences";
-import { previewCelebration } from "@/lib/celebrate";
+import { previewCelebration, previewLoosePages } from "@/lib/celebrate";
 import { deleteView, renameView } from "@/lib/actions/saved-views";
 import { moveId, orderByIds } from "@/lib/library-order";
 import { topBarLinks } from "@/lib/nav";
@@ -122,6 +122,7 @@ const HTML_ATTRIBUTES: Partial<Record<keyof Preferences, string>> = {
   progressRibbon: "data-ribbon",
   shelfWear: "data-shelf-wear",
   bookBackdrop: "data-book-backdrop",
+  finishPages: "data-finish-pages",
   spineFill: "data-spine-fill",
   inkStats: "data-ink-stats",
 };
@@ -1017,6 +1018,19 @@ export function PreferencesForm({
           onChange={(v) => {
             update({ celebration: v });
             previewCelebration(v);
+          }}
+        />
+        <Choice
+          label="Finishing a book"
+          hint="As well as the celebration, a few loose pages can come away from the book and flutter down."
+          value={prefs.finishPages}
+          options={[
+            { value: "on", label: "Loose pages flutter down" },
+            { value: "off", label: "Just the celebration" },
+          ]}
+          onChange={(v) => {
+            update({ finishPages: v });
+            if (v === "on") previewLoosePages();
           }}
         />
         <Choice

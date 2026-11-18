@@ -4,7 +4,7 @@ import { useActionState, useEffect, useEffectEvent, useRef } from "react";
 import type { Book, ProgressEntry } from "@prisma/client";
 import { BookOwnership, ReadingStatus } from "@/lib/enums";
 import { updateReading } from "@/lib/actions/books";
-import { celebrate } from "@/lib/celebrate";
+import { celebrateFinish } from "@/lib/celebrate";
 import { toDateInputValue } from "@/lib/display";
 import { customStatusOf, statusChoice } from "@/lib/statuses";
 import { usePendingItems } from "@/components/offline-provider";
@@ -78,7 +78,7 @@ export function ReadingCard({
   // the chime with sounds on. Each save returns a new state object, so this
   // runs once per save.
   const finished = useEffectEvent(() => {
-    celebrate(saveButton.current);
+    celebrateFinish(saveButton.current);
     sound("finished");
   });
   useEffect(() => {

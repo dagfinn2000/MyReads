@@ -12,11 +12,38 @@ import type { Celebration } from "@/lib/preferences";
  * device asks for reduced motion.
  */
 export function celebrate(origin?: Element | null): void {
+  play((document.documentElement.dataset.celebration ?? "confetti") as Celebration, originPoint(origin));
+}
+
+/**
+ * Finishing a book: the celebration, and as well, unless "Finishing a
+ * book" in Preferences › Motion says otherwise (`data-finish-pages`), a
+ * few loose pages come away from where it was finished and flutter down
+ * the screen. Not with animations off or reduced motion.
+ */
+export function celebrateFinish(origin?: Element | null): void {
+  celebrate(origin);
+  if (document.documentElement.dataset.finishPages !== "off") playLoosePages(originPoint(origin));
+}
+
+/** The loose pages on their own from the middle of the screen, so
+ *  Preferences can show them as they're turned on. */
+export function previewLoosePages(): void {
+  playLoosePages({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
+}
+
+function playLoosePages(at: Point) {
+  if (!motionAllowed()) return;
+  const stage = openStage();
+  if (stage) loosePages(stage, at);
+}
+
+/** The middle of `origin`, or a little way down the middle of the screen. */
+function originPoint(origin?: Element | null): Point {
   const rect = origin?.getBoundingClientRect();
-  const at = rect
+  return rect
     ? { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 }
     : { x: window.innerWidth / 2, y: window.innerHeight / 4 };
-  play((document.documentElement.dataset.celebration ?? "confetti") as Celebration, at);
 }
 
 /** Plays `style` once from the middle of the screen, so Preferences can
@@ -376,3 +403,132 @@ const petals: Effect = (stage, at) => {
 };
 
 const EFFECTS: Record<Exclude<Celebration, "off">, Effect> = { confetti, fireworks, sparkles, petals };
+
+// ── Loose pages ───────────────────────────────────────────────────────────
+
+/**
+ * A few pages come loose from a finished book: thrown up and out from the
+ * origin, they turn over as they slow, then flutter down the screen the way
+ * a sheet of paper falls, gliding to one side and the other and slowing
+ * at the end of each swing, tipped into the glide and seen edge-on as it
+ * turns. Each is printed: lines of text in a block, a short last line,
+ * and a page number; the back is the same paper with the print showing
+ * through faintly. A fine edge and a soft shadow keep them on a pale page.
+ */
+const loosePages: Effect = (stage, at) => {
+  const DURATION = 5000;
+  const papers = ["#fbf7ee", "#f7f0e1", "#f3ead6", "#fdfaf3"];
+  const count = 5 + Math.floor(Math.random() * 3);
+  const sheets = Array.from({ length: count }, (_, i) => {
+    const width = 46 + Math.random() * 18;
+    // Fanned out evenly, a little jostled, so no two go the same way.
+    const side = (i / (count - 1) - 0.5) * 2;
+    return {
+      x: at.x + spread(24),
+      y: at.y + spread(12),
+      vx: side * (2.5 + Math.random() * 2.5) + spread(1.5),
+      vy: -(6.5 + Math.random() * 4.5),
+      width,
+      height: width * 1.42,
+      // The roll in the screen's plane, and the turn about the page's own
+      // upright, which shows its back when past a quarter.
+      roll: spread(0.8),
+      vroll: spread(0.12),
+      turn: Math.random() * Math.PI,
+      vturn: 0.03 + Math.random() * 0.05,
+      // Its own swing: how wide and how often.
+      sway: 1.6 + Math.random() * 1.6,
+      swing: 0.0022 + Math.random() * 0.0012,
+      phase: Math.random() * Math.PI * 2,
+      fall: 1.8 + Math.random() * 1.0,
+      delay: i * 40 + Math.random() * 60,
+      paper: pick(papers),
+      lines: 7 + Math.floor(Math.random() * 3),
+      number: 120 + Math.floor(Math.random() * 280),
+    };
+  });
+  const { ctx, height } = stage;
+  stage.run(DURATION, (elapsed, step) => {
+    const fade = Math.min(1, (DURATION - elapsed) / 700);
+    for (const s of sheets) {
+      if (elapsed < s.delay) continue;
+      if (s.vy < 0) {
+        // Thrown up: slowing under gravity and the air.
+        s.vy += 0.32 * step;
+        s.vx *= 0.97 ** step;
+      } else {
+        // Falling: eased into its glide, side to side, fastest through the
+        // middle of each swing and all but stopping at its ends.
+        const swing = Math.cos(elapsed * s.swing + s.phase);
+        const glideX = s.sway * swing;
+        const glideY = 1.1 + s.fall * swing * swing;
+        s.vx += (glideX - s.vx) * 0.06 * step;
+        s.vy += (glideY - s.vy) * 0.06 * step;
+        // Tipped down into the way it's gliding.
+        s.vroll += (swing * 0.5 - s.roll) * 0.004 * step;
+        s.vroll *= 0.95 ** step;
+      }
+      s.x += s.vx * step;
+      s.y += s.vy * step;
+      s.roll += s.vroll * step;
+      s.turn += s.vturn * step;
+      if (s.y - s.height > height) continue;
+      // Seen from the side as it turns, never quite edge-on to nothing.
+      const face = Math.cos(s.turn);
+      const across = Math.sign(face || 1) * Math.max(0.08, Math.abs(face));
+      // Rocking forward and back with the swing, too.
+      const tip = 0.72 + 0.28 * Math.abs(Math.cos(elapsed * s.swing * 1.7 + s.phase));
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, fade);
+      ctx.translate(s.x, s.y);
+      ctx.rotate(s.roll);
+      ctx.scale(across, tip);
+      drawPage(ctx, s, face >= 0, 0.82 + 0.18 * Math.abs(face));
+      ctx.restore();
+    }
+  });
+};
+
+/** One loose page centred on the origin, lit by `light` (1 when it faces
+ *  the screen square on). The front is printed; the back shows the print
+ *  through, faint and mirrored, which the flip already does. */
+function drawPage(
+  ctx: CanvasRenderingContext2D,
+  page: { width: number; height: number; paper: string; lines: number; number: number },
+  front: boolean,
+  light: number,
+) {
+  const w = page.width;
+  const h = page.height;
+  const x = -w / 2;
+  const y = -h / 2;
+  ctx.shadowColor = "rgb(0 0 0 / 0.18)";
+  ctx.shadowBlur = 6;
+  ctx.shadowOffsetY = 3;
+  ctx.fillStyle = page.paper;
+  ctx.fillRect(x, y, w, h);
+  ctx.shadowColor = "transparent";
+  // Darker as it turns away from the light.
+  if (light < 1) {
+    ctx.fillStyle = `rgb(60 45 25 / ${((1 - light) * 0.9).toFixed(3)})`;
+    ctx.fillRect(x, y, w, h);
+  }
+  ctx.lineWidth = 0.75;
+  ctx.strokeStyle = "rgb(90 70 40 / 0.35)";
+  ctx.strokeRect(x, y, w, h);
+
+  const margin = w * 0.14;
+  const lineGap = (h - margin * 2.6) / page.lines;
+  ctx.fillStyle = front ? "rgb(40 32 24 / 0.5)" : "rgb(40 32 24 / 0.12)";
+  for (let i = 0; i < page.lines; i++) {
+    // A paragraph ends a little short; the last line shorter still.
+    const short = i === page.lines - 1 ? 0.45 : (i * 7 + page.number) % 5 === 0 ? 0.7 : 1;
+    ctx.fillRect(x + margin, y + margin + i * lineGap, (w - margin * 2) * short, Math.max(0.8, h * 0.012));
+  }
+  if (front) {
+    ctx.fillStyle = "rgb(40 32 24 / 0.45)";
+    ctx.font = `${Math.max(5, w * 0.12)}px Georgia, serif`;
+    ctx.textAlign = "center";
+    ctx.fillText(String(page.number), 0, y + h - margin * 0.55);
+  }
+}
