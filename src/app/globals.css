@@ -9434,6 +9434,44 @@ html[data-ribbon="bar"] .spine-bookmark {
   box-shadow: inset -1px 0 0 rgb(0 0 0 / 0.15);
   clip-path: none;
 }
+/* A book being read is in its full colour only as far up as the reader has
+   got (--read, 0 to 1), like a glass filling; above that the colour hasn't
+   come in yet. Two layers over the spine, under its lettering, slid up out
+   of the spine by --read: a grey that takes the colour out but keeps its
+   light and dark (a saturation blend, which shades the bindings' gilt and
+   leather too), with a soft foot where the colour seeps up into it; and a
+   pale wash, a little darker on a dark page. As the library opens they
+   slide up from the foot, so the spine fills to the mark. Preferences can
+   leave every spine in full colour (data-spine-fill="off"). */
+.spine-unread {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(to top, transparent, rgb(128 128 128 / 0.85) calc(var(--h) * 0.05));
+  mix-blend-mode: saturation;
+  transform: translateY(calc(var(--read, 0) * -100%));
+}
+.spine-unread-wash {
+  background: linear-gradient(to top, transparent, rgb(255 255 255 / 0.3) calc(var(--h) * 0.05));
+  mix-blend-mode: normal;
+}
+.dark .spine-unread-wash {
+  background: linear-gradient(to top, transparent, rgb(0 0 0 / 0.22) calc(var(--h) * 0.05));
+}
+html[data-spine-fill="off"] .spine-unread {
+  display: none;
+}
+@keyframes spine-fill {
+  from {
+    transform: translateY(0);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-motion="off"]) .card-in .spine-unread {
+    animation: spine-fill 1.8s cubic-bezier(0.35, 0.1, 0.25, 1) backwards;
+    animation-delay: calc(0.35s + min(var(--i, 0), 24) * 40ms);
+  }
+}
 /* The year's shelf (components/year-shelf.tsx): a little room between
    months, and a brass plate on the board under each month's first book. */
 .year-shelf {
