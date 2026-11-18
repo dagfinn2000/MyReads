@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { CrossfadeLink } from "@/components/crossfade-link";
 import { Bookmark, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -35,25 +35,23 @@ export function SavedViewChips({
               active && "border-primary bg-primary/10 font-medium",
             )}
           >
-            {/* No prefetching, here or below: see BookLink. */}
-            <Link
+            {/* Crossfading, and not prefetched, here and below: see CrossfadeLink. */}
+            <CrossfadeLink
               href={`/books?${view.query}`}
-              prefetch={false}
               className={cn("flex items-center gap-1.5 py-1 pl-3", active ? "pr-1" : "pr-3")}
             >
               <Bookmark className="size-3.5" />
               {view.name}
-            </Link>
+            </CrossfadeLink>
             {active && (
-              <Link
+              <CrossfadeLink
                 href={clearHref}
-                prefetch={false}
                 className="mr-1 rounded-full p-0.5 hover:bg-primary/20"
                 title="Clear this view’s filters"
               >
                 <X className="size-3.5" />
                 <span className="sr-only">Clear this view’s filters</span>
-              </Link>
+              </CrossfadeLink>
             )}
           </span>
         );

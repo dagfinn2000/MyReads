@@ -9060,6 +9060,36 @@ html.page-turn-back::view-transition-old(root) {
   }
 }
 
+/* ── Crossfades ────────────────────────────────────────────────────────────
+   With "Moving between pages: Crossfade" the old page fades into the new
+   one (page-fade), and a tab that changes what a page shows (the library's
+   status tabs, shelves and saved views, the Stats periods) does the same,
+   more quickly (tab-fade, lib/page-turn.ts crossfadeTo). The browser's own
+   view transition is a crossfade, so only its pace is set here. Add book's
+   two tabs, which change on the page itself, fade their new side in.
+   "Switching tabs: Straight away" (data-tab-change="off") snaps as before;
+   neither moves with animations off. */
+html.page-fade::view-transition-old(root),
+html.page-fade::view-transition-new(root) {
+  animation-duration: 0.4s;
+  animation-timing-function: ease-in-out;
+}
+html.tab-fade::view-transition-old(root),
+html.tab-fade::view-transition-new(root) {
+  animation-duration: 0.22s;
+  animation-timing-function: ease-out;
+}
+@keyframes tab-in {
+  from {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-motion="off"], [data-tab-change="off"]) [data-slot="tabs-content"] {
+    animation: tab-in 0.25s ease-out;
+  }
+}
+
 /* Words and ticks on the app's amber (a series' "Next" and "Reading" tags
    and its read ticks). Themes repaint that amber, from Newsprint's black
    to Blueprint's white, so what goes on it is worked out from it: a deep

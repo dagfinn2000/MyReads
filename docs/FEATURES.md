@@ -1195,7 +1195,12 @@ tab goes away. You can also keep the house and leave the avatar out.
   right edge and turns away over the left, out of the light, and the new
   one comes out of its shadow underneath. Going back along the bar, the
   new page turns in from the left instead. The top bar stays put, like the
-  binding. Preferences > Motion can have new pages simply fade in.
+  binding. Preferences > Motion can have the old page crossfade into the
+  new one instead.
+- **Crossfades.** Tabs that change what a page shows (the library's status
+  tabs, shelves and saved views, the periods on Stats) fade into their new
+  look instead of snapping, and Add book's two tabs fade their new side in.
+  Preferences > Motion can have them switch straight away.
 - Animations can be turned off, or only the backgrounds kept still. They
   stay off when your device asks for reduced motion.
 - **Book typography.** Choose "Like a printed book" in Preferences > Text

@@ -213,6 +213,7 @@ export default async function RootLayout({
       // Appearance (Preferences); see globals.css.
       data-motion={prefs?.motion}
       data-page-change={prefs?.pageChange}
+      data-tab-change={prefs?.tabChange}
       data-celebration={prefs?.celebration}
       data-covers={prefs?.coverArt}
       data-accent={prefs?.accent}
