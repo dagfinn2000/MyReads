@@ -167,7 +167,7 @@ describe("syncItems", () => {
       items: [logItem(finished.id), logItem(short.id), logItem(theirs.id)],
     });
     expect("results" in out && out.results.map((r) => (r.ok ? "ok" : r.error))).toEqual([
-      "Only books you're reading can log pages. Set this one to Currently Reading first.",
+      "Only books you’re reading can log pages. Set this one to Currently Reading first.",
       expect.stringContaining("100"),
       "Book not found",
     ]);
@@ -249,7 +249,7 @@ describe("syncItems", () => {
       ],
     });
     expect("results" in out && out.results.map((r) => r.ok)).toEqual([false, false, false, false, true]);
-    expect("results" in out && out.results[0]).toEqual({ id: "short", ok: false, error: "This couldn't be read." });
+    expect("results" in out && out.results[0]).toEqual({ id: "short", ok: false, error: "This couldn’t be read." });
   });
 
   it("refuses a body that isn't a list, or too long a list", async () => {

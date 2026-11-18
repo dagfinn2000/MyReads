@@ -154,7 +154,7 @@ export default async function AccountPage() {
           <p className="text-sm text-muted-foreground">
             Deleting your account removes your entire library from this
             instance — permanently. A backup zip restores into any MyReads
-            instance, so grab one first if there&apos;s any doubt.
+            instance, so grab one first if there’s any doubt.
           </p>
           <div className="flex flex-wrap gap-2">
             <Button asChild variant="outline">

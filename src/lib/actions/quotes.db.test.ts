@@ -182,12 +182,12 @@ describe("importing Kindle highlights", () => {
     expect(await prisma.quote.count({ where: { bookId: theirs.id } })).toBe(0);
 
     const mine = await prisma.book.create({ data: { userId, title: "Mine", searchText: "x" } });
-    expect(await importKindleQuotes(mine.id, [])).toEqual({ error: "Those highlights couldn't be read" });
+    expect(await importKindleQuotes(mine.id, [])).toEqual({ error: "Those highlights couldn’t be read" });
     expect(await importKindleQuotes(mine.id, [{ text: "" }])).toEqual({
-      error: "Those highlights couldn't be read",
+      error: "Those highlights couldn’t be read",
     });
     expect(await importKindleQuotes(mine.id, "nonsense")).toEqual({
-      error: "Those highlights couldn't be read",
+      error: "Those highlights couldn’t be read",
     });
   });
 

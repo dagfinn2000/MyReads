@@ -917,10 +917,10 @@ export function findLinkError(rawName: string, rawUrl: string): string | null {
   try {
     const parsed = new URL(url.replace(/\{(isbn|title|author)\}/g, "x"));
     if (parsed.protocol !== "https:" || !parsed.hostname || parsed.username || parsed.password) {
-      return "That isn't a web address.";
+      return "That isn’t a web address.";
     }
   } catch {
-    return "That isn't a web address.";
+    return "That isn’t a web address.";
   }
   return null;
 }

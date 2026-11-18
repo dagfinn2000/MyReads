@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatNumber } from "@/lib/display";
 import { PILE_AGES, pileLastsText, sinceMonth, type PileSummary } from "@/lib/to-read-pile";
 import { Ink } from "@/components/ink-number";
+import { fineText } from "@/lib/fine-type";
 
 /** The pile with the oldest waiting first, in the library. */
 const PILE_HREF = "/books?shelf=WANT_TO_READ&sort=createdAt&dir=asc";
@@ -51,7 +52,7 @@ export function ToReadPileCard({
         {pile.size === 0 && pile.added === 0 ? (
           <p className="text-sm text-muted-foreground">
             Nothing waits on Want to Read. Books you add to read later pile up here, with how long
-            they&apos;ve waited.
+            they’ve waited.
           </p>
         ) : (
           <div className="grid gap-6 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:gap-10">
@@ -91,7 +92,7 @@ export function ToReadPileCard({
             <div className="grid content-start gap-5">
               {pile.size > 0 && (
                 <div className="grid gap-2">
-                  <h3 className="text-sm text-muted-foreground">How long they&apos;ve waited</h3>
+                  <h3 className="text-sm text-muted-foreground">How long they’ve waited</h3>
                   <ul className="grid gap-1.5">
                     {PILE_AGES.map((age, i) => (
                       <li key={age.label} className="grid grid-cols-[7.5rem_minmax(0,1fr)_2.5rem] items-center gap-2 text-sm">
@@ -125,7 +126,7 @@ export function ToReadPileCard({
                       <li key={b.id} className="w-20 shrink-0">
                         <BookLink bookId={b.id} className="group grid gap-1" title={b.title}>
                           <BookCover book={b} className="aspect-[2/3] w-20" />
-                          <span className="line-clamp-2 text-xs leading-tight group-hover:underline">{b.title}</span>
+                          <span className="line-clamp-2 text-xs leading-tight group-hover:underline">{fineText(b.title)}</span>
                           <span className="text-[11px] text-muted-foreground">
                             Since {sinceMonth(b.createdAt, prefs.timeZone)}
                           </span>

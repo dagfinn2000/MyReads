@@ -24,6 +24,7 @@ import { StatusBadge } from "@/components/status-badge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { fineText } from "@/lib/fine-type";
 
 /** "I bought it" for one book: saving, saved, or what went wrong. Tied to the
  *  book's id, so a save still running when the next ISBN is checked never
@@ -112,7 +113,7 @@ export function CheckBookClient() {
         const res = await setOwnership(id, BookOwnership.OWNED);
         state = res.error ? { error: res.error } : "done";
       } catch {
-        state = { error: "Couldn't save that. Are you online?" };
+        state = { error: "Couldn’t save that. Are you online?" };
       }
       // Only the book this was for: another ISBN may have been checked
       // while it saved.
@@ -212,7 +213,7 @@ function MatchVerdict({
   }, [marked]);
 
   const Icon = TONE_ICONS[verdict.tone];
-  const detail = marked ? "Marked as owned. It's on your shelf now." : verdict.detail;
+  const detail = marked ? "Marked as owned. It’s on your shelf now." : verdict.detail;
   const showMark = verdict.markOwned !== null && !marked;
 
   return (
@@ -266,13 +267,13 @@ function NoMatch({ result, isbn }: { result: LibraryCheckResult; isbn: string })
       </p>
       {result.lookupFailed && (
         <p className="text-sm text-muted-foreground">
-          Couldn&apos;t reach the book catalogues, so only this exact edition was checked,
+          Couldn’t reach the book catalogues, so only this exact edition was checked,
           not other editions of the same title.
         </p>
       )}
       {result.lookedUp && (
         <p className="text-sm text-muted-foreground">
-          Looked up: <span className="font-medium">{result.lookedUp.title}</span>
+          Looked up: <span className="font-medium">{fineText(result.lookedUp.title)}</span>
           {result.lookedUp.authors.length > 0
             ? ` by ${result.lookedUp.authors.join(", ")}`
             : ""}
@@ -310,7 +311,7 @@ function MatchedBook({
     >
       <BookCover book={book} className="h-20 w-14 shrink-0 rounded" />
       <div className="grid min-w-0 gap-1">
-        <p className="truncate text-sm font-medium">{book.title}</p>
+        <p className="truncate text-sm font-medium">{fineText(book.title)}</p>
         <p className="truncate text-xs text-muted-foreground">
           {book.authors.join(", ")}
         </p>

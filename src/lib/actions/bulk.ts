@@ -72,7 +72,7 @@ async function resolveTarget(
   if (count === 0) return { error: "No matching books" };
   if (count > BULK_MAX_MATCHING) {
     return {
-      error: `That's more than ${BULK_MAX_MATCHING.toLocaleString("en-US")} books. Narrow the filters first.`,
+      error: `That’s more than ${BULK_MAX_MATCHING.toLocaleString("en-US")} books. Narrow the filters first.`,
     };
   }
   return { where, count };

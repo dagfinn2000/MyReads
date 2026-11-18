@@ -210,7 +210,7 @@ describe("loanSchema", () => {
 
   it("refuses a day it was lent that is still to come", () => {
     const later = loanSchema.safeParse({ borrower: "Kari", lentAt: day(5) });
-    expect(later.error?.issues[0]?.message).toBe("You can't have lent it on a day still to come.");
+    expect(later.error?.issues[0]?.message).toBe("You can’t have lent it on a day still to come.");
   });
 
   it("takes today and earlier days", () => {

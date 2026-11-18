@@ -402,7 +402,7 @@ export function RoomView({
               )}
 
               {added.length > 0 && (
-                <Group title="Each room's walls and floor">
+                <Group title="Each room’s walls and floor">
                   <RoomOwnControls rooms={added} decor={decor} onChange={change} />
                 </Group>
               )}

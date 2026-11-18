@@ -392,7 +392,7 @@ describe("updateBook", () => {
   it("refuses fewer pages than the page the reader is on", async () => {
     const bk = await makeBook({ status: ReadingStatus.READING, pageCount: 320, currentPage: 200 });
     const result = await updateBook(bk.id, {}, form({ ...bookFields, pageCount: "100" }));
-    expect(result.error).toBe("You're on page 200, past the end of 100 pages. Move your place back first.");
+    expect(result.error).toBe("You’re on page 200, past the end of 100 pages. Move your place back first.");
     expect((await prisma.book.findUniqueOrThrow({ where: { id: bk.id } })).pageCount).toBe(320);
 
     await redirectOf(updateBook(bk.id, {}, form({ ...bookFields, pageCount: "200" })));

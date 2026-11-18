@@ -10,10 +10,10 @@ export type CardHasContent = Partial<Record<BookPageCard, boolean>>;
  * the library.
  */
 export const FORCED_CARD_NOTES: Partial<Record<BookPageCard, string>> = {
-  reading: "Shown although hidden, because you're reading it or wrote a review.",
+  reading: "Shown although hidden, because you’re reading it or wrote a review.",
   history: "Shown although hidden, because this book has past reads.",
-  lending: "Shown although hidden, because it's lent out.",
-  quotes: "Shown although hidden, because you've written notes or saved quotes in it.",
+  lending: "Shown although hidden, because it’s lent out.",
+  quotes: "Shown although hidden, because you’ve written notes or saved quotes in it.",
 };
 
 /**

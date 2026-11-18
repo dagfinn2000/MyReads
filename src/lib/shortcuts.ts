@@ -172,7 +172,7 @@ export function shortcutGroups(links: readonly NavItem[], mac = false): Shortcut
       ),
     },
     {
-      title: "On a book's page",
+      title: "On a book’s page",
       items: [{ keys: ["e"], label: "Edit the book" }],
     },
   ];

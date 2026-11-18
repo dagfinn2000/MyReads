@@ -1198,7 +1198,17 @@ tab goes away. You can also keep the house and leave the avatar out.
   in the accent colour, quotes hang on a large opening quote mark, and
   lines wrap so a paragraph doesn't end on one short word. Short
   descriptions, and ones that start with a quote mark or a number, keep
-  their first letter plain.
+  their first letter plain. Numbers in long text become old-style
+  figures, which sit on the line like small letters, where the font has
+  them (most book serifs do; the app's own sans doesn't). The book serif
+  for long text sets its numbers that way too.
+- **Typesetting.** Titles, authors, descriptions, reviews, notes and
+  quotes show curly quotes and apostrophes (“Ender’s Game”), a proper
+  dash for two hyphens or a spaced hyphen, and an ellipsis for three dots,
+  however they were typed or came from the catalogue. What's saved stays
+  as typed, so search and editing see your own text, and web addresses
+  are left alone. Titles and headings break into lines of even length, so
+  none ends on one word by itself.
 - Sounds, if you turn them on: a page turning over when you log pages (a
   riffle of a few after a long sitting: more pages read, more pages
   turn), a soft wooden thud when you put a book on a shelf or close a

@@ -104,7 +104,7 @@ export function SmartShelfDraftBar({
         ? await updateSmartShelfRules(draft.id!, rules)
         : await createSmartShelf(draft.name, rules);
       if (res.error || !res.id) {
-        setError(res.error ?? "Couldn't save that shelf.");
+        setError(res.error ?? "Couldn’t save that shelf.");
         return;
       }
       open(res.id);

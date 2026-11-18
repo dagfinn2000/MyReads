@@ -47,9 +47,9 @@ describe("lendingMode", () => {
 
   it("says why for each kind of copy", () => {
     expect(LENDING_NOTE.lendable).toBe("This copy is on your shelf.");
-    expect(LENDING_NOTE.borrowed).toBe("Borrowed copy. It isn't yours to lend.");
+    expect(LENDING_NOTE.borrowed).toBe("Borrowed copy. It isn’t yours to lend.");
     expect(LENDING_NOTE["given-away"]).toBe("You gave this copy away.");
-    expect(LENDING_NOTE.wishlist).toBe("On your wishlist, so there's no copy to lend.");
+    expect(LENDING_NOTE.wishlist).toBe("On your wishlist, so there’s no copy to lend.");
   });
 });
 

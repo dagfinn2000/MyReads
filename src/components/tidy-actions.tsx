@@ -106,7 +106,7 @@ export function FillFromCatalogue({ ids }: { ids: string[] }) {
       if (result.kind === "error") {
         failed = result.message;
         // The catalogues being out of reach won't change for the next book.
-        if (result.message.startsWith("Couldn't reach")) break;
+        if (result.message.startsWith("Couldn’t reach")) break;
       }
       if (result.kind === "filled") filled++;
       done++;
@@ -143,7 +143,7 @@ export function FillFromCatalogue({ ids }: { ids: string[] }) {
       <span className="text-muted-foreground" role="status">
         {state.phase === "done"
           ? `${state.filled === 0 ? "Nothing new found" : `Filled in ${state.filled} ${state.filled === 1 ? "book" : "books"}`}${state.failed ? `. ${state.failed}` : "."}`
-          : `${ids.length} ${ids.length === 1 ? "has" : "have"} an ISBN to look up by. Only what's missing is filled in.`}
+          : `${ids.length} ${ids.length === 1 ? "has" : "have"} an ISBN to look up by. Only what’s missing is filled in.`}
       </span>
     </div>
   );

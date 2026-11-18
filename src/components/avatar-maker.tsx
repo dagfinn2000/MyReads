@@ -202,7 +202,7 @@ export function AvatarMaker({
           <span>
             Show me in the reading room
             <span className="block text-xs text-muted-foreground">
-              Walking about, or in the armchair while you&apos;re reading a book.
+              Walking about, or in the armchair while you’re reading a book.
             </span>
           </span>
         </label>
@@ -294,7 +294,7 @@ export function AvatarMaker({
               </Tiles>
               <Swatches
                 label="Hair colour"
-                hint={look.facialHair !== "none" ? "And the beard's." : undefined}
+                hint={look.facialHair !== "none" ? "And the beard’s." : undefined}
                 value={look.hairColour}
                 options={AVATAR_HAIR_COLOURS}
                 swatches={HAIR_SWATCHES}
@@ -460,7 +460,7 @@ export function AvatarMaker({
                 {(p) => (p === "none" ? <span className="self-center text-lg text-muted-foreground">–</span> : <PetPicture pet={p} coats={coats} />)}
               </Tiles>
               <Tiles
-                label="The cats' coat"
+                label="The cats’ coat"
                 hint="Every cat in the house: yours, and the one in the armchair."
                 options={CAT_COATS}
                 labels={PET_LABELS}
@@ -470,7 +470,7 @@ export function AvatarMaker({
                 {(cat) => <PetPicture pet="cat" coats={{ ...coats, cat }} />}
               </Tiles>
               <Tiles
-                label="The dog's coat"
+                label="The dog’s coat"
                 hint="Yours, and the one asleep in its basket."
                 options={DOG_COATS}
                 labels={PET_LABELS}

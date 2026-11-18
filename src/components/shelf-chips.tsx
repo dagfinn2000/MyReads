@@ -112,7 +112,7 @@ export function ShelfChips({
     startTransition(async () => {
       const res = await startSmartShelfDraft({ id: shelf.id });
       if (res.error || res.rules === undefined) {
-        setEditError(res.error ?? "Couldn't open that shelf's rules.");
+        setEditError(res.error ?? "Couldn’t open that shelf’s rules.");
         return;
       }
       router.push(withView(res.rules));

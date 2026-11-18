@@ -105,7 +105,7 @@ export async function updateProgressEntry(
   if (!entry) return { error: "Entry not found" };
   // The page-0 anchor marks where a read starts; moving it would hand one
   // read's pages to another. The log doesn't offer it.
-  if (entry.page === 0) return { error: "The start of a read can't be changed." };
+  if (entry.page === 0) return { error: "The start of a read can’t be changed." };
   const { book } = entry;
   if (book.pageCount != null && page > book.pageCount) {
     return { error: pastTheEnd(page, book.pageCount) };
@@ -135,7 +135,7 @@ export async function updateProgressEntry(
     if (!around) return { error: "Entry not found" };
     if (around.nextAnchor && at.getTime() >= around.nextAnchor.date.getTime()) {
       return {
-        error: `That's after you started reading it again (${formatDate(around.nextAnchor.date, prefs)}).`,
+        error: `That’s after you started reading it again (${formatDate(around.nextAnchor.date, prefs)}).`,
       };
     }
     // Without a page-0 anchor the read starts on its Started day, and an
@@ -158,7 +158,7 @@ export async function updateProgressEntry(
     );
     if (!placement.ok) {
       if (placement.reason === "beforeStart") {
-        return { error: `That's before this read started (${formatDate(placement.neighbour.date, prefs)}).` };
+        return { error: `That’s before this read started (${formatDate(placement.neighbour.date, prefs)}).` };
       }
       const hi = placement.after?.page ?? book.pageCount;
       // Read against what was typed, so 42% isn't "between 42% and 49%".
@@ -171,7 +171,7 @@ export async function updateProgressEntry(
       return {
         error:
           hi == null
-            ? `That entry can't be below ${lo}, to fit the days around it.`
+            ? `That entry can’t be below ${lo}, to fit the days around it.`
             : `That entry has to stay between ${lo} and ${top}, to fit the days around it.`,
       };
     }
@@ -224,7 +224,7 @@ export async function deleteProgressEntry(entryId: string): Promise<{ error?: st
   });
   if (!existing) return { error: "Entry not found" };
   // Without its anchor a read would run on into the one before it.
-  if (existing.page === 0) return { error: "The start of a read can't be deleted." };
+  if (existing.page === 0) return { error: "The start of a read can’t be deleted." };
   const tz = (await readerPrefs(userId)).timeZone;
 
   await prisma.$transaction(async (tx) => {
@@ -264,7 +264,7 @@ export async function moveFromReading(
   const userId = await requireUserId();
   const result = await moveFromReadingAs(userId, bookId, to, timed);
   // "Already there" only answers a move sent later, with its moment.
-  if ("already" in result) return { error: "This book isn't in Currently Reading any more." };
+  if ("already" in result) return { error: "This book isn’t in Currently Reading any more." };
   if (!("error" in result)) revalidateReading(bookId);
   return result;
 }
@@ -378,7 +378,7 @@ export async function setStopReason(bookId: string, reason: string | null): Prom
     where: { id: id.data, userId, status: ReadingStatus.DNF },
     data: { stopReason },
   });
-  if (count === 0) return { error: "This book isn't in Did Not Finish any more." };
+  if (count === 0) return { error: "This book isn’t in Did Not Finish any more." };
   revalidateReading(id.data);
   return {};
 }

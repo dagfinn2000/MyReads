@@ -147,7 +147,7 @@ export function finishByLine(
   const label = dueBack ? `Due back ${day}` : `Finish by ${day}`;
   switch (state.kind) {
     case "done":
-      return { label, detail: "You're at the end. Mark it finished.", tone: "good" };
+      return { label, detail: "You’re at the end. Mark it finished.", tone: "good" };
     case "late":
       return {
         label,
@@ -157,7 +157,7 @@ export function finishByLine(
     case "today":
       return {
         label: dueBack ? "Due back today" : "Finish by today",
-        detail: state.pagesLeft ? `${leftText(state.pagesLeft, info)} to go.` : "That's today.",
+        detail: state.pagesLeft ? `${leftText(state.pagesLeft, info)} to go.` : "That’s today.",
         tone: "warn",
       };
     case "ahead": {

@@ -106,7 +106,7 @@ export default async function AuthorsPage({
       {all.length === 0 ? (
         <p className="text-sm text-muted-foreground">
           No authors yet. Add a book with its author, and the author shows up here with how much
-          of them you&apos;ve read.
+          of them you’ve read.
         </p>
       ) : (
         <>

@@ -75,7 +75,7 @@ export function ManageTagsDialog({
       setMessage(
         res.error ??
           `Removed “${tag}” from ${res.count} book${res.count === 1 ? "" : "s"}.${
-            res.ruleSaved ? " It won't be imported again." : ""
+            res.ruleSaved ? " It won’t be imported again." : ""
           }`,
       );
       reset();

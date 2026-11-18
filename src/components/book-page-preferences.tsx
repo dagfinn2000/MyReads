@@ -149,7 +149,7 @@ export function FindLinksEditor({ prefs, update }: { prefs: Preferences; update:
         </p>
         <p id={hintId} className="text-xs text-muted-foreground">
           Links to your library or a shop, shown on each book. Put {"{isbn}"}, {"{title}"} or{" "}
-          {"{author}"} where the book&apos;s details go. Links that use {"{isbn}"} are hidden on
+          {"{author}"} where the book’s details go. Links that use {"{isbn}"} are hidden on
           books without one.
         </p>
       </div>
@@ -278,7 +278,7 @@ export function FindLinksEditor({ prefs, update }: { prefs: Preferences; update:
         </form>
       ) : (
         <p className="text-sm text-muted-foreground">
-          That&apos;s the most links ({MAX_FIND_LINKS}). Remove one to add another.
+          That’s the most links ({MAX_FIND_LINKS}). Remove one to add another.
         </p>
       )}
     </div>

@@ -67,8 +67,8 @@ export async function sendTestReminder(id: unknown): Promise<{ error?: string }>
   if (outcome === "gone") {
     await prisma.pushDevice.deleteMany({ where: { id: device.id } });
     revalidatePath("/account");
-    return { error: "That browser has stopped taking reminders, so it's off the list now." };
+    return { error: "That browser has stopped taking reminders, so it’s off the list now." };
   }
-  if (outcome === "failed") return { error: "The browser's push service didn't take it. Try again later." };
+  if (outcome === "failed") return { error: "The browser’s push service didn’t take it. Try again later." };
   return {};
 }

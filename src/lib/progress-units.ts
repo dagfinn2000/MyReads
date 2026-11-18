@@ -177,7 +177,7 @@ export function parseUnitText(text: string, info: UnitInfo): ParsedPosition | nu
     const minutes = parseDuration(s);
     if (minutes === null) return { error: "Use hours and minutes, like 5:12." };
     if (minutes > info.lengthMinutes!) {
-      return { error: `That's past the end (${formatDuration(info.lengthMinutes!)}).` };
+      return { error: `That’s past the end (${formatDuration(info.lengthMinutes!)}).` };
     }
     return { value: minutes, page: unitToPage(minutes, info) };
   }
@@ -278,14 +278,14 @@ export function addStep(text: string, step: number, currentPage: number | null, 
 export function fallbackHint(info: UnitInfo): { before: string; after: string } | null {
   if (info.fallback === "noLength") {
     return {
-      before: "Tracking by page for now. Add the audiobook's length on the ",
+      before: "Tracking by page for now. Add the audiobook’s length on the ",
       after: " to track by time.",
     };
   }
   if (info.fallback === "noPageCount") {
     return info.wanted === "time"
       ? {
-          before: "Tracking by page for now. Add a page count (the print edition's is fine) on the ",
+          before: "Tracking by page for now. Add a page count (the print edition’s is fine) on the ",
           after: " to track by time.",
         }
       : { before: "Tracking by page for now. Add a page count on the ", after: " to track by percent." };

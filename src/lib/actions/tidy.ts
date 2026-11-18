@@ -96,7 +96,7 @@ export async function fillFromCatalogue(bookId: string): Promise<FillResult> {
       (await getPreferences()).catalogues,
     );
   } catch (e) {
-    if (e instanceof CataloguesUnreachableError) return { kind: "error", message: "Couldn't reach the book catalogues." };
+    if (e instanceof CataloguesUnreachableError) return { kind: "error", message: "Couldn’t reach the book catalogues." };
     throw e;
   }
 

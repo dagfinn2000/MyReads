@@ -307,7 +307,7 @@ describe("bulkUpdateBooks, more fields", () => {
     expect(
       await bulkUpdateBooks({ bookIds: [...ids, "one-more"], status: ReadingStatus.DNF }),
     ).toEqual({
-      error: "That's more than 2,000 books. Use “Select all books that match” instead.",
+      error: "That’s more than 2,000 books. Use “Select all books that match” instead.",
     });
   });
 });

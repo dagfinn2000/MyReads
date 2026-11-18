@@ -219,7 +219,7 @@ export function BackupReminderSetting({ initial }: { initial: BackupReminder }) 
             : status === "saved"
               ? "Saved."
               : status === "error"
-                ? "Couldn't save that change. Try again."
+                ? "Couldn’t save that change. Try again."
                 : ""}
         </p>
       </div>

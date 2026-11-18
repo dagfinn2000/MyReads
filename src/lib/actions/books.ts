@@ -169,7 +169,7 @@ export async function updateBook(
   // which adding a book and logging a page both refuse.
   if (existing.currentPage != null && data.pageCount != null && existing.currentPage > data.pageCount) {
     return {
-      error: `You're on page ${existing.currentPage}, past the end of ${data.pageCount} pages. Move your place back first.`,
+      error: `You’re on page ${existing.currentPage}, past the end of ${data.pageCount} pages. Move your place back first.`,
     };
   }
   const { customFields } = await getPreferences();

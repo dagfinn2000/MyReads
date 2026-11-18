@@ -49,10 +49,10 @@ export function SavedViewChips({
                 href={clearHref}
                 prefetch={false}
                 className="mr-1 rounded-full p-0.5 hover:bg-primary/20"
-                title="Clear this view's filters"
+                title="Clear this view’s filters"
               >
                 <X className="size-3.5" />
-                <span className="sr-only">Clear this view&apos;s filters</span>
+                <span className="sr-only">Clear this view’s filters</span>
               </Link>
             )}
           </span>

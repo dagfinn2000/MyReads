@@ -74,7 +74,7 @@ export async function renameTag(
   if (target.length > TAG_RULE_MAX) return { error: "Tag must be at most 50 characters" };
   // The book form splits tags on commas, so one with a comma in it would
   // come apart the next time the book is saved.
-  if (target.includes(",")) return { error: "Tags can't contain commas." };
+  if (target.includes(",")) return { error: "Tags can’t contain commas." };
   if (source === target) return { count: 0 };
   // A tag too long to be a rule (an old import) is still renamed on books.
   const remember =

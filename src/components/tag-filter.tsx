@@ -13,7 +13,7 @@ const FIND_FROM = 12;
 
 type Match = "any" | "all";
 
-const UNUSABLE_HINT = "Tags with a comma can't be filtered. Rename it in Manage tags.";
+const UNUSABLE_HINT = "Tags with a comma can’t be filtered. Rename it in Manage tags.";
 
 /**
  * The library's tag filter: a checklist of every tag, each one ticked to

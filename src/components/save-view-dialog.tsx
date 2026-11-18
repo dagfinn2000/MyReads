@@ -42,7 +42,7 @@ export function SaveViewDialog({ query }: { query: string }) {
       if (smart) {
         const res = await createSmartShelf(name, query);
         if (res.error || !res.id) {
-          setError(res.error ?? "Couldn't make that shelf.");
+          setError(res.error ?? "Couldn’t make that shelf.");
           return;
         }
         setOpen(false);

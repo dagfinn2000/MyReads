@@ -29,9 +29,9 @@ const SUPPORT_TEXT: Record<Exclude<Support, "checking" | "ready">, string> = {
     "Browsers only show notifications from a site opened over https (or on this computer, as localhost). Open MyReads at its https address to turn reminders on here.",
   "home-screen":
     "On an iPhone or iPad, reminders come to MyReads on the Home Screen. In Safari, tap Share › Add to Home Screen, open MyReads from there, and turn them on.",
-  unsupported: "This browser can't show notifications from a website.",
+  unsupported: "This browser can’t show notifications from a website.",
   denied:
-    "Notifications are blocked for this site. Allow them in the browser's settings for this site, then come back here.",
+    "Notifications are blocked for this site. Allow them in the browser’s settings for this site, then come back here.",
 };
 
 function detectSupport(): Support {
@@ -109,7 +109,7 @@ export function ReminderDevices({
       const permission = await Notification.requestPermission();
       if (permission !== "granted") {
         if (permission === "denied") setSupport("denied");
-        else setNote({ text: "Notifications weren't allowed, so reminders can't show here.", error: true });
+        else setNote({ text: "Notifications weren’t allowed, so reminders can’t show here.", error: true });
         return;
       }
       const res = await reminderKey();
@@ -141,7 +141,7 @@ export function ReminderDevices({
       setNote({ text: "Reminders are on in this browser." });
       router.refresh();
     } catch {
-      setNote({ text: "This browser couldn't turn reminders on. Try again in a moment.", error: true });
+      setNote({ text: "This browser couldn’t turn reminders on. Try again in a moment.", error: true });
     } finally {
       setBusy(false);
     }
@@ -158,7 +158,7 @@ export function ReminderDevices({
       }
       router.refresh();
     } catch {
-      setNote({ text: "Couldn't remove that. Try again.", error: true });
+      setNote({ text: "Couldn’t remove that. Try again.", error: true });
     } finally {
       setBusy(false);
     }
@@ -176,7 +176,7 @@ export function ReminderDevices({
       );
       if (res.error) router.refresh();
     } catch {
-      setNote({ text: "Couldn't send that. Try again.", error: true });
+      setNote({ text: "Couldn’t send that. Try again.", error: true });
     } finally {
       setBusy(false);
     }

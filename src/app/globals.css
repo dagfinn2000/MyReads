@@ -7129,6 +7129,14 @@ html[data-long-font="serif"] .long-text {
   font-family: ui-serif, "Iowan Old Style", "Palatino Linotype", Palatino, Georgia,
     Cambria, "Times New Roman", serif;
 }
+/* Numbers in long text set the way a book sets them: old-style figures,
+   which sit on the line like small letters (1984 reads as part of the
+   sentence, not as a row of capitals), in the serif or with "Like a
+   printed book". Only where the face has them: Georgia, Palatino and most
+   book serifs do; the app's own sans doesn't, and keeps its lining ones. */
+html:is([data-long-font="serif"], [data-typography="bookish"]) .long-text {
+  font-variant-numeric: oldstyle-nums proportional-nums;
+}
 
 /* The heading face: page titles (every h1), book titles on cards and rows,
    card and dialog titles, all through `font-heading`, which reads
@@ -10192,9 +10200,11 @@ html[data-covers="plain"] .book-backdrop[data-drawn] {
 }
 
 /* ── Small touches ─────────────────────────────────────────────────────────
-   Selected text and scrollbars take a tint of the accent colour. Headings
-   break into lines of even length, and paragraphs avoid a last line of one
-   word. A reading status badge leads with a dot of its colour. */
+   Selected text and scrollbars take a tint of the accent colour. Headings,
+   card and dialog titles and the titles under covers break into lines of
+   even length, so none ends on one word alone, and paragraphs, list items
+   and quotes avoid a last line of one word. A reading status badge leads
+   with a dot of its colour. */
 ::selection {
   background: color-mix(in oklab, var(--primary) 24%, transparent);
 }
@@ -10204,10 +10214,17 @@ html {
 @layer base {
   h1,
   h2,
-  h3 {
+  h3,
+  [data-slot="card-title"],
+  [data-slot="dialog-title"],
+  .book-title-line {
     text-wrap-style: balance;
   }
-  p {
+  p,
+  li,
+  dd,
+  blockquote,
+  figcaption {
     text-wrap-style: pretty;
   }
 }

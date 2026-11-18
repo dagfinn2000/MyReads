@@ -37,7 +37,7 @@ describe("bulkSchema", () => {
     expect(BULK_MAX_IDS).toBe(2000);
     expect(bulkSchema.safeParse({ bookIds: ids(2000), status: "READ" }).success).toBe(true);
     expect(firstError(bulkSchema.safeParse({ bookIds: ids(2001), status: "READ" }))).toBe(
-      "That's more than 2,000 books. Use “Select all books that match” instead.",
+      "That’s more than 2,000 books. Use “Select all books that match” instead.",
     );
   });
 

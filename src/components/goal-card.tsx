@@ -133,7 +133,7 @@ export function GoalCard({
                       go.
                     </>
                   )}
-                  {leavesOutRereads && " Re-reads don't count toward this goal."}
+                  {leavesOutRereads && " Re-reads don’t count toward this goal."}
                 </p>
               )}
             </div>

@@ -64,11 +64,11 @@ export function FinishedDateField({
           }}
           className="size-4 accent-primary"
         />
-        Don&apos;t remember
+        Don’t remember
       </label>
       {unknown && (
         <p id={`${id}-hint`} className="basis-full text-xs text-muted-foreground">
-          Counts in Books read, but not in any year&apos;s stats or goal.
+          Counts in Books read, but not in any year’s stats or goal.
         </p>
       )}
     </div>

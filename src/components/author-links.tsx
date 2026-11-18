@@ -1,5 +1,6 @@
 import { Fragment } from "react";
 import Link from "next/link";
+import { fineText } from "@/lib/fine-type";
 
 /** A book's authors, each a link to their books in the library. */
 export function AuthorLinks({ authors }: { authors: string[] }) {
@@ -10,7 +11,7 @@ export function AuthorLinks({ authors }: { authors: string[] }) {
         href={`/books?author=${encodeURIComponent(a)}`}
         className="hover:text-foreground hover:underline"
       >
-        {a}
+        {fineText(a)}
       </Link>
     </Fragment>
   ));

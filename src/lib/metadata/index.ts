@@ -19,7 +19,7 @@ export type { BookDetails, BookMetadata, CoverCandidate };
  *  "couldn't reach the catalogues" instead of "no results". */
 export class CataloguesUnreachableError extends Error {
   constructor() {
-    super("Couldn't reach the book catalogues");
+    super("Couldn’t reach the book catalogues");
     this.name = "CataloguesUnreachableError";
   }
 }

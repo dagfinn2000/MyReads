@@ -40,7 +40,7 @@ export function SyncStatus() {
         : waiting.length > 0
           ? [CloudUpload, state === "sending" ? "Sending…" : `${waiting.length} to send`]
           : unreachable
-            ? [CloudOff, "Can't reach MyReads"]
+            ? [CloudOff, "Can’t reach MyReads"]
             : [CloudOff, "Saved copy"];
   const count = refused.length || waiting.length;
 
@@ -71,21 +71,21 @@ export function SyncStatus() {
         <div className="grid gap-1">
           <p className="font-medium">
             {!online
-              ? "You're offline."
+              ? "You’re offline."
               : unreachable
-                ? "MyReads can't be reached right now."
+                ? "MyReads can’t be reached right now."
                 : state === "signed-out"
-                  ? "Sign in again to send what's saved here."
+                  ? "Sign in again to send what’s saved here."
                   : waiting.length > 0
                     ? "Back online."
                     : refused.length > 0
-                      ? "Some reading couldn't be saved."
-                      : "You're looking at a saved copy."}
+                      ? "Some reading couldn’t be saved."
+                      : "You’re looking at a saved copy."}
           </p>
           <p className="text-muted-foreground">
             {savedAt !== null && `This page was saved ${savedWhen(savedAt, now, prefs.timeZone, prefs.dateFormat)}. `}
             {!online || unreachable
-              ? "Pages you've opened lately still open, and reading you log is saved on this device. It's sent once MyReads can be reached."
+              ? "Pages you’ve opened lately still open, and reading you log is saved on this device. It’s sent once MyReads can be reached."
               : waiting.length > 0
                 ? "What you logged on this device is on its way."
                 : refused.length > 0

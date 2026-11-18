@@ -164,7 +164,7 @@ export const bookSchema = z.object({
   borrowedFrom: z
     .string()
     .trim()
-    .max(200, "Keep who it's borrowed from to 200 characters or fewer")
+    .max(200, "Keep who it’s borrowed from to 200 characters or fewer")
     .transform((s) => s || null)
     .nullable()
     .optional(),
@@ -404,11 +404,11 @@ export const loanSchema = z.object({
   // A day's slack, as for the read dates: a date field's day is midnight
   // UTC, which is already tomorrow east of UTC.
   if (d.lentAt && d.lentAt.getTime() > Date.now() + 86_400_000) {
-    ctx.addIssue({ code: "custom", path: ["lentAt"], message: "You can't have lent it on a day still to come." });
+    ctx.addIssue({ code: "custom", path: ["lentAt"], message: "You can’t have lent it on a day still to come." });
   }
   // Same calendar-day comparison as the read dates: both are midnight UTC.
   if (d.dueAt && d.lentAt && d.dueAt < d.lentAt) {
-    ctx.addIssue({ code: "custom", path: ["dueAt"], message: "It can't be due back before you lent it." });
+    ctx.addIssue({ code: "custom", path: ["dueAt"], message: "It can’t be due back before you lent it." });
   }
 });
 

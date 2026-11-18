@@ -33,7 +33,7 @@ export default function GlobalError({
       >
         <div style={{ textAlign: "center", maxWidth: "34rem" }}>
           <h1 style={{ fontSize: "1.25rem", fontWeight: 600, margin: "0 0 .5rem" }}>
-            MyReads couldn&apos;t start
+            MyReads couldn’t start
           </h1>
           <p style={{ color: "#666", margin: "0 0 1rem", lineHeight: 1.5 }}>
             Something failed before the page could render. If this persists,

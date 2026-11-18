@@ -162,7 +162,7 @@ describe("logPage", () => {
   it("refuses a future day, a day before the start, a page past the end and page 0", async () => {
     const book = await makeBook();
     expect(await logPage(book.id, { page: 10, day: "2026-10-13" })).toEqual({
-      error: "That day hasn't happened yet.",
+      error: "That day hasn’t happened yet.",
     });
     expect(await logPage(book.id, { page: 10, day: "2026-10-04" })).toEqual({
       error: "You started this book on 5 Oct 2026. Pick that day or later.",
@@ -178,7 +178,7 @@ describe("logPage", () => {
   it("refuses a book that isn't being read, and another account's book", async () => {
     const shelved = await makeBook({ status: ReadingStatus.WANT_TO_READ });
     expect(await logPage(shelved.id, { page: 10, day: "today" })).toEqual({
-      error: "Only books you're reading can log pages. Set this one to Currently Reading first.",
+      error: "Only books you’re reading can log pages. Set this one to Currently Reading first.",
     });
     const theirs = await makeBook({}, otherUserId);
     expect(await logPage(theirs.id, { page: 10, day: "today" })).toEqual({ error: "Book not found" });
@@ -339,10 +339,10 @@ describe("updateProgressEntry", () => {
       error: "That entry has to stay between page 210 and page 300, to fit the days around it.",
     });
     expect(await updateProgressEntry(rows[1].id, { page: 120, day: "2026-10-01" })).toEqual({
-      error: "That's before this read started (5 Oct 2026).",
+      error: "That’s before this read started (5 Oct 2026).",
     });
     expect(await updateProgressEntry(rows[1].id, { page: 120, day: "2026-10-13" })).toEqual({
-      error: "That day hasn't happened yet.",
+      error: "That day hasn’t happened yet.",
     });
   });
 
@@ -385,7 +385,7 @@ describe("updateProgressEntry", () => {
     ]);
     const rows = await prisma.progressEntry.findMany({ where: { bookId: book.id }, orderBy: { date: "asc" } });
     expect(await updateProgressEntry(rows[1].id, { page: 300, day: "2026-03-05" })).toEqual({
-      error: "That's after you started reading it again (1 Mar 2026).",
+      error: "That’s after you started reading it again (1 Mar 2026).",
     });
     // An earlier read's fix leaves the current read's page alone.
     await updateProgressEntry(rows[1].id, { page: 290, day: "2026-02-01" });
@@ -395,7 +395,7 @@ describe("updateProgressEntry", () => {
   it("refuses the start of a read and another account's entry", async () => {
     const { rows } = await seeded();
     expect(await updateProgressEntry(rows[0].id, { page: 5, day: "2026-10-05" })).toEqual({
-      error: "The start of a read can't be changed.",
+      error: "The start of a read can’t be changed.",
     });
     currentUserId = otherUserId;
     expect(await updateProgressEntry(rows[2].id, { page: 150, day: "2026-10-10" })).toEqual({
@@ -424,7 +424,7 @@ describe("deleteProgressEntry", () => {
     const book = await makeBook();
     await addEntries(book.id, [[0, "2026-10-05T00:00:00.000Z"], [20, "2026-10-06T10:00:00.000Z"]]);
     const rows = await prisma.progressEntry.findMany({ where: { bookId: book.id }, orderBy: { date: "asc" } });
-    expect(await deleteProgressEntry(rows[0].id)).toEqual({ error: "The start of a read can't be deleted." });
+    expect(await deleteProgressEntry(rows[0].id)).toEqual({ error: "The start of a read can’t be deleted." });
     currentUserId = otherUserId;
     expect(await deleteProgressEntry(rows[1].id)).toEqual({ error: "Entry not found" });
     expect(await log(book.id)).toHaveLength(2);
@@ -496,7 +496,7 @@ describe("moveFromReading and undo", () => {
   it("refuses a book that isn't being read and another account's book", async () => {
     const shelved = await makeBook({ status: ReadingStatus.READ });
     expect(await moveFromReading(shelved.id, "READ")).toEqual({
-      error: "This book isn't in Currently Reading any more.",
+      error: "This book isn’t in Currently Reading any more.",
     });
     const theirs = await makeBook({}, otherUserId);
     expect(await moveFromReading(theirs.id, "READ")).toEqual({ error: "Book not found" });
@@ -588,7 +588,7 @@ describe("time read (the reading timer)", () => {
       error: "Give at least a minute",
     });
     expect(await logPage(book.id, { page: 40, day: "today", minutes: 1441 })).toEqual({
-      error: "That's more than a day of reading",
+      error: "That’s more than a day of reading",
     });
     expect(await log(book.id)).toEqual([]);
   });

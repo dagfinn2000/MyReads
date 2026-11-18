@@ -32,6 +32,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { fineText } from "@/lib/fine-type";
 
 type Kind = "note" | "quote";
 
@@ -266,7 +267,7 @@ function BookStrip({
         )}
         {here && (
           <span
-            title={`You're on page ${here}`}
+            title={`You’re on page ${here}`}
             className="absolute top-[26px] -ml-[5px] size-0 border-x-[5px] border-b-[6px] border-x-transparent border-b-primary"
             style={{ left: at(here) }}
           />
@@ -304,7 +305,7 @@ function BookStrip({
             className="absolute top-0 font-medium whitespace-nowrap text-foreground"
             style={{ left: at(here), translate: `${(-stripAt(here, end) * 100).toFixed(1)}% 0` }}
           >
-            You&apos;re on p. {here}
+            You’re on p. {here}
           </span>
         )}
         <span className={cn(here && stripAt(here, end) > 0.88 && "invisible")}>p. {end}</span>
@@ -326,7 +327,7 @@ function MarkTip({ entry, at }: { entry: Entry; at: number }) {
         {entry.kind === "note" ? "Note" : "Quote"} · p. {entry.page}
         {chapter && ` · ${chapter}`}
       </span>
-      <span className="mt-0.5 line-clamp-3 whitespace-pre-line">{entry.text}</span>
+      <span className="mt-0.5 line-clamp-3 whitespace-pre-line">{fineText(entry.text)}</span>
     </span>
   );
 }
@@ -400,12 +401,12 @@ function EntryRow({
             {entry.kind === "quote" ? (
               <blockquote className="long-text border-l-2 border-primary/40 pl-3 text-sm leading-relaxed break-words whitespace-pre-line">
                 <span className="sr-only">Quote: </span>
-                {entry.text}
+                {fineText(entry.text)}
               </blockquote>
             ) : (
               <p className="long-text text-sm leading-relaxed break-words whitespace-pre-line">
                 <span className="sr-only">Note: </span>
-                {entry.text}
+                {fineText(entry.text)}
               </p>
             )}
             <div className={cn("flex min-h-7 flex-wrap items-center gap-x-2", entry.kind === "quote" && "pl-3")}>

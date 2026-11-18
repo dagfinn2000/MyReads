@@ -393,7 +393,7 @@ describe("parsePreferences: the newer settings", () => {
     expect(findLinkError("A", "https://a.example/{year}")).toBe(
       "Only {isbn}, {title} and {author} can be filled in.",
     );
-    expect(findLinkError("A", "https://user:pw@a.example")).toBe("That isn't a web address.");
+    expect(findLinkError("A", "https://user:pw@a.example")).toBe("That isn’t a web address.");
     expect(findLinkError("A", "https://a.example/s?t={title}&a={author}")).toBeNull();
   });
 

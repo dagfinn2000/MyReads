@@ -27,6 +27,7 @@ import { dustGrain, stoppedAt, stoppedNote, type StoppedAt } from "@/lib/shelf-w
 import { coverAt, coverSrcSet, hasCoverCopies } from "@/lib/cover-src";
 import type { LibraryDisplay } from "@/lib/library-view";
 import { cn } from "@/lib/utils";
+import { fineText } from "@/lib/fine-type";
 
 /** Cover image, or a stand-in when the book has none.
  *  Lazy by default — grids request hundreds of covers at once, and the
@@ -219,9 +220,9 @@ function MissingCover({ title, author }: { title: string; author?: string }) {
         aria-hidden="true"
       >
         <div className="drawn-cover-frame">
-          <span className="drawn-cover-title">{title}</span>
+          <span className="drawn-cover-title">{fineText(title)}</span>
           <span className="drawn-cover-rule" />
-          {author && <span className="drawn-cover-author">{author}</span>}
+          {author && <span className="drawn-cover-author">{fineText(author)}</span>}
         </div>
       </div>
       <div className="plain-cover h-full w-full items-center justify-center">
@@ -418,12 +419,12 @@ export function BookRow({
       />
       <div className="grid min-w-0 flex-1 gap-0.5">
         <p className="truncate font-heading text-sm font-medium group-hover:underline">
-          {book.title}
+          {fineText(book.title)}
         </p>
         <p className="truncate text-xs text-muted-foreground">
-          {book.authors.join(", ")}
+          {fineText(book.authors.join(", "))}
           {details.showSeries && book.seriesName && (
-            <span className="italic text-muted-foreground/80"> · {seriesLabel(book)}</span>
+            <span className="italic text-muted-foreground/80"> · {fineText(seriesLabel(book))}</span>
           )}
         </p>
         {facts && <p className="truncate text-xs text-muted-foreground tabular-nums">{facts}</p>}
@@ -496,20 +497,20 @@ export function BookCard({
       <div className="flex flex-1 flex-col gap-1">
         <p
           className={cn(
-            "line-clamp-2 font-heading font-medium leading-snug group-hover:underline",
+            "book-title-line line-clamp-2 font-heading font-medium leading-snug group-hover:underline",
             compact ? "text-xs" : "text-sm",
           )}
         >
-          {book.title}
+          {fineText(book.title)}
         </p>
         {!compact && (
           <p className="line-clamp-1 text-xs text-muted-foreground">
-            {book.authors.join(", ")}
+            {fineText(book.authors.join(", "))}
           </p>
         )}
         {details.showSeries && book.seriesName && (
           <p className="line-clamp-1 text-xs italic text-muted-foreground/80">
-            {seriesLabel(book)}
+            {fineText(seriesLabel(book))}
           </p>
         )}
         {/* flex-wrap: on narrow cards the badge drops below the stars
@@ -559,11 +560,11 @@ export function BookCoverTile({ book, compact = false }: { book: BookCardBook; c
       )}
       <p
         className={cn(
-          "line-clamp-2 font-heading leading-snug text-muted-foreground group-hover:text-foreground group-hover:underline",
+          "book-title-line line-clamp-2 font-heading leading-snug text-muted-foreground group-hover:text-foreground group-hover:underline",
           compact ? "text-[11px]" : "text-xs",
         )}
       >
-        {book.title}
+        {fineText(book.title)}
       </p>
     </BookLink>
   );
@@ -586,7 +587,7 @@ export function BookOnShelf({ book }: { book: BookCardBook }) {
         wearTitle={false}
         stickers={book.stickers}
       />
-      <span className="sr-only">{book.title}</span>
+      <span className="sr-only">{fineText(book.title)}</span>
     </BookLink>
   );
 }

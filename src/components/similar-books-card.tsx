@@ -5,6 +5,7 @@ import { similarReasonText, type SimilarBook, type SimilarCandidate } from "@/li
 import { BookCover } from "@/components/book-card";
 import { BookLink } from "@/components/book-link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { fineText } from "@/lib/fine-type";
 
 /**
  * "More like this" on a book's page (lib/similar-books.ts): a row of the
@@ -47,7 +48,7 @@ export function SimilarBooksCard({
                     )}
                   </span>
                   <span className="line-clamp-2 text-xs leading-tight font-medium group-hover:underline">
-                    {book.title}
+                    {fineText(book.title)}
                   </span>
                   {why && (
                     <span className="line-clamp-2 text-[11px] leading-tight text-muted-foreground">

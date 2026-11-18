@@ -16,6 +16,7 @@ import { KindleImport } from "@/components/kindle-import";
 import { QuoteItem } from "@/components/quote-item";
 import { QuotesToolbar } from "@/components/quotes-toolbar";
 import { Button } from "@/components/ui/button";
+import { fineText } from "@/lib/fine-type";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Quotes · MyReads" };
@@ -117,10 +118,10 @@ export default async function QuotesPage({
                   <BookCover book={book} className="aspect-[2/3] w-10 shrink-0" />
                   <span className="min-w-0">
                     <span className="block truncate font-heading text-lg font-medium group-hover:underline">
-                      {book.title}
+                      {fineText(book.title)}
                     </span>
                     <span className="block truncate text-sm font-normal text-muted-foreground">
-                      {book.authors.join(", ")}
+                      {fineText(book.authors.join(", "))}
                     </span>
                   </span>
                 </Link>

@@ -112,7 +112,7 @@ export function reminderMessage(input: {
 }): ReminderMessage {
   const lines: string[] = [];
   if (input.book) lines.push(input.book.place ? `${input.book.title} · ${input.book.place}` : input.book.title);
-  if (input.goalLeft) lines.push(`${input.goalLeft} to go for today's goal`);
+  if (input.goalLeft) lines.push(`${input.goalLeft} to go for today’s goal`);
   return {
     title: "Time to read",
     body: lines.length ? lines.join("\n") : "Pick up where you left off.",

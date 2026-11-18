@@ -398,7 +398,7 @@ export function BookForm({
                   aria-describedby="finishBy-hint"
                 />
                 <p id="finishBy-hint" className="text-xs text-muted-foreground">
-                  The day it&apos;s due back, say.
+                  The day it’s due back, say.
                 </p>
               </div>
             )}

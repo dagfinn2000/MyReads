@@ -98,7 +98,7 @@ export function InteriorControls({ decor, onChange }: { decor: RoomDecor; onChan
     <>
       <Tiles
         label="Wallpaper"
-        hint="Printed in the walls' colour."
+        hint="Printed in the walls’ colour."
         options={ROOM_PAPERS}
         labels={ROOM_PAPER_LABELS}
         chosen={(paper) => decor.paper === paper}
@@ -108,7 +108,7 @@ export function InteriorControls({ decor, onChange }: { decor: RoomDecor; onChan
       </Tiles>
       <Tiles
         label="Floor"
-        hint="Wooden floors are in the wood's colour, carpet in the fabrics'."
+        hint="Wooden floors are in the wood’s colour, carpet in the fabrics’."
         options={ROOM_FLOORS}
         labels={ROOM_FLOOR_LABELS}
         chosen={(floor) => decor.floor === floor}
@@ -186,7 +186,7 @@ export function FiresideControls({ decor, onChange }: { decor: RoomDecor; onChan
       </Tiles>
       <Tiles
         label="Over it"
-        hint="Tapestries are woven in the fabrics' colours."
+        hint="Tapestries are woven in the fabrics’ colours."
         options={ROOM_HANGINGS}
         labels={ROOM_HANGING_LABELS}
         chosen={(hanging) => decor.hanging === hanging}
@@ -203,7 +203,7 @@ export function FiresideControls({ decor, onChange }: { decor: RoomDecor; onChan
       </Tiles>
       <Tiles
         label="Armchair"
-        hint="Upholstered in the fabrics' colour. The cat sleeps in it."
+        hint="Upholstered in the fabrics’ colour. The cat sleeps in it."
         options={ROOM_CHAIRS}
         labels={ROOM_CHAIR_LABELS}
         chosen={(chair) => decor.chair === chair}
@@ -252,7 +252,7 @@ export function BookcaseControls({ decor, onChange }: { decor: RoomDecor; onChan
     <>
       <Tiles
         label="Design"
-        hint="In the wood's colour."
+        hint="In the wood’s colour."
         options={ROOM_BOOKCASES}
         labels={ROOM_BOOKCASE_LABELS}
         chosen={(bookcase) => decor.bookcase === bookcase}
@@ -263,7 +263,7 @@ export function BookcaseControls({ decor, onChange }: { decor: RoomDecor; onChan
       </Tiles>
       <Tiles
         label="On the shelves"
-        hint="Beside the books, wherever there's room."
+        hint="Beside the books, wherever there’s room."
         options={ROOM_ORNAMENTS}
         labels={ROOM_ORNAMENT_LABELS}
         chosen={(o) => decor.ornaments === o}
@@ -313,7 +313,7 @@ export function OutsideControls({ decor, onChange }: { decor: RoomDecor; onChang
       </Tiles>
       <Tiles
         label="In the garden"
-        hint={cave ? "A cave's garden is its hill." : "Pick as many as you like."}
+        hint={cave ? "A cave’s garden is its hill." : "Pick as many as you like."}
         options={ROOM_GARDEN}
         labels={ROOM_GARDEN_LABELS}
         multiple
@@ -340,7 +340,7 @@ export function OutsideControls({ decor, onChange }: { decor: RoomDecor; onChang
       </Tiles>
       <Tiles
         label="Holiday decorations"
-        hint="Following the calendar: Christmas from 1 December to 6 January, Halloween from 24 October, Easter from Palm Sunday to Easter Monday, Midsummer from 20 to 24 June, and New Year's Eve and Day."
+        hint="Following the calendar: Christmas from 1 December to 6 January, Halloween from 24 October, Easter from Palm Sunday to Easter Monday, Midsummer from 20 to 24 June, and New Year’s Eve and Day."
         options={ROOM_HOLIDAYS}
         labels={ROOM_HOLIDAY_LABELS}
         chosen={(h) => decor.holiday === h}
@@ -379,7 +379,7 @@ export function RoomPlaceControls({
                 {ROOM_LABELS[room].name}
               </p>
               {next && upstairs.includes(room) && (
-                <p className="text-xs text-muted-foreground">No space beside it on this screen, so it&apos;s upstairs.</p>
+                <p className="text-xs text-muted-foreground">No space beside it on this screen, so it’s upstairs.</p>
               )}
             </div>
             <div role="radiogroup" aria-labelledby={`place-${room}`} className="inline-flex justify-self-start rounded-md border p-0.5">
@@ -471,7 +471,7 @@ export function RoomOwnControls({
               options={ROOM_WALLS}
               swatches={WALL_SWATCHES}
               labels={{ ...COLOUR_LABELS, style: "Like the rest of the house" }}
-              styleText="The house's"
+              styleText="The house’s"
               onChange={(walls) => set(room, { walls })}
             />
             <Pick

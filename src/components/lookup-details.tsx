@@ -16,7 +16,7 @@ import { foldForSearch } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
 const TOO_MANY = "Too many lookups this minute. Try again in a moment.";
-const UNREACHABLE = "Couldn't reach the book catalogues.";
+const UNREACHABLE = "Couldn’t reach the book catalogues.";
 
 /** A lookup that ends with something to say instead of values. */
 class LookupMessage extends Error {}
@@ -60,12 +60,12 @@ async function lookUpCatalogue(
     const variants = isbnVariants(isbn);
     const rows = await search(isbn);
     row = rows.find((r) => r.isbn && variants.includes(normalizeIsbn(r.isbn))) ?? rows[0] ?? null;
-    if (!row && !olid) throw new LookupMessage("Couldn't find this ISBN in the catalogues.");
+    if (!row && !olid) throw new LookupMessage("Couldn’t find this ISBN in the catalogues.");
   } else if (!olid) {
     const q = [title, author].filter(Boolean).join(" ");
     const first = q.length >= 3 ? (await search(q))[0] : undefined;
     if (!first || foldForSearch(first.title.trim()) !== foldForSearch(title)) {
-      throw new LookupMessage("Couldn't find this exact book. Add its ISBN and try again.");
+      throw new LookupMessage("Couldn’t find this exact book. Add its ISBN and try again.");
     }
     row = first;
   }

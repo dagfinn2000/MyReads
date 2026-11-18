@@ -54,8 +54,8 @@ export async function readerPrefs(userId: string): Promise<Preferences> {
   return { ...prefs, timeZone: prefs.timeZone || serverTimeZone() };
 }
 
-const NOT_READING = "Only books you're reading can log pages. Set this one to Currently Reading first.";
-export const FUTURE = "That day hasn't happened yet.";
+const NOT_READING = "Only books you’re reading can log pages. Set this one to Currently Reading first.";
+export const FUTURE = "That day hasn’t happened yet.";
 export const CHANGED = "This book has changed since. Open it to set its status.";
 
 export function beforeStarted(dateStarted: Date, prefs: Preferences): string {
@@ -162,7 +162,7 @@ export async function logPageAs(
       if (!placement.ok) {
         const n = placement.neighbour;
         if (placement.reason === "beforeStart") {
-          return { error: `That's before this read started (${formatDate(n.date, prefs)}).` };
+          return { error: `That’s before this read started (${formatDate(n.date, prefs)}).` };
         }
         const when = loggedWhen(calendarDay(n.date, tz), today, prefs.dateFormat);
         const [mine, theirs] = positionTexts(info, { page, value, capital: true }, { page: n.page });
@@ -273,7 +273,7 @@ export async function moveFromReadingAs(
     };
   }
   if (book.status !== ReadingStatus.READING) {
-    return { error: "This book isn't in Currently Reading any more." };
+    return { error: "This book isn’t in Currently Reading any more." };
   }
   const now = madeAt(sentAt, new Date());
   if (sentAt && book.dateStarted && book.dateStarted.getTime() > now.getTime()) return { error: CHANGED };

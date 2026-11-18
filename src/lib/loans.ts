@@ -47,9 +47,9 @@ export function showsLendingCard(ownership: BookOwnership, loanCount: number): b
 /** The card's line while nothing is lent out. */
 export const LENDING_NOTE: Record<LendingMode, string> = {
   lendable: "This copy is on your shelf.",
-  borrowed: "Borrowed copy. It isn't yours to lend.",
+  borrowed: "Borrowed copy. It isn’t yours to lend.",
   "given-away": "You gave this copy away.",
-  wishlist: "On your wishlist, so there's no copy to lend.",
+  wishlist: "On your wishlist, so there’s no copy to lend.",
 };
 
 const DAY_MS = 86_400_000;

@@ -20,7 +20,7 @@ export type StopReason = (typeof STOP_REASONS)[number];
 export const STOP_REASON_LABELS: Record<StopReason, string> = {
   slow: "Too slow",
   "not-for-me": "Not for me",
-  writing: "Didn't like the writing",
+  writing: "Didn’t like the writing",
   "lost-interest": "Lost interest",
   "too-long": "Too long",
   "not-now": "Not the right time",
