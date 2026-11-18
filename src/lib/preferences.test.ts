@@ -105,6 +105,9 @@ describe("parsePreferences", () => {
     expect(parsePreferences({ roomCandle: false }).roomCandle).toBe(false);
     expect(parsePreferences({ roomCandle: "lit" }).roomCandle).toBe(true);
     expect(parsePreferences({}).dogEars).toBe("on");
+    expect(parsePreferences({}).spacing).toBe("calm");
+    expect(parsePreferences({ spacing: "compact" }).spacing).toBe("compact");
+    expect(parsePreferences({ spacing: "airy" }).spacing).toBe("calm");
     expect(parsePreferences({}).tabChange).toBe("fade");
     expect(parsePreferences({ tabChange: "off" }).tabChange).toBe("off");
     expect(parsePreferences({ tabChange: "slide" }).tabChange).toBe("fade");

@@ -10233,6 +10233,36 @@ html[data-covers="plain"] .book-backdrop[data-drawn] {
     0 2px 4px rgb(0 0 0 / 0.12),
     0 24px 40px -20px rgb(0 0 0 / 0.55);
 }
+/* ── Calm spacing ──────────────────────────────────────────────────────────
+   A book's page and Stats get room to breathe, on one steady measure: the
+   details under a book's title sit 1.25rem apart, its cards and Stats'
+   cards 2rem (1.5rem on a phone), the same down the page as across it, and
+   the cover stands a little further from the title on a wide screen.
+   "Spacing: Compact" in Preferences (data-spacing="compact") keeps the
+   tighter spacing these pages had. Plain rules, so they win over the
+   pages' own gap utilities. */
+html:not([data-spacing="compact"]) .book-details {
+  row-gap: 1.25rem;
+}
+html:not([data-spacing="compact"]) .book-cards {
+  row-gap: 1.5rem;
+  margin-top: 0.75rem;
+}
+html:not([data-spacing="compact"]) :is(.stats-page, .stats-pair) {
+  gap: 1.5rem;
+}
+@media (width >= 40rem) {
+  html:not([data-spacing="compact"]) .book-cards,
+  html:not([data-spacing="compact"]) :is(.stats-page, .stats-pair) {
+    gap: 2rem;
+  }
+}
+@media (width >= 48rem) {
+  html:not([data-spacing="compact"]) .book-page {
+    column-gap: 2.5rem;
+  }
+}
+
 /* The X back to the library (components/close-book-button.tsx) sits in the
    page's top right corner. On a wide screen that is beside the title, which
    leaves it room; on a phone the title is below the cover and clear of it. */

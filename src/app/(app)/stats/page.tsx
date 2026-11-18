@@ -408,7 +408,7 @@ export default async function StatsPage({
   const maxFormat = Math.max(...formatCounts.values(), 0);
 
   return (
-    <div className="grid grid-cols-1 gap-6">
+    <div className="stats-page grid grid-cols-1 gap-6">
       <InkWatcher />
       <div className="grid gap-3">
         <h1 className="text-2xl font-semibold tracking-tight">Stats</h1>
@@ -589,7 +589,7 @@ export default async function StatsPage({
 
       {prefs.ratingBreakdown && ratingsCard}
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <div className="stats-pair grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Without the breakdown it is only the chart, half the width. */}
         {!prefs.ratingBreakdown && ratingsCard}
         {!hidden.has("perYear") && (

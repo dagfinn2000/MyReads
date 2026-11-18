@@ -1260,8 +1260,10 @@ On the Account page:
   cards, the background texture, whether it follows the light of the
   day and the weather outside, a wash of the cover's colours behind
   the top of each book's page, whether spines fill with colour as you
-  read, and whether Up next is a pile of books or a row of covers.
-- Animations on or off, whether pages turn or fade, whether a cover opens
+  read, whether Up next is a pile of books or a row of covers, soft
+  shadows under covers or none, and calm or compact spacing on book pages and Stats: calm gives the cards
+  more room and one steady space from each to the next.
+- Animations on or off, whether pages turn or crossfade and tabs fade, whether a cover opens
   like a book or flies to its page, how a finished book
   is celebrated and whether loose pages flutter down, whether the moving
   backgrounds move, and whether covers follow the pointer.

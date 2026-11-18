@@ -261,7 +261,7 @@ export default async function BookDetailPage({
           <DeleteBookButton bookId={book.id} title={book.title} />
         </BookPageCover>
 
-        <div className="grid grid-cols-1 content-start gap-4">
+        <div className="book-details grid grid-cols-1 content-start gap-4">
           {/* A title, author or series with no spaces to break at wraps
               anywhere, instead of pushing the page sideways. */}
           <div className="book-title wrap-anywhere">
@@ -443,24 +443,30 @@ export default async function BookDetailPage({
             </section>
           )}
 
-          {arranged.map(({ key, forced }) =>
-            // A card left out here (null) gets no "shown although hidden" line.
-            forced && cards[key] ? (
-              <div key={key} className="grid grid-cols-1 gap-1.5">
-                {cards[key]}
-                <p className="text-xs text-amber-700 dark:text-amber-400">
-                  {FORCED_CARD_NOTES[key]}{" "}
-                  <Link
-                    href="/account#book-page"
-                    className="font-medium underline underline-offset-4 hover:text-foreground"
-                  >
-                    Book page settings
-                  </Link>
-                </p>
-              </div>
-            ) : (
-              <Fragment key={key}>{cards[key]}</Fragment>
-            ),
+          {/* The cards keep a wider space between them than the details above
+              (globals.css, "Calm spacing"). */}
+          {arranged.some(({ key }) => cards[key]) && (
+            <div className="book-cards grid grid-cols-1 gap-4">
+              {arranged.map(({ key, forced }) =>
+                // A card left out here (null) gets no "shown although hidden" line.
+                forced && cards[key] ? (
+                  <div key={key} className="grid grid-cols-1 gap-1.5">
+                    {cards[key]}
+                    <p className="text-xs text-amber-700 dark:text-amber-400">
+                      {FORCED_CARD_NOTES[key]}{" "}
+                      <Link
+                        href="/account#book-page"
+                        className="font-medium underline underline-offset-4 hover:text-foreground"
+                      >
+                        Book page settings
+                      </Link>
+                    </p>
+                  </div>
+                ) : (
+                  <Fragment key={key}>{cards[key]}</Fragment>
+                ),
+              )}
+            </div>
           )}
         </div>
       </div>
