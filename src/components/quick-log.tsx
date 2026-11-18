@@ -4,7 +4,7 @@ import { useEffect, useId, useRef, useState, useTransition } from "react";
 import { CircleAlert, CloudUpload, X } from "lucide-react";
 import type { BookFormat } from "@/lib/enums";
 import { logPage, moveFromReading } from "@/lib/actions/progress";
-import { celebrate } from "@/lib/celebrate";
+import { celebrateFinish } from "@/lib/celebrate";
 import { calendarDay, dayKey, shiftDayKey } from "@/lib/dates";
 import {
   addToOutbox,
@@ -254,7 +254,7 @@ export function QuickLog({
         });
       }
       if (finishing) {
-        celebrate(origin);
+        celebrateFinish(origin);
         sound("finished");
       }
     };
@@ -272,7 +272,7 @@ export function QuickLog({
       if (timed.minutes) timer.consumed();
       // Before the row goes away with the move.
       if (result.finished) {
-        celebrate(origin);
+        celebrateFinish(origin);
         sound("finished");
       }
       onMoved?.(result);

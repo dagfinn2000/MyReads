@@ -225,6 +225,11 @@ export const INK_STATS = ["on", "off"] as const;
  *  all the way up with just the bookmark. */
 export const SPINE_FILLS = ["on", "off"] as const;
 
+/** Whether finishing a book also sends a few loose pages fluttering down
+ *  from it, as well as the celebration (lib/celebrate.ts). Only while
+ *  animations are allowed. */
+export const FINISH_PAGES = ["on", "off"] as const;
+
 /** Colour steps for the reading calendar (see lib/heatmap.ts). */
 export const HEATMAP_SCALES = ["standard", "gentle", "heavy", "auto"] as const;
 
@@ -410,6 +415,7 @@ export type CoverTilt = (typeof COVER_TILTS)[number];
 export type ProgressRibbon = (typeof PROGRESS_RIBBONS)[number];
 export type ShelfWearSetting = (typeof SHELF_WEARS)[number];
 export type HeatmapScale = (typeof HEATMAP_SCALES)[number];
+export type FinishPages = (typeof FINISH_PAGES)[number];
 export type SpineFill = (typeof SPINE_FILLS)[number];
 export type InkStats = (typeof INK_STATS)[number];
 export type StartPage = (typeof START_PAGES)[number];
@@ -489,6 +495,7 @@ export type Preferences = {
   // Appearance
   motion: Motion;
   pageChange: PageChange;
+  finishPages: FinishPages;
   celebration: Celebration;
   coverArt: CoverArtStyle;
   accent: Accent;
@@ -688,6 +695,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
   headingFont: "sans",
   motion: "on",
   pageChange: "turn",
+  finishPages: "on",
   celebration: "confetti",
   coverArt: "drawn",
   accent: "theme",
@@ -1033,6 +1041,7 @@ export function parsePreferences(raw: unknown): Preferences {
     headingFont: pick(HEADING_FONTS, obj.headingFont, d.headingFont),
     motion: pick(MOTIONS, obj.motion, d.motion),
     pageChange: pick(PAGE_CHANGES, obj.pageChange, d.pageChange),
+    finishPages: pick(FINISH_PAGES, obj.finishPages, d.finishPages),
     celebration: pick(CELEBRATIONS, obj.celebration, d.celebration),
     coverArt: pick(COVER_ARTS, obj.coverArt, d.coverArt),
     accent: pick(ACCENTS, obj.accent, d.accent),
