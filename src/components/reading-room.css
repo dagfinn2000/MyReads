@@ -1735,6 +1735,28 @@
   animation-delay: -1.5s;
 }
 
+/* The candle on the side table while the reading timer runs (TimerCandle
+   in reading-room.tsx, room-candle.ts): its flame flickers a little out
+   of step with the fire, its pool of light at night breathes with it, and
+   snuffed, a wisp of smoke rises from the wick a few times and is gone. */
+.room-candle .room-frame-a,
+.room-candle .room-frame-b {
+  animation-duration: 0.56s;
+}
+.room-glow-candle {
+  background: radial-gradient(
+    closest-side,
+    rgb(255 196 112 / 0.5),
+    rgb(255 170 80 / 0.16) 55%,
+    transparent
+  );
+  animation: room-breathe 1.4s ease-in-out infinite alternate;
+}
+.room-wisp {
+  opacity: 0;
+  animation: room-steam 2.4s ease-out 3;
+}
+
 /* The canary hops between its perches now and then; on the lower one is
    the still picture. */
 .room-hop-b {

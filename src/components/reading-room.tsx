@@ -78,6 +78,9 @@ import { flakesFor, type Box, type FallKind } from "@/components/room-seasons";
 import { PICTURE_W } from "@/components/room-pictures";
 import { EASTER_TWIGS, MANTEL_TREE, SMALL_LANTERN, TREE, mantelGarland } from "@/components/room-holidays";
 import { isClosingBook } from "@/lib/cover-flight";
+import { useAnyReadingTimer } from "@/components/reading-timer";
+import { candleArt, candleRows } from "@/components/room-candle";
+import { MAX_ENTRY_MINUTES, elapsedMs } from "@/lib/reading-time";
 import { OWNERSHIP_LABELS, STATUS_LABELS } from "@/lib/display";
 import {
   BEAM,
@@ -408,9 +411,13 @@ export function ReadingRoom({
   onPlan,
   avatar = null,
   pet = "none",
+  candleMinutes = null,
 }: {
   books: RoomBook[];
   decor?: RoomDecor;
+  /** How long the candle by the armchair takes to burn down while the
+   *  reading timer runs (room-candle.ts), or null for no candle. */
+  candleMinutes?: number | null;
   avatar?: AvatarLook | null;
   /** The animal at the avatar's heels. */
   pet?: Pet;
@@ -762,6 +769,7 @@ export function ReadingRoom({
             arranging={arranging}
             avatar={figure}
             doors={doors[f]}
+            candleMinutes={candleMinutes}
           />
         ))}
 
@@ -991,6 +999,7 @@ const Floor = memo(function Floor({
   arranging,
   avatar,
   doors,
+  candleMinutes,
 }: {
   index: number;
   pieces: Piece[];
@@ -1015,6 +1024,7 @@ const Floor = memo(function Floor({
   avatar: Avatar | null;
   /** The doors through the walls between its rooms, from its left. */
   doors: readonly number[];
+  candleMinutes: number | null;
 }) {
   const floorLine = STOREY;
   const hearth = pieces.find((p) => p.kind === "hearth");
@@ -1062,6 +1072,7 @@ const Floor = memo(function Floor({
             fireside={fireside}
             mantel={mantel}
             avatar={avatar}
+            candleMinutes={candleMinutes}
           />
         );
       })}
@@ -1319,6 +1330,88 @@ const Falling = memo(function Falling({
   );
 });
 
+/**
+ * The candle on the side table by the armchair (room-candle.ts): lit while
+ * the reading timer runs on any book in this browser, a row of wax shorter
+ * every so often, and snuffed where it stands when the timer is paused or
+ * stopped, with a wisp of smoke if that happens while the room is open.
+ * Once the time is logged it's gone. A timer left running over a day is
+ * one forgotten, which the timer itself won't log, so it lights nothing.
+ * Its own component, so the clock that burns it down redraws only it.
+ */
+function TimerCandle({ x, base, scale: s, minutes }: { x: number; base: number; scale: number; minutes: number }) {
+  const timer = useAnyReadingTimer();
+  const lit = timer?.runningSince != null;
+  const now = useCandleClock(lit);
+  // Snuffed while the room is open: smoke, once per snuffing.
+  const [wasLit, setWasLit] = useState(lit);
+  const [snuffed, setSnuffed] = useState(0);
+  if (wasLit !== lit) {
+    setWasLit(lit);
+    if (!lit) setSnuffed((n) => n + 1);
+  }
+  if (!timer) return null;
+  const elapsed = elapsedMs(timer, now);
+  if (elapsed > MAX_ENTRY_MINUTES * 60_000 || (!lit && elapsed <= 0)) return null;
+  const candle = candleArt(candleRows(elapsed, minutes));
+  const top = base - candle.art.h;
+  return (
+    <>
+      <Sprite art={candle.art} scale={s} className="room-abs room-candle" style={{ left: x * s, top: top * s }}>
+        {lit && (
+          <>
+            <Rects className="room-frame-a" rects={candle.flames[0]} />
+            <Rects className="room-frame-b" rects={candle.flames[1]} />
+          </>
+        )}
+      </Sprite>
+      {lit && <Glow x={x + candle.flame.x} y={top + candle.flame.y} r={18} scale={s} className="room-glow-candle" />}
+      {!lit && snuffed > 0 && (
+        <Sprite
+          key={snuffed}
+          art={{ w: 2, h: 3, rects: STEAM[0] }}
+          scale={s}
+          className="room-abs room-wisp"
+          style={{ left: (x + 2) * s, top: (top + 1) * s }}
+        />
+      )}
+    </>
+  );
+}
+
+/** Now, every so often while the candle burns and the page is in view: a
+ *  row of wax goes in minutes, so a tick each quarter minute is plenty. */
+function useCandleClock(lit: boolean): number {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    if (!lit) return;
+    let id: number | undefined;
+    const tick = () => setNow(Date.now());
+    const start = () => {
+      if (id === undefined && !document.hidden) id = window.setInterval(tick, 15_000);
+    };
+    const stop = () => {
+      if (id !== undefined) window.clearInterval(id);
+      id = undefined;
+    };
+    const onVisibility = () => {
+      if (document.hidden) stop();
+      else {
+        tick();
+        start();
+      }
+    };
+    tick();
+    start();
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      stop();
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [lit]);
+  return now;
+}
+
 function Furniture({
   kind,
   x,
@@ -1331,6 +1424,7 @@ function Furniture({
   fireside,
   mantel,
   avatar,
+  candleMinutes,
 }: {
   kind: Piece["kind"];
   x: number;
@@ -1343,6 +1437,8 @@ function Furniture({
   fireside: Fireside;
   mantel: Mantel;
   avatar: Avatar | null;
+  /** The reading timer's candle on the side table (TimerCandle), or null. */
+  candleMinutes: number | null;
 }) {
   const stand = (a: Art, dx: number, extra?: { className?: string; children?: React.ReactNode; lift?: number }) => (
     <Stand
@@ -1441,6 +1537,10 @@ function Furniture({
             className="room-abs room-steam"
             style={{ left: (x + 89) * s, top: (floorLine - SIDE_TABLE.h - TEACUP.h - 4) * s }}
           />
+          {/* Behind the open book, when it lies on the table. */}
+          {candleMinutes != null && (
+            <TimerCandle x={x + 82} base={floorLine - SIDE_TABLE.h} scale={s} minutes={candleMinutes} />
+          )}
           {seated && (
             <BookLink
               bookId={openBook.book.id}

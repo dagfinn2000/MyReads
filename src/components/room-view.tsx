@@ -145,6 +145,7 @@ export function RoomView({
   pet: savedPet,
   hiddenNav,
   summary,
+  candleMinutes,
 }: {
   books: RoomBook[];
   decor: RoomDecor;
@@ -161,6 +162,9 @@ export function RoomView({
   hiddenNav: HideableNav[];
   /** "198 books on 5 bookcases", beside the title. */
   summary: string | null;
+  /** How long the reading timer's candle takes to burn down, or null for
+   *  none (ReadingRoom). */
+  candleMinutes: number | null;
 }) {
   const [decor, setDecor] = useState(savedDecor);
   const [arrangement, setArrangement] = useState<Arrangement>(() => ({
@@ -651,6 +655,7 @@ export function RoomView({
         onPlan={onPlan}
         avatar={avatarShown ? avatar : null}
         pet={pet}
+        candleMinutes={candleMinutes}
       />
     </>
   );
