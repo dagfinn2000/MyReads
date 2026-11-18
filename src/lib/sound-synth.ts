@@ -27,28 +27,60 @@ function grain(
   ctx: BaseAudioContext,
   out: AudioNode,
   at: number,
-  { type, from, to, q, peak, decay }: {
+  { type, from, to, q, peak, decay, attack = 0.01 }: {
     type: BiquadFilterType;
     from: number;
     to: number;
     q: number;
     peak: number;
     decay: number;
+    /** Seconds to rise to `peak`: a swish swells, a tap doesn't. */
+    attack?: number;
   },
 ) {
   const source = ctx.createBufferSource();
-  source.buffer = noise(ctx, decay + 0.05);
+  source.buffer = noise(ctx, attack + decay + 0.05);
   const filter = ctx.createBiquadFilter();
   filter.type = type;
   filter.Q.value = q;
   filter.frequency.setValueAtTime(from, at);
-  filter.frequency.exponentialRampToValueAtTime(to, at + decay);
+  filter.frequency.exponentialRampToValueAtTime(to, at + attack + decay);
   const gain = ctx.createGain();
-  envelope(gain.gain, at, peak, 0.01, decay);
+  envelope(gain.gain, at, peak, attack, decay);
   source.connect(filter).connect(gain).connect(out);
   source.start(at);
-  source.stop(at + decay + 0.05);
+  source.stop(at + attack + decay + 0.05);
 }
+
+/**
+ * One page turning over, its loudness `level` and its pitch `pitch` (about
+ * 1): the edge lifting off the page under it with a faint crisp tick, the
+ * swish of it swinging over, brighter and then duller as it goes, and the
+ * soft flap of it settling on the other side.
+ */
+function pageTurn(ctx: BaseAudioContext, out: AudioNode, at: number, level: number, pitch: number) {
+  grain(ctx, out, at, { type: "highpass", from: 5200 * pitch, to: 4200 * pitch, q: 0.7, peak: 0.12 * level, decay: 0.035 });
+  grain(ctx, out, at + 0.015, {
+    type: "bandpass",
+    from: 3400 * pitch,
+    to: 1300 * pitch,
+    q: 0.75,
+    peak: 0.62 * level,
+    attack: 0.05,
+    decay: 0.13,
+  });
+  grain(ctx, out, at + 0.17, { type: "lowpass", from: 1600 * pitch, to: 600 * pitch, q: 0.8, peak: 0.4 * level, decay: 0.06 });
+}
+
+/** Each page of a riffle a little quieter and a touch higher than the one
+ *  before, and the pages coming a little quicker, as a thumb lets them go. */
+const RIFFLE = [
+  { at: 0, level: 1, pitch: 1 },
+  { at: 0.15, level: 0.82, pitch: 1.06 },
+  { at: 0.28, level: 0.72, pitch: 0.97 },
+  { at: 0.39, level: 0.64, pitch: 1.09 },
+  { at: 0.49, level: 0.56, pitch: 1.02 },
+];
 
 /** A tone with a few soft overtones, like a small bell or a struck glass. */
 function tone(
@@ -77,12 +109,13 @@ function tone(
   }
 }
 
-const SOUNDS: Record<SoundName, (ctx: BaseAudioContext, out: AudioNode, at: number) => void> = {
-  // A page turned: two quick brushes of paper, the second higher and
-  // lighter, each sweeping down.
-  rustle(ctx, out, at) {
-    grain(ctx, out, at, { type: "bandpass", from: 3200, to: 1800, q: 0.8, peak: 0.55, decay: 0.16 });
-    grain(ctx, out, at + 0.075, { type: "bandpass", from: 5200, to: 2600, q: 0.9, peak: 0.32, decay: 0.2 });
+const SOUNDS: Record<SoundName, (ctx: BaseAudioContext, out: AudioNode, at: number, turns: number) => void> = {
+  // Pages logged: one page turning over, or for a long sitting a riffle of
+  // a few, one after another.
+  rustle(ctx, out, at, turns) {
+    for (const page of RIFFLE.slice(0, Math.max(1, Math.min(RIFFLE.length, turns)))) {
+      pageTurn(ctx, out, at + page.at, page.level, page.pitch);
+    }
   },
 
   // E5 then B5, a rising fifth, warm rather than bright.
@@ -131,6 +164,26 @@ const SOUNDS: Record<SoundName, (ctx: BaseAudioContext, out: AudioNode, at: numb
     grain(ctx, out, at, { type: "lowpass", from: 900, to: 400, q: 0.7, peak: 0.35, decay: 0.06 });
   },
 
+  // A book put on a shelf: the hush of it sliding in along the board, then
+  // a soft, woody thud as it lands, a low knock with the hollow ring of
+  // the shelf in it and the tap of its corner.
+  thud(ctx, out, at) {
+    grain(ctx, out, at, { type: "bandpass", from: 700, to: 1300, q: 0.7, peak: 0.09, attack: 0.06, decay: 0.05 });
+    const land = at + 0.11;
+    const body = ctx.createOscillator();
+    body.frequency.setValueAtTime(170, land);
+    body.frequency.exponentialRampToValueAtTime(105, land + 0.1);
+    const bodyGain = ctx.createGain();
+    envelope(bodyGain.gain, land, 0.62, 0.003, 0.14);
+    body.connect(bodyGain).connect(out);
+    body.start(land);
+    body.stop(land + 0.2);
+    // The board ringing, briefly.
+    grain(ctx, out, land, { type: "bandpass", from: 460, to: 380, q: 4, peak: 0.42, decay: 0.09 });
+    tone(ctx, out, land, { freq: 290, type: "triangle", peak: 0.1, decay: 0.07 });
+    grain(ctx, out, land, { type: "highpass", from: 2400, to: 2000, q: 0.7, peak: 0.07, decay: 0.015 });
+  },
+
   // A light tap, like a pencil mark.
   tick(ctx, out, at) {
     tone(ctx, out, at, { freq: 1850, peak: 0.28, decay: 0.045 });
@@ -138,12 +191,13 @@ const SOUNDS: Record<SoundName, (ctx: BaseAudioContext, out: AudioNode, at: numb
   },
 };
 
-/** Plays `name` on `ctx` at `gain` (0 to 1), starting now. */
-export function playSynth(ctx: BaseAudioContext, name: SoundName, gain: number): void {
+/** Plays `name` on `ctx` at `gain` (0 to 1), starting now; a rustle turns
+ *  `turns` pages. */
+export function playSynth(ctx: BaseAudioContext, name: SoundName, gain: number, turns = 1): void {
   const out = ctx.createGain();
   out.gain.value = gain;
   out.connect(ctx.destination);
-  SOUNDS[name](ctx, out, ctx.currentTime + 0.01);
+  SOUNDS[name](ctx, out, ctx.currentTime + 0.01, turns);
   // Every sound has finished well within this.
   setTimeout(() => out.disconnect(), 1500);
 }

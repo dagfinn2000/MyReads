@@ -3,7 +3,16 @@
 import { useCallback, useEffect, useEffectEvent } from "react";
 import { usePathname } from "next/navigation";
 import { playSynth } from "@/lib/sound-synth";
-import { VOLUME_GAIN, soundFor, type SoundEvent, type SoundName, type SoundVolume } from "@/lib/sounds";
+import {
+  EVENT_SOUNDS,
+  MOST_TURNS,
+  VOLUME_GAIN,
+  soundFor,
+  type SoundDetail,
+  type SoundEvent,
+  type SoundName,
+  type SoundVolume,
+} from "@/lib/sounds";
 import { usePreferences } from "@/components/preferences-provider";
 
 /**
@@ -29,11 +38,11 @@ function wake(): AudioContext | null {
   }
 }
 
-function play(name: SoundName, gain: number) {
+function play(name: SoundName, gain: number, turns?: number) {
   const ctx = context;
   if (!ctx) return;
   try {
-    playSynth(ctx, name, gain);
+    playSynth(ctx, name, gain, turns);
   } catch {
     // A browser without some part of Web Audio: no sound, nothing else.
   }
@@ -44,14 +53,14 @@ function play(name: SoundName, gain: number) {
  * Call it only for the reader's own actions in this tab, never on a page
  * opening or a refresh.
  */
-export function useSound(): (event: SoundEvent) => void {
-  const { sounds, soundVolume } = usePreferences();
+export function useSound(): (event: SoundEvent, detail?: SoundDetail) => void {
+  const { sounds, soundVolume, mutedSounds } = usePreferences();
   return useCallback(
-    (event: SoundEvent) => {
-      const sound = soundFor(event, { sounds, soundVolume });
-      if (sound) play(sound.name, sound.gain);
+    (event: SoundEvent, detail?: SoundDetail) => {
+      const sound = soundFor(event, { sounds, soundVolume, mutedSounds }, detail);
+      if (sound) play(sound.name, sound.gain, sound.turns);
     },
-    [sounds, soundVolume],
+    [sounds, soundVolume, mutedSounds],
   );
 }
 
@@ -83,11 +92,13 @@ export function useSaveSound(event: SoundEvent | undefined) {
   };
 }
 
-/** The sample in Preferences, at the volume being tried. It plays from
- *  its own button press, so it works with sounds still off. */
-export function playSample(volume: SoundVolume) {
+/** The sample in Preferences, at the volume being tried: the chime, or the
+ *  sound for `event` (a log's as a riffle of pages). It plays from its own
+ *  button press, so it works with sounds still off. */
+export function playSample(volume: SoundVolume, event?: SoundEvent) {
   wake();
-  play("chime", VOLUME_GAIN[volume]);
+  if (!event) play("chime", VOLUME_GAIN[volume]);
+  else play(EVENT_SOUNDS[event], VOLUME_GAIN[volume], event === "logged" ? MOST_TURNS - 2 : undefined);
 }
 
 /**

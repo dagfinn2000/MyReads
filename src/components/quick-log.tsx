@@ -167,9 +167,11 @@ export function QuickLog({
     if ("error" in timed) return fail(timed.error);
 
     const id = newClientId();
+    // A long sitting turns a riffle of pages rather than one.
+    const pages = parsed.page - (currentPage ?? 0);
     const done = (lastPage: boolean, message: string) => {
       if (timed.minutes) timer.consumed();
-      sound("logged");
+      sound("logged", { pages });
       setDraft(null);
       setDay("today");
       if (lastPage) {

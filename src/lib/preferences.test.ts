@@ -79,6 +79,11 @@ describe("parsePreferences", () => {
       lon: 5.3,
     });
     expect(parsePreferences({ weatherPlace: { name: "Bergen" } }).weatherPlace).toBeNull();
+    expect(parsePreferences({}).mutedSounds).toEqual([]);
+    expect(parsePreferences({ mutedSounds: ["shelved", "rated", "rated", "honk"] }).mutedSounds).toEqual([
+      "shelved",
+      "rated",
+    ]);
     expect(parsePreferences({}).upNextLook).toBe("pile");
     expect(parsePreferences({ upNextLook: "covers" }).upNextLook).toBe("covers");
     expect(parsePreferences({ upNextLook: "sideways" }).upNextLook).toBe("pile");

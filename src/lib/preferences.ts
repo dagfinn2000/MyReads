@@ -56,7 +56,7 @@ import { DEFAULT_AVATAR, parseAvatar, parseSavedLooks, type AvatarLook } from "@
 import { parseCatCoat, parseDogCoat, parsePet, type CatCoat, type DogCoat, type Pet } from "@/lib/pets";
 import { parseOwnCss } from "@/lib/own-css";
 import { REMINDER_TIMES, parseReminderDays } from "@/lib/reminders";
-import { SOUND_SETTINGS, SOUND_VOLUMES, type SoundSetting, type SoundVolume } from "@/lib/sounds";
+import { SOUND_EVENTS, SOUND_SETTINGS, SOUND_VOLUMES, type SoundEvent, type SoundSetting, type SoundVolume } from "@/lib/sounds";
 import { WEATHER_SETTINGS, parseWeatherPlace, type WeatherPlace, type WeatherSetting } from "@/lib/weather";
 import { parsePartThemes, type PartThemes } from "@/lib/themes";
 import { parseCustomStatuses, parseStatusNames, type CustomStatus, type StatusNames } from "@/lib/statuses";
@@ -545,6 +545,8 @@ export type Preferences = {
    *  turned on. */
   sounds: SoundSetting;
   soundVolume: SoundVolume;
+  /** Sounds turned off one by one while the rest play. */
+  mutedSounds: SoundEvent[];
 
   heatmapScale: HeatmapScale;
   inkStats: InkStats;
@@ -745,6 +747,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
   ownCss: "",
   sounds: "off",
   soundVolume: "quiet",
+  mutedSounds: [],
   heatmapScale: "standard",
   inkStats: "on",
   startPage: "library",
@@ -1096,6 +1099,7 @@ export function parsePreferences(raw: unknown): Preferences {
     ownCss: parseOwnCss(obj.ownCss),
     sounds: pick(SOUND_SETTINGS, obj.sounds, d.sounds),
     soundVolume: pick(SOUND_VOLUMES, obj.soundVolume, d.soundVolume),
+    mutedSounds: pickList(SOUND_EVENTS, obj.mutedSounds),
     heatmapScale: pick(HEATMAP_SCALES, obj.heatmapScale, d.heatmapScale),
     inkStats: pick(INK_STATS, obj.inkStats, d.inkStats),
     startPage: pick(START_PAGES, obj.startPage, d.startPage),

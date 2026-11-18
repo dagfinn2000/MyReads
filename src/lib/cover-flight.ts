@@ -129,9 +129,10 @@ function whenLibraryShows(back: LibraryReturn): Promise<HTMLElement | null> {
  * back to the library; this puts it back at the scroll position it had and
  * flies the book page's cover back into its card, the opening flight in
  * reverse. Without view transitions or with animations off the library just
- * comes back where it was.
+ * comes back where it was. `onHome` is told once the book is back in its
+ * place (for its sound), if its place shows.
  */
-export function flyCoverHome(back: LibraryReturn, navigate: () => void): void {
+export function flyCoverHome(back: LibraryReturn, navigate: () => void, onHome?: () => void): void {
   const hero = document.querySelector<HTMLElement>(
     `[data-cover-for="${CSS.escape(back.bookId)}"]`,
   );
@@ -139,8 +140,10 @@ export function flyCoverHome(back: LibraryReturn, navigate: () => void): void {
   const fly = hero && canFlyCover();
   if (!fly) navigate();
   const landing = whenLibraryShows(back);
-  void landing.then(() => {
+  void landing.then((found) => {
     closing = false;
+    // Without the flight it is home as soon as its place shows.
+    if (!fly && found) onHome?.();
   });
   if (!fly) return;
 
@@ -160,7 +163,10 @@ export function flyCoverHome(back: LibraryReturn, navigate: () => void): void {
 
   transition.finished
     .finally(() => {
-      if (target) target.style.viewTransitionName = "";
+      if (!target) return;
+      target.style.viewTransitionName = "";
+      // Landed in its place.
+      onHome?.();
     })
     .catch(() => {});
 }
