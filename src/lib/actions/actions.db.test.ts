@@ -402,7 +402,7 @@ describe("tag management", () => {
     // The library's tag filter keeps its tags comma-separated in the URL.
     await makeBook({ tags: ["scifi"] });
     expect(await renameTag("scifi", "science, fiction")).toEqual({
-      error: "Tags can't contain commas.",
+      error: "Tags can’t contain commas.",
     });
     const bk = await prisma.book.findFirstOrThrow({ where: { userId } });
     expect(bk.tags).toEqual(["scifi"]);
@@ -480,11 +480,11 @@ describe("lending", () => {
       {},
       form({ borrower: "Kari", lentAt: "2026-10-10", dueAt: "2026-10-01" }),
     );
-    expect(res.error).toBe("It can't be due back before you lent it.");
+    expect(res.error).toBe("It can’t be due back before you lent it.");
     // Lent "now" (no date given): yesterday can't be the due date either.
     const yesterday = new Date(Date.now() - 2 * 86_400_000).toISOString().slice(0, 10);
     const res2 = await lendBook(bk.id, {}, form({ borrower: "Kari", lentAt: "", dueAt: yesterday }));
-    expect(res2.error).toBe("It can't be due back before you lent it.");
+    expect(res2.error).toBe("It can’t be due back before you lent it.");
     expect(await prisma.loan.count({ where: { bookId: bk.id } })).toBe(0);
   });
 
@@ -498,8 +498,8 @@ describe("lending", () => {
     let saved = await prisma.loan.findUniqueOrThrow({ where: { id: loan.id } });
     expect(saved.dueAt?.toISOString()).toBe("2026-12-24T00:00:00.000Z");
 
-    expect(await setLoanDue(loan.id, "2026-09-30")).toBe("It can't be due back before you lent it.");
-    expect(await setLoanDue(loan.id, "next week")).toBe("That isn't a date.");
+    expect(await setLoanDue(loan.id, "2026-09-30")).toBe("It can’t be due back before you lent it.");
+    expect(await setLoanDue(loan.id, "next week")).toBe("That isn’t a date.");
 
     expect(await setLoanDue(loan.id, "")).toBeUndefined();
     saved = await prisma.loan.findUniqueOrThrow({ where: { id: loan.id } });
@@ -642,7 +642,7 @@ describe("tag rules for future imports", () => {
   it("refuses a new name with a comma in it", async () => {
     await makeBook({ tags: ["sf"] });
     expect((await renameTag("sf", "sci, fi", { remember: true })).error).toBe(
-      "Tags can't contain commas.",
+      "Tags can’t contain commas.",
     );
     expect((await prisma.book.findFirstOrThrow({ where: { userId } })).tags).toEqual(["sf"]);
   });

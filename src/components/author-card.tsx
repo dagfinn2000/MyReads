@@ -15,6 +15,7 @@ import { BookCover } from "@/components/book-card";
 import { BookLink } from "@/components/book-link";
 import { StarGraphic } from "@/components/stars";
 import { Card, CardContent } from "@/components/ui/card";
+import { fineText } from "@/lib/fine-type";
 
 /** Covers a card draws before the rest become "+N". */
 const COVERS_SHOWN = 9;
@@ -158,7 +159,7 @@ function NextLine({ author }: { author: AuthorEntry }) {
       <p className="text-sm text-muted-foreground">
         Reading{" "}
         <BookLink bookId={current.id} className="font-medium text-foreground hover:underline">
-          {current.title}
+          {fineText(current.title)}
         </BookLink>{" "}
         now.
       </p>
@@ -169,7 +170,7 @@ function NextLine({ author }: { author: AuthorEntry }) {
       <p className="text-sm text-muted-foreground">
         Next:{" "}
         <BookLink bookId={next.id} className="font-medium text-foreground hover:underline">
-          {next.title}
+          {fineText(next.title)}
         </BookLink>
         {next.ownership === "WISHLIST" && " (on your wishlist)"}
       </p>

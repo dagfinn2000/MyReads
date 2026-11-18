@@ -206,7 +206,7 @@ export function ShortcutsDialog({
         <DialogHeader>
           <DialogTitle>Keyboard shortcuts</DialogTitle>
           <DialogDescription>
-            They work whenever you&apos;re not typing in a box. You can turn
+            They work whenever you’re not typing in a box. You can turn
             them off in Preferences.
           </DialogDescription>
         </DialogHeader>

@@ -456,7 +456,7 @@ export function LibraryView({
             </Link>
           </>
         )}
-        {shownPickNote === "error" && "Couldn't pick a book. Try again."}
+        {shownPickNote === "error" && "Couldn’t pick a book. Try again."}
       </p>
 
       {totalCount === 0 ? (
@@ -508,7 +508,7 @@ export function LibraryView({
       {(hiddenCount > 0 || hasMore) &&
         (atCap ? (
           <p className="text-center text-sm text-muted-foreground">
-            That&apos;s as many as the library shows at once. Search or filter to
+            That’s as many as the library shows at once. Search or filter to
             find the rest.
           </p>
         ) : (
@@ -556,7 +556,7 @@ export function LibraryView({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="keep">Status: don&apos;t change</SelectItem>
+                <SelectItem value="keep">Status: don’t change</SelectItem>
                 <StatusSelectItems />
               </SelectContent>
             </Select>
@@ -566,7 +566,7 @@ export function LibraryView({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="keep">Shelf: don&apos;t change</SelectItem>
+                  <SelectItem value="keep">Shelf: don’t change</SelectItem>
                   {/* Hidden shelves too: hiding is only about the chip row. */}
                   {orderByIds(shelves, prefs.shelfOrder).map((s) => (
                     <SelectItem key={s.id} value={`add:${s.id}`}>
@@ -586,7 +586,7 @@ export function LibraryView({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="keep">Format: don&apos;t change</SelectItem>
+                <SelectItem value="keep">Format: don’t change</SelectItem>
                 {Object.values(BookFormat).map((f) => (
                   <SelectItem key={f} value={f}>
                     {FORMAT_LABELS[f]}
@@ -599,7 +599,7 @@ export function LibraryView({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="keep">Ownership: don&apos;t change</SelectItem>
+                <SelectItem value="keep">Ownership: don’t change</SelectItem>
                 {Object.values(BookOwnership).map((o) => (
                   <SelectItem key={o} value={o}>
                     {OWNERSHIP_LABELS[o]}
@@ -615,7 +615,7 @@ export function LibraryView({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="keep">Mood: don&apos;t change</SelectItem>
+                  <SelectItem value="keep">Mood: don’t change</SelectItem>
                   {offeredMoods(prefs).map((m) => (
                     <SelectItem key={m.key} value={`add:${m.key}`}>
                       <MoodIcon mood={m} className="size-4" />
@@ -694,7 +694,7 @@ export function LibraryView({
             <DialogTitle>Delete {booksLabel(selCount)}?</DialogTitle>
             <DialogDescription>
               They leave your library with their reading history, quotes and
-              loans. This can&apos;t be undone, so{" "}
+              loans. This can’t be undone, so{" "}
               <a href="/api/export">download a backup</a> first if you might
               want them back.
             </DialogDescription>

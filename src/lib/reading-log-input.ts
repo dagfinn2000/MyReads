@@ -40,7 +40,7 @@ const minutesField = z
   .number()
   .int("Give the time in whole minutes")
   .min(1, "Give at least a minute")
-  .max(MAX_ENTRY_MINUTES, "That's more than a day of reading");
+  .max(MAX_ENTRY_MINUTES, "That’s more than a day of reading");
 
 /** The id a browser gives a log it makes (lib/outbox.ts), so the same log
  *  sent twice is written once. */

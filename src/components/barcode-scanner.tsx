@@ -45,11 +45,11 @@ function isIsbn13(code: string): boolean {
 
 const ERROR_MESSAGES: Record<string, string> = {
   unsupported:
-    "This browser can't detect barcodes yet (works in Chrome and Edge, including Chrome on Android). You can type the ISBN into the search box instead.",
+    "This browser can’t detect barcodes yet (works in Chrome and Edge, including Chrome on Android). You can type the ISBN into the search box instead.",
   insecure:
     "Camera access only works over HTTPS (or on localhost). Open the app through your reverse proxy / an https:// address and try again.",
   denied:
-    "Couldn't access the camera. Check this site's camera permission in the browser.",
+    "Couldn’t access the camera. Check this site’s camera permission in the browser.",
 };
 
 /** Where the "Keep scanning" switch is remembered, per device. */

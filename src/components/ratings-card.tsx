@@ -6,6 +6,7 @@ import { BookCover } from "@/components/book-card";
 import { Ink } from "@/components/ink-number";
 import { StarGraphic } from "@/components/stars";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { fineText } from "@/lib/fine-type";
 
 type CardBook = AspectBook & { coverUrl: string | null; authors: string[] };
 
@@ -173,7 +174,7 @@ function Aspects({
     return (
       <p className="text-sm text-muted-foreground">
         {allTime
-          ? "Rate the plot, characters and writing under a book's own rating, and how each averages out shows here."
+          ? "Rate the plot, characters and writing under a book’s own rating, and how each averages out shows here."
           : "None of the books finished in this period is rated for its plot, characters or writing."}
       </p>
     );
@@ -216,7 +217,7 @@ function Aspects({
                       href={`/books/${a.best.id}`}
                       className="truncate font-medium text-foreground hover:underline"
                     >
-                      {a.best.title}
+                      {fineText(a.best.title)}
                     </Link>
                     <span>· {ratingLabel(a.best[a.key]!, style)}</span>
                   </span>

@@ -82,10 +82,10 @@ describe("turning reminders on in a browser", () => {
       { ...good, keys: { ...good.keys, auth: "not base64!" } },
       { endpoint: good.endpoint },
     ]) {
-      expect(await addPushDevice(bad)).toEqual({ error: "This browser's subscription couldn't be read." });
+      expect(await addPushDevice(bad)).toEqual({ error: "This browser’s subscription couldn’t be read." });
     }
     for (const inside of ["https://127.0.0.1/push", "https://10.0.0.8/push", "https://[::1]/push"]) {
-      expect((await addPushDevice(subscription(inside))).error).toMatch(/can't reach/);
+      expect((await addPushDevice(subscription(inside))).error).toMatch(/can’t reach/);
     }
     expect(await prisma.pushDevice.count({ where: { userId } })).toBe(0);
   });
@@ -217,7 +217,7 @@ describe("the reminder timer", () => {
       },
     });
     await sendDueReminders(due, r.send);
-    expect(r.sent.map((s) => s.message.body)).toEqual(["Dune · page 120 of 412\n30 pages to go for today's goal"]);
+    expect(r.sent.map((s) => s.message.body)).toEqual(["Dune · page 120 of 412\n30 pages to go for today’s goal"]);
   });
 
   it("names the book read last, in its own unit", async () => {

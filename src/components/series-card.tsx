@@ -15,6 +15,7 @@ import { cn } from "@/lib/utils";
 import { BookCover } from "@/components/book-card";
 import { BookLink } from "@/components/book-link";
 import { Card, CardContent } from "@/components/ui/card";
+import { fineText } from "@/lib/fine-type";
 
 /** "#3", "#1.5": how a series number reads. */
 function numberLabel(n: number | null): string {
@@ -97,7 +98,7 @@ export function SeriesCard({
             <>
               Reading{" "}
               <BookLink bookId={reading.id} className="font-medium text-foreground hover:underline">
-                {numberLabel(reading.seriesNumber)} {reading.title}
+                {numberLabel(reading.seriesNumber)} {fineText(reading.title)}
               </BookLink>{" "}
               now.
             </>
@@ -105,7 +106,7 @@ export function SeriesCard({
             <>
               Next:{" "}
               <BookLink bookId={next.id} className="font-medium text-foreground hover:underline">
-                {numberLabel(next.seriesNumber)} {next.title}
+                {numberLabel(next.seriesNumber)} {fineText(next.title)}
               </BookLink>
             </>
           ) : series.state === "finished" ? (
@@ -221,7 +222,7 @@ function Place({ slot }: { slot: Extract<SeriesSlot<SeriesBook>, { kind: "book" 
             {numberLabel(b.seriesNumber)}{" "}
           </span>
         )}
-        {b.title}
+        {fineText(b.title)}
       </span>
     </BookLink>
   );

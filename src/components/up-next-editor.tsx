@@ -17,6 +17,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { fineText } from "@/lib/fine-type";
 
 export interface UpNextItem {
   id: string;
@@ -135,7 +136,7 @@ export function UpNextEditor({ picks, others }: { picks: UpNextItem[]; others: U
                   </span>
                   <BookCover book={book} className="aspect-[2/3] w-7 shrink-0 rounded-sm" />
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate text-sm font-medium">{book.title}</span>
+                    <span className="block truncate text-sm font-medium">{fineText(book.title)}</span>
                     {book.authors.length > 0 && (
                       <span className="block truncate text-xs text-muted-foreground">{book.authors.join(", ")}</span>
                     )}
@@ -209,7 +210,7 @@ export function UpNextEditor({ picks, others }: { picks: UpNextItem[]; others: U
                   >
                     <BookCover book={book} className="aspect-[2/3] w-7 shrink-0 rounded-sm" />
                     <span className="min-w-0 flex-1">
-                      <span className="block truncate text-sm">{book.title}</span>
+                      <span className="block truncate text-sm">{fineText(book.title)}</span>
                       {book.authors.length > 0 && (
                         <span className="block truncate text-xs text-muted-foreground">
                           {book.authors.join(", ")}

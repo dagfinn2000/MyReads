@@ -11,6 +11,7 @@ import type { BookFormValues } from "@/components/book-form";
 import { BarcodeScanner } from "@/components/barcode-scanner";
 import { NEWEST_FIRST_HREF, type ShelfScan } from "@/components/shelf-scan";
 import { Input } from "@/components/ui/input";
+import { fineText } from "@/lib/fine-type";
 
 /** Shortest query worth sending: one or two letters match most of a
  *  catalogue, and every search fans out to three of them. Mirrored by the
@@ -217,7 +218,7 @@ export function ImportSearch({
       {!searching && longEnough && results.length === 0 && (
         <p className="text-sm text-muted-foreground">
           {failed
-            ? "Couldn't reach the book catalogues. Try again in a moment, or add the book manually."
+            ? "Couldn’t reach the book catalogues. Try again in a moment, or add the book manually."
             : "No results. You can still add the book manually."}
         </p>
       )}
@@ -253,7 +254,7 @@ export function ImportSearch({
                   )}
                 </div>
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-medium">{r.title}</p>
+                  <p className="truncate text-sm font-medium">{fineText(r.title)}</p>
                   <p className="truncate text-xs text-muted-foreground">
                     {r.authors.join(", ")}
                     {r.publishedDate ? ` · ${r.publishedDate}` : ""}

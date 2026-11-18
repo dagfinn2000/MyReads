@@ -83,8 +83,8 @@ export function FieldSettings({
   return (
     <>
       <p className="text-xs text-muted-foreground">
-        Fields of your own for every book: where it&apos;s shelved, what it cost, whether it&apos;s
-        signed. Fill them in when you add or edit a book. They show on the book&apos;s page, and
+        Fields of your own for every book: where it’s shelved, what it cost, whether it’s
+        signed. Fill them in when you add or edit a book. They show on the book’s page, and
         the library can search them and filter by them under More filters.
       </p>
       <div className="grid gap-3">
@@ -97,7 +97,7 @@ export function FieldSettings({
                 {removing === f.id ? (
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="min-w-0">
-                      Remove “{f.name}”? Every book&apos;s {f.type === "yesno" ? "answer" : "value"} for it
+                      Remove “{f.name}”? Every book’s {f.type === "yesno" ? "answer" : "value"} for it
                       goes too.
                     </span>
                     <span className="flex gap-1">
@@ -189,7 +189,7 @@ export function FieldSettings({
           </form>
         ) : (
           <p className="text-xs text-muted-foreground">
-            That&apos;s the most there can be ({MAX_BOOK_FIELDS}).
+            That’s the most there can be ({MAX_BOOK_FIELDS}).
           </p>
         )}
         <p aria-live="polite" className="text-sm text-destructive">

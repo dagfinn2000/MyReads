@@ -25,6 +25,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { fineText } from "@/lib/fine-type";
 
 type Stage =
   | { step: "pick"; error?: string; reading?: boolean }
@@ -98,14 +99,14 @@ export function KindleImport() {
       if (books.length === 0) {
         setStage({
           step: "pick",
-          error: "No highlights in that file. It's called My Clippings.txt, in the Kindle's documents folder.",
+          error: "No highlights in that file. It’s called My Clippings.txt, in the Kindle’s documents folder.",
         });
         return;
       }
       const choice = Object.fromEntries(books.map((b) => [b.key, matchKindleBook(b, library)]));
       setStage({ step: "review", books, library, choice, found: choice });
     } catch {
-      setStage({ step: "pick", error: "That file couldn't be read. Try choosing it again." });
+      setStage({ step: "pick", error: "That file couldn’t be read. Try choosing it again." });
     }
   }
 
@@ -267,7 +268,7 @@ export function KindleImport() {
             )}
             {stage.failed.length > 0 && (
               <p role="alert" className="text-sm text-destructive">
-                Couldn&apos;t import {stage.failed.join(", ")}. Try the file again.
+                Couldn’t import {stage.failed.join(", ")}. Try the file again.
               </p>
             )}
           </div>
@@ -347,7 +348,7 @@ function ReviewList({
           <li key={book.key} className="grid gap-2 py-3">
             <div className="flex min-w-0 items-start gap-3">
               <div className="min-w-0 flex-1">
-                <p className="truncate font-medium">{book.title}</p>
+                <p className="truncate font-medium">{fineText(book.title)}</p>
                 <p className="truncate text-xs text-muted-foreground">
                   {book.author ? `${book.author} · ` : ""}
                   {plural(book.highlights.length, "highlight", "highlights", prefs)}
@@ -381,7 +382,7 @@ function ReviewList({
               <p className="flex min-w-0 items-center gap-1.5 text-sm">
                 <Check className="size-3.5 shrink-0 text-primary" />
                 <span className="shrink-0 text-muted-foreground">Into</span>
-                <span className="truncate">{target.title}</span>
+                <span className="truncate">{fineText(target.title)}</span>
               </p>
             ) : (
               <p className="text-sm text-muted-foreground">
@@ -453,7 +454,7 @@ function BookFinder({
             >
               <Check className={cn("size-3.5 shrink-0 text-primary", b.id !== chosen && "invisible")} />
               <span className="min-w-0 truncate">
-                {b.title}
+                {fineText(b.title)}
                 {b.authors.length > 0 && <span className="text-muted-foreground"> · {b.authors.join(", ")}</span>}
               </span>
             </button>

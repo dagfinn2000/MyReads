@@ -155,7 +155,7 @@ describe("parseUnitText", () => {
       error: "Use hours and minutes, like 5:12.",
     });
     expect(parseUnitText("17:00", audio(476, 700))).toEqual({
-      error: "That's past the end (11:40).",
+      error: "That’s past the end (11:40).",
     });
   });
 });
@@ -233,8 +233,8 @@ describe("stepsFor", () => {
 describe("fallbackHint", () => {
   it("says what the book is missing", () => {
     expect(fallbackHint(ebook(null))?.after).toBe(" to track by percent.");
-    expect(fallbackHint(audio(null, 970))?.before).toContain("the print edition's is fine");
-    expect(fallbackHint(audio(476, null))?.before).toContain("the audiobook's length");
+    expect(fallbackHint(audio(null, 970))?.before).toContain("the print edition’s is fine");
+    expect(fallbackHint(audio(476, null))?.before).toContain("the audiobook’s length");
     expect(fallbackHint(paper(412))).toBeNull();
   });
 });

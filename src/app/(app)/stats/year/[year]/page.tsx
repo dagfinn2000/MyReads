@@ -57,6 +57,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { fineText } from "@/lib/fine-type";
 
 export const dynamic = "force-dynamic";
 
@@ -514,7 +515,7 @@ export default async function YearInReviewPage({
                   <BookCover book={f.book} className="aspect-[2/3] w-24" />
                   <Stars value={f.rating!} className="mt-1.5" />
                   <p className="mt-1 line-clamp-2 text-xs leading-tight text-muted-foreground group-hover:text-foreground">
-                    {f.book.title}
+                    {fineText(f.book.title)}
                   </p>
                 </Link>
               ))}
@@ -710,7 +711,7 @@ function BookLink({ book }: { book: Pick<StatsBook, "id" | "title"> }) {
       href={`/books/${book.id}`}
       className="font-medium hover:underline"
     >
-      {book.title}
+      {fineText(book.title)}
     </Link>
   );
 }

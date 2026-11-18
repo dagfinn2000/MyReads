@@ -93,7 +93,7 @@ export function TagRulesList({ renames, skips }: Rules) {
         )}
         {error && (
           <p role="alert" className="text-sm text-destructive">
-            Couldn&apos;t remove that rule. Try again.
+            Couldn’t remove that rule. Try again.
           </p>
         )}
       </div>

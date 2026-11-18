@@ -355,7 +355,7 @@ function EntryEditor({
     // An empty box clears the time; "0" too.
     const minutes = minutesText.trim() === "" ? 0 : parseDuration(minutesText);
     if (minutes === null) return setError("Type the time read in minutes, like 25 or 1:10.");
-    if (minutes > MAX_ENTRY_MINUTES) return setError("That's more than a day of reading.");
+    if (minutes > MAX_ENTRY_MINUTES) return setError("That’s more than a day of reading.");
     setError(null);
     startTransition(async () => {
       const result = await updateProgressEntry(entry.id, {

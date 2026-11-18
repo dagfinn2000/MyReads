@@ -71,6 +71,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { fineText } from "@/lib/fine-type";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Stats · MyReads" };
@@ -702,7 +703,7 @@ export default async function StatsPage({
             </CardHeader>
             <CardContent className="grid grid-cols-1 gap-3">
               <blockquote className="long-text whitespace-pre-line break-words border-l-2 border-primary/50 pl-3 text-sm leading-relaxed">
-                {randomQuote.text}
+                {fineText(randomQuote.text)}
               </blockquote>
               <p className="text-sm text-muted-foreground">
                 —{" "}

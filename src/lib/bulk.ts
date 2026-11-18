@@ -42,7 +42,7 @@ const tagList = z
       .string()
       .trim()
       .toLowerCase()
-      .min(1, "Tags can't be empty.")
+      .min(1, "Tags can’t be empty.")
       .max(50, "Tags can be at most 50 characters."),
   )
   .max(20, "Up to 20 tags at a time.")
@@ -55,7 +55,7 @@ const targetFields = {
     .array(z.string().min(1).max(64))
     .max(
       BULK_MAX_IDS,
-      `That's more than ${BULK_MAX_IDS.toLocaleString("en-US")} books. Use “Select all books that match” instead.`,
+      `That’s more than ${BULK_MAX_IDS.toLocaleString("en-US")} books. Use “Select all books that match” instead.`,
     )
     .optional(),
   matching: z

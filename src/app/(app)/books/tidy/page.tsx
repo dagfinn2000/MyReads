@@ -11,6 +11,7 @@ import { BookCover } from "@/components/book-card";
 import { BookLink } from "@/components/book-link";
 import { BringBackButton, FillFromCatalogue, LeaveButton, StaleActions } from "@/components/tidy-actions";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { fineText } from "@/lib/fine-type";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Tidy up · MyReads" };
@@ -115,7 +116,7 @@ export default async function TidyPage() {
             <Sparkles className="size-8 text-primary" aria-hidden="true" />
             <p className="font-medium">All tidy</p>
             <p className="max-w-sm text-sm text-muted-foreground">
-              Every book has its cover, page count and author, and nothing looks like it&apos;s in
+              Every book has its cover, page count and author, and nothing looks like it’s in
               the library twice.
             </p>
           </CardContent>
@@ -143,7 +144,7 @@ export default async function TidyPage() {
                         </BookLink>
                         <span className="grid min-w-0 content-start gap-0.5 text-sm">
                           <BookLink bookId={b.id} className="truncate font-medium hover:underline">
-                            {b.title}
+                            {fineText(b.title)}
                           </BookLink>
                           <span className="truncate text-muted-foreground">{b.authors.join(", ")}</span>
                           <span className="text-xs text-muted-foreground">
@@ -170,7 +171,7 @@ export default async function TidyPage() {
             <CardTitle>Still reading?</CardTitle>
             <CardDescription>
               On Currently Reading, but nothing logged for a while. Put it down, back on the pile, or
-              leave it if you&apos;re still at it.
+              leave it if you’re still at it.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -217,8 +218,8 @@ export default async function TidyPage() {
           <CardHeader>
             <CardTitle>Read, but when?</CardTitle>
             <CardDescription>
-              Read without a finish date, so they don&apos;t count in a year&apos;s stats or goal. If
-              you don&apos;t remember, leave it.
+              Read without a finish date, so they don’t count in a year’s stats or goal. If
+              you don’t remember, leave it.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -265,7 +266,7 @@ function TidyRow({ book: b, note, actions }: { book: TidyBook; note: string; act
       </BookLink>
       <span className="grid min-w-0 flex-1 basis-48 gap-0.5 text-sm">
         <BookLink bookId={b.id} className="truncate font-medium hover:underline">
-          {b.title}
+          {fineText(b.title)}
         </BookLink>
         {b.authors.length > 0 && <span className="truncate text-muted-foreground">{b.authors.join(", ")}</span>}
         {note && <span className="text-xs text-muted-foreground">{note}</span>}

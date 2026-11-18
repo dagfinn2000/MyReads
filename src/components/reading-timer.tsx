@@ -223,14 +223,14 @@ export function useReadingTimer(bookId: string, readStartedAt?: number | null): 
         // A timer running for over a day is almost always one left going by
         // mistake; don't silently cap it at a day and bank it.
         if (ms > MAX_ENTRY_MINUTES * 60_000) {
-          return { error: "The timer's been running over a day. Stop it and check the time first." };
+          return { error: "The timer’s been running over a day. Stop it and check the time first." };
         }
         return { minutes: timerMinutes(ms) };
       }
       if (box === null || box.trim() === "") return {};
       const minutes = parseDuration(box);
       if (minutes === null) return { error: "Type the time read in minutes, like 25 or 1:10." };
-      if (minutes > MAX_ENTRY_MINUTES) return { error: "That's more than a day of reading." };
+      if (minutes > MAX_ENTRY_MINUTES) return { error: "That’s more than a day of reading." };
       return minutes > 0 ? { minutes } : {};
     },
     consumed: () => {

@@ -37,7 +37,7 @@ export function Swatches<T extends string>({
   options,
   swatches,
   labels,
-  styleText = "Style's own",
+  styleText = "Style’s own",
   onChange,
 }: {
   label: string;

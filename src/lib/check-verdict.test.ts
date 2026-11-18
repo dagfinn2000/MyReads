@@ -21,7 +21,7 @@ describe("checkVerdict on the exact edition", () => {
     expect(checkVerdict("isbn", { ownership: WISHLIST, format: PHYSICAL })).toEqual({
       tone: "info",
       headline: "On your wishlist.",
-      detail: "You don't own it yet.",
+      detail: "You don’t own it yet.",
       markOwned: "I bought it",
       addAnyway: false,
     });
@@ -31,7 +31,7 @@ describe("checkVerdict on the exact edition", () => {
     const v = checkVerdict("isbn", { ownership: BORROWED, format: EBOOK });
     expect(v.tone).toBe("warn");
     expect(v.headline).toBe("You borrowed this copy.");
-    expect(v.detail).toBe("It's in your library, but not your own.");
+    expect(v.detail).toBe("It’s in your library, but not your own.");
     expect(v.markOwned).toBeNull();
     expect(v.addAnyway).toBe(false);
   });
@@ -71,7 +71,7 @@ describe("checkVerdict on another edition", () => {
     expect(checkVerdict("title", { ownership: WISHLIST, format: EBOOK })).toMatchObject({
       tone: "info",
       headline: "This title is on your wishlist.",
-      detail: "The one in your library is an ebook. You don't own it yet.",
+      detail: "The one in your library is an ebook. You don’t own it yet.",
     });
   });
 

@@ -94,7 +94,7 @@ describe("reminderMessage", () => {
       reminderMessage({ book: { title: "Dune", place: "page 120 of 412" }, goalLeft: "20 pages" }),
     ).toEqual({
       title: "Time to read",
-      body: "Dune · page 120 of 412\n20 pages to go for today's goal",
+      body: "Dune · page 120 of 412\n20 pages to go for today’s goal",
       url: "/reading",
     });
     expect(reminderMessage({ book: { title: "Dune", place: null }, goalLeft: null }).body).toBe("Dune");

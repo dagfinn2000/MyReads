@@ -11,6 +11,7 @@ import { QuoteCardButton } from "@/components/quote-card-dialog";
 import { DeleteQuoteButton, QuoteForm } from "@/components/quotes-card";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { fineText } from "@/lib/fine-type";
 
 export interface QuoteItemQuote {
   id: string;
@@ -60,7 +61,7 @@ export function QuoteItem({ quote, showBook }: { quote: QuoteItemQuote; showBook
         ) : (
           <>
             <blockquote className="long-text whitespace-pre-line break-words border-l-2 border-primary/50 pl-3 text-sm leading-relaxed">
-              {quote.text}
+              {fineText(quote.text)}
             </blockquote>
             {quote.note && (
               <p className="long-text break-words text-sm italic text-muted-foreground">
@@ -78,10 +79,10 @@ export function QuoteItem({ quote, showBook }: { quote: QuoteItemQuote; showBook
                   <BookCover book={quote.book} className="aspect-[2/3] w-7 shrink-0" />
                   <span className="min-w-0">
                     <span className="block truncate font-medium group-hover:underline">
-                      {quote.book.title}
+                      {fineText(quote.book.title)}
                     </span>
                     <span className="block truncate text-xs text-muted-foreground">
-                      {quote.book.authors.join(", ")}
+                      {fineText(quote.book.authors.join(", "))}
                       {place && ` · ${place}`}
                       {` · ${added}`}
                     </span>

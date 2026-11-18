@@ -30,7 +30,7 @@ export default async function ReadingRoomPage() {
       <div className="mx-auto grid max-w-md justify-items-center gap-3 py-16 text-center">
         <h1 className="text-2xl font-semibold tracking-tight">Reading room</h1>
         <p className="text-sm text-muted-foreground">
-          The reading room is turned off, so your books aren&apos;t drawn as a house here, and the Room tab is
+          The reading room is turned off, so your books aren’t drawn as a house here, and the Room tab is
           hidden.
         </p>
         <RoomSwitch hiddenNav={prefs.hiddenNav} on />
@@ -157,9 +157,9 @@ export default async function ReadingRoomPage() {
         </p>
       ) : (
         <p className="mx-auto max-w-prose text-center text-xs text-muted-foreground">
-          Books are filed by author. An outline keeps the place of a book that isn&apos;t on the
+          Books are filed by author. An outline keeps the place of a book that isn’t on the
           shelf right now: wished for, lent out or given away. A red ribbon marks a book
-          you&apos;re reading. The room gets more furniture as your library grows, and
+          you’re reading. The room gets more furniture as your library grows, and
           Decorate changes its style and colours, adds rooms and furniture, moves it
           about, and makes the little you who lives there.
         </p>

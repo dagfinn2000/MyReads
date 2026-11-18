@@ -32,6 +32,7 @@ import {
   useCoverImage,
 } from "@/lib/picture-share";
 import { cn } from "@/lib/utils";
+import { fineText } from "@/lib/fine-type";
 
 /** The look and shape last used, kept in this browser only. */
 const CHOICE_KEY = "myreads:quote-card";
@@ -129,7 +130,7 @@ function QuoteCardDialog({ quote, book }: { quote: CardQuote; book: CardBook }) 
     if (!fonts || !canvasRef.current) return;
     drawQuoteCard(
       canvasRef.current,
-      { text: quote.text, title: book.title, authors: book.authors, page: quote.page, colour, cover },
+      { text: fineText(quote.text), title: fineText(book.title), authors: book.authors.map((a) => fineText(a)), page: quote.page, colour, cover },
       choice.style,
       choice.shape,
       fonts,

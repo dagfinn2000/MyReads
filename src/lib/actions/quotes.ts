@@ -148,7 +148,7 @@ export async function importKindleQuotes(
   if (!book) return { error: "Book not found" };
 
   const parsed = kindleQuotesSchema.safeParse(highlights);
-  if (!parsed.success) return { error: "Those highlights couldn't be read" };
+  if (!parsed.success) return { error: "Those highlights couldn’t be read" };
 
   const existing = await prisma.quote.findMany({ where: { bookId: id.data }, select: { text: true } });
   const seen = new Set(existing.map((q) => quoteKey(q.text)));

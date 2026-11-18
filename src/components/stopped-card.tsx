@@ -3,6 +3,7 @@ import { STOP_REASON_LABELS, type StopSummary } from "@/lib/stop-reasons";
 import { BookCover } from "@/components/book-card";
 import { BookLink } from "@/components/book-link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { fineText } from "@/lib/fine-type";
 
 const DNF_HREF = "/books?shelf=DNF";
 
@@ -53,7 +54,7 @@ export function StoppedCard({ summary: s, fmt }: { summary: StopSummary; fmt: (n
         ) : (
           <p className="text-sm text-muted-foreground">
             When you stop a book on Now reading you can say why, and the reasons add up here. A
-            stopped book&apos;s page has the same menu.
+            stopped book’s page has the same menu.
           </p>
         )}
 
@@ -108,7 +109,7 @@ export function StoppedCard({ summary: s, fmt }: { summary: StopSummary; fmt: (n
                       className="aspect-[2/3] w-16"
                       stopped={{ page: b.currentPage, of: b.pageCount }}
                     />
-                    <span className="line-clamp-2 text-xs leading-tight group-hover:underline">{b.title}</span>
+                    <span className="line-clamp-2 text-xs leading-tight group-hover:underline">{fineText(b.title)}</span>
                   </BookLink>
                 </li>
               ))}

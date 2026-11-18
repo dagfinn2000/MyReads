@@ -9,6 +9,7 @@ import { bookStatusName } from "@/lib/statuses";
 import { dustGrain } from "@/lib/shelf-wear";
 import { readingAt, type CoverWear } from "@/components/book-card";
 import { cn } from "@/lib/utils";
+import { fineText } from "@/lib/fine-type";
 
 /** What a spine needs to know about its book. */
 export type SpineBook = Pick<
@@ -97,7 +98,7 @@ export function BookSpine({
         data-away={away ? "" : undefined}
         aria-hidden="true"
       >
-        <span className="spine-title">{book.title}</span>
+        <span className="spine-title">{fineText(book.title)}</span>
         {author && <span className="spine-author">{author}</span>}
         {read != null && !away && (
           // The colour not yet come in above where the reader is: a grey

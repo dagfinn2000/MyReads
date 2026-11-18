@@ -255,7 +255,7 @@ describe("scanAddBook", () => {
     searchBooks.mockRejectedValue(new CataloguesUnreachableError());
     expect(await scanAddBook(SCANNED)).toMatchObject({
       kind: "error",
-      message: "Couldn't reach the book catalogues",
+      message: "Couldn’t reach the book catalogues",
     });
     expect(await prisma.book.count({ where: { userId } })).toBe(0);
   });

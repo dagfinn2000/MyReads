@@ -44,7 +44,7 @@ export function RoomSwitch({
       </Button>
       {failed && (
         <p role="alert" className="text-xs text-destructive">
-          That didn&apos;t save. Try again.
+          That didn’t save. Try again.
         </p>
       )}
     </>

@@ -54,7 +54,7 @@ export function YearVersusCard({ versus: v }: { versus: YearVersus }) {
             {course !== null && (
               <>
                 {" "}
-                At this pace you&apos;ll finish about{" "}
+                At this pace you’ll finish about{" "}
                 <span className="font-medium text-foreground">{fmt(course)}</span> this year, against{" "}
                 {fmt(v.thenFullYear)} in all of {v.then.year}.
               </>

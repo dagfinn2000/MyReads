@@ -25,6 +25,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { fineText } from "@/lib/fine-type";
 
 /** "12 May 2024 – 3 Jun 2024", partial-date variants, or "Undated read". */
 function readLabel(
@@ -101,7 +102,7 @@ export function ReadHistoryCard({
                     </div>
                     {read.note && (
                       <p className="long-text whitespace-pre-line break-words text-sm text-muted-foreground">
-                        {read.note}
+                        {fineText(read.note)}
                       </p>
                     )}
                   </>

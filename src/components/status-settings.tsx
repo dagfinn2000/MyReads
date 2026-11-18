@@ -257,7 +257,7 @@ export function StatusSettings({
           </form>
         ) : (
           <p className="text-xs text-muted-foreground">
-            That&apos;s the most there can be ({MAX_CUSTOM_STATUSES}).
+            That’s the most there can be ({MAX_CUSTOM_STATUSES}).
           </p>
         )}
         <p aria-live="polite" className="text-sm text-destructive">

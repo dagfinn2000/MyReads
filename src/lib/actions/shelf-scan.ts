@@ -73,7 +73,7 @@ export async function scanAddBook(
   });
 
   const parsed = scanSchema.safeParse({ isbn, force: options?.force });
-  if (!parsed.success) return answer({ kind: "error", message: "That isn't an ISBN" });
+  if (!parsed.success) return answer({ kind: "error", message: "That isn’t an ISBN" });
   const code = normalizeIsbn(parsed.data.isbn);
 
   const owned = await findBookByIsbn(userId, code);
@@ -88,7 +88,7 @@ export async function scanAddBook(
     results = await searchBooks(code, prefs.catalogues);
   } catch (e) {
     if (!(e instanceof CataloguesUnreachableError)) throw e;
-    return answer({ kind: "error", message: "Couldn't reach the book catalogues" });
+    return answer({ kind: "error", message: "Couldn’t reach the book catalogues" });
   }
   // The row for this very edition when there is one; an ISBN search's
   // first row otherwise.
@@ -127,7 +127,7 @@ export async function scanAddBook(
     format: prefs.newBookFormat,
     ownership: prefs.newBookOwnership,
   });
-  if (!book.success) return answer({ kind: "error", message: "Couldn't add this book" });
+  if (!book.success) return answer({ kind: "error", message: "Couldn’t add this book" });
   const data = book.data;
 
   const reading = settleReadingState(

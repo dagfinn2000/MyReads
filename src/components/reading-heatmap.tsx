@@ -31,6 +31,7 @@ import {
 } from "@/lib/reading-calendar";
 import { cn } from "@/lib/utils";
 import { Ink } from "@/components/ink-number";
+import { fineText } from "@/lib/fine-type";
 
 type Prefs = Pick<Preferences, "weekStart" | "heatmapScale" | "dateFormat" | "numberFormat">;
 type Streak = "current" | "longest";
@@ -256,7 +257,7 @@ export function ReadingHeatmap({
   if (Object.keys(data.days).length === 0) {
     return (
       <p className="text-sm text-muted-foreground">
-        Update a book&apos;s current page as you read — every day you log
+        Update a book’s current page as you read — every day you log
         progress lights up here.
       </p>
     );
@@ -811,7 +812,7 @@ function DayDetail({
                     className="aspect-[2/3] w-7 shrink-0 rounded-sm"
                   />
                   <span className="min-w-0">
-                    <span className="block truncate text-sm font-medium">{book.title}</span>
+                    <span className="block truncate text-sm font-medium">{fineText(book.title)}</span>
                     <span className="block truncate text-xs text-muted-foreground">
                       {[book.author, ...parts].filter(Boolean).join(" · ")}
                     </span>

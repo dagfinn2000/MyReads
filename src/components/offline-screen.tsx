@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { BookOpenText, CloudOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { fineText } from "@/lib/fine-type";
 
 interface SavedPage {
   path: string;
@@ -74,10 +75,10 @@ export function OfflineScreen() {
       <div className="flex w-full max-w-md flex-col items-center gap-5 text-center">
         <CloudOff className="size-12 text-muted-foreground/40" aria-hidden="true" />
         <div className="grid gap-1">
-          <h1 className="text-2xl font-semibold tracking-tight">You&apos;re offline</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">You’re offline</h1>
           <p className="text-sm text-muted-foreground">
-            This page isn&apos;t saved on this device yet. Pages you&apos;ve opened lately open
-            without a connection, and reading you log there is sent once you&apos;re back.
+            This page isn’t saved on this device yet. Pages you’ve opened lately open
+            without a connection, and reading you log there is sent once you’re back.
           </p>
         </div>
         <div className="flex flex-wrap justify-center gap-2">
@@ -101,7 +102,7 @@ export function OfflineScreen() {
                     href={p.path}
                     className="flex items-baseline justify-between gap-3 px-3 py-2 text-sm hover:bg-muted"
                   >
-                    <span className="min-w-0 truncate font-medium">{p.title}</span>
+                    <span className="min-w-0 truncate font-medium">{fineText(p.title)}</span>
                     {p.savedAt > 0 && (
                       <span className="shrink-0 text-xs text-muted-foreground">{ago(p.savedAt, now)}</span>
                     )}

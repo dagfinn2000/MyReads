@@ -200,7 +200,7 @@ export function ManageShelvesDialog({
       const res = await renameShelf(shelf.id, to);
       if (res.error || !res.shelfId) {
         // The name stays in the box to fix.
-        setMessage(res.error ?? "Couldn't rename that shelf.");
+        setMessage(res.error ?? "Couldn’t rename that shelf.");
         return;
       }
       reset();

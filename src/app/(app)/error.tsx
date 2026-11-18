@@ -48,11 +48,11 @@ export default function AppError({
       <div className="flex flex-col items-center gap-4 rounded-lg border border-dashed py-16 text-center">
         <CloudOff className="size-10 text-muted-foreground/40" />
         <div className="grid gap-1">
-          <p className="font-medium">{online ? "MyReads can't be reached." : "You're offline."}</p>
+          <p className="font-medium">{online ? "MyReads can’t be reached." : "You’re offline."}</p>
           <p className="max-w-prose text-sm text-muted-foreground">
             That needs a connection, so nothing was saved. Pages you log
-            reading on (Now reading, a book&apos;s page) still work: what you
-            log is kept on this device and sent once you&apos;re back.
+            reading on (Now reading, a book’s page) still work: what you
+            log is kept on this device and sent once you’re back.
           </p>
         </div>
         <div className="flex gap-2">
@@ -72,7 +72,7 @@ export default function AppError({
       <div className="grid gap-1">
         <p className="font-medium">Something went wrong.</p>
         <p className="max-w-prose text-sm text-muted-foreground">
-          The page couldn&apos;t be loaded. Your library is fine — this was a
+          The page couldn’t be loaded. Your library is fine — this was a
           problem rendering the page, not reading your data.
         </p>
         {error.digest && (

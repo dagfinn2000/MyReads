@@ -122,6 +122,7 @@ import {
 } from "@/lib/room";
 import { useCoverColours } from "@/lib/cover-colours";
 import { drawnSpineColour } from "@/lib/spine-colour";
+import { fineText } from "@/lib/fine-type";
 
 /** Stone and grass under the house. */
 const FOUNDATION = 6;
@@ -581,7 +582,7 @@ export function ReadingRoom({
     const landed = placementsOf(plan).find((p) => p.kind === kind);
     const name = FURNITURE_LABELS[kind];
     if (!landed || landed.floor !== wanted.floor || landed.slot !== wanted.slot || landed.room !== wanted.room) {
-      setNote({ text: `There isn't room for the ${name.toLowerCase()} there.`, shown: true });
+      setNote({ text: `There isn’t room for the ${name.toLowerCase()} there.`, shown: true });
       return false;
     }
     const f = plan.floors.length - 1 - landed.floor;
@@ -787,7 +788,7 @@ export function ReadingRoom({
           Use the arrow keys to move from book to book, and Enter to open one.
         </p>
         <p id="room-arrange-keys" className="sr-only">
-          Drag a piece of furniture to move it, or use the arrow keys. Press Escape when you&apos;re done.
+          Drag a piece of furniture to move it, or use the arrow keys. Press Escape when you’re done.
         </p>
         <p className="sr-only" aria-live="polite">
           {arranging && note?.text}
@@ -799,7 +800,7 @@ export function ReadingRoom({
         )}
         {tipBook && tip && (
           <div className="room-tip" style={{ left: tip.left, top: tip.top }} aria-hidden="true">
-            <p className="font-heading font-medium">{tipBook.title}</p>
+            <p className="font-heading font-medium">{fineText(tipBook.title)}</p>
             {tipBook.author && <p className="text-muted-foreground">{tipBook.author}</p>}
             <p className="text-muted-foreground">{statusLine(tipBook)}</p>
           </div>

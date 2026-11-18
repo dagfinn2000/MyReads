@@ -60,7 +60,7 @@ export type MovedResult = Extract<MoveResult, { ok: true }>;
 const EMPTY: Record<ProgressUnit, string> = {
   page: "Type a page first.",
   percent: "Type a percent first.",
-  time: "Type how long you've listened first.",
+  time: "Type how long you’ve listened first.",
 };
 
 const AT_LEAST: Record<ProgressUnit, string> = {
@@ -161,7 +161,7 @@ export function QuickLog({
       parsed.page === currentPage &&
       parsed.value !== pageToUnit(currentPage, info)
     ) {
-      return fail(`That's still page ${parsed.page} of ${info.pageCount}. Log a little further.`);
+      return fail(`That’s still page ${parsed.page} of ${info.pageCount}. Log a little further.`);
     }
     const timed = timer.minutesForLog();
     if ("error" in timed) return fail(timed.error);
@@ -183,7 +183,7 @@ export function QuickLog({
     };
     // No connection: keep it here, for the day it was meant for.
     const keepHere = () => {
-      if (!offline) return fail("Couldn't reach MyReads. Try again.");
+      if (!offline) return fail("Couldn’t reach MyReads. Try again.");
       const key = when === "today" ? today : when === "yesterday" ? shiftDayKey(today, -1) : when;
       const label = formatUnitValue(parsed.value, info);
       addToOutbox({
@@ -201,7 +201,7 @@ export function QuickLog({
       });
       done(
         book.pageCount != null && parsed.page === book.pageCount,
-        `Saved ${label} for ${describeDay(key, today, prefs.dateFormat)} on this device. It's sent once you're back online.`,
+        `Saved ${label} for ${describeDay(key, today, prefs.dateFormat)} on this device. It’s sent once you’re back online.`,
       );
     };
     if (offline && (!offline.online || waiting)) return keepHere();
@@ -233,7 +233,7 @@ export function QuickLog({
     if ("error" in timed) return fail(timed.error);
     const finishing = to === "READ";
     const keepHere = () => {
-      if (!offline) return fail("Couldn't reach MyReads. Try again.");
+      if (!offline) return fail("Couldn’t reach MyReads. Try again.");
       addToOutbox({
         kind: "move",
         id: newClientId(),
@@ -251,7 +251,7 @@ export function QuickLog({
       // says what happened here.
       if (!onMoved) {
         setMessage({
-          text: `${finishing ? "Marked as Read" : "Moved to Did Not Finish"} on this device. It's sent once you're back online.`,
+          text: `${finishing ? "Marked as Read" : "Moved to Did Not Finish"} on this device. It’s sent once you’re back online.`,
           error: false,
         });
       }
@@ -407,7 +407,7 @@ export function QuickLog({
             aria-labelledby={`${id}-ask`}
             className="flex flex-wrap items-center gap-2 rounded-lg bg-muted px-3 py-2 text-sm"
           >
-            <span id={`${id}-ask`}>That&apos;s the last page. Mark as Read?</span>
+            <span id={`${id}-ask`}>That’s the last page. Mark as Read?</span>
             <Button
               ref={markRef}
               type="button"

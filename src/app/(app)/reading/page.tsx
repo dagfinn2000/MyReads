@@ -30,6 +30,7 @@ import { OverdueNotice } from "@/components/overdue-notice";
 import { UpNextEditor } from "@/components/up-next-editor";
 import { UpNextPile } from "@/components/up-next-pile";
 import { Button } from "@/components/ui/button";
+import { fineText } from "@/lib/fine-type";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Now reading · MyReads" };
@@ -179,7 +180,7 @@ export default async function NowReadingPage() {
         empty={
           <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed px-4 py-12 text-center">
             <BookOpenText className="size-10 text-muted-foreground/40" />
-            <p className="text-muted-foreground">You&apos;re not reading anything right now.</p>
+            <p className="text-muted-foreground">You’re not reading anything right now.</p>
             {next.length > 0 ? (
               <p className="text-sm text-muted-foreground">
                 Pick one from Up next below and set it to Currently Reading on its page.
@@ -207,7 +208,7 @@ export default async function NowReadingPage() {
                 >
                   <BookCover book={b} className="cover-shadow aspect-[2/3] w-10 shrink-0" />
                   <span className="grid min-w-0 gap-1">
-                    <span className="truncate font-heading text-sm font-medium">{b.title}</span>
+                    <span className="truncate font-heading text-sm font-medium">{fineText(b.title)}</span>
                     <FinishByNote
                       className="justify-self-start"
                       line={finishByLine(
@@ -268,10 +269,10 @@ export default async function NowReadingPage() {
                     </span>
                     {/* A cover this small has no room for its own title. */}
                     <span aria-hidden="true" className="mt-1.5 line-clamp-2 text-[11px] leading-tight text-muted-foreground">
-                      {b.title}
+                      {fineText(b.title)}
                     </span>
                     {/* A cover image is named by its alt text; a drawn one isn't. */}
-                    {!b.coverUrl && <span className="sr-only">{b.title}</span>}
+                    {!b.coverUrl && <span className="sr-only">{fineText(b.title)}</span>}
                     {i < picks.length && <span className="sr-only">, number {i + 1} on your list</span>}
                   </BookLink>
                 </li>

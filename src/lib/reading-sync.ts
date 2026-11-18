@@ -51,7 +51,7 @@ export type SyncResult =
   /** `retry`: the server failed, not the item; send it again later. */
   | { id: string; ok: false; error: string; retry?: boolean };
 
-const SERVER_FAILED = "The server couldn't save this one. It tries again later.";
+const SERVER_FAILED = "The server couldn’t save this one. It tries again later.";
 
 async function syncOne(userId: string, raw: unknown): Promise<SyncResult> {
   const rawId =
@@ -59,7 +59,7 @@ async function syncOne(userId: string, raw: unknown): Promise<SyncResult> {
       ? (raw as { id: string }).id
       : "";
   const parsed = syncItemSchema.safeParse(raw);
-  if (!parsed.success) return { id: rawId, ok: false, error: "This couldn't be read." };
+  if (!parsed.success) return { id: rawId, ok: false, error: "This couldn’t be read." };
   const item = parsed.data;
   const at = new Date(item.at);
   try {
@@ -80,7 +80,7 @@ async function syncOne(userId: string, raw: unknown): Promise<SyncResult> {
       ? { id: item.id, ok: true, message: result.message }
       : { id: item.id, ok: true, message: result.message, undo: result.undo };
   } catch (err) {
-    console.error("Couldn't sync a saved log:", err);
+    console.error("Couldn’t sync a saved log:", err);
     return { id: item.id, ok: false, error: SERVER_FAILED, retry: true };
   }
 }

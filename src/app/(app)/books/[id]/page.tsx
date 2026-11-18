@@ -44,6 +44,7 @@ import { SimilarBooksCard } from "@/components/similar-books-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { equalsIgnoringCase } from "@/lib/utils";
+import { fineText } from "@/lib/fine-type";
 
 export const dynamic = "force-dynamic";
 
@@ -265,7 +266,7 @@ export default async function BookDetailPage({
               anywhere, instead of pushing the page sideways. */}
           <div className="book-title wrap-anywhere">
             <h1 className="text-3xl leading-tight font-semibold tracking-tight text-balance sm:text-4xl">
-              {book.title}
+              {fineText(book.title)}
             </h1>
             {book.authors.length > 0 && (
               <p className="mt-1.5 text-lg text-muted-foreground">
@@ -278,7 +279,7 @@ export default async function BookDetailPage({
                 className="mt-1 inline-flex items-center gap-1.5 text-sm italic text-muted-foreground hover:text-foreground hover:underline"
               >
                 <Library className="size-3.5" />
-                {book.seriesName}
+                {fineText(book.seriesName)}
                 {book.seriesNumber != null ? ` #${book.seriesNumber}` : ""}
               </Link>
             )}
@@ -402,7 +403,7 @@ export default async function BookDetailPage({
                 className="long-text book-prose max-w-prose whitespace-pre-line break-words text-sm leading-relaxed text-muted-foreground"
                 data-drop-cap={takesDropCap(book.description) ? "" : undefined}
               >
-                {book.description}
+                {fineText(book.description)}
               </p>
             ))}
 
@@ -412,14 +413,14 @@ export default async function BookDetailPage({
                 <span>
                   More in{" "}
                   <Link href={seriesHref} className="italic hover:underline">
-                    {book.seriesName}
+                    {fineText(book.seriesName)}
                   </Link>
                 </span>
                 <Link
                   href={`/series#${seriesAnchor(book.seriesName!)}`}
                   className="text-xs font-normal underline-offset-2 hover:text-foreground hover:underline"
                 >
-                  What&apos;s next in the series
+                  What’s next in the series
                 </Link>
               </h2>
               {/* One row that scrolls, so a long series doesn't push the rest down. */}
@@ -434,7 +435,7 @@ export default async function BookDetailPage({
                     <BookCover book={b} className="aspect-[2/3] w-20" />
                     <p className="mt-1 line-clamp-2 text-xs leading-tight text-muted-foreground group-hover:text-foreground">
                       {b.seriesNumber != null ? `#${b.seriesNumber} · ` : ""}
-                      {b.title}
+                      {fineText(b.title)}
                     </p>
                   </BookLink>
                 ))}

@@ -80,7 +80,7 @@ function describe(row: ScanRow): string {
     case "notFound":
       return `Not found: ${row.isbn}`;
     case "failed":
-      return `Couldn't look up ${row.isbn}`;
+      return `Couldn’t look up ${row.isbn}`;
     default:
       return "";
   }
@@ -227,7 +227,7 @@ class ShelfScanSession {
       this.setRow(id, { state: { ...have, ownership: BookOwnership.OWNED, marked: true } }, true);
     } catch {
       this.setRow(id, { state: have });
-      this.set({ announcement: `Couldn't mark ${have.title} as owned` });
+      this.set({ announcement: `Couldn’t mark ${have.title} as owned` });
     }
   };
 
@@ -348,7 +348,7 @@ const KIND_LABELS: Record<RowState["kind"], string> = {
   have: "Already in your library",
   same: "Same barcode again",
   notFound: "Not found",
-  failed: "Couldn't look up",
+  failed: "Couldn’t look up",
 };
 
 function RowLine({

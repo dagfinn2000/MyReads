@@ -38,11 +38,11 @@ export async function savePushDevice(
   const p256dh = sub.success ? fromBase64Url(sub.data.keys.p256dh) : null;
   const auth = sub.success ? fromBase64Url(sub.data.keys.auth) : null;
   if (!sub.success || p256dh?.length !== 65 || p256dh[0] !== 4 || auth?.length !== 16) {
-    return { error: "This browser's subscription couldn't be read." };
+    return { error: "This browser’s subscription couldn’t be read." };
   }
   const { endpoint } = sub.data;
   const allowed = await checkUrlAllowed(endpoint);
-  if (!allowed.ok) return { error: "This server can't reach that browser's push service." };
+  if (!allowed.ok) return { error: "This server can’t reach that browser’s push service." };
 
   const keys = { p256dh: toBase64Url(p256dh), auth: toBase64Url(auth) };
   const label = deviceLabel(userAgent);

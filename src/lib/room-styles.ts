@@ -31,7 +31,7 @@ export type RoomStyle = (typeof ROOM_STYLES)[number];
 export const ROOM_STYLE_LABELS: Record<RoomStyle, { name: string; blurb: string }> = {
   cottage: { name: "Cottage", blurb: "Brick, a tiled roof and striped wallpaper." },
   medieval: { name: "Castle", blurb: "A stone keep with battlements and a banner." },
-  fantasy: { name: "Wizard's house", blurb: "A crooked spire, starry walls and toadstools." },
+  fantasy: { name: "Wizard’s house", blurb: "A crooked spire, starry walls and toadstools." },
   elven: { name: "Elven hall", blurb: "Pale wood under a roof of leaves, among birches." },
   cave: { name: "Cave", blurb: "Dug into a grassy hill, with rock walls and torches." },
   scifi: { name: "Space station", blurb: "Metal panels, glowing strips and a plasma fire." },
@@ -187,7 +187,7 @@ export const ROOM_PAPERS = [
 export type RoomPaper = (typeof ROOM_PAPERS)[number];
 
 export const ROOM_PAPER_LABELS: Record<RoomPaper, string> = {
-  style: "The style's own",
+  style: "The style’s own",
   stripes: "Stripes",
   damask: "Damask",
   flowers: "Flowers",
@@ -213,7 +213,7 @@ export const ROOM_FLOORS = ["style", "boards", "planks", "parquet", "flags", "ti
 export type RoomFloor = (typeof ROOM_FLOORS)[number];
 
 export const ROOM_FLOOR_LABELS: Record<RoomFloor, string> = {
-  style: "The style's own",
+  style: "The style’s own",
   boards: "Boards",
   planks: "Wide planks",
   parquet: "Parquet",
@@ -329,7 +329,7 @@ export const ROOM_HOLIDAY_LABELS: Record<RoomHoliday, string> = {
   halloween: "Halloween",
   easter: "Easter",
   midsummer: "Midsummer",
-  newyear: "New Year's Eve",
+  newyear: "New Year’s Eve",
 };
 
 /** Easter Sunday in `year` (Gregorian), as [month, day]: the anonymous
@@ -424,7 +424,7 @@ export const FABRIC_SWATCHES: Record<Exclude<RoomFabric, "style">, string> = {
 };
 
 export const COLOUR_LABELS: Record<string, string> = {
-  style: "The style's own",
+  style: "The style’s own",
   cream: "Cream",
   sage: "Sage",
   sky: "Sky blue",

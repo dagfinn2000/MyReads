@@ -4,6 +4,7 @@ import { useId, useLayoutEffect, useRef, useState } from "react";
 import { descriptionMayOverflow, takesDropCap } from "@/lib/book-page";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { fineText } from "@/lib/fine-type";
 
 /**
  * A book's description cut to its first four lines, with a More button when
@@ -43,7 +44,7 @@ export function BookDescription({ text }: { text: string }) {
           !expanded && "line-clamp-4",
         )}
       >
-        {text}
+        {fineText(text)}
       </p>
       {(overflowing || expanded) && (
         <Button

@@ -25,6 +25,7 @@ import { QuickLog, type MovedResult, type QuickLogBook } from "@/components/quic
 import { giveBackTime } from "@/components/reading-timer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { fineText } from "@/lib/fine-type";
 
 export interface NowReadingBook extends QuickLogBook, LogBook {
   authors: string[];
@@ -247,11 +248,11 @@ const NowReadingRow = memo(function NowReadingRow({
           <div className="min-w-0">
             <h2 className="truncate font-heading text-base font-medium">
               <Link href={`/books/${book.id}`} className="hover:underline">
-                {book.title}
+                {fineText(book.title)}
               </Link>
             </h2>
             {book.authors.length > 0 && (
-              <p className="truncate text-sm text-muted-foreground">{book.authors.join(", ")}</p>
+              <p className="truncate text-sm text-muted-foreground">{fineText(book.authors.join(", "))}</p>
             )}
             {(quiet || deadline) && (
               <div className="mt-1.5 flex flex-wrap items-start gap-1.5">
@@ -387,7 +388,7 @@ function QueuedMoveRow({ item, onUndone }: { item: OutboxItem; onUndone: () => v
       <CloudUpload className="size-4 shrink-0" aria-hidden="true" />
       <span className="min-w-0 flex-1">
         {item.title} moves to {target}{" "}
-        {offline?.state === "sending" ? "now." : "once you're back online. It's saved on this device."}
+        {offline?.state === "sending" ? "now." : "once you’re back online. It’s saved on this device."}
       </span>
       <Button
         ref={undoRef}

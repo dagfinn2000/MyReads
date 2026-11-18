@@ -308,7 +308,7 @@ export function MoodSettings({
           </form>
         ) : (
           <p className="text-xs text-muted-foreground">
-            That&apos;s the most there can be ({MAX_CUSTOM_MOODS}).
+            That’s the most there can be ({MAX_CUSTOM_MOODS}).
           </p>
         )}
         <p aria-live="polite" className="text-sm text-destructive">

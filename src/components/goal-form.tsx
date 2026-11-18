@@ -47,7 +47,7 @@ export function GoalForm({
       ? "Goal removed."
       : state.saved
         ? state.saved.year > currentYear && !monthly
-          ? "Saved. This year's goal is unchanged."
+          ? "Saved. This year’s goal is unchanged."
           : "Saved."
         : "";
 

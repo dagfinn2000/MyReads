@@ -59,6 +59,7 @@ import {
   type WrappedBook,
   type YearWrapped,
 } from "@/lib/year-wrapped";
+import { fineText } from "@/lib/fine-type";
 
 const MONTH_NAMES = [
   "January", "February", "March", "April", "May", "June",
@@ -468,7 +469,7 @@ function IntroSlide({ w }: { w: YearWrapped }) {
         <p className="story-rise mt-2 font-heading text-8xl leading-none font-bold tracking-tighter tabular-nums sm:text-9xl" style={delay(150)}>
           {w.year}
         </p>
-        <Line at={600}>{w.current ? "So far, anyway. Here's how it's going." : "Here's how it went."}</Line>
+        <Line at={600}>{w.current ? "So far, anyway. Here’s how it’s going." : "Here’s how it went."}</Line>
       </div>
     </>
   );
@@ -488,7 +489,7 @@ function BooksSlide({ w }: { w: YearWrapped }) {
       </Big>
       <Line>
         {w.rereads > 0 && `${fmt(w.rereads)} of them ${w.rereads === 1 ? "was a re-read" : "were re-reads"}. `}
-        {every >= 1 && `That's one every ${every === 1 ? "day" : `${fmt(every)} days`}.`}
+        {every >= 1 && `That’s one every ${every === 1 ? "day" : `${fmt(every)} days`}.`}
       </Line>
       {covers.length > 0 && (
         <div className="mt-7 grid grid-cols-6 gap-2" aria-hidden="true">
@@ -524,7 +525,7 @@ function PagesSlide({ w }: { w: YearWrapped }) {
       </Big>
       {yardstick && (
         <Line>
-          As many as <i>{yardstick.title}</i>, {fmt(yardstick.times)} times over.
+          As many as <i>{fineText(yardstick.title)}</i>, {fmt(yardstick.times)} times over.
         </Line>
       )}
       {perDay >= 1 && (
@@ -576,7 +577,7 @@ function TimeSlide({ w }: { w: YearWrapped }) {
       </Big>
       <Line>
         {wholeDays >= 1
-          ? `That's ${wholeDays === 1 ? "a whole day" : `${fmt(wholeDays)} whole days`} with a book.`
+          ? `That’s ${wholeDays === 1 ? "a whole day" : `${fmt(wholeDays)} whole days`} with a book.`
           : `${fmt(w.minutes)} minutes in all.`}
       </Line>
     </>
@@ -730,7 +731,7 @@ function TopSlide({ w }: { w: YearWrapped }) {
       <div className="story-drop mt-6 flex items-end gap-5" style={delay(200)}>
         <BookCover book={first.book} className="cover-shadow aspect-[2/3] w-32 shrink-0 sm:w-36" loading="eager" />
         <div className="min-w-0 pb-1">
-          <p className="font-heading text-2xl leading-tight font-bold text-balance break-words sm:text-3xl">{first.book.title}</p>
+          <p className="font-heading text-2xl leading-tight font-bold text-balance break-words sm:text-3xl">{fineText(first.book.title)}</p>
           {first.book.authors.length > 0 && (
             <p className="mt-1 text-sm text-muted-foreground">{first.book.authors.join(", ")}</p>
           )}
@@ -744,7 +745,7 @@ function TopSlide({ w }: { w: YearWrapped }) {
               <BookCover book={f.book} className="cover-shadow aspect-[2/3] w-full" loading="eager" />
               <p className="mt-1.5 flex gap-1 text-xs leading-tight">
                 <span className="font-semibold tabular-nums">{i + 2}</span>
-                <span className="line-clamp-2 text-muted-foreground">{f.book.title}</span>
+                <span className="line-clamp-2 text-muted-foreground">{fineText(f.book.title)}</span>
               </p>
             </li>
           ))}
@@ -775,7 +776,7 @@ function LongestSlide({ w }: { w: YearWrapped }) {
             <BookCover book={r.book} className="cover-shadow aspect-[2/3] w-24 shrink-0" loading="eager" />
             <div className="min-w-0">
               <p className="text-xs font-semibold tracking-[0.2em] text-muted-foreground uppercase">{r.label}</p>
-              <p className="mt-1 font-heading text-2xl leading-tight font-bold text-balance break-words">{r.book.title}</p>
+              <p className="mt-1 font-heading text-2xl leading-tight font-bold text-balance break-words">{fineText(r.book.title)}</p>
               <p className="mt-1 text-sm text-muted-foreground">{r.figure}</p>
             </div>
           </div>

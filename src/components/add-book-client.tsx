@@ -13,6 +13,7 @@ import { ImportSearch } from "@/components/import-search";
 import { NEWEST_FIRST_HREF, useShelfScan } from "@/components/shelf-scan";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { fineText } from "@/lib/fine-type";
 
 /** A picked or handed-over book, waiting in the review form. */
 interface Prefill {
@@ -100,7 +101,7 @@ export function AddBookClient({
         <div className="flex items-start gap-2 rounded-lg border border-emerald-300 bg-emerald-50 p-3 text-sm dark:border-emerald-900 dark:bg-emerald-950/40">
           <CircleCheck className="mt-0.5 size-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
           <span className="min-w-0 flex-1 break-words">
-            Added <b className="font-medium">{lastAdded.title}</b> ·{" "}
+            Added <b className="font-medium">{fineText(lastAdded.title)}</b> ·{" "}
             <Link href={`/books/${lastAdded.id}`} className="underline underline-offset-2">
               Open it
             </Link>
@@ -156,7 +157,7 @@ export function AddBookClient({
                   href={`/books/${dupe.book.id}`}
                   className="font-medium underline underline-offset-2"
                 >
-                  {dupe.book.title}
+                  {fineText(dupe.book.title)}
                 </Link>
                 {duplicateNotice(dupe.match, dupe.book.ownership).tail}
               </span>

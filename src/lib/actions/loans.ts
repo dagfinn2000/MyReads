@@ -55,7 +55,7 @@ export async function lendBook(
   if (!data.lentAt && data.dueAt) {
     const prefs = await getPreferences();
     if (data.dueAt < overdueCutoff(new Date(), prefs.timeZone)) {
-      return { error: "It can't be due back before you lent it." };
+      return { error: "It can’t be due back before you lent it." };
     }
   }
 
@@ -91,7 +91,7 @@ export async function setLoanDue(loanId: string, value: string): Promise<string 
   const id = idSchema.safeParse(loanId);
   const due = loanDueSchema.safeParse(value);
   if (!id.success) return "Loan not found";
-  if (!due.success) return "That isn't a date.";
+  if (!due.success) return "That isn’t a date.";
 
   const loan = await prisma.loan.findFirst({
     where: { id: id.data, book: { userId } },
@@ -102,7 +102,7 @@ export async function setLoanDue(loanId: string, value: string): Promise<string 
   // reader's clock), the due date is a day saved as midnight UTC.
   const { timeZone } = await getPreferences();
   if (due.data && calendarDay(due.data) < calendarDay(loan.lentAt, timeZone)) {
-    return "It can't be due back before you lent it.";
+    return "It can’t be due back before you lent it.";
   }
 
   await prisma.loan.update({ where: { id: id.data }, data: { dueAt: due.data } });

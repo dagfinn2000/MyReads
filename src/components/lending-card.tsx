@@ -127,7 +127,7 @@ export function LendingCard({
           !formOpen && (
             <p className="text-sm text-muted-foreground">
               {mode === "borrowed" && borrowedFrom
-                ? `Borrowed from ${borrowedFrom}. It isn't yours to lend.`
+                ? `Borrowed from ${borrowedFrom}. It isn’t yours to lend.`
                 : LENDING_NOTE[mode]}
             </p>
           )

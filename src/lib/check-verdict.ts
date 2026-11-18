@@ -40,7 +40,7 @@ export function checkVerdict(
         return {
           tone: "info",
           headline: "On your wishlist.",
-          detail: "You don't own it yet.",
+          detail: "You don’t own it yet.",
           markOwned: "I bought it",
           addAnyway: false,
         };
@@ -48,7 +48,7 @@ export function checkVerdict(
         return {
           tone: "warn",
           headline: "You borrowed this copy.",
-          detail: "It's in your library, but not your own.",
+          detail: "It’s in your library, but not your own.",
           markOwned: null,
           addAnyway: false,
         };
@@ -56,7 +56,7 @@ export function checkVerdict(
         return {
           tone: "warn",
           headline: "You gave this copy away.",
-          detail: "It's in your library as a book you no longer have.",
+          detail: "It’s in your library as a book you no longer have.",
           markOwned: "I have it again",
           addAnyway: false,
         };
@@ -77,7 +77,7 @@ export function checkVerdict(
       return {
         tone: "info",
         headline: "This title is on your wishlist.",
-        detail: `${theirs} You don't own it yet.`,
+        detail: `${theirs} You don’t own it yet.`,
         markOwned: null,
         addAnyway: true,
       };
@@ -139,7 +139,7 @@ export function duplicateNotice(
   return {
     lead,
     tail: exact
-      ? ". If it's yours now, set that book's Ownership to Owned instead of adding it twice."
+      ? ". If it’s yours now, set that book’s Ownership to Owned instead of adding it twice."
       : ". You can still add this edition.",
   };
 }

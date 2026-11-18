@@ -466,7 +466,7 @@ export function PreferencesForm({
           : status === "saved"
             ? "Saved."
             : status === "error"
-              ? "Couldn't save that change. Try again."
+              ? "Couldn’t save that change. Try again."
               : "Changes save as you make them."}
       </p>
 
@@ -494,7 +494,7 @@ export function PreferencesForm({
         />
         <Choice
           label="Books I add as Read were finished"
-          hint="Bulk edit's Set status: Read follows this too."
+          hint="Bulk edit’s Set status: Read follows this too."
           value={prefs.addedAsReadFinished}
           options={[
             { value: "today", label: "Today" },
@@ -583,7 +583,7 @@ export function PreferencesForm({
       <Section title="Reading" id="reading">
         <Choice
           label="Step buttons"
-          hint="The buttons next to the page box, in the book's own unit: pages, percent or minutes."
+          hint="The buttons next to the page box, in the book’s own unit: pages, percent or minutes."
           value={prefs.quickLogSteps}
           options={[
             { value: "10-25", label: "+10 and +25" },
@@ -603,7 +603,7 @@ export function PreferencesForm({
         />
         <Choice
           label="Audiobooks: track by"
-          hint="Time needs the book's length and a page count, both on its Edit page."
+          hint="Time needs the book’s length and a page count, both on its Edit page."
           value={prefs.audiobookUnit}
           options={[
             { value: "page", label: "Page" },
@@ -655,8 +655,8 @@ export function PreferencesForm({
       <Section title="Reading reminders" id="reminders">
         <p className="text-xs text-muted-foreground">
           A notification at the time you choose, to pick your book up again. It names the book
-          you read last and what&apos;s left of your daily goal. Turn them on in each browser
-          you want them in, such as your phone&apos;s. The time and days are the same for all.
+          you read last and what’s left of your daily goal. Turn them on in each browser
+          you want them in, such as your phone’s. The time and days are the same for all.
         </p>
         {reminders.available ? (
           <>
@@ -704,7 +704,7 @@ export function PreferencesForm({
               </div>
             </div>
             <Toggle
-              label="Not on a day I've already read"
+              label="Not on a day I’ve already read"
               checked={prefs.reminderSkipIfRead}
               onChange={(v) => update({ reminderSkipIfRead: v })}
             />
@@ -852,7 +852,7 @@ export function PreferencesForm({
         />
         <p className="text-xs text-muted-foreground">
           Borrowed books count as books you have. Wishlist, given-away and
-          lent-out books don&apos;t. A Want to Read book in a series is skipped
+          lent-out books don’t. A Want to Read book in a series is skipped
           while an earlier one is still unread.
         </p>
       </Section>
@@ -889,7 +889,7 @@ export function PreferencesForm({
             { value: "half", label: "Half stars" },
             { value: "whole", label: "Whole stars" },
             { value: "ten", label: "A score out of 10" },
-            { value: "off", label: "Don't use ratings" },
+            { value: "off", label: "Don’t use ratings" },
           ]}
           onChange={(v) => update({ ratingStyle: v })}
         />
@@ -901,9 +901,9 @@ export function PreferencesForm({
               onChange={(c) => update({ ratingBreakdown: c })}
             />
             <p className="text-xs text-muted-foreground">
-              They go under a book&apos;s rating, each one optional, and Stats
+              They go under a book’s rating, each one optional, and Stats
               shows your averages. Your overall rating stays your own: it
-              isn&apos;t worked out from them.
+              isn’t worked out from them.
             </p>
           </>
         )}
@@ -1018,10 +1018,10 @@ export function PreferencesForm({
         />
         <WeatherSettings value={prefs.weather} place={prefs.weatherPlace} onChange={update} />
         <Choice
-          label="Behind a book's page"
+          label="Behind a book’s page"
           value={prefs.bookBackdrop}
           options={[
-            { value: "cover", label: "A soft wash of its cover's colours" },
+            { value: "cover", label: "A soft wash of its cover’s colours" },
             { value: "plain", label: "Nothing" },
           ]}
           onChange={(v) => update({ bookBackdrop: v })}
@@ -1204,7 +1204,7 @@ export function PreferencesForm({
         />
         <Choice
           label="Book typography"
-          hint="A drop cap opening each book’s description and an ornament closing it, and quotes hung on a large quote mark."
+          hint="A drop cap opening each book’s description and an ornament closing it, quotes hung on a large quote mark, and old-style numbers where the font has them."
           value={prefs.typography}
           options={[
             { value: "plain", label: "Plain" },
@@ -1336,7 +1336,7 @@ export function PreferencesForm({
             />
             <p className="pl-6 text-xs text-muted-foreground">
               It stands on the table by the armchair and burns down as you read: over your daily goal when
-              that&apos;s in minutes, otherwise over an hour. Pausing the timer snuffs it out.
+              that’s in minutes, otherwise over an hour. Pausing the timer snuffs it out.
             </p>
           </div>
         )}
@@ -1359,7 +1359,7 @@ export function PreferencesForm({
           value={prefs.shelvesCard}
           options={[
             { value: "all", label: "Every shelf" },
-            { value: "mine", label: "Only this book's shelves, plus Add" },
+            { value: "mine", label: "Only this book’s shelves, plus Add" },
           ]}
           onChange={(v) => update({ shelvesCard: v })}
         />
@@ -1447,7 +1447,7 @@ export function PreferencesForm({
             label="Books I stop reading"
             value={prefs.statsStoppedBooks}
             options={[
-              { value: "none", label: "Don't count" },
+              { value: "none", label: "Don’t count" },
               { value: "pages", label: "Count the pages I read" },
               { value: "book", label: "Count as a book" },
             ]}

@@ -58,7 +58,7 @@ async function checkedRules(
       prisma.smartShelf.findFirst({ where: { id: shelfId, userId }, select: { id: true } }),
     ]);
     if (smart) {
-      return { error: "A smart shelf can't take its books from another smart shelf. Pick one of your own shelves, or none." };
+      return { error: "A smart shelf can’t take its books from another smart shelf. Pick one of your own shelves, or none." };
     }
     if (!shelf) return { error: "The shelf in these filters is gone. Pick another, or none." };
   }
@@ -109,7 +109,7 @@ export async function updateSmartShelfRules(id: string, query: string): Promise<
   const checked = await checkedRules(userId, query);
   if ("error" in checked) return checked;
   if (rulesShelfId(checked.rules) === id) {
-    return { error: "A smart shelf can't take its books from itself." };
+    return { error: "A smart shelf can’t take its books from itself." };
   }
 
   await prisma.smartShelf.update({ where: { id, userId }, data: { rules: checked.rules } });

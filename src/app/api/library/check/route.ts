@@ -71,7 +71,7 @@ export async function GET(req: Request) {
   // The scan flow has only the ISBN to go on; junk there would be answered
   // "not in your library", which reads as a real answer.
   if (!titleParam && !looksLikeIsbn(isbnParam)) {
-    return NextResponse.json({ error: "That doesn't look like an ISBN" }, { status: 400 });
+    return NextResponse.json({ error: "That doesn’t look like an ISBN" }, { status: 400 });
   }
 
   if (isbnParam) {
