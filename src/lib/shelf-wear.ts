@@ -104,3 +104,24 @@ export function dustGrain(id: string): number {
   for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0;
   return h % 3;
 }
+
+/** Where a book the reader stopped reading was put down, as far as it's
+ *  known: the page, and of how many. Its cover gets a dog-eared corner
+ *  (components/book-card.tsx DogEar). */
+export type StoppedAt = { page: number | null; of: number | null };
+
+/** Where a book was put down; null for a book the reader didn't stop. A
+ *  stopped book keeps the page it was left at. */
+export function stoppedAt(book: {
+  status: ReadingStatus | string;
+  currentPage: number | null;
+  pageCount: number | null;
+}): StoppedAt | null {
+  return book.status === ReadingStatus.DNF ? { page: book.currentPage, of: book.pageCount } : null;
+}
+
+/** What a dog-eared corner says under the pointer. */
+export function stoppedNote(at: StoppedAt): string {
+  if (at.page == null || at.page <= 0) return "Put down before the end";
+  return at.of ? `Put down at page ${at.page} of ${at.of}` : `Put down at page ${at.page}`;
+}

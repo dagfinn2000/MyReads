@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { setBookStickers } from "@/lib/actions/stickers";
 import { motionAllowed } from "@/lib/motion";
+import type { StoppedAt } from "@/lib/shelf-wear";
 import { STICKERS, type Sticker } from "@/lib/stickers";
 import { cn } from "@/lib/utils";
 
@@ -22,6 +23,7 @@ export function BookPageCover({
   bookId,
   book,
   reading,
+  stopped,
   wear,
   stickers,
   children,
@@ -29,6 +31,7 @@ export function BookPageCover({
   bookId: string;
   book: Pick<Book, "title" | "coverUrl" | "authors">;
   reading: ReadingAt | null;
+  stopped?: StoppedAt | null;
   wear?: CoverWear;
   stickers: string[];
   children: React.ReactNode;
@@ -90,6 +93,7 @@ export function BookPageCover({
         flightTarget={bookId}
         tilt
         reading={reading}
+        stopped={stopped}
         wear={wear}
         stickers={current}
         freshStickers={fresh}

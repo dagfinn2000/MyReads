@@ -23,7 +23,7 @@ import {
   type FormatPrefs,
 } from "@/lib/display";
 import { coverArt } from "@/lib/cover-art";
-import { dustGrain } from "@/lib/shelf-wear";
+import { dustGrain, stoppedAt, stoppedNote, type StoppedAt } from "@/lib/shelf-wear";
 import { coverAt, coverSrcSet, hasCoverCopies } from "@/lib/cover-src";
 import type { LibraryDisplay } from "@/lib/library-view";
 import { cn } from "@/lib/utils";
@@ -43,6 +43,7 @@ export function BookCover({
   wearTitle = true,
   stickers,
   freshStickers,
+  stopped,
 }: {
   book: Pick<Book, "title" | "coverUrl"> & { authors?: string[] };
   className?: string;
@@ -65,6 +66,9 @@ export function BookCover({
    *  just now, which press on. */
   stickers?: readonly string[];
   freshStickers?: readonly string[];
+  /** Where it was put down, for a book the reader stopped reading: its top
+   *  corner is folded down to keep the place (DogEar). */
+  stopped?: StoppedAt | null;
 }) {
   const worn = !!wear && (!!wear.dust || !!wear.worn);
   return (
@@ -104,6 +108,7 @@ export function BookCover({
       {stickers && stickers.length > 0 && (
         <CoverStickers title={book.title} stickers={stickers} fresh={freshStickers} />
       )}
+      {stopped && <DogEar at={stopped} />}
       {reading && <ProgressRibbon at={reading} />}
     </div>
   );
@@ -115,6 +120,18 @@ export type CoverWear = { dust?: number; worn?: number; wearNote?: string };
 
 /** How far into a book the reader is: a page of so many. */
 export type ReadingAt = { page: number; of: number };
+
+/**
+ * The top corner of a book the reader stopped reading, folded down to keep
+ * the place for another go: the flap of the cover, its pale inside showing,
+ * lies across the cover with a soft shadow under it, and the first page
+ * shows in the corner it left (globals.css, "Dog-ears"). It lifts a little
+ * under the pointer while animations are allowed. "Dog-eared corners" in
+ * Preferences (`data-dog-ears` on <html>) hides it.
+ */
+function DogEar({ at }: { at: StoppedAt }) {
+  return <span className="cover-dogear" title={stoppedNote(at)} aria-hidden="true" />;
+}
 
 /**
  * A satin bookmark ribbon on a book being read: it comes out of the top of
@@ -396,6 +413,7 @@ export function BookRow({
         book={book}
         className="aspect-[2/3] w-10 shrink-0"
         reading={readingAt(book)}
+        stopped={stoppedAt(book)}
         wear={book}
       />
       <div className="grid min-w-0 flex-1 gap-0.5">
@@ -460,6 +478,7 @@ export function BookCard({
         className="aspect-[2/3] w-full"
         tilt
         reading={readingAt(book)}
+        stopped={stoppedAt(book)}
         wear={book}
         stickers={book.stickers}
       />
@@ -523,6 +542,7 @@ export function BookCoverTile({ book, compact = false }: { book: BookCardBook; c
         className="cover-shadow aspect-[2/3] w-full"
         tilt
         reading={readingAt(book)}
+        stopped={stoppedAt(book)}
         wear={book}
         stickers={book.stickers}
       />
@@ -561,6 +581,7 @@ export function BookOnShelf({ book }: { book: BookCardBook }) {
         className="cover-shadow aspect-[2/3] w-full"
         tilt
         reading={readingAt(book)}
+        stopped={stoppedAt(book)}
         wear={book}
         wearTitle={false}
         stickers={book.stickers}

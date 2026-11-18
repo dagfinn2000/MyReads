@@ -1,5 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { dustFor, dustGrain, lastTouched, shelfWear, wornFor, type WearBook } from "@/lib/shelf-wear";
+import {
+  dustFor,
+  dustGrain,
+  lastTouched,
+  shelfWear,
+  stoppedAt,
+  stoppedNote,
+  wornFor,
+  type WearBook,
+} from "@/lib/shelf-wear";
 
 const NOW = new Date("2026-11-17T12:00:00Z");
 const daysAgo = (n: number) => new Date(NOW.getTime() - n * 86_400_000);
@@ -86,5 +95,22 @@ describe("dustGrain", () => {
     expect(grains.every((g) => g >= 0 && g < 3)).toBe(true);
     expect(new Set(grains).size).toBeGreaterThan(1);
     expect(dustGrain("Dune")).toBe(dustGrain("Dune"));
+  });
+});
+
+describe("dog-ears", () => {
+  it("folds the corner of a book the reader stopped, and only that", () => {
+    expect(stoppedAt({ status: "DNF", currentPage: 312, pageCount: 1017 })).toEqual({ page: 312, of: 1017 });
+    expect(stoppedAt({ status: "DNF", currentPage: null, pageCount: null })).toEqual({ page: null, of: null });
+    for (const status of ["READING", "READ", "WANT_TO_READ"]) {
+      expect(stoppedAt({ status, currentPage: 40, pageCount: 300 })).toBeNull();
+    }
+  });
+
+  it("says where the book was put down, as far as it's known", () => {
+    expect(stoppedNote({ page: 312, of: 1017 })).toBe("Put down at page 312 of 1017");
+    expect(stoppedNote({ page: 88, of: null })).toBe("Put down at page 88");
+    expect(stoppedNote({ page: null, of: 400 })).toBe("Put down before the end");
+    expect(stoppedNote({ page: 0, of: 400 })).toBe("Put down before the end");
   });
 });

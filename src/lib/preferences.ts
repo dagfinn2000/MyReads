@@ -215,6 +215,11 @@ export const PROGRESS_RIBBONS = ["crimson", "navy", "green", "gold", "bar"] as c
  *  ones untouched for a year or more, wear on well-read favourites. */
 export const SHELF_WEARS = ["on", "off"] as const;
 
+/** Whether a book the reader stopped reading has its top corner folded down,
+ *  to keep the place for another go (components/book-card.tsx DogEar,
+ *  globals.css "Dog-ears"). */
+export const DOG_EARS = ["on", "off"] as const;
+
 /** Whether the big numbers on Stats write themselves in, like ink from a pen,
  *  as they come into view (components/ink-stats.tsx, globals.css "Ink
  *  stats"), or simply show. Only while animations are allowed. */
@@ -429,6 +434,7 @@ export type BackgroundMotion = (typeof BACKGROUND_MOTIONS)[number];
 export type CoverTilt = (typeof COVER_TILTS)[number];
 export type ProgressRibbon = (typeof PROGRESS_RIBBONS)[number];
 export type ShelfWearSetting = (typeof SHELF_WEARS)[number];
+export type DogEars = (typeof DOG_EARS)[number];
 export type HeatmapScale = (typeof HEATMAP_SCALES)[number];
 export type BookOpening = (typeof BOOK_OPENINGS)[number];
 export type TimeOfDayLight = (typeof TIME_OF_DAY_LIGHTS)[number];
@@ -533,6 +539,7 @@ export type Preferences = {
   coverTilt: CoverTilt;
   progressRibbon: ProgressRibbon;
   shelfWear: ShelfWearSetting;
+  dogEars: DogEars;
   spineFill: SpineFill;
   upNextLook: UpNextLook;
   bookBackdrop: BookBackdrop;
@@ -740,6 +747,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
   coverTilt: "on",
   progressRibbon: "crimson",
   shelfWear: "on",
+  dogEars: "on",
   spineFill: "on",
   upNextLook: "pile",
   bookBackdrop: "cover",
@@ -1092,6 +1100,7 @@ export function parsePreferences(raw: unknown): Preferences {
     coverTilt: pick(COVER_TILTS, obj.coverTilt, d.coverTilt),
     progressRibbon: pick(PROGRESS_RIBBONS, obj.progressRibbon, d.progressRibbon),
     shelfWear: pick(SHELF_WEARS, obj.shelfWear, d.shelfWear),
+    dogEars: pick(DOG_EARS, obj.dogEars, d.dogEars),
     spineFill: pick(SPINE_FILLS, obj.spineFill, d.spineFill),
     upNextLook: pick(UP_NEXT_LOOKS, obj.upNextLook, d.upNextLook),
     bookBackdrop: pick(BOOK_BACKDROPS, obj.bookBackdrop, d.bookBackdrop),

@@ -101,6 +101,9 @@ describe("parsePreferences", () => {
     expect(parsePreferences({ pageChange: "slide" }).pageChange).toBe("turn");
     expect(parsePreferences({ shelfWear: "off" }).shelfWear).toBe("off");
     expect(parsePreferences({ shelfWear: "dusty" }).shelfWear).toBe("on");
+    expect(parsePreferences({}).dogEars).toBe("on");
+    expect(parsePreferences({ dogEars: "off" }).dogEars).toBe("off");
+    expect(parsePreferences({ dogEars: "folded" }).dogEars).toBe("on");
     expect(parsePreferences({ coverArt: "plain" }).coverArt).toBe("plain");
     expect(parsePreferences({ coverArt: 3 }).coverArt).toBe("drawn");
     expect(parsePreferences({ accent: "teal" }).accent).toBe("teal");
