@@ -122,6 +122,7 @@ const HTML_ATTRIBUTES: Partial<Record<keyof Preferences, string>> = {
   progressRibbon: "data-ribbon",
   shelfWear: "data-shelf-wear",
   bookBackdrop: "data-book-backdrop",
+  bookOpening: "data-book-opening",
   timeOfDay: "data-time-light",
   finishPages: "data-finish-pages",
   spineFill: "data-spine-fill",
@@ -1024,6 +1025,16 @@ export function PreferencesForm({
             { value: "fade", label: "Fade the new page in" },
           ]}
           onChange={(v) => update({ pageChange: v })}
+        />
+        <Choice
+          label="Opening a book"
+          hint="Tapping a book’s cover in the library, a series or anywhere else covers show."
+          value={prefs.bookOpening}
+          options={[
+            { value: "open", label: "The cover swings open like a book’s" },
+            { value: "fly", label: "The cover flies to its page" },
+          ]}
+          onChange={(v) => update({ bookOpening: v })}
         />
         <Choice
           label="Celebrations"

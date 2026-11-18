@@ -8766,6 +8766,174 @@ html[data-daylight="dawn"] .room-scene {
   --dl-room-dim: 0.14;
 }
 
+/* ── Book opening ──────────────────────────────────────────────────────────
+   A cover tapped opens like a book as its page loads (lib/book-opening.ts,
+   which builds this and moves it; Preferences > Motion > Opening a book).
+   Over everything, so nothing can be tapped while it plays; the veil stops
+   at the top bar (--bo-top, or --bo-bottom where a theme puts the bar at the
+   foot), which stays as it was.
+
+   .bo-book is the right-hand page's box, its left edge the spine. On it lie
+   the page with its half-title and the front board: the cover on one face
+   and the endpaper on the other, turning on the spine. The page and the
+   endpaper are paper whatever the theme, a shade softer on a dark one. */
+.book-opening {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  --bo-paper: #fbf7ee;
+  --bo-ink: #2f2a24;
+}
+.dark .book-opening {
+  --bo-paper: #e9e1cf;
+}
+.bo-veil {
+  position: absolute;
+  inset: var(--bo-top, 0) 0 var(--bo-bottom, 0);
+  background: color-mix(in oklab, var(--background) 94%, transparent);
+}
+.bo-book {
+  position: absolute;
+  transform-origin: 0 50%;
+  perspective: 2200px;
+  perspective-origin: 0 50%;
+}
+.bo-page {
+  position: absolute;
+  inset: 1.8% 2.6% 1.8% 0;
+  container-type: inline-size;
+  overflow: hidden;
+  border-radius: 0 3px 3px 0;
+  background:
+    linear-gradient(90deg, rgb(60 40 20 / 0.16), rgb(60 40 20 / 0.04) 7%, transparent 14%),
+    var(--bo-paper);
+  /* The fore-edge: the other pages' edges, a hair apart. */
+  box-shadow:
+    1px 0 0 #ddd4c1,
+    2px 0 0 var(--bo-paper),
+    3px 0 0 #d6ccb8,
+    4px 1px 0 var(--bo-paper),
+    5px 1px 0 #cfc4ae,
+    0 16px 34px -14px rgb(0 0 0 / 0.45);
+}
+.bo-half-title {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7cqi;
+  padding: 34cqi 13cqi 0 15cqi;
+  color: var(--bo-ink);
+  font-family: var(--font-literata), Georgia, serif;
+  text-align: center;
+}
+.bo-title {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  overflow: hidden;
+  font-size: 6.6cqi;
+  font-weight: 500;
+  line-height: 1.45;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  text-wrap: balance;
+}
+/* Two hairlines and a diamond. */
+.bo-ornament {
+  position: relative;
+  width: 26cqi;
+  height: 3cqi;
+  opacity: 0.6;
+  background:
+    linear-gradient(currentColor 0 0) left center / 38% 1px no-repeat,
+    linear-gradient(currentColor 0 0) right center / 38% 1px no-repeat;
+}
+.bo-ornament::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 2.1cqi;
+  height: 2.1cqi;
+  background: currentColor;
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+.bo-page-shade {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  background: linear-gradient(90deg, rgb(20 12 4 / 0.55), rgb(20 12 4 / 0.15) 45%, transparent 80%);
+}
+.bo-board {
+  position: absolute;
+  inset: 0;
+  transform-origin: 0 50%;
+  transform-style: preserve-3d;
+}
+.bo-front,
+.bo-inside {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  backface-visibility: hidden;
+}
+.bo-front {
+  border-radius: 2px 5px 5px 2px;
+  box-shadow:
+    0 2px 5px rgb(0 0 0 / 0.18),
+    0 18px 36px -14px rgb(0 0 0 / 0.5);
+}
+.book-opening .bo-cover {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: auto;
+  border-radius: inherit;
+  box-shadow: none;
+  transform: none;
+}
+/* The hinge: the groove a hardback's board bends at. */
+.bo-front::before {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  inset: 0 auto 0 5%;
+  width: 3px;
+  background: linear-gradient(90deg, rgb(0 0 0 / 0.22), rgb(255 255 255 / 0.16));
+}
+/* The inside of the board: the cloth turned in round the edges, and the
+   endpaper pasted down over it, printed in the board's colour. Its spine
+   side is the right, so it lies the right way round once open. */
+.bo-inside {
+  --bo-board: color-mix(in oklab, var(--primary) 65%, #2a2018);
+  transform: rotateY(180deg);
+  border-radius: 5px 2px 2px 5px;
+  background: color-mix(in oklab, var(--bo-board) 80%, #120c06);
+  box-shadow: 0 16px 34px -14px rgb(0 0 0 / 0.45);
+}
+.bo-inside::before {
+  content: "";
+  position: absolute;
+  inset: 2.4% 0 2.4% 3.4%;
+  --bo-print: color-mix(in oklab, var(--bo-board) 60%, #f3ead8);
+  background:
+    linear-gradient(270deg, rgb(30 20 10 / 0.3), transparent 12%),
+    radial-gradient(circle, color-mix(in oklab, var(--bo-board) 50%, transparent) 0 1.1px, transparent 1.7px) 0 0 / 10px 10px,
+    radial-gradient(circle, color-mix(in oklab, var(--bo-board) 30%, transparent) 0 0.8px, transparent 1.4px) 5px 5px / 10px 10px,
+    var(--bo-print);
+}
+.dark .bo-inside::before {
+  --bo-print: color-mix(in oklab, var(--bo-board) 62%, #e3d9c4);
+}
+.bo-shade {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  opacity: 0;
+  background: #0c0804;
+}
+
 /* ── Page turns ────────────────────────────────────────────────────────────
    Moving to another section from the top bar turns the page like a book's
    (lib/page-turn.ts). The browser holds a picture of the old page over the

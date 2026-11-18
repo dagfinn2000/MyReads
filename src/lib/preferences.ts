@@ -241,6 +241,9 @@ export const UP_NEXT_LOOKS = ["pile", "covers"] as const;
  *  night (lib/daylight.ts, components/daylight.tsx), or keep to daylight. */
 export const TIME_OF_DAY_LIGHTS = ["on", "off"] as const;
 
+/** What a cover does when tapped: swing open like a book as its page loads (lib/book-opening.ts), or fly across to its place on the page (lib/cover-flight.ts). */
+export const BOOK_OPENINGS = ["open", "fly"] as const;
+
 /** Colour steps for the reading calendar (see lib/heatmap.ts). */
 export const HEATMAP_SCALES = ["standard", "gentle", "heavy", "auto"] as const;
 
@@ -426,6 +429,7 @@ export type CoverTilt = (typeof COVER_TILTS)[number];
 export type ProgressRibbon = (typeof PROGRESS_RIBBONS)[number];
 export type ShelfWearSetting = (typeof SHELF_WEARS)[number];
 export type HeatmapScale = (typeof HEATMAP_SCALES)[number];
+export type BookOpening = (typeof BOOK_OPENINGS)[number];
 export type TimeOfDayLight = (typeof TIME_OF_DAY_LIGHTS)[number];
 export type UpNextLook = (typeof UP_NEXT_LOOKS)[number];
 export type FinishPages = (typeof FINISH_PAGES)[number];
@@ -508,6 +512,7 @@ export type Preferences = {
   // Appearance
   motion: Motion;
   pageChange: PageChange;
+  bookOpening: BookOpening;
   finishPages: FinishPages;
   celebration: Celebration;
   coverArt: CoverArtStyle;
@@ -710,6 +715,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
   headingFont: "sans",
   motion: "on",
   pageChange: "turn",
+  bookOpening: "open",
   finishPages: "on",
   celebration: "confetti",
   coverArt: "drawn",
@@ -1058,6 +1064,7 @@ export function parsePreferences(raw: unknown): Preferences {
     headingFont: pick(HEADING_FONTS, obj.headingFont, d.headingFont),
     motion: pick(MOTIONS, obj.motion, d.motion),
     pageChange: pick(PAGE_CHANGES, obj.pageChange, d.pageChange),
+    bookOpening: pick(BOOK_OPENINGS, obj.bookOpening, d.bookOpening),
     finishPages: pick(FINISH_PAGES, obj.finishPages, d.finishPages),
     celebration: pick(CELEBRATIONS, obj.celebration, d.celebration),
     coverArt: pick(COVER_ARTS, obj.coverArt, d.coverArt),

@@ -223,6 +223,7 @@ export default async function RootLayout({
       data-ribbon={prefs?.progressRibbon}
       data-shelf-wear={prefs?.shelfWear}
       data-book-backdrop={prefs?.bookBackdrop}
+      data-book-opening={prefs?.bookOpening}
       data-time-light={prefs?.timeOfDay}
       data-daylight={daylight?.phase}
       style={daylight ? (daylightStyle(daylight) as React.CSSProperties) : undefined}
