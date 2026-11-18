@@ -101,6 +101,19 @@ describe("what falls", () => {
   it("keeps a big sky's snow to a sensible number", () => {
     expect(flakesFor("snow", { x: 0, y: 0, w: 2000, h: 2000 }).length).toBeLessThanOrEqual(150);
   });
+
+  it("drops the weather's rain straight down, quickly, and fewer when it's light", () => {
+    const area = { x: 0, y: 0, w: 60, h: 300 };
+    const rain = flakesFor("rain", area, 2);
+    expect(rain.length).toBeGreaterThan(20);
+    for (const f of rain) {
+      expect(f.sway).toBe(0);
+      expect(f.t).toBeLessThan(5);
+    }
+    const light = flakesFor("rain", area, 2, 3);
+    expect(light.length).toBeLessThan(rain.length / 2);
+    expect(flakesFor("rain", { x: 0, y: 0, w: 2000, h: 2000 }).length).toBeLessThanOrEqual(120);
+  });
 });
 
 /** A two-storey house, with a garden either side. */

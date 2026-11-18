@@ -26,6 +26,7 @@ import {
 } from "next/font/google";
 import { BackgroundScene } from "@/components/background-scene";
 import { Daylight } from "@/components/daylight";
+import { WeatherOutside } from "@/components/weather-outside";
 import { IconSprite } from "@/components/icon-sprite";
 import { getCurrentUser } from "@/lib/current-user";
 import { serverTimeZone } from "@/lib/preferences";
@@ -258,6 +259,8 @@ export default async function RootLayout({
             scene={startsOverScene(prefs?.background ?? "plain", fixedTheme)}
           />
         )}
+        {/* Rain or snow over the scenes when it's coming down outside. */}
+        {prefs?.weather === "on" && prefs.weatherPlace && <WeatherOutside place={prefs.weatherPlace} />}
         {/* Star and book icons that pages repeat, drawn once. */}
         <IconSprite />
         {children}

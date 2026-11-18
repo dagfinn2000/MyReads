@@ -1,9 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useWeather } from "@/components/weather-outside";
+import { SCENE_THEMES } from "@/lib/daylight";
 import { handOverSceneMotion } from "@/lib/scene-motion";
 import { skyAt, skyStyle } from "@/lib/sky";
 import { THEME_SCENES } from "@/lib/themes";
+import type { Weather, WeatherAmount } from "@/lib/weather";
 
 /**
  * What lies and moves behind the pages for the backgrounds that are
@@ -37,6 +40,12 @@ import { THEME_SCENES } from "@/lib/themes";
  * (`data-own-background`) replaces it, and then there is no scene, unless
  * the theme brings one of its own (lib/themes.ts, `scene`): the fireflies
  * of Wildwood, or Birchwood's falling leaves.
+ *
+ * With Weather outside on (components/weather-outside.tsx), while it rains
+ * or snows where the reader is, the Rain and Snow backgrounds turn to
+ * whichever is coming down, as hard as it is, and rain or snow falls over
+ * the other scenes (and the themes under Scenes) in a layer of its own.
+ * The textures, which aren't scenes, stay dry.
  */
 
 const subscribe = (fn: () => void) => {
@@ -51,6 +60,31 @@ const readBackground = () => {
   const root = document.documentElement;
   if (root.hasAttribute("data-own-background")) return THEME_SCENES[root.dataset.theme ?? ""] ?? "plain";
   return root.dataset.background ?? "plain";
+};
+/** Whether the page is over the picture of a theme under Scenes. */
+const readSceneTheme = () => {
+  const root = document.documentElement;
+  return root.hasAttribute("data-own-background") && SCENE_THEMES.has(root.dataset.theme ?? "");
+};
+
+/** The scenes the weather falls over, besides the Rain and Snow
+ *  backgrounds, which become it. */
+const WEATHER_OVER: ReadonlySet<string> = new Set(["stars", "aurora", "ripples", "sky", "fireflies", "leaves"]);
+
+/** Which of the near drops or flakes fall at each amount: all of them when
+ *  it's heavy (and for the Rain and Snow backgrounds as they are), two in
+ *  three when it's moderate, one in three when it's light. */
+const SHARE: Record<WeatherAmount, (i: number) => boolean> = {
+  heavy: () => true,
+  moderate: (i) => i % 3 !== 2,
+  light: (i) => i % 3 === 0,
+};
+
+/** The far-off layers of snow at each amount. */
+const SNOW_LAYERS: Record<WeatherAmount, readonly ("far-a" | "far-b" | "mid-a" | "mid-b")[]> = {
+  heavy: ["far-a", "far-b", "mid-a", "mid-b"],
+  moderate: ["far-a", "mid-a"],
+  light: ["far-b"],
 };
 
 /** Raindrops on the pond: where each lands, how often, and when first. */
@@ -206,11 +240,21 @@ export function BackgroundScene({
   /** The sky as the server worked it out, so the first paint is right. */
   sky?: Record<string, string>;
 }) {
-  const current = useSyncExternalStore(subscribe, readBackground, () => background);
+  const chosen = useSyncExternalStore(subscribe, readBackground, () => background);
+  const sceneTheme = useSyncExternalStore(subscribe, readSceneTheme, () => false);
+  const weather = useWeather();
+  // Rain and Snow become the weather while it's coming down; it falls over
+  // the other scenes.
+  const asWeather = !!weather && (chosen === "rain" || chosen === "snow");
+  const current = asWeather ? weather.kind : chosen;
+  const over = weather && !asWeather && (WEATHER_OVER.has(chosen) || sceneTheme) ? weather : null;
   const [sky, setSky] = useState(initialSky);
   const night = Number(sky?.["--sky-stars"] ?? 0) > 0;
   const ref = useRef<HTMLDivElement>(null);
-  useSceneMotion(ref, current === "sky" && night ? "sky-night" : current);
+  useSceneMotion(
+    ref,
+    `${current === "sky" && night ? "sky-night" : current}${asWeather ? `-${weather.amount}` : ""}`,
+  );
 
   useEffect(() => {
     if (current !== "sky") return;
@@ -233,33 +277,10 @@ export function BackgroundScene({
   let scene: React.ReactNode;
   switch (current) {
     case "rain":
-      scene = (
-        <>
-          <i className="bg-rain-far-a" />
-          <i className="bg-rain-far-b" />
-          <b className="bg-many bg-rain-near">
-            {RAIN.map((s, i) => (
-              <i key={i} className="bg-raindrop" style={s} />
-            ))}
-          </b>
-        </>
-      );
+      scene = <Rain amount={asWeather ? weather.amount : "heavy"} />;
       break;
     case "snow":
-      scene = (
-        <>
-          {(["far-a", "far-b", "mid-a", "mid-b"] as const).map((layer) => (
-            <b key={layer} className={`bg-sway bg-sway-${layer}`}>
-              <i className={`bg-snow-${layer}`} />
-            </b>
-          ))}
-          <b className="bg-many bg-snow-near">
-            {SNOW.map((s, i) => (
-              <i key={i} className="bg-flake" style={s} />
-            ))}
-          </b>
-        </>
-      );
+      scene = <Snow amount={asWeather ? weather.amount : "heavy"} />;
       break;
     case "stars":
       scene = (
@@ -316,17 +337,75 @@ export function BackgroundScene({
       );
       break;
     default:
-      return null;
+      scene = null;
   }
+  const falling = over && <WeatherLayer weather={over} sky={chosen === "sky"} />;
+  if (scene === null) return falling || null;
+  return (
+    <>
+      <div
+        ref={ref}
+        className="bg-scene"
+        data-scene={current}
+        aria-hidden="true"
+        style={current === "sky" ? sky : undefined}
+      >
+        {scene}
+      </div>
+      {falling}
+    </>
+  );
+}
+
+/** Rain: the far-off strokes and the nearer drops, as many as `amount`
+ *  calls for. */
+function Rain({ amount }: { amount: WeatherAmount }) {
+  return (
+    <>
+      {amount !== "light" && <i className="bg-rain-far-a" />}
+      {amount === "heavy" && <i className="bg-rain-far-b" />}
+      <b className="bg-many bg-rain-near">
+        {RAIN.map((s, i) => SHARE[amount](i) && <i key={i} className="bg-raindrop" style={s} />)}
+      </b>
+    </>
+  );
+}
+
+/** Snow: the far-off layers and the nearer flakes, as many as `amount`
+ *  calls for. */
+function Snow({ amount }: { amount: WeatherAmount }) {
+  return (
+    <>
+      {SNOW_LAYERS[amount].map((layer) => (
+        <b key={layer} className={`bg-sway bg-sway-${layer}`}>
+          <i className={`bg-snow-${layer}`} />
+        </b>
+      ))}
+      <b className="bg-many bg-snow-near">
+        {SNOW.map((s, i) => SHARE[amount](i) && <i key={i} className="bg-flake" style={s} />)}
+      </b>
+    </>
+  );
+}
+
+/**
+ * The weather outside falling over a scene, in a fixed layer of its own
+ * just above it (globals.css, "Weather outside"). Over Sky, the sky also
+ * greys over a little.
+ */
+function WeatherLayer({ weather, sky }: { weather: Weather; sky: boolean }) {
+  const ref = useRef<HTMLDivElement>(null);
+  useSceneMotion(ref, `${weather.kind}-${weather.amount}`);
   return (
     <div
       ref={ref}
-      className="bg-scene"
-      data-scene={current}
+      className="bg-weather"
+      data-weather={weather.kind}
+      data-amount={weather.amount}
+      data-over-sky={sky ? "" : undefined}
       aria-hidden="true"
-      style={current === "sky" ? sky : undefined}
     >
-      {scene}
+      {weather.kind === "rain" ? <Rain amount={weather.amount} /> : <Snow amount={weather.amount} />}
     </div>
   );
 }

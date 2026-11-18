@@ -57,6 +57,7 @@ import { parseCatCoat, parseDogCoat, parsePet, type CatCoat, type DogCoat, type 
 import { parseOwnCss } from "@/lib/own-css";
 import { REMINDER_TIMES, parseReminderDays } from "@/lib/reminders";
 import { SOUND_SETTINGS, SOUND_VOLUMES, type SoundSetting, type SoundVolume } from "@/lib/sounds";
+import { WEATHER_SETTINGS, parseWeatherPlace, type WeatherPlace, type WeatherSetting } from "@/lib/weather";
 import { parsePartThemes, type PartThemes } from "@/lib/themes";
 import { parseCustomStatuses, parseStatusNames, type CustomStatus, type StatusNames } from "@/lib/statuses";
 import { parseBookFields, type BookField } from "@/lib/book-fields";
@@ -522,6 +523,13 @@ export type Preferences = {
   background: Background;
   backgroundMotion: BackgroundMotion;
   timeOfDay: TimeOfDayLight;
+  /** Rain or snow over the scenes and round the reading room when it's
+   *  raining or snowing at `weatherPlace` (lib/weather.ts). Off unless
+   *  turned on. */
+  weather: WeatherSetting;
+  /** Where the weather is asked for, rounded to about ten kilometres; null
+   *  until the reader sets it. */
+  weatherPlace: WeatherPlace | null;
   coverTilt: CoverTilt;
   progressRibbon: ProgressRibbon;
   shelfWear: ShelfWearSetting;
@@ -725,6 +733,8 @@ export const DEFAULT_PREFERENCES: Preferences = {
   background: "plain",
   backgroundMotion: "moving",
   timeOfDay: "on",
+  weather: "off",
+  weatherPlace: null,
   coverTilt: "on",
   progressRibbon: "crimson",
   shelfWear: "on",
@@ -1074,6 +1084,8 @@ export function parsePreferences(raw: unknown): Preferences {
     background: pick(BACKGROUNDS, obj.background, d.background),
     backgroundMotion: pick(BACKGROUND_MOTIONS, obj.backgroundMotion, d.backgroundMotion),
     timeOfDay: pick(TIME_OF_DAY_LIGHTS, obj.timeOfDay, d.timeOfDay),
+    weather: pick(WEATHER_SETTINGS, obj.weather, d.weather),
+    weatherPlace: parseWeatherPlace(obj.weatherPlace),
     coverTilt: pick(COVER_TILTS, obj.coverTilt, d.coverTilt),
     progressRibbon: pick(PROGRESS_RIBBONS, obj.progressRibbon, d.progressRibbon),
     shelfWear: pick(SHELF_WEARS, obj.shelfWear, d.shelfWear),

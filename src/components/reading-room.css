@@ -2129,6 +2129,20 @@
 .room-fall-petals span[data-look="1"] {
   background: var(--room-petal-white);
 }
+/* The weather outside's rain (Preferences > Weather outside): streaks
+   three dots long falling straight down, slate blue with a paler head
+   against a light page, pale against a dark one. */
+.room-fall-rain span {
+  height: calc(var(--u) * 3);
+  background: linear-gradient(rgb(96 120 160 / 0.35), rgb(74 98 140 / 0.8));
+}
+.room-fall-rain span[data-look="1"] {
+  height: calc(var(--u) * 2);
+  opacity: 0.7;
+}
+:where(.dark) .room-fall-rain span {
+  background: linear-gradient(rgb(200 214 236 / 0.2), rgb(200 214 236 / 0.6));
+}
 @media (prefers-reduced-motion: no-preference) {
   html:not([data-motion="off"]) .room-fall span {
     animation:
@@ -2139,6 +2153,10 @@
   html:not([data-motion="off"]) .room-fall-petals span {
     animation-name: room-fall, room-tumble;
     animation-timing-function: steps(var(--n)), ease-in-out;
+  }
+  /* Rain doesn't sway. */
+  html:not([data-motion="off"]) .room-fall-rain span {
+    animation: room-fall var(--t) steps(var(--n)) calc(var(--p) * var(--t) * -1) infinite;
   }
 }
 @keyframes room-fall {

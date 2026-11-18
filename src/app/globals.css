@@ -7653,8 +7653,8 @@ html.dark[data-background="ripples"] body,
   contain: strict;
 }
 /* :where() keeps these from outranking the rules for each part below. */
-:where(.bg-scene) i,
-:where(.bg-scene) b {
+:where(.bg-scene, .bg-weather) i,
+:where(.bg-scene, .bg-weather) b {
   position: absolute;
   display: block;
 }
@@ -8764,6 +8764,66 @@ html[data-daylight="dawn"] .room-scene {
 }
 .dark .room-scene {
   --dl-room-dim: 0.14;
+}
+
+/* ── Weather outside ───────────────────────────────────────────────────────
+   Rain or snow while it's coming down where the reader is (lib/weather.ts,
+   components/weather-outside.tsx; Preferences > Appearance > Weather
+   outside). The Rain and Snow backgrounds turn to it themselves; over the
+   other scenes it falls in this layer, just above the scene and behind the
+   page, drawn with the same drops and flakes as those two backgrounds, and
+   moving by the same rules ("Moving backgrounds" above): still where they
+   are while nothing may move. Over Sky the sky greys over a little, more
+   the harder it comes down; at night the clouds hide some of the stars. */
+.bg-weather {
+  --overcast: 112 120 134;
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  contain: strict;
+}
+.bg-weather[data-weather="rain"] {
+  --mark: rgb(104 114 134 / 0.5);
+}
+.dark .bg-weather[data-weather="rain"] {
+  --mark: rgb(210 215 230 / 0.22);
+}
+.bg-weather[data-weather="snow"] {
+  --mark: rgb(108 120 148 / 0.72);
+}
+.dark .bg-weather[data-weather="snow"] {
+  --mark: rgb(238 242 252 / 0.62);
+}
+.bg-weather[data-over-sky] {
+  background: rgb(var(--overcast) / var(--cloud, 0.16));
+}
+.dark .bg-weather[data-over-sky] {
+  --overcast: 14 18 28;
+  --cloud: 0.3;
+}
+.bg-weather[data-over-sky][data-amount="light"] {
+  --cloud: 0.1;
+}
+.dark .bg-weather[data-over-sky][data-amount="light"] {
+  --cloud: 0.2;
+}
+.bg-weather[data-over-sky][data-amount="heavy"] {
+  --cloud: 0.24;
+}
+.dark .bg-weather[data-over-sky][data-amount="heavy"] {
+  --cloud: 0.42;
+}
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-motion="off"]) .bg-weather {
+    animation: daylight-in 1.6s ease-out backwards;
+  }
+}
+@media print {
+  .bg-weather {
+    display: none !important;
+  }
 }
 
 /* ── Book opening ──────────────────────────────────────────────────────────

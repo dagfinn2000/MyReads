@@ -70,9 +70,11 @@ import { CHAIRS, FIREPLACES, LAMPS, rugFor } from "@/components/room-fireside";
 import { RoomPieceView } from "@/components/room-rooms";
 import type { AvatarLook } from "@/lib/avatar";
 import type { CatCoat, DogCoat, Pet } from "@/lib/pets";
-import { chimneyFoot, chimneyRise, roofCrown, roofHeight, shellArt, type Moving, type Shell } from "@/components/room-shells";
+import { chimneyFoot, chimneyRise, openAir, roofCrown, roofHeight, shellArt, type Moving, type Shell } from "@/components/room-shells";
+import { useWeather } from "@/components/weather-outside";
+import type { WeatherAmount } from "@/lib/weather";
 import { WINDOW_W } from "@/components/room-windows";
-import { flakesFor, type Box, type Fall } from "@/components/room-seasons";
+import { flakesFor, type Box, type FallKind } from "@/components/room-seasons";
 import { PICTURE_W } from "@/components/room-pictures";
 import { EASTER_TWIGS, MANTEL_TREE, SMALL_LANTERN, TREE, mantelGarland } from "@/components/room-holidays";
 import { isClosingBook } from "@/lib/cover-flight";
@@ -504,6 +506,13 @@ export function ReadingRoom({
   }, [layout, onPlan]);
   const reading = books.findIndex((b) => b.status === ReadingStatus.READING && isOnShelf(b));
   const figure = useAvatar(avatar, pet);
+  // Rain or snow round the house while it's coming down outside
+  // (components/weather-outside.tsx).
+  const weather = useWeather();
+  const outside = useMemo(
+    () => (weather && layout ? { ...weather, areas: openAir(layout.geo) } : null),
+    [weather, layout],
+  );
 
   // Which floors have come near the screen: their covers get read.
   useEffect(() => {
@@ -712,8 +721,21 @@ export function ReadingRoom({
         {shell.fireflies.map((box, i) => (
           <Fireflies key={i} box={box} scale={s} />
         ))}
-        {shell.fall?.areas.map((area, i) => (
-          <Falling key={i} kind={shell.fall!.kind} area={area} seed={i} scale={s} />
+        {/* The weather outside takes the place of the season's snow; leaves
+            and petals still come down under the trees. */}
+        {(!outside || shell.fall?.kind !== "snow") &&
+          shell.fall?.areas.map((area, i) => (
+            <Falling key={i} kind={shell.fall!.kind} area={area} seed={i} scale={s} />
+          ))}
+        {outside?.areas.map((area, i) => (
+          <Falling
+            key={`weather-${i}`}
+            kind={outside.kind}
+            area={area}
+            seed={i + 7}
+            scale={s}
+            thin={WEATHER_THIN[outside.amount]}
+          />
         ))}
 
         {layout.floors.map((pieces, f) => (
@@ -1241,10 +1263,26 @@ function Fireflies({ box, scale: s }: { box: Shell["fireflies"][number]; scale: 
   );
 }
 
+/** How much further apart the weather's rain or snow falls than a winter's
+ *  snow, by how hard it's coming down. */
+const WEATHER_THIN: Record<WeatherAmount, number> = { light: 3, moderate: 1.6, heavy: 1 };
+
 /** Snow, leaves or petals falling through `area`, in their season
- *  (room-seasons.ts). */
-const Falling = memo(function Falling({ kind, area, seed, scale: s }: { kind: Fall["kind"]; area: Box; seed: number; scale: number }) {
-  const flakes = useMemo(() => flakesFor(kind, area, seed), [kind, area, seed]);
+ *  (room-seasons.ts), or the weather outside's rain or snow. */
+const Falling = memo(function Falling({
+  kind,
+  area,
+  seed,
+  scale: s,
+  thin = 1,
+}: {
+  kind: FallKind;
+  area: Box;
+  seed: number;
+  scale: number;
+  thin?: number;
+}) {
+  const flakes = useMemo(() => flakesFor(kind, area, seed, thin), [kind, area, seed, thin]);
   return (
     <div
       className={`room-fall room-fall-${kind}`}

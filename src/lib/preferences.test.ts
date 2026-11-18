@@ -69,6 +69,16 @@ describe("parsePreferences", () => {
     expect(parsePreferences({}).timeOfDay).toBe("on");
     expect(parsePreferences({ timeOfDay: "off" }).timeOfDay).toBe("off");
     expect(parsePreferences({ timeOfDay: "sideways" }).timeOfDay).toBe("on");
+    expect(parsePreferences({}).weather).toBe("off");
+    expect(parsePreferences({ weather: "on" }).weather).toBe("on");
+    expect(parsePreferences({ weather: "hail" }).weather).toBe("off");
+    expect(parsePreferences({}).weatherPlace).toBeNull();
+    expect(parsePreferences({ weatherPlace: { name: "Bergen", lat: 60.39, lon: 5.32 } }).weatherPlace).toEqual({
+      name: "Bergen",
+      lat: 60.4,
+      lon: 5.3,
+    });
+    expect(parsePreferences({ weatherPlace: { name: "Bergen" } }).weatherPlace).toBeNull();
     expect(parsePreferences({}).upNextLook).toBe("pile");
     expect(parsePreferences({ upNextLook: "covers" }).upNextLook).toBe("covers");
     expect(parsePreferences({ upNextLook: "sideways" }).upNextLook).toBe("pile");
