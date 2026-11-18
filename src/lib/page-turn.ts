@@ -11,8 +11,10 @@ import { isNavActive } from "@/lib/nav";
  *
  * Only between sections: opening a book or filtering the library stays on
  * its page (a cover flies to a book's page instead). Not when animations
- * are off, on a browser without view transitions, or with "Moving between
- * pages" set to a fade in Preferences, where pages fade up as before.
+ * are off or on a browser without view transitions, where pages fade up as
+ * they open. With "Moving between pages" set to a crossfade in Preferences
+ * the old page fades into the new one instead, and tabs within a page
+ * (crossfadeTo) do the same, more quickly.
  */
 
 export type TurnDirection = "on" | "back";
@@ -43,29 +45,69 @@ export function pageTurnDirection(
 }
 
 /**
- * Goes to `href` (by calling `navigate`) with the page turning, and returns
- * true; or returns false without doing anything when the page shouldn't
- * turn, for the caller to navigate as usual.
+ * Goes to `href` (by calling `navigate`) with the page turning, or with
+ * the old page crossfading into the new one when "Moving between pages" is
+ * set to a crossfade, and returns true; or returns false without doing
+ * anything when nothing should move, for the caller to navigate as usual.
  *
  * The browser snapshots the page as it is and holds that picture while
  * `navigate` runs. Once the new page is in, past its loading skeleton, the
- * old picture turns away to show it (or it turns in over the old).
+ * old picture turns away to show it (or it turns in over the old, or the
+ * two fade into each other).
  */
 export function turnPage(href: string, navigate: () => void): boolean {
-  if (turning || typeof document === "undefined" || !document.startViewTransition || !motionAllowed()) {
-    return false;
-  }
+  if (!canMove()) return false;
   const html = document.documentElement;
-  if (html.dataset.pageChange === "fade") return false;
-
   const links = [...document.querySelectorAll<HTMLAnchorElement>(".top-bar a.nav-link")].map(
     (a) => a.getAttribute("href") ?? "",
   );
   const direction = pageTurnDirection(links, window.location.pathname, href);
   if (!direction) return false;
+  const classes =
+    html.dataset.pageChange === "fade" ? ["page-fade"] : ["page-turn", `page-turn-${direction}`];
+  hold(href, navigate, classes, { skeletonAfter: SKELETON_AFTER_MS, limit: WAIT_LIMIT_MS, exact: false });
+  return true;
+}
 
-  const target = new URL(href, window.location.href).pathname;
-  const classes = ["page-turn", `page-turn-${direction}`];
+/** How long a tab holds its old look for the new one. Moving within a page
+ *  is usually quicker than to another section, and a tab that is slow to
+ *  answer shouldn't keep the page still for long. */
+const TAB_WAIT_LIMIT_MS = 800;
+
+/**
+ * Goes to `href` with the page crossfading into the new one, for tabs that
+ * change what a page shows (the library's status tabs and shelves, the
+ * Stats periods): returns true, or false when nothing should move ("Switching
+ * tabs" set to straight away, animations off, no view transitions, or the
+ * address already open), for the caller to navigate as usual.
+ */
+export function crossfadeTo(href: string, navigate: () => void): boolean {
+  if (!canMove() || document.documentElement.dataset.tabChange === "off") return false;
+  const target = new URL(href, window.location.href);
+  if (target.pathname + target.search === window.location.pathname + window.location.search) return false;
+  hold(href, navigate, ["tab-fade"], { skeletonAfter: TAB_WAIT_LIMIT_MS, limit: TAB_WAIT_LIMIT_MS, exact: true });
+  return true;
+}
+
+function canMove(): boolean {
+  return !(turning || typeof document === "undefined" || !document.startViewTransition || !motionAllowed());
+}
+
+/** Holds a picture of the page while `navigate` brings `href`, then lets
+ *  the CSS under `classes` (globals.css, "Page turns") carry it away. The
+ *  new page is in once the address has its path, or with `exact` (a tab on
+ *  the same page) its query too. */
+function hold(
+  href: string,
+  navigate: () => void,
+  classes: string[],
+  { skeletonAfter, limit, exact }: { skeletonAfter: number; limit: number; exact: boolean },
+) {
+  const html = document.documentElement;
+  const target = new URL(href, window.location.href);
+  const arrived = () =>
+    window.location.pathname === target.pathname &&
+    (!exact || window.location.search === target.search);
   html.classList.add(...classes);
   turning = true;
 
@@ -75,9 +117,8 @@ export function turnPage(href: string, navigate: () => void): boolean {
         navigate();
         const started = performance.now();
         const ready = () =>
-          window.location.pathname === target &&
-          (!document.querySelector(".loading-sweep") ||
-            performance.now() - started > SKELETON_AFTER_MS);
+          arrived() &&
+          (!document.querySelector(".loading-sweep") || performance.now() - started > skeletonAfter);
         const land = () => {
           observer.disconnect();
           clearTimeout(look);
@@ -94,8 +135,8 @@ export function turnPage(href: string, navigate: () => void): boolean {
           if (ready()) land();
         });
         // Nothing may change once the skeleton is up: look again then.
-        const look = setTimeout(() => ready() && land(), SKELETON_AFTER_MS + 10);
-        const timer = setTimeout(land, WAIT_LIMIT_MS);
+        const look = setTimeout(() => ready() && land(), skeletonAfter + 10);
+        const timer = setTimeout(land, limit);
         observer.observe(document.body, { childList: true, subtree: true });
         if (ready()) land();
       }),
@@ -107,5 +148,4 @@ export function turnPage(href: string, navigate: () => void): boolean {
       turning = false;
     })
     .catch(() => {});
-  return true;
 }

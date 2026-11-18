@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useState, useTransition } from "react";
-import Link from "next/link";
+import { CrossfadeLink } from "@/components/crossfade-link";
 import { useRouter } from "next/navigation";
 import { Pencil, Plus, Sparkles, X } from "lucide-react";
 import { createShelf, deleteShelf } from "@/lib/actions/shelves";
@@ -139,25 +139,23 @@ export function ShelfChips({
     // data-keeps-search: see ShelfTabs.
     <div className="flex flex-wrap items-center gap-1.5" data-keeps-search="">
       <span className="mr-1 text-sm text-muted-foreground">Shelves:</span>
-      {/* No prefetching, here or below: see BookLink. */}
-      <Link
+      {/* Crossfading, and not prefetched, here and below: see CrossfadeLink. */}
+      <CrossfadeLink
         href={shelfHref(null)}
-        prefetch={false}
         className={cn(
           "rounded-full border px-3 py-1 text-sm transition-colors hover:border-ring/60",
           !active && "border-primary bg-primary/10 font-medium",
         )}
       >
         All
-      </Link>
+      </CrossfadeLink>
       {visible.map((shelf) => {
         const smart = shelf.rules !== undefined;
         const on = shelf.id === activeShelfId;
         return (
           <span key={shelf.id} className="inline-flex items-center">
-            <Link
+            <CrossfadeLink
               href={shelfHref(shelf.id)}
-              prefetch={false}
               title={smart ? `Smart shelf: ${describe(shelf.rules!).join(", ")}` : undefined}
               data-smart-shelf={smart ? "" : undefined}
               className={cn(
@@ -176,7 +174,7 @@ export function ShelfChips({
               <span className="ml-1.5 text-xs text-muted-foreground tabular-nums">
                 {shelf.bookCount}
               </span>
-            </Link>
+            </CrossfadeLink>
             {on && smart && (
               <button
                 type="button"

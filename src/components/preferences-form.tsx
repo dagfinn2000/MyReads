@@ -122,6 +122,7 @@ const HTML_ATTRIBUTES: Partial<Record<keyof Preferences, string>> = {
   typography: "data-typography",
   motion: "data-motion",
   pageChange: "data-page-change",
+  tabChange: "data-tab-change",
   celebration: "data-celebration",
   coverArt: "data-covers",
   accent: "data-accent",
@@ -1056,9 +1057,19 @@ export function PreferencesForm({
           value={prefs.pageChange}
           options={[
             { value: "turn", label: "Turn the page, like a book’s" },
-            { value: "fade", label: "Fade the new page in" },
+            { value: "fade", label: "Crossfade into the new page" },
           ]}
           onChange={(v) => update({ pageChange: v })}
+        />
+        <Choice
+          label="Switching tabs"
+          hint="The library’s status tabs, shelves and saved views, the periods on Stats and the two ways to add a book."
+          value={prefs.tabChange}
+          options={[
+            { value: "fade", label: "Crossfade into the new tab" },
+            { value: "off", label: "Straight away" },
+          ]}
+          onChange={(v) => update({ tabChange: v })}
         />
         <Choice
           label="Opening a book"

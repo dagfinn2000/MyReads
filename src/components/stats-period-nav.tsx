@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { CrossfadeLink } from "@/components/crossfade-link";
 import { STATS_PERIODS, type StatsPeriod } from "@/lib/preferences";
 import { PERIOD_LABELS, statsHref } from "@/lib/stats-period";
 import { cn } from "@/lib/utils";
@@ -19,7 +19,7 @@ export function StatsPeriodNav({
   return (
     <nav aria-label="Stats period" className="flex flex-wrap gap-1.5">
       {STATS_PERIODS.map((p) => (
-        <Link
+        <CrossfadeLink
           key={p}
           href={statsHref({ period: p, goalYear })}
           scroll={false}
@@ -32,7 +32,7 @@ export function StatsPeriodNav({
           )}
         >
           {PERIOD_LABELS[p]}
-        </Link>
+        </CrossfadeLink>
       ))}
     </nav>
   );

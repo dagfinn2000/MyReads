@@ -121,9 +121,15 @@ export const HEADING_FONTS = ["sans", "serif", "rounded"] as const;
 export const MOTIONS = ["on", "off"] as const;
 
 /** What moving between the app's sections looks like (lib/page-turn.ts):
- *  the page turns like a book's, or the new page simply fades up. Only while
- *  animations are allowed. */
+ *  the page turns like a book's, or the old page crossfades into the new
+ *  one. Only while animations are allowed. */
 export const PAGE_CHANGES = ["turn", "fade"] as const;
+
+/** Whether a tab that changes what a page shows (the library's status tabs
+ *  and shelves, the Stats periods, Add book's two ways) crossfades into its
+ *  new look (lib/page-turn.ts crossfadeTo), or switches straight away. Only
+ *  while animations are allowed. */
+export const TAB_CHANGES = ["fade", "off"] as const;
 
 /** What happens on screen when you finish a book or reach a goal
  *  (lib/celebrate.ts): a burst of confetti, fireworks, gold sparkles,
@@ -440,6 +446,7 @@ export type CoverTilt = (typeof COVER_TILTS)[number];
 export type ProgressRibbon = (typeof PROGRESS_RIBBONS)[number];
 export type ShelfWearSetting = (typeof SHELF_WEARS)[number];
 export type DogEars = (typeof DOG_EARS)[number];
+export type TabChange = (typeof TAB_CHANGES)[number];
 export type CoverShadows = (typeof COVER_SHADOWS)[number];
 export type HeatmapScale = (typeof HEATMAP_SCALES)[number];
 export type BookOpening = (typeof BOOK_OPENINGS)[number];
@@ -525,6 +532,7 @@ export type Preferences = {
   // Appearance
   motion: Motion;
   pageChange: PageChange;
+  tabChange: TabChange;
   bookOpening: BookOpening;
   finishPages: FinishPages;
   celebration: Celebration;
@@ -742,6 +750,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
   headingFont: "sans",
   motion: "on",
   pageChange: "turn",
+  tabChange: "fade",
   bookOpening: "open",
   finishPages: "on",
   celebration: "confetti",
@@ -1097,6 +1106,7 @@ export function parsePreferences(raw: unknown): Preferences {
     headingFont: pick(HEADING_FONTS, obj.headingFont, d.headingFont),
     motion: pick(MOTIONS, obj.motion, d.motion),
     pageChange: pick(PAGE_CHANGES, obj.pageChange, d.pageChange),
+    tabChange: pick(TAB_CHANGES, obj.tabChange, d.tabChange),
     bookOpening: pick(BOOK_OPENINGS, obj.bookOpening, d.bookOpening),
     finishPages: pick(FINISH_PAGES, obj.finishPages, d.finishPages),
     celebration: pick(CELEBRATIONS, obj.celebration, d.celebration),

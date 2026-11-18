@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { CrossfadeLink } from "@/components/crossfade-link";
 import type { ReadingStatus } from "@/lib/enums";
 import { statusTabsToShow } from "@/lib/library-order";
 import { STATUS_COLOR_DOT, statusName, type StatusPrefs } from "@/lib/statuses";
@@ -55,11 +55,10 @@ export function ShelfTabs({
         {tabs.map(({ key, label }) => {
           const active = current === key;
           return (
-            // No prefetching, here or below: see BookLink.
-            <Link
+            // Crossfading, and not prefetched, here and below: see CrossfadeLink.
+            <CrossfadeLink
               key={key}
               href={href(key)}
-              prefetch={false}
               aria-current={active ? "page" : undefined}
               className={cn(
                 "-mb-px flex items-center gap-1.5 border-b-2 border-transparent px-3 py-2 text-sm text-muted-foreground transition-colors hover:text-foreground",
@@ -70,7 +69,7 @@ export function ShelfTabs({
               <span className="rounded-full bg-muted px-1.5 text-xs tabular-nums">
                 {counts[key] ?? 0}
               </span>
-            </Link>
+            </CrossfadeLink>
           );
         })}
       </nav>
@@ -79,9 +78,8 @@ export function ShelfTabs({
           aria-label={`Kinds of ${statusName(current as ReadingStatus, statuses)}`}
           className="flex flex-wrap gap-1.5"
         >
-          <Link
+          <CrossfadeLink
             href={href(current)}
-            prefetch={false}
             aria-current={!currentKey ? "page" : undefined}
             className={cn(
               "rounded-full border px-3 py-1 text-sm transition-colors hover:border-ring/60",
@@ -89,12 +87,11 @@ export function ShelfTabs({
             )}
           >
             All
-          </Link>
+          </CrossfadeLink>
           {kinds.map((c) => (
-            <Link
+            <CrossfadeLink
               key={c.key}
               href={href(current, c.key)}
-              prefetch={false}
               aria-current={currentKey === c.key ? "page" : undefined}
               className={cn(
                 "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-sm transition-colors hover:border-ring/60",
@@ -104,7 +101,7 @@ export function ShelfTabs({
               <span aria-hidden="true" className={cn("size-1.5 rounded-full", STATUS_COLOR_DOT[c.color])} />
               {c.name}
               <span className="text-xs text-muted-foreground tabular-nums">{keyCounts[c.key] ?? 0}</span>
-            </Link>
+            </CrossfadeLink>
           ))}
         </nav>
       )}
