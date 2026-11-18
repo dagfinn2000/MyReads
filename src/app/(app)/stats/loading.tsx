@@ -2,7 +2,7 @@
  *  this is the page most worth showing progress for. */
 export default function StatsLoading() {
   return (
-    <div className="loading-sweep grid gap-6">
+    <div className="stats-page loading-sweep grid gap-6">
       <div className="grid gap-3">
         <div className="h-8 w-24 rounded bg-muted" />
         <div className="flex flex-wrap gap-1.5">

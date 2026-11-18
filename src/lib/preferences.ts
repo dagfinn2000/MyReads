@@ -226,6 +226,11 @@ export const SHELF_WEARS = ["on", "off"] as const;
  *  globals.css "Dog-ears"). */
 export const DOG_EARS = ["on", "off"] as const;
 
+/** How book pages and Stats are spaced (globals.css "Calm spacing"): calm,
+ *  with more room between the cards and a steady rhythm down the page, or
+ *  compact, as they were. */
+export const SPACINGS = ["calm", "compact"] as const;
+
 /** Whether covers sit on a thin, soft shadow that deepens as one you can
  *  open lifts under the pointer (globals.css "Cover shadows"), or lie flat
  *  on the page as they used to. */
@@ -446,6 +451,7 @@ export type CoverTilt = (typeof COVER_TILTS)[number];
 export type ProgressRibbon = (typeof PROGRESS_RIBBONS)[number];
 export type ShelfWearSetting = (typeof SHELF_WEARS)[number];
 export type DogEars = (typeof DOG_EARS)[number];
+export type Spacing = (typeof SPACINGS)[number];
 export type TabChange = (typeof TAB_CHANGES)[number];
 export type CoverShadows = (typeof COVER_SHADOWS)[number];
 export type HeatmapScale = (typeof HEATMAP_SCALES)[number];
@@ -554,6 +560,7 @@ export type Preferences = {
   progressRibbon: ProgressRibbon;
   shelfWear: ShelfWearSetting;
   dogEars: DogEars;
+  spacing: Spacing;
   coverShadows: CoverShadows;
   spineFill: SpineFill;
   upNextLook: UpNextLook;
@@ -767,6 +774,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
   progressRibbon: "crimson",
   shelfWear: "on",
   dogEars: "on",
+  spacing: "calm",
   coverShadows: "soft",
   spineFill: "on",
   upNextLook: "pile",
@@ -1123,6 +1131,7 @@ export function parsePreferences(raw: unknown): Preferences {
     progressRibbon: pick(PROGRESS_RIBBONS, obj.progressRibbon, d.progressRibbon),
     shelfWear: pick(SHELF_WEARS, obj.shelfWear, d.shelfWear),
     dogEars: pick(DOG_EARS, obj.dogEars, d.dogEars),
+    spacing: pick(SPACINGS, obj.spacing, d.spacing),
     coverShadows: pick(COVER_SHADOWS, obj.coverShadows, d.coverShadows),
     spineFill: pick(SPINE_FILLS, obj.spineFill, d.spineFill),
     upNextLook: pick(UP_NEXT_LOOKS, obj.upNextLook, d.upNextLook),

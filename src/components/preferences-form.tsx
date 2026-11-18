@@ -134,6 +134,7 @@ const HTML_ATTRIBUTES: Partial<Record<keyof Preferences, string>> = {
   progressRibbon: "data-ribbon",
   shelfWear: "data-shelf-wear",
   dogEars: "data-dog-ears",
+  spacing: "data-spacing",
   coverShadows: "data-cover-shadows",
   bookBackdrop: "data-book-backdrop",
   bookOpening: "data-book-opening",
@@ -994,6 +995,16 @@ export function PreferencesForm({
             { value: "off", label: "Flat on the page" },
           ]}
           onChange={(v) => update({ coverShadows: v })}
+        />
+        <Choice
+          label="Spacing"
+          hint="On a book’s page and on Stats: more room between the cards, and the same steady space from one to the next."
+          value={prefs.spacing}
+          options={[
+            { value: "calm", label: "Calm, with room to breathe" },
+            { value: "compact", label: "Compact, to see more at once" },
+          ]}
+          onChange={(v) => update({ spacing: v })}
         />
         <Choice
           label="Corners"
