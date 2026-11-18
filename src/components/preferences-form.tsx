@@ -122,6 +122,7 @@ const HTML_ATTRIBUTES: Partial<Record<keyof Preferences, string>> = {
   progressRibbon: "data-ribbon",
   shelfWear: "data-shelf-wear",
   bookBackdrop: "data-book-backdrop",
+  inkStats: "data-ink-stats",
 };
 
 /** The accent colour swatches, one round button each. */
@@ -1261,6 +1262,16 @@ export function PreferencesForm({
             { value: "auto", label: "Based on my usual day" },
           ]}
           onChange={(v) => update({ heatmapScale: v })}
+        />
+        <Choice
+          label="Big numbers"
+          hint="The big numbers write themselves in as they come into view, like ink from a pen. Not when animations are off."
+          value={prefs.inkStats}
+          options={[
+            { value: "on", label: "Written in ink" },
+            { value: "off", label: "Simply there" },
+          ]}
+          onChange={(v) => update({ inkStats: v })}
         />
         <Choice
           label="Stats open on"

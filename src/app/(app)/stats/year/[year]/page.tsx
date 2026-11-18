@@ -40,6 +40,7 @@ import {
 import { BookCover } from "@/components/book-card";
 import { GoldMedal } from "@/components/gold-medal";
 import { Bar, StatCard } from "@/components/stat-blocks";
+import { InkWatcher } from "@/components/ink-stats";
 import { StarGraphic, Stars } from "@/components/stars";
 import { YearShelf } from "@/components/year-shelf";
 import { YearStoryButton } from "@/components/year-story";
@@ -432,8 +433,9 @@ export default async function YearInReviewPage({
   return (
     <div className="grid grid-cols-1 gap-6">
       {header(hasStory(wrapped) && <YearStoryButton wrapped={wrapped} />)}
+      <InkWatcher />
 
-      <div className={`grid grid-cols-2 gap-4 max-lg:[&>:last-child:nth-child(odd)]:col-span-2 ${ratings ? "lg:grid-cols-4" : "lg:grid-cols-3"}`}>
+      <div className={`ink-stagger grid grid-cols-2 gap-4 max-lg:[&>:last-child:nth-child(odd)]:col-span-2 ${ratings ? "lg:grid-cols-4" : "lg:grid-cols-3"}`}>
         <StatCard
           label={prefs.statsStoppedBooks === "book" ? "Books read" : "Books finished"}
           icon={BookCheck}

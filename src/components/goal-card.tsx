@@ -10,6 +10,7 @@ import { GoalReached } from "@/components/goal-reached";
 import { GoalYearSelect } from "@/components/goal-year-select";
 import { GoldMedal } from "@/components/gold-medal";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Ink } from "@/components/ink-number";
 
 interface Goal {
   target: number;
@@ -100,10 +101,12 @@ export function GoalCard({
               ))}
             <div className="min-w-56 flex-1">
               <p className="text-2xl font-semibold tabular-nums">
-                {fmt(done)}{" "}
-                <span className="text-base font-normal text-muted-foreground">
-                  of {fmt(goal.target)} {unitWord(goal.unit, goal.target)}
-                </span>
+                <Ink chars={fmt(done).length + 6}>
+                  {fmt(done)}{" "}
+                  <span className="text-base font-normal text-muted-foreground">
+                    of {fmt(goal.target)} {unitWord(goal.unit, goal.target)}
+                  </span>
+                </Ink>
               </p>
               <GoalBar
                 done={done}

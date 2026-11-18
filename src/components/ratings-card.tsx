@@ -3,6 +3,7 @@ import type { RatingStyle } from "@/lib/preferences";
 import { ratingLabel } from "@/lib/library-sort";
 import type { AspectBook, AspectSummary, RatingBucket, ratingLean } from "@/lib/rating-breakdown";
 import { BookCover } from "@/components/book-card";
+import { Ink } from "@/components/ink-number";
 import { StarGraphic } from "@/components/stars";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -189,14 +190,16 @@ function Aspects({
               ) : (
                 <span className="flex flex-wrap items-center gap-x-2">
                   <span className="font-heading text-2xl font-semibold tabular-nums">
-                    {style === "ten" ? (
-                      <>
-                        {a.average.toFixed(1)}
-                        <span className="text-base font-normal text-muted-foreground">/10</span>
-                      </>
-                    ) : (
-                      (a.average / 2).toFixed(1)
-                    )}
+                    <Ink>
+                      {style === "ten" ? (
+                        <>
+                          {a.average.toFixed(1)}
+                          <span className="text-base font-normal text-muted-foreground">/10</span>
+                        </>
+                      ) : (
+                        (a.average / 2).toFixed(1)
+                      )}
+                    </Ink>
                   </span>
                   {style !== "ten" && <StarGraphic value={a.average} />}
                   <span className="text-xs text-muted-foreground">

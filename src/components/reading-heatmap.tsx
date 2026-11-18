@@ -30,6 +30,7 @@ import {
   type WindowRange,
 } from "@/lib/reading-calendar";
 import { cn } from "@/lib/utils";
+import { Ink } from "@/components/ink-number";
 
 type Prefs = Pick<Preferences, "weekStart" | "heatmapScale" | "dateFormat" | "numberFormat">;
 type Streak = "current" | "longest";
@@ -650,8 +651,10 @@ function TileHead({ icon: Icon, label }: { icon: LucideIcon; label: string }) {
 function Big({ value, unit }: { value: string; unit?: string }) {
   return (
     <span className="font-heading text-2xl font-semibold tracking-tight tabular-nums">
-      {value}
-      {unit && <span className="text-sm font-normal text-muted-foreground"> {unit}</span>}
+      <Ink chars={value.length + (unit ? unit.length / 2 : 0)}>
+        {value}
+        {unit && <span className="text-sm font-normal text-muted-foreground"> {unit}</span>}
+      </Ink>
     </span>
   );
 }
