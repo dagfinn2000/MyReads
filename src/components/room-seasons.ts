@@ -217,6 +217,9 @@ export interface Fall {
   areas: Box[];
 }
 
+/** What can fall: a season's, or the weather outside's rain. */
+export type FallKind = Fall["kind"] | "rain";
+
 /** One thing falling: `x` dots across its area, `p` of the way down its
  *  fall when still, the seconds a fall (`t`) and a sway (`s`) take and
  *  how far it sways (`sway`, in dots), how far through its sway it starts
@@ -233,19 +236,23 @@ export interface Flake {
 
 /** How each kind falls: how many to an area of dots, how fast in dots a
  *  second, how far they sway, and how many looks it has. */
-const FALLS: Record<Fall["kind"], { per: number; most: number; speed: [number, number]; sway: [number, number]; looks: number }> = {
+const FALLS: Record<FallKind, { per: number; most: number; speed: [number, number]; sway: [number, number]; looks: number }> = {
   snow: { per: 260, most: 140, speed: [9, 17], sway: [1, 3], looks: 3 },
+  // Straight down and quick, a streak at a time.
+  rain: { per: 200, most: 120, speed: [70, 95], sway: [0, 0], looks: 2 },
   leaves: { per: 520, most: 9, speed: [5, 8], sway: [3, 7], looks: 4 },
   petals: { per: 460, most: 10, speed: [4, 7], sway: [3, 6], looks: 2 },
 };
 
 /** The things falling through an area `w` × `h` dots: where they are and
  *  how they move, the same on every visit. Areas less than a few dots
- *  across have none. */
-export function flakesFor(kind: Fall["kind"], area: Box, seed = 0): Flake[] {
+ *  across have none. `thin` spreads them that many times further apart,
+ *  for weather that is only light. */
+export function flakesFor(kind: FallKind, area: Box, seed = 0, thin = 1): Flake[] {
   const f = FALLS[kind];
   if (area.w < 3 || area.h < 8) return [];
-  const n = Math.min(f.most, Math.max(kind === "snow" ? 6 : 2, Math.round((area.w * area.h) / f.per)));
+  const few = kind === "snow" || kind === "rain" ? 6 : 2;
+  const n = Math.min(f.most, Math.max(few, Math.round((area.w * area.h) / (f.per * thin))));
   return Array.from({ length: n }, (_, i) => {
     const speed = f.speed[0] + noise(i, seed, 2) * (f.speed[1] - f.speed[0]);
     return {

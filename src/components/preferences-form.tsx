@@ -57,6 +57,7 @@ import { FieldSettings } from "@/components/field-settings";
 import { MoodSettings } from "@/components/mood-settings";
 import { ReminderDevices, type ReminderDevice } from "@/components/reminder-settings";
 import { TagRulesList } from "@/components/tag-rules-list";
+import { WeatherSettings } from "@/components/weather-settings";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -994,6 +995,7 @@ export function PreferencesForm({
           ]}
           onChange={(v) => update({ timeOfDay: v })}
         />
+        <WeatherSettings value={prefs.weather} place={prefs.weatherPlace} onChange={update} />
         <Choice
           label="Behind a book's page"
           value={prefs.bookBackdrop}

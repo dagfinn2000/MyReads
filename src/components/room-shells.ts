@@ -17,7 +17,7 @@
 import { art, grid, type Art, type HouseGeometry, type Paint, type Rect } from "@/components/room-art";
 import { DOOR_H, doorFor } from "@/components/room-doors";
 import { climberArt, gardenArt } from "@/components/room-garden";
-import { smooth, snowCaps, snowGround, type Fall } from "@/components/room-seasons";
+import { smooth, snowCaps, snowGround, type Box as Area, type Fall } from "@/components/room-seasons";
 import { WINDOW_DROP, WINDOW_W, windowFor } from "@/components/room-windows";
 import { PICTURE_W, pictureAt, pictureFor } from "@/components/room-pictures";
 import { dressHouse } from "@/components/room-holidays";
@@ -2479,23 +2479,30 @@ function inTheGrass(season: "spring" | "autumn", g: HouseGeometry, earth: number
   return R;
 }
 
+/** The open air round the house, where snow and rain fall: down the garden
+ *  either side to the ground (`earth`, the top of the grass), and over the
+ *  house to its eaves. */
+export function openAir(g: HouseGeometry, earth = groundLine(g)): Area[] {
+  const { houseX: hx, houseW: hw, sceneW } = g;
+  return [
+    { x: 0, y: 0, w: hx, h: earth },
+    { x: hx, y: 0, w: hw, h: g.floorsTop },
+    { x: hx + hw, y: 0, w: sceneW - hx - hw, h: earth },
+  ];
+}
+
+/** Where the grass starts: under the bottom floor's beam and the
+ *  foundation (as shellArt works it out). */
+export function groundLine(g: HouseGeometry): number {
+  return g.floorsTop + g.floorCount * g.storey + g.beam + g.foundation;
+}
+
 /** What falls through the air in this season: snow everywhere outside in
  *  winter, though not in front of the rooms; under the trees, leaves in
  *  autumn and petals in spring. Nothing in summer. */
 function fallFor(season: Season, style: RoomStyle, g: HouseGeometry, earth: number, garden: readonly RoomGarden[], shell: Shell): Fall | null {
   const { houseX: hx, houseW: hw, sceneW } = g;
-  if (season === "winter") {
-    // Down the garden either side to the ground, and over the house to
-    // its eaves.
-    return {
-      kind: "snow",
-      areas: [
-        { x: 0, y: 0, w: hx, h: earth },
-        { x: hx, y: 0, w: hw, h: g.floorsTop },
-        { x: hx + hw, y: 0, w: sceneW - hx - hw, h: earth },
-      ],
-    };
-  }
+  if (season === "winter") return { kind: "snow", areas: openAir(g, earth) };
   if (season === "summer" || style === "cave") return null;
   // Under a tree either side: the garden's, or the elven birches.
   const trees = garden.includes("trees");

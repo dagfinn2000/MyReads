@@ -485,6 +485,8 @@ Everything below is under **Decorate** on the Room page.
   chrysanthemums in the beds and red ivy; in winter bare trees, snowdrops,
   snow on the roof and in the garden, icicles under the eaves and snow
   falling. The view from the windows changes with it.
+- With Weather outside on (Preferences > Appearance), the real weather
+  falls round the house too: rain in streaks, or snow, whatever the season.
 
 ### Holidays
 
@@ -1131,6 +1133,17 @@ tab goes away. You can also keep the house and leave the avatar out.
   night the dark draws in from the edges, leaving the middle where you
   read alone. The reading room warms up and dims with it. Preferences >
   Appearance can keep it daylight all day.
+- **Weather outside**, if you turn it on in Preferences > Appearance: while
+  it's raining or snowing where you are, it rains or snows on your
+  background too. Rain and Snow turn to whichever is coming down, as hard
+  as it is; over Sky, Starry night, Aurora, Ripples and the scene themes
+  the rain or snow falls in front of the scene (and Sky clouds over a
+  little); and round the reading room it rains in streaks or snows. The
+  textures stay dry. Pick a town, or let your browser say where you are
+  (it asks you first; that needs an https address). Your browser asks
+  [Open-Meteo](https://open-meteo.com/) for the weather there, rounded to
+  about 10 km, every twenty minutes while MyReads is open. If it can't be
+  reached, nothing falls.
 - A little motion: pages turn or fade in, bars fill up, finishing a book or
   reaching your goal sets off a celebration, and the reading room's fire
   flickers.
@@ -1204,8 +1217,8 @@ On the Account page:
 - The accent colour, text size, a serif font for reviews and quotes, book
   typography, the font for headings and how round the corners are (or as the theme has
   them: a few themes have their own), flat, raised or frosted
-  cards, the background texture and whether it follows the light of the
-  day, a wash of the cover's colours behind
+  cards, the background texture, whether it follows the light of the
+  day and the weather outside, a wash of the cover's colours behind
   the top of each book's page, whether spines fill with colour as you
   read, and whether Up next is a pile of books or a row of covers.
 - Animations on or off, whether pages turn or fade, whether a cover opens
