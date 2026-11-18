@@ -28,6 +28,7 @@ import { NowReading } from "@/components/now-reading";
 import { OnThisDayCard } from "@/components/on-this-day-card";
 import { OverdueNotice } from "@/components/overdue-notice";
 import { UpNextEditor } from "@/components/up-next-editor";
+import { UpNextPile } from "@/components/up-next-pile";
 import { Button } from "@/components/ui/button";
 
 export const dynamic = "force-dynamic";
@@ -142,6 +143,13 @@ export default async function NowReadingPage() {
     authors,
     coverUrl,
   });
+  const pileBook = ({ id, title, authors, coverUrl, pageCount }: (typeof wantToRead)[number]) => ({
+    id,
+    title,
+    authors,
+    coverUrl,
+    pageCount,
+  });
 
   return (
     <div className="grid grid-cols-1 gap-6">
@@ -234,7 +242,10 @@ export default async function NowReadingPage() {
               </Link>
             </span>
           </div>
-          {/* Scrolls inside its own box on a phone, never the page. */}
+          {prefs.upNextLook === "pile" ? (
+            <UpNextPile picks={picks.map(pileBook)} suggested={suggested.map(pileBook)} />
+          ) : (
+          /* Scrolls inside its own box on a phone, never the page. */
           <ul className="relative flex gap-3 overflow-x-auto pb-1">
             {next.map((b, i) => (
               <Fragment key={b.id}>
@@ -267,6 +278,7 @@ export default async function NowReadingPage() {
               </Fragment>
             ))}
           </ul>
+          )}
         </section>
       )}
     </div>

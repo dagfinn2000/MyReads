@@ -9472,6 +9472,148 @@ html[data-spine-fill="off"] .spine-unread {
     animation-delay: calc(0.35s + min(var(--i, 0), 24) * 40ms);
   }
 }
+/* ── Up next pile ──────────────────────────────────────────────────────────
+   Up next on Now reading as books piled on the table, spines out
+   (components/up-next-pile.tsx): the library's spines laid on their sides,
+   the head to the left, so their titles read across. Each lies a little
+   off true (--dx, --tilt), with a shadow on the book under it, and the
+   pile casts a soft shadow on the table. As the page opens the books drop
+   on from the bottom up (--below is how many lie under one), wobbling as
+   each lands; a pile out of sight waits until it is scrolled to
+   ([data-waiting]). Restacking is done from script ([data-settled] once
+   the drop is over, so a book React moves doesn't drop again). Pointing at a book slides it
+   out to the side. */
+.up-next-piles {
+  --spine-h: 9.5rem;
+  --spine-scale: 0.72;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 1.25rem 2.5rem;
+  padding-top: 0.5rem;
+}
+.up-next-pile {
+  display: grid;
+  justify-items: center;
+  gap: 0.625rem;
+}
+.pile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-inline: 1.75rem 0.75rem;
+}
+/* The pile's shadow on the table. */
+.pile::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: auto 8% -0.4rem;
+  height: 0.8rem;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(0 0 0 / 0.28), transparent);
+}
+.pile-book {
+  position: relative;
+  transform-origin: 50% 100%;
+}
+.pile-lie {
+  position: relative;
+  display: block;
+  width: calc(var(--spine-h) * var(--len, 1));
+  height: calc(var(--thick, 1.9rem) * var(--spine-scale));
+  border-radius: 2px;
+  translate: var(--dx, 0) 0;
+  rotate: var(--tilt, 0deg);
+  box-shadow: 0 3px 4px -2px rgb(0 0 0 / 0.4);
+}
+.pile-lie > .spine-link {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-90deg);
+}
+/* Lettering a size down from the shelf's, which leaves a thick book's long
+   title room on a spine this short; and like the shelf, two lines down a
+   thick one. */
+.pile .spine-title {
+  font-size: clamp(0.5rem, calc(var(--w) * 0.3), 0.6875rem);
+}
+.pile .book-spine[data-lines="2"] .spine-title {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  font-size: clamp(0.5rem, calc(var(--w) * 0.22), 0.6875rem);
+  white-space: normal;
+  text-wrap: balance;
+}
+.pile .spine-author {
+  font-size: clamp(0.4375rem, calc(var(--w) * 0.22), 0.5625rem);
+}
+/* A number on the reader's own picks, at the foot of each spine. */
+.pile-number {
+  position: absolute;
+  top: 50%;
+  right: calc(100% + 0.4rem);
+  display: grid;
+  place-items: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  translate: var(--dx, 0) -50%;
+  border-radius: 999px;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font-size: 0.625rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  box-shadow: 0 0 0 2px color-mix(in oklab, var(--background) 70%, transparent);
+}
+.pile-book:has(.spine-link:hover) {
+  z-index: 1;
+}
+@keyframes pile-drop {
+  0% {
+    translate: 0 -2.5rem;
+    opacity: 0;
+    animation-timing-function: cubic-bezier(0.5, 0, 0.9, 0.6);
+  }
+  55% {
+    translate: 0 0;
+    rotate: 0deg;
+    opacity: 1;
+    animation-timing-function: ease-out;
+  }
+  70% {
+    rotate: 1.6deg;
+  }
+  84% {
+    rotate: -0.9deg;
+  }
+  93% {
+    rotate: 0.35deg;
+  }
+  100% {
+    rotate: 0deg;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-motion="off"]) .pile-book {
+    animation: pile-drop 0.7s backwards;
+    animation-delay: calc(0.15s + var(--below, 0) * 70ms);
+  }
+  html:not([data-motion="off"]) .pile[data-settled] .pile-book {
+    animation: none;
+  }
+  html:not([data-motion="off"]) .pile[data-waiting] .pile-book {
+    animation: none;
+    opacity: 0;
+  }
+  html:not([data-motion="off"]) .pile-lie > .spine-link:hover {
+    translate: 0.6rem 0;
+  }
+}
+
 /* The year's shelf (components/year-shelf.tsx): a little room between
    months, and a brass plate on the board under each month's first book. */
 .year-shelf {
