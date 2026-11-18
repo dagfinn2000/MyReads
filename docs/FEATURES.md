@@ -1185,11 +1185,16 @@ tab goes away. You can also keep the house and leave the avatar out.
   lines wrap so a paragraph doesn't end on one short word. Short
   descriptions, and ones that start with a quote mark or a number, keep
   their first letter plain.
-- Sounds, if you turn them on: a rustle of paper when you log pages, a
-  chime when you finish a book, a little flourish when you reach your
-  daily goal, a soft thunk when you add a book and a tick when you rate
-  one. Quiet, medium or loud. They only ever answer something you just
-  did, and they are made in the browser, with nothing to download.
+- Sounds, if you turn them on: a page turning over when you log pages (a
+  riffle of a few after a long sitting: more pages read, more pages
+  turn), a soft wooden thud when you put a book on a shelf or close a
+  book's page back into the library or the reading room, a chime when you
+  finish a book, a little flourish when you reach your daily goal, a soft
+  thunk when you add a book and a tick when you rate one. Quiet, medium or
+  loud, and each one can be turned off on its own (Preferences > Sound,
+  where each also plays for you to hear). They only ever answer something
+  you just did, and they are made in the browser, with nothing to
+  download.
 - Install MyReads on your phone's home screen like an app. It opens
   offline too ([Without a connection](#without-a-connection)).
 

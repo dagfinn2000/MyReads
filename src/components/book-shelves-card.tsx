@@ -7,6 +7,7 @@ import { createShelf, toggleBookShelf } from "@/lib/actions/shelves";
 import type { ActionState } from "@/lib/actions/helpers";
 import { submitKeepingInput } from "@/lib/submit-form";
 import { usePreferences } from "@/components/preferences-provider";
+import { useSound } from "@/components/sounds";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -49,6 +50,7 @@ export function BookShelvesCard({
   smartShelves?: { id: string; name: string }[];
 }) {
   const { shelvesCard } = usePreferences();
+  const sound = useSound();
   const [pendingIds, setOptimistic] = useOptimistic(
     memberIds,
     (ids: string[], toggle: { shelfId: string; member: boolean }) =>
@@ -76,6 +78,8 @@ export function BookShelvesCard({
 
   function toggle(shelfId: string, member: boolean) {
     setKept((k) => (k.has(shelfId) ? k : new Set(k).add(shelfId)));
+    // Onto the shelf with a soft thud, as the box is ticked.
+    if (member) sound("shelved");
     startTransition(async () => {
       setOptimistic({ shelfId, member });
       await toggleBookShelf(bookId, shelfId, member);

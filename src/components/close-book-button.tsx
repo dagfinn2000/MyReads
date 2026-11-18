@@ -9,6 +9,7 @@ import {
   previousEntryIs,
   readLibraryReturn,
 } from "@/lib/library-return";
+import { useSound } from "@/components/sounds";
 import { Button } from "@/components/ui/button";
 
 /** The note only changes as a book link is followed, which mounts a new page
@@ -27,8 +28,9 @@ function isEditable(el: Element | null): boolean {
  * The X on a book's page, shown when the book was opened from the library
  * or the reading room (lib/library-return.ts). It goes back to the library with the same
  * filters and scroll position, and the cover flies back into its card
- * (lib/cover-flight.ts). Escape does the same, unless a menu or dialog is
- * open or the cursor is in a text field.
+ * (lib/cover-flight.ts), landing with a soft thud if sounds are on. Escape
+ * does the same, unless a menu or dialog is open or the cursor is in a text
+ * field.
  *
  * Rendered on the server as nothing: the note is in this tab's storage, so
  * the X appears once the page is running in the browser.
@@ -38,13 +40,17 @@ export function CloseBookButton({ bookId }: { bookId: string }) {
   const raw = useSyncExternalStore(subscribe, readLibraryReturn, () => null);
   const back = parseLibraryReturn(raw, bookId);
   const closing = useRef(false);
+  const sound = useSound();
 
   const close = () => {
     if (!back || closing.current) return;
     closing.current = true;
     const historyBack = previousEntryIs(back.href);
-    flyCoverHome(back, () =>
-      historyBack ? router.back() : router.push(back.href, { scroll: false }),
+    flyCoverHome(
+      back,
+      () => (historyBack ? router.back() : router.push(back.href, { scroll: false })),
+      // Back on its shelf with a soft thud.
+      () => sound("shelved"),
     );
   };
 

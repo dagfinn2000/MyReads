@@ -1,6 +1,14 @@
 import { describe, expect, it, vi } from "vitest";
 import { playSynth } from "@/lib/sound-synth";
-import { EVENT_SOUNDS, SOUND_VOLUMES, VOLUME_GAIN, soundFor, type SoundName } from "@/lib/sounds";
+import {
+  EVENT_SOUNDS,
+  MOST_TURNS,
+  SOUND_VOLUMES,
+  VOLUME_GAIN,
+  pageTurns,
+  soundFor,
+  type SoundName,
+} from "@/lib/sounds";
 
 describe("soundFor", () => {
   it("plays nothing with sounds off", () => {
@@ -11,11 +19,27 @@ describe("soundFor", () => {
     expect(soundFor("logged", { sounds: "on", soundVolume: "quiet" })).toEqual({
       name: "rustle",
       gain: VOLUME_GAIN.quiet,
+      turns: 1,
     });
+    expect(soundFor("shelved", { sounds: "on", soundVolume: "medium" })?.name).toBe("thud");
     expect(soundFor("finished", { sounds: "on", soundVolume: "loud" })?.name).toBe("chime");
     expect(soundFor("goal", { sounds: "on", soundVolume: "medium" })?.name).toBe("flourish");
     expect(soundFor("added", { sounds: "on", soundVolume: "medium" })?.name).toBe("thunk");
     expect(soundFor("rated", { sounds: "on", soundVolume: "medium" })?.name).toBe("tick");
+  });
+
+  it("keeps quiet a sound turned off, and plays the rest", () => {
+    const prefs = { sounds: "on" as const, soundVolume: "medium" as const, mutedSounds: ["shelved" as const] };
+    expect(soundFor("shelved", prefs)).toBeNull();
+    expect(soundFor("logged", prefs)?.name).toBe("rustle");
+  });
+
+  it("turns more pages the more were read, up to a riffle of five", () => {
+    expect([null, -12, 0, 4, 9, 10, 24, 25, 49, 50, 99, 100, 640].map(pageTurns)).toEqual([
+      1, 1, 1, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5,
+    ]);
+    expect(soundFor("logged", { sounds: "on", soundVolume: "loud" }, { pages: 60 })?.turns).toBe(4);
+    expect(soundFor("finished", { sounds: "on", soundVolume: "loud" }, { pages: 60 })?.turns).toBeUndefined();
   });
 
   it("gets louder from quiet to loud, and never past full", () => {
@@ -82,6 +106,13 @@ describe("playSynth", () => {
     const { ctx, stops } = fakeContext();
     playSynth(ctx, name, VOLUME_GAIN.loud);
     expect(stops.length).toBeGreaterThan(0);
+    expect(Math.max(...stops)).toBeLessThanOrEqual(1);
+  });
+
+  it("a riffle of the most pages is still over within a second", () => {
+    const { ctx, stops } = fakeContext();
+    playSynth(ctx, "rustle", VOLUME_GAIN.loud, MOST_TURNS);
+    expect(stops.length).toBeGreaterThan(9);
     expect(Math.max(...stops)).toBeLessThanOrEqual(1);
   });
 

@@ -11,7 +11,7 @@ import { moveId, orderByIds } from "@/lib/library-order";
 import { topBarLinks } from "@/lib/nav";
 import { SAVED_VIEW_NAME_MAX } from "@/lib/saved-views";
 import { REMINDER_TIMES, WEEKDAY_SHORT, formatClock, weekdaysInOrder } from "@/lib/reminders";
-import type { SoundVolume } from "@/lib/sounds";
+import { SOUND_EVENTS, type SoundEvent, type SoundVolume } from "@/lib/sounds";
 import {
   FORMAT_LABELS,
   OWNERSHIP_LABELS,
@@ -87,6 +87,16 @@ function isHideableNav(item: NavItem): item is HideableNav {
 function isOptionalNav(item: NavItem): item is OptionalNav {
   return (OPTIONAL_NAV as readonly NavItem[]).includes(item);
 }
+
+/** Each sound in Preferences > Sound, and what it sounds like. */
+const SOUND_LABELS: Record<SoundEvent, [string, string]> = {
+  logged: ["Logging pages", "a page turning, or a riffle of them after a long sitting"],
+  shelved: ["Putting a book on a shelf", "a soft thud, also as a closed book lands back in its place"],
+  finished: ["Finishing a book", "a chime"],
+  goal: ["Reaching your daily goal", "a flourish"],
+  added: ["Adding a book", "a thunk"],
+  rated: ["Rating a book", "a tick"],
+};
 
 const ACCENT_LABELS: Record<Accent, string> = {
   theme: "Theme default",
@@ -1092,7 +1102,7 @@ export function PreferencesForm({
       <Section title="Sound" id="sound">
         <Choice
           label="Sounds"
-          hint="Soft sounds when you log pages, finish a book, reach your daily goal, add a book or rate one. Only for what you do, never on their own."
+          hint="Soft sounds when you log pages, put a book on a shelf, finish a book, reach your daily goal, add a book or rate one. Only for what you do, never on their own."
           value={prefs.sounds}
           options={[
             { value: "off", label: "Off" },
@@ -1122,6 +1132,42 @@ export function PreferencesForm({
             </Button>
           </div>
         </div>
+        {prefs.sounds === "on" && (
+          <div className="grid gap-1.5 sm:grid-cols-[14rem_1fr] sm:gap-4">
+            <div>
+              <p className="text-sm font-medium">Which sounds</p>
+              <p className="text-xs text-muted-foreground">Turn one off and the rest still play.</p>
+            </div>
+            <ul className="grid gap-1">
+              {SOUND_EVENTS.map((event) => (
+                <li key={event} className="flex items-center justify-between gap-2 sm:justify-start">
+                  <label className="flex items-start gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={!prefs.mutedSounds.includes(event)}
+                      onChange={(e) => update({ mutedSounds: toggleIn(prefs.mutedSounds, event, !e.target.checked) })}
+                      className="mt-0.5 size-4 shrink-0 accent-primary"
+                    />
+                    <span>
+                      {SOUND_LABELS[event][0]}
+                      <span className="text-muted-foreground">: {SOUND_LABELS[event][1]}</span>
+                    </span>
+                  </label>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    aria-label={`Hear it: ${SOUND_LABELS[event][0].toLowerCase()}`}
+                    title="Hear it"
+                    onClick={() => playSample(prefs.soundVolume, event)}
+                  >
+                    <Volume2 />
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </Section>
 
       <Section title="Text">

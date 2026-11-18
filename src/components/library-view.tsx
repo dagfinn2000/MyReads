@@ -307,6 +307,7 @@ export function LibraryView({
       } else {
         setMessage(`Updated ${booksLabel(res.count ?? 0)}.`);
         if (status.split(":")[0] === ReadingStatus.READ && res.count) sound("finished");
+        else if (shelfAction === "add" && shelfTarget && res.count) sound("shelved");
         clearSelection();
         // Apply is disabled with nothing selected; focus goes to how it went
         // rather than falling to the page. The action's reply brings the
