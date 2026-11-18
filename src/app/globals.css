@@ -9428,6 +9428,72 @@ html[data-shelf-wear="off"] .spine-wear {
   --rubbed: 0.34;
 }
 
+/* ── Dog-ears ──────────────────────────────────────────────────────────────
+   A book the reader stopped reading has its top corner folded down to keep
+   the place (DogEar in components/book-card.tsx): the corner of the cover
+   is turned in along a diagonal, so the first page shows in the corner it
+   left (::before, the page colour 3D covers use, shaded where the fold
+   overhangs it) and the flap, its pale inside up, lies across the cover
+   below the fold (::after: brightest where it bends, a little greyer at the
+   tip), with a soft shadow under its edges. Drawn over the stickers, as a
+   sticker on that corner would be folded under. Under the pointer the flap
+   lifts a little off the cover, turning about the fold, while animations
+   are allowed; at rest it has no transform at all (see the tilt note
+   above). "Dog-eared corners" in Preferences (data-dog-ears) turns it off. */
+html[data-dog-ears="off"] .cover-dogear {
+  display: none;
+}
+.cover-dogear {
+  --flap-bend: #fff;
+  --flap-in: #fbfaf6;
+  --flap-tip: #e3ded3;
+  --fold-shade: rgb(60 44 20);
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: clamp(0.55rem, 17cqi, 2.6rem);
+  aspect-ratio: 1;
+  filter: drop-shadow(-0.5px 0.5px 0 rgb(0 0 0 / 0.22)) drop-shadow(-1px 2px 2px rgb(0 0 0 / 0.28));
+}
+html.dark .cover-dogear {
+  --flap-bend: #efede8;
+  --flap-in: #e2ddd3;
+  --flap-tip: #bfb8aa;
+  filter: drop-shadow(-0.5px 0.5px 0 rgb(0 0 0 / 0.4)) drop-shadow(-1px 2px 2px rgb(0 0 0 / 0.45));
+}
+.cover-dogear::before,
+.cover-dogear::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+/* The page lies a cover's thickness below the fold, which shades it in a
+   thin line along the crease. */
+.cover-dogear::before {
+  background: linear-gradient(
+    to bottom left,
+    var(--cover-pages) 30%,
+    color-mix(in oklab, var(--cover-pages), var(--fold-shade) 12%) 44%,
+    color-mix(in oklab, var(--cover-pages), var(--fold-shade) 38%) 50%
+  );
+  clip-path: polygon(0 0, 100% 0, 100% 100%);
+}
+/* The flap's tip was the cover's rounded corner. */
+.cover-dogear::after {
+  background: linear-gradient(to bottom left, var(--flap-bend) 50%, var(--flap-in) 57%, var(--flap-tip));
+  clip-path: polygon(0 0, 100% 100%, 0 100%);
+  border-bottom-left-radius: min(var(--radius-md, 0.375rem), 22%);
+  transform-origin: 50% 50%;
+}
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-motion="off"]) .cover-dogear::after {
+    transition: transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  html:not([data-motion="off"]) :is(a, .book-cover):hover .cover-dogear::after {
+    transform: perspective(6rem) rotate3d(1, 1, 0, -28deg);
+  }
+}
+
 /* ── Stickers ──────────────────────────────────────────────────────────────
    Stickers and stamps pinned on a cover (components/cover-stickers.tsx):
    each about a third of the cover's width, a little off straight, the

@@ -286,6 +286,12 @@ page by page.
   lies along the tops of the books and favourites have cracked spines.
   Point at a cover to see why. Preferences > Appearance can keep every
   book like new.
+- **Dog-eared corners.** A book you stopped reading has its top corner
+  folded down, to keep your place for another go: the flap of the cover
+  lies across it with its pale inside up, the first page shows in the
+  corner, and pointing at it says the page you stopped at. With animations
+  on the flap lifts a little under the pointer. Preferences > Appearance
+  can leave the corners flat.
 - **Stickers on covers.** Pin stickers and stamps on a book's cover from
   its page (the Stickers button under the cover): Signed, First edition, A
   gift, Re-read, Loved, Book club, Award winner, Bargain, Rare and Holiday

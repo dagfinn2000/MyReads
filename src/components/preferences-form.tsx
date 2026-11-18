@@ -132,6 +132,7 @@ const HTML_ATTRIBUTES: Partial<Record<keyof Preferences, string>> = {
   coverTilt: "data-cover-tilt",
   progressRibbon: "data-ribbon",
   shelfWear: "data-shelf-wear",
+  dogEars: "data-dog-ears",
   bookBackdrop: "data-book-backdrop",
   bookOpening: "data-book-opening",
   timeOfDay: "data-time-light",
@@ -971,6 +972,16 @@ export function PreferencesForm({
             { value: "off", label: "Keep every book like new" },
           ]}
           onChange={(v) => update({ shelfWear: v })}
+        />
+        <Choice
+          label="Dog-eared corners"
+          hint="A book you stopped reading has its top corner folded down, to keep your place for another go. The page you stopped at shows under the pointer."
+          value={prefs.dogEars}
+          options={[
+            { value: "on", label: "Fold the corner" },
+            { value: "off", label: "Leave the corners flat" },
+          ]}
+          onChange={(v) => update({ dogEars: v })}
         />
         <Choice
           label="Corners"

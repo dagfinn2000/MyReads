@@ -103,7 +103,11 @@ export function StoppedCard({ summary: s, fmt }: { summary: StopSummary; fmt: (n
               {s.anotherGo.map((b) => (
                 <li key={b.id} className="w-16 shrink-0">
                   <BookLink bookId={b.id} className="group grid gap-1" title={b.title}>
-                    <BookCover book={b} className="aspect-[2/3] w-16" />
+                    <BookCover
+                      book={b}
+                      className="aspect-[2/3] w-16"
+                      stopped={{ page: b.currentPage, of: b.pageCount }}
+                    />
                     <span className="line-clamp-2 text-xs leading-tight group-hover:underline">{b.title}</span>
                   </BookLink>
                 </li>

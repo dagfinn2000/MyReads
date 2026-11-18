@@ -22,7 +22,7 @@ import {
 } from "@/lib/display";
 import { AuthorLinks } from "@/components/author-links";
 import { formatLength } from "@/lib/progress-units";
-import { shelfWear } from "@/lib/shelf-wear";
+import { shelfWear, stoppedAt } from "@/lib/shelf-wear";
 import { BookBackdrop, BookCover, readingAt } from "@/components/book-card";
 import { BookPageCover } from "@/components/book-page-cover";
 import { BookDescription } from "@/components/book-description";
@@ -247,6 +247,7 @@ export default async function BookDetailPage({
           bookId={book.id}
           book={{ title: book.title, coverUrl: book.coverUrl, authors: book.authors }}
           reading={readingAt(book)}
+          stopped={stoppedAt(book)}
           wear={wear}
           stickers={book.stickers}
         >
