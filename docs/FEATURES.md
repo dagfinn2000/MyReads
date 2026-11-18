@@ -298,6 +298,10 @@ page by page.
   books you're reading, and books on your wishlist, lent out or given away
   keep their place as an outline. Point at a spine and it slides out a
   little.
+- A book you're reading is in its full colour only as far up its spine as
+  you've read, and pale grey above, like a glass filling up; as the
+  library opens, the colour rises to the mark. Preferences > Appearance
+  can keep every spine in full colour.
 - Save the searches and filters you use often as views, and open the
   library on one of them if you like. A view keeps the sort and grouping
   too; a smart shelf keeps only which books.
@@ -1175,8 +1179,9 @@ On the Account page:
 - The accent colour, text size, a serif font for reviews and quotes, book
   typography, the font for headings and how round the corners are (or as the theme has
   them: a few themes have their own), flat, raised or frosted
-  cards, the background texture, and a wash of the cover's colours behind
-  the top of each book's page.
+  cards, the background texture, a wash of the cover's colours behind
+  the top of each book's page, and whether spines fill with colour as you
+  read.
 - Animations on or off, whether pages turn or fade, how a finished book
   is celebrated, whether the moving backgrounds move, and whether covers
   follow the pointer.

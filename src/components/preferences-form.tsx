@@ -122,6 +122,7 @@ const HTML_ATTRIBUTES: Partial<Record<keyof Preferences, string>> = {
   progressRibbon: "data-ribbon",
   shelfWear: "data-shelf-wear",
   bookBackdrop: "data-book-backdrop",
+  spineFill: "data-spine-fill",
   inkStats: "data-ink-stats",
 };
 
@@ -926,6 +927,16 @@ export function PreferencesForm({
             { value: "bar", label: "A plain bar under the cover" },
           ]}
           onChange={(v) => update({ progressRibbon: v })}
+        />
+        <Choice
+          label="Reading progress on spines"
+          hint="In the library’s Spines view, a book you’re reading is in full colour only as far up as you’ve read, and fills up to there as the shelf opens."
+          value={prefs.spineFill}
+          options={[
+            { value: "on", label: "Fill with colour as I read" },
+            { value: "off", label: "Full colour, with a bookmark" },
+          ]}
+          onChange={(v) => update({ spineFill: v })}
         />
         <Choice
           label="Shelf wear"

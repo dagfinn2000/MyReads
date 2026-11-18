@@ -219,6 +219,12 @@ export const SHELF_WEARS = ["on", "off"] as const;
  *  stats"), or simply show. Only while animations are allowed. */
 export const INK_STATS = ["on", "off"] as const;
 
+/** Whether a book being read fills with its colour in the Spines view as far
+ *  up as the reader has got, rising to it as the shelf opens
+ *  (components/book-spine.tsx, globals.css "Spines"), or keeps its colour
+ *  all the way up with just the bookmark. */
+export const SPINE_FILLS = ["on", "off"] as const;
+
 /** Colour steps for the reading calendar (see lib/heatmap.ts). */
 export const HEATMAP_SCALES = ["standard", "gentle", "heavy", "auto"] as const;
 
@@ -404,6 +410,7 @@ export type CoverTilt = (typeof COVER_TILTS)[number];
 export type ProgressRibbon = (typeof PROGRESS_RIBBONS)[number];
 export type ShelfWearSetting = (typeof SHELF_WEARS)[number];
 export type HeatmapScale = (typeof HEATMAP_SCALES)[number];
+export type SpineFill = (typeof SPINE_FILLS)[number];
 export type InkStats = (typeof INK_STATS)[number];
 export type StartPage = (typeof START_PAGES)[number];
 export type NavItem = (typeof NAV_ITEMS)[number];
@@ -492,6 +499,7 @@ export type Preferences = {
   coverTilt: CoverTilt;
   progressRibbon: ProgressRibbon;
   shelfWear: ShelfWearSetting;
+  spineFill: SpineFill;
   bookBackdrop: BookBackdrop;
   /** Themes for parts of the app (lib/themes.ts THEME_PARTS), as stored
    *  theme settings. A part left out shows the theme used everywhere. */
@@ -690,6 +698,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
   coverTilt: "on",
   progressRibbon: "crimson",
   shelfWear: "on",
+  spineFill: "on",
   bookBackdrop: "cover",
   partThemes: {},
   ownCss: "",
@@ -1034,6 +1043,7 @@ export function parsePreferences(raw: unknown): Preferences {
     coverTilt: pick(COVER_TILTS, obj.coverTilt, d.coverTilt),
     progressRibbon: pick(PROGRESS_RIBBONS, obj.progressRibbon, d.progressRibbon),
     shelfWear: pick(SHELF_WEARS, obj.shelfWear, d.shelfWear),
+    spineFill: pick(SPINE_FILLS, obj.spineFill, d.spineFill),
     bookBackdrop: pick(BOOK_BACKDROPS, obj.bookBackdrop, d.bookBackdrop),
     partThemes: parsePartThemes(obj.partThemes),
     ownCss: parseOwnCss(obj.ownCss),

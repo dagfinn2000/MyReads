@@ -7,14 +7,15 @@ import { usePreferences } from "@/components/preferences-provider";
 import { drawnSpineHex, spineAuthor, spineInk, spineShape } from "@/lib/book-spine";
 import { bookStatusName } from "@/lib/statuses";
 import { dustGrain } from "@/lib/shelf-wear";
-import type { CoverWear } from "@/components/book-card";
+import { readingAt, type CoverWear } from "@/components/book-card";
 import { cn } from "@/lib/utils";
 
 /** What a spine needs to know about its book. */
 export type SpineBook = Pick<
   Book,
   "id" | "title" | "authors" | "coverUrl" | "pageCount" | "status"
-> & {
+> &
+  Partial<Pick<Book, "currentPage">> & {
   statusKey?: string | null;
   ownership?: BookOwnership;
   /** Lent out right now. */
@@ -32,9 +33,11 @@ export function spineColourOf(book: Pick<SpineBook, "title" | "coverUrl">, known
  * the shelf on a Year in review (globals.css, "Spines"). Its width comes
  * from the page count and its height and binding from the title
  * (lib/book-spine.ts); the title runs down it with the author's surname at
- * the foot. A book being read has a bookmark peeking out of the top, and one
- * on the wishlist, lent out or given away keeps its place as an outline, as
- * in the reading room.
+ * the foot. A book being read has a bookmark peeking out of the top and is
+ * in its full colour only as far up as the reader has got, filling up to
+ * there as the shelf opens (unless Preferences turns that off). One on the
+ * wishlist, lent out or given away keeps its place as an outline, as in the
+ * reading room.
  *
  * The link itself is what flies to the book page's cover when clicked
  * (`data-flight-cover`, components/book-link.tsx).
@@ -59,9 +62,12 @@ export function BookSpine({
     book.ownership === BookOwnership.GIVEN_AWAY ||
     !!book.lentOut;
   const reading = book.status === ReadingStatus.READING;
+  const at = readingAt({ ...book, currentPage: book.currentPage ?? null });
+  const read = at ? Math.min(1, Math.max(0, at.page / at.of)) : null;
   const author = book.authors[0] ? spineAuthor(book.authors[0]) : "";
   const byline = book.authors.length ? `, by ${book.authors.join(", ")}` : "";
   const notes = [bookStatusName(book, prefs)];
+  if (at) notes.push(`page ${at.page} of ${at.of}`);
   if (book.ownership === BookOwnership.WISHLIST) notes.push("on your wishlist");
   else if (book.ownership === BookOwnership.GIVEN_AWAY) notes.push("given away");
   else if (book.lentOut) notes.push("lent out");
@@ -93,6 +99,17 @@ export function BookSpine({
       >
         <span className="spine-title">{book.title}</span>
         {author && <span className="spine-author">{author}</span>}
+        {read != null && !away && (
+          // The colour not yet come in above where the reader is: a grey
+          // of it, and a pale wash (globals.css, "Spines").
+          <>
+            <span className="spine-unread" style={{ "--read": read } as React.CSSProperties} />
+            <span
+              className="spine-unread spine-unread-wash"
+              style={{ "--read": read } as React.CSSProperties}
+            />
+          </>
+        )}
         {(!!book.dust || !!book.worn) && (
           <span
             className="spine-wear"
