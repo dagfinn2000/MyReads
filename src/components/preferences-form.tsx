@@ -940,6 +940,16 @@ export function PreferencesForm({
           onChange={(v) => update({ spineFill: v })}
         />
         <Choice
+          label="Up next on Now reading"
+          hint="A pile restacks itself when you put your list in another order."
+          value={prefs.upNextLook}
+          options={[
+            { value: "pile", label: "A pile of books, spines out" },
+            { value: "covers", label: "A row of covers" },
+          ]}
+          onChange={(v) => update({ upNextLook: v })}
+        />
+        <Choice
           label="Shelf wear"
           hint="Books untouched for a year or more gather a little dust, and ones read again and again, or rated 4½ stars or more, look well worn."
           value={prefs.shelfWear}

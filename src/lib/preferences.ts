@@ -230,6 +230,12 @@ export const SPINE_FILLS = ["on", "off"] as const;
  *  animations are allowed. */
 export const FINISH_PAGES = ["on", "off"] as const;
 
+/** How Up next shows on Now reading: as a wobbly pile of books lying spine
+ *  out, the reader's list on one pile and the suggestions on another,
+ *  which restacks when the list is put in another order
+ *  (components/up-next-pile.tsx), or as a row of covers. */
+export const UP_NEXT_LOOKS = ["pile", "covers"] as const;
+
 /** Colour steps for the reading calendar (see lib/heatmap.ts). */
 export const HEATMAP_SCALES = ["standard", "gentle", "heavy", "auto"] as const;
 
@@ -415,6 +421,7 @@ export type CoverTilt = (typeof COVER_TILTS)[number];
 export type ProgressRibbon = (typeof PROGRESS_RIBBONS)[number];
 export type ShelfWearSetting = (typeof SHELF_WEARS)[number];
 export type HeatmapScale = (typeof HEATMAP_SCALES)[number];
+export type UpNextLook = (typeof UP_NEXT_LOOKS)[number];
 export type FinishPages = (typeof FINISH_PAGES)[number];
 export type SpineFill = (typeof SPINE_FILLS)[number];
 export type InkStats = (typeof INK_STATS)[number];
@@ -507,6 +514,7 @@ export type Preferences = {
   progressRibbon: ProgressRibbon;
   shelfWear: ShelfWearSetting;
   spineFill: SpineFill;
+  upNextLook: UpNextLook;
   bookBackdrop: BookBackdrop;
   /** Themes for parts of the app (lib/themes.ts THEME_PARTS), as stored
    *  theme settings. A part left out shows the theme used everywhere. */
@@ -707,6 +715,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
   progressRibbon: "crimson",
   shelfWear: "on",
   spineFill: "on",
+  upNextLook: "pile",
   bookBackdrop: "cover",
   partThemes: {},
   ownCss: "",
@@ -1053,6 +1062,7 @@ export function parsePreferences(raw: unknown): Preferences {
     progressRibbon: pick(PROGRESS_RIBBONS, obj.progressRibbon, d.progressRibbon),
     shelfWear: pick(SHELF_WEARS, obj.shelfWear, d.shelfWear),
     spineFill: pick(SPINE_FILLS, obj.spineFill, d.spineFill),
+    upNextLook: pick(UP_NEXT_LOOKS, obj.upNextLook, d.upNextLook),
     bookBackdrop: pick(BOOK_BACKDROPS, obj.bookBackdrop, d.bookBackdrop),
     partThemes: parsePartThemes(obj.partThemes),
     ownCss: parseOwnCss(obj.ownCss),

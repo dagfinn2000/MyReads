@@ -135,6 +135,13 @@ page by page.
   reading, then the books you added last). Starting or finishing a book
   takes it off, and you can take one off yourself on its page or in Edit
   list.
+- Up next shows as books piled on a table, spines out and never quite
+  straight: your list on one pile with the next to read on top, and the
+  suggestions on another. The books drop onto the piles one by one as they
+  come into view, wobbling as they land, and when you put your list in
+  another order the pile restacks as Edit list closes, a book going up
+  pulled out to the side and put back on. Preferences > Appearance can
+  show a row of covers instead.
 - **On this day.** Now reading remembers what you finished or started on
   today's date in earlier years, and a quote you saved on it.
 
@@ -1185,8 +1192,8 @@ On the Account page:
   typography, the font for headings and how round the corners are (or as the theme has
   them: a few themes have their own), flat, raised or frosted
   cards, the background texture, a wash of the cover's colours behind
-  the top of each book's page, and whether spines fill with colour as you
-  read.
+  the top of each book's page, whether spines fill with colour as you
+  read, and whether Up next is a pile of books or a row of covers.
 - Animations on or off, whether pages turn or fade, how a finished book
   is celebrated and whether loose pages flutter down, whether the moving
   backgrounds move, and whether covers follow the pointer.
