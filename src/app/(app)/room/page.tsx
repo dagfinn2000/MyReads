@@ -8,6 +8,7 @@ import { caseCount, shelve, spineFor, type RoomBook } from "@/lib/room";
 import { bookStatusName } from "@/lib/statuses";
 import { RoomView } from "@/components/room-view";
 import { RoomSwitch } from "@/components/room-switch";
+import { CANDLE_MINUTES } from "@/components/room-candle";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Reading room · MyReads" };
@@ -135,6 +136,9 @@ export default async function ReadingRoomPage() {
         rooms={prefs.roomRooms}
         beside={prefs.roomBeside}
         extras={prefs.roomExtras}
+        candleMinutes={
+          prefs.roomCandle ? (prefs.dailyGoal === "minutes" ? prefs.dailyGoalMinutes : CANDLE_MINUTES) : null
+        }
         summary={
           books.length > 0
             ? `${books.length === 1 ? "1 book" : `${formatNumber(books.length, prefs)} books`} on ${

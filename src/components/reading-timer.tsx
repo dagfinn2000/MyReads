@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useState, useSyncExternalStore } from "react";
+import { useEffect, useId, useMemo, useState, useSyncExternalStore } from "react";
 import { Pause, Play, Square, Timer, X } from "lucide-react";
 import { parseDuration } from "@/lib/progress-units";
 import {
@@ -78,6 +78,47 @@ function subscribe(onChange: () => void): () => void {
     window.removeEventListener("storage", onChange);
     window.removeEventListener(CHANGED, onChange);
   };
+}
+
+/**
+ * The timer this browser has going on any book, as stored: a running one
+ * first, else the one paused or stopped with the most time on it. Raw, so
+ * the snapshot stays the same string until a timer changes. For the
+ * reading room's candle.
+ */
+function readAnyRaw(): string | null {
+  const found: string[] = [...memory.values()];
+  if (!storageBroken) {
+    try {
+      const store = window.localStorage;
+      for (let i = 0; i < store.length; i++) {
+        const key = store.key(i);
+        if (key?.startsWith(KEY_PREFIX)) found.push(store.getItem(key) ?? "");
+      }
+    } catch {
+      // As if there were none in storage; memory still counts.
+    }
+  }
+  let best: string | null = null;
+  let bestRank = -1;
+  for (const raw of found) {
+    const t = parseTimer(raw);
+    if (!t) continue;
+    // Running beats everything; then the most banked time.
+    const rank = t.runningSince != null ? Number.MAX_SAFE_INTEGER : t.banked;
+    if (rank > bestRank) {
+      best = raw;
+      bestRank = rank;
+    }
+  }
+  return best;
+}
+
+/** The reading timer going in this browser, on whichever book (see
+ *  readAnyRaw), or null when there is none. */
+export function useAnyReadingTimer(): TimerState | null {
+  const raw = useSyncExternalStore(subscribe, readAnyRaw, () => null);
+  return useMemo(() => parseTimer(raw), [raw]);
 }
 
 /** The current moment, refreshed every second while `ticking` and the page

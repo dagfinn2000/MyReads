@@ -1327,6 +1327,19 @@ export function PreferencesForm({
             onChange={(avatarShown) => update({ avatarShown })}
           />
         )}
+        {!prefs.hiddenNav.includes("room") && (
+          <div className="grid gap-1">
+            <Toggle
+              label="Light a candle while the reading timer runs"
+              checked={prefs.roomCandle}
+              onChange={(roomCandle) => update({ roomCandle })}
+            />
+            <p className="pl-6 text-xs text-muted-foreground">
+              It stands on the table by the armchair and burns down as you read: over your daily goal when
+              that&apos;s in minutes, otherwise over an hour. Pausing the timer snuffs it out.
+            </p>
+          </div>
+        )}
       </Section>
 
       <Section title="Book page" id="book-page">

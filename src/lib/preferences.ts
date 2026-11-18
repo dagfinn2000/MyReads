@@ -695,6 +695,9 @@ export type Preferences = {
   roomBeside: RoomKind[];
   /** Furniture added from the catalogue (lib/room.ts). */
   roomExtras: Extra[];
+  /** A candle on the side table that burns while the reading timer runs
+   *  (components/room-candle.ts). */
+  roomCandle: boolean;
   // The reader's avatar in the room (lib/avatar.ts)
   /** Whether the avatar is in the room at all. */
   avatarShown: boolean;
@@ -830,6 +833,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
   roomRooms: [],
   roomBeside: [],
   roomExtras: [],
+  roomCandle: true,
   avatarShown: true,
   avatar: DEFAULT_AVATAR,
   avatarLooks: [],
@@ -1191,6 +1195,7 @@ export function parsePreferences(raw: unknown): Preferences {
     roomRooms: pickList(ROOMS, obj.roomRooms),
     roomBeside: pickList(ROOMS, obj.roomBeside),
     roomExtras: pickList(EXTRAS, obj.roomExtras),
+    roomCandle: bool(obj.roomCandle, d.roomCandle),
     avatarShown: bool(obj.avatarShown, d.avatarShown),
     avatar: parseAvatar(obj.avatar),
     avatarLooks: parseSavedLooks(obj.avatarLooks),

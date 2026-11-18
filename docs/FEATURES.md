@@ -409,6 +409,14 @@ The Room page draws your library as a cozy pixel-art house.
 - Light themes show it by day. Dark themes show it at night, with the
   lamps lit and the fire glowing. Either way the room takes on the light
   outside: rosy at sunrise, amber at sunset and dimmer after dark.
+- While the reading timer runs, a candle burns on the table by the
+  armchair, shorter every few minutes as you read: from a new candle to a
+  stub over your daily goal when it's in minutes, otherwise over an hour.
+  Wax runs down its side and pools in the dish as it goes, and at night it
+  casts a little pool of light. Pause or stop the timer and it's snuffed
+  out (with a wisp of smoke, if the room is open in another window); log
+  the time and it's put away. Preferences > Reading room can leave it
+  unlit.
 
 Everything below is under **Decorate** on the Room page.
 
