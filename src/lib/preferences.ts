@@ -236,6 +236,11 @@ export const FINISH_PAGES = ["on", "off"] as const;
  *  (components/up-next-pile.tsx), or as a row of covers. */
 export const UP_NEXT_LOOKS = ["pile", "covers"] as const;
 
+/** Whether the scenes behind the pages and the reading room take the light
+ *  of the time of day where the reader is: warm at dawn and dusk, dim at
+ *  night (lib/daylight.ts, components/daylight.tsx), or keep to daylight. */
+export const TIME_OF_DAY_LIGHTS = ["on", "off"] as const;
+
 /** Colour steps for the reading calendar (see lib/heatmap.ts). */
 export const HEATMAP_SCALES = ["standard", "gentle", "heavy", "auto"] as const;
 
@@ -421,6 +426,7 @@ export type CoverTilt = (typeof COVER_TILTS)[number];
 export type ProgressRibbon = (typeof PROGRESS_RIBBONS)[number];
 export type ShelfWearSetting = (typeof SHELF_WEARS)[number];
 export type HeatmapScale = (typeof HEATMAP_SCALES)[number];
+export type TimeOfDayLight = (typeof TIME_OF_DAY_LIGHTS)[number];
 export type UpNextLook = (typeof UP_NEXT_LOOKS)[number];
 export type FinishPages = (typeof FINISH_PAGES)[number];
 export type SpineFill = (typeof SPINE_FILLS)[number];
@@ -510,6 +516,7 @@ export type Preferences = {
   cardStyle: CardStyle;
   background: Background;
   backgroundMotion: BackgroundMotion;
+  timeOfDay: TimeOfDayLight;
   coverTilt: CoverTilt;
   progressRibbon: ProgressRibbon;
   shelfWear: ShelfWearSetting;
@@ -711,6 +718,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
   cardStyle: "raised",
   background: "plain",
   backgroundMotion: "moving",
+  timeOfDay: "on",
   coverTilt: "on",
   progressRibbon: "crimson",
   shelfWear: "on",
@@ -1058,6 +1066,7 @@ export function parsePreferences(raw: unknown): Preferences {
     cardStyle: pick(CARD_STYLES, obj.cardStyle, d.cardStyle),
     background: pick(BACKGROUNDS, obj.background, d.background),
     backgroundMotion: pick(BACKGROUND_MOTIONS, obj.backgroundMotion, d.backgroundMotion),
+    timeOfDay: pick(TIME_OF_DAY_LIGHTS, obj.timeOfDay, d.timeOfDay),
     coverTilt: pick(COVER_TILTS, obj.coverTilt, d.coverTilt),
     progressRibbon: pick(PROGRESS_RIBBONS, obj.progressRibbon, d.progressRibbon),
     shelfWear: pick(SHELF_WEARS, obj.shelfWear, d.shelfWear),

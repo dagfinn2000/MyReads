@@ -25,16 +25,19 @@ import {
   VT323,
 } from "next/font/google";
 import { BackgroundScene } from "@/components/background-scene";
+import { Daylight } from "@/components/daylight";
 import { IconSprite } from "@/components/icon-sprite";
 import { getCurrentUser } from "@/lib/current-user";
 import { serverTimeZone } from "@/lib/preferences";
 import { skyAt, skyStyle } from "@/lib/sky";
+import { daylightAt, daylightStyle, startsOverScene } from "@/lib/daylight";
 import { cn } from "@/lib/utils";
 import {
   DARK_THEME_IDS,
   THEME_CLASS_PREFIX,
   THEME_INIT_SCRIPT,
   THEME_SCENES,
+  THEMES,
   parseThemeSetting,
 } from "@/lib/themes";
 
@@ -164,6 +167,11 @@ export default async function RootLayout({
     prefs?.background === "sky"
       ? skyStyle(skyAt(new Date(), prefs.timeZone || serverTimeZone()))
       : undefined;
+  // The light of the time of day on scenes and the reading room, for the
+  // first paint (components/daylight.tsx keeps it going).
+  const daylight =
+    prefs?.timeOfDay === "on" ? daylightAt(new Date(), prefs.timeZone || serverTimeZone()) : null;
+  const fixedTheme = setting?.kind === "fixed" ? THEMES.find((t) => t.id === setting.id) ?? null : null;
 
   return (
     // suppressHydrationWarning: the theme init script mutates data-theme and
@@ -215,6 +223,9 @@ export default async function RootLayout({
       data-ribbon={prefs?.progressRibbon}
       data-shelf-wear={prefs?.shelfWear}
       data-book-backdrop={prefs?.bookBackdrop}
+      data-time-light={prefs?.timeOfDay}
+      data-daylight={daylight?.phase}
+      style={daylight ? (daylightStyle(daylight) as React.CSSProperties) : undefined}
       data-finish-pages={prefs?.finishPages}
       data-spine-fill={prefs?.spineFill}
       data-ink-stats={prefs?.inkStats}
@@ -240,6 +251,12 @@ export default async function RootLayout({
           timeZone={prefs?.timeZone ?? ""}
           sky={sky}
         />
+        {daylight && (
+          <Daylight
+            timeZone={prefs?.timeZone ?? ""}
+            scene={startsOverScene(prefs?.background ?? "plain", fixedTheme)}
+          />
+        )}
         {/* Star and book icons that pages repeat, drawn once. */}
         <IconSprite />
         {children}

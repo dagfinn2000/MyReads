@@ -401,7 +401,8 @@ The Room page draws your library as a cozy pixel-art house.
   armchair, a grandfather clock, a library ladder, a window seat, a
   writing desk and a gramophone.
 - Light themes show it by day. Dark themes show it at night, with the
-  lamps lit and the fire glowing.
+  lamps lit and the fire glowing. Either way the room takes on the light
+  outside: rosy at sunrise, amber at sunset and dimmer after dark.
 
 Everything below is under **Decorate** on the Room page.
 
@@ -1124,6 +1125,12 @@ tab goes away. You can also keep the house and leave the avatar out.
   star now and then shoots across the sky). The light shifts on Aurora,
   and drops ripple the pond on Ripples. Sky changes colour with the time
   of day where you are.
+- The light follows the clock where you are. Over the moving backgrounds
+  (all but Sky, which has its own) and the scene themes a rosy glow rises
+  low in the window around sunrise and an amber one around sunset, and at
+  night the dark draws in from the edges, leaving the middle where you
+  read alone. The reading room warms up and dims with it. Preferences >
+  Appearance can keep it daylight all day.
 - A little motion: pages turn or fade in, a book's cover flies to its page and
   back into its place in the library when you close it, bars fill up,
   finishing a book or reaching your goal sets off a celebration, and the
@@ -1191,7 +1198,8 @@ On the Account page:
 - The accent colour, text size, a serif font for reviews and quotes, book
   typography, the font for headings and how round the corners are (or as the theme has
   them: a few themes have their own), flat, raised or frosted
-  cards, the background texture, a wash of the cover's colours behind
+  cards, the background texture and whether it follows the light of the
+  day, a wash of the cover's colours behind
   the top of each book's page, whether spines fill with colour as you
   read, and whether Up next is a pile of books or a row of covers.
 - Animations on or off, whether pages turn or fade, how a finished book

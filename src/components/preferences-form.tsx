@@ -122,6 +122,7 @@ const HTML_ATTRIBUTES: Partial<Record<keyof Preferences, string>> = {
   progressRibbon: "data-ribbon",
   shelfWear: "data-shelf-wear",
   bookBackdrop: "data-book-backdrop",
+  timeOfDay: "data-time-light",
   finishPages: "data-finish-pages",
   spineFill: "data-spine-fill",
   inkStats: "data-ink-stats",
@@ -982,6 +983,16 @@ export function PreferencesForm({
           onChange={(v) => update({ cardStyle: v })}
         />
         <BackgroundPicker value={prefs.background} onChange={(b) => update({ background: b })} />
+        <Choice
+          label="Light through the day"
+          hint="Rain, snow, stars, aurora, ripples, the scene themes and the reading room warm up around sunrise and sunset and dim at night, by the clock where you are. Sky has its own."
+          value={prefs.timeOfDay}
+          options={[
+            { value: "on", label: "Follow the time of day" },
+            { value: "off", label: "Always daylight" },
+          ]}
+          onChange={(v) => update({ timeOfDay: v })}
+        />
         <Choice
           label="Behind a book's page"
           value={prefs.bookBackdrop}
