@@ -133,6 +133,7 @@ const HTML_ATTRIBUTES: Partial<Record<keyof Preferences, string>> = {
   progressRibbon: "data-ribbon",
   shelfWear: "data-shelf-wear",
   dogEars: "data-dog-ears",
+  coverShadows: "data-cover-shadows",
   bookBackdrop: "data-book-backdrop",
   bookOpening: "data-book-opening",
   timeOfDay: "data-time-light",
@@ -982,6 +983,16 @@ export function PreferencesForm({
             { value: "off", label: "Leave the corners flat" },
           ]}
           onChange={(v) => update({ dogEars: v })}
+        />
+        <Choice
+          label="Shadows under covers"
+          hint="A thin, even shadow under every cover, which lifts a little when the pointer is on one you can open."
+          value={prefs.coverShadows}
+          options={[
+            { value: "soft", label: "A soft shadow" },
+            { value: "off", label: "Flat on the page" },
+          ]}
+          onChange={(v) => update({ coverShadows: v })}
         />
         <Choice
           label="Corners"

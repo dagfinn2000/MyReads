@@ -9082,6 +9082,83 @@ html.page-turn-back::view-transition-old(root) {
     0 1px 2px rgb(0 0 0 / 0.14),
     0 10px 18px -12px rgb(0 0 0 / 0.55);
 }
+
+/* ── Cover shadows ─────────────────────────────────────────────────────────
+   Every cover sits on the page on a thin, even shadow, with a hairline
+   edge so a pale cover doesn't melt into a pale page. A cover you can open
+   (one inside a link) lifts a little under the pointer: it rises 2px and
+   its shadow grows softer and further below it. Library cards lift as a
+   whole instead, so their covers only keep the resting shadow; the covers
+   that stand alone (Covers only, Bookshelf: .cover-shadow) and the book
+   page's own cover (.hero-cover) keep their deeper ones, and 3D covers
+   their own. Dark pages need darker shadows to show at all. Themes that
+   draw a flat world (a terminal, a blueprint, pixels, print, tiles) keep
+   their covers flat, and themes that frame or shadow covers themselves
+   win by specificity: this is a single class.
+   "Shadows under covers: Flat on the page" in Preferences
+   (data-cover-shadows="off") leaves every cover as it was. */
+html {
+  --cover-rest:
+    0 0 0 0.5px rgb(0 0 0 / 0.08),
+    0 1px 2px rgb(0 0 0 / 0.1),
+    0 3px 8px -4px rgb(0 0 0 / 0.18);
+  --cover-lift:
+    0 0 0 0.5px rgb(0 0 0 / 0.08),
+    0 3px 6px -2px rgb(0 0 0 / 0.12),
+    0 14px 24px -12px rgb(0 0 0 / 0.38);
+}
+html.dark {
+  --cover-rest:
+    0 0 0 0.5px rgb(255 255 255 / 0.07),
+    0 1px 2px rgb(0 0 0 / 0.35),
+    0 3px 8px -4px rgb(0 0 0 / 0.5);
+  --cover-lift:
+    0 0 0 0.5px rgb(255 255 255 / 0.07),
+    0 3px 6px -2px rgb(0 0 0 / 0.4),
+    0 14px 24px -12px rgb(0 0 0 / 0.7);
+}
+:is(
+    .theme-is-desktop-95,
+    .theme-is-terminal,
+    .theme-is-terminal-light,
+    .theme-is-blueprint,
+    .theme-is-whiteprint,
+    .theme-is-newsprint,
+    .theme-is-newsprint-dark,
+    .theme-is-comic,
+    .theme-is-metro,
+    .theme-is-quest,
+    .theme-is-editor,
+    .theme-is-haiku,
+    .theme-is-bitmap,
+    .theme-is-dot-matrix,
+    .theme-is-eight-bit,
+    .theme-is-teletext,
+    .theme-is-departures
+  ) {
+  --cover-rest: none;
+  --cover-lift: none;
+}
+:where(html:not([data-cover-shadows="off"], [data-cover-3d])) .book-cover:where(:not(.cover-shadow, .hero-cover)) {
+  box-shadow: var(--cover-rest);
+}
+@media (hover: hover) {
+  :where(html:not([data-cover-shadows="off"], [data-cover-3d])) a:where(:not(.surface, .lift-cover)):hover .book-cover:where(:not(.cover-shadow, .hero-cover)) {
+    box-shadow: var(--cover-lift);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  :where(html:not([data-motion="off"], [data-cover-shadows="off"], [data-cover-3d])) a:where(:not(.surface, .lift-cover)) .book-cover:where(:not(.cover-shadow, .hero-cover)) {
+    transition:
+      box-shadow 0.25s cubic-bezier(0.2, 0.8, 0.2, 1),
+      translate 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+}
+@media (prefers-reduced-motion: no-preference) and (hover: hover) {
+  :where(html:not([data-motion="off"], [data-cover-shadows="off"], [data-cover-3d])) a:where(:not(.surface, .lift-cover)):hover .book-cover:where(:not(.cover-shadow, .hero-cover)) {
+    translate: 0 -2px;
+  }
+}
 /* Library cards and rows out of sight are skipped: the browser doesn't
    style, lay out or paint them until they come near the screen. A phone
    shows four or so of the 200, and drawing them all held up the page's
@@ -9153,13 +9230,15 @@ html.page-turn-back::view-transition-old(root) {
   html:not([data-motion="off"]):not([data-cover-tilt="off"]) [data-tilt] {
     transition:
       transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1),
-      translate 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+      translate 0.2s cubic-bezier(0.2, 0.8, 0.2, 1),
+      box-shadow 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
   }
   html:not([data-motion="off"]):not([data-cover-tilt="off"]) [data-tilt][data-tilting] {
     transform: perspective(40rem) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
     transition:
       transform 0.12s ease-out,
-      translate 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+      translate 0.2s cubic-bezier(0.2, 0.8, 0.2, 1),
+      box-shadow 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
   }
   html:not([data-motion="off"]):not([data-cover-tilt="off"]) [data-tilt]::before {
     content: "";
@@ -10733,7 +10812,8 @@ html:not(.dark) .story-day-streak {
 html[data-theme-changing] .transition,
 html[data-theme-changing] .transition-colors,
 html[data-theme-changing] .transition-shadow,
-html[data-theme-changing] .lift {
+html[data-theme-changing] .lift,
+html[data-theme-changing] .book-cover {
   transition: none !important;
 }
 

@@ -292,6 +292,12 @@ page by page.
   corner, and pointing at it says the page you stopped at. With animations
   on the flap lifts a little under the pointer. Preferences > Appearance
   can leave the corners flat.
+- **Shadows under covers.** Every cover sits on a thin, even shadow with a
+  hairline edge, so a pale cover doesn't melt into a pale page, and one
+  you can open lifts a little under the pointer as its shadow softens
+  below it. Themes with a flat look of their own (Terminal, Blueprint,
+  Desktop 95, the pixel and print themes) keep their covers flat.
+  Preferences > Appearance can lay every cover flat on the page.
 - **Stickers on covers.** Pin stickers and stamps on a book's cover from
   its page (the Stickers button under the cover): Signed, First edition, A
   gift, Re-read, Loved, Book club, Award winner, Bargain, Rare and Holiday

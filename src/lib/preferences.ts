@@ -220,6 +220,11 @@ export const SHELF_WEARS = ["on", "off"] as const;
  *  globals.css "Dog-ears"). */
 export const DOG_EARS = ["on", "off"] as const;
 
+/** Whether covers sit on a thin, soft shadow that deepens as one you can
+ *  open lifts under the pointer (globals.css "Cover shadows"), or lie flat
+ *  on the page as they used to. */
+export const COVER_SHADOWS = ["soft", "off"] as const;
+
 /** Whether the big numbers on Stats write themselves in, like ink from a pen,
  *  as they come into view (components/ink-stats.tsx, globals.css "Ink
  *  stats"), or simply show. Only while animations are allowed. */
@@ -435,6 +440,7 @@ export type CoverTilt = (typeof COVER_TILTS)[number];
 export type ProgressRibbon = (typeof PROGRESS_RIBBONS)[number];
 export type ShelfWearSetting = (typeof SHELF_WEARS)[number];
 export type DogEars = (typeof DOG_EARS)[number];
+export type CoverShadows = (typeof COVER_SHADOWS)[number];
 export type HeatmapScale = (typeof HEATMAP_SCALES)[number];
 export type BookOpening = (typeof BOOK_OPENINGS)[number];
 export type TimeOfDayLight = (typeof TIME_OF_DAY_LIGHTS)[number];
@@ -540,6 +546,7 @@ export type Preferences = {
   progressRibbon: ProgressRibbon;
   shelfWear: ShelfWearSetting;
   dogEars: DogEars;
+  coverShadows: CoverShadows;
   spineFill: SpineFill;
   upNextLook: UpNextLook;
   bookBackdrop: BookBackdrop;
@@ -751,6 +758,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
   progressRibbon: "crimson",
   shelfWear: "on",
   dogEars: "on",
+  coverShadows: "soft",
   spineFill: "on",
   upNextLook: "pile",
   bookBackdrop: "cover",
@@ -1105,6 +1113,7 @@ export function parsePreferences(raw: unknown): Preferences {
     progressRibbon: pick(PROGRESS_RIBBONS, obj.progressRibbon, d.progressRibbon),
     shelfWear: pick(SHELF_WEARS, obj.shelfWear, d.shelfWear),
     dogEars: pick(DOG_EARS, obj.dogEars, d.dogEars),
+    coverShadows: pick(COVER_SHADOWS, obj.coverShadows, d.coverShadows),
     spineFill: pick(SPINE_FILLS, obj.spineFill, d.spineFill),
     upNextLook: pick(UP_NEXT_LOOKS, obj.upNextLook, d.upNextLook),
     bookBackdrop: pick(BOOK_BACKDROPS, obj.bookBackdrop, d.bookBackdrop),

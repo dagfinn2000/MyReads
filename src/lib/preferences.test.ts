@@ -107,6 +107,9 @@ describe("parsePreferences", () => {
     expect(parsePreferences({}).dogEars).toBe("on");
     expect(parsePreferences({ dogEars: "off" }).dogEars).toBe("off");
     expect(parsePreferences({ dogEars: "folded" }).dogEars).toBe("on");
+    expect(parsePreferences({}).coverShadows).toBe("soft");
+    expect(parsePreferences({ coverShadows: "off" }).coverShadows).toBe("off");
+    expect(parsePreferences({ coverShadows: "deep" }).coverShadows).toBe("soft");
     expect(parsePreferences({ coverArt: "plain" }).coverArt).toBe("plain");
     expect(parsePreferences({ coverArt: 3 }).coverArt).toBe("drawn");
     expect(parsePreferences({ accent: "teal" }).accent).toBe("teal");
