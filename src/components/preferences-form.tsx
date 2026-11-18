@@ -134,6 +134,7 @@ const HTML_ATTRIBUTES: Partial<Record<keyof Preferences, string>> = {
   progressRibbon: "data-ribbon",
   shelfWear: "data-shelf-wear",
   dogEars: "data-dog-ears",
+  dividers: "data-dividers",
   spacing: "data-spacing",
   coverShadows: "data-cover-shadows",
   bookBackdrop: "data-book-backdrop",
@@ -373,7 +374,7 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section id={id} className="grid grid-cols-1 scroll-mt-20 gap-3 border-t pt-4 first:border-t-0 first:pt-0">
+    <section id={id} className="fine-rule grid grid-cols-1 scroll-mt-20 gap-3 border-t pt-4 first:border-t-0 first:pt-0">
       <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
         {title}
       </h3>
@@ -1005,6 +1006,16 @@ export function PreferencesForm({
             { value: "compact", label: "Compact, to see more at once" },
           ]}
           onChange={(v) => update({ spacing: v })}
+        />
+        <Choice
+          label="Dividers"
+          hint="Between the sections of a card and of this page, and before a book’s cards and Stats’ cards."
+          value={prefs.dividers}
+          options={[
+            { value: "ornament", label: "A fine line round a small lozenge" },
+            { value: "plain", label: "A plain line" },
+          ]}
+          onChange={(v) => update({ dividers: v })}
         />
         <Choice
           label="Corners"

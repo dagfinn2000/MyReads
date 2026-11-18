@@ -228,7 +228,7 @@ function Aspects({
         ))}
       </dl>
       {lean && (
-        <div className="grid gap-0.5 border-t pt-4">
+        <div className="fine-rule grid gap-0.5 border-t pt-4">
           <p className="text-sm text-muted-foreground">
             Your overall rating rises and falls most with{" "}
             <span className="font-medium text-foreground">{lean.phrase}</span>.

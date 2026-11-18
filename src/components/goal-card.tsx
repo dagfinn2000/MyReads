@@ -180,7 +180,7 @@ export function GoalCard({
         <MonthlyGoal year={year} currentYear={currentYear} monthly={monthly} prefs={prefs} />
 
         {past.length > 0 && (
-          <div className="grid gap-1.5 border-t pt-3">
+          <div className="fine-rule grid gap-1.5 border-t pt-3">
             <p className="text-xs font-medium text-muted-foreground">Past goals</p>
             {past.map((g) => (
               <div key={g.year} className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-sm">
@@ -289,7 +289,7 @@ function MonthlyGoal({
   const tally = monthsMet(months);
 
   return (
-    <div className="grid gap-3 border-t pt-4">
+    <div className="fine-rule grid gap-3 border-t pt-4">
       <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
         <p className="text-sm font-medium">
           Every month

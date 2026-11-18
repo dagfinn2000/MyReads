@@ -468,6 +468,10 @@ export default async function StatsPage({
         )}
       </div>
 
+      {/* Between the totals and the cards that go into them (globals.css,
+          "Fine dividers"). */}
+      <hr className="fine-rule fine-rule-alone" />
+
       {!hidden.has("goal") && (
         <GoalCard
           year={shownYear}

@@ -117,7 +117,7 @@ export function ChallengesCard({
         <ChallengeForm sources={sources} currentYear={currentYear} />
 
         {past.length > 0 && (
-          <div className="grid gap-1.5 border-t pt-3">
+          <div className="fine-rule grid gap-1.5 border-t pt-3">
             <p className="text-xs font-medium text-muted-foreground">Past challenges</p>
             {past.map((c) => (
               <div key={c.id} className="flex items-center gap-3 text-sm">

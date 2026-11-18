@@ -10233,6 +10233,61 @@ html[data-covers="plain"] .book-backdrop[data-drawn] {
     0 2px 4px rgb(0 0 0 / 0.12),
     0 24px 40px -20px rgb(0 0 0 / 0.55);
 }
+/* ── Fine dividers ──────────────────────────────────────────────────────────
+   The rules between sections (Preferences' sections, the parts of the goal,
+   ratings, challenges and reading cards: `fine-rule`) become a hairline
+   that fades in from each end and parts round a small lozenge in the
+   middle, the way a printed book marks a break. Short standalone ones
+   (`fine-rule-alone`) part a book's details from its cards and Stats'
+   totals from its cards. The line is drawn in the top border's own pixel,
+   so nothing moves. "Dividers: A plain line" in Preferences
+   (data-dividers="plain") keeps the full plain borders, and leaves the
+   standalone ones out. */
+html {
+  --rule: var(--border);
+  --rule-mark: color-mix(in oklab, var(--muted-foreground) 55%, transparent);
+}
+html:not([data-dividers="plain"]) .fine-rule:is(.fine-rule-alone, :not(:first-child)) {
+  position: relative;
+  border-top-color: transparent;
+  background-image: linear-gradient(
+    to right,
+    transparent,
+    var(--rule) 16%,
+    var(--rule) calc(50% - 0.875rem),
+    transparent calc(50% - 0.875rem) calc(50% + 0.875rem),
+    var(--rule) calc(50% + 0.875rem),
+    var(--rule) 84%,
+    transparent
+  );
+  background-size: 100% 1px;
+  background-position: top;
+  background-repeat: no-repeat;
+  background-origin: border-box;
+}
+html:not([data-dividers="plain"]) .fine-rule:is(.fine-rule-alone, :not(:first-child))::before {
+  content: "";
+  position: absolute;
+  top: -4px;
+  left: 50%;
+  width: 7px;
+  height: 7px;
+  margin-left: -3.5px;
+  border: 1px solid var(--rule-mark);
+  rotate: 45deg;
+  pointer-events: none;
+}
+hr.fine-rule-alone {
+  /* A rule clips what it holds by default, the lozenge too. */
+  overflow: visible;
+  width: min(100%, 24rem);
+  justify-self: center;
+  margin-inline: auto;
+}
+html[data-dividers="plain"] .fine-rule-alone {
+  display: none;
+}
+
 /* ── Calm spacing ──────────────────────────────────────────────────────────
    A book's page and Stats get room to breathe, on one steady measure: the
    details under a book's title sit 1.25rem apart, its cards and Stats'

@@ -1261,8 +1261,10 @@ On the Account page:
   day and the weather outside, a wash of the cover's colours behind
   the top of each book's page, whether spines fill with colour as you
   read, whether Up next is a pile of books or a row of covers, soft
-  shadows under covers or none, and calm or compact spacing on book pages and Stats: calm gives the cards
-  more room and one steady space from each to the next.
+  shadows under covers or none, calm or compact spacing on book pages and
+  Stats (calm gives the cards more room and one steady space from each to
+  the next), and whether the rules between sections are a fine line round
+  a small lozenge, the way a printed book marks a break, or a plain line.
 - Animations on or off, whether pages turn or crossfade and tabs fade, whether a cover opens
   like a book or flies to its page, how a finished book
   is celebrated and whether loose pages flutter down, whether the moving
