@@ -225,6 +225,7 @@ export default async function RootLayout({
       data-ribbon={prefs?.progressRibbon}
       data-shelf-wear={prefs?.shelfWear}
       data-dog-ears={prefs?.dogEars}
+      data-dividers={prefs?.dividers}
       data-spacing={prefs?.spacing}
       data-cover-shadows={prefs?.coverShadows}
       data-book-backdrop={prefs?.bookBackdrop}

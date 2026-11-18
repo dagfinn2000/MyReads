@@ -447,6 +447,9 @@ export default async function BookDetailPage({
               (globals.css, "Calm spacing"). */}
           {arranged.some(({ key }) => cards[key]) && (
             <div className="book-cards grid grid-cols-1 gap-4">
+              {/* Between the book and what you keep of it (globals.css,
+                  "Fine dividers"). */}
+              <hr className="fine-rule fine-rule-alone" />
               {arranged.map(({ key, forced }) =>
                 // A card left out here (null) gets no "shown although hidden" line.
                 forced && cards[key] ? (

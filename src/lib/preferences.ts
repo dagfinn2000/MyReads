@@ -226,6 +226,10 @@ export const SHELF_WEARS = ["on", "off"] as const;
  *  globals.css "Dog-ears"). */
 export const DOG_EARS = ["on", "off"] as const;
 
+/** The rules between sections (globals.css "Fine dividers"): a hairline
+ *  that fades at its ends round a small lozenge, or the plain full line. */
+export const DIVIDERS = ["ornament", "plain"] as const;
+
 /** How book pages and Stats are spaced (globals.css "Calm spacing"): calm,
  *  with more room between the cards and a steady rhythm down the page, or
  *  compact, as they were. */
@@ -451,6 +455,7 @@ export type CoverTilt = (typeof COVER_TILTS)[number];
 export type ProgressRibbon = (typeof PROGRESS_RIBBONS)[number];
 export type ShelfWearSetting = (typeof SHELF_WEARS)[number];
 export type DogEars = (typeof DOG_EARS)[number];
+export type Dividers = (typeof DIVIDERS)[number];
 export type Spacing = (typeof SPACINGS)[number];
 export type TabChange = (typeof TAB_CHANGES)[number];
 export type CoverShadows = (typeof COVER_SHADOWS)[number];
@@ -560,6 +565,7 @@ export type Preferences = {
   progressRibbon: ProgressRibbon;
   shelfWear: ShelfWearSetting;
   dogEars: DogEars;
+  dividers: Dividers;
   spacing: Spacing;
   coverShadows: CoverShadows;
   spineFill: SpineFill;
@@ -774,6 +780,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
   progressRibbon: "crimson",
   shelfWear: "on",
   dogEars: "on",
+  dividers: "ornament",
   spacing: "calm",
   coverShadows: "soft",
   spineFill: "on",
@@ -1131,6 +1138,7 @@ export function parsePreferences(raw: unknown): Preferences {
     progressRibbon: pick(PROGRESS_RIBBONS, obj.progressRibbon, d.progressRibbon),
     shelfWear: pick(SHELF_WEARS, obj.shelfWear, d.shelfWear),
     dogEars: pick(DOG_EARS, obj.dogEars, d.dogEars),
+    dividers: pick(DIVIDERS, obj.dividers, d.dividers),
     spacing: pick(SPACINGS, obj.spacing, d.spacing),
     coverShadows: pick(COVER_SHADOWS, obj.coverShadows, d.coverShadows),
     spineFill: pick(SPINE_FILLS, obj.spineFill, d.spineFill),

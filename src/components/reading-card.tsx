@@ -266,7 +266,7 @@ export function ReadingCard({
         </form>
 
         {progress.length > 0 && (
-          <div className="border-t pt-3">
+          <div className="fine-rule border-t pt-3">
             <ProgressLog entries={progress} book={book} />
           </div>
         )}
