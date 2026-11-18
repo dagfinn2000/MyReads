@@ -4,15 +4,17 @@ import { useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { canFlyCover, flyCover } from "@/lib/cover-flight";
+import { canOpenBook, openBook } from "@/lib/book-opening";
 import { noteBookOpened } from "@/lib/library-return";
 
 /**
- * A link to a book's page whose cover flies across to the book page when
- * clicked (lib/cover-flight.ts). The cover is the first BookCover inside
+ * A link to a book's page whose cover opens like a book as the page loads
+ * (lib/book-opening.ts), or flies across to the book page if the reader
+ * prefers (lib/cover-flight.ts). The cover is the first BookCover inside
  * the link, or the link itself when it carries `data-flight-cover` (a
- * spine in the reading room). A ctrl- or middle-click still opens a new
- * tab, and without view transitions or with animations off it is an
- * ordinary link.
+ * spine in the reading room or the Spines view, which always flies). A
+ * ctrl- or middle-click still opens a new tab, and with animations off (or,
+ * for the flight, without view transitions) it is an ordinary link.
  *
  * Followed from the library or the reading room, it also notes the way
  * back for the book page's X (lib/library-return.ts), and `data-book-link`
@@ -56,7 +58,15 @@ export function BookLink({
           link?.querySelector<HTMLElement>(".book-cover") ??
           (link?.hasAttribute("data-flight-cover") ? link : null);
         noteBookOpened(bookId, cover);
-        if (!cover || !canFlyCover()) return;
+        if (!cover) return;
+        // A cover opens like a book, unless the reader picked the flight
+        // (Preferences > Motion); a spine always flies.
+        if (cover.classList.contains("book-cover") && canOpenBook()) {
+          e.preventDefault();
+          openBook(cover, bookId, () => router.push(href));
+          return;
+        }
+        if (!canFlyCover()) return;
         e.preventDefault();
         flyCover(cover, bookId, () => router.push(href));
       }}

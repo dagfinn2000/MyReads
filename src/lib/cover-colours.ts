@@ -52,6 +52,12 @@ const subscribeColours = (fn: () => void) => {
   return () => listeners.delete(fn);
 };
 
+/** A cover's main colour if it has been read before (for the spines), or
+ *  null. For a moment's use, like a book opening (lib/book-opening.ts). */
+export function knownCoverColour(url: string): string | null {
+  return loadColours()[url] || null;
+}
+
 /** The cover's spine colour; "" when it can't be read, null when it might
  *  work another time (a network hiccup). */
 function readCover(url: string): Promise<string | null> {

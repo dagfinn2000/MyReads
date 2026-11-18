@@ -1131,10 +1131,16 @@ tab goes away. You can also keep the house and leave the avatar out.
   night the dark draws in from the edges, leaving the middle where you
   read alone. The reading room warms up and dims with it. Preferences >
   Appearance can keep it daylight all day.
-- A little motion: pages turn or fade in, a book's cover flies to its page and
-  back into its place in the library when you close it, bars fill up,
-  finishing a book or reaching your goal sets off a celebration, and the
-  reading room's fire flickers.
+- A little motion: pages turn or fade in, bars fill up, finishing a book or
+  reaching your goal sets off a celebration, and the reading room's fire
+  flickers.
+- Tap a book's cover and it opens like a real book while its page loads:
+  it lifts out of its card into the middle of the window, the front board
+  swings open on its hinge to show an endpaper printed in the cover's own
+  colour, and the half-title waits on the first page, the book's name
+  alone. Then you go into the book and its page is there. Closing the page
+  flies the cover back into its place in the library. Preferences > Motion
+  can have the cover fly to its page instead; a spine always flies.
 - The sign-in page fills its shelf as it opens: the books drop onto it one
   by one and the last tips over to lean, then the name and the form rise
   into place. While you sign in the books bob in turn until your library
@@ -1202,7 +1208,8 @@ On the Account page:
   day, a wash of the cover's colours behind
   the top of each book's page, whether spines fill with colour as you
   read, and whether Up next is a pile of books or a row of covers.
-- Animations on or off, whether pages turn or fade, how a finished book
+- Animations on or off, whether pages turn or fade, whether a cover opens
+  like a book or flies to its page, how a finished book
   is celebrated and whether loose pages flutter down, whether the moving
   backgrounds move, and whether covers follow the pointer.
 - The book page: which cards show and in what order, long descriptions in
