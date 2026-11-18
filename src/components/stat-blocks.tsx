@@ -2,6 +2,7 @@ import type { LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { MOOD_BAR, moodHref, type Mood } from "@/lib/moods";
 import { cn } from "@/lib/utils";
+import { Ink } from "@/components/ink-number";
 import { MoodIcon } from "@/components/mood-icon";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -76,7 +77,7 @@ export function StatCard({
           )}
         </div>
         <div className="mt-1 font-heading text-3xl font-semibold tracking-tight tabular-nums">
-          {children}
+          <Ink>{children}</Ink>
         </div>
         {note && <p className="mt-1 text-xs text-muted-foreground">{note}</p>}
       </CardContent>

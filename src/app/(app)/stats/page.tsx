@@ -61,6 +61,7 @@ import { ToReadPileCard } from "@/components/to-read-pile-card";
 import { YearVersusCard } from "@/components/year-versus-card";
 import { StoppedCard } from "@/components/stopped-card";
 import { Bar, Duration, MoodBar, StatCard } from "@/components/stat-blocks";
+import { InkWatcher } from "@/components/ink-stats";
 import { allMoods, bookMoods, offeredMoods } from "@/lib/moods";
 import { StatsPeriodNav } from "@/components/stats-period-nav";
 import { Stars } from "@/components/stars";
@@ -407,13 +408,14 @@ export default async function StatsPage({
 
   return (
     <div className="grid grid-cols-1 gap-6">
+      <InkWatcher />
       <div className="grid gap-3">
         <h1 className="text-2xl font-semibold tracking-tight">Stats</h1>
         <StatsPeriodNav period={period} goalYear={goalYear} />
       </div>
 
       <div className="grid gap-3">
-        <div className={`grid grid-cols-2 gap-4 max-lg:[&>:last-child:nth-child(odd)]:col-span-2 ${TOP_GRID[topCards]}`}>
+        <div className={`ink-stagger grid grid-cols-2 gap-4 max-lg:[&>:last-child:nth-child(odd)]:col-span-2 ${TOP_GRID[topCards]}`}>
           <StatCard label="Books in library" icon={LibraryBig}>{fmt(books.length)}</StatCard>
           <StatCard label={`${booksLabel} · ${words}`} icon={BookCheck} note={notes.books.join(" · ")}>
             {fmt(period === "all" ? readAllTime.books : totals.books)}

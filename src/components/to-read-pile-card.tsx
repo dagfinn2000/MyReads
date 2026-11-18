@@ -8,6 +8,7 @@ import { BookLink } from "@/components/book-link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatNumber } from "@/lib/display";
 import { PILE_AGES, pileLastsText, sinceMonth, type PileSummary } from "@/lib/to-read-pile";
+import { Ink } from "@/components/ink-number";
 
 /** The pile with the oldest waiting first, in the library. */
 const PILE_HREF = "/books?shelf=WANT_TO_READ&sort=createdAt&dir=asc";
@@ -56,7 +57,9 @@ export function ToReadPileCard({
           <div className="grid gap-6 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:gap-10">
             <div className="grid content-start gap-3">
               <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                <p className="font-heading text-3xl font-semibold tabular-nums">{fmt(pile.size)}</p>
+                <p className="font-heading text-3xl font-semibold tabular-nums">
+                  <Ink>{fmt(pile.size)}</Ink>
+                </p>
                 <p className="text-sm text-muted-foreground">
                   {pile.size === 1 ? "book waits" : "books wait"} to be read
                   {change !== 0 && (

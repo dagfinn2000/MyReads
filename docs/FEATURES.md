@@ -341,6 +341,11 @@ page by page.
   rated best for each. Once enough books are rated, it also says which of
   the three your overall rating follows most. The year in review shows the
   three averages too.
+- **Numbers written in ink:** as Stats opens, its big numbers write
+  themselves in from the left like ink from a pen, a stroke at a time, the
+  ones side by side one after another. Numbers further down wait until you
+  scroll to them. Preferences > Stats page can have them simply show, as
+  they do with animations off.
 - Decide what counts in your stats. Pages read can mean a whole book's
   pages when you finish it, or the pages you log as you go. You also
   choose whether books you stop reading count, and how audiobooks count.
@@ -1180,7 +1185,7 @@ On the Account page:
 - Which page opens first, and the top bar: its links in your own order,
   with Now reading, Check and Quotes left out or Series and Authors added if you like
   (phones get the same links, as icons). Also which cards show on the
-  Stats page.
+  Stats page, and whether its numbers write themselves in.
 - The reading room and your avatar, on or off.
 - Keyboard shortcuts on a computer, on unless you turn them off: `?` lists
   them, Ctrl+K (⌘K) opens quick find, `/` searches the library, `n` adds a

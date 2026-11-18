@@ -214,6 +214,11 @@ export const PROGRESS_RIBBONS = ["crimson", "navy", "green", "gold", "bar"] as c
  *  ones untouched for a year or more, wear on well-read favourites. */
 export const SHELF_WEARS = ["on", "off"] as const;
 
+/** Whether the big numbers on Stats write themselves in, like ink from a pen,
+ *  as they come into view (components/ink-stats.tsx, globals.css "Ink
+ *  stats"), or simply show. Only while animations are allowed. */
+export const INK_STATS = ["on", "off"] as const;
+
 /** Colour steps for the reading calendar (see lib/heatmap.ts). */
 export const HEATMAP_SCALES = ["standard", "gentle", "heavy", "auto"] as const;
 
@@ -399,6 +404,7 @@ export type CoverTilt = (typeof COVER_TILTS)[number];
 export type ProgressRibbon = (typeof PROGRESS_RIBBONS)[number];
 export type ShelfWearSetting = (typeof SHELF_WEARS)[number];
 export type HeatmapScale = (typeof HEATMAP_SCALES)[number];
+export type InkStats = (typeof INK_STATS)[number];
 export type StartPage = (typeof START_PAGES)[number];
 export type NavItem = (typeof NAV_ITEMS)[number];
 export type HideableNav = (typeof HIDEABLE_NAV)[number];
@@ -498,6 +504,7 @@ export type Preferences = {
   soundVolume: SoundVolume;
 
   heatmapScale: HeatmapScale;
+  inkStats: InkStats;
   startPage: StartPage;
   /** Every top-bar link, in the order shown. Always a full list (see
    *  parse); whether a link shows is hiddenNav's and shownNav's say. */
@@ -689,6 +696,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
   sounds: "off",
   soundVolume: "quiet",
   heatmapScale: "standard",
+  inkStats: "on",
   startPage: "library",
   navOrder: [...NAV_ITEMS],
   hiddenNav: [],
@@ -1032,6 +1040,7 @@ export function parsePreferences(raw: unknown): Preferences {
     sounds: pick(SOUND_SETTINGS, obj.sounds, d.sounds),
     soundVolume: pick(SOUND_VOLUMES, obj.soundVolume, d.soundVolume),
     heatmapScale: pick(HEATMAP_SCALES, obj.heatmapScale, d.heatmapScale),
+    inkStats: pick(INK_STATS, obj.inkStats, d.inkStats),
     startPage: pick(START_PAGES, obj.startPage, d.startPage),
     navOrder: parseNavOrder(obj.navOrder),
     hiddenNav: pickList(HIDEABLE_NAV, obj.hiddenNav),

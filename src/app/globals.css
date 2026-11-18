@@ -8614,6 +8614,77 @@ html[data-covers="plain"] .drawn-cover {
   animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
+/* ── Ink stats ─────────────────────────────────────────────────────────────
+   The big numbers on Stats write themselves in like ink from a pen
+   (components/ink-number.tsx; Preferences > Stats page, data-ink-stats).
+   A mask sweeps across each number from the left, in fits and starts the
+   way a hand writes, a stroke and a lift and the next, its edge leaning
+   like a nib's stroke and fainter where the ink is still going on. The
+   longer the number, the longer the pen takes (--ink-len, its length).
+   The mask is only there while it writes: at rest nothing is left on the
+   number. Numbers side by side (.ink-stagger) start one after another, and
+   ones out of sight wait for the reader to scroll to them
+   ([data-ink-wait], components/ink-stats.tsx). */
+.ink-number {
+  display: inline-block;
+}
+@keyframes ink-write {
+  0% {
+    mask-image: linear-gradient(100deg, #000 33.3%, rgb(0 0 0 / 0.45) 37%, transparent 40%);
+    mask-size: 300% 100%;
+    mask-repeat: no-repeat;
+    mask-position: 60% 0;
+    animation-timing-function: cubic-bezier(0.35, 0, 0.6, 1);
+  }
+  24% {
+    mask-position: 42% 0;
+    animation-timing-function: linear;
+  }
+  31% {
+    mask-position: 40.5% 0;
+    animation-timing-function: cubic-bezier(0.35, 0, 0.6, 1);
+  }
+  57% {
+    mask-position: 23% 0;
+    animation-timing-function: linear;
+  }
+  64% {
+    mask-position: 21.5% 0;
+    animation-timing-function: cubic-bezier(0.35, 0, 0.5, 1);
+  }
+  100% {
+    mask-image: linear-gradient(100deg, #000 33.3%, rgb(0 0 0 / 0.45) 37%, transparent 40%);
+    mask-size: 300% 100%;
+    mask-repeat: no-repeat;
+    mask-position: 0% 0;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  html[data-ink-stats="on"]:not([data-motion="off"]) .ink-number {
+    animation: ink-write min(calc(0.3s + var(--ink-len, 3) * 0.14s), 1.7s) linear backwards;
+    animation-delay: calc(0.12s + var(--ink-delay, 0s));
+  }
+  html[data-ink-stats="on"]:not([data-motion="off"]) .ink-number[data-ink-wait] {
+    animation: none;
+    opacity: 0;
+  }
+  .ink-stagger > :nth-child(2) {
+    --ink-delay: 0.12s;
+  }
+  .ink-stagger > :nth-child(3) {
+    --ink-delay: 0.24s;
+  }
+  .ink-stagger > :nth-child(4) {
+    --ink-delay: 0.36s;
+  }
+  .ink-stagger > :nth-child(5) {
+    --ink-delay: 0.48s;
+  }
+  .ink-stagger > :nth-child(n + 6) {
+    --ink-delay: 0.6s;
+  }
+}
+
 /* ── Page turns ────────────────────────────────────────────────────────────
    Moving to another section from the top bar turns the page like a book's
    (lib/page-turn.ts). The browser holds a picture of the old page over the

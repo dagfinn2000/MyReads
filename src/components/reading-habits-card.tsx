@@ -1,6 +1,7 @@
 import type { ReadingHabits } from "@/lib/reading-habits";
 import { Duration } from "@/components/stat-blocks";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Ink } from "@/components/ink-number";
 
 /**
  * Reading habits on Stats: pages by day of the week as bars, with the
@@ -74,7 +75,7 @@ export function ReadingHabitsCard({
               </ul>
             </div>
 
-            <dl className="grid grid-cols-2 content-start gap-x-6 gap-y-5">
+            <dl className="ink-stagger grid grid-cols-2 content-start gap-x-6 gap-y-5">
               {h.pagesPerReadingDay !== null && (
                 <Fact
                   label="Pages on a reading day"
@@ -120,7 +121,9 @@ function Fact({ label, note, children }: { label: string; note: string; children
   return (
     <div className="grid gap-0.5">
       <dt className="text-sm text-muted-foreground">{label}</dt>
-      <dd className="font-heading text-2xl font-semibold tabular-nums">{children}</dd>
+      <dd className="font-heading text-2xl font-semibold tabular-nums">
+        <Ink>{children}</Ink>
+      </dd>
       <dd className="text-xs text-muted-foreground">{note}</dd>
     </div>
   );
