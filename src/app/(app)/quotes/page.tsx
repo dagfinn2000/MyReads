@@ -14,6 +14,7 @@ import { loadQuotes, quoteSources } from "@/lib/quotes-query";
 import { BookCover } from "@/components/book-card";
 import { KindleImport } from "@/components/kindle-import";
 import { QuoteItem } from "@/components/quote-item";
+import { GlideList } from "@/components/glide-list";
 import { QuotesToolbar } from "@/components/quotes-toolbar";
 import { Button } from "@/components/ui/button";
 import { fineText } from "@/lib/fine-type";
@@ -143,13 +144,19 @@ export default async function QuotesPage({
         // grid-cols-1 (minmax(0,1fr)) caps the track at the container width;
         // a bare `grid` would let a long nowrap book title stretch every
         // quote card past the page edge instead of truncating.
-        <ul className="grid grid-cols-1 gap-3" data-quote-scope="">
+        // Shuffled again or sorted another way, the quotes glide to their
+        // new places (lib/glide.ts).
+        <GlideList
+          order={(list ?? []).map((q) => q.id).join(" ")}
+          className="grid grid-cols-1 gap-3"
+          data-quote-scope=""
+        >
           {(list ?? []).map((quote) => (
-            <li key={quote.id}>
+            <li key={quote.id} data-glide={quote.id}>
               <QuoteItem quote={quote} showBook />
             </li>
           ))}
-        </ul>
+        </GlideList>
       )}
 
       {hidden > 0 &&

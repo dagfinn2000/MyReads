@@ -10,6 +10,7 @@ import { pickRandomBook } from "@/lib/actions/pick";
 import { STAGGERED_CARDS, cascadeSteps } from "@/lib/card-cascade";
 import { useCoverColours } from "@/lib/cover-colours";
 import { isClosingBook } from "@/lib/cover-flight";
+import { useGlide } from "@/lib/glide";
 import { FORMAT_LABELS, OWNERSHIP_LABELS, formatNumber } from "@/lib/display";
 import { orderByIds } from "@/lib/library-order";
 import { cn } from "@/lib/utils";
@@ -358,6 +359,10 @@ export function LibraryView({
   const coverColours = useCoverColours(
     spines ? books.flatMap((b) => (b.coverUrl ? [b.coverUrl] : [])) : [],
   );
+  // Sorted, filtered or searched, the books that stay glide to their new
+  // places (lib/glide.ts); a change of view (size, list, style) doesn't.
+  const glideRef = useRef<HTMLDivElement>(null);
+  useGlide(glideRef, cardSource, `${display.layout}:${display.cardStyle}:${display.cardSize}`);
   const renderGrid = (items: BookCardBook[], section?: string) => (
     // no-lift: cards stay put on hover while picking, so the selection ring
     // keeps lining up with the card.
@@ -374,6 +379,7 @@ export function LibraryView({
       {items.map((book) => (
         <LibraryCell
           key={book.id}
+          glideKey={cardKey(book.id, section)}
           book={book}
           step={steps.get(cardKey(book.id, section)) ?? 0}
           returning={returning}
@@ -397,7 +403,7 @@ export function LibraryView({
     // While selecting, room at the bottom so the action bar never covers
     // the last books. data-library-view tells a closing book page that the
     // library itself is back, not its loading skeleton (lib/cover-flight.ts).
-    <div className={cn("grid gap-4", selectMode && "pb-80 sm:pb-48")} data-library-view="">
+    <div ref={glideRef} className={cn("grid gap-4", selectMode && "pb-80 sm:pb-48")} data-library-view="">
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground tabular-nums">
           {totalCount} book{totalCount === 1 ? "" : "s"}
@@ -750,6 +756,8 @@ function sameBook(a: BookCardBook, b: BookCardBook): boolean {
 }
 
 interface CellProps {
+  /** Its own key among the cards, for gliding (lib/glide.ts). */
+  glideKey: string;
   book: BookCardBook;
   /** Its turn as the cards rise in (lib/card-cascade.ts). */
   step: number;
@@ -774,6 +782,7 @@ interface CellProps {
  */
 const LibraryCell = memo(
   function LibraryCell({
+    glideKey,
     book,
     step,
     returning,
@@ -801,6 +810,9 @@ const LibraryCell = memo(
           selectMode && selected && !spines && "ring-2 ring-primary",
         )}
         data-selected={spines && selectMode && selected ? "" : undefined}
+        data-glide={glideKey}
+        // On the bookshelf the book glides along its board, which stays.
+        data-glide-inner={style === "shelf" ? "" : undefined}
         style={{ "--i": step } as React.CSSProperties}
       >
         <LibraryCard book={book} display={display} formatPrefs={formatPrefs} colour={colour} />
@@ -828,6 +840,7 @@ const LibraryCell = memo(
     );
   },
   (a, b) =>
+    a.glideKey === b.glideKey &&
     sameBook(a.book, b.book) &&
     a.step === b.step &&
     a.returning === b.returning &&

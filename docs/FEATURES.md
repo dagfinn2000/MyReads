@@ -1201,6 +1201,13 @@ tab goes away. You can also keep the house and leave the avatar out.
   tabs, shelves and saved views, the periods on Stats) fade into their new
   look instead of snapping, and Add book's two tabs fade their new side in.
   Preferences > Motion can have them switch straight away.
+- **Gliding books.** Sort, filter or search the library and the books
+  that stay glide to their new places, closing the gaps where others went,
+  while the books new to the view rise in; spines slide along their shelf
+  and books on the bookshelf along their board. Shuffling the quotes moves
+  them the same way. A book coming from far down the page rises into its
+  place rather than streak across it. Preferences > Motion > Sorting and
+  filtering can have them jump straight there.
 - Animations can be turned off, or only the backgrounds kept still. They
   stay off when your device asks for reduced motion.
 - **Book typography.** Choose "Like a printed book" in Preferences > Text
