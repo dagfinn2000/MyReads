@@ -393,7 +393,7 @@ export function QuickLog({
           bookId={book.id}
           showSaved={text !== positionText(currentPage, info)}
         />
-        <ReadingTimer control={timer} />
+        <ReadingTimer control={timer} look={prefs.timerLook} />
         {saved.items.length > 0 && (
           <ul aria-label="Saved on this device" className="grid gap-1">
             {saved.items.map((item) => (
