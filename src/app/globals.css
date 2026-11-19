@@ -7104,9 +7104,9 @@ html[data-own-background] body::before {
 /* ── Reading preferences ───────────────────────────────────────────────────
    Set on <html> by the root layout from the account's Preferences.
    Text size scales the root font size, which every rem-based size in the
-   app follows. The serif choice applies to long passages only — book
-   descriptions, reviews, quotes and notes — marked with `long-text`. It uses
-   fonts the device already has, so choosing it downloads nothing. */
+   app follows. The faces picked for the app's text, headings and long
+   passages (book descriptions, reviews, quotes and notes, marked with
+   `long-text`) are below. */
 html[data-text-size="large"] {
   font-size: 112.5%;
 }
@@ -7125,29 +7125,45 @@ html[data-text-size="larger"] {
     zoom: 0.8;
   }
 }
-html[data-long-font="serif"] .long-text {
-  font-family: ui-serif, "Iowan Old Style", "Palatino Linotype", Palatino, Georgia,
-    Cambria, "Times New Roman", serif;
+/* The faces picked in Preferences › Text (lib/fonts.ts). The root layout
+   names each one on <html> (data-body-font and so on, left off for a slot
+   kept as the theme has it) and puts the face itself in --body-face,
+   --heading-face and --long-face. They come with the app (next/font in
+   app/layout.tsx and app/fonts.ts), so a pick looks the same on every
+   device, and they win over a theme's own faces.
+
+   The app's text: --font-sans is every font-sans in the app, and the
+   body rule outranks the themes that set one face for the whole page
+   (`.theme-is-terminal body`). --font-sans is the app's own Geist until
+   then; next/font names its variable --font-geist, so the two never
+   chase each other. */
+:root {
+  --font-sans: var(--font-geist);
+}
+html[data-body-font] {
+  --font-sans: var(--body-face);
+}
+html[data-body-font] body {
+  font-family: var(--body-face);
+}
+/* Headings: page titles (every h1), book titles on cards and rows, card
+   and dialog titles, all through `font-heading`, which reads
+   --heading-font and falls back to the app's text face. */
+html[data-heading-font] {
+  --heading-font: var(--heading-face);
+}
+/* Long text. */
+html[data-long-font] .long-text {
+  font-family: var(--long-face);
 }
 /* Numbers in long text set the way a book sets them: old-style figures,
    which sit on the line like small letters (1984 reads as part of the
-   sentence, not as a row of capitals), in the serif or with "Like a
-   printed book". Only where the face has them: Georgia, Palatino and most
-   book serifs do; the app's own sans doesn't, and keeps its lining ones. */
-html:is([data-long-font="serif"], [data-typography="bookish"]) .long-text {
+   sentence, not as a row of capitals), in a serif (data-long-serif) or
+   with "Like a printed book". Only where the face has them: Georgia,
+   Palatino and most book serifs do; the app's own sans doesn't, and keeps
+   its lining ones. */
+html:is([data-long-serif], [data-typography="bookish"]) .long-text {
   font-variant-numeric: oldstyle-nums proportional-nums;
-}
-
-/* The heading face: page titles (every h1), book titles on cards and rows,
-   card and dialog titles, all through `font-heading`, which reads
-   --heading-font and falls back to the app's sans. Unlike the long-text
-   serif these faces come with the app (next/font in app/layout.tsx), so a
-   heading looks the same on every device. */
-html[data-heading-font="serif"] {
-  --heading-font: var(--font-literata), ui-serif, Georgia, serif;
-}
-html[data-heading-font="rounded"] {
-  --heading-font: var(--font-nunito), ui-rounded, ui-sans-serif, system-ui, sans-serif;
 }
 
 /* ── Book typography ───────────────────────────────────────────────────────

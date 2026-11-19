@@ -1,4 +1,5 @@
 import { BookFormat, BookOwnership, ReadingStatus } from "@/lib/enums";
+import { pickFont } from "@/lib/fonts";
 import {
   EXTRAS,
   MOVABLE,
@@ -105,16 +106,11 @@ export const RATING_STYLES = ["half", "whole", "ten", "off"] as const;
 
 export const TEXT_SIZES = ["normal", "large", "larger"] as const;
 
-export const LONG_TEXT_FONTS = ["sans", "serif"] as const;
-
 /** Plain long text, or set like a printed book (globals.css, "Book
  *  typography"): a drop cap and an end ornament on a book's description,
  *  and quotes hung on a large quote mark. */
 export const TYPOGRAPHY_STYLES = ["plain", "bookish"] as const;
 
-/** The face for page titles, book titles and card titles: the app's own
- *  sans (Geist), a book serif (Literata) or a rounded sans (Nunito). */
-export const HEADING_FONTS = ["sans", "serif", "rounded"] as const;
 
 /** Animations on or off. Off is also forced whenever the device asks for
  *  reduced motion, whatever this says (see globals.css and lib/motion.ts). */
@@ -438,9 +434,7 @@ export type AuthorOrder = (typeof AUTHOR_ORDERS)[number];
 export type Catalogue = (typeof CATALOGUES)[number];
 export type RatingStyle = (typeof RATING_STYLES)[number];
 export type TextSize = (typeof TEXT_SIZES)[number];
-export type LongTextFont = (typeof LONG_TEXT_FONTS)[number];
 export type Typography = (typeof TYPOGRAPHY_STYLES)[number];
-export type HeadingFont = (typeof HEADING_FONTS)[number];
 export type Motion = (typeof MOTIONS)[number];
 export type PageChange = (typeof PAGE_CHANGES)[number];
 export type Celebration = (typeof CELEBRATIONS)[number];
@@ -536,9 +530,13 @@ export type Preferences = {
   ratingBreakdown: boolean;
 
   textSize: TextSize;
-  longTextFont: LongTextFont;
+  /** The faces for the app's text, headings, and long text (descriptions,
+   *  reviews, quotes and notes): an id from lib/fonts.ts, or "theme" for
+   *  what the theme has there. */
+  bodyFont: string;
+  headingFont: string;
+  longTextFont: string;
   typography: Typography;
-  headingFont: HeadingFont;
 
   // Appearance
   motion: Motion;
@@ -758,9 +756,10 @@ export const DEFAULT_PREFERENCES: Preferences = {
   ratingStyle: "half",
   ratingBreakdown: true,
   textSize: "normal",
-  longTextFont: "sans",
+  bodyFont: "theme",
+  headingFont: "theme",
+  longTextFont: "theme",
   typography: "plain",
-  headingFont: "sans",
   motion: "on",
   pageChange: "turn",
   tabChange: "fade",
@@ -1116,9 +1115,10 @@ export function parsePreferences(raw: unknown): Preferences {
     ratingStyle: pick(RATING_STYLES, obj.ratingStyle, d.ratingStyle),
     ratingBreakdown: bool(obj.ratingBreakdown, d.ratingBreakdown),
     textSize: pick(TEXT_SIZES, obj.textSize, d.textSize),
-    longTextFont: pick(LONG_TEXT_FONTS, obj.longTextFont, d.longTextFont),
+    bodyFont: pickFont("body", obj.bodyFont),
+    headingFont: pickFont("heading", obj.headingFont),
+    longTextFont: pickFont("long", obj.longTextFont),
     typography: pick(TYPOGRAPHY_STYLES, obj.typography, d.typography),
-    headingFont: pick(HEADING_FONTS, obj.headingFont, d.headingFont),
     motion: pick(MOTIONS, obj.motion, d.motion),
     pageChange: pick(PAGE_CHANGES, obj.pageChange, d.pageChange),
     tabChange: pick(TAB_CHANGES, obj.tabChange, d.tabChange),

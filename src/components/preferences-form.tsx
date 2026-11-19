@@ -45,6 +45,7 @@ import {
 import { PERIOD_LABELS } from "@/lib/stats-period";
 import { statusName } from "@/lib/statuses";
 import { THEMES } from "@/lib/themes";
+import { applyFont, type FontSlot } from "@/lib/fonts";
 import { cn } from "@/lib/utils";
 import { BookPageCardList, FindLinksEditor } from "@/components/book-page-preferences";
 import { ShortcutsDialog } from "@/components/keyboard-shortcuts";
@@ -58,6 +59,7 @@ import { MoodSettings } from "@/components/mood-settings";
 import { ReminderDevices, type ReminderDevice } from "@/components/reminder-settings";
 import { TagRulesList } from "@/components/tag-rules-list";
 import { WeatherSettings } from "@/components/weather-settings";
+import { FontChoice, FontPreview } from "@/components/font-picker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -118,7 +120,6 @@ const ACCENT_LABELS: Record<Accent, string> = {
  * server round trip; the refreshed layout then writes the same value.
  */
 const HTML_ATTRIBUTES: Partial<Record<keyof Preferences, string>> = {
-  headingFont: "data-heading-font",
   typography: "data-typography",
   motion: "data-motion",
   pageChange: "data-page-change",
@@ -143,6 +144,14 @@ const HTML_ATTRIBUTES: Partial<Record<keyof Preferences, string>> = {
   finishPages: "data-finish-pages",
   spineFill: "data-spine-fill",
   inkStats: "data-ink-stats",
+};
+
+/** The face preferences, which go on <html> as an attribute and a custom
+ *  property each (lib/fonts.ts applyFont). */
+const FONT_PREFS: Partial<Record<keyof Preferences, FontSlot>> = {
+  bodyFont: "body",
+  headingFont: "heading",
+  longTextFont: "long",
 };
 
 /** The accent colour swatches, one round button each. */
@@ -419,6 +428,8 @@ export function PreferencesForm({
     for (const [key, value] of Object.entries(patch)) {
       const attribute = HTML_ATTRIBUTES[key as keyof Preferences];
       if (attribute) document.documentElement.setAttribute(attribute, String(value));
+      const slot = FONT_PREFS[key as keyof Preferences];
+      if (slot) applyFont(document.documentElement, slot, String(value), { ...prefs, ...patch });
     }
     setStatus("saving");
     startTransition(async () => {
@@ -1236,16 +1247,31 @@ export function PreferencesForm({
           ]}
           onChange={(v) => update({ textSize: v })}
         />
-        <Choice
-          label="Font for long text"
+        <FontChoice
+          slot="body"
+          label="Font"
+          hint="Everything, unless Headings or Long text below picks a face of its own. Some themes have a face of their own, like Terminal’s; a face picked here wins."
+          themeLabel="As the theme has it"
+          value={prefs.bodyFont}
+          onChange={(v) => update({ bodyFont: v })}
+        />
+        <FontChoice
+          slot="heading"
+          label="Headings"
+          hint="Page titles, book titles and card titles."
+          themeLabel="As the theme has them"
+          value={prefs.headingFont}
+          onChange={(v) => update({ headingFont: v })}
+        />
+        <FontChoice
+          slot="long"
+          label="Long text"
           hint="Descriptions, reviews, quotes and notes."
+          themeLabel="Same as everything else"
           value={prefs.longTextFont}
-          options={[
-            { value: "sans", label: "Same as everything else" },
-            { value: "serif", label: "Book-style serif" },
-          ]}
           onChange={(v) => update({ longTextFont: v })}
         />
+        <FontPreview />
         <Choice
           label="Book typography"
           hint="A drop cap opening each book’s description and an ornament closing it, quotes hung on a large quote mark, and old-style numbers where the font has them."
@@ -1255,17 +1281,6 @@ export function PreferencesForm({
             { value: "bookish", label: "Like a printed book" },
           ]}
           onChange={(v) => update({ typography: v })}
-        />
-        <Choice
-          label="Headings"
-          hint="Page titles, book titles and card titles. Most themes use the same face as everything else; a few have their own, like Newsprint’s serif."
-          value={prefs.headingFont}
-          options={[
-            { value: "sans", label: "As the theme has them" },
-            { value: "serif", label: "Book-style serif" },
-            { value: "rounded", label: "Rounded" },
-          ]}
-          onChange={(v) => update({ headingFont: v })}
         />
       </Section>
 
