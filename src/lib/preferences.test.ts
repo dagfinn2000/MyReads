@@ -123,10 +123,24 @@ describe("parsePreferences", () => {
     expect(parsePreferences({ coverArt: 3 }).coverArt).toBe("drawn");
     expect(parsePreferences({ accent: "teal" }).accent).toBe("teal");
     expect(parsePreferences({ accent: "#ff0000" }).accent).toBe("theme");
-    expect(parsePreferences({ headingFont: "serif" }).headingFont).toBe("serif");
+    // Headings were sans, serif (Literata) or rounded (Nunito) before there
+    // were more faces; long text sans or serif (the device's).
+    expect(parsePreferences({ headingFont: "serif" }).headingFont).toBe("literata");
+    expect(parsePreferences({ headingFont: "rounded" }).headingFont).toBe("nunito");
+    expect(parsePreferences({ headingFont: "sans" }).headingFont).toBe("theme");
+    expect(parsePreferences({ headingFont: "cinzel" }).headingFont).toBe("cinzel");
+    expect(parsePreferences({ longTextFont: "serif" }).longTextFont).toBe("device-serif");
+    expect(parsePreferences({ longTextFont: "sans" }).longTextFont).toBe("theme");
+    expect(parsePreferences({ longTextFont: "eb-garamond" }).longTextFont).toBe("eb-garamond");
+    // Display faces are for headings only.
+    expect(parsePreferences({ longTextFont: "cinzel" }).longTextFont).toBe("theme");
+    expect(parsePreferences({ bodyFont: "cinzel" }).bodyFont).toBe("theme");
+    expect(parsePreferences({}).bodyFont).toBe("theme");
+    expect(parsePreferences({ bodyFont: "lexend" }).bodyFont).toBe("lexend");
+    expect(parsePreferences({ bodyFont: "Comic Sans" }).bodyFont).toBe("theme");
     expect(parsePreferences({ typography: "bookish" }).typography).toBe("bookish");
     expect(parsePreferences({ typography: "fancy" }).typography).toBe("plain");
-    expect(parsePreferences({ headingFont: "Comic Sans" }).headingFont).toBe("sans");
+    expect(parsePreferences({ headingFont: "Comic Sans" }).headingFont).toBe("theme");
     expect(parsePreferences({ corners: "square" }).corners).toBe("square");
     expect(parsePreferences({ corners: "0px" }).corners).toBe("rounded");
     expect(parsePreferences({ background: "dots" }).background).toBe("dots");

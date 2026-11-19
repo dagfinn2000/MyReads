@@ -24,6 +24,7 @@ import {
   Ubuntu_Sans,
   VT323,
 } from "next/font/google";
+import { PICKABLE_FONT_VARIABLES } from "./fonts";
 import { BackgroundScene } from "@/components/background-scene";
 import { Daylight } from "@/components/daylight";
 import { WeatherOutside } from "@/components/weather-outside";
@@ -33,6 +34,7 @@ import { serverTimeZone } from "@/lib/preferences";
 import { skyAt, skyStyle } from "@/lib/sky";
 import { daylightAt, daylightStyle, startsOverScene } from "@/lib/daylight";
 import { cn } from "@/lib/utils";
+import { fontStyle, longTextIsSerif } from "@/lib/fonts";
 import {
   DARK_THEME_IDS,
   THEME_CLASS_PREFIX,
@@ -42,7 +44,9 @@ import {
   parseThemeSetting,
 } from "@/lib/themes";
 
-const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
+// The app's own face. Its variable feeds --font-sans (globals.css), which a
+// face picked for everything (Preferences › Text, lib/fonts.ts) replaces.
+const geist = Geist({ subsets: ["latin"], variable: "--font-geist" });
 // A book face for the titles on drawn covers, the serif heading choice and
 // the pictures of quotes (in italic), and a rounded face for the other
 // heading choice (Preferences). Not preloaded: the browser only fetches a
@@ -173,6 +177,10 @@ export default async function RootLayout({
   const daylight =
     prefs?.timeOfDay === "on" ? daylightAt(new Date(), prefs.timeZone || serverTimeZone()) : null;
   const fixedTheme = setting?.kind === "fixed" ? THEMES.find((t) => t.id === setting.id) ?? null : null;
+  // The faces picked for the app's text, headings and long text, as custom
+  // properties (lib/fonts.ts); a slot left to the theme has none.
+  const style = { ...(daylight ? daylightStyle(daylight) : {}), ...(prefs ? fontStyle(prefs) : {}) };
+  const picked = (id: string | undefined) => (id && id !== "theme" ? id : undefined);
 
   return (
     // suppressHydrationWarning: the theme init script mutates data-theme and
@@ -201,15 +209,18 @@ export default async function RootLayout({
         fraunces.variable,
         hyperlegible.variable,
         pixel.variable,
+        PICKABLE_FONT_VARIABLES,
         setting?.kind === "fixed" && THEME_CLASS_PREFIX + setting.id,
         dark && "dark",
       )}
       {...themeAttrs}
       // Text size and fonts (Preferences); see globals.css.
       data-text-size={prefs?.textSize}
-      data-long-font={prefs?.longTextFont}
+      data-body-font={picked(prefs?.bodyFont)}
+      data-long-font={picked(prefs?.longTextFont)}
+      data-long-serif={prefs && longTextIsSerif(prefs) ? "" : undefined}
       data-typography={prefs?.typography}
-      data-heading-font={prefs?.headingFont}
+      data-heading-font={picked(prefs?.headingFont)}
       // Appearance (Preferences); see globals.css.
       data-motion={prefs?.motion}
       data-page-change={prefs?.pageChange}
@@ -232,7 +243,7 @@ export default async function RootLayout({
       data-book-opening={prefs?.bookOpening}
       data-time-light={prefs?.timeOfDay}
       data-daylight={daylight?.phase}
-      style={daylight ? (daylightStyle(daylight) as React.CSSProperties) : undefined}
+      style={Object.keys(style).length > 0 ? (style as React.CSSProperties) : undefined}
       data-finish-pages={prefs?.finishPages}
       data-spine-fill={prefs?.spineFill}
       data-ink-stats={prefs?.inkStats}

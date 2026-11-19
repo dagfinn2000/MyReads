@@ -7497,7 +7497,7 @@ html[data-accent]:not([data-accent="theme"])[data-theme="pinstripe"] {
    (unless Headings picks a face of its own): in mono most titles were cut
    short. */
 @media (width < 40rem) {
-  .theme-is-hyprland:not([data-heading-font="serif"], [data-heading-font="rounded"]) .font-heading:is(.truncate, .line-clamp-2) {
+  .theme-is-hyprland:not([data-heading-font]) .font-heading:is(.truncate, .line-clamp-2) {
     font-family: var(--hl-sans);
   }
   .theme-is-hyprland .font-heading.text-3xl {

@@ -1211,8 +1211,19 @@ tab goes away. You can also keep the house and leave the avatar out.
   descriptions, and ones that start with a quote mark or a number, keep
   their first letter plain. Numbers in long text become old-style
   figures, which sit on the line like small letters, where the font has
-  them (most book serifs do; the app's own sans doesn't). The book serif
-  for long text sets its numbers that way too.
+  them (most book serifs do; the app's own sans doesn't). A serif picked
+  for long text, or for everything, sets its numbers that way too.
+- **Fonts.** Preferences > Text picks a face for everything, one for
+  headings and one for long text (descriptions, reviews, quotes and
+  notes), from about fifty that come with the app: sans serifs like
+  Inter, Lexend (made for easy reading) and Atkinson Hyperlegible (for low
+  vision), book serifs like Literata, Lora, EB Garamond and Libre
+  Baskerville, slab serifs, a typewriter, handwriting, and faces for
+  headings only, from Playfair Display and Bodoni to Roman capitals and
+  blackletter. Each name in the list is set in its own face, and a few
+  lines under the lists show them together. A face picked wins over the
+  theme's own; "As the theme has it" keeps the theme's. A face is only
+  downloaded once you pick it.
 - **Typesetting.** Titles, authors, descriptions, reviews, notes and
   quotes show curly quotes and apostrophes (“Ender’s Game”), a proper
   dash for two hyphens or a spaced hyphen, and an ellipsis for three dots,
@@ -1254,9 +1265,9 @@ On the Account page:
   (tags, ISBN, your review), and what Pick for me leaves out.
 - How long you usually lend books for, and whether overdue books remind
   you.
-- The accent colour, text size, a serif font for reviews and quotes, book
-  typography, the font for headings and how round the corners are (or as the theme has
-  them: a few themes have their own), flat, raised or frosted
+- The accent colour, text size, the fonts for everything, for headings
+  and for long text, book typography and how round the corners are (or
+  as the theme has them: a few themes have their own), flat, raised or frosted
   cards, the background texture, whether it follows the light of the
   day and the weather outside, a wash of the cover's colours behind
   the top of each book's page, whether spines fill with colour as you
