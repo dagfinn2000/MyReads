@@ -126,6 +126,7 @@ describe("parsePreferences", () => {
     expect(parsePreferences({ coverShadows: "off" }).coverShadows).toBe("off");
     expect(parsePreferences({ coverShadows: "deep" }).coverShadows).toBe("soft");
     expect(parsePreferences({ coverArt: "plain" }).coverArt).toBe("plain");
+    expect(parsePreferences({ coverArt: "cloth" }).coverArt).toBe("cloth");
     expect(parsePreferences({ coverArt: 3 }).coverArt).toBe("drawn");
     expect(parsePreferences({ accent: "teal" }).accent).toBe("teal");
     expect(parsePreferences({ accent: "#ff0000" }).accent).toBe("theme");

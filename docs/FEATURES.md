@@ -272,6 +272,12 @@ page by page.
 - Show the library as cards, bare covers or a bookshelf, in three sizes, or
   as a list, and choose what each book shows. Covers can look like little
   hardbacks, and books without a cover get one drawn with their title.
+- **Clothbound covers.** In Preferences > Appearance, books without a cover
+  can be bound in cloth instead: the drawn cover's colour, woven, with the
+  groove where the board meets the spine, the title stamped in gilt inside
+  a double gilt frame, or on a dark label across the middle. The light runs
+  along the gilt when you point at a cover. Grey and green themes
+  (E-Paper, Bitmap, Dot Matrix) stamp it in silver or pale green.
 - **Bookmark ribbons.** A book you're reading has a satin ribbon hanging
   from the top of its cover, down as far as you've got: a short tail at
   the start, the foot of the cover at the end. Point at it for the page.

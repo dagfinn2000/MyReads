@@ -8426,6 +8426,98 @@ html[data-covers="plain"] .drawn-cover {
   }
 }
 
+/* ── Clothbound covers ─────────────────────────────────────────────────────
+   "Books without a cover: Clothbound" (data-covers="cloth") binds the drawn
+   cover in book cloth: the same colour, a little deeper, woven (fine
+   threads each way, too fine to read as a tile) under a soft light from
+   the top left, with the groove where the board meets the spine. The
+   title is stamped in gilt, a gold that catches the light along it, the
+   author and the rule in flat gold, and the frame is a double gilt fillet;
+   the banded arrangement gets a dark label instead of a pale band. Under
+   the pointer the light runs across the gilt, while animations are
+   allowed. Only background images are added, so themes that print their
+   covers in grey or green (E-Paper, Bitmap, Dot Matrix) keep their board
+   colour, and their gilt is silver or a paler green to match. */
+html[data-covers="cloth"] .drawn-cover {
+  --gilt-flat: #ecd189;
+  --gilt-line: rgb(236 209 137 / 0.55);
+  --gilt: linear-gradient(
+    105deg,
+    #dbb862 0%,
+    #f1d98f 26%,
+    #fff3cc 40%,
+    #eccd7c 54%,
+    #d9b563 76%,
+    #efd58e 100%
+  );
+  color: var(--gilt-flat);
+  background-image:
+    radial-gradient(130% 90% at 25% 8%, rgb(255 255 255 / 0.08), transparent 62%),
+    repeating-linear-gradient(0deg, rgb(255 255 255 / 0.04) 0 1px, transparent 1px 2px),
+    repeating-linear-gradient(90deg, rgb(0 0 0 / 0.08) 0 1px, transparent 1px 2px),
+    linear-gradient(rgb(0 0 0 / 0.24), rgb(0 0 0 / 0.24));
+}
+html[data-covers="cloth"] .drawn-cover::after {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 7.5%;
+  width: 1.5px;
+  background: linear-gradient(90deg, rgb(0 0 0 / 0.38), rgb(255 255 255 / 0.12));
+}
+html[data-covers="cloth"] .drawn-cover-frame {
+  z-index: 1;
+  border-color: var(--gilt-line);
+  box-shadow: inset 0 0 0 2px transparent, inset 0 0 0 3px color-mix(in srgb, var(--gilt-line) 60%, transparent);
+}
+html[data-covers="cloth"] .drawn-cover-title {
+  /* The gilt is the title's background, which only reaches as far as its
+     box: room round the lines for accents and descenders, taken back so
+     the title sits where it did. */
+  padding-block: 0.12em 0.2em;
+  margin-block: -0.12em -0.2em;
+  background: var(--gilt) 0 0 / 240% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: 0.01em;
+}
+html[data-covers="cloth"] .drawn-cover-rule {
+  opacity: 0.8;
+}
+html[data-covers="cloth"] .drawn-cover-author {
+  opacity: 0.92;
+}
+html[data-covers="cloth"] .drawn-cover[data-layout="2"] .drawn-cover-frame {
+  box-shadow: none;
+}
+html[data-covers="cloth"] .drawn-cover[data-layout="2"] .drawn-cover-frame::before {
+  border-block: 1px solid var(--gilt-line);
+  background: rgb(0 0 0 / 0.3);
+  box-shadow:
+    inset 0 2px 0 -1px color-mix(in srgb, var(--gilt-line) 55%, transparent),
+    inset 0 -2px 0 -1px color-mix(in srgb, var(--gilt-line) 55%, transparent);
+}
+@media (prefers-reduced-motion: no-preference) {
+  html[data-covers="cloth"]:not([data-motion="off"]) .drawn-cover-title {
+    transition: background-position 1.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  html[data-covers="cloth"]:not([data-motion="off"]) :is(a, .book-cover):hover .drawn-cover-title {
+    background-position: 100% 0;
+  }
+}
+html[data-covers="cloth"].theme-is-e-paper .drawn-cover,
+html[data-covers="cloth"].theme-is-e-paper-dark .drawn-cover,
+html[data-covers="cloth"].theme-is-bitmap .drawn-cover {
+  --gilt-flat: #e6e6e6;
+  --gilt-line: rgb(230 230 230 / 0.5);
+  --gilt: linear-gradient(105deg, #c9c9c9, #ececec 26%, #ffffff 40%, #dcdcdc 56%, #c6c6c6 78%, #e4e4e4);
+}
+html[data-covers="cloth"].theme-is-dot-matrix .drawn-cover {
+  --gilt-flat: #e3ebc4;
+  --gilt-line: rgb(227 235 196 / 0.5);
+  --gilt: linear-gradient(105deg, #ccd8a2, #e6eec8 26%, #f6faea 40%, #dbe5b4 56%, #c9d59c 78%, #e1eabf);
+}
+
 /* ── Page and library motion ───────────────────────────────────────────────
    Pages fade up as they open ((app)/template.tsx), library cards rise into
    place one after another from the top (each card's --i is its step, from
