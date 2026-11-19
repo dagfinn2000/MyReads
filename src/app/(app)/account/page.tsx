@@ -98,6 +98,7 @@ export default async function AccountPage() {
               available: remindersEnabled(),
               devices: pushDevices.map((d) => ({ ...d, createdAt: d.createdAt.toISOString() })),
             }}
+            username={user.username}
           />
         </CardContent>
       </Card>
