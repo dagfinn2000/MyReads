@@ -140,6 +140,7 @@ const HTML_ATTRIBUTES: Partial<Record<keyof Preferences, string>> = {
   coverShadows: "data-cover-shadows",
   bookBackdrop: "data-book-backdrop",
   bookOpening: "data-book-opening",
+  cardGlide: "data-card-glide",
   timeOfDay: "data-time-light",
   finishPages: "data-finish-pages",
   spineFill: "data-spine-fill",
@@ -1103,6 +1104,16 @@ export function PreferencesForm({
             { value: "off", label: "Straight away" },
           ]}
           onChange={(v) => update({ tabChange: v })}
+        />
+        <Choice
+          label="Sorting and filtering"
+          hint="The library’s books when you sort, filter or search it, and the quotes when you shuffle them."
+          value={prefs.cardGlide}
+          options={[
+            { value: "on", label: "Books glide to their new places" },
+            { value: "off", label: "Straight away" },
+          ]}
+          onChange={(v) => update({ cardGlide: v })}
         />
         <Choice
           label="Opening a book"
