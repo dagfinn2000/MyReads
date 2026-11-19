@@ -992,6 +992,7 @@ export function PreferencesForm({
           value={prefs.coverArt}
           options={[
             { value: "drawn", label: "A drawn cover with the title" },
+            { value: "cloth", label: "Clothbound, the title in gilt" },
             { value: "plain", label: "A plain grey box" },
           ]}
           onChange={(v) => update({ coverArt: v })}

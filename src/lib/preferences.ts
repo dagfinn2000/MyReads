@@ -134,8 +134,9 @@ export const TAB_CHANGES = ["fade", "off"] as const;
 export const CELEBRATIONS = ["confetti", "fireworks", "sparkles", "petals", "off"] as const;
 
 /** What a book without a cover image shows: a drawn cover with its title,
- *  or the plain grey box. */
-export const COVER_ARTS = ["drawn", "plain"] as const;
+ *  the same cover bound in cloth with its title in gilt (globals.css
+ *  "Clothbound covers"), or the plain grey box. */
+export const COVER_ARTS = ["drawn", "cloth", "plain"] as const;
 
 /** Accent colours that can replace a theme's own: buttons, links, focus
  *  rings and progress bars. "theme" keeps the theme's accent. Each has a
