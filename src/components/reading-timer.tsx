@@ -16,7 +16,7 @@ import {
   type TimerState,
 } from "@/lib/reading-time";
 import { Hourglass } from "@/components/hourglass";
-import { usePreferences } from "@/components/preferences-provider";
+import type { TimerLook } from "@/lib/preferences";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -243,9 +243,17 @@ export function useReadingTimer(bookId: string, readStartedAt?: number | null): 
 }
 
 /** The timer's line under the quick-log row. */
-export function ReadingTimer({ control: t }: { control: ReadingTimerControl }) {
+export function ReadingTimer({
+  control: t,
+  look = "hourglass",
+}: {
+  control: ReadingTimerControl;
+  /** Preferences › Motion › Reading timer. Passed in, so this file stays
+   *  free of the preferences provider (and the server actions it brings)
+   *  for the reading room, which uses useAnyReadingTimer. */
+  look?: TimerLook;
+}) {
   const id = useId();
-  const prefs = usePreferences();
   const { timer, box } = t;
 
   if (box !== null) {
@@ -315,7 +323,7 @@ export function ReadingTimer({ control: t }: { control: ReadingTimerControl }) {
           running ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
         }`}
       >
-        {prefs.timerLook === "hourglass" ? (
+        {look === "hourglass" ? (
           <Hourglass elapsedMs={elapsed} running={running} />
         ) : (
           <span
