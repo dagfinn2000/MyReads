@@ -9,6 +9,7 @@ import { formatNumber } from "@/lib/display";
 import { usePreferences } from "@/components/preferences-provider";
 import { useSound } from "@/components/sounds";
 import { Card, CardContent } from "@/components/ui/card";
+import { RollingNumber } from "@/components/rolling-number";
 
 const SIZE = 72;
 const STROKE = 7;
@@ -105,7 +106,7 @@ export function DailyGoalRing({
               <Check className="size-6 text-primary" strokeWidth={2.5} />
             ) : (
               <>
-                <span className="font-heading text-lg font-semibold">{done}</span>
+                <RollingNumber text={String(done)} className="font-heading text-lg font-semibold" />
                 <span className="mt-0.5 text-[10px] text-muted-foreground">of {goal}</span>
               </>
             )}
@@ -114,10 +115,9 @@ export function DailyGoalRing({
         <div className="grid min-w-0 gap-0.5">
           <p className="font-heading font-medium">{headline}</p>
           <p className="text-sm text-muted-foreground tabular-nums">
-            {met
-              ? `${done} of ${goal} ${word} today`
-              : `${done} of ${goal} ${word} so far`}
-            {detail && ` · ${detail}`}
+            <RollingNumber
+              text={(met ? `${done} of ${goal} ${word} today` : `${done} of ${goal} ${word} so far`) + (detail ? ` · ${detail}` : "")}
+            />
           </p>
           <Link
             href="/account#reading"

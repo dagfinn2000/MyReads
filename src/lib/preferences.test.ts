@@ -111,6 +111,9 @@ describe("parsePreferences", () => {
     expect(parsePreferences({}).spacing).toBe("calm");
     expect(parsePreferences({ spacing: "compact" }).spacing).toBe("compact");
     expect(parsePreferences({ spacing: "airy" }).spacing).toBe("calm");
+    expect(parsePreferences({}).rollingNumbers).toBe("on");
+    expect(parsePreferences({ rollingNumbers: "off" }).rollingNumbers).toBe("off");
+    expect(parsePreferences({ rollingNumbers: "spin" }).rollingNumbers).toBe("on");
     expect(parsePreferences({}).cardGlide).toBe("on");
     expect(parsePreferences({ cardGlide: "off" }).cardGlide).toBe("off");
     expect(parsePreferences({ cardGlide: "bounce" }).cardGlide).toBe("on");

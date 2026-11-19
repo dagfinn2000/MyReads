@@ -26,6 +26,7 @@ import { giveBackTime } from "@/components/reading-timer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { fineText } from "@/lib/fine-type";
+import { RollingNumber } from "@/components/rolling-number";
 
 export interface NowReadingBook extends QuickLogBook, LogBook {
   authors: string[];
@@ -278,11 +279,11 @@ const NowReadingRow = memo(function NowReadingRow({
           </div>
           {pct !== null && (
             <div className="h-2 rounded-full bg-muted">
-              <div className="bar-grow h-full rounded-full bg-primary/80" style={{ width: `${pct}%` }} />
+              <div className="bar-grow progress-fill h-full rounded-full bg-primary/80" style={{ width: `${pct}%` }} />
             </div>
           )}
           <div className="flex flex-wrap justify-between gap-x-3 gap-y-0.5 text-xs text-muted-foreground tabular-nums sm:text-sm">
-            <span>{currentPage != null ? progressFigure(currentPage, info) : "Not started"}</span>
+            <RollingNumber text={currentPage != null ? progressFigure(currentPage, info) : "Not started"} />
             <span className="grid sm:justify-items-end">
               <span>{pace}</span>
               {speed && <span>{speed}</span>}

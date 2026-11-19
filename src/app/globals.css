@@ -8630,6 +8630,61 @@ html[data-covers="plain"] .drawn-cover {
   filter: drop-shadow(0 0 6px color-mix(in oklab, var(--primary) 50%, transparent));
 }
 
+/* ── Rolling numbers ───────────────────────────────────────────────────────
+   Logging pages, the page count, the percentage and the daily goal's count
+   roll to their new numbers like a counter's wheels
+   (components/rolling-number.tsx, lib/rolling.ts). A wheel is a window one
+   line tall over a strip of two digits, the old and the new; it rests on
+   the new one, and only the start of the turn is animated, so with
+   animations off (whose rule ends every animation at once) it simply shows
+   the new digit. Upward the new digit comes in from below, downward from
+   above; the tens follow the units by a moment, the way a carry turns the
+   next wheel. The progress bar slides to its new length alongside.
+   "Logging pages: straight away" in Preferences renders plain text. */
+/* An inline grid, not an inline block: one that clips sits on its bottom
+   edge, not on the text's baseline. */
+.roll-wheel {
+  position: relative;
+  display: inline-grid;
+  overflow: hidden;
+}
+.roll-sizer {
+  visibility: hidden;
+}
+.roll-strip {
+  position: absolute;
+  inset: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  animation: roll-turn 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+  animation-delay: var(--roll-delay, 0ms);
+}
+.roll-strip > span {
+  display: block;
+  height: 1lh;
+}
+/* At rest the strip sits with its new digit in the window and nothing
+   moving it, so it lines up with the text round it to the pixel: upward
+   the strip (old over new) hangs from the window's foot, and starts a line
+   lower; downward (new over old) it stands on the window's top, and
+   starts a line higher. */
+.roll-wheel[data-dir="up"] .roll-strip {
+  inset: auto 0 0;
+  --roll-from: 50%;
+}
+.roll-wheel[data-dir="down"] .roll-strip {
+  --roll-from: -50%;
+}
+@keyframes roll-turn {
+  from {
+    translate: 0 var(--roll-from);
+  }
+}
+html:not([data-rolling-numbers="off"]) .progress-fill {
+  transition: width 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
 /* A clicked cover flying to its place on the book page
    (lib/cover-flight.ts). A touch slower than the page cross-fade, with an
    ease that settles, so the cover visibly lands. */

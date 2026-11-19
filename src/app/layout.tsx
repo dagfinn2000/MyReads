@@ -242,6 +242,7 @@ export default async function RootLayout({
       data-book-backdrop={prefs?.bookBackdrop}
       data-book-opening={prefs?.bookOpening}
       data-card-glide={prefs?.cardGlide}
+      data-rolling-numbers={prefs?.rollingNumbers}
       data-time-light={prefs?.timeOfDay}
       data-daylight={daylight?.phase}
       style={Object.keys(style).length > 0 ? (style as React.CSSProperties) : undefined}

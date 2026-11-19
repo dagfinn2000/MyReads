@@ -1208,6 +1208,12 @@ tab goes away. You can also keep the house and leave the avatar out.
   them the same way. A book coming from far down the page rises into its
   place rather than streak across it. Preferences > Motion > Sorting and
   filtering can have them jump straight there.
+- **Rolling numbers.** Log some pages and the page count, the percentage
+  and the daily goal's count roll to their new numbers like a counter's
+  wheels: each digit that changed turns over, upward as it grows, the tens
+  a moment after the units, while the progress bar slides along to its new
+  length. Preferences > Motion > Logging pages can have them change
+  straight away.
 - Animations can be turned off, or only the backgrounds kept still. They
   stay off when your device asks for reduced motion.
 - **Book typography.** Choose "Like a printed book" in Preferences > Text
