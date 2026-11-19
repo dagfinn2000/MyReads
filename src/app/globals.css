@@ -8648,25 +8648,26 @@ html[data-covers="plain"] .drawn-cover {
 .hourglass-cap {
   fill: currentColor;
 }
+/* A whole pixel wide: a layer narrower than one can be drawn as nothing. */
 .hourglass-stream {
   position: absolute;
-  left: calc(50% - 0.4px);
-  width: 0.8px;
+  left: calc(50% - 0.5px);
+  width: 1px;
   overflow: hidden;
-  opacity: 0.8;
+  opacity: 0.75;
 }
 .hourglass-stream > span {
   position: absolute;
-  inset: -1.6px 0 0;
-  background: repeating-linear-gradient(to bottom, currentColor 0 0.8px, transparent 0.8px 1.6px);
-  animation: hourglass-fall 0.32s linear infinite;
+  inset: -1.8px 0 0;
+  background: repeating-linear-gradient(to bottom, currentColor 0 0.9px, transparent 0.9px 1.8px);
+  animation: hourglass-fall 0.34s linear infinite;
 }
 @keyframes hourglass-fall {
   from {
     translate: 0 0;
   }
   to {
-    translate: 0 1.6px;
+    translate: 0 1.8px;
   }
 }
 .hourglass[data-turned] {
