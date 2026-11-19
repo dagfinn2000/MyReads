@@ -271,6 +271,12 @@ export const BOOK_OPENINGS = ["open", "fly"] as const;
  *  jump straight there. Only while animations are allowed. */
 export const CARD_GLIDES = ["on", "off"] as const;
 
+/** Whether page counts, percentages and the daily goal's count roll to
+ *  their new numbers like a counter's wheels when you log pages, with the
+ *  progress bar sliding along (components/rolling-number.tsx), or change
+ *  straight away. Only while animations are allowed. */
+export const ROLLING_NUMBERS = ["on", "off"] as const;
+
 /** Colour steps for the reading calendar (see lib/heatmap.ts). */
 export const HEATMAP_SCALES = ["standard", "gentle", "heavy", "auto"] as const;
 
@@ -461,6 +467,7 @@ export type CoverShadows = (typeof COVER_SHADOWS)[number];
 export type HeatmapScale = (typeof HEATMAP_SCALES)[number];
 export type BookOpening = (typeof BOOK_OPENINGS)[number];
 export type CardGlide = (typeof CARD_GLIDES)[number];
+export type RollingNumbers = (typeof ROLLING_NUMBERS)[number];
 export type TimeOfDayLight = (typeof TIME_OF_DAY_LIGHTS)[number];
 export type UpNextLook = (typeof UP_NEXT_LOOKS)[number];
 export type FinishPages = (typeof FINISH_PAGES)[number];
@@ -550,6 +557,7 @@ export type Preferences = {
   tabChange: TabChange;
   bookOpening: BookOpening;
   cardGlide: CardGlide;
+  rollingNumbers: RollingNumbers;
   finishPages: FinishPages;
   celebration: Celebration;
   coverArt: CoverArtStyle;
@@ -772,6 +780,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
   tabChange: "fade",
   bookOpening: "open",
   cardGlide: "on",
+  rollingNumbers: "on",
   finishPages: "on",
   celebration: "confetti",
   coverArt: "drawn",
@@ -1132,6 +1141,7 @@ export function parsePreferences(raw: unknown): Preferences {
     tabChange: pick(TAB_CHANGES, obj.tabChange, d.tabChange),
     bookOpening: pick(BOOK_OPENINGS, obj.bookOpening, d.bookOpening),
     cardGlide: pick(CARD_GLIDES, obj.cardGlide, d.cardGlide),
+    rollingNumbers: pick(ROLLING_NUMBERS, obj.rollingNumbers, d.rollingNumbers),
     finishPages: pick(FINISH_PAGES, obj.finishPages, d.finishPages),
     celebration: pick(CELEBRATIONS, obj.celebration, d.celebration),
     coverArt: pick(COVER_ARTS, obj.coverArt, d.coverArt),

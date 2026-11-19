@@ -42,6 +42,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { RollingNumber } from "@/components/rolling-number";
 
 /**
  * The "my reading of this book" panel on the detail page. On top, progress:
@@ -144,14 +145,14 @@ export function ReadingCard({
               <div className="grid max-w-sm gap-1">
                 <div className="h-2 rounded-full bg-muted">
                   <div
-                    className="bar-grow h-full rounded-full bg-primary/80"
+                    className="bar-grow progress-fill h-full rounded-full bg-primary/80"
                     style={{
                       width: `${Math.min((page! / book.pageCount!) * 100, 100)}%`,
                     }}
                   />
                 </div>
                 <p className="text-xs text-muted-foreground tabular-nums">
-                  {progressFigure(page!, info)}
+                  <RollingNumber text={progressFigure(page!, info)} />
                 </p>
               </div>
             )}

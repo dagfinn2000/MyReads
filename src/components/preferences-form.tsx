@@ -141,6 +141,7 @@ const HTML_ATTRIBUTES: Partial<Record<keyof Preferences, string>> = {
   bookBackdrop: "data-book-backdrop",
   bookOpening: "data-book-opening",
   cardGlide: "data-card-glide",
+  rollingNumbers: "data-rolling-numbers",
   timeOfDay: "data-time-light",
   finishPages: "data-finish-pages",
   spineFill: "data-spine-fill",
@@ -1114,6 +1115,16 @@ export function PreferencesForm({
             { value: "off", label: "Straight away" },
           ]}
           onChange={(v) => update({ cardGlide: v })}
+        />
+        <Choice
+          label="Logging pages"
+          hint="Page counts, percentages and the daily goal’s count as they change, and the progress bar."
+          value={prefs.rollingNumbers}
+          options={[
+            { value: "on", label: "Numbers roll like a counter" },
+            { value: "off", label: "Straight away" },
+          ]}
+          onChange={(v) => update({ rollingNumbers: v })}
         />
         <Choice
           label="Opening a book"
