@@ -56,6 +56,7 @@ import {
 import { DEFAULT_AVATAR, parseAvatar, parseSavedLooks, type AvatarLook } from "@/lib/avatar";
 import { parseCatCoat, parseDogCoat, parsePet, type CatCoat, type DogCoat, type Pet } from "@/lib/pets";
 import { parseOwnCss } from "@/lib/own-css";
+import { parseBookplateName } from "@/lib/bookplate";
 import { REMINDER_TIMES, parseReminderDays } from "@/lib/reminders";
 import { SOUND_EVENTS, SOUND_SETTINGS, SOUND_VOLUMES, type SoundEvent, type SoundSetting, type SoundVolume } from "@/lib/sounds";
 import { WEATHER_SETTINGS, parseWeatherPlace, type WeatherPlace, type WeatherSetting } from "@/lib/weather";
@@ -221,6 +222,11 @@ export const SHELF_WEARS = ["on", "off"] as const;
  *  to keep the place for another go (components/book-card.tsx DogEar,
  *  globals.css "Dog-ears"). */
 export const DOG_EARS = ["on", "off"] as const;
+
+/** Whether a book you own has a bookplate on its page, under the cover:
+ *  "Ex libris", your name and its number in your library
+ *  (components/bookplate.tsx, globals.css "Bookplates"). */
+export const BOOKPLATES = ["on", "off"] as const;
 
 /** The rules between sections (globals.css "Fine dividers"): a hairline
  *  that fades at its ends round a small lozenge, or the plain full line. */
@@ -460,6 +466,7 @@ export type CoverTilt = (typeof COVER_TILTS)[number];
 export type ProgressRibbon = (typeof PROGRESS_RIBBONS)[number];
 export type ShelfWearSetting = (typeof SHELF_WEARS)[number];
 export type DogEars = (typeof DOG_EARS)[number];
+export type Bookplate = (typeof BOOKPLATES)[number];
 export type Dividers = (typeof DIVIDERS)[number];
 export type Spacing = (typeof SPACINGS)[number];
 export type TabChange = (typeof TAB_CHANGES)[number];
@@ -578,6 +585,9 @@ export type Preferences = {
   progressRibbon: ProgressRibbon;
   shelfWear: ShelfWearSetting;
   dogEars: DogEars;
+  bookplate: Bookplate;
+  /** The name on bookplates (lib/bookplate.ts); empty for the username. */
+  bookplateName: string;
   dividers: Dividers;
   spacing: Spacing;
   coverShadows: CoverShadows;
@@ -796,6 +806,8 @@ export const DEFAULT_PREFERENCES: Preferences = {
   progressRibbon: "crimson",
   shelfWear: "on",
   dogEars: "on",
+  bookplate: "on",
+  bookplateName: "",
   dividers: "ornament",
   spacing: "calm",
   coverShadows: "soft",
@@ -1157,6 +1169,8 @@ export function parsePreferences(raw: unknown): Preferences {
     progressRibbon: pick(PROGRESS_RIBBONS, obj.progressRibbon, d.progressRibbon),
     shelfWear: pick(SHELF_WEARS, obj.shelfWear, d.shelfWear),
     dogEars: pick(DOG_EARS, obj.dogEars, d.dogEars),
+    bookplate: pick(BOOKPLATES, obj.bookplate, d.bookplate),
+    bookplateName: parseBookplateName(obj.bookplateName),
     dividers: pick(DIVIDERS, obj.dividers, d.dividers),
     spacing: pick(SPACINGS, obj.spacing, d.spacing),
     coverShadows: pick(COVER_SHADOWS, obj.coverShadows, d.coverShadows),

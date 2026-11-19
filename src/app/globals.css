@@ -9682,6 +9682,163 @@ html.dark .cover-dogear {
   }
 }
 
+/* ── Bookplates ────────────────────────────────────────────────────────────
+   The "Ex libris" plate on a book you own (components/bookplate.tsx),
+   under its cover: a small printed label, its paper the card's colour on
+   a cream laid paper and its ink the theme's colour taken towards the
+   text's, so it reads as printed on every theme, light or dark (4.5:1 or
+   more on each). A frame of two fine rules (the border and an inset outline),
+   a curl in each corner, an open book, the name in italics and the
+   number, all in Literata, as a plate is printed once
+   whatever the page is set in. It sits a hair off straight, as pasted by
+   hand. Preferences › Appearance › Bookplate turns it off (the page leaves
+   it out). */
+.bookplate {
+  /* Printing ink: the theme's colour taken towards the text's, and a little
+     deeper on light paper. */
+  --plate-ink: color-mix(
+    in oklab,
+    color-mix(in oklab, var(--primary) 55%, var(--foreground)) 82%,
+    #000
+  );
+  /* The card's colour on a cream laid paper, with a touch of the theme's. */
+  --plate-paper: color-mix(
+    in oklab,
+    color-mix(in oklab, var(--card) 82%, #f6ecd4) 97%,
+    var(--primary)
+  );
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 0.375rem;
+  width: 100%;
+  max-width: 15rem;
+  padding: 1.05rem 1.25rem 0.95rem;
+  border: 1px solid color-mix(in oklab, var(--plate-ink) 60%, transparent);
+  border-radius: 2px;
+  outline: 1px solid color-mix(in oklab, var(--plate-ink) 38%, transparent);
+  outline-offset: -5px;
+  color: var(--plate-ink);
+  background:
+    radial-gradient(120% 90% at 50% 35%, color-mix(in oklab, var(--plate-paper), #fff 5%), transparent 70%),
+    var(--plate-paper);
+  box-shadow:
+    0 1px 1px rgb(0 0 0 / 0.06),
+    0 2px 6px -2px rgb(0 0 0 / 0.12);
+  font-family: var(--font-literata), ui-serif, Georgia, serif;
+  text-align: center;
+  rotate: -0.4deg;
+}
+html.dark .bookplate {
+  --plate-ink: color-mix(in oklab, var(--primary) 55%, var(--foreground));
+  --plate-paper: color-mix(
+    in oklab,
+    color-mix(in oklab, var(--card) 92%, #b49a6e) 96%,
+    var(--primary)
+  );
+  box-shadow:
+    0 1px 1px rgb(0 0 0 / 0.25),
+    0 2px 8px -2px rgb(0 0 0 / 0.45);
+}
+.bookplate-corner {
+  position: absolute;
+  width: 0.9rem;
+  height: 0.9rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1;
+  stroke-linecap: round;
+  opacity: 0.85;
+}
+.bookplate-corner circle {
+  fill: currentColor;
+  stroke: none;
+}
+.bookplate-corner[data-corner="tl"] {
+  top: 8px;
+  left: 8px;
+}
+.bookplate-corner[data-corner="tr"] {
+  top: 8px;
+  right: 8px;
+  scale: -1 1;
+}
+.bookplate-corner[data-corner="bl"] {
+  bottom: 8px;
+  left: 8px;
+  scale: 1 -1;
+}
+.bookplate-corner[data-corner="br"] {
+  right: 8px;
+  bottom: 8px;
+  scale: -1 -1;
+}
+.bookplate-ex {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.32em;
+  /* The spacing after the last letter, taken back so it centres. */
+  margin-right: -0.32em;
+  text-transform: uppercase;
+  line-height: 1.2;
+}
+.bookplate-book {
+  width: 2.75rem;
+  height: auto;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.bookplate-name {
+  max-width: 100%;
+  font-size: 1.3125rem;
+  font-style: italic;
+  font-weight: 450;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+.bookplate-rule {
+  position: relative;
+  width: 5.5rem;
+  height: 7px;
+  background: linear-gradient(
+      to right,
+      transparent,
+      currentColor 25%,
+      currentColor calc(50% - 0.6rem),
+      transparent calc(50% - 0.6rem) calc(50% + 0.6rem),
+      currentColor calc(50% + 0.6rem),
+      currentColor 75%,
+      transparent
+    )
+    center / 100% 1px no-repeat;
+  opacity: 0.7;
+}
+.bookplate-rule::before {
+  content: "";
+  position: absolute;
+  top: 1px;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  margin-left: -2.5px;
+  background: currentColor;
+  rotate: 45deg;
+}
+.bookplate-number {
+  font-size: 0.8125rem;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+}
+.bookplate-number abbr {
+  font-variant-caps: small-caps;
+  text-decoration: none;
+  letter-spacing: 0.04em;
+}
+
 /* ── Stickers ──────────────────────────────────────────────────────────────
    Stickers and stamps pinned on a cover (components/cover-stickers.tsx):
    each about a third of the cover's width, a little off straight, the

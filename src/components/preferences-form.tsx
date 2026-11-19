@@ -10,6 +10,7 @@ import { deleteView, renameView } from "@/lib/actions/saved-views";
 import { moveId, orderByIds } from "@/lib/library-order";
 import { topBarLinks } from "@/lib/nav";
 import { SAVED_VIEW_NAME_MAX } from "@/lib/saved-views";
+import { BOOKPLATE_NAME_MAX, parseBookplateName } from "@/lib/bookplate";
 import { REMINDER_TIMES, WEEKDAY_SHORT, formatClock, weekdaysInOrder } from "@/lib/reminders";
 import { SOUND_EVENTS, type SoundEvent, type SoundVolume } from "@/lib/sounds";
 import {
@@ -348,6 +349,51 @@ function Choice<T extends string>({
   );
 }
 
+/** The name printed on bookplates, saved when the field is left or Enter
+ *  is pressed. Left empty, the plate says the username. */
+function BookplateNameField({
+  value,
+  username,
+  onSave,
+}: {
+  value: string;
+  username: string;
+  onSave: (name: string) => void;
+}) {
+  const [draft, setDraft] = useState(value);
+  function save() {
+    const name = parseBookplateName(draft);
+    setDraft(name);
+    if (name !== value) onSave(name);
+  }
+  return (
+    <div className="grid gap-1.5 sm:grid-cols-[14rem_1fr] sm:items-center sm:gap-4">
+      <div>
+        <label htmlFor="bookplate-name" className="text-sm font-medium">
+          Name on the bookplate
+        </label>
+        <p className="text-xs text-muted-foreground">Left empty, it says your username.</p>
+      </div>
+      <Input
+        id="bookplate-name"
+        className="w-full sm:w-72"
+        value={draft}
+        placeholder={username}
+        maxLength={BOOKPLATE_NAME_MAX}
+        autoComplete="name"
+        onChange={(e) => setDraft(e.target.value)}
+        onBlur={save}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            save();
+          }
+        }}
+      />
+    </div>
+  );
+}
+
 /** A checkbox with its label. */
 function Toggle({
   label,
@@ -406,6 +452,7 @@ export function PreferencesForm({
   googleAvailable,
   savedViews,
   reminders,
+  username,
 }: {
   /** As stored: `timeZone` is "" while the server's zone is in use. */
   initial: Preferences;
@@ -419,6 +466,8 @@ export function PreferencesForm({
   /** Whether this server sends reading reminders, and the account's
    *  browsers that take them. */
   reminders: { available: boolean; devices: ReminderDevice[] };
+  /** What a bookplate says when no name is given for it. */
+  username: string;
 }) {
   const router = useRouter();
   const [prefs, setPrefs] = useState(initial);
@@ -1000,6 +1049,23 @@ export function PreferencesForm({
           ]}
           onChange={(v) => update({ dogEars: v })}
         />
+        <Choice
+          label="Bookplate"
+          hint="An “Ex libris” plate under the cover of a printed book you own, with your name and its number in your library, counting in the order you added them."
+          value={prefs.bookplate}
+          options={[
+            { value: "on", label: "On books I own" },
+            { value: "off", label: "No bookplate" },
+          ]}
+          onChange={(v) => update({ bookplate: v })}
+        />
+        {prefs.bookplate === "on" && (
+          <BookplateNameField
+            value={prefs.bookplateName}
+            username={username}
+            onSave={(name) => update({ bookplateName: name })}
+          />
+        )}
         <Choice
           label="Shadows under covers"
           hint="A thin, even shadow under every cover, which lifts a little when the pointer is on one you can open."

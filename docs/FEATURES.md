@@ -292,6 +292,14 @@ page by page.
   corner, and pointing at it says the page you stopped at. With animations
   on the flap lifts a little under the pointer. Preferences > Appearance
   can leave the corners flat.
+- **Bookplates.** A printed book you own has an "Ex libris" plate under
+  its cover, as if pasted inside it: a small framed label with an open
+  book, your name in italics and the book's number in your library
+  (counting in the order you added them) with the year it came in. It's
+  printed in the theme's own colours on a cream paper, in the same face
+  whatever the page is set in, and closes the page on a phone.
+  Preferences > Appearance can give it another name than your username,
+  or leave it off.
 - **Shadows under covers.** Every cover sits on a thin, even shadow with a
   hairline edge, so a pale cover doesn't melt into a pale page, and one
   you can open lifts a little under the pointer as its shadow softens

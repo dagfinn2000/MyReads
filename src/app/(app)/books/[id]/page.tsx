@@ -22,9 +22,12 @@ import {
 } from "@/lib/display";
 import { AuthorLinks } from "@/components/author-links";
 import { formatLength } from "@/lib/progress-units";
+import { dayKey } from "@/lib/dates";
 import { shelfWear, stoppedAt } from "@/lib/shelf-wear";
 import { BookBackdrop, BookCover, readingAt } from "@/components/book-card";
 import { BookPageCover } from "@/components/book-page-cover";
+import { Bookplate } from "@/components/bookplate";
+import { bookplateCountWhere, takesBookplate } from "@/lib/bookplate";
 import { BookDescription } from "@/components/book-description";
 import { BookLink } from "@/components/book-link";
 import { BookShelvesCard } from "@/components/book-shelves-card";
@@ -145,7 +148,8 @@ export default async function BookDetailPage({
       ]).then(([candidates, total]) => similarBooks(book, candidates, total))
     : Promise.resolve([]);
 
-  const [allShelves, seriesBooks, upNextPlace, smartShelves, similar] = await Promise.all([
+  const showPlate = prefs.bookplate === "on" && takesBookplate(book);
+  const [allShelves, seriesBooks, upNextPlace, smartShelves, similar, plateNumber] = await Promise.all([
     shelvesPromise,
     book.seriesName
       ? prisma.book.findMany({
@@ -170,7 +174,17 @@ export default async function BookDetailPage({
     // The smart shelves whose rules hold it.
     smartPromise.then((all) => smartShelvesHolding(userId, book.id, all, prefs)),
     similarPromise,
+    // Its number among the printed books you own, in the order added.
+    showPlate ? prisma.book.count({ where: bookplateCountWhere(userId, book) }) : null,
   ]);
+  const plate =
+    plateNumber !== null ? (
+      <Bookplate
+        name={prefs.bookplateName || session.user.name || "This reader"}
+        number={plateNumber}
+        year={Number(dayKey(book.createdAt, prefs.timeZone || undefined).slice(0, 4))}
+      />
+    ) : null;
 
   // The reader's own fields that this book has a value for, in their order.
   const values = cleanFieldValues(book.fields, prefs.customFields);
@@ -251,6 +265,7 @@ export default async function BookDetailPage({
           stopped={stoppedAt(book)}
           wear={wear}
           stickers={book.stickers}
+          plate={plate}
         >
           <Button asChild variant="outline" size="sm">
             <Link href={`/books/${book.id}/edit`}>
@@ -471,6 +486,8 @@ export default async function BookDetailPage({
               )}
             </div>
           )}
+          {/* On a phone the plate closes the page, as the endpaper would. */}
+          {plate && <div className="grid justify-items-center pt-2 md:hidden">{plate}</div>}
         </div>
       </div>
     </>

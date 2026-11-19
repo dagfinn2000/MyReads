@@ -26,6 +26,7 @@ export function BookPageCover({
   stopped,
   wear,
   stickers,
+  plate,
   children,
 }: {
   bookId: string;
@@ -34,6 +35,9 @@ export function BookPageCover({
   stopped?: StoppedAt | null;
   wear?: CoverWear;
   stickers: string[];
+  /** The bookplate, under the buttons from md up (the page puts it at its
+   *  foot on a phone). */
+  plate?: React.ReactNode;
   children: React.ReactNode;
 }) {
   const [current, setOptimistic] = useOptimistic(stickers, (_: string[], next: string[]) => next);
@@ -179,6 +183,7 @@ export function BookPageCover({
             </p>
           </PopoverContent>
         </div>
+        {plate && <div className="mt-3 hidden md:grid">{plate}</div>}
       </div>
     </Popover>
   );
