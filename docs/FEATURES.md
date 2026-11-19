@@ -1222,6 +1222,11 @@ tab goes away. You can also keep the house and leave the avatar out.
   a moment after the units, while the progress bar slides along to its new
   length. Preferences > Motion > Logging pages can have them change
   straight away.
+- **An hourglass in the reading timer.** While the timer runs, a small
+  quarter-hour glass beside the time lets its sand run down, a fine stream
+  of grains falling through the neck, and turns itself over at each
+  quarter hour to run again. It stands still while the timer is paused.
+  Preferences > Motion > Reading timer can bring back the breathing dot.
 - Animations can be turned off, or only the backgrounds kept still. They
   stay off when your device asks for reduced motion.
 - **Book typography.** Choose "Like a printed book" in Preferences > Text

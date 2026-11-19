@@ -1193,6 +1193,16 @@ export function PreferencesForm({
           onChange={(v) => update({ rollingNumbers: v })}
         />
         <Choice
+          label="Reading timer"
+          hint="What shows the timer is running, beside the time read."
+          value={prefs.timerLook}
+          options={[
+            { value: "hourglass", label: "An hourglass, turned each quarter hour" },
+            { value: "dot", label: "A dot that breathes" },
+          ]}
+          onChange={(v) => update({ timerLook: v })}
+        />
+        <Choice
           label="Opening a book"
           hint="Tapping a book’s cover in the library, a series or anywhere else covers show."
           value={prefs.bookOpening}

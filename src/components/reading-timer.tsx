@@ -15,6 +15,8 @@ import {
   timerMinutes,
   type TimerState,
 } from "@/lib/reading-time";
+import { Hourglass } from "@/components/hourglass";
+import { usePreferences } from "@/components/preferences-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -243,6 +245,7 @@ export function useReadingTimer(bookId: string, readStartedAt?: number | null): 
 /** The timer's line under the quick-log row. */
 export function ReadingTimer({ control: t }: { control: ReadingTimerControl }) {
   const id = useId();
+  const prefs = usePreferences();
   const { timer, box } = t;
 
   if (box !== null) {
@@ -298,7 +301,8 @@ export function ReadingTimer({ control: t }: { control: ReadingTimerControl }) {
   }
 
   const running = timer.runningSince != null;
-  const clock = formatClock(elapsedMs(timer, t.now));
+  const elapsed = elapsedMs(timer, t.now);
+  const clock = formatClock(elapsed);
   const control = `grid size-6 place-items-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring ${
     running ? "hover:bg-primary/15" : "hover:bg-foreground/10"
   }`;
@@ -311,10 +315,14 @@ export function ReadingTimer({ control: t }: { control: ReadingTimerControl }) {
           running ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
         }`}
       >
-        <span
-          aria-hidden="true"
-          className={`size-2 rounded-full ${running ? "timer-breathe bg-primary" : "bg-muted-foreground/60"}`}
-        />
+        {prefs.timerLook === "hourglass" ? (
+          <Hourglass elapsedMs={elapsed} running={running} />
+        ) : (
+          <span
+            aria-hidden="true"
+            className={`size-2 rounded-full ${running ? "timer-breathe bg-primary" : "bg-muted-foreground/60"}`}
+          />
+        )}
         <span className="font-medium">{running ? "Reading" : "Paused"}</span>
         {/* role=timer is never read out as it changes. */}
         <span role="timer" aria-label={`${running ? "Reading" : "Paused"} for ${clock}`}>
