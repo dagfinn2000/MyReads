@@ -497,7 +497,7 @@ export function BookCard({
       <div className="flex flex-1 flex-col gap-1">
         <p
           className={cn(
-            "book-title-line line-clamp-2 font-heading font-medium leading-snug group-hover:underline",
+            "book-title-line line-clamp-2 font-heading font-medium group-hover:underline",
             compact ? "text-xs" : "text-sm",
           )}
         >
@@ -560,7 +560,7 @@ export function BookCoverTile({ book, compact = false }: { book: BookCardBook; c
       )}
       <p
         className={cn(
-          "book-title-line line-clamp-2 font-heading leading-snug text-muted-foreground group-hover:text-foreground group-hover:underline",
+          "book-title-line line-clamp-2 font-heading text-muted-foreground group-hover:text-foreground group-hover:underline",
           compact ? "text-[11px]" : "text-xs",
         )}
       >
