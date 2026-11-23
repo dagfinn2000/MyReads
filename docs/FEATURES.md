@@ -1298,7 +1298,9 @@ tab goes away. You can also keep the house and leave the avatar out.
 
 ## Preferences
 
-On the Account page:
+On the Account page. **Find a setting**, the box at the top, finds any of
+them as you type ("ribbon", "fonts", "time zone") and takes you straight
+to it, marked for a moment. Quick find (Ctrl+K) finds settings too.
 
 - Date and number formats, your time zone and the first day of the week.
 - How titles and authors sort, with Norwegian, Danish, Swedish and German
