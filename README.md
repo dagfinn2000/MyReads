@@ -29,6 +29,8 @@ server.
   sent by itself when you're back online.
 - Time your reading, set a daily goal in pages or minutes, get a reminder
   at a time you choose, and keep your own list of what to read next.
+- If you like, an email on the 1st with your month in books: what you
+  finished, your reading days on a little calendar, and your goals.
 - Write notes as you read, tied to a page or a chapter, and save quotes
   or import your Kindle highlights. A book's page lays them out in the
   order of the book.
@@ -218,6 +220,7 @@ Account page, and the theme with the palette button in the top bar.
 | `APP_PORT` | no | Port MyReads runs on (default `3000`). |
 | `BACKUP_HOUR`, `BACKUP_KEEP` | no | Every night the server saves a backup of each account in the `backups` volume: at this hour (UTC, default `3`), keeping the newest `7`. |
 | `READING_REMINDERS` | no | `off` stops the server sending reading reminders. They are on by default and need no setup, but browsers only allow them over https. |
+| `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM` | no | A mail server for the monthly email, which each reader turns on for themselves. Without `SMTP_HOST` no email is ever sent. |
 
 ## Cleaning up cover images
 

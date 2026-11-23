@@ -8,6 +8,8 @@ import { formatDate, formatDayKey, formatFileSize, formatNumber } from "@/lib/di
 import { orderByIds } from "@/lib/library-order";
 import { googleBooksEnabled } from "@/lib/metadata/googlebooks";
 import { DEFAULT_PREFERENCES, serverTimeZone } from "@/lib/preferences";
+import { mailEnabled } from "@/lib/mail";
+import { lastMonth, nextMonthlyEmail } from "@/lib/monthly-email";
 import { remindersEnabled } from "@/lib/reminders";
 import { serverBackupConfig, serverBackupNote } from "@/lib/server-backups";
 import { listServerBackups } from "@/lib/server-backups-run";
@@ -44,7 +46,7 @@ export default async function AccountPage() {
   const [user, bookCount, current, prefs, savedViews, copies, pushDevices, passkeys] = await Promise.all([
     prisma.user.findUnique({
       where: { id: userId },
-      select: { username: true, createdAt: true, lastBackupAt: true },
+      select: { username: true, createdAt: true, lastBackupAt: true, lastMonthlyEmail: true },
     }),
     prisma.book.count({ where: { userId } }),
     getCurrentUser(),
@@ -70,6 +72,8 @@ export default async function AccountPage() {
   // As stored, so the form can tell "never set" from a chosen zone.
   const stored = current?.preferences ?? DEFAULT_PREFERENCES;
   const timeZones = [...new Set(["UTC", ...Intl.supportedValuesOf("timeZone")])];
+  const zone = prefs.timeZone || serverTimeZone();
+  const now = new Date();
 
   return (
     <div className="grid grid-cols-1 gap-6" data-settings-root="">
@@ -110,6 +114,12 @@ export default async function AccountPage() {
             reminders={{
               available: remindersEnabled(),
               devices: pushDevices.map((d) => ({ ...d, createdAt: d.createdAt.toISOString() })),
+            }}
+            monthlyEmail={{
+              available: mailEnabled(),
+              lastSent: user.lastMonthlyEmail,
+              next: nextMonthlyEmail(user.lastMonthlyEmail, now, zone),
+              latest: lastMonth(now, zone),
             }}
             username={user.username}
           />

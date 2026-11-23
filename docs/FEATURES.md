@@ -437,6 +437,26 @@ page by page.
   2026". Make one from a tag, a mood, a shelf or a saved view; it shows
   the covers of the books that count so far, and a medal once it's done.
 
+### Monthly email
+
+An email on the morning of the 1st (08:00 where you are) with the month
+before in books. It's off until you turn it on, under Preferences >
+Monthly email, with the address it should go to.
+
+- It has your books finished, pages, reading days and time read, each
+  beside the month before; the best-rated book of the month large, with
+  its cover, and the others you finished; a calendar of the month, darker
+  the more you read; your monthly and yearly goals; what you're reading
+  now; and a quote you saved that month. It counts the same way as Stats.
+- **Preview** shows any of the last twelve months' emails, and **Send it
+  to me** sends one to you now, to see it in your own mail app.
+- A month with no reading gets no email, unless you turn that off.
+- **Stop these emails** at the bottom turns it off without signing in.
+- It looks right in light and dark mail apps, and on a phone.
+- It needs a mail server, set up by whoever runs MyReads (`SMTP_HOST` and
+  the settings beside it in [.env.example](../.env.example)). Without one,
+  Preview still works.
+
 ## The reading room
 
 The Room page draws your library as a cozy pixel-art house.
@@ -763,6 +783,8 @@ to it, marked for a moment. Quick find (Ctrl+K) finds settings too.
   percent or time for audiobooks, where your pace comes from, and the
   daily goal.
 - When reading reminders come, and the browsers they come to.
+- The monthly email: whether you get it, where it goes, and whether a
+  month with no reading gets one.
 - The rating style, whether to rate plot, characters and writing too,
   and what counts in your stats.
 - Names for the statuses, and statuses of your own.
