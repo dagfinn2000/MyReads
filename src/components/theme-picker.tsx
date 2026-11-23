@@ -1,9 +1,10 @@
 "use client";
 
-import { useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { MonitorSmartphone, Palette, SunMoon } from "lucide-react";
 import { saveTheme } from "@/lib/actions/theme";
+import { OPEN_THEME_PICKER_EVENT } from "@/lib/theme-picker-event";
 import { motionAllowed } from "@/lib/motion";
 import {
   DARK_THEME_IDS,
@@ -204,6 +205,16 @@ export function ThemePicker() {
   const auto = current?.kind === "auto" ? current : null;
   const triggerRef = useRef<HTMLButtonElement>(null);
   const [open, setOpen] = useState(false);
+
+  // Opened from elsewhere on the page (the welcome on an empty library).
+  useEffect(() => {
+    const show = () => {
+      triggerRef.current?.scrollIntoView({ block: "nearest" });
+      setOpen(true);
+    };
+    window.addEventListener(OPEN_THEME_PICKER_EVENT, show);
+    return () => window.removeEventListener(OPEN_THEME_PICKER_EVENT, show);
+  }, []);
 
   /** Shows the page's theme again, after what it's made from changed. */
   function show() {
