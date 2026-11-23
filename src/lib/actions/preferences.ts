@@ -1,12 +1,14 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/actions/helpers";
 import { cleanPreferencesPatch, type Preferences } from "@/lib/preferences";
 import { forgetLostStatuses } from "@/lib/status-keys";
 import { forgetLostFieldValues } from "@/lib/field-values";
 import { forgetLostMoods } from "@/lib/mood-keys";
+import { expectedSite } from "@/lib/passkeys";
 
 /**
  * Saves some preferences on the account. Only the keys in `patch` change.
@@ -19,6 +21,13 @@ import { forgetLostMoods } from "@/lib/mood-keys";
 export async function savePreferences(patch: Partial<Preferences>): Promise<void> {
   const userId = await requireUserId();
   const clean = cleanPreferencesPatch(patch);
+  // Where the monthly email's links go is the server's to say: where the
+  // reader has MyReads open as they set the email up.
+  delete clean.emailSite;
+  if ("monthlyEmail" in clean || "emailAddress" in clean) {
+    const site = expectedSite(await headers())?.origin;
+    if (site) clean.emailSite = site;
+  }
   if (Object.keys(clean).length === 0) return;
 
   await prisma.$executeRaw`

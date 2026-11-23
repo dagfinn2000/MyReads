@@ -58,6 +58,12 @@ import { StatusSettings } from "@/components/status-settings";
 import { FieldSettings } from "@/components/field-settings";
 import { MoodSettings } from "@/components/mood-settings";
 import { ReminderDevices, type ReminderDevice } from "@/components/reminder-settings";
+import {
+  EmailAddressField,
+  MonthlyEmailActions,
+  monthlyEmailStatus,
+  type MonthlyEmailInfo,
+} from "@/components/monthly-email-settings";
 import { TagRulesList } from "@/components/tag-rules-list";
 import { WeatherSettings } from "@/components/weather-settings";
 import { FontChoice, FontPreview } from "@/components/font-picker";
@@ -454,6 +460,7 @@ export function PreferencesForm({
   googleAvailable,
   savedViews,
   reminders,
+  monthlyEmail,
   username,
 }: {
   /** As stored: `timeZone` is "" while the server's zone is in use. */
@@ -468,6 +475,8 @@ export function PreferencesForm({
   /** Whether this server sends reading reminders, and the account's
    *  browsers that take them. */
   reminders: { available: boolean; devices: ReminderDevice[] };
+  /** Whether this server sends email, and when the next monthly one goes. */
+  monthlyEmail: MonthlyEmailInfo;
   /** What a bookplate says when no name is given for it. */
   username: string;
 }) {
@@ -782,6 +791,45 @@ export function PreferencesForm({
             Reading reminders are turned off on this server (READING_REMINDERS=off).
           </p>
         )}
+      </Section>
+
+      <Section title="Monthly email" id="monthly-email">
+        <p className="text-xs text-muted-foreground">
+          On the morning of the 1st, a summary of the month before: the books you finished, your
+          pages, time and reading days on a little calendar, your goals, and a quote you saved.
+          Off until you turn it on.
+        </p>
+        {!monthlyEmail.available && (
+          <p className="rounded-lg border bg-muted/40 px-3 py-2.5 text-sm text-muted-foreground">
+            Email isn’t set up on this server, so it can’t be sent yet. Whoever runs MyReads can
+            add a mail server with SMTP_HOST and the settings beside it (see .env.example).
+          </p>
+        )}
+        {monthlyEmail.available && (
+          <>
+            <EmailAddressField
+              value={prefs.emailAddress}
+              onSave={(address) =>
+                update(address ? { emailAddress: address } : { emailAddress: "", monthlyEmail: false })
+              }
+            />
+            <Toggle
+              label="Send me the monthly email"
+              checked={prefs.monthlyEmail && !!prefs.emailAddress}
+              disabled={!prefs.emailAddress}
+              onChange={(v) => update({ monthlyEmail: v })}
+            />
+            <Toggle
+              label="Not for a month with no reading"
+              checked={prefs.monthlyEmailSkipQuiet}
+              onChange={(v) => update({ monthlyEmailSkipQuiet: v })}
+            />
+            <p className="text-sm text-muted-foreground" aria-live="polite">
+              {monthlyEmailStatus(monthlyEmail, prefs)}
+            </p>
+          </>
+        )}
+        <MonthlyEmailActions info={monthlyEmail} address={prefs.emailAddress} />
       </Section>
 
       <Section title="Dates and numbers">

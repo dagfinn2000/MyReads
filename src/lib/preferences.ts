@@ -58,6 +58,7 @@ import { parseCatCoat, parseDogCoat, parsePet, type CatCoat, type DogCoat, type 
 import { parseOwnCss } from "@/lib/own-css";
 import { parseBookplateName } from "@/lib/bookplate";
 import { REMINDER_TIMES, parseReminderDays } from "@/lib/reminders";
+import { parseEmailAddress } from "@/lib/email-address";
 import { SOUND_EVENTS, SOUND_SETTINGS, SOUND_VOLUMES, type SoundEvent, type SoundSetting, type SoundVolume } from "@/lib/sounds";
 import { WEATHER_SETTINGS, parseWeatherPlace, type WeatherPlace, type WeatherSetting } from "@/lib/weather";
 import { parsePartThemes, type PartThemes } from "@/lib/themes";
@@ -658,6 +659,18 @@ export type Preferences = {
   reminderDays: number[];
   /** None on a day the reader has already logged some reading. */
   reminderSkipIfRead: boolean;
+  /** The monthly email (lib/monthly-email.ts): a summary of the month
+   *  before, on the 1st. Off until the reader turns it on, and only sent
+   *  on a server with email set up (lib/mail.ts). */
+  monthlyEmail: boolean;
+  /** Where it goes; "" until an address is given. */
+  emailAddress: string;
+  /** None for a month with no reading at all. */
+  monthlyEmailSkipQuiet: boolean;
+  /** Where the reader had MyReads open when they last set the email up
+   *  ("https://books.example.com"), for its links when AUTH_URL isn't set.
+   *  Written by the server (actions/preferences.ts), never by the form. */
+  emailSite: string;
 
   // Book page
   /** Every card, in the order shown. Always a full list (see parse). */
@@ -849,6 +862,10 @@ export const DEFAULT_PREFERENCES: Preferences = {
   reminderTime: "20:00",
   reminderDays: [0, 1, 2, 3, 4, 5, 6],
   reminderSkipIfRead: true,
+  monthlyEmail: false,
+  emailAddress: "",
+  monthlyEmailSkipQuiet: true,
+  emailSite: "",
   bookPageCards: [...BOOK_PAGE_CARDS],
   hiddenBookPageCards: [],
   bookDescription: "full",
@@ -1219,6 +1236,10 @@ export function parsePreferences(raw: unknown): Preferences {
         : d.reminderTime,
     reminderDays: parseReminderDays(obj.reminderDays),
     reminderSkipIfRead: bool(obj.reminderSkipIfRead, d.reminderSkipIfRead),
+    monthlyEmail: bool(obj.monthlyEmail, d.monthlyEmail),
+    emailAddress: parseEmailAddress(obj.emailAddress),
+    monthlyEmailSkipQuiet: bool(obj.monthlyEmailSkipQuiet, d.monthlyEmailSkipQuiet),
+    emailSite: parseSiteOrigin(obj.emailSite),
     bookPageCards: parseBookPageCards(obj.bookPageCards),
     hiddenBookPageCards: pickList(BOOK_PAGE_CARDS, obj.hiddenBookPageCards),
     bookDescription: pick(BOOK_DESCRIPTIONS, obj.bookDescription, d.bookDescription),
@@ -1280,6 +1301,17 @@ export function parsePreferences(raw: unknown): Preferences {
     avatarLooks: parseSavedLooks(obj.avatarLooks),
     avatarPet: parsePet(obj.avatarPet),
   };
+}
+
+/** An http(s) origin, "https://books.example.com", or "". */
+export function parseSiteOrigin(raw: unknown): string {
+  if (typeof raw !== "string" || !raw) return "";
+  try {
+    const url = new URL(raw);
+    return url.protocol === "https:" || url.protocol === "http:" ? url.origin : "";
+  } catch {
+    return "";
+  }
 }
 
 /** Where each start page lives. */

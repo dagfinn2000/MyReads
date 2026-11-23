@@ -43,48 +43,52 @@ enum BookOwnership {
 }
 
 model User {
-  id              String        @id @default(cuid())
-  username        String        @unique
-  passwordHash    String // bcrypt
+  id               String        @id @default(cuid())
+  username         String        @unique
+  passwordHash     String // bcrypt
   /// Bumped whenever every existing session should stop working — currently
   /// a password change. Sessions are JWTs with no server-side row to delete,
   /// so the token carries the value it was minted with and `auth.ts` rejects
   /// it once the two disagree. Tokens minted before this column existed have
   /// no value at all and are treated as 0, so upgrading doesn't sign anyone
   /// out; the first password change invalidates them like any other.
-  tokenVersion    Int           @default(0)
+  tokenVersion     Int           @default(0)
   /// Chosen UI theme (id from lib/themes.ts), so the look follows the
   /// account across browsers. Null = never picked one on this account;
   /// the client falls back to localStorage, then the default.
-  theme           String?
+  theme            String?
   /// Preferred library view ({ sort, dir, group } — see lib/library-view.ts),
   /// applied when /books is opened without explicit view params so the
   /// chosen sort survives navigating away and back. Null = defaults.
-  libraryView     Json?
+  libraryView      Json?
   /// Everything set in the Preferences card on the Account page (see
   /// lib/preferences.ts): defaults for new books, date and number formats,
   /// time zone, sorting rules, catalogues, rating style and so on. One JSON
   /// column rather than a column per setting, so adding a setting needs no
   /// migration — parsePreferences fills in a default for anything missing.
   /// Null = never changed anything.
-  preferences     Json?
+  preferences      Json?
   /// When this account last downloaded its backup zip (GET /api/export), so
   /// the Backup card can say how old the newest copy is. Null = never.
-  lastBackupAt    DateTime?
+  lastBackupAt     DateTime?
   /// The day (YYYY-MM-DD, in the reader's zone) the last reading reminder
   /// was sent, or let go because the reader had already read: what keeps
   /// it to one a day (lib/reminders.ts). Null = never.
-  lastReminderDay String?
-  createdAt       DateTime      @default(now())
-  books           Book[]
-  shelves         Shelf[]
-  smartShelves    SmartShelf[]
-  readingGoals    ReadingGoal[]
-  savedViews      SavedView[]
-  challenges      Challenge[]
-  pushDevices     PushDevice[]
-  deletedBooks    DeletedBook[]
-  passkeys        Passkey[]
+  lastReminderDay  String?
+  /// The month (YYYY-MM) the last monthly email was about, or let go
+  /// because nothing was read in it: what keeps it to one a month
+  /// (lib/monthly-email.ts). Null = never.
+  lastMonthlyEmail String?
+  createdAt        DateTime      @default(now())
+  books            Book[]
+  shelves          Shelf[]
+  smartShelves     SmartShelf[]
+  readingGoals     ReadingGoal[]
+  savedViews       SavedView[]
+  challenges       Challenge[]
+  pushDevices      PushDevice[]
+  deletedBooks     DeletedBook[]
+  passkeys         Passkey[]
 }
 
 /// A passkey that signs in to this account in place of the password

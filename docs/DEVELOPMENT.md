@@ -132,6 +132,7 @@ Screenshots live in `docs/`, next to FEATURES.md.
   passwords hashed with bcrypt
 - [Tailwind CSS v4](https://tailwindcss.com/) and [shadcn/ui](https://ui.shadcn.com/)
 - [Zod](https://zod.dev/) for validation and [Vitest](https://vitest.dev/) for tests
+- [Nodemailer](https://nodemailer.com/) to send the monthly email
 
 ## Project layout
 
@@ -164,8 +165,8 @@ src/
 │  ├─ dates.ts         which calendar day a date falls on, by time zone
 │  ├─ enums.ts         the database's enums, safe to import in the browser
 │  ├─ net-guard.ts     stops the server fetching private addresses
-│  └─ server-jobs.ts   the server's own timer, for nightly backups and
-│                      reading reminders
+│  └─ server-jobs.ts   the server's own timer, for nightly backups,
+│                      reading reminders and the monthly email
 ├─ auth.config.ts      Auth.js config that is safe to run in proxy.ts
 ├─ auth.ts             full Auth.js config (credentials, Prisma, bcrypt)
 ├─ instrumentation.ts  starts the server's own jobs when it starts
@@ -576,6 +577,30 @@ The reading room's files:
   ([public/sw.js](../public/sw.js)) shows the notification. Push
   addresses come from the browser, so they go through the same network
   guard as cover downloads.
+- **The monthly email is tables and inline styles.** Mail apps throw away
+  most of CSS, so [monthly-email-html.ts](../src/lib/monthly-email-html.ts)
+  lays the email out in tables with every style on its element, light
+  first, with a dark look in a `prefers-color-scheme` block (and the same
+  rules under `[data-ogsc]` for Outlook's dark mode). Covers go inside the
+  message as small JPEGs shown by `cid:`, since `/api/covers` needs a
+  signed-in browser; the preview (`/api/email/monthly`) puts them in the
+  page as `data:` instead. What it says comes from
+  [monthly-email.ts](../src/lib/monthly-email.ts), which counts with the
+  same rules as Stats. The job ([monthly-email-run.ts](../src/lib/monthly-email-run.ts))
+  looks every 15 minutes, only with `SMTP_HOST` set; from 08:00 on the 1st
+  in a reader's zone it claims the month in `User.lastMonthlyEmail` before
+  sending, and gives it back if the send fails, so it is tried again (later
+  each time) until the 7th. "Stop these emails" works without signing in:
+  its key is an HMAC of the account and address with `AUTH_SECRET`, so it
+  stops working when the address changes. Opening it asks first, since
+  mail scanners open links; the mail app's own Unsubscribe button POSTs
+  (RFC 8058). [mail.ts](../src/lib/mail.ts) reads the `SMTP_*` settings
+  and sends through nodemailer, which `package.json` overrides to the
+  current version: next-auth still lists an older one as an optional
+  peer, which MyReads doesn't use.
+  To try it, run a mail catcher such as
+  [Mailpit](https://mailpit.axllent.org/) (`SMTP_HOST=localhost`,
+  `SMTP_PORT=1025`, `SMTP_FROM=books@example.com`) and press Send it to me.
 - **Offline is two halves.** Opening the app without a connection is the
   service worker's: [public/sw.js](../public/sw.js), registered as
   `/sw.js?v=<build id>` by

@@ -31,10 +31,12 @@ export const config = {
   //  - the PWA manifest and app icons (fetched without credentials on install)
   //  - the pictures of the themes that bring their own (public/themes), which
   //    the sign-in pages show too
+  //  - the monthly email's "Stop these emails" link, which is opened from
+  //    a mail app with no session and checks a key of its own instead
   //  - the service worker (and push-sw.js, its old name), which a redirect
   //    to /login would keep from installing, the list of the build's files
   //    it keeps, and the page it shows offline: none holds anything private
   matcher: [
-    "/((?!api/auth|api/register|api/import$|api/covers/upload$|api/offline/assets$|_next/static|_next/image|favicon.ico|icon.svg|manifest.webmanifest|apple-icon.png|icons/|themes/|sw.js$|push-sw.js$|offline$).*)",
+    "/((?!api/auth|api/register|api/import$|api/covers/upload$|api/offline/assets$|api/email/unsubscribe$|_next/static|_next/image|favicon.ico|icon.svg|manifest.webmanifest|apple-icon.png|icons/|themes/|sw.js$|push-sw.js$|offline$).*)",
   ],
 };
