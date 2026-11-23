@@ -88,7 +88,8 @@ server.
   restore it on any MyReads server.
 - With Docker, the server also saves a copy of every library each night.
 
-Every feature is described in [docs/FEATURES.md](docs/FEATURES.md).
+Every feature is described in [docs/FEATURES.md](docs/FEATURES.md), and
+every theme in [docs/THEMES.md](docs/THEMES.md).
 
 Left out on purpose: anything social, recommendations of books you don't
 have, and importing a list of books from a spreadsheet (CSV) file.

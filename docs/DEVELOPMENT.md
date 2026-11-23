@@ -96,8 +96,9 @@ A new setting usually needs no migration: settings are JSON (see
 
 The [README](../README.md) is a short overview for someone deciding
 whether to install MyReads. [FEATURES.md](FEATURES.md) lists everything
-the app can do. When a change adds or changes something a reader can see,
-update FEATURES.md, and the README only when its overview no longer fits.
+the app can do, and [THEMES.md](THEMES.md) every theme. When a change adds
+or changes something a reader can see, update FEATURES.md (THEMES.md for a
+theme), and the README only when its overview no longer fits.
 Screenshots live in `docs/`, next to FEATURES.md.
 
 ## Publishing a release
