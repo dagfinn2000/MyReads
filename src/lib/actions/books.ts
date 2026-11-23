@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import type { Prisma } from "@prisma/client";
 import { BookFormat, BookOwnership, ReadingStatus } from "@/lib/enums";
 import { z } from "zod";
@@ -10,6 +11,8 @@ import { idSchema } from "@/lib/reading-log-input";
 import { bookSchema, readingSchema } from "@/lib/validation";
 import { deleteCachedCover } from "@/lib/covers";
 import { localizeCoverAfterResponse } from "@/lib/cover-localize";
+import { binBooks } from "@/lib/recently-deleted";
+import { JUST_DELETED_COOKIE } from "@/lib/just-deleted";
 import { getPreferences } from "@/lib/current-user";
 import { requireUserId } from "@/lib/actions/helpers";
 import type { ActionState } from "@/lib/actions/helpers";
@@ -435,20 +438,24 @@ async function logProgress(
   }
 }
 
-/** Delete a book and its cached cover image. */
+/**
+ * Delete a book: it goes to Recently deleted for 30 days, cover and all
+ * (lib/recently-deleted.ts), and the library says so with an Undo.
+ */
 export async function deleteBook(bookId: string): Promise<void> {
   const userId = await requireUserId();
   if (!idSchema.safeParse(bookId).success) return;
 
-  const existing = await prisma.book.findFirst({
-    where: { id: bookId, userId },
-    select: { coverUrl: true },
+  const moved = await binBooks(userId, [bookId]);
+  if (moved === 0) return;
+
+  (await cookies()).set(JUST_DELETED_COOKIE, bookId, {
+    path: "/",
+    maxAge: 120,
+    sameSite: "lax",
   });
-  if (!existing) return;
-
-  await prisma.book.delete({ where: { id: bookId } });
-  await deleteCachedCover(existing.coverUrl);
-
   revalidatePath("/books");
+  revalidatePath("/stats");
+  revalidatePath("/quotes");
   redirect("/books");
 }

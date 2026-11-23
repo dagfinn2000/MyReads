@@ -3,16 +3,18 @@ import { backupEnvProblems, serverBackupConfig } from "@/lib/server-backups";
 import { registerServerJob, startServerJobs } from "@/lib/server-jobs";
 
 /**
- * Registers each job whose setting turns it on, and starts the timer if
- * there is at least one; called from instrumentation.ts. Nightly backups
- * are on with BACKUP_DIR set, reading reminders unless READING_REMINDERS
- * is off. A job's own code is only loaded once it's on.
+ * Registers each job whose setting turns it on, and starts the timer;
+ * called from instrumentation.ts. Recently deleted's hourly sweep always
+ * runs. Nightly backups are on with BACKUP_DIR set, reading reminders
+ * unless READING_REMINDERS is off. A job's own code is only loaded once
+ * it's on.
  */
 export async function startServerJobsFromEnv(): Promise<void> {
   const backups = serverBackupConfig();
   const reminders = remindersEnabled();
-  if (!backups && !reminders) return;
 
+  const { recentlyDeletedJob } = await import("@/lib/recently-deleted");
+  registerServerJob(recentlyDeletedJob());
   if (backups) {
     const { serverBackupJob } = await import("@/lib/server-backups-run");
     registerServerJob(serverBackupJob(backups));

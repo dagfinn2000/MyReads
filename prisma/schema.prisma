@@ -83,6 +83,7 @@ model User {
   savedViews      SavedView[]
   challenges      Challenge[]
   pushDevices     PushDevice[]
+  deletedBooks    DeletedBook[]
 }
 
 /// A browser that takes this account's reading reminders (Preferences ›
@@ -467,6 +468,26 @@ model BookNote {
   updatedAt DateTime @updatedAt
 
   @@index([bookId])
+}
+
+/// A deleted book, kept for 30 days in Recently deleted so it can be put
+/// back (lib/recently-deleted.ts). The id is the book's own, so a book put
+/// back keeps its address and everything that points at it. `data` holds
+/// the book's row and its reads, reading log, loans, quotes, notes and
+/// shelves as they were; title, authors and cover are copied out so the
+/// list needs nothing else. Its cover file stays until the entry goes for
+/// good. Not part of a backup: the bin isn't the library.
+model DeletedBook {
+  id        String   @id
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  authors   String[] @default([])
+  coverUrl  String?
+  data      Json
+  deletedAt DateTime @default(now())
+
+  @@index([userId, deletedAt])
 }
 
 /// Caches raw Open Library / Google Books responses so repeated lookups of the

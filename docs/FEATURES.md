@@ -345,6 +345,13 @@ page by page.
   remove tags or a mood, put them on a shelf or take them off it, or
   delete them.
   Pick the books on screen, or every book that matches your filters.
+- **Recently deleted.** A book you delete, one at a time or many at once,
+  waits in Recently deleted for 30 days with its reading history, notes,
+  quotes and loans. Right after a delete the library offers Undo. Later,
+  open Recently deleted from the line under the library (or with quick
+  find) and press Put back: the book returns just as it was, on the same
+  shelves. Delete now, or Empty, removes books for good straight away.
+  Books in it aren't part of a backup.
 - Rename, merge, reorder and hide shelves, and choose which status tabs the
   library shows. Saved views can be renamed and reordered too.
 

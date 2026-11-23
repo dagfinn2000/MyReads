@@ -185,10 +185,12 @@ export async function deleteCachedCover(coverUrl: string | null | undefined) {
   if (!coverUrl?.startsWith("/api/covers/")) return;
   const filename = path.basename(coverUrl);
   try {
-    const stillUsed = await prisma.book.count({
-      where: { coverUrl: { contains: filename } },
-    });
-    if (stillUsed > 0) return;
+    // A book in Recently deleted keeps its cover until it goes for good.
+    const [books, binned] = await Promise.all([
+      prisma.book.count({ where: { coverUrl: { contains: filename } } }),
+      prisma.deletedBook.count({ where: { coverUrl: { contains: filename } } }),
+    ]);
+    if (books + binned > 0) return;
   } catch {
     return; // can't tell — keep the file
   }
@@ -199,7 +201,7 @@ export async function deleteCachedCover(coverUrl: string | null | undefined) {
  * deleteCachedCover for many books at once (bulk delete). One look at every
  * cached cover still in use, instead of a search of every book per cover,
  * which for thousands of books is thousands of full scans. The rule is the
- * same: a file any book still names stays.
+ * same: a file any book (or entry in Recently deleted) still names stays.
  */
 export async function deleteCachedCovers(coverUrls: (string | null | undefined)[]) {
   const filenames = new Set(
@@ -211,10 +213,18 @@ export async function deleteCachedCovers(coverUrls: (string | null | undefined)[
 
   const stillUsed = new Set<string>();
   try {
-    const rows = await prisma.book.findMany({
-      where: { coverUrl: { contains: "/api/covers/" } },
-      select: { coverUrl: true },
-    });
+    // A book in Recently deleted keeps its cover until it goes for good.
+    const [books, binned] = await Promise.all([
+      prisma.book.findMany({
+        where: { coverUrl: { contains: "/api/covers/" } },
+        select: { coverUrl: true },
+      }),
+      prisma.deletedBook.findMany({
+        where: { coverUrl: { contains: "/api/covers/" } },
+        select: { coverUrl: true },
+      }),
+    ]);
+    const rows = [...books, ...binned];
     for (const { coverUrl } of rows) {
       if (!coverUrl) continue;
       stillUsed.add(path.basename(coverUrl));

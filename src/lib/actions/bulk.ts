@@ -15,7 +15,7 @@ import {
   type BulkDeleteInput,
   type BulkInput,
 } from "@/lib/bulk";
-import { deleteCachedCovers } from "@/lib/covers";
+import { binBooks } from "@/lib/recently-deleted";
 import { getPreferences } from "@/lib/current-user";
 import { parseFilters } from "@/lib/library-filters";
 import { resolveBookWhere } from "@/lib/library-where";
@@ -27,6 +27,8 @@ import { moodOf } from "@/lib/moods";
 export interface BulkResult {
   count?: number;
   error?: string;
+  /** The books a delete moved to Recently deleted, for its Undo. */
+  ids?: string[];
 }
 
 /** Room for thousands of per-book writes (a status change runs each book
@@ -295,9 +297,8 @@ export async function bulkUpdateBooks(input: BulkInput): Promise<BulkResult> {
 }
 
 /**
- * Delete many books at once, with their reading history, quotes and loans
- * (the schema cascades), then their cached covers where no other book uses
- * them. For "every book that matches", the count the confirmation showed
+ * Delete many books at once, with their reading history, quotes and loans.
+ * They go to Recently deleted for 30 days, so the bar can offer Undo. For "every book that matches", the count the confirmation showed
  * must still be the count that matches, or nothing is deleted: a book
  * added or changed in the meantime must not quietly join the delete.
  */
@@ -323,17 +324,13 @@ export async function bulkDeleteBooks(input: BulkDeleteInput): Promise<BulkResul
   }
   if (doomed.length === 0) return { error: "No matching books" };
 
-  const outcome = await prisma.$transaction(async (tx) => {
-    for (const part of chunk(doomed.map((b) => b.id), BULK_CHUNK)) {
-      await tx.book.deleteMany({ where: { id: { in: part }, userId } });
-    }
-  }, TRANSACTION_OPTIONS).catch(timedOut);
-  if (outcome === "timeout") return { error: TOO_LONG };
-
-  await deleteCachedCovers(doomed.map((b) => b.coverUrl));
+  // Into Recently deleted, covers and all, so Undo can bring them back.
+  const ids = doomed.map((b) => b.id);
+  const moved = await binBooks(userId, ids).catch(timedOut);
+  if (moved === "timeout") return { error: TOO_LONG };
 
   revalidatePath("/books");
   revalidatePath("/stats");
   revalidatePath("/quotes");
-  return { count: doomed.length };
+  return { count: moved, ids };
 }

@@ -38,10 +38,12 @@ try {
   }
 
   // Every locally-cached cover currently referenced by a book.
-  const rows = await prisma.book.findMany({
-    where: { coverUrl: { startsWith: "/api/covers/" } },
-    select: { coverUrl: true },
-  });
+  // (and every one kept for a book in Recently deleted).
+  const where = { coverUrl: { startsWith: "/api/covers/" } };
+  const rows = [
+    ...(await prisma.book.findMany({ where, select: { coverUrl: true } })),
+    ...(await prisma.deletedBook.findMany({ where, select: { coverUrl: true } })),
+  ];
   const referenced = new Set(rows.map((r) => path.basename(r.coverUrl)));
 
   const now = Date.now();

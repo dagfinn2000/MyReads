@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { BookFormat, BookOwnership, ReadingStatus } from "@/lib/enums";
 import { Check, Dices, SquareCheckBig, X } from "lucide-react";
 import { bulkDeleteBooks, bulkUpdateBooks } from "@/lib/actions/bulk";
+import { restoreDeletedBooks } from "@/lib/actions/recently-deleted";
 import { pickRandomBook } from "@/lib/actions/pick";
 import { STAGGERED_CARDS, cascadeSteps } from "@/lib/card-cascade";
 import { useCoverColours } from "@/lib/cover-colours";
@@ -186,6 +187,9 @@ export function LibraryView({
   const [matchingFor, setMatchingFor] = useState<string | null>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleting, startDelete] = useTransition();
+  // The books the last delete moved to Recently deleted, for its Undo.
+  const [undoIds, setUndoIds] = useState<string[] | null>(null);
+  const [undoing, startUndo] = useTransition();
   const cancelDeleteRef = useRef<HTMLButtonElement>(null);
   const [message, setMessage] = useState<string | null>(null);
   const messageRef = useRef<HTMLSpanElement>(null);
@@ -270,6 +274,7 @@ export function LibraryView({
   const shownPickNote = pickNote?.key === viewKey ? pickNote.reason : null;
 
   function apply() {
+    setUndoIds(null);
     const addTags = splitTags(tags);
     const dropTags = splitTags(removeTags);
     // The shelf select's values are "add:<id>" and "remove:<id>".
@@ -332,6 +337,7 @@ export function LibraryView({
         setMessage(res.error);
       } else {
         setMessage(`Deleted ${booksLabel(res.count ?? 0)}.`);
+        setUndoIds(res.ids ?? null);
         clearSelection();
       }
     });
@@ -676,6 +682,25 @@ export function LibraryView({
             >
               {message}
             </span>
+            {undoIds && undoIds.length > 0 && (
+              <Button
+                size="sm"
+                variant="ghost"
+                disabled={undoing}
+                onClick={() =>
+                  startUndo(async () => {
+                    const res = await restoreDeletedBooks(undoIds);
+                    setUndoIds(null);
+                    setMessage(
+                      res.count ? `Put back ${booksLabel(res.count)}.` : (res.error ?? "Nothing to put back."),
+                    );
+                    messageRef.current?.focus();
+                  })
+                }
+              >
+                {undoing ? "Putting back…" : "Undo"}
+              </Button>
+            )}
           </div>
         </div>
       )}
@@ -699,10 +724,10 @@ export function LibraryView({
           <DialogHeader>
             <DialogTitle>Delete {booksLabel(selCount)}?</DialogTitle>
             <DialogDescription>
-              They leave your library with their reading history, quotes and
-              loans. This can’t be undone, so{" "}
-              <a href="/api/export">download a backup</a> first if you might
-              want them back.
+              They leave your library with their reading history, notes,
+              quotes and loans, and wait in{" "}
+              <Link href="/books/deleted">Recently deleted</Link> for 30 days in case
+              you want them back.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
