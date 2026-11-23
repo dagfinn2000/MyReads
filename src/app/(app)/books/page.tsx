@@ -7,6 +7,8 @@ import { LibraryBig, Plus, Sparkles, Trash2 } from "lucide-react";
 import { JustDeletedNotice } from "@/components/just-deleted-notice";
 import { JUST_DELETED_COOKIE } from "@/lib/just-deleted";
 import { binCutoff } from "@/lib/recently-deleted";
+import { coverColours } from "@/lib/cover-colour-store";
+import { bookRainbowKey, cachedCoverFile } from "@/lib/rainbow";
 import { fineText } from "@/lib/fine-type";
 import { formatNumber } from "@/lib/display";
 import { BULK_MAX_IDS } from "@/lib/bulk";
@@ -317,6 +319,7 @@ export default async function BooksPage({
     overdue: late.has(b.id),
     finishSoon: finishSoonBadge(b, now, prefs),
     shelves: shelvesOf.get(b.id) ?? [],
+    rainbow: null as number | null,
   }));
   // A book just deleted from its page, and what Recently deleted holds.
   const justDeletedId = jar.get(JUST_DELETED_COOKIE)?.value;
@@ -341,6 +344,15 @@ export default async function BooksPage({
     statusNames: prefs.statusNames,
     moods: allMoods(prefs),
   };
+  // Sorted by cover colour: each book's place in the rainbow, from its
+  // cached cover's colour (read on the server the first time) or the
+  // colour its cover is drawn in.
+  if (values.sort === "colour") {
+    const colours = await coverColours(
+      withLoanFlag.map((b) => cachedCoverFile(b.coverUrl)).filter((f): f is string => f !== null),
+    );
+    for (const b of withLoanFlag) b.rainbow = bookRainbowKey(b, colours);
+  }
   const sorted = sortBooks(withLoanFlag, values.sort, values.dir, sortOptions);
   const groups = groupBooks(sorted, values.group, sortOptions);
   // Grouped views fill their sections up to `limit` entries. A book under

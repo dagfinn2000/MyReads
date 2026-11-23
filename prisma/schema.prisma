@@ -490,6 +490,16 @@ model DeletedBook {
   @@index([userId, deletedAt])
 }
 
+/// The main colour of a cached cover file, read on the server for the
+/// library's sort by cover colour (lib/cover-colour-store.ts) with the same
+/// rule the spines use in the browser (lib/spine-colour.ts). Keyed by the
+/// file's name, which changes with its content, so a row never goes stale;
+/// shared by every book naming the file. "" = the file couldn't be read.
+model CoverColour {
+  file   String @id
+  colour String
+}
+
 /// Caches raw Open Library / Google Books responses so repeated lookups of the
 /// same query don't hit the external APIs. Rows are upserted per (source,
 /// query) and considered stale after `expiresAt`.

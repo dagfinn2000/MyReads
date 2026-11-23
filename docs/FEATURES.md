@@ -239,7 +239,14 @@ page by page.
   and fills in its cover and page count where they're missing, never
   replacing what you set.
 - Search, filter, sort and group the library. Authors sort by surname, the
-  way a bookshelf is filed. More filters also finds books by page count
+  way a bookshelf is filed.
+- **Rainbow shelf.** Sort by Cover colour and the library runs like a
+  rainbow: red, orange, yellow, green, blue, violet and pink, each colour
+  light to dark, then the white, grey and black covers. It's lovely in the
+  Spines view, and handy when all you remember is that the book was blue.
+  Each cover's colour is read once on your server, the same way the spines
+  get theirs (a library with many covers may take a moment the first
+  time). A book without a cover goes by the colour its cover is drawn in. More filters also finds books by page count
   ("up to 300 pages"), the year they came out, and when you added them
   (in the last week, month, three months or year).
 - **More like this:** at the foot of a book's page, up to eight books from

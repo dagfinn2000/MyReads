@@ -69,8 +69,9 @@ export async function coverThumbnail(filename: string, width: number): Promise<B
   }
 }
 
-/** Deletes a cached cover and its smaller copies. */
+/** Deletes a cached cover, its smaller copies and its colour. */
 async function unlinkCover(filename: string) {
+  await prisma.coverColour.deleteMany({ where: { file: filename } }).catch(() => {});
   await Promise.all(
     [coverFilePath(filename), ...COVER_WIDTHS.map((w) => thumbPath(filename, w))].map((p) =>
       fs.unlink(p).catch(() => {
