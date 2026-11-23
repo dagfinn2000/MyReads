@@ -50,7 +50,8 @@ function scan(root: HTMLElement): Omit<Found, "score">[] {
     const title = titled?.dataset.setting || text(el);
     if (!title || title.length > 80) continue;
     const heading = el.matches("section > h3") ? null : row.closest("section")?.querySelector(":scope > h3");
-    rows.set(row, { title, section: heading ? text(heading) : null, row });
+    const section = heading ? text(heading) : null;
+    rows.set(row, { title, section: section === title ? null : section, row });
   }
   return [...rows.values()];
 }

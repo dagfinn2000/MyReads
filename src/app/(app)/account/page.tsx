@@ -18,6 +18,7 @@ import {
 } from "@/components/backup-download";
 import { ChangePasswordForm } from "@/components/change-password-form";
 import { DeleteAccount } from "@/components/delete-account";
+import { PasskeySettings, SignOutEverywhereElse } from "@/components/passkey-settings";
 import { PreferencesForm } from "@/components/preferences-form";
 import { SettingsFinder } from "@/components/settings-finder";
 import { RestoreBackup } from "@/components/restore-backup";
@@ -40,7 +41,7 @@ export default async function AccountPage() {
   // Null with server backups off, and then the card is as it always was.
   const serverBackups = serverBackupConfig();
 
-  const [user, bookCount, current, prefs, savedViews, copies, pushDevices] = await Promise.all([
+  const [user, bookCount, current, prefs, savedViews, copies, pushDevices, passkeys] = await Promise.all([
     prisma.user.findUnique({
       where: { id: userId },
       select: { username: true, createdAt: true, lastBackupAt: true },
@@ -57,6 +58,11 @@ export default async function AccountPage() {
     prisma.pushDevice.findMany({
       where: { userId },
       select: { id: true, label: true, endpoint: true, createdAt: true },
+      orderBy: { createdAt: "asc" },
+    }),
+    prisma.passkey.findMany({
+      where: { userId },
+      select: { id: true, name: true, createdAt: true, lastUsedAt: true },
       orderBy: { createdAt: "asc" },
     }),
   ]);
@@ -116,6 +122,30 @@ export default async function AccountPage() {
         </CardHeader>
         <CardContent>
           <ChangePasswordForm />
+        </CardContent>
+      </Card>
+
+      <Card id="signing-in" className="scroll-mt-20">
+        <CardHeader>
+          <CardTitle>Signing in</CardTitle>
+        </CardHeader>
+        <CardContent className="grid gap-6">
+          <section className="grid gap-3" data-setting="Passkeys">
+            <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Passkeys</h3>
+            <PasskeySettings
+              prefs={prefs}
+              passkeys={passkeys.map((p) => ({
+                id: p.id,
+                name: p.name,
+                createdAt: p.createdAt.toISOString(),
+                lastUsedAt: p.lastUsedAt?.toISOString() ?? null,
+              }))}
+            />
+          </section>
+          <section className="grid gap-3" data-setting="Sign out everywhere else">
+            <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Other devices</h3>
+            <SignOutEverywhereElse />
+          </section>
         </CardContent>
       </Card>
 
