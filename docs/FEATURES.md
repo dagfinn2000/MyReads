@@ -11,6 +11,7 @@ page by page.
 - [The reading room](#the-reading-room)
 - [Look and feel](#look-and-feel)
 - [Preferences](#preferences)
+- [Signing in](#signing-in)
 - [Backups](#backups)
 
 ## Adding books
@@ -1348,6 +1349,21 @@ to it, marked for a moment. Quick find (Ctrl+K) finds settings too.
   them, Ctrl+K (⌘K) opens quick find, `/` searches the library, `n` adds a
   book, `g` and a letter goes to a page in your top bar, and `e` edits the
   book whose page you're on.
+
+## Signing in
+
+- **Passkeys**: add one on the Account page (Signing in) and sign in
+  with your fingerprint, face or screen lock instead of your password,
+  with the "Sign in with a passkey" button or by picking it in the
+  username box. Each one is named after what keeps it (iCloud Keychain,
+  Google Password Manager, 1Password...), and can be renamed or removed.
+  Your password still works too.
+- Passkeys need MyReads to be opened over https (or on localhost), and
+  belong to the address they were made on. Behind a proxy that changes
+  the address, set `AUTH_URL` to the one you open.
+- **Sign out everywhere else** signs out every other browser and phone
+  signed in to your account, and keeps this one. Changing your password
+  signs out everywhere, this browser included.
 
 ## Backups
 

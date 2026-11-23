@@ -84,6 +84,31 @@ model User {
   challenges      Challenge[]
   pushDevices     PushDevice[]
   deletedBooks    DeletedBook[]
+  passkeys        Passkey[]
+}
+
+/// A passkey that signs in to this account in place of the password
+/// (Account › Passkeys; lib/webauthn.ts checks them). Made with no
+/// attestation: only its public key is kept, never anything secret.
+model Passkey {
+  /// The credential id the browser gave it, base64url.
+  id         String    @id
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// The public key, SPKI DER, and its COSE algorithm (-7 ES256 and so on).
+  publicKey  Bytes
+  algorithm  Int
+  /// The signature counter it last showed; one that goes backwards is
+  /// refused. Synced passkeys stay at 0.
+  signCount  BigInt    @default(0)
+  /// How the browser can reach it ("internal", "hybrid", "usb"...).
+  transports String[]
+  /// What the reader calls it; first a guess ("iCloud Keychain").
+  name       String
+  createdAt  DateTime  @default(now())
+  lastUsedAt DateTime?
+
+  @@index([userId])
 }
 
 /// A browser that takes this account's reading reminders (Preferences ›

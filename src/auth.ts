@@ -5,6 +5,8 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { authConfig } from "@/auth.config";
 import { clientIp, loginLimiter } from "@/lib/rate-limit";
+import { passkeySignIn } from "@/lib/passkey-sign-in";
+import { keptVersion } from "@/lib/session-keep";
 
 const credentialsSchema = z.object({
   username: z.string().min(1),
@@ -22,7 +24,7 @@ class RateLimited extends CredentialsSignin {
  * Full Auth.js setup (Node runtime): the edge-safe base config plus the
  * Credentials provider that checks username/password against the database.
  */
-export const { handlers, auth, signIn, signOut } = NextAuth({
+export const { handlers, auth, signIn, signOut, unstable_update } = NextAuth({
   ...authConfig,
   providers: [
     Credentials({
@@ -75,6 +77,27 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         };
       },
     }),
+    /**
+     * Signing in with a passkey (Account › Passkeys): `response` is the
+     * browser's signed answer to a challenge from passkeySignInOptions,
+     * checked in lib/passkey-sign-in.ts. A failure counts against the
+     * address like a wrong password does.
+     */
+    Credentials({
+      id: "passkey",
+      name: "Passkey",
+      credentials: { response: {} },
+      async authorize(credentials, request) {
+        const ipKey = `login:ip:${clientIp(request.headers)}`;
+        if (loginLimiter.blocked(ipKey)) throw new RateLimited();
+        const user = await passkeySignIn(credentials?.response, request.headers);
+        if (!user) {
+          loginLimiter.hit(ipKey);
+          return null;
+        }
+        return { id: user.id, name: user.username, tokenVersion: user.tokenVersion };
+      },
+    }),
   ],
   callbacks: {
     ...authConfig.callbacks,
@@ -96,7 +119,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
      * as 0, matching the column default — upgrading an existing instance
      * doesn't sign anyone out.
      */
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       if (user) {
         token.id = user.id;
         token.tokenVersion = user.tokenVersion ?? 0;
@@ -104,6 +127,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
 
       if (typeof token.id !== "string") return null;
+
+      // "Sign out everywhere else" moving this session onto the account's
+      // new version, with a proof only the server can make
+      // (lib/session-keep.ts).
+      if (trigger === "update") {
+        const kept = keptVersion((session as { keepSession?: unknown } | undefined)?.keepSession, token.id);
+        if (kept !== null) token.tokenVersion = kept;
+      }
 
       const current = await prisma.user.findUnique({
         where: { id: token.id },

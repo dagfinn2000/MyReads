@@ -125,6 +125,17 @@ export const SETTINGS: SettingEntry[] = [
   { label: "Books I stop reading", section: "Stats page" },
   { label: "Audiobooks", section: "Stats page" },
   { label: "Change password", section: null, aka: ["password"] },
+  { label: "Signing in", section: null, aka: ["login", "log in", "security"] },
+  {
+    label: "Passkeys",
+    section: "Signing in",
+    aka: ["passkey", "face id", "touch id", "fingerprint", "windows hello", "webauthn"],
+  },
+  {
+    label: "Sign out everywhere else",
+    section: "Signing in",
+    aka: ["sign out", "log out", "sessions", "other devices", "lost phone"],
+  },
   { label: "Backup", section: null, aka: ["export", "download", "restore", "zip"] },
   { label: "Delete account", section: null },
 ];
