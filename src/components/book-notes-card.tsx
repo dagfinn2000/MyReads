@@ -2,7 +2,7 @@
 
 import { useActionState, useEffect, useId, useMemo, useRef, useState, type CSSProperties } from "react";
 import type { BookNote, Quote } from "@prisma/client";
-import { PenLine, Pencil, Quote as QuoteIcon } from "lucide-react";
+import { FileDown, PenLine, Pencil, Quote as QuoteIcon } from "lucide-react";
 import { ReadingStatus } from "@/lib/enums";
 import {
   CHAPTER_MAX,
@@ -125,8 +125,9 @@ export function BookNotesCard({
     <Card id="notes" className="scroll-mt-20">
       <CardHeader>
         <CardTitle>Notes &amp; quotes</CardTitle>
-        {both && (
-          <CardAction>
+        {entries.length > 0 && (
+          <CardAction className="flex items-center gap-1">
+            {both && (
             <div role="group" aria-label="Show" className="flex items-center gap-0.5 rounded-lg bg-muted p-0.5 text-xs">
               {(
                 [
@@ -146,6 +147,18 @@ export function BookNotesCard({
                 </button>
               ))}
             </div>
+            )}
+            <Button asChild variant="ghost" size="icon" className="size-8 text-muted-foreground">
+              {/* A plain link: the file comes from a route, not a page. */}
+              <a
+                href={`/api/notes/markdown?book=${encodeURIComponent(book.id)}`}
+                download
+                aria-label="Download notes and quotes as Markdown"
+                title="Download as Markdown, for Obsidian or any notes app"
+              >
+                <FileDown />
+              </a>
+            </Button>
           </CardAction>
         )}
       </CardHeader>

@@ -166,6 +166,12 @@ page by page.
   mark to read it; click it to jump to it in the list.
 - Search all your quotes on the Quotes page, by their text, your note on
   them, their chapter or the book.
+- **Take them to your notes app.** The download button on a book's Notes &
+  quotes card saves them as a Markdown file, in the order of the book under
+  its chapters, with your review and the book's details (author, dates,
+  rating, tags) at the top the way Obsidian reads them. On the Quotes page,
+  Download as Markdown saves a zip with one such file for every book that
+  has notes or quotes. Everything goes out exactly as you typed it.
 - **Quote pictures.** The picture button by a quote sets it large with the
   book's title and author under it, to download or, on a phone, share
   straight to another app. Four looks (Paper, Night, the cover's colours

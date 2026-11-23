@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Quote } from "lucide-react";
+import { FileDown, Quote } from "lucide-react";
+import { prisma } from "@/lib/prisma";
 import { getPreferences, getSession } from "@/lib/current-user";
 import { formatNumber } from "@/lib/display";
 import {
@@ -49,14 +50,18 @@ export default async function QuotesPage({
     redirect(quotesHref({ ...params, seed: newSeed(), limit: undefined }));
   }
 
-  const [{ total, shown, list, groups }, sources] = await Promise.all([
+  const [{ total, shown, list, groups }, sources, anyNote, anyQuote] = await Promise.all([
     loadQuotes(userId, params, {
       ignoreArticles: prefs.ignoreArticles,
       authorOrder: prefs.authorOrder,
       alphabet: prefs.sortAlphabet,
     }),
     quoteSources(userId, { alphabet: prefs.sortAlphabet, shelfId: params.shelfId }),
+    // Whether there's anything at all to download as Markdown.
+    prisma.bookNote.findFirst({ where: { book: { userId } }, select: { id: true } }),
+    prisma.quote.findFirst({ where: { book: { userId } }, select: { id: true } }),
   ]);
+  const hasAnything = Boolean(anyNote || anyQuote);
 
   const fromFilter = Boolean(params.tag || params.shelfId);
   const filtered = Boolean(params.q) || fromFilter;
@@ -76,7 +81,22 @@ export default async function QuotesPage({
           {filtered ? " matching" : ""}
           {hidden > 0 ? ` · showing ${formatNumber(shown, prefs)}` : ""}
         </span>
-        <KindleImport />
+        <span className="ml-auto flex flex-wrap items-center gap-2">
+          {hasAnything && (
+            <Button asChild variant="outline" size="sm">
+              {/* A plain link: the zip comes from a route, not a page. */}
+              <a
+                href="/api/notes/markdown"
+                download
+                title="Every book's notes and quotes, a Markdown file each, for Obsidian or any notes app"
+              >
+                <FileDown data-slot="icon" />
+                Download as Markdown
+              </a>
+            </Button>
+          )}
+          <KindleImport />
+        </span>
       </div>
 
       <QuotesToolbar
