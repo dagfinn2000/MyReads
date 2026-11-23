@@ -15,6 +15,9 @@ page by page.
 
 ## Adding books
 
+- A new, empty library opens with a welcome and three ways to start: add
+  books (a whole shelf by barcode, if you like), restore a backup from
+  another MyReads server, or pick a theme.
 - Search by title, author or ISBN and import the details from
   [Open Library](https://openlibrary.org/), with
   [Google Books](https://developers.google.com/books) (optional) and the

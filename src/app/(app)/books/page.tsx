@@ -5,6 +5,8 @@ import type { Prisma } from "@prisma/client";
 import { ReadingStatus } from "@/lib/enums";
 import { LibraryBig, Plus, Sparkles, Trash2 } from "lucide-react";
 import { JustDeletedNotice } from "@/components/just-deleted-notice";
+import { LibraryWelcome } from "@/components/library-welcome";
+import { THEMES } from "@/lib/themes";
 import { JUST_DELETED_COOKIE } from "@/lib/just-deleted";
 import { binCutoff } from "@/lib/recently-deleted";
 import { coverColours } from "@/lib/cover-colour-store";
@@ -566,6 +568,9 @@ export default async function BooksPage({
         shelves={shelves.map((s) => ({ id: s.id, name: s.name }))}
         display={accountView}
         empty={
+          counts.all === 0 && !hasFilters ? (
+            <LibraryWelcome themeCount={THEMES.length} />
+          ) : (
           <div
             className="flex flex-col items-center gap-3 rounded-lg border border-dashed py-16 text-center"
             data-library-view=""
@@ -587,6 +592,7 @@ export default async function BooksPage({
               </Button>
             )}
           </div>
+          )
         }
       />
       {binCount > 0 && (
