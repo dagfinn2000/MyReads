@@ -108,10 +108,11 @@ export async function deleteAccount(
   // The other order loses your images to a failed delete, leaving a library
   // that still lists every book with a broken cover — the same trap
   // updateBook already avoids when it replaces a cover.
-  const books = await prisma.book.findMany({
-    where: { userId: user.id },
-    select: { coverUrl: true },
-  });
+  // Books in Recently deleted still hold their covers too.
+  const books = [
+    ...(await prisma.book.findMany({ where: { userId: user.id }, select: { coverUrl: true } })),
+    ...(await prisma.deletedBook.findMany({ where: { userId: user.id }, select: { coverUrl: true } })),
+  ];
 
   await prisma.user.delete({ where: { id: user.id } });
 

@@ -26,6 +26,7 @@ const { renameShelf } = await import("@/lib/actions/shelves");
 const { renameView } = await import("@/lib/actions/saved-views");
 const { bulkUpdateBooks, bulkDeleteBooks } = await import("@/lib/actions/bulk");
 const { prisma: appPrisma } = await import("@/lib/prisma");
+const { forgetBooks } = await import("@/lib/recently-deleted");
 
 let userId: string;
 let otherUserId: string;
@@ -320,9 +321,15 @@ describe("bulkDeleteBooks", () => {
     await prisma.quote.create({ data: { bookId: gone.id, text: "A line" } });
     await prisma.loan.create({ data: { bookId: gone.id, borrower: "Sam" } });
 
-    expect(await bulkDeleteBooks({ bookIds: [gone.id, theirs.id] })).toEqual({ count: 1 });
+    expect(await bulkDeleteBooks({ bookIds: [gone.id, theirs.id] })).toEqual({
+      count: 1,
+      ids: [gone.id],
+    });
 
     expect(await prisma.book.findUnique({ where: { id: gone.id } })).toBeNull();
+    // Kept in Recently deleted for Undo.
+    expect(await prisma.deletedBook.count({ where: { id: gone.id, userId } })).toBe(1);
+    expect(await prisma.deletedBook.count({ where: { id: theirs.id } })).toBe(0);
     expect(await prisma.read.count({ where: { bookId: gone.id } })).toBe(0);
     expect(await prisma.quote.count({ where: { bookId: gone.id } })).toBe(0);
     expect(await prisma.loan.count({ where: { bookId: gone.id } })).toBe(0);
@@ -339,7 +346,7 @@ describe("bulkDeleteBooks", () => {
     });
     expect(await prisma.book.count({ where: { userId } })).toBe(3);
 
-    expect(await bulkDeleteBooks({ matching: { tag: "weed" }, expectedCount: 2 })).toEqual({
+    expect(await bulkDeleteBooks({ matching: { tag: "weed" }, expectedCount: 2 })).toMatchObject({
       count: 2,
     });
     expect(await prisma.book.findMany({ where: { userId }, select: { id: true } })).toEqual([
@@ -365,7 +372,7 @@ describe("bulkDeleteBooks", () => {
     expect(await prisma.book.count({ where: { userId } })).toBe(3);
   });
 
-  it("removes cached covers no other book uses, and keeps shared ones", async () => {
+  it("keeps covers while the books are in Recently deleted, then removes the unshared ones", async () => {
     const write = async (name: string) => {
       await fs.writeFile(path.join(coversDir, name), "cover");
       return `/api/covers/${name}`;
@@ -382,8 +389,11 @@ describe("bulkDeleteBooks", () => {
     await makeBook({ coverUrl: shared }, otherUserId);
     const remote = await makeBook({ coverUrl: "https://covers.example.org/x.jpg" });
 
-    expect(await bulkDeleteBooks({ bookIds: [a.id, b.id, remote.id] })).toEqual({ count: 3 });
+    expect(await bulkDeleteBooks({ bookIds: [a.id, b.id, remote.id] })).toMatchObject({ count: 3 });
+    expect(await exists(own)).toBe(true);
+    expect(await exists(shared)).toBe(true);
 
+    await forgetBooks(userId);
     expect(await exists(own)).toBe(false);
     expect(await exists(shared)).toBe(true);
   });

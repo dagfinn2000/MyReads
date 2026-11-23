@@ -3,7 +3,12 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import type { Prisma } from "@prisma/client";
 import { ReadingStatus } from "@/lib/enums";
-import { LibraryBig, Plus, Sparkles } from "lucide-react";
+import { LibraryBig, Plus, Sparkles, Trash2 } from "lucide-react";
+import { JustDeletedNotice } from "@/components/just-deleted-notice";
+import { JUST_DELETED_COOKIE } from "@/lib/just-deleted";
+import { binCutoff } from "@/lib/recently-deleted";
+import { fineText } from "@/lib/fine-type";
+import { formatNumber } from "@/lib/display";
 import { BULK_MAX_IDS } from "@/lib/bulk";
 import { orderByIds } from "@/lib/library-order";
 import { prisma } from "@/lib/prisma";
@@ -313,7 +318,18 @@ export default async function BooksPage({
     finishSoon: finishSoonBadge(b, now, prefs),
     shelves: shelvesOf.get(b.id) ?? [],
   }));
-  const overdueNote = await overdueReminder(userId, prefs, openLoans);
+  // A book just deleted from its page, and what Recently deleted holds.
+  const justDeletedId = jar.get(JUST_DELETED_COOKIE)?.value;
+  const [overdueNote, justDeleted, binCount] = await Promise.all([
+    overdueReminder(userId, prefs, openLoans),
+    justDeletedId
+      ? prisma.deletedBook.findFirst({
+          where: { id: justDeletedId, userId },
+          select: { id: true, title: true },
+        })
+      : null,
+    prisma.deletedBook.count({ where: { userId, deletedAt: { gte: binCutoff() } } }),
+  ]);
 
   const sortOptions: SortOptions = {
     ignoreArticles: prefs.ignoreArticles,
@@ -455,6 +471,7 @@ export default async function BooksPage({
 
   return (
     <div className="grid grid-cols-1 gap-4">
+      {justDeleted && <JustDeletedNotice id={justDeleted.id} title={fineText(justDeleted.title)} />}
       {overdueNote && (
         <OverdueNotice
           message={overdueNote.message}
@@ -560,6 +577,14 @@ export default async function BooksPage({
           </div>
         }
       />
+      {binCount > 0 && (
+        <p className="text-center text-sm text-muted-foreground">
+          <Link href="/books/deleted" className="inline-flex items-center gap-1.5 underline-offset-4 hover:text-foreground hover:underline">
+            <Trash2 className="size-3.5" aria-hidden />
+            {binCount === 1 ? "1 book" : `${formatNumber(binCount, prefs)} books`} in Recently deleted
+          </Link>
+        </p>
+      )}
     </div>
   );
 }

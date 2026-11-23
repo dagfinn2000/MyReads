@@ -14,7 +14,7 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 
-/** Delete with a confirm dialog — removal also drops the cached cover. */
+/** Delete with a confirm dialog: the book goes to Recently deleted. */
 export function DeleteBookButton({
   bookId,
   title,
@@ -36,8 +36,9 @@ export function DeleteBookButton({
         <DialogHeader>
           <DialogTitle>Delete “{title}”?</DialogTitle>
           <DialogDescription>
-            This permanently removes the book along with your rating, review,
-            and reading history. There is no undo.
+            It goes to Recently deleted with your rating, review, notes and
+            reading history, and stays there for 30 days in case you want it
+            back.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>

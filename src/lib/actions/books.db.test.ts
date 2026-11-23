@@ -51,6 +51,15 @@ vi.mock("@/lib/covers", async (importOriginal) => ({
   cacheCoverImage: (url: string, bookId: string) => cacheCoverImage(url, bookId),
 }));
 
+const cookieJar = new Map<string, string>();
+vi.mock("next/headers", () => ({
+  cookies: async () => ({
+    get: (name: string) => (cookieJar.has(name) ? { name, value: cookieJar.get(name)! } : undefined),
+    set: (name: string, value: string) => void cookieJar.set(name, value),
+    delete: (name: string) => void cookieJar.delete(name),
+  }),
+}));
+
 const { createBook, updateBook, updateReading, deleteBook } = await import(
   "@/lib/actions/books"
 );
@@ -718,13 +727,20 @@ describe("updateReading and the reading log", () => {
 });
 
 describe("deleteBook", () => {
-  it("removes the book and its cached cover", async () => {
+  it("moves the book to Recently deleted, cover kept, and tells the library", async () => {
     const cover = await writeCover("gone.jpg");
     const bk = await makeBook({ coverUrl: cover });
+    cookieJar.clear();
     expect(await redirectOf(deleteBook(bk.id))).toBe("/books");
 
     expect(await prisma.book.findUnique({ where: { id: bk.id } })).toBeNull();
-    expect(await coverExists(cover)).toBe(false);
+    expect(await prisma.deletedBook.findUnique({ where: { id: bk.id } })).toMatchObject({
+      userId,
+      title: bk.title,
+      coverUrl: cover,
+    });
+    expect(await coverExists(cover)).toBe(true);
+    expect(cookieJar.get("myreads-just-deleted")).toBe(bk.id);
   });
 
   it("leaves a cover file that another account's book points at", async () => {
@@ -740,6 +756,7 @@ describe("deleteBook", () => {
     const bk = await makeBook({}, otherUserId);
     await deleteBook(bk.id);
     expect(await prisma.book.findUnique({ where: { id: bk.id } })).not.toBeNull();
+    expect(await prisma.deletedBook.count({ where: { id: bk.id } })).toBe(0);
   });
 });
 
