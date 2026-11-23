@@ -64,7 +64,9 @@
     --secondary: oklch(0.97 0 0);
     --secondary-foreground: oklch(0.205 0 0);
     --muted: oklch(0.97 0 0);
-    --muted-foreground: oklch(0.556 0 0);
+    /* A shade under shadcn's 0.556, which read at 4.3:1 on --muted (the
+       count beside each library tab): 4.7:1 now. */
+    --muted-foreground: oklch(0.535 0 0);
     --accent: oklch(0.97 0 0);
     --accent-foreground: oklch(0.205 0 0);
     --destructive: oklch(0.577 0.245 27.325);
@@ -140,10 +142,10 @@
     --secondary: #424458;
     --secondary-foreground: #f8f8f2;
     --muted: #424458;
-    --muted-foreground: #a9adc8;
+    --muted-foreground: #b4b8d2;
     --accent: #424458;
     --accent-foreground: #f8f8f2;
-    --destructive: #ff5555;
+    --destructive: #ff7b7b;
     --border: #44475a;
     --input: #44475a;
     --ring: #bd93f9;
@@ -161,10 +163,11 @@
     --secondary: #3d484d;
     --secondary-foreground: #d3c6aa;
     --muted: #3d484d;
-    --muted-foreground: #9da9a0;
+    /* A step lighter than Everforest's grey2, for 4.5:1 on the cards. */
+    --muted-foreground: #b0b9b0;
     --accent: #3d484d;
     --accent-foreground: #d3c6aa;
-    --destructive: #e67e80;
+    --destructive: #f09496;
     --border: #475258;
     --input: #475258;
     --ring: #83c092;
@@ -1492,25 +1495,29 @@
     --heading-font: var(--font-nunito), ui-rounded, ui-sans-serif, system-ui, sans-serif;
 }
 
+/* Solarized's own text tones (base00 on base2) read at 3.6:1, and its
+   yellow and red at 3:1, so the text here sits between base01 and base02,
+   quiet text a shade under base01, and the yellow and red are deepened:
+   4.5:1 or more on every surface. */
 [data-theme="solarized-light"] {
     --background: #fdf6e3;
-    --foreground: #657b83;
+    --foreground: #3a5058;
     --card: #eee8d5;
-    --card-foreground: #657b83;
+    --card-foreground: #3a5058;
     --popover: #eee8d5;
-    --popover-foreground: #657b83;
-    --primary: #b58900;
+    --popover-foreground: #3a5058;
+    --primary: #8a6a00;
     --primary-foreground: #ffffff;
     --secondary: #e7e1cd;
-    --secondary-foreground: #657b83;
+    --secondary-foreground: #3a5058;
     --muted: #e7e1cd;
-    --muted-foreground: #839496;
+    --muted-foreground: #52676e;
     --accent: #e7e1cd;
-    --accent-foreground: #657b83;
-    --destructive: #dc322f;
+    --accent-foreground: #3a5058;
+    --destructive: #b52b28;
     --border: #d3cbb8;
     --input: #d3cbb8;
-    --ring: #b58900;
+    --ring: #8a6a00;
 }
 
 /* Cherry-blossom pink with a deep raspberry accent. Cooler and pinker
@@ -11377,5 +11384,34 @@ html[data-motion="off"] *::after {
 @keyframes setting-found {
   from {
     background-color: color-mix(in oklab, var(--primary) 14%, transparent);
+  }
+}
+
+/* ── Skip link ─────────────────────────────────────────────────────────────
+   The first Tab stop on every signed-in page ((app)/layout.tsx): out of
+   sight until it has focus, then a small button over the top bar's corner
+   that takes focus past the bar to the page. */
+.skip-link {
+  position: fixed;
+  top: 0.5rem;
+  left: 0.5rem;
+  z-index: 60;
+  padding: 0.5rem 0.875rem;
+  border-radius: var(--radius-md);
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font-size: 0.875rem;
+  font-weight: 500;
+  box-shadow: 0 6px 18px -6px rgb(0 0 0 / 0.35);
+  translate: 0 calc(-100% - 1rem);
+}
+.skip-link:focus-visible {
+  translate: none;
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-motion="off"]) .skip-link {
+    transition: translate 0.15s ease-out;
   }
 }

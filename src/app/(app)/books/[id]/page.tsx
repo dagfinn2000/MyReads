@@ -51,6 +51,15 @@ import { fineText } from "@/lib/fine-type";
 
 export const dynamic = "force-dynamic";
 
+/** The book's title in the tab, and for a screen reader arriving here. */
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
+  const [session, { id }] = await Promise.all([getSession(), params]);
+  const book = session?.user?.id
+    ? await prisma.book.findFirst({ where: { id, userId: session.user.id }, select: { title: true } })
+    : null;
+  return { title: book ? `${book.title} · MyReads` : "MyReads" };
+}
+
 export default async function BookDetailPage({
   params,
 }: {

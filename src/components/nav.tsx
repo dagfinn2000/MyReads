@@ -41,6 +41,8 @@ export async function Nav() {
           bigger buttons or on a 320px phone, the links give up some of
           their padding to make room (globals.css, "Top bar"). */}
       <div
+        role="navigation"
+        aria-label="Main"
         className={cn(
           "mx-auto flex h-14 max-w-6xl items-center gap-0.5 px-3 sm:gap-1 sm:px-4",
           packed

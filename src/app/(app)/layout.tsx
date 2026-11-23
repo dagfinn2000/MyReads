@@ -37,8 +37,12 @@ export default async function AppLayout({
       >
         {/* The stickers covers can wear, drawn once (cover-stickers.tsx). */}
         <StickerSprite />
+        {/* The first Tab stop: straight past the top bar to the page. */}
+        <a href="#main" className="skip-link">
+          Skip to content
+        </a>
         <Nav />
-        <main className="mx-auto max-w-6xl px-4 py-6">
+        <main id="main" tabIndex={-1} className="mx-auto max-w-6xl px-4 py-6 outline-none">
           <BackupReminder />
           {children}
         </main>

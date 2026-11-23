@@ -297,11 +297,13 @@ export function readingAt(
     : null;
 }
 
+// The badges below wear a pale tint of their own colour, so their text
+// reads at 4.5:1 whatever the card under them is (Delft's cards are blue).
 function LentBadge({ overdue }: { overdue?: boolean }) {
   return overdue ? (
     <Badge
       variant="outline"
-      className="border-red-400 text-[10px] text-red-700 dark:border-red-700 dark:text-red-300"
+      className="border-red-400 bg-red-50 text-[10px] text-red-700 dark:border-red-700 dark:bg-red-950 dark:text-red-300"
       title="Lent out, and past the day it was due back"
     >
       <HandHeart className="size-3" />
@@ -310,7 +312,7 @@ function LentBadge({ overdue }: { overdue?: boolean }) {
   ) : (
     <Badge
       variant="outline"
-      className="border-amber-400 text-[10px] text-amber-700 dark:text-amber-300"
+      className="border-amber-400 bg-amber-50 text-[10px] text-amber-700 dark:bg-amber-950 dark:text-amber-300"
       title="Lent out"
     >
       <HandHeart className="size-3" />
@@ -324,7 +326,7 @@ function FinishSoonBadge({ soon }: { soon: FinishSoon }) {
   return soon.late ? (
     <Badge
       variant="outline"
-      className="border-rose-400 text-[10px] text-rose-700 dark:border-rose-700 dark:text-rose-300"
+      className="border-rose-400 bg-rose-50 text-[10px] text-rose-700 dark:border-rose-700 dark:bg-rose-950 dark:text-rose-300"
       title={`Past its finish-by day, ${soon.day}`}
     >
       <CalendarClock className="size-3" />
@@ -333,7 +335,7 @@ function FinishSoonBadge({ soon }: { soon: FinishSoon }) {
   ) : (
     <Badge
       variant="outline"
-      className="border-amber-400 text-[10px] text-amber-700 dark:text-amber-300"
+      className="border-amber-400 bg-amber-50 text-[10px] text-amber-700 dark:bg-amber-950 dark:text-amber-300"
       title={`To finish by ${soon.day}`}
     >
       <CalendarClock className="size-3" />
@@ -424,7 +426,7 @@ export function BookRow({
         <p className="truncate text-xs text-muted-foreground">
           {fineText(book.authors.join(", "))}
           {details.showSeries && book.seriesName && (
-            <span className="italic text-muted-foreground/80"> · {fineText(seriesLabel(book))}</span>
+            <span className="italic text-muted-foreground"> · {fineText(seriesLabel(book))}</span>
           )}
         </p>
         {facts && <p className="truncate text-xs text-muted-foreground tabular-nums">{facts}</p>}
@@ -509,7 +511,7 @@ export function BookCard({
           </p>
         )}
         {details.showSeries && book.seriesName && (
-          <p className="line-clamp-1 text-xs italic text-muted-foreground/80">
+          <p className="line-clamp-1 text-xs italic text-muted-foreground">
             {fineText(seriesLabel(book))}
           </p>
         )}

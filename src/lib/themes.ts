@@ -525,7 +525,7 @@ export const THEMES: ThemeDef[] = [
   },
 
   // Light palettes
-  { id: "solarized-light", name: "Solarized Light", mode: "light", category: "plain", swatch: ["#fdf6e3", "#b58900"] },
+  { id: "solarized-light", name: "Solarized Light", mode: "light", category: "plain", swatch: ["#fdf6e3", "#8a6a00"] },
   { id: "blossom", name: "Blossom", mode: "light", category: "plain", swatch: ["#f9d7e3", "#a8124f"] },
   { id: "cyanotype", name: "Cyanotype", mode: "light", category: "plain", swatch: ["#cfe1f6", "#17468c"] },
   { id: "sage", name: "Sage", mode: "light", category: "plain", swatch: ["#d4e0cb", "#2b5e3c"] },
