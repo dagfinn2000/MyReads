@@ -52,6 +52,7 @@ import { SmartShelfDraftBar } from "@/components/smart-shelf-rules";
 import { Button } from "@/components/ui/button";
 
 export const dynamic = "force-dynamic";
+export const metadata = { title: "Library · MyReads" };
 
 /** Cards rendered per page load, and the ceiling "Show more" can reach.
  *  The cap keeps a crafted ?limit= from asking the server to serialize an

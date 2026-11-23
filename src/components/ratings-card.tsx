@@ -112,7 +112,7 @@ function Spread({
               key={b.value}
               // Focusable so a tap (or Tab) shows the count, as hover does.
               tabIndex={0}
-              className="group relative flex min-w-0 flex-1 items-end justify-center rounded-sm outline-none focus-visible:bg-accent/40"
+              className="group relative flex min-w-0 flex-1 items-end justify-center rounded-sm outline-none focus-visible:bg-accent/40 focus-visible:ring-2 focus-visible:ring-ring/60"
             >
               <span className="sr-only">
                 {ratingLabel(b.value, style)}: {books(b.count)}

@@ -110,7 +110,9 @@ describe("THEMES", () => {
   });
 
   it("keeps its own themes, the Silly set too, easy to read", () => {
-    // Ported from dagfinn2000/dashify as they are there.
+    // Ported from dagfinn2000/dashify, keeping their own text colours:
+    // these need 7:1 for text, as AAA does, not this app's 11:1. Everything
+    // else they meet like the rest.
     const ported = new Set(["dracula", "everforest", "solarized-light"]);
     const luminance = (hex: string) => {
       const [r, g, b] = [1, 3, 5].map((i) => {
@@ -124,12 +126,26 @@ describe("THEMES", () => {
       return (x + 0.05) / (y + 0.05);
     };
     for (const [id, body] of blocks) {
-      if (ported.has(id)) continue;
-      expect(contrast(body, "foreground", "background"), `${id} text`).toBeGreaterThanOrEqual(11);
+      expect(contrast(body, "foreground", "background"), `${id} text`).toBeGreaterThanOrEqual(ported.has(id) ? 7 : 11);
       expect(contrast(body, "muted-foreground", "muted"), `${id} muted text`).toBeGreaterThanOrEqual(4.5);
       expect(contrast(body, "primary-foreground", "primary"), `${id} buttons`).toBeGreaterThanOrEqual(4.5);
       expect(contrast(body, "primary", "background"), `${id} accent`).toBeGreaterThanOrEqual(4.5);
       expect(contrast(body, "destructive", "card"), `${id} danger`).toBeGreaterThanOrEqual(4.5);
+    }
+  });
+
+  it("keeps quiet text readable in the default light and dark themes", () => {
+    // Plain greys in oklch, where a grey's luminance is its lightness cubed.
+    const grey = (body: string, name: string) => {
+      const l = Number(body.match(new RegExp(`--${name}:\\s*oklch\\(([\\d.]+) 0 0\\)`))?.[1]);
+      return l ** 3;
+    };
+    const ratio = (a: number, b: number) => (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+    for (const selector of [":root", ".dark"]) {
+      const body = css.match(new RegExp(`\\n${selector.replace(".", "\\.")} \\{([^}]*)\\}`))![1];
+      for (const surface of ["muted", "background", "card"]) {
+        expect(ratio(grey(body, "muted-foreground"), grey(body, surface)), `${selector} on ${surface}`).toBeGreaterThanOrEqual(4.5);
+      }
     }
   });
 

@@ -194,7 +194,9 @@ const BarSelect = memo(function BarSelect({
     // Its list drawn only when wanted, too (ui/select.tsx): coming back to
     // the library drew all four, hidden, before the page could answer.
     <Select lazyList value={value} onValueChange={onValueChange}>
-      <SelectTrigger className={className} aria-label={label}>
+      {/* A combobox takes no name from what it shows, so without a label
+          the placeholder names it ("Format"). */}
+      <SelectTrigger className={className} aria-label={label ?? placeholder}>
         {children ?? (
           <SelectValue placeholder={placeholder}>
             {options.find((o) => o.value === value)?.label}

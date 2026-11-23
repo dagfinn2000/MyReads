@@ -333,9 +333,11 @@ function Choice<T extends string>({
         <p className="text-sm font-medium">{label}</p>
         {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
       </div>
-      <Select value={value} onValueChange={(v) => onChange(v as T)}>
+      {/* Its list drawn only when wanted (ui/select.tsx): closed, the time
+          zones alone were some 400 items drawn off the page on every visit. */}
+      <Select lazyList value={value} onValueChange={(v) => onChange(v as T)}>
         <SelectTrigger className="w-full sm:w-72" aria-label={label}>
-          <SelectValue />
+          <SelectValue>{options.find((o) => o.value === value)?.label}</SelectValue>
         </SelectTrigger>
         <SelectContent>
           {options.map((o) => (

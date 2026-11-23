@@ -33,10 +33,14 @@ function CardHeader({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
+/** A heading to screen readers (level 2, under the page's h1), so they can
+ *  move card to card; still a div, so every theme's styles stay as they are. */
 function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="card-title"
+      role="heading"
+      aria-level={2}
       className={cn(
         "font-heading text-base leading-snug font-medium group-data-[size=sm]/card:text-sm",
         className
