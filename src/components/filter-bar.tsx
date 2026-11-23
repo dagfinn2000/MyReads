@@ -83,6 +83,7 @@ const SORT_OPTIONS = [
   { value: "pageCount", label: "Page count" },
   { value: "published", label: "Year published" },
   { value: "updatedAt", label: "Recently edited" },
+  { value: "colour", label: "Cover colour" },
 ];
 
 /** `short` is what the closed menu shows on a phone, next to its icon. */
@@ -132,6 +133,10 @@ const DIR_LABELS: Record<string, { asc: string; desc: string }> = {
   updatedAt: {
     asc: "Sorted least recently edited first. Click for most recent first.",
     desc: "Sorted most recently edited first. Click for least recent first.",
+  },
+  colour: {
+    asc: "Sorted like a rainbow, red to violet, then white to black. Click to turn it round.",
+    desc: "Sorted like a rainbow, black to white, then violet to red. Click to turn it round.",
   },
 };
 

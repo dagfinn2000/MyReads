@@ -28,6 +28,9 @@ export interface SortableBook {
   publishedDate: string | null;
   createdAt: Date;
   updatedAt: Date;
+  /** Where its cover's colour falls in the rainbow (lib/rainbow.ts), for
+   *  the sort by cover colour; null or missing when it isn't known. */
+  rainbow?: number | null;
 }
 
 /** The fields the groupings read on top of those. */
@@ -159,6 +162,7 @@ const SORT_VALUES: Record<string, (b: SortableBook, opts: SortOptions) => string
   pageCount: (b) => b.pageCount || null,
   published: (b) => publishedYear(b.publishedDate),
   updatedAt: (b) => b.updatedAt.getTime(),
+  colour: (b) => b.rainbow ?? null,
 };
 
 /** In-memory sort — a personal library is small enough that sorting after

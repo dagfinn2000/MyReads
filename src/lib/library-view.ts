@@ -22,6 +22,7 @@ export const LIBRARY_SORTS = [
   "pageCount",
   "published",
   "updatedAt",
+  "colour",
 ] as const;
 
 export const LIBRARY_GROUPS = [
@@ -58,6 +59,8 @@ export const NATURAL_DIRS: Record<LibrarySortKey, LibraryDir> = {
   pageCount: "desc",
   published: "desc",
   updatedAt: "desc",
+  // Red through the rainbow to violet, then the greys.
+  colour: "asc",
 };
 
 export function naturalDir(sort: string): LibraryDir {
