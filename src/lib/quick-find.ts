@@ -18,7 +18,7 @@ import { foldForSearch, searchWords } from "@/lib/utils";
 export const QUICK_FIND_EVENT = "myreads-quick-find";
 
 /** How many of each kind the list shows. */
-export const QUICK_FIND_LIMITS = { books: 6, authors: 3, series: 3, shelves: 3, pages: 4 } as const;
+export const QUICK_FIND_LIMITS = { books: 6, authors: 3, series: 3, shelves: 3, pages: 4, settings: 3 } as const;
 
 /** The longest query worth looking up. */
 export const QUICK_FIND_MAX_QUERY = 100;

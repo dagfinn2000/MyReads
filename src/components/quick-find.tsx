@@ -11,6 +11,7 @@ import {
   Feather,
   Search,
   Settings2,
+  SlidersHorizontal,
   Sparkles,
   type LucideIcon,
 } from "lucide-react";
@@ -19,6 +20,7 @@ import { NAV_ITEMS } from "@/lib/preferences";
 import {
   EMPTY_RESULT,
   QUICK_FIND_EVENT,
+  QUICK_FIND_LIMITS,
   QUICK_FIND_MAX_QUERY,
   matchPages,
   matchScore,
@@ -37,6 +39,7 @@ import { StatusBadge } from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { fineText } from "@/lib/fine-type";
+import { matchSettings, settingHref, type SettingEntry } from "@/lib/settings-index";
 
 /** How long typing pauses before the server is asked. */
 const DEBOUNCE_MS = 120;
@@ -120,6 +123,7 @@ type Option =
   | { kind: "author" | "series"; key: string; href: string; name: string; count: number }
   | { kind: "shelf"; key: string; href: string; name: string; smart: boolean }
   | { kind: "page"; key: string; href: string; page: QuickPage }
+  | { kind: "setting"; key: string; href: string; setting: SettingEntry }
   | { kind: "search"; key: string; href: string; q: string };
 
 type Group = { title: string; options: Option[] };
@@ -184,6 +188,17 @@ function buildGroups(q: string, result: QuickFindResult, pages: QuickPage[]): Gr
       })),
     },
   ];
+  if (typed) {
+    groups.push({
+      title: "Settings",
+      options: matchSettings(q, QUICK_FIND_LIMITS.settings, matchScore).map((setting) => ({
+        kind: "setting",
+        key: `set:${setting.section}:${setting.label}`,
+        href: settingHref(setting),
+        setting,
+      })),
+    });
+  }
   // Books first when a title matches; when they only match by their
   // author or series, that author or series comes first.
   if (typed && !result.books.some((b) => matchScore(b.title, q) > 0)) {
@@ -533,6 +548,16 @@ function OptionBody({ option }: { option: Option }) {
         </>
       );
     }
+    case "setting":
+      return (
+        <>
+          <OptionIcon icon={SlidersHorizontal} />
+          <span className="min-w-0 flex-1 truncate">{option.setting.label}</span>
+          <span className="shrink-0 text-xs text-muted-foreground">
+            {option.setting.section ? `Preferences › ${option.setting.section}` : "Account"}
+          </span>
+        </>
+      );
     case "search":
       return (
         <>

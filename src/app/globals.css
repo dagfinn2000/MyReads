@@ -11359,3 +11359,23 @@ html[data-motion="off"] *::after {
   transition-delay: 0s !important;
   scroll-behavior: auto !important;
 }
+
+/* ── Find a setting ──────────────────────────────────────────────────────────
+   The setting Find a setting (or quick find) took you to: ringed while the
+   class is on (components/settings-finder.tsx takes it off after a moment),
+   and with motion on, washed with the accent as it arrives. */
+.setting-found {
+  outline: 2px solid color-mix(in oklab, var(--ring) 75%, transparent);
+  outline-offset: 6px;
+  border-radius: calc(var(--radius) - 2px);
+}
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-motion="off"]) .setting-found {
+    animation: setting-found 1.4s ease-out;
+  }
+}
+@keyframes setting-found {
+  from {
+    background-color: color-mix(in oklab, var(--primary) 14%, transparent);
+  }
+}

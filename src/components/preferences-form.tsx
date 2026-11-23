@@ -328,7 +328,7 @@ function Choice<T extends string>({
   onChange: (value: T) => void;
 }) {
   return (
-    <div className="grid gap-1.5 sm:grid-cols-[14rem_1fr] sm:items-center sm:gap-4">
+    <div data-setting={label} className="grid gap-1.5 sm:grid-cols-[14rem_1fr] sm:items-center sm:gap-4">
       <div>
         <p className="text-sm font-medium">{label}</p>
         {hint && <p className="text-xs text-muted-foreground">{hint}</p>}

@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { HardDriveDownload } from "lucide-react";
 import { prisma } from "@/lib/prisma";
@@ -18,6 +19,7 @@ import {
 import { ChangePasswordForm } from "@/components/change-password-form";
 import { DeleteAccount } from "@/components/delete-account";
 import { PreferencesForm } from "@/components/preferences-form";
+import { SettingsFinder } from "@/components/settings-finder";
 import { RestoreBackup } from "@/components/restore-backup";
 import { Button } from "@/components/ui/button";
 import {
@@ -64,8 +66,13 @@ export default async function AccountPage() {
   const timeZones = [...new Set(["UTC", ...Intl.supportedValuesOf("timeZone")])];
 
   return (
-    <div className="grid grid-cols-1 gap-6">
-      <h1 className="text-2xl font-semibold tracking-tight">Account</h1>
+    <div className="grid grid-cols-1 gap-6" data-settings-root="">
+      <div className="grid gap-3 sm:grid-cols-[1fr_minmax(0,22rem)] sm:items-center">
+        <h1 className="text-2xl font-semibold tracking-tight">Account</h1>
+        <Suspense>
+          <SettingsFinder />
+        </Suspense>
+      </div>
 
       <Card>
         <CardHeader>
