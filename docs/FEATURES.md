@@ -457,6 +457,8 @@ Monthly email, with the address it should go to.
   the settings beside it in [.env.example](../.env.example)). Without one,
   Preview still works.
 
+![The monthly email for October: in a light mail app on a computer, and in a dark one on a phone](monthly-email.png)
+
 ## The reading room
 
 The Room page draws your library as a cozy pixel-art house.
