@@ -110,7 +110,7 @@ export default async function AuthorsPage({
         </p>
       ) : (
         <>
-          <nav aria-label="Which authors" className="flex gap-1 overflow-x-auto border-b">
+          <nav aria-label="Which authors" className="flex flex-wrap gap-1 border-b">
             {AUTHOR_SHOW.map((s) => (
               <Link
                 key={s}

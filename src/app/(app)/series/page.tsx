@@ -76,7 +76,7 @@ export default async function SeriesPage({
         </p>
       ) : (
         <>
-          <nav aria-label="Which series" className="flex gap-1 overflow-x-auto border-b">
+          <nav aria-label="Which series" className="flex flex-wrap gap-1 border-b">
             {SERIES_SHOW.map((s) => (
               <Link
                 key={s}
