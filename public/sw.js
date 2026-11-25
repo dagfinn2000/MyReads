@@ -264,6 +264,9 @@ async function keepPage(path, res) {
     "x-myreads-saved": String(Date.now()),
     "x-myreads-title": encodeURIComponent(title),
   });
+  // The copy keeps its policy too, nonce and all: they came together.
+  const policy = res.headers.get("content-security-policy");
+  if (policy) headers.set("Content-Security-Policy", policy);
   const cache = await caches.open(PAGES);
   await cache.put(path, new Response(html, { status: 200, headers }));
   await trim(cache, MAX_PAGES);

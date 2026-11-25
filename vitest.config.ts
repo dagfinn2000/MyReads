@@ -15,6 +15,9 @@ export default defineConfig({
     // default 5 s limit and failed tests that were right. The limit is
     // there to catch a hang, which this still does.
     testTimeout: 30_000,
+    // next-auth imports "next/server" without the ".js" Node needs, so the
+    // proxy's test has it go through Vite's resolver instead.
+    server: { deps: { inline: ["next-auth"] } },
   },
   resolve: {
     // Mirror the "@/*" path alias from tsconfig.json.

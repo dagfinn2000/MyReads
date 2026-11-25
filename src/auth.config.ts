@@ -40,6 +40,9 @@ export const authConfig = {
         nextUrl.pathname.startsWith("/register");
 
       if (isAuthPage) return true;
+      // The page the service worker keeps to show offline: it holds nothing
+      // private, and a redirect to /login would keep it from being saved.
+      if (nextUrl.pathname === "/offline") return true;
       return !!auth?.user;
     },
     /** Persist the user id into the JWT at sign-in. */

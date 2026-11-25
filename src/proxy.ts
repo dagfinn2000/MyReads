@@ -1,5 +1,7 @@
 import NextAuth from "next-auth";
+import { NextResponse, type NextFetchEvent, type NextRequest } from "next/server";
 import { authConfig } from "@/auth.config";
+import { makeNonce, pagePolicy } from "@/lib/csp";
 
 /**
  * Route protection (Next 16 `proxy` convention — the old middleware.ts,
@@ -16,7 +18,34 @@ import { authConfig } from "@/auth.config";
  * request, and the check it would duplicate already happens where the data
  * is actually read.
  */
-export default NextAuth(authConfig).auth;
+const authProxy = NextAuth(authConfig).auth as unknown as (
+  req: NextRequest,
+  ev: NextFetchEvent,
+) => Promise<Response>;
+
+/**
+ * And every page gets its Content-Security-Policy here (lib/csp.ts), with a
+ * nonce of its own: Next marks its inline scripts with the nonce it finds
+ * in the policy on the request, and the root layout marks the theme's
+ * pre-paint script with `x-nonce`. API routes keep the headers they set
+ * themselves (the monthly email's pages send stricter ones).
+ */
+export default async function proxy(req: NextRequest, ev: NextFetchEvent): Promise<Response> {
+  const res = await authProxy(req, ev);
+  // A redirect to /login renders nothing here, and an API route isn't a page.
+  if (res.headers.get("x-middleware-next") !== "1" || req.nextUrl.pathname.startsWith("/api/")) return res;
+
+  const nonce = makeNonce();
+  const policy = pagePolicy(nonce);
+  const requestHeaders = new Headers(req.headers);
+  requestHeaders.set("content-security-policy", policy);
+  requestHeaders.set("x-nonce", nonce);
+  const page = NextResponse.next({ request: { headers: requestHeaders } });
+  // The session cookie, when the auth layer renewed it.
+  for (const cookie of res.headers.getSetCookie()) page.headers.append("set-cookie", cookie);
+  page.headers.set("Content-Security-Policy", policy);
+  return page;
+}
 
 export const config = {
   // Protect everything except:
@@ -34,9 +63,11 @@ export const config = {
   //  - the monthly email's "Stop these emails" link, which is opened from
   //    a mail app with no session and checks a key of its own instead
   //  - the service worker (and push-sw.js, its old name), which a redirect
-  //    to /login would keep from installing, the list of the build's files
-  //    it keeps, and the page it shows offline: none holds anything private
+  //    to /login would keep from installing, and the list of the build's
+  //    files it keeps: neither holds anything private. (The page it shows
+  //    offline is let through by auth.config.ts instead, so it gets its
+  //    Content-Security-Policy here like every other page.)
   matcher: [
-    "/((?!api/auth|api/register|api/import$|api/covers/upload$|api/offline/assets$|api/email/unsubscribe$|_next/static|_next/image|favicon.ico|icon.svg|manifest.webmanifest|apple-icon.png|icons/|themes/|sw.js$|push-sw.js$|offline$).*)",
+    "/((?!api/auth|api/register|api/import$|api/covers/upload$|api/offline/assets$|api/email/unsubscribe$|_next/static|_next/image|favicon.ico|icon.svg|manifest.webmanifest|apple-icon.png|icons/|themes/|sw.js$|push-sw.js$).*)",
   ],
 };

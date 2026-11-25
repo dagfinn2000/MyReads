@@ -170,7 +170,8 @@ src/
 ├─ auth.config.ts      Auth.js config that is safe to run in proxy.ts
 ├─ auth.ts             full Auth.js config (credentials, Prisma, bcrypt)
 ├─ instrumentation.ts  starts the server's own jobs when it starts
-└─ proxy.ts            sends signed-out visitors to the login page
+└─ proxy.ts            sends signed-out visitors to the login page and
+                       gives every page its Content-Security-Policy
                        (Next 16's new name for middleware.ts)
 ```
 
@@ -191,6 +192,17 @@ The reading room's files:
 | [avatar-art.ts](../src/components/avatar-art.ts), [room-avatar.tsx](../src/components/room-avatar.tsx), [avatar-maker.tsx](../src/components/avatar-maker.tsx) | The avatar: drawing it, walking it about, and its maker |
 
 ## Design decisions
+
+- **Pages run only the scripts the server marked.** Every page is sent with
+  a Content-Security-Policy ([csp.ts](../src/lib/csp.ts)) that lets scripts
+  run from the app's own files and from inline scripts carrying that
+  response's nonce, which [proxy.ts](../src/proxy.ts) makes fresh for each
+  one. Next marks its own scripts; an inline `<script>` of ours needs
+  `nonce={(await headers()).get("x-nonce")}`, as the theme's pre-paint script
+  in the root layout has. `eval` and `onclick="…"`-style handlers don't run.
+  A request to another site from the browser needs its address in
+  `connect-src` (Open-Meteo is there for the weather). Styles, pictures and
+  fonts may come from anywhere, for covers and Your own CSS.
 
 - **Reading data lives on the Book row.** Each book belongs to one user, so
   a separate "reading entry" table would add nothing. The Book row holds the
