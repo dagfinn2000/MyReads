@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { BookFormat, BookOwnership, ReadingStatus } from "@/lib/enums";
 import { Check, Dices, SquareCheckBig, X } from "lucide-react";
 import { bulkDeleteBooks, bulkUpdateBooks } from "@/lib/actions/bulk";
+import { noteBookOpened } from "@/lib/library-return";
 import { restoreDeletedBooks } from "@/lib/actions/recently-deleted";
 import { pickRandomBook } from "@/lib/actions/pick";
 import { STAGGERED_CARDS, cascadeSteps } from "@/lib/card-cascade";
@@ -264,7 +265,12 @@ export function LibraryView({
     startTransition(async () => {
       try {
         const res = await pickRandomBook(searchParams);
-        if ("id" in res) router.push(`/books/${res.id}`);
+        if ("id" in res) {
+          // Opened from the library like a clicked book, so its page has
+          // the X (and Esc) back to this spot (lib/library-return.ts).
+          noteBookOpened(res.id, null);
+          router.push(`/books/${res.id}`);
+        }
         else setPickNote({ key, reason: res.reason });
       } catch {
         setPickNote({ key, reason: "error" });

@@ -6989,6 +6989,12 @@ html[data-own-background] body::before {
     left: -34px;
     animation: picnic-ants 1.8s linear infinite;
   }
+  /* The line starts an ant to the left and marches one ant to the right,
+     so it reaches past the window's edge; clipped there, sideways only,
+     so the page doesn't scroll sideways and the ants still hang below. */
+  html:not([data-motion="off"]).theme-is-picnic .top-bar {
+    overflow-x: clip;
+  }
 }
 @keyframes picnic-ants {
   to {
@@ -11402,11 +11408,13 @@ html[data-motion="off"] *::after {
   color: var(--primary-foreground);
   font-size: 0.875rem;
   font-weight: 500;
-  box-shadow: 0 6px 18px -6px rgb(0 0 0 / 0.35);
   translate: 0 calc(-100% - 1rem);
 }
+/* The shadow only once it shows: tucked away above the window, it still
+   reached a few pixels down over the top bar's corner. */
 .skip-link:focus-visible {
   translate: none;
+  box-shadow: 0 6px 18px -6px rgb(0 0 0 / 0.35);
   outline: 2px solid var(--ring);
   outline-offset: 2px;
 }
@@ -11414,4 +11422,13 @@ html[data-motion="off"] *::after {
   html:not([data-motion="off"]) .skip-link {
     transition: translate 0.15s ease-out;
   }
+}
+
+/* Bulk edit's menus sit two to a row, narrow on a phone: a choice too long
+   for its box ends in an ellipsis instead of being cut off mid-word. */
+.bulk-bar [data-slot="select-trigger"] > [data-slot="select-value"] {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
