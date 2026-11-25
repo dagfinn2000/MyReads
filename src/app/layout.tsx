@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 // Themes restyled from top to bottom, after the rest so they can reshape it.
 import "./restyles.css";
+import { headers } from "next/headers";
 import localFont from "next/font/local";
 import {
   Architects_Daughter,
@@ -156,6 +157,9 @@ export default async function RootLayout({
   // Request-scoped cache: the page rendering inside this layout resolves the
   // same user, and both now share one session decode and one row read.
   const user = await getCurrentUser();
+  // This response's nonce (proxy.ts), which the page's policy lets the
+  // pre-paint script below run with.
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
   const setting = parseThemeSetting(user?.theme);
   const prefs = user?.preferences;
 
@@ -262,8 +266,9 @@ export default async function RootLayout({
       <body className="min-h-screen bg-background text-foreground antialiased">
         {/* Applies the stored theme before first paint to avoid a flash of
             the default theme, and sets the browser's title bar colour to
-            match. Must stay ahead of {children}. */}
-        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+            match. Must stay ahead of {children}. Browsers hide a nonce
+            from the page once it's read, so hydration mustn't compare it. */}
+        <script nonce={nonce} dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} suppressHydrationWarning />
         <BackgroundScene
           background={
             (setting?.kind === "fixed" && THEME_SCENES[setting.id]) || (prefs?.background ?? "plain")

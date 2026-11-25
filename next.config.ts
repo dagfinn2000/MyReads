@@ -29,6 +29,8 @@ const nextConfig: NextConfig = {
         // ones of their own (nothing runs or loads there, and the stop link's
         // key never goes out as a referrer). A header set here replaces one
         // of the same name that a route sets, so these must leave them be.
+        // Pages get a full policy from proxy.ts instead, which replaces this
+        // one; it stays for everything else the proxy doesn't see.
         source: SITE_POLICY_PATHS,
         headers: [
           { key: "Content-Security-Policy", value: "frame-ancestors 'none'" },
