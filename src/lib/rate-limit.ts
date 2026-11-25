@@ -122,12 +122,20 @@ const globalForRateLimit = globalThis as unknown as {
   registerLimiter?: RateLimiter;
   metadataLimiter?: RateLimiter;
   uploadLimiter?: RateLimiter;
+  passkeyAskLimiter?: RateLimiter;
 };
 
 /** Failed sign-in attempts: 10 per username (and 10 per IP) per 15 minutes.
  *  Also guards the "confirm your password" checks on the account page. */
 export const loginLimiter = (globalForRateLimit.loginLimiter ??=
   new RateLimiter(10, 15 * 60_000));
+
+/** Asking to sign in with a passkey: 30 asks per IP a minute. The sign-in
+ *  page asks once as it opens and again for the button, so people never
+ *  meet it; it keeps one address from filling the server's list of open
+ *  challenges (lib/passkeys.ts) and pushing everyone else's out. */
+export const passkeyAskLimiter = (globalForRateLimit.passkeyAskLimiter ??=
+  new RateLimiter(30, 60_000));
 
 /** Account creation: 10 attempts per IP per hour — roomy for a human
  *  fumbling the password rules, useless for flooding junk accounts. */

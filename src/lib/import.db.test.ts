@@ -649,6 +649,42 @@ describe("book-page settings", () => {
   });
 });
 
+describe("monthly email settings", () => {
+  it("restores the address and switch, but not where the links go", async () => {
+    await importLibrary(
+      userId,
+      payload([], {
+        settings: {
+          theme: null,
+          defaultViewName: null,
+          preferences: {
+            emailAddress: "reader@example.com",
+            monthlyEmail: true,
+            emailSite: "https://elsewhere.example",
+          },
+        },
+      }),
+    );
+    const user = await prisma.user.findUniqueOrThrow({ where: { id: userId } });
+    expect(user.preferences).toEqual({ emailAddress: "reader@example.com", monthlyEmail: true });
+  });
+
+  it("keeps the address this server already has for the links", async () => {
+    await prisma.user.update({
+      where: { id: userId },
+      data: { preferences: { emailSite: "https://books.example" } },
+    });
+    await importLibrary(
+      userId,
+      payload([], {
+        settings: { theme: null, defaultViewName: null, preferences: { emailSite: "https://elsewhere.example" } },
+      }),
+    );
+    const user = await prisma.user.findUniqueOrThrow({ where: { id: userId } });
+    expect(user.preferences).toEqual({ emailSite: "https://books.example" });
+  });
+});
+
 describe("top-bar settings", () => {
   const restore = (preferences: unknown) =>
     importLibrary(

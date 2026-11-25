@@ -1,5 +1,8 @@
 import type { NextConfig } from "next";
 
+/** Every address but those under /api/email/ (see headers() below). */
+export const SITE_POLICY_PATHS = "/:path((?!api/email/).*)";
+
 const nextConfig: NextConfig = {
   // Standalone output produces a self-contained server bundle that the
   // Dockerfile copies into a minimal runtime image (no full node_modules).
@@ -17,9 +20,18 @@ const nextConfig: NextConfig = {
           // No other site may show MyReads in a frame, where it could be
           // dressed up to trick a signed-in reader into clicking Delete.
           { key: "X-Frame-Options", value: "DENY" },
-          { key: "Content-Security-Policy", value: "frame-ancestors 'none'" },
           // Browsers take each response for the type it says it is.
           { key: "X-Content-Type-Options", value: "nosniff" },
+        ],
+      },
+      {
+        // Everything but the monthly email's two pages, which send stricter
+        // ones of their own (nothing runs or loads there, and the stop link's
+        // key never goes out as a referrer). A header set here replaces one
+        // of the same name that a route sets, so these must leave them be.
+        source: SITE_POLICY_PATHS,
+        headers: [
+          { key: "Content-Security-Policy", value: "frame-ancestors 'none'" },
           // Links out (Find it at, catalogue pages) say which site the
           // reader came from, not which book page.
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },

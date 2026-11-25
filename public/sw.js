@@ -350,7 +350,8 @@ self.addEventListener("push", (event) => {
     // Not one of ours: show the plain reminder rather than nothing, since a
     // push that shows nothing counts against the site in some browsers.
   }
-  const url = typeof message.url === "string" && message.url.startsWith("/") ? message.url : "/reading";
+  // A path on this site only: "//host" or "/\host" is another site.
+  const url = typeof message.url === "string" && /^\/(?![/\\])/.test(message.url) ? message.url : "/reading";
   event.waitUntil(
     self.registration.showNotification(message.title || "Time to read", {
       body: message.body || "",
