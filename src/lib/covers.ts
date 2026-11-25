@@ -3,6 +3,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { readBodyCapped } from "@/lib/capped-read";
 import { COVER_WIDTHS } from "@/lib/cover-src";
+import { sniffImageKind } from "@/lib/image-type";
 import { checkUrlAllowed } from "@/lib/net-guard";
 import { prisma } from "@/lib/prisma";
 
@@ -81,12 +82,8 @@ async function unlinkCover(filename: string) {
   );
 }
 
-const EXT_BY_MIME: Record<string, string> = {
-  "image/jpeg": "jpg",
-  "image/png": "png",
-  "image/gif": "gif",
-  "image/webp": "webp",
-};
+/** What a cover download must say it is (and then also be: see below). */
+const IMAGE_MIMES = new Set(["image/jpeg", "image/png", "image/gif", "image/webp"]);
 
 /** Hard ceiling on a downloaded cover. Book covers are tens to hundreds of
  *  KB; anything past this is a mistake or an attempt to exhaust memory. */
@@ -149,8 +146,7 @@ export async function cacheCoverImage(
     }
 
     const mime = (res.headers.get("content-type") ?? "").split(";")[0].trim();
-    const ext = EXT_BY_MIME[mime];
-    if (!ext) {
+    if (!IMAGE_MIMES.has(mime)) {
       await res.body?.cancel().catch(() => {});
       return null;
     }
@@ -159,11 +155,17 @@ export async function cacheCoverImage(
     if (!buf) return null;
     // Open Library serves a tiny placeholder for missing covers; skip those.
     if (buf.length < 500) return null;
+    // The bytes decide what was downloaded, as for an upload: the other
+    // server's Content-Type is only its word, so anything that isn't
+    // really an image stays out of the cache, and an image labelled as
+    // another kind is kept under its own.
+    const kind = sniffImageKind(buf);
+    if (!kind) return null;
 
     const dir = coversDir();
     await fs.mkdir(dir, { recursive: true });
     const hash = crypto.createHash("sha1").update(buf).digest("hex").slice(0, 8);
-    const filename = `${bookId}-${hash}.${ext}`;
+    const filename = `${bookId}-${hash}.${kind}`;
     await fs.writeFile(coverFilePath(filename), buf);
     return `/api/covers/${filename}`;
   } catch {

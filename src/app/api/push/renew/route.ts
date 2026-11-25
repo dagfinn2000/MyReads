@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
+import { readBodyCapped } from "@/lib/capped-read";
 import { savePushDevice } from "@/lib/push-devices";
 import { remindersEnabled } from "@/lib/reminders";
 
@@ -19,8 +20,11 @@ export async function POST(req: Request) {
   if (!req.headers.get("content-type")?.startsWith("application/json")) {
     return NextResponse.json({ error: "Expected JSON" }, { status: 415 });
   }
-  const text = await req.text();
-  if (text.length > 10_000) return NextResponse.json({ error: "Too large" }, { status: 413 });
+  // Read with a ceiling, not all of whatever is sent: three bytes for each
+  // of the 10,000 characters allowed, the most UTF-8 can take for them.
+  const bytes = await readBodyCapped(req, 3 * 10_000);
+  const text = bytes ? new TextDecoder().decode(bytes) : null;
+  if (text === null || text.length > 10_000) return NextResponse.json({ error: "Too large" }, { status: 413 });
   let body: { oldEndpoint?: unknown; subscription?: unknown };
   try {
     body = JSON.parse(text) ?? {};
