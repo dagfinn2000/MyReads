@@ -15,6 +15,7 @@ import { formatDate } from "@/lib/display";
 import type { Preferences } from "@/lib/preferences";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export interface PasskeyRow {
   id: string;
@@ -45,17 +46,22 @@ export function PasskeySettings({ passkeys, prefs }: { passkeys: PasskeyRow[]; p
   const [editing, setEditing] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
   const [removing, setRemoving] = useState<string | null>(null);
+  // Adding one asks for the account's password first.
+  const [asking, setAsking] = useState(false);
+  const [password, setPassword] = useState("");
 
   async function add() {
     setBusy(true);
     setAdding(true);
     setNote(null);
     try {
-      const res = await passkeyRegistrationOptions();
+      const res = await passkeyRegistrationOptions(password);
       if ("error" in res) {
         setNote({ text: res.error ?? "", error: true });
         return;
       }
+      setAsking(false);
+      setPassword("");
       const made = await createPasskey(res.options);
       if (!made) return;
       const saved = await addPasskey(made);
@@ -197,9 +203,56 @@ export function PasskeySettings({ passkeys, prefs }: { passkeys: PasskeyRow[]; p
 
       {unavailable && unavailable !== "checking" ? (
         <p className="text-sm text-muted-foreground">{UNAVAILABLE_TEXT[unavailable]}</p>
+      ) : asking ? (
+        <form
+          className="grid max-w-sm gap-3"
+          onSubmit={(e) => {
+            e.preventDefault();
+            void add();
+          }}
+        >
+          <div className="grid gap-2">
+            <Label htmlFor="passkey-password">Your password</Label>
+            <Input
+              id="passkey-password"
+              type="password"
+              autoComplete="current-password"
+              required
+              autoFocus
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Button type="submit" variant="outline" disabled={busy || !password}>
+              <Plus data-slot="icon" />
+              {adding ? "Waiting for the passkey…" : "Add a passkey"}
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              disabled={busy}
+              onClick={() => {
+                setAsking(false);
+                setPassword("");
+                setNote(null);
+              }}
+            >
+              Cancel
+            </Button>
+          </div>
+        </form>
       ) : (
         <div>
-          <Button type="button" variant="outline" disabled={busy || unavailable === "checking"} onClick={add}>
+          <Button
+            type="button"
+            variant="outline"
+            disabled={busy || unavailable === "checking"}
+            onClick={() => {
+              setAsking(true);
+              setNote(null);
+            }}
+          >
             <Plus data-slot="icon" />
             {adding ? "Waiting for the passkey…" : "Add a passkey"}
           </Button>

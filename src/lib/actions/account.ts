@@ -4,17 +4,16 @@ import bcrypt from "bcryptjs";
 import { auth, signOut } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { deleteCachedCovers } from "@/lib/covers";
+import { checkPassword } from "@/lib/password-check";
 import { removeServerBackups } from "@/lib/server-backups-run";
-import { loginLimiter } from "@/lib/rate-limit";
 import { changePasswordSchema } from "@/lib/validation";
 import type { ActionState } from "@/lib/actions/helpers";
 
 /**
  * Account-level actions. Both re-verify the current password — a session
  * cookie proves you're signed in, not that you're the account owner sitting
- * at an unlocked machine. The verification shares the login limiter's
- * per-username budget, so these forms aren't a rate-limit-free side door
- * for password guessing.
+ * at an unlocked machine (lib/password-check.ts, which shares the sign-in
+ * limiter's per-username budget).
  */
 
 /** The signed-in user, fetched fresh (not from the JWT). */
@@ -24,24 +23,6 @@ async function requireUser() {
   const user = await prisma.user.findUnique({ where: { id: session.user.id } });
   if (!user) throw new Error("Not authenticated");
   return user;
-}
-
-/** Rate-limited bcrypt check of the account password. Same keying as the
- *  login throttle in auth.ts, so failures here and there pool together. */
-async function verifyPassword(
-  user: { username: string; passwordHash: string },
-  password: string,
-): Promise<{ error: string } | { ok: true }> {
-  const key = `login:u:${user.username}`;
-  if (loginLimiter.blocked(key)) {
-    return { error: "Too many failed attempts — wait a few minutes and try again." };
-  }
-  if (!(await bcrypt.compare(password, user.passwordHash))) {
-    loginLimiter.hit(key);
-    return { error: "Current password is incorrect" };
-  }
-  loginLimiter.clear(key);
-  return { ok: true };
 }
 
 /**
@@ -68,7 +49,7 @@ export async function changePassword(
     return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
   }
 
-  const verified = await verifyPassword(user, parsed.data.currentPassword);
+  const verified = await checkPassword(user, parsed.data.currentPassword);
   if ("error" in verified) return verified;
 
   const passwordHash = await bcrypt.hash(parsed.data.newPassword, 12);
@@ -100,7 +81,7 @@ export async function deleteAccount(
   if (typeof password !== "string" || !password) {
     return { error: "Enter your password to confirm" };
   }
-  const verified = await verifyPassword(user, password);
+  const verified = await checkPassword(user, password);
   if ("error" in verified) return verified;
 
   // Collect the cover paths *before* the delete (the rows are about to go),

@@ -68,6 +68,8 @@ describe("verifyRegistration and verifyAssertion", () => {
     expect(() => verifyRegistration(makePasskey({ rpId: "evil.example" }).response, site)).toThrow(/another site/);
     expect(() => verifyRegistration(makePasskey({ type: "webauthn.get" }).response, site)).toThrow(/kind/);
     expect(() => verifyRegistration(makePasskey({ flags: 0x44 }).response, site)).toThrow(/approve/);
+    // Touched, but the device didn't check who it was.
+    expect(() => verifyRegistration(makePasskey({ flags: 0x49 }).response, site)).toThrow(/check it was you/);
     const made = makePasskey();
     expect(() => verifyRegistration({ ...made.response, id: b64(Buffer.from("other-id-of-sixteen")) }, site)).toThrow(
       /id/,
@@ -90,6 +92,9 @@ describe("verifyRegistration and verifyAssertion", () => {
       /another account/,
     );
     expect(() => verifyAssertion(signIn(made.privateKey, -7, kept.id, { flags: 0x00 }), stored, site)).toThrow(/approve/);
+    expect(() => verifyAssertion(signIn(made.privateKey, -7, kept.id, { flags: 0x01 }), stored, site)).toThrow(
+      /check it was you/,
+    );
   });
 
   it("refuses a sign-in whose counter didn't go up", () => {

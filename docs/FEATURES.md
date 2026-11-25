@@ -825,12 +825,15 @@ to it, marked for a moment. Quick find (Ctrl+K) finds settings too.
 
 ## Signing in
 
-- **Passkeys**: add one on the Account page (Signing in) and sign in
-  with your fingerprint, face or screen lock instead of your password,
-  with the "Sign in with a passkey" button or by picking it in the
-  username box. Each one is named after what keeps it (iCloud Keychain,
-  Google Password Manager, 1Password...), and can be renamed or removed.
-  Your password still works too.
+- **Passkeys**: add one on the Account page (Signing in), after typing
+  your password, and sign in with your fingerprint, face or screen lock
+  instead of your password, with the "Sign in with a passkey" button or
+  by picking it in the username box. Each one is named after what keeps
+  it (iCloud Keychain, Google Password Manager, 1Password...), and can be
+  renamed or removed. Your password still works too.
+- A passkey only signs in once your device has checked it's you, with
+  your fingerprint, face, PIN or screen lock, so a security key needs a
+  PIN set on it.
 - Passkeys need MyReads to be opened over https (or on localhost), and
   belong to the address they were made on. Behind a proxy that changes
   the address, set `AUTH_URL` to the one you open.
