@@ -133,6 +133,28 @@ describe("turning reminders on in a browser", () => {
     const devices = await prisma.pushDevice.findMany({ where: { userId } });
     expect(devices.map((d) => [d.endpoint, d.auth])).toEqual([[after.endpoint, after.keys.auth]]);
   });
+
+  it("stops reading a body that runs past its limit", async () => {
+    // Sent as a stream with no Content-Length, so only the reading itself
+    // can notice; it gives up after the first 30 KB of a body that never ends.
+    let sent = 0;
+    const endless = new ReadableStream<Uint8Array>({
+      pull(controller) {
+        sent += 16_384;
+        controller.enqueue(new Uint8Array(16_384).fill(32));
+      },
+    });
+    const res = await renew(
+      new Request("http://localhost/api/push/renew", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: endless,
+        duplex: "half",
+      } as RequestInit),
+    );
+    expect(res.status).toBe(413);
+    expect(sent).toBeLessThan(100_000);
+  });
 });
 
 describe("the server's key", () => {
