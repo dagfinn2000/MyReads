@@ -264,6 +264,9 @@ function checkClientData(client: ClientData, type: string, expected: Expected) {
 function checkAuthData(auth: AuthenticatorData, expected: Expected) {
   if (!crypto.timingSafeEqual(auth.rpIdHash, sha256(expected.rpId))) fail("Passkey belongs to another site");
   if (!auth.userPresent) fail("No one was there to approve it");
+  // And the device checked it was them (fingerprint, face, PIN or screen
+  // lock), so a security key someone else picks up doesn't sign in alone.
+  if (!auth.userVerified) fail("The device didn't check it was you");
 }
 
 // ---------------------------------------------------------------------------

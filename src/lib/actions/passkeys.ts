@@ -6,6 +6,7 @@ import { z } from "zod";
 import { auth, signOut, unstable_update } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/actions/helpers";
+import { checkPassword } from "@/lib/password-check";
 import { clientIp, loginLimiter, passkeyAskLimiter } from "@/lib/rate-limit";
 import { MAX_PASSKEYS, expectedSite, issueChallenge, passkeyName, takeChallenge } from "@/lib/passkeys";
 import { keepSessionProof } from "@/lib/session-keep";
@@ -19,18 +20,29 @@ import { PASSKEY_ALGORITHMS, WebAuthnError, userHandle, verifyRegistration } fro
 
 const NOT_HERE = "Passkeys can’t be used at this address.";
 
-/** What a browser needs to make a passkey for this account. */
-export async function passkeyRegistrationOptions() {
+/**
+ * What a browser needs to make a passkey for this account, once the
+ * account's password is given. A passkey signs in for as long as it's kept,
+ * so a moment at someone else's unlocked, signed-in browser mustn't be
+ * enough to add one; and a passkey can only be added by answering a
+ * challenge given here.
+ */
+export async function passkeyRegistrationOptions(password: unknown) {
   const userId = await requireUserId();
   const site = expectedSite(await headers());
   if (!site) return { error: NOT_HERE } as const;
   const [user, existing] = await Promise.all([
-    prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { username: true } }),
+    prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { username: true, passwordHash: true } }),
     prisma.passkey.findMany({ where: { userId }, select: { id: true, transports: true } }),
   ]);
   if (existing.length >= MAX_PASSKEYS) {
     return { error: `An account can have ${MAX_PASSKEYS} passkeys. Remove one to add another.` } as const;
   }
+  if (typeof password !== "string" || !password) return { error: "Enter your password first." } as const;
+  // bcrypt reads at most 72 bytes; a longer string is no password of ours.
+  if (password.length > 1000) return { error: "Current password is incorrect" } as const;
+  const verified = await checkPassword(user, password);
+  if ("error" in verified) return { error: verified.error } as const;
   return {
     options: {
       challenge: issueChallenge("register", userId),
@@ -42,7 +54,10 @@ export async function passkeyRegistrationOptions() {
       authenticatorSelection: {
         residentKey: "required" as const,
         requireResidentKey: true,
-        userVerification: "preferred" as const,
+        // The device checks it's you (fingerprint, face, PIN or screen
+        // lock), not only that someone touched it: lib/webauthn.ts refuses
+        // a passkey made or used without that.
+        userVerification: "required" as const,
       },
       // Don't make a second one on a device that already has one.
       excludeCredentials: existing.map((p) => ({ type: "public-key" as const, id: p.id, transports: p.transports })),
@@ -140,7 +155,7 @@ export async function passkeySignInOptions() {
       challenge: issueChallenge("sign-in"),
       rpId: site.rpId,
       timeout: 5 * 60_000,
-      userVerification: "preferred" as const,
+      userVerification: "required" as const,
     },
   } as const;
 }

@@ -1,3 +1,4 @@
+import bcrypt from "bcryptjs";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { prisma } from "@/lib/prisma";
 import { issueChallenge } from "@/lib/passkeys";
@@ -6,9 +7,9 @@ import { makePasskey, signIn } from "@/lib/webauthn-fake";
 
 /**
  * Passkeys against a real database: one is kept only for the account that
- * asked for it and only answering a challenge given to that account; it
- * then signs in once per challenge, its counter is kept, and a removed or
- * another account's passkey signs no one in.
+ * asked for it, with its password, and only answering a challenge given to
+ * that account; it then signs in once per challenge, its counter is kept,
+ * and a removed or another account's passkey signs no one in.
  */
 
 let currentUserId: string | null = null;
@@ -24,20 +25,25 @@ vi.mock("next/cache", () => ({ revalidatePath: () => undefined }));
 const { addPasskey, removePasskey, renamePasskey, passkeyRegistrationOptions, passkeySignInOptions } = await import(
   "@/lib/actions/passkeys"
 );
-const { passkeyAskLimiter } = await import("@/lib/rate-limit");
+const { loginLimiter, passkeyAskLimiter } = await import("@/lib/rate-limit");
 const { passkeySignIn } = await import("@/lib/passkey-sign-in");
 
 let userId: string;
 let otherId: string;
+let username: string;
+
+const PASSWORD = "correct horse battery";
+const passwordHash = bcrypt.hashSync(PASSWORD, 4);
 
 beforeEach(async () => {
   delete process.env.AUTH_URL;
   const stamp = `${Date.now()}-${Math.random()}`;
   const [a, b] = await Promise.all([
-    prisma.user.create({ data: { username: `pk-${stamp}`, passwordHash: "x" } }),
-    prisma.user.create({ data: { username: `pk-other-${stamp}`, passwordHash: "x" } }),
+    prisma.user.create({ data: { username: `pk-${stamp}`, passwordHash } }),
+    prisma.user.create({ data: { username: `pk-other-${stamp}`, passwordHash } }),
   ]);
   userId = a.id;
+  username = a.username;
   otherId = b.id;
   currentUserId = userId;
 });
@@ -48,7 +54,7 @@ afterEach(async () => {
 
 /** Makes a passkey the way the Account page does, for the signed-in account. */
 async function addOne(alg = -7) {
-  const asked = await passkeyRegistrationOptions();
+  const asked = await passkeyRegistrationOptions(PASSWORD);
   if (!("options" in asked) || !asked.options) throw new Error("no options");
   expect(asked.options.rp.id).toBe("books.example.org");
   const made = makePasskey({ alg, challenge: asked.options.challenge });
@@ -75,11 +81,45 @@ describe("passkeys", () => {
     expect(rows[0].algorithm).toBe(-7);
   });
 
+  it("asks for the account's password before a passkey can be made", async () => {
+    try {
+      expect(await passkeyRegistrationOptions(undefined)).toEqual({ error: "Enter your password first." });
+      expect(await passkeyRegistrationOptions("")).toEqual({ error: "Enter your password first." });
+      expect(await passkeyRegistrationOptions("not it")).toEqual({ error: "Current password is incorrect" });
+      expect(await passkeyRegistrationOptions("x".repeat(5000))).toEqual({ error: "Current password is incorrect" });
+      // Wrong ones count with failed sign-ins, so this isn't a way to guess.
+      for (let i = 0; i < 10; i++) await passkeyRegistrationOptions("not it");
+      expect(await passkeyRegistrationOptions(PASSWORD)).toEqual({
+        error: "Too many failed attempts — wait a few minutes and try again.",
+      });
+      loginLimiter.clear(`login:u:${username}`);
+      expect("options" in (await passkeyRegistrationOptions(PASSWORD))).toBe(true);
+    } finally {
+      loginLimiter.clear(`login:u:${username}`);
+    }
+  });
+
+  it("keeps no passkey, and signs no one in, without the device checking it was them", async () => {
+    // Touched, but no fingerprint, face, PIN or screen lock (flag UV unset).
+    const asked = await passkeyRegistrationOptions(PASSWORD);
+    if (!("options" in asked) || !asked.options) throw new Error("no options");
+    expect(asked.options.authenticatorSelection.userVerification).toBe("required");
+    const unverified = makePasskey({ challenge: asked.options.challenge, flags: 0x49 });
+    expect((await addPasskey(unverified.response)).error).toMatch(/couldn’t be checked/);
+    expect(await prisma.passkey.count({ where: { userId } })).toBe(0);
+
+    const { made } = await addOne();
+    expect(await passkeySignIn(answer(made, userId, { flags: 0x01 }), siteHeaders)).toBeNull();
+    expect((await passkeySignIn(answer(made, userId, { flags: 0x05 }), siteHeaders))?.id).toBe(userId);
+    const signInAsk = await passkeySignInOptions();
+    expect("options" in signInAsk && signInAsk.options?.userVerification).toBe("required");
+  });
+
   it("refuses a passkey answering a challenge it wasn't given, or one used already", async () => {
     const made = makePasskey({ challenge: "not-one-of-ours" });
     expect(await addPasskey(made.response)).toEqual({ error: "That took too long. Try adding it again." });
 
-    const asked = await passkeyRegistrationOptions();
+    const asked = await passkeyRegistrationOptions(PASSWORD);
     const challenge = "options" in asked ? asked.options!.challenge : "";
     // Another account can't use this account's challenge.
     currentUserId = otherId;
@@ -132,7 +172,7 @@ describe("passkeys", () => {
 
   it("uses AUTH_URL for the site when it's set", async () => {
     process.env.AUTH_URL = "https://reads.example.net/";
-    const asked = await passkeyRegistrationOptions();
+    const asked = await passkeyRegistrationOptions(PASSWORD);
     expect("options" in asked && asked.options?.rp.id).toBe("reads.example.net");
   });
 
