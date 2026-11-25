@@ -1,5 +1,8 @@
+import crypto from "node:crypto";
+import fs from "node:fs/promises";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { prisma } from "@/lib/prisma";
+import { coverFilePath, coversDir } from "@/lib/covers";
 import JSZip from "jszip";
 
 /**
@@ -168,6 +171,76 @@ describe("export and lastBackupAt", () => {
       expect(await lastBackupAt(userId)).toBeNull();
     }
     expect(chunks.length).toBeGreaterThan(0);
+    expect(await lastBackupAt(userId)).not.toBeNull();
+  });
+});
+
+describe("covers in the backup", () => {
+  const made: string[] = [];
+  /** A cover file in the cache with `bytes` random bytes; returns its name. */
+  async function cover(bytes: number): Promise<{ name: string; data: Buffer }> {
+    const name = `export-test-${crypto.randomUUID()}.jpg`;
+    const data = crypto.randomBytes(bytes);
+    await fs.mkdir(coversDir(), { recursive: true });
+    await fs.writeFile(coverFilePath(name), data);
+    made.push(name);
+    return { name, data };
+  }
+  afterEach(async () => {
+    await Promise.all(made.splice(0).map((name) => fs.rm(coverFilePath(name), { force: true })));
+  });
+
+  const book = (title: string, coverName: string | null) =>
+    prisma.book.create({
+      data: {
+        userId,
+        title,
+        searchText: title.toLowerCase(),
+        coverUrl: coverName ? `/api/covers/${coverName}` : null,
+      },
+    });
+
+  async function exportedZip() {
+    const res = await exportRoute();
+    return JSZip.loadAsync(new Uint8Array(await res.arrayBuffer()));
+  }
+
+  it("bundles each cached cover once, byte for byte, and skips one that's missing", async () => {
+    const big = await cover(700_000);
+    const small = await cover(2_000);
+    await book("One", big.name);
+    await book("Two", small.name);
+    await book("Same cover", big.name);
+    await book("Lost cover", "export-test-missing.jpg");
+    await book("Remote", null);
+
+    const zip = await exportedZip();
+    const names = Object.keys(zip.files).filter((n) => n.startsWith("covers/") && !zip.files[n].dir);
+    expect(names).toEqual([`covers/${big.name}`, `covers/${small.name}`]);
+    expect(Buffer.from(await zip.file(`covers/${big.name}`)!.async("uint8array"))).toEqual(big.data);
+    expect(Buffer.from(await zip.file(`covers/${small.name}`)!.async("uint8array"))).toEqual(small.data);
+  });
+
+  it("still makes the backup when a cover goes while it's being made", async () => {
+    const kept = await cover(5_000);
+    const gone = await cover(5_000);
+    await book("Kept", kept.name);
+    await book("Gone", gone.name);
+
+    const res = await exportRoute();
+    const reader = res.body!.getReader();
+    const chunks: Uint8Array[] = [];
+    let first = true;
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      chunks.push(value);
+      // The covers are read as the zip reaches them, after the first chunk.
+      if (first) await fs.rm(coverFilePath(gone.name));
+      first = false;
+    }
+    const zip = await JSZip.loadAsync(Buffer.concat(chunks));
+    expect(Buffer.from(await zip.file(`covers/${kept.name}`)!.async("uint8array"))).toEqual(kept.data);
     expect(await lastBackupAt(userId)).not.toBeNull();
   });
 });

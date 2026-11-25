@@ -334,4 +334,35 @@ describe("deleting an account", () => {
     expect(await exists(path.join(dir, a))).toBe(false);
     expect(await exists(copyPath(b))).toBe(true);
   });
+
+  it("removes its covers, but not one another account's book still shows", async () => {
+    const a = await makeUser("sb-a", "secret");
+    const b = await makeUser("sb-b");
+    const own = `del-own-${Date.now()}.png`;
+    const binned = `del-binned-${Date.now()}.png`;
+    const shared = `del-shared-${Date.now()}.png`;
+    await fs.mkdir(coversDir(), { recursive: true });
+    for (const name of [own, binned, shared]) await fs.writeFile(coverFilePath(name), PNG);
+    const book = (userId: string, title: string, cover: string) =>
+      prisma.book.create({ data: { userId, title, searchText: title, coverUrl: `/api/covers/${cover}` } });
+    await book(a, "Mine", own);
+    await book(a, "Ours", shared);
+    await book(b, "Theirs", shared);
+    await prisma.deletedBook.create({
+      data: { id: `del-${Date.now()}`, userId: a, title: "Binned", coverUrl: `/api/covers/${binned}`, data: {} },
+    });
+
+    try {
+      currentUserId = a;
+      const form = new FormData();
+      form.set("password", "secret");
+      await deleteAccount({}, form);
+
+      expect(await exists(coverFilePath(own))).toBe(false);
+      expect(await exists(coverFilePath(binned))).toBe(false);
+      expect(await exists(coverFilePath(shared))).toBe(true);
+    } finally {
+      for (const name of [own, binned, shared]) await fs.rm(coverFilePath(name), { force: true });
+    }
+  });
 });

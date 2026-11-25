@@ -3,7 +3,7 @@
 import bcrypt from "bcryptjs";
 import { auth, signOut } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { deleteCachedCover } from "@/lib/covers";
+import { deleteCachedCovers } from "@/lib/covers";
 import { removeServerBackups } from "@/lib/server-backups-run";
 import { loginLimiter } from "@/lib/rate-limit";
 import { changePasswordSchema } from "@/lib/validation";
@@ -116,9 +116,9 @@ export async function deleteAccount(
 
   await prisma.user.delete({ where: { id: user.id } });
 
-  for (const b of books) {
-    await deleteCachedCover(b.coverUrl); // tolerates already-missing files
-  }
+  // One look at which covers are still in use, not one search of every
+  // book in the instance per cover (tolerates already-missing files).
+  await deleteCachedCovers(books.map((b) => b.coverUrl));
   await removeServerBackups(user.id);
 
   // Throws Next's redirect to /login — never returns.

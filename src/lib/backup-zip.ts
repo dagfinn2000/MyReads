@@ -1,5 +1,7 @@
+import { constants as fsConstants } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
+import { Readable } from "node:stream";
 import JSZip from "jszip";
 import { prisma } from "@/lib/prisma";
 import { coverFilePath } from "@/lib/covers";
@@ -194,25 +196,24 @@ export async function buildBackupZip(userId: string): Promise<BackupZip> {
 
   // Bundle every locally cached cover. A missing file is not an error — the
   // book row simply exports without its image, exactly as before. Files are
-  // read concurrently but added to the zip in book order, so the archive
-  // layout stays deterministic.
-  const coverFiles = await Promise.all(
-    books
-      .filter((b) => b.coverUrl?.startsWith("/api/covers/"))
-      .map(async (book) => {
-        const filename = path.basename(book.coverUrl!);
-        try {
-          return { filename, buf: await fs.readFile(coverFilePath(filename)) };
-        } catch {
-          return null; // cover cache miss — skip
-        }
-      }),
-  );
-  for (const file of coverFiles) {
-    if (!file) continue;
+  // looked for concurrently but added to the zip in book order, so the
+  // archive layout stays deterministic. Each is read from disk only when
+  // the zip reaches it: reading them all first held every cover in memory
+  // at once (some 300 MB for a thousand photographed covers), on every
+  // download and for every account each night.
+  const coverNames = [
+    ...new Set(
+      books
+        .filter((b) => b.coverUrl?.startsWith("/api/covers/"))
+        .map((book) => path.basename(book.coverUrl!)),
+    ),
+  ];
+  const present = await Promise.all(coverNames.map((filename) => isReadableFile(coverFilePath(filename))));
+  coverNames.forEach((filename, i) => {
+    if (!present[i]) return; // cover cache miss — skip
     // Covers are already-compressed images; deflating again wastes CPU.
-    zip.file(`covers/${file.filename}`, file.buf, { compression: "STORE" });
-  }
+    zip.file(`covers/${filename}`, readWhenAsked(coverFilePath(filename)), { compression: "STORE" });
+  });
 
   // Streamed rather than assembled in memory: generateAsync would hold the
   // entire archive — every cover image plus the JSON — as one buffer before
@@ -225,6 +226,41 @@ export async function buildBackupZip(userId: string): Promise<BackupZip> {
 
   const date = new Date().toISOString().slice(0, 10);
   return { stream, fileName: `myreads-export-${date}.zip` };
+}
+
+/** Whether `file` is a file this process can read. */
+async function isReadableFile(file: string): Promise<boolean> {
+  try {
+    await fs.access(file, fsConstants.R_OK);
+    return (await fs.stat(file)).isFile();
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * A file's bytes as a stream that opens the file only once something reads
+ * from it, which JSZip does when it reaches that entry, one at a time. A
+ * file gone by then (deleted in between) reads as empty, which a restore
+ * treats as a missing cover, rather than breaking the whole backup.
+ */
+function readWhenAsked(file: string): Readable {
+  return Readable.from(
+    (async function* () {
+      let handle: fs.FileHandle;
+      try {
+        handle = await fs.open(file, "r");
+      } catch {
+        return;
+      }
+      try {
+        for await (const chunk of handle.createReadStream()) yield chunk as Buffer;
+      } finally {
+        await handle.close().catch(() => {});
+      }
+    })(),
+    { objectMode: false },
+  );
 }
 
 /**
