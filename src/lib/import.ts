@@ -918,12 +918,16 @@ async function restoreSettings(
 
   const storedPrefs = asObject(user.preferences);
   // The backup's own ids point at shelves and views on the old instance;
-  // they come back through the names exported beside them.
+  // they come back through the names exported beside them. Where the
+  // monthly email's links go is this server's to say, as in
+  // savePreferences: the old instance's address, or one written into the
+  // file by hand, would send the reader's "Stop these emails" elsewhere.
   const {
     defaultViewId: _oldViewId,
     shelfOrder: _oldShelfOrder,
     hiddenShelves: _oldHiddenShelves,
     savedViewOrder: _oldViewOrder,
+    emailSite: _oldEmailSite,
     ...backupPrefs
   } = cleanPreferencesPatch(settings.preferences);
   const prefAdds: Record<string, unknown> = missing(storedPrefs, backupPrefs);

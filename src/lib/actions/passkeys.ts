@@ -6,7 +6,7 @@ import { z } from "zod";
 import { auth, signOut, unstable_update } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/actions/helpers";
-import { clientIp, loginLimiter } from "@/lib/rate-limit";
+import { clientIp, loginLimiter, passkeyAskLimiter } from "@/lib/rate-limit";
 import { MAX_PASSKEYS, expectedSite, issueChallenge, passkeyName, takeChallenge } from "@/lib/passkeys";
 import { keepSessionProof } from "@/lib/session-keep";
 import { PASSKEY_ALGORITHMS, WebAuthnError, userHandle, verifyRegistration } from "@/lib/webauthn";
@@ -123,11 +123,18 @@ export async function passkeySignInOptions() {
   const h = await headers();
   const site = expectedSite(h);
   if (!site) return { error: NOT_HERE } as const;
-  // Asking costs nothing but memory, so a flood of asks from one address
-  // is turned away like failed sign-ins are.
-  if (loginLimiter.blocked(`login:ip:${clientIp(h)}`)) {
+  // An address with too many failed sign-ins is turned away here too.
+  const ip = clientIp(h);
+  if (loginLimiter.blocked(`login:ip:${ip}`)) {
     return { error: "Too many failed attempts — wait a few minutes and try again." } as const;
   }
+  // Asking costs the server a challenge kept for five minutes, so asks are
+  // counted too: a flood from one address can't push out everyone else's.
+  const askKey = `passkey-ask:${ip}`;
+  if (passkeyAskLimiter.blocked(askKey)) {
+    return { error: "Too many tries — wait a minute and try again." } as const;
+  }
+  passkeyAskLimiter.hit(askKey);
   return {
     options: {
       challenge: issueChallenge("sign-in"),

@@ -21,7 +21,10 @@ const siteHeaders = new Headers({ host: "books.example.org", "x-forwarded-proto"
 vi.mock("next/headers", () => ({ headers: async () => siteHeaders }));
 vi.mock("next/cache", () => ({ revalidatePath: () => undefined }));
 
-const { addPasskey, removePasskey, renamePasskey, passkeyRegistrationOptions } = await import("@/lib/actions/passkeys");
+const { addPasskey, removePasskey, renamePasskey, passkeyRegistrationOptions, passkeySignInOptions } = await import(
+  "@/lib/actions/passkeys"
+);
+const { passkeyAskLimiter } = await import("@/lib/rate-limit");
 const { passkeySignIn } = await import("@/lib/passkey-sign-in");
 
 let userId: string;
@@ -131,5 +134,22 @@ describe("passkeys", () => {
     process.env.AUTH_URL = "https://reads.example.net/";
     const asked = await passkeyRegistrationOptions();
     expect("options" in asked && asked.options?.rp.id).toBe("reads.example.net");
+  });
+
+  it("turns away a flood of sign-in asks from one address", async () => {
+    siteHeaders.set("x-forwarded-for", "203.0.113.9");
+    try {
+      const asks = [];
+      for (let i = 0; i < 31; i++) asks.push(await passkeySignInOptions());
+      expect(asks.slice(0, 30).every((a) => "options" in a)).toBe(true);
+      expect(asks[30]).toEqual({ error: "Too many tries — wait a minute and try again." });
+      // Another address still gets its challenge.
+      siteHeaders.set("x-forwarded-for", "203.0.113.10");
+      expect("options" in (await passkeySignInOptions())).toBe(true);
+    } finally {
+      siteHeaders.delete("x-forwarded-for");
+      passkeyAskLimiter.clear("passkey-ask:203.0.113.9");
+      passkeyAskLimiter.clear("passkey-ask:203.0.113.10");
+    }
   });
 });
